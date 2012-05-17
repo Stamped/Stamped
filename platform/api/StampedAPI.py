@@ -316,7 +316,9 @@ class StampedAPI(AStampedAPI):
         
         # Remove friends / followers
         for followerId in followerIds:
-            friendship = Friendship(user_id=followerId, friend_id=account.user_id)
+            friendship              = Friendship()
+            friendship.user_id      = account.user_id
+            friendship.friend_id    = friendId
             
             self._friendshipDB.removeFriendship(friendship)
             
@@ -327,7 +329,9 @@ class StampedAPI(AStampedAPI):
             self._stampDB.removeInboxStampReferencesForUser(followerId, stampIds)
         
         for friendId in friendIds:
-            friendship = Friendship(user_id=account.user_id, friend_id=friendId)
+            friendship              = Friendship()
+            friendship.user_id      = account.user_id
+            friendship.friend_id    = friendId
             
             self._friendshipDB.removeFriendship(friendship)
             
@@ -850,7 +854,9 @@ class StampedAPI(AStampedAPI):
             if authUserId is None:
                 raise StampedPermissionsError("Insufficient privileges to view user")
             
-            friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+            friendship              = Friendship()
+            friendship.user_id      = authUserId
+            friendship.friend_id    = user.user_id
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
@@ -1102,18 +1108,25 @@ class StampedAPI(AStampedAPI):
         
         # If either account is private, make sure authUserId is friend
         if userA.privacy == True and authUserId != userA.user_id:
-            check = Friendship(user_id=authUserId, friend_id=userA.user_id)
+            check                   = Friendship()
+            friendship.user_id      = authUserId
+            friendship.friend_id    = userA.user_id
             
             if not self._friendshipDB.checkFriendship(check):
                 raise StampedPermissionsError("Insufficient privileges to check friendship")
         
         if userB.privacy == True and authUserId != userB.user_id:
-            check = Friendship(user_id=authUserId, friend_id=userB.user_id)
+            check                   = Friendship()
+            friendship.user_id      = authUserId
+            friendship.friend_id    = userB.user_id
             
             if not self._friendshipDB.checkFriendship(check):
                 raise StampedPermissionsError("Insufficient privileges to check friendship")
         
-        friendship = Friendship(user_id=userA.user_id, friend_id=userB.user_id)
+        friendship              = Friendship()
+        friendship.user_id      = userA.user_id
+        friendship.friend_id    = userB.user_id
+
         return self._friendshipDB.checkFriendship(friendship)
     
     @API_CALL
@@ -1637,7 +1650,7 @@ class StampedAPI(AStampedAPI):
         allEntityIds = set()
 
         for stamp in stampData:
-            allEntityIds.add(stamp.entity_id)
+            allEntityIds.add(stamp.entity.entity_id)
 
         # Enrich missing entity ids
         missingEntityIds = allEntityIds.difference(set(entityIds.keys()))
@@ -1692,15 +1705,17 @@ class StampedAPI(AStampedAPI):
 
         for stamp in stampData:
             # Stamp owner
-            allUserIds.add(stamp.user_id)
+            allUserIds.add(stamp.user.user_id)
             
             # Credit given
-            for credit in stamp.credit:
-                allUserIds.add(credit.user_id)
+            if stamp.credit is not None:
+                for credit in stamp.credit:
+                    allUserIds.add(credit.user_id)
             
             # Comments
-            for comment in stamp.previews.comments:
-                allUserIds.add(comment.user_id)
+            if stamp.previews is not None and stamp.previews.comments is not None:
+                for comment in stamp.previews.comments:
+                    allUserIds.add(comment.user_id)
 
         for stat in stats:
             # Likes
@@ -1747,38 +1762,41 @@ class StampedAPI(AStampedAPI):
 
                 # Credit
                 credits = []
-                for credit in stamp.credit:
-                    user = userIds[credit.user_id]
-                    item                    = CreditSchema()
-                    item.user_id            = credit.user_id
-                    item.stamp_id           = credit.stamp_id
-                    item.screen_name        = user['screen_name']
-                    item.color_primary      = user['color_primary']
-                    item.color_secondary    = user['color_secondary']
-                    item.privacy            = user['privacy']
-                    credits.append(item)
-                stamp.credit = credits
+                if stamp.credit is not None:
+                    for credit in stamp.credit:
+                        user = userIds[credit.user_id]
+                        item                    = CreditSchema()
+                        item.user_id            = credit.user_id
+                        item.stamp_id           = credit.stamp_id
+                        item.screen_name        = user['screen_name']
+                        item.color_primary      = user['color_primary']
+                        item.color_secondary    = user['color_secondary']
+                        item.privacy            = user['privacy']
+                        credits.append(item)
+                    stamp.credit = credits
 
                 # Previews
+                previews = StampPreviews()
                 for stat in stats:
                     if str(stat.stamp_id) == str(stamp.stamp_id):
                         break 
                 else:
                     stat = None
 
-                if stat is not None:
+                if stat is not None and stamp.previews is not None:
                     # Likes
-                    stamp.previews.likes = []
+                    likes = []
                     for like in stat.preview_likes:
                         try:
-                            stamp.previews.likes.append(userIds[str(like)])
+                            previews.likes.append(userIds[str(like)])
                         except KeyError:
                             logs.warning("Key error for like (user_id = %s)" % like)
                             logs.debug("Stamp: %s" % stamp)
                             continue
+                    previews.likes = likes
                     
                     # Todos
-                    stamp.previews.todos = []
+                    todos = []
                     for todo in stat.preview_todos:
                         try:
                             stamp.previews.todos.append(userIds[str(todo)])
@@ -1786,9 +1804,10 @@ class StampedAPI(AStampedAPI):
                             logs.warning("Key error for todo (user_id = %s)" % todo)
                             logs.debug("Stamp: %s" % stamp)
                             continue
+                    previews.todos = todos
 
                     # Credits
-                    stamp.previews.credits = []
+                    credits = []
                     for i in stat.preview_credits:
                         try:
                             credit = underlyingStampIds[str(i)]
@@ -1800,26 +1819,30 @@ class StampedAPI(AStampedAPI):
                             logs.warning("Error: %s" % e)
                             logs.debug("Stamp: %s" % stamp)
                             continue
+                    previews.credits = credits
 
                 else:
                     tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
 
                 # Comments
                 comments = []
-                for comment in stamp.previews.comments:
-                    try:
-                        comment.user = userIds[str(comment.user.user_id)]
-                        comments.append(comment)
-                    except KeyError, e:
-                        logs.warning("Key error for comment / user: %s" % comment)
-                        logs.debug("Stamp: %s" % stamp)
-                        continue
-                stamp.previews.comments = comments
+                if stamp.previews is not None:
+                    for comment in stamp.previews.comments:
+                        try:
+                            comment.user = userIds[str(comment.user.user_id)]
+                            comments.append(comment)
+                        except KeyError, e:
+                            logs.warning("Key error for comment / user: %s" % comment)
+                            logs.debug("Stamp: %s" % stamp)
+                            continue
+                previews.comments = comments
+
+                stamp.previews = previews
 
                 # User-specific attributes
                 if authUserId:
                     # Mark as favorited
-                    if stamp.entity_id in favorites:
+                    if stamp.entity.entity_id in favorites:
                         stamp.is_fav = True
                     
                     # Mark as liked
@@ -1845,7 +1868,7 @@ class StampedAPI(AStampedAPI):
         return stamps
     
     def getStampBadges(self, stamp):
-        userId = stamp.user_id
+        userId = stamp.user.user_id
         badges  = []
         
         if stamp.stats.stamp_num == 1:
@@ -1972,9 +1995,12 @@ class StampedAPI(AStampedAPI):
         # Build new stamp
         else:
             stamp                       = Stamp()
-            stamp.user_id               = user.user_id
             stamp.entity                = entity
             stamp.contents              = [ content ]
+
+            userMini                    = UserMini()
+            userMini.user_id            = user.user_id 
+            stamp.user                  = userMini
 
             stats                       = StampStatsSchema()
             stats.num_blurbs            = 1
@@ -2057,7 +2083,9 @@ class StampedAPI(AStampedAPI):
                 if item.user_id == authUserId:
                     continue
                 
-                friendship = Friendship(user_id=authUserId, friend_id=item.user_id)
+                friendship              = Friendship()
+                friendship.user_id      = authUserId
+                friendship.friend_id    = item.user_id
                 
                 # Check if block exists between user and credited user
                 if self._friendshipDB.blockExists(friendship) == True:
@@ -2356,7 +2384,9 @@ class StampedAPI(AStampedAPI):
         
         # Check privacy of stamp
         if stamp.user_id != authUserId and stamp.user.privacy == True:
-            friendship = Friendship(user_id=user.user_id, friend_id=authUserId)
+            friendship              = Friendship()
+            friendship.user_id      = user.user_id
+            friendship.friend_id    = authUserId
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
@@ -2442,7 +2472,9 @@ class StampedAPI(AStampedAPI):
         stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Verify user has the ability to comment on the stamp
-        friendship = Friendship(user_id=stamp.user.user_id, friend_id=user.user_id)
+        friendship              = Friendship()
+        friendship.user_id      = stamp.user.user_id
+        friendship.friend_id    = user.user_id
         
         # Check if stamp is private; if so, must be a follower
         if stamp.user.privacy == True:
@@ -2528,7 +2560,9 @@ class StampedAPI(AStampedAPI):
                 replied_user_id = prevComment['user']['user_id']
                 
                 # Check if block exists between user and previous commenter
-                friendship = Friendship(user_id=authUserId, friend_id=replied_user_id)
+                friendship              = Friendship()
+                friendship.user_id      = authUserId
+                friendship.friend_id    = replied_user_id
                 
                 if self._friendshipDB.blockExists(friendship) == False:
                     repliedUserIds.add(replied_user_id)
@@ -2586,7 +2620,9 @@ class StampedAPI(AStampedAPI):
         
         # Check privacy of stamp
         if stamp.user.privacy == True:
-            friendship = Friendship(user_id=stamp.user.user_id, friend_id=authUserId)
+            friendship              = Friendship()
+            friendship.user_id      = stamp.user.user_id
+            friendship.friend_id    = authUserId
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
@@ -2641,7 +2677,9 @@ class StampedAPI(AStampedAPI):
         
         # Verify user has the ability to 'like' the stamp
         if stamp.user_id != authUserId:
-            friendship = Friendship(user_id=stamp.user_id, friend_id=authUserId)
+            friendship              = Friendship()
+            friendship.user_id      = stamp.user_id
+            friendship.friend_id    = authUserId
             
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
@@ -2743,7 +2781,9 @@ class StampedAPI(AStampedAPI):
         
         # Verify user has the ability to view the stamp's likes
         if stamp.user_id != authUserId:
-            friendship = Friendship(user_id=stamp.user_id, friend_id=authUserId)
+            friendship              = Friendship()
+            friendship.user_id      = stamp.user_id
+            friendship.friend_id    = authUserId
             
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
@@ -2905,7 +2945,9 @@ class StampedAPI(AStampedAPI):
             if authUserId is None:
                 raise StampedPermissionsError("Must be logged in to view account")
             
-            friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+            friendship              = Friendship()
+            friendship.user_id      = authUserId
+            friendship.friend_id    = user.user_id
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
@@ -2941,7 +2983,9 @@ class StampedAPI(AStampedAPI):
             if authUserId is None:
                 raise StampedPermissionsError("Must be logged in to view account")
             
-            friendship = Friendship(user_id=authUserId, friend_id=user.user_id)
+            friendship              = Friendship()
+            friendship.user_id      = authUserId
+            friendship.friend_id    = user.user_id
             
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
@@ -3236,7 +3280,9 @@ class StampedAPI(AStampedAPI):
             validRecipientIds = []
             for recipientId in recipientIds:
                 # Check if block exists between user and mentioned user
-                friendship = Friendship(user_id=recipientId, friend_id=userId)
+                friendship              = Friendship()
+                friendship.user_id      = recipientId
+                friendship.friend_id    = userId
                 if self._friendshipDB.blockExists(friendship) == False:
                     validRecipientIds.append(recipientId)
             kwargs['recipientIds']  = validRecipientIds

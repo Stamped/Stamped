@@ -21,7 +21,6 @@ from MongoStampLikesCollection      import MongoStampLikesCollection
 from MongoStampViewsCollection      import MongoStampViewsCollection
 from MongoUserStampsCollection      import MongoUserStampsCollection
 from MongoInboxStampsCollection     import MongoInboxStampsCollection
-from MongoDeletedStampCollection    import MongoDeletedStampCollection
 from MongoCreditGiversCollection    import MongoCreditGiversCollection
 from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
 
@@ -67,10 +66,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['timestamp']['stamped'] = document['timestamp']['created']
         
         entityData = document.pop('entity')
-        entity = buildEntity(entityData, mini=True)
+        entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
         
-        stamp = self._obj(document, overflow=self._overflow)
+        stamp = self._obj().dataImport(document, overflow=self._overflow)
         stamp.entity = entity
 
         return stamp 
@@ -105,10 +104,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def user_likes_collection(self):
         return MongoUserLikesCollection()
     
-    @lazyProperty
-    def deleted_stamp_collection(self):
-        return MongoDeletedStampCollection()
-    
     def addStamp(self, stamp):
         return self._addObject(stamp)
     
@@ -123,8 +118,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def removeStamp(self, stampId):
         documentId = self._getObjectIdFromString(stampId)
         result = self._removeMongoDocument(documentId)
-
-        self.deleted_stamp_collection.addStamp(stampId)
 
         return result
     
@@ -210,9 +203,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 query['user.user_id'] = { '$in' : userIds }
 
         return self._collection.find(query).count()
-    
-    def getDeletedStamps(self, stampIds, genericCollectionSlice):
-        return self.deleted_stamp_collection.getStamps(stampIds, genericCollectionSlice)
     
     def checkStamp(self, userId, entityId):
         try:

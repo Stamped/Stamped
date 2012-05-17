@@ -705,6 +705,7 @@ class HTTPUserMini(Schema):
 
     def importUserMini(self, mini):
         self.dataImport(mini.dataExport(), overflow=True)
+        logs.info("USER MINI: %s" % mini)
         self.image_url = _profileImageURL(mini.screen_name, mini.image_cache)
 
         self.image = _buildProfileImage(self.screen_name,
@@ -2038,7 +2039,7 @@ class HTTPStamp(Schema):
         todos                   = getattr(previews, 'todos', [])
         credits                 = getattr(previews, 'credits', [])
 
-        if len(credit) > 0:
+        if credit is not None and len(credit) > 0:
             self.credit = credit
 
         self.entity = HTTPEntityMini().importEntity(entity)

@@ -556,33 +556,82 @@ class EntitySourcesSchema(Schema):
         cls.addProperty('googleplaces_source',             basestring)
         cls.addProperty('googleplaces_timestamp',          datetime)
 
+class BasicEntityMini(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('schema_version',                   int, required=True)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('kind',                             basestring)
+        cls.addPropertyList('types',                        basestring)
+        cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
+        cls.addNestedPropertyList('images',                 ImageSchema)
 
-class BasicEntity(Schema):
+    def __init__(self):
+        Schema.__init__(self)
+        self.schema_version = 0
+        self.kind = 'other'
+        self.sources = EntitySourcesSchema()
+
+class PlaceEntityMini(BasicEntityMini):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedProperty('coordinates', CoordinatesSchema)
+
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'place'
+
+class PersonEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'person'
+
+class MediaCollectionEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'media_collection'
+
+class MediaItemEntityMini(BasicEntityMini):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('length', int)
+
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'media_item'
+
+class SoftwareEntityMini(BasicEntityMini):
+    def __init__(self):
+        BasicEntityMini.__init__(self)
+        self.kind = 'software'
+
+class BasicEntity(BasicEntityMini):
 
     @classmethod
     def setSchema(cls):
-        cls.addProperty('schema_version',                   int, required=True) 
+        # cls.addProperty('schema_version',                   int, required=True) 
 
-        cls.addProperty('entity_id',                        basestring)
-        cls.addProperty('title',                            basestring)
-        cls.addProperty('kind',                             basestring, required=True)
+        # cls.addProperty('entity_id',                        basestring)
+        # cls.addProperty('title',                            basestring)
+        # cls.addProperty('kind',                             basestring, required=True)
         cls.addProperty('locale',                           basestring)
 
         cls.addProperty('desc',                             basestring)
         cls.addProperty('desc_source',                      basestring)
         cls.addProperty('desc_timestamp',                   datetime)
         
-        cls.addPropertyList('types',                        basestring)
+        # cls.addPropertyList('types',                        basestring)
         cls.addProperty('types_source',                     basestring)
         cls.addProperty('types_timestamp',                  datetime)
         
-        cls.addNestedPropertyList('images',                 ImageSchema)
+        # cls.addNestedPropertyList('images',                 ImageSchema)
         cls.addProperty('images_source',                    basestring)
         cls.addProperty('images_timestamp',                 datetime)
         
         cls.addNestedProperty('contact',                    EntityContactSchema)
         cls.addNestedProperty('stats',                      EntityStatsSchema)
-        cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
+        # cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
         cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
 
     def __init__(self):
@@ -674,51 +723,6 @@ class BasicEntity(Schema):
     #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(unicode(i) for i in t))
 
 
-class BasicEntityMini(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('schema_version',                   int)
-        cls.addProperty('entity_id',                        basestring)
-        cls.addProperty('title',                            basestring)
-        cls.addProperty('kind',                             basestring)
-        cls.addPropertyList('types',                        basestring)
-        cls.addNestedProperty('sources',                    EntitySourcesSchema)
-        cls.addNestedProperty('coordinates',                CoordinatesSchema)
-        cls.addNestedPropertyList('images',                 ImageSchema)
-
-    def __init__(self):
-        # BasicEntity.__init__(self)
-        self.schema_version = 0
-        self.kind = 'other'
-
-class PlaceEntityMini(BasicEntityMini):
-    def __init__(self):
-        BasicEntityMini.__init__(self)
-        self.kind = 'place'
-
-class PersonEntityMini(BasicEntityMini):
-    def __init__(self):
-        BasicEntityMini.__init__(self)
-        self.kind = 'person'
-
-class MediaCollectionEntityMini(BasicEntityMini):
-    def __init__(self):
-        BasicEntityMini.__init__(self)
-        self.kind = 'media_collection'
-
-class MediaItemEntityMini(BasicEntityMini):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('length', int)
-
-    def __init__(self):
-        BasicEntityMini.__init__(self)
-        self.kind = 'media_item'
-
-class SoftwareEntityMini(BasicEntityMini):
-    def __init__(self):
-        BasicEntityMini.__init__(self)
-        self.kind = 'software'
 
 
 def getEntityObjectFromKind(kind):
@@ -1377,8 +1381,6 @@ class Stamp(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.entity     = BasicEntity()
-        self.user       = UserMini()
         self.timestamp  = StampTimestampSchema()
         self.stats      = StampStatsSchema()
 

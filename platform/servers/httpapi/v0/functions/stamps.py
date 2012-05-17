@@ -21,7 +21,7 @@ def create(request, authUserId, data, **kwargs):
         data['credit'] = data['credit'].split(',')
     
     stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = HTTPStamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 
@@ -36,7 +36,7 @@ def update(request, authUserId, http_schema, data, **kwargs):
             data[k] = None
     
     stamp = stampedAPI.updateStamp(authUserId, http_schema.stamp_id, data)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = httpstamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 
@@ -46,7 +46,7 @@ def update(request, authUserId, http_schema, data, **kwargs):
 def update_image(request, authUserId, http_schema, **kwargs):
     ret   = stampedAPI.updateStampImage(authUserId, http_schema.stamp_id, 
                                         http_schema.image)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = httpstamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 
@@ -55,7 +55,7 @@ def update_image(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = httpstamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 
@@ -64,7 +64,7 @@ def show(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = httpstamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 
@@ -73,7 +73,7 @@ def remove(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def likesCreate(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = httpstamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 
@@ -82,7 +82,7 @@ def likesCreate(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def likesRemove(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.removeLike(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importSchema(stamp)
+    stamp = httpstamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
 

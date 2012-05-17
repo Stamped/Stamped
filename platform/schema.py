@@ -131,6 +131,10 @@ class Schema(object):
         return cur, path[-1]
 
     def __getattr__(self, name):
+        # Special case
+        if name in set(['_Schema__required_count', '__class__', '_Schema__properties']):
+            return object.__getattribute__(self, name)
+
         if self.__required_count < len(self.__class__._required_fields):
             print 'Object: %s' % pprint.pformat(self)
             print 'Required: %s' % self.__class__._required_fields
@@ -153,7 +157,7 @@ class Schema(object):
             else:
                 return None
         else:
-            object.__getattribute__(self, name)
+            return object.__getattribute__(self, name)
 
     def __setattr__(self, name, value):
         # print(self.__class__._propertyInfo)
