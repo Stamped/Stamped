@@ -397,13 +397,16 @@
                 
                 var $items    = $('.stamp-gallery-item');
                 var completed = false;
+                completed = true;
                 
                 // TODO: address scrollbar forcing whole page resize after removing isotope items
                 
-                $gallery.isotope('remove', $items, function() {
-                    $items.remove();
-                    completed = true;
+                $gallery.css({
+                    visibility : 'hidden', 
+                    opacity    : 0
                 });
+                
+                $('.stamp-gallery-nav').hide();
                 $('.loading').show();
                 
                 $(".stamp-gallery-nav a").each(function() {
@@ -411,11 +414,12 @@
                     var parsed = parse_url(href);
                     var params = get_custom_params({ category : category }, parsed.options);
                     var url    = get_custom_url(params, parsed.base_url);
-                    console.debug('HREF: ' + url);
+                    //console.debug('HREF: ' + url);
                     
                     $(this).attr('href', url);
                 });
-
+                
+                // load stamps for new category selection via AJAX
                 client.get_user_stamps_by_screen_name(screen_name, params).done(function(stamps) {
                     //console.debug("num_stamps: " + stamps.length);
                     
@@ -433,11 +437,28 @@
                                 
                                 var $elements = $target.find('.stamp-gallery-item').remove();
                                 
-                                $('.loading').hide();
-                                /*$('.inset-stamp .number').html(stamps.length);*/
+                                //$('.stamp-gallery-nav').show();
+                                //$('.inset-stamp .number').html(stamps.length);
                                 
                                 $gallery.append($elements);
-                                $gallery.isotope('appended', $elements, function() { });
+                                
+                                $gallery.isotope('remove',   $items,    function() {
+                                    $('.loading').hide();
+                                });
+                                
+                                $gallery.isotope('appended', $elements, function() {
+                                });
+                                
+                                $gallery.stop(true, false).css({
+                                    visibility : 'visible'
+                                }).animate({
+                                    opacity : 1
+                                }, {
+                                    duration : 200, 
+                                    specialEasing : { 
+                                        opacity : 'easeInCubic'
+                                    }
+                                });
                             } else {
                                 setTimeout(complete_animation, 50);
                             }
