@@ -113,10 +113,17 @@
         
         var client      = new StampedClient();
         var screen_name = STAMPED_PRELOAD.user.screen_name;
+        
+        // ---------------------------------------------------------------------
+        // initialize URL / history handling
+        // ---------------------------------------------------------------------
+        
         var url         = document.URL;
         var parts       = url.split('?');
         var base_url    = parts[0];
         var options     = {};
+        var base_uri0   = base_url.split('/')
+        var base_uri    = base_uri0[base_uri0.length - 1];
         
         if (parts.length === 2) {
             var opts = parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
@@ -166,7 +173,7 @@
         
         var get_custom_params_string = function(params) {
             var custom_params = get_custom_params(params);
-            var str = "?";
+            var str = "/" + base_uri + "?";
             var key;
             
             for (key in custom_params) {
@@ -297,7 +304,7 @@
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size
                 });
-                console.debug("cur_ratio: " + cur_ratio);
+                //console.debug("cur_ratio: " + cur_ratio);
             }
         });
         
@@ -394,6 +401,10 @@
                 
                 if (History && History.enabled) {
                     var params_str = get_custom_params_string(params);
+                    
+                    //console.debug(params);
+                    //console.debug(orig_category);
+                    //console.debug(params_str);
                     
                     History.pushState(params, orig_category, params_str);
                 }
