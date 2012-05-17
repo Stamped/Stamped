@@ -1978,6 +1978,16 @@ class HTTPStamp(Schema):
                     img.importSchema(image)
                     # quick fix for now
                     # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
+                    if len(img.sizes) == 0:
+                        continue
+                    source              = HTTPActionSource()
+                    source.source       = 'stamped'
+                    source.source_id    = img.sizes[0].url
+
+                    action              = HTTPAction()
+                    action.type         = 'stamped_view_image'
+                    action.sources      = [ source ]
+                    img.action          = action
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)
@@ -1987,11 +1997,20 @@ class HTTPStamp(Schema):
 
             # handle old format image specifier
             if 'image_dimensions' in data:
+                logs.info('Converting old image_dimensions stamp into ImageSchema')
                 img = HTTPImageSchema()
                 imgSize = HTTPImageSizeSchema()
                 imgSize.url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                 imgSize.width, imgSize.height = data['image_dimensions'].split(',')
                 img.sizes [ imgSize ]
+                source              = HTTPActionSource()
+                source.source       = 'stamped'
+                source.source_id    = imgSize.url
+
+                action              = HTTPAction()
+                action.type         = 'stamped_view_image'
+                action.sources      = [ source ]
+                img.action          = action
                 item.images.append(img)
 
             self.num_comments = 0
