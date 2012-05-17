@@ -377,11 +377,8 @@ class HTTPAccount(Schema):
         cls.addProperty('privacy',            bool, required=True)
         cls.addProperty('phone',              int)
 
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Account':
-            self.importData(schema.exportSparse(), overflow=True)
-        else:
-            raise NotImplementedError(type(schema))
+    def importAccount(self, account):
+        self.dataImport(account.dataExport(), overflow=True)
         return self
 
 class HTTPAccountNew(Schema):
@@ -530,12 +527,11 @@ class HTTPAccountAlerts(Schema):
         self.email_alert_reply          = False
         self.email_alert_follow         = False
 
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Account':
-            data = schema.alerts.value
-            self.importData(data, overflow=True)
-        else:
-            raise NotImplementedError(type(schema))
+    def importAccount(self, account):
+        alerts = getattr(account, 'alerts', None)
+        if alerts is not None:
+            self.dataImport(alerts.dataExport(), overflow=True)
+
         return self
 
 class HTTPAPNSToken(Schema):
@@ -882,6 +878,7 @@ class HTTPEntityMini(Schema):
         except AttributeError:
             pass
 
+        return self
 
 #        def importSchema(self, schema):
 #            if isinstance(schema, BasicEntity):
@@ -1723,6 +1720,7 @@ class HTTPEntity(Schema):
         if mini.coordinates is not None:
             self.coordinates    = _coordinatesDictToFlat(mini.coordinates)
 
+        return self
 #
 #        def importSchema(self, schema, client=None):
 #            if schema.__class__.__name__ == 'EntityMini':

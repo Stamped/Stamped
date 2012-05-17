@@ -60,7 +60,7 @@ def settings(request, authUserId, **kwargs):
         schema  = parseRequest(None, request)
         account = stampedAPI.getAccount(authUserId)
     
-    account     = HTTPAccount().importSchema(account)
+    account     = HTTPAccount().importAccount(account)
     
     return transformOutput(account.dataExport())
 
@@ -74,7 +74,7 @@ def update_profile(request, authUserId, data, **kwargs):
             data[k] = None
     
     account = stampedAPI.updateProfile(authUserId, data)
-    user    = HTTPUser().importSchema(account)
+    user    = HTTPUser().importUser(account)
     
     return transformOutput(user.dataExport())
 
@@ -83,7 +83,7 @@ def update_profile(request, authUserId, data, **kwargs):
 @require_http_methods(["POST"])
 def update_profile_image(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.updateProfileImage(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
 
@@ -92,7 +92,7 @@ def update_profile_image(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def customize_stamp(request, authUserId, data, **kwargs):
     account = stampedAPI.customizeStamp(authUserId, data)
-    user    = HTTPUser().importSchema(account)
+    user    = HTTPUser().importUser(account)
     
     return transformOutput(user.dataExport())
 
@@ -104,7 +104,7 @@ def customize_stamp(request, authUserId, data, **kwargs):
 def check(request, client_id, http_schema, **kwargs):
     try:
         user = stampedAPI.checkAccount(http_schema.login)
-        user = HTTPUser().importSchema(user)
+        user = HTTPUser().importUser(user)
         
         ### TODO: REMOVE THIS TEMPORARY CONVERSION!!!!
         try:
@@ -319,7 +319,7 @@ def reset_password(request, client_id, http_schema, **kwargs):
 @require_http_methods(["GET"])
 def show_alerts(request, authUserId, **kwargs):
     account  = stampedAPI.getAccount(authUserId)
-    settings = HTTPAccountAlerts().importSchema(account)
+    settings = HTTPAccountAlerts().importAccount(account)
 
     return transformOutput(settings.dataExport())
 
@@ -328,7 +328,7 @@ def show_alerts(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 def update_alerts(request, authUserId, http_schema, **kwargs):
     account  = stampedAPI.updateAlerts(authUserId, http_schema)
-    settings = HTTPAccountAlerts().importSchema(account)
+    settings = HTTPAccountAlerts().importAccount(account)
 
     return transformOutput(settings.dataExport())
 

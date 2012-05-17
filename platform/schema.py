@@ -94,6 +94,22 @@ class Schema(object):
                 raise SchemaException('nested properties must be Schemas not %s' % (kind,))
         kwargs[_kindKey] = kind
         kwargs[_typeKey] = t
+        # Set default cast
+        if 'cast' not in kwargs:
+            if kind == bool:
+                def __castBool(x):
+                    if x in set([True, 'true', 'True', 1]):
+                        return True 
+                    if x in set([False, 'false', 'False', 0]):
+                        return False
+                    raise Exception("Cannot cast %s as bool" % x)
+                kwargs['cast'] = __castBool
+            elif kind == int:
+                kwargs['cast'] = lambda x: int(x)
+            elif kind == float:
+                kwargs['cast'] = lambda x: float(x)
+            elif kind == basestring:
+                kwargs['cast'] = lambda x: unicode(x)
         cls._propertyInfo[name] = kwargs
 
     def __shortcutHelper(self, name, create=False):
@@ -142,6 +158,11 @@ class Schema(object):
         if name in self.__class__._propertyInfo:
             info = self.__class__._propertyInfo[name]
             kind = info[_kindKey]
+
+            # Apply cast
+            if 'cast' in info:
+                value = info['cast'](value)
+
             if value is None:
                 if name in self.__class__._required_fields:
                     # Decrement __required_count if required
@@ -238,7 +259,7 @@ class Schema(object):
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
 
-        for k,v in properties.items():
+        for k, v in properties.items():
             try:
                 p = self.__class__._propertyInfo[k]
                 if p[_typeKey] == _nestedPropertyKey:
