@@ -27,6 +27,7 @@ _nestedPropertyListKey  = 'nested_property_list'
 
 _typeKey                = 'type'
 _kindKey                = 'kind'
+_castKey                = 'cast'
 
 class Schema(object):
     __metaclass__ = SchemaMeta
@@ -173,6 +174,12 @@ class Schema(object):
                 t = info[_typeKey]
                 # Check if t is a scalar value or a list
                 if t == _propertyKey or t == _nestedPropertyKey:
+
+                    # if there is a cast function, apply it to the value
+                    cast = info.get(_castKey, None)
+                    if cast is not None:
+                        value = cast(value)
+
                     if isinstance(value, kind):
                         # Success!
                         if name in self.__class__._required_fields:
@@ -184,7 +191,13 @@ class Schema(object):
                     else:
                         raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
                 else:
-                    value2 = tuple(value)
+                    # if there is a cast function, apply it to all items in the list
+                    cast = info.get(_castKey, None)
+                    if cast is not None:
+                        value2 = tuple([ cast(v) for v in value])
+                    else:
+                        value2 = tuple(value)
+
                     valid = True
                     for item in value2:
                         if not isinstance(item, kind):
