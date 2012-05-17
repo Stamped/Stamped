@@ -1995,24 +1995,6 @@ class HTTPStamp(Schema):
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
 
-            # handle old format image specifier
-            if 'image_dimensions' in data:
-                logs.info('Converting old image_dimensions stamp into ImageSchema')
-                img = HTTPImageSchema()
-                imgSize = HTTPImageSizeSchema()
-                imgSize.url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                imgSize.width, imgSize.height = data['image_dimensions'].split(',')
-                img.sizes [ imgSize ]
-                source              = HTTPActionSource()
-                source.source       = 'stamped'
-                source.source_id    = imgSize.url
-
-                action              = HTTPAction()
-                action.type         = 'stamped_view_image'
-                action.sources      = [ source ]
-                img.action          = action
-                item.images.append(img)
-
             self.num_comments = 0
             if schema.num_comments > 0:
                 self.num_comments       = schema.num_comments
