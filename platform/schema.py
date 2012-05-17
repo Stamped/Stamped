@@ -189,7 +189,7 @@ class Schema(object):
                         self.__properties[name] = value
 
                     else:
-                        raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
+                        raise SchemaException('Bad type for field "%s" and value %s, should be "%s"' % (name, value, kind))
                 else:
                     # if there is a cast function, apply it to all items in the list
                     cast = info.get(_castKey, None)
@@ -201,7 +201,7 @@ class Schema(object):
                     valid = True
                     for item in value2:
                         if not isinstance(item, kind):
-                            raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
+                            raise SchemaException('Bad type for field "%s" and value %s, should be "%s"' % (name, value, kind))
                     if name in self.__class__._required_fields:
                         # Increment __required_count if required
                         if name not in self.__properties or self.__properties[name] is None:

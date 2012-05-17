@@ -12,7 +12,7 @@ import unicodedata, gevent
 import libs.worldcities
 
 from EntitySearcher import EntitySearcher
-from Schemas        import Entity
+from api.Schemas    import Entity
 from difflib        import SequenceMatcher
 from pymongo.son    import SON
 from gevent.pool    import Pool

@@ -13,7 +13,7 @@ from utils                          import lazyProperty
 from AFavoriteDB                    import AFavoriteDB
 from AMongoCollectionView           import AMongoCollectionView
 from MongoUserFavEntitiesCollection import MongoUserFavEntitiesCollection
-from Schemas                        import *
+from api.Schemas                        import *
 from Entity                         import buildEntity
 
 class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):

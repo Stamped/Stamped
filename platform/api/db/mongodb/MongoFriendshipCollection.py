@@ -12,7 +12,7 @@ import libs.worldcities
 from collections                import defaultdict
 from utils                      import lazyProperty
 from pprint                     import pprint
-from Schemas                    import *
+from api.Schemas                import *
 
 from AMongoCollection           import AMongoCollection
 from MongoUserCollection        import MongoUserCollection

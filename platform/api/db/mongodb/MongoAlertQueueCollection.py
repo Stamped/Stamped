@@ -10,7 +10,7 @@ import Globals, logs, copy, pymongo
 from datetime import datetime
 from utils import lazyProperty
 
-from Schemas import *
+from api.Schemas import *
 
 from AMongoCollection import AMongoCollection
 # from AAlertDB import AAlertDB

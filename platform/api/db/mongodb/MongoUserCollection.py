@@ -15,7 +15,7 @@ from utils                      import lazyProperty
 from pprint                     import pformat
 from errors                     import *
 
-from Schemas                    import *
+from api.Schemas                import *
 from AMongoCollection           import AMongoCollection
 from MongoFollowersCollection   import MongoFollowersCollection
 from MongoFriendsCollection     import MongoFriendsCollection

@@ -9,7 +9,7 @@ import Globals, utils, logs
 
 from datetime   import datetime
 from utils      import lazyProperty
-from Schemas    import *
+from api.Schemas    import *
 from errors     import *
 
 from AMongoCollection           import AMongoCollection
