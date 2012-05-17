@@ -281,7 +281,7 @@ def buildEntity(data=None, kind=None, mini=False):
         new = getEntityMiniObjectFromKind(kind)
     else:
         new = getEntityObjectFromKind(kind)
-    return new(data, overflow=True)
+    return entity().dataImport(data, overflow=True)
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
