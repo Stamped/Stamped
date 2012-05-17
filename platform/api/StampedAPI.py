@@ -407,13 +407,13 @@ class StampedAPI(AStampedAPI):
         
         account = self._accountDB.getAccount(authUserId)
         
-        old_screen_name = account['screen_name']
+        old_screen_name = account.screen_name
         
         # Import each item
         for k, v in data.iteritems():
             if k == 'password':
                 v = convertPasswordForStorage(v)
-            account[k] = v
+            setattr(account, k, v)
         
         ### TODO: Carve out "validate account" function
 
@@ -457,7 +457,7 @@ class StampedAPI(AStampedAPI):
         
         # Import each item
         for k, v in data.iteritems():
-            account[k] = v
+            setattr(account, k, v)
         
         self._accountDB.updateAccount(account)
         return account
@@ -563,13 +563,19 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateAlerts(self, authUserId, alerts):
         account = self._accountDB.getAccount(authUserId)
-        
+
+        accountAlerts = account.alerts 
+        if accountAlerts is None:
+            accountAlerts = AccountAlerts()
+
         for k, v in alerts.dataExport().iteritems():
             if v:
-                account['alerts'][k] = True
+                setattr(accountAlerts, k, True)
             else:
-                account['alerts'][k] = False
+                setattr(accountAlerts, k, False)
         
+        account.alerts = accountAlerts
+
         self._accountDB.updateAccount(account)
         return account
     
@@ -974,7 +980,7 @@ class StampedAPI(AStampedAPI):
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
-            return sorted(users, key=lambda k: suggested[k['screen_name']])
+            return sorted(users, key=lambda k: suggested[getattr(k, 'screen_name')])
     
     @API_CALL
     def ignoreSuggestedUsers(self, authUserId, user_ids):

@@ -9,7 +9,7 @@ import datetime, copy
 import Globals, utils, logs
 
 from errors import *
-from Schemas import *
+from api.Schemas import *
 
 from AMongoCollection import AMongoCollection
 from AAuthEmailAlertsDB import AAuthEmailAlertsDB

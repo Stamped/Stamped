@@ -9,7 +9,7 @@ import Globals, logs, copy, pymongo
 
 from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
-from Schemas                            import *
+from api.Schemas                            import *
 
 from AActivityDB                        import AActivityDB
 from MongoAlertQueueCollection          import MongoAlertQueueCollection

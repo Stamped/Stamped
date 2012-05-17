@@ -446,38 +446,49 @@ class HTTPAccountCheck(Schema):
 class HTTPLinkedAccounts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('twitter_id',             basestring)
-        cls.addProperty('twitter_screen_name',    basestring)
-        cls.addProperty('twitter_key',            basestring)
-        cls.addProperty('twitter_secret',         basestring)
-        cls.addProperty('facebook_id',            basestring)
-        cls.addProperty('facebook_name',          basestring)
-        cls.addProperty('facebook_screen_name',   basestring)
-        cls.addProperty('facebook_token',         basestring)
-        cls.addProperty('netflix_user_id',             basestring)
-        cls.addProperty('netflix_token',          basestring)
-        cls.addProperty('netflix_secret',         basestring)
+        cls.addProperty('twitter_id',               basestring)
+        cls.addProperty('twitter_screen_name',      basestring)
+        cls.addProperty('twitter_key',              basestring)
+        cls.addProperty('twitter_secret',           basestring)
+        cls.addProperty('facebook_id',              basestring)
+        cls.addProperty('facebook_name',            basestring)
+        cls.addProperty('facebook_screen_name',     basestring)
+        cls.addProperty('facebook_token',           basestring)
+        cls.addProperty('netflix_user_id',          basestring)
+        cls.addProperty('netflix_token',            basestring)
+        cls.addProperty('netflix_secret',           basestring)
 
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'LinkedAccounts':
-            schema.twitter_id           = self.twitter_id
-            schema.twitter_screen_name  = self.twitter_screen_name
-            schema.facebook_id          = self.facebook_id
-            schema.facebook_name        = self.facebook_name
-            schema.facebook_screen_name = self.facebook_screen_name
-            schema.netflix_id           = self.netflix_id
-        elif schema.__class__.__name__ == 'TwitterAuthSchema':
-            schema.twitter_key          = self.twitter_key
-            schema.twitter_secret       = self.twitter_secret
-        elif schema.__class__.__name__ == 'FacebookAuthSchema':
-            schema.facebook_token       = self.facebook_token
-        elif schema.__class__.__name__ == 'NetflixAuthSchema':
-            schema.netflix.user_id      = self.netflix_user_id
-            schema.netflix.token        = self.netflix_token
-            schema.netflix.secret       = self.netflix_secret
-        else:
-            raise NotImplementedError(type(schema))
-        return schema
+    def exportLinkedAccounts(self):
+        schema = LinkedAccounts()
+
+        data = self.dataExport()
+
+        twitter = TwitterAccountSchema()
+        twitter.dataImport(data, overflow=True)
+
+        facebook = FacebookAccountSchema()
+        facebook.dataImport(data, overflow=True)
+
+        schema.dataImport(self.dataExport(), overflow=True)
+        schema.twitter = twitter 
+        schema.facebook = facebook
+        
+        return schema 
+
+    def exportTwitterAuthSchema(self):
+        schema = TwitterAuthSchema()
+        schema.dataImport(self.dataExport(), overflow=True)
+        return schema 
+
+    def exportFacebookAuthSchema(self):
+        schema = FacebookAuthSchema()
+        schema.dataImport(self.dataExport(), overflow=True)
+        return schema 
+
+    def exportNetflixAuthSchema(self):
+        schema = NetflixAuthSchema()
+        schema.dataImport(self.dataExport(), overflow=True)
+        return schema 
 
 class HTTPAvailableLinkedAccounts(Schema):
     @classmethod
@@ -552,8 +563,8 @@ class HTTPUserId(Schema):
 class HTTPUserIds(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addPropertyList('user_ids',         basestring) # Comma delimited
-        cls.addPropertyList('screen_names',     basestring) # Comma delimited
+        cls.addProperty('user_ids',             basestring) # Comma delimited
+        cls.addProperty('screen_names',         basestring) # Comma delimited
 
 class HTTPUserSearch(Schema):
     @classmethod

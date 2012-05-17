@@ -11,7 +11,7 @@ from datetime import datetime
 from utils import lazyProperty
 from errors import *
 
-from Schemas import *
+from api.Schemas import *
 
 from AMongoCollection import AMongoCollection
 

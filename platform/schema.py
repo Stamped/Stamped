@@ -188,12 +188,12 @@ class Schema(object):
                                 self.__required_count += 1
                         self.__properties[name] = value
                     else:
-                        raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
+                        raise SchemaException('Bad type for field "%s" and value %s, should be "%s"' % (name, value, kind))
                 else:
                     valid = True
                     for item in value:
                         if not isinstance(item, kind):
-                            raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
+                            raise SchemaException('Bad type for field "%s" and value %s, should be "%s"' % (name, value, kind))
                     if name in self.__class__._required_fields:
                         # Increment __required_count if required
                         if name not in self.__properties or self.__properties[name] is None:

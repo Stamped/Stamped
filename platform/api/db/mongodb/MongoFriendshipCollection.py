@@ -12,7 +12,7 @@ import libs.worldcities
 from collections                import defaultdict
 from utils                      import lazyProperty
 from pprint                     import pprint
-from Schemas                    import *
+from api.Schemas                import *
 
 from AMongoCollection           import AMongoCollection
 from MongoUserCollection        import MongoUserCollection
@@ -210,7 +210,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         friends             = None
         coords              = None
         
-        if request.coordinates.lat is not None and request.coordinates.lng is not None:
+        if request.coordinates is not None and request.coordinates.lat is not None and request.coordinates.lng is not None:
             coords = (request.coordinates.lat, request.coordinates.lng)
         
         def visit_user(user_id, distance):

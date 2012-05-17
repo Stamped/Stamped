@@ -9,7 +9,7 @@ import Globals, logs, re
 import unicodedata, utils
 
 try:
-    from Schemas        import *
+    from api.Schemas        import *
     from difflib        import SequenceMatcher
     from libs.LibUtils  import parseDateString
     from datetime       import datetime
