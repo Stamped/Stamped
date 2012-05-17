@@ -118,35 +118,53 @@
         // initialize URL / history handling
         // ---------------------------------------------------------------------
         
-        var url         = document.URL;
-        var parts       = url.split('?');
-        var base_url    = parts[0];
-        var options     = {};
-        var base_uri0   = base_url.split('/')
-        var base_uri    = base_uri0[base_uri0.length - 1];
-        
-        if (parts.length === 2) {
-            var opts = parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
+        var parse_url = function(url) {
+            var _parts       = url.split('?');
+            var _base_url    = _parts[0];
+            var _options     = {};
+            var _base_uri0   = _base_url.split('/')
+            var _base_uri    = _base_uri0[_base_uri0.length - 1];
             
-            $.each(opts, function(i, opt) {
-                var opt_parts = opt.split('=');
-                var key = opt_parts[0];
+            if (_parts.length === 2) {
+                var _opts = _parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
                 
-                if (opt_parts.length === 2) {
-                    var value = opt_parts[1];
+                $.each(_opts, function(i, opt) {
+                    var opt_parts = opt.split('=');
+                    var key = opt_parts[0];
                     
-                    options[key] = value;
-                }
-            });
-        }
+                    if (opt_parts.length === 2) {
+                        var value = opt_parts[1];
+                        
+                        _options[key] = value;
+                    }
+                });
+            }
+            
+            return {
+                base_url : _base_url, 
+                options  : _options, 
+                base_uri : _base_uri
+            };
+        };
         
-        var get_custom_params = function(params) {
+        var url         = document.URL;
+        var parsed_url  = parse_url(url);
+        
+        var base_url    = parsed_url.base_url;
+        var options     = parsed_url.options;
+        var base_uri    = parsed_url.base_uri;
+        
+        var get_custom_params = function(params, opts) {
+            if (typeof(opts) === 'undefined') {
+                opts = options;
+            }
+            
             var custom_params = {};
             var key, value;
             
-            for (key in options) {
-                if (options.hasOwnProperty(key)) {
-                    value = options[key];
+            for (key in opts) {
+                if (opts.hasOwnProperty(key)) {
+                    value = opts[key];
                     
                     if (value !== null) {
                         custom_params[key] = value;
@@ -171,9 +189,13 @@
             return custom_params;
         };
         
-        var get_custom_params_string = function(params) {
+        var get_custom_params_string = function(params, uri) {
+            if (typeof(uri) === 'undefined') {
+                uri = base_uri;
+            }
+            
             var custom_params = get_custom_params(params);
-            var str = "/" + base_uri + "?";
+            var str = "/" + uri + "?";
             var key;
             
             for (key in custom_params) {
@@ -185,13 +207,25 @@
             return str;
         };
         
-        var get_custom_url = function(params) {
+        var get_custom_url = function(params, url) {
+            if (typeof(url) === 'undefined') {
+                url = base_url;
+            }
+            
+            url += '?';
+            
             var custom_params = get_custom_params(params);
-            var url = base_url;
+            var first = true;
             var key;
             
             for (key in custom_params) {
                 if (custom_params.hasOwnProperty(key)) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        url += "?";
+                    }
+                    
                     url += key + "=" + custom_params[key];
                 }
             }
@@ -350,6 +384,16 @@
                 });
                 $('.loading').show();
                 
+                $(".stamp-gallery-nav a").each(function() {
+                    var href   = $(this).attr('href');
+                    var parsed = parse_url(href);
+                    var params = get_custom_params({ category : category }, parsed.options);
+                    var url    = get_custom_url(params, parsed.base_url);
+                    console.debug('HREF: ' + url);
+                    
+                    $(this).attr('href', url);
+                });
+
                 client.get_user_stamps_by_screen_name(screen_name, params).done(function(stamps) {
                     //console.debug("num_stamps: " + stamps.length);
                     
