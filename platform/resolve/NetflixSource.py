@@ -303,7 +303,7 @@ class NetflixSource(GenericSource):
 
                 # return all remaining results through separate page calls to the api
                 while result_counter < num_results:
-                    results = self.__netflix.searchTitles(query, start_index=result_counter)
+                    results = self.__netflix.searchTitles(query, start=result_counter)
                     result_counter += results['results_per_page']
 
                     # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.
