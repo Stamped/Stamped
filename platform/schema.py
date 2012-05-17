@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import copy
+import pprint
 
 class SchemaException(Exception):
     pass
@@ -131,7 +132,7 @@ class Schema(object):
 
     def __getattr__(self, name):
         if self.__required_count < len(self.__class__._required_fields):
-            print 'Object: %s' % self
+            print 'Object: %s' % pprint.pformat(self.dataExport())
             print 'Required: %s' % self.__class__._required_fields
             raise SchemaException('Invalid access, required properties not set')
         if name in self.__class__._propertyInfo:
