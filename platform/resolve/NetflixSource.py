@@ -98,8 +98,6 @@ class _NetflixObject(object):
     def cast(self):
         try:
             cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
-            for entry in cast:
-                print("\nCAST MEMBER: %s" % entry['title'])
             return [
                 {
                 'name':         entry['title'],
