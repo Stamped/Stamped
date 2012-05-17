@@ -9,8 +9,18 @@
 (function() {
     $(document).ready(function() {
         // ---------------------------------------------------------------------
+        // initialize StampedClient
+        // ---------------------------------------------------------------------
+        
+        
+        var client      = new StampedClient();
+        var screen_name = STAMPED_PRELOAD.user.screen_name;
+        
+        
+        // ---------------------------------------------------------------------
         // initialize profile header navigation
         // ---------------------------------------------------------------------
+        
         
         $('.profile-nav a').each(function () {
             $(this).click(function(event) {
@@ -47,9 +57,11 @@
         //$(document).emoji();
         //$container.emoji();
         
+        
         // ---------------------------------------------------------------------
         // initialize stamp-gallery isotope / masonry layout and infinite scroll
         // ---------------------------------------------------------------------
+        
         
         var $gallery = null;
         var infinite_scroll = null;
@@ -111,19 +123,18 @@
         // TODO: initial gallery opening animation by adding items one at a time
         init_gallery();
         
-        var client      = new StampedClient();
-        var screen_name = STAMPED_PRELOAD.user.screen_name;
         
         // ---------------------------------------------------------------------
-        // initialize URL / history handling
+        // URL / history initialization and handling
         // ---------------------------------------------------------------------
+        
         
         var parse_url = function(url) {
             var _parts       = url.split('?');
             var _base_url    = _parts[0];
-            var _options     = {};
             var _base_uri0   = _base_url.split('/')
             var _base_uri    = _base_uri0[_base_uri0.length - 1];
+            var _options     = {};
             
             if (_parts.length === 2) {
                 var _opts = _parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
@@ -195,11 +206,18 @@
             }
             
             var custom_params = get_custom_params(params);
-            var str = "/" + uri + "?";
-            var key;
+            var first = true;
+            var str   = "/" + uri;
             
-            for (key in custom_params) {
+            for (var key in custom_params) {
                 if (custom_params.hasOwnProperty(key)) {
+                    if (first) {
+                        str += '?';
+                        first = false;
+                    } else {
+                        str += "&";
+                    }
+                    
                     str += key + "=" + custom_params[key];
                 }
             }
@@ -212,18 +230,16 @@
                 url = base_url;
             }
             
-            url += '?';
-            
             var custom_params = get_custom_params(params);
             var first = true;
-            var key;
             
-            for (key in custom_params) {
+            for (var key in custom_params) {
                 if (custom_params.hasOwnProperty(key)) {
                     if (first) {
+                        url += '?';
                         first = false;
                     } else {
-                        url += "?";
+                        url += "&";
                     }
                     
                     url += key + "=" + custom_params[key];
@@ -236,9 +252,11 @@
         console.debug("Stamped profile page for screen_name '" + screen_name + "'");
         console.debug(options);
         
+        
         // ---------------------------------------------------------------------
         // initialize responsive header that gets smaller as you scroll
         // ---------------------------------------------------------------------
+        
         
         var $user_logo          = $('header .user-logo-large');
         var user_logo_width     = parseFloat($user_logo.css('width'));
@@ -342,9 +360,11 @@
             }
         });
         
+        
         // ---------------------------------------------------------------------
         // initialize stamp category nav bar
         // ---------------------------------------------------------------------
+        
         
         var $nav_bar   = $('#stamp-category-nav-bar');
         var categories = 'default place music book film other';
@@ -377,6 +397,8 @@
                 
                 var $items    = $('.stamp-gallery-item');
                 var completed = false;
+                
+                // TODO: address scrollbar forcing whole page resize after removing isotope items
                 
                 $gallery.isotope('remove', $items, function() {
                     $items.remove();
@@ -446,11 +468,30 @@
                 if (History && History.enabled) {
                     var params_str = get_custom_params_string(params);
                     
-                    //console.debug(params);
-                    //console.debug(orig_category);
-                    //console.debug(params_str);
+                    console.debug(params);
+                    console.debug(orig_category);
+                    console.debug(params_str);
                     
-                    History.pushState(params, orig_category, params_str);
+                    var title = "Stamped - " + screen_name;
+                    if (category !== null) {
+                        text = category;
+                        
+                        if (category === 'place') {
+                            text = 'places';
+                        } else if (category === 'music') {
+                            text = 'music';
+                        } else if (category === 'book') {
+                            text = 'books';
+                        } else if (category === 'film') {
+                            text = 'film and tv';
+                        } else if (category === 'other') {
+                            text = 'other';
+                        }
+                        
+                        title += " - " + text;
+                    }
+                    
+                    History.pushState(params, title, params_str);
                 }
                 
                 return false;
@@ -458,19 +499,6 @@
         });
         
         return;
-        
-        /*
-        $('.sign-in a.button').click(function() {
-            client.login('travis', 'cierfshs2').done(function(user) {
-                console.debug("login:");
-                console.debug(user);
-                
-                client.get_authorized_user().done(function(auth_user) {
-                    console.debug("authorized:");
-                    console.debug(auth_user);
-                });
-            });
-        });*/
         
         var userP = client.get_user_by_screen_name(screen_name);
         

@@ -180,3 +180,17 @@ document.URL.replace(/^.*\/(\w{1,20})\/?/, "$1");
             }
         });*/
 
+
+        /*
+        $('.sign-in a.button').click(function() {
+            client.login('travis', '*******').done(function(user) {
+                console.debug("login:");
+                console.debug(user);
+                
+                client.get_authorized_user().done(function(auth_user) {
+                    console.debug("authorized:");
+                    console.debug(auth_user);
+                });
+            });
+        });*/
+

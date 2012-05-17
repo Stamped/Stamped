@@ -228,7 +228,7 @@ def stamped_render(request, template, context, **kwargs):
     preload = kwargs.pop('preload', None)
     context = get_stamped_context(context, preload)
     
-    utils.log(pprint.pformat(context));
+    #utils.log(pprint.pformat(context));
     return render_to_response(template, context, **kwargs)
 
 def get_stamped_context(context, preload=None):
