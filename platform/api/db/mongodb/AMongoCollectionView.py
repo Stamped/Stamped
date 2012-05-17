@@ -28,7 +28,7 @@ class AMongoCollectionView(AMongoCollection):
         viewport    = (genericCollectionSlice.viewport and genericCollectionSlice.viewport.lowerRight.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
         orig_coords = True
-
+        
         if genericCollectionSlice.limit is None:
             genericCollectionSlice.limit = 0
         
@@ -92,13 +92,13 @@ class AMongoCollectionView(AMongoCollection):
             kinds           = deriveKindFromCategory(genericCollectionSlice.category) 
             types           = deriveTypesFromCategory(genericCollectionSlice.category)
             subcategories   = deriveSubcategoriesFromCategory(genericCollectionSlice.category)
-
+            
             kinds_and_types = []
             if len(kinds) > 0:
                 kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
             if len(types) > 0:
                 kinds_and_types.append({'entity.types': {'$in': list(types)}})
-
+            
             if len(kinds_and_types) > 0:
                 add_or_query([ { "entity.category" : str(genericCollectionSlice.category).lower() }, 
                                { "entity.subcategory" : {"$in": list(subcategories)} },
