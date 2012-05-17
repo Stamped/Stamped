@@ -132,7 +132,7 @@ class Schema(object):
 
     def __getattr__(self, name):
         if self.__required_count < len(self.__class__._required_fields):
-            print 'Object: %s' % pprint.pformat(self.dataExport())
+            print 'Object: %s' % pprint.pformat(self)
             print 'Required: %s' % self.__class__._required_fields
             raise SchemaException('Invalid access, required properties not set')
         if name in self.__class__._propertyInfo:
