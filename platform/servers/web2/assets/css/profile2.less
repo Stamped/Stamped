@@ -43,20 +43,55 @@
     -o-box-shadow: @args;
     box-shadow: @args;*/
     
-    background: #FEFEFE;
+    /*.transition(background-color, .5s, ease-in);*/
+    
+    .rounded(4px);
     float: left;
     width: 100%;
     
     border-bottom: 1px solid #bbb;
+    background-color: #FEFEFE;
+    
+    &:hover .content .rhs .timestamp {
+        opacity: 1;
+    }
     
     .content {
         padding: 2.5em 2em;
         position: relative;
         
-        .stamp-preview {
+        .rhs {
             display: block;
             float: right;
-            margin-left: 1em;
+            
+            .timestamp_raw, .timestamp {
+                font-size: 80%;
+            }
+            
+            .timestamp_raw {
+                display: none;
+            }
+            .timestamp {
+                display: block;
+                opacity: 0;
+                
+                .transition(opacity, 0.2s, ease-out);
+            }
+            
+            .sized(@width: 140px) {
+                display: block;
+                max-width: @width;
+                height: auto;
+            }
+            
+            .stamp-preview {
+                margin-left: 1em;
+                .sized();
+                
+                img {
+                    .sized();
+                }
+            }
         }
         
         .inner-content {
@@ -108,9 +143,6 @@
                     margin: -1px .2em 0 .7em;
                 }
                 
-                div.count {
-                }
-                
                 div.like {
                     .preview-image(0, 0);
                 }
@@ -122,73 +154,6 @@
                 div.comments {
                     .preview-image(-38px, 0);
                 }
-                
-                /*.profile-image-small {
-                    display: inline-block;
-                    float: none;
-                    
-                    position: relative;
-                    margin: 0 2px 4px 0;
-                    
-                    @width:  14px;
-                    @height: 14px;
-                    
-                    .preview-image(@bgleft, @bgtop) {
-                        background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
-                        background-position: @bgleft, @bgtop;
-                        
-                        position: absolute;
-                        bottom: -(@height / 3);
-                        right:  -(@width  / 3);
-                        
-                        display: block;
-                        width:  @width;
-                        height: @height;
-                        z-index: 100;
-                    }
-                    
-                    .like {
-                        .preview-image(0, 0);
-                    }
-                    
-                    .todo {
-                        .preview-image(-16px, 0);
-                    }
-                    
-                    .comment {
-                        .preview-image(-32px, 0);
-                    }
-                    
-                    .credit {
-                        position: absolute;
-                        bottom: -(@height / 3);
-                        right:  -(@width  / 3);
-                        
-                        display: block;
-                        width: 18px;
-                        height: 18px;
-                        z-index: 101;
-                        
-                        img {
-                            background: none;
-                            border: 0 none;
-                            
-                            -webkit-box-shadow: none;
-                            -moz-box-shadow: none;
-                            -ms-box-shadow: none;
-                            -o-box-shadow: none;
-                            box-shadow: none;
-                            
-                            display: block;
-                            width:  18px;
-                            height: 18px;
-                        }
-                    }
-                    
-                    .like img, .todo img, .comment img {
-                        .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
-                    }
-                }*/
             }
         }
     }
