@@ -2990,314 +2990,323 @@ class HTTPActivity(Schema):
 
         return self
 
-if 1 == 0:
 
-    class HTTPTextReference(Schema):
-        def setSchema(self):
-            self.indices            = SchemaList(SchemaElement(int))
-            self.action             = HTTPAction()
+class HTTPTextReference(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addPropertyList('indices',          int)
+        cls.addNestedProperty('action',         HTTPAction)
 
-    class HTTPActivitySlice(HTTPGenericSlice):
-        def setSchema(self):
-            HTTPGenericSlice.setSchema(self)
-            self.distance           = SchemaElement(int)
+class HTTPActivitySlice(HTTPGenericSlice):
+    @classmethod
+    def setSchema(cls):
+        HTTPGenericSlice.setSchema(self)
+        cls.addProperty('distance',             int)
 
-    class HTTPLinkedURL(Schema):
-        def setSchema(self):
-            self.url                = SchemaElement(basestring, required=True)
-            self.chrome             = SchemaElement(bool)
+class HTTPLinkedURL(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('url',                  basestring, required=True)
+        cls.addProperty('chrome',               bool)
 
-        def importSchema(self, schema):
-            if schema.__class__.__name__ == 'LinkedURL':
-                self.importData(schema.exportSparse(), overflow=True)
-            else:
-                raise NotImplementedError
-            return self
+    def importLinkedURL(self, linkedurl):
+        self.dataImport(linkedurl.dataExport(), overflow=True)
+        return self
 
 
-    # #### #
-    # Menu #
-    # #### #
+# #### #
+# Menu #
+# #### #
 
-    class HTTPMenu(Schema):
-        def setSchema(self):
-            self.disclaimer = SchemaElement(basestring)
-            self.attribution_image = SchemaElement(basestring)
-            self.attribution_image_link = SchemaElement(basestring)
-            self.menus = SchemaList(HTTPSubmenu())
+class HTTPMenu(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('disclaimer',               basestring)
+        cls.addProperty('attribution_image',        basestring)
+        cls.addProperty('attribution_image_link',   basestring)
+        cls.addNestedPropertyList('menus',          HTTPSubmenu)
 
-        def importSchema(self, schema):
-            if schema.__class__.__name__ == 'MenuSchema':
-                self.disclaimer = schema.disclaimer
-                self.attribution_image = schema.attribution_image
-                self.attribution_image_link = schema.attribution_image_link
-                self.menus = schema.menus.value
-            else:
-                raise NotImplementedError
-            return self
+    def importMenuSchema(self, menu):
+        self.dataImport(menu.dataExport(), overflow=True)
+        return self
 
-    class HTTPSubmenu(Schema):
-        def setSchema(self):
-            self.title = SchemaElement(basestring)
-            self.times = HTTPTimes()
-            self.footnote = SchemaElement(basestring)
-            self.desc = SchemaElement(basestring)
-            self.short_desc = SchemaElement(basestring)
-            self.sections = SchemaList(HTTPMenuSection())
+#        def importSchema(self, schema):
+#            if schema.__class__.__name__ == 'MenuSchema':
+#                self.disclaimer = schema.disclaimer
+#                self.attribution_image = schema.attribution_image
+#                self.attribution_image_link = schema.attribution_image_link
+#                self.menus = schema.menus.value
+#            else:
+#                raise NotImplementedError
+#            return self
 
-    class HTTPMenuSection(Schema):
-        def setSchema(self):
-            self.title = SchemaElement(basestring)
-            self.desc = SchemaElement(basestring)
-            self.short_desc = SchemaElement(basestring)
-            self.items = SchemaList(HTTPMenuItem())
+class HTTPSubmenu(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('title',                    basestring)
+        cls.addNestedProperty('times',              HTTPTimes)
+        cls.addProperty('footnote',                 basestring)
+        cls.addProperty('desc',                     basestring)
+        cls.addProperty('short_desc',               basestring)
+        cls.addNestedPropertyList('sections',       HTTPMenuSection)
 
-    class HTTPMenuItem(Schema):
-        def setSchema(self):
-            self.title = SchemaElement(basestring)
-            self.desc = SchemaElement(basestring)
-            self.categories = SchemaList(SchemaElement(basestring))
-            self.short_desc = SchemaElement(basestring)
-            self.spicy = SchemaElement(int)
-            self.allergens = SchemaList(SchemaElement(basestring))
-            self.allergen_free = SchemaList(SchemaElement(basestring))
-            self.restrictions = SchemaList(SchemaElement(basestring))
-            self.prices = SchemaList(HTTPMenuPrice())
+class HTTPMenuSection(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('title',                    basestring)
+        cls.addProperty('desc',                     basestring)
+        cls.addProperty('short_desc',               basestring)
+        cls.addNestedPropertyList('items',          HTTPMenuItem)
 
-    class HTTPMenuPrice(Schema):
-        def setSchema(self):
-            self.title = SchemaElement(basestring)
-            self.price = SchemaElement(basestring)
-            self.calories = SchemaElement(int)
-            self.unit = SchemaElement(basestring)
-            self.currency = SchemaElement(basestring)
+class HTTPMenuItem(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('title',                    basestring)
+        cls.addProperty('desc',                     basestring)
+        cls.addPropertyList('categories',           basestring)
+        cls.addProperty('short_desc',               basestring)
+        cls.addProperty('spicy',                    int)
+        cls.addPropertyList('allergens',            basestring)
+        cls.addPropertyList('allergen_free',        basestring)
+        cls.addPropertyList('restrictions',         basestring)
+        cls.addNestedPropertyList('prices',         HTTPMenuPrice)
 
-    class HTTPTimes(Schema):
-        def setSchema(self):
-            self.sun = SchemaList(HTTPHours())
-            self.mon = SchemaList(HTTPHours())
-            self.tue = SchemaList(HTTPHours())
-            self.wed = SchemaList(HTTPHours())
-            self.thu = SchemaList(HTTPHours())
-            self.fri = SchemaList(HTTPHours())
-            self.sat = SchemaList(HTTPHours())
+class HTTPMenuPrice(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('title',                    basestring)
+        cls.addProperty('price',                    basestring)
+        cls.addProperty('calories',                 int)
+        cls.addProperty('unit',                     basestring)
+        cls.addProperty('currency',                 basestring)
 
-    class HTTPHours(Schema):
-        def setSchema(self):
-            self.open = SchemaElement(basestring)
-            self.close = SchemaElement(basestring)
-            self.desc = SchemaElement(basestring)
+class HTTPTimes(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('sun',            HTTPHours)
+        cls.addNestedPropertyList('mon',            HTTPHours)
+        cls.addNestedPropertyList('tue',            HTTPHours)
+        cls.addNestedPropertyList('wed',            HTTPHours)
+        cls.addNestedPropertyList('thu',            HTTPHours)
+        cls.addNestedPropertyList('fri',            HTTPHours)
+        cls.addNestedPropertyList('sat',            HTTPHours)
 
+class HTTPHours(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('open',                     basestring)
+        cls.addProperty('close',                    basestring)
+        cls.addProperty('desc',                     basestring)
 
     # ########## #
     # Deprecated #
     # ########## #
 
-    class HTTPEntity_stampedtest(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-            self.title              = SchemaElement(basestring, required=True)
-            self.subtitle           = SchemaElement(basestring, required=True)
-            self.category           = SchemaElement(basestring, required=True)
-            self.subcategory        = SchemaElement(basestring, required=True)
-            self.desc               = SchemaElement(basestring)
-            self.image              = SchemaElement(basestring)
-            self.last_modified      = SchemaElement(basestring)
-
-            # Address
-            self.address            = SchemaElement(basestring)
-            self.address_street     = SchemaElement(basestring)
-            self.address_city       = SchemaElement(basestring)
-            self.address_state      = SchemaElement(basestring)
-            self.address_country    = SchemaElement(basestring)
-            self.address_zip        = SchemaElement(basestring)
-
-            self.neighborhood       = SchemaElement(basestring)
-            self.coordinates        = SchemaElement(basestring)
-
-            # Contact
-            self.phone              = SchemaElement(basestring)
-            self.site               = SchemaElement(basestring)
-            self.hours              = SchemaElement(basestring)
-
-            # Cross-Category
-            self.release_date       = SchemaElement(basestring)
-            self.length             = SchemaElement(basestring)
-            self.rating             = SchemaElement(basestring)
-            self.genre              = SchemaElement(basestring)
-
-            # Food
-            self.cuisine            = SchemaElement(basestring)
-            self.price_scale        = SchemaElement(basestring)
-
-            # Book
-            self.author             = SchemaElement(basestring)
-            self.isbn               = SchemaElement(basestring)
-            self.publisher          = SchemaElement(basestring)
-            self.format             = SchemaElement(basestring)
-            self.language           = SchemaElement(basestring)
-            self.edition            = SchemaElement(basestring)
-
-            # Film
-            self.cast               = SchemaElement(basestring)
-            self.director           = SchemaElement(basestring)
-            self.network            = SchemaElement(basestring)
-            self.in_theaters        = SchemaElement(basestring)
-            self.run_dates          = SchemaElement(basestring)
-
-            # Music
-            self.artist_name        = SchemaElement(basestring)
-            self.album_name         = SchemaElement(basestring)
-            self.label              = SchemaElement(basestring)
-            self.albums             = SchemaList(SchemaElement(basestring))
-            self.songs              = SchemaList(SchemaElement(basestring))
-            self.preview_url        = SchemaElement(basestring)
-
-            # Affiliates
-            self.opentable_url      = SchemaElement(basestring)
-            self.opentable_m_url    = SchemaElement(basestring)
-            self.itunes_url         = SchemaElement(basestring)
-            self.itunes_short_url   = SchemaElement(basestring)
-            self.netflix_url        = SchemaElement(basestring)
-            self.fandango_url       = SchemaElement(basestring)
-            self.barnesnoble_url    = SchemaElement(basestring)
-            self.amazon_url         = SchemaElement(basestring)
-
-        def importSchema(self, schema):
-
-            if 'ntity' not in schema.__class__.__name__:
-                raise NotImplementedError(type(schema))
-
-            validEntities = set([
-                'BasicEntity',
-                'PlaceEntity',
-                'PersonEntity',
-                'MediaCollectionEntity',
-                'MediaItemEntity',
-                'SoftwareEntity',
-            ])
-
-            if schema.__class__.__name__ in validEntities:
-
-                self.entity_id          = schema.entity_id
-                self.title              = schema.title
-                self.subtitle           = schema.subtitle
-                self.category           = schema.category
-                self.subcategory        = schema.subcategory
-                self.desc               = schema.desc
-                self.last_modified      = schema.timestamp.created
-
-                self.phone              = schema.phone
-                self.site               = schema.site
-
-                # TODO: Image
-                if len(schema.images) > 0:
-                    if len(schema.images[0].sizes) > 0:
-                        self.image = self._handle_image(schema.images[0].sizes[0]['url'])
-
-                # Affiliates
-
-                if schema.sources.fandango_url is not None:
-                    self.fandango_url   = schema.sources.fandango_url
-
-                if schema.sources.itunes_url is not None:
-                    base        = "http://click.linksynergy.com/fs-bin/stat"
-                    params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" % LINKSHARE_TOKEN
-                    deep_url    = "%s?%s&RD_PARM1=%s" % (base, params, _encodeLinkShareDeepURL(schema.sources.itunes_url))
-                    short_url   = _encodeiTunesShortURL(schema.sources.itunes_url)
-                    self.itunes_url       = deep_url
-                    self.itunes_short_url = short_url
-
-                if schema.sources.amazon_url is not None:
-                    self.amazon_url     = _encodeAmazonURL(schema.sources.amazon_url)
-
-                if schema.sources.opentable_id is not None:
-                    opentable_id = schema.sources.opentable_id
-                    self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % opentable_id
-                    self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % opentable_id
-
-            if schema.__class__.__name__ == 'PlaceEntity':
-
-                self.address            = schema.formatAddress()
-                self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
-
-                if len(schema.cuisine) > 0:
-                    self.cuisine        = ', '.join(unicode(i) for i in schema.cuisine)
-
-                if schema.price_range is not None:
-                    self.price_scale    = '$' * schema.price_range
-
-            if schema.__class__.__name__ == 'PersonEntity':
-
-                if len(schema.genres) > 0:
-                    self.genre          = ', '.join(unicode(i) for i in schema.genres)
-
-                if len(schema.tracks) > 0:
-                    tracks = schema.tracks[:10]
-                    for track in tracks:
-                        self.songs.append(track['title'])
-
-                for album in schema.albums:
-                    self.albums.append(album['title'])
-
-            if schema.__class__.__name__ in ['MediaCollectionEntity', 'MediaItemEntity']:
-
-                self.length             = schema.length
-                self.rating             = schema.mpaa_rating
-
-                if schema.release_date is not None:
-                    self.release_date   = schema.release_date.strftime("%h %d, %Y")
-
-                if len(schema.genres) > 0:
-                    self.genre          = ', '.join(unicode(i) for i in schema.genres)
-
-
-                if len(schema.authors) > 0:
-                    self.author         = ', '.join(unicode(i['title']) for i in schema.authors)
-
-                if len(schema.artists) > 0:
-                    self.artist_name    = ', '.join(unicode(i['title']) for i in schema.artists)
-
-                if len(schema.publishers) > 0:
-                    self.publisher      = ', '.join(unicode(i['title']) for i in schema.publishers)
-
-                if len(schema.cast) > 0:
-                    self.cast           = ', '.join(unicode(i['title']) for i in schema.cast)
-
-                if len(schema.directors) > 0:
-                    self.director       = ', '.join(unicode(i['title']) for i in schema.directors)
-
-                if len(schema.networks) > 0:
-                    self.network        = ', '.join(unicode(i['title']) for i in schema.networks)
-
-            if schema.__class__.__name__ == 'MediaItemEntity':
-
-                self.isbn               = schema.isbn
-
-            if schema.__class__.__name__ == 'SoftwareEntity':
-
-                pass
-
-            if schema.__class__.__name__ == 'EntityMini':
-                data                = schema.value
-                coordinates         = data.pop('coordinates', None)
-                self.importData(data, overflow=True)
-                self.coordinates    = _coordinatesDictToFlat(coordinates)
-
-            return self
-
-        def _handle_image(self, url):
-            if url is not None:
-                domain = urlparse.urlparse(url).netloc
-
-                if 'amzstatic.com' in domain:
-                    # try to return the maximum-resolution apple photo possible if we have
-                    # a lower-resolution version stored in our db
-                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
-
-                elif 'amazon.com' in domain:
-                    # strip the 'look inside' image modifier
-                    url = amazon_image_re.sub(r'\1.jpg', url)
-
-            return url
-
+#    class HTTPEntity_stampedtest(Schema):
+#        def setSchema(self):
+#            self.entity_id          = SchemaElement(basestring, required=True)
+#            self.title              = SchemaElement(basestring, required=True)
+#            self.subtitle           = SchemaElement(basestring, required=True)
+#            self.category           = SchemaElement(basestring, required=True)
+#            self.subcategory        = SchemaElement(basestring, required=True)
+#            self.desc               = SchemaElement(basestring)
+#            self.image              = SchemaElement(basestring)
+#            self.last_modified      = SchemaElement(basestring)
+#
+#            # Address
+#            self.address            = SchemaElement(basestring)
+#            self.address_street     = SchemaElement(basestring)
+#            self.address_city       = SchemaElement(basestring)
+#            self.address_state      = SchemaElement(basestring)
+#            self.address_country    = SchemaElement(basestring)
+#            self.address_zip        = SchemaElement(basestring)
+#
+#            self.neighborhood       = SchemaElement(basestring)
+#            self.coordinates        = SchemaElement(basestring)
+#
+#            # Contact
+#            self.phone              = SchemaElement(basestring)
+#            self.site               = SchemaElement(basestring)
+#            self.hours              = SchemaElement(basestring)
+#
+#            # Cross-Category
+#            self.release_date       = SchemaElement(basestring)
+#            self.length             = SchemaElement(basestring)
+#            self.rating             = SchemaElement(basestring)
+#            self.genre              = SchemaElement(basestring)
+#
+#            # Food
+#            self.cuisine            = SchemaElement(basestring)
+#            self.price_scale        = SchemaElement(basestring)
+#
+#            # Book
+#            self.author             = SchemaElement(basestring)
+#            self.isbn               = SchemaElement(basestring)
+#            self.publisher          = SchemaElement(basestring)
+#            self.format             = SchemaElement(basestring)
+#            self.language           = SchemaElement(basestring)
+#            self.edition            = SchemaElement(basestring)
+#
+#            # Film
+#            self.cast               = SchemaElement(basestring)
+#            self.director           = SchemaElement(basestring)
+#            self.network            = SchemaElement(basestring)
+#            self.in_theaters        = SchemaElement(basestring)
+#            self.run_dates          = SchemaElement(basestring)
+#
+#            # Music
+#            self.artist_name        = SchemaElement(basestring)
+#            self.album_name         = SchemaElement(basestring)
+#            self.label              = SchemaElement(basestring)
+#            self.albums             = SchemaList(SchemaElement(basestring))
+#            self.songs              = SchemaList(SchemaElement(basestring))
+#            self.preview_url        = SchemaElement(basestring)
+#
+#            # Affiliates
+#            self.opentable_url      = SchemaElement(basestring)
+#            self.opentable_m_url    = SchemaElement(basestring)
+#            self.itunes_url         = SchemaElement(basestring)
+#            self.itunes_short_url   = SchemaElement(basestring)
+#            self.netflix_url        = SchemaElement(basestring)
+#            self.fandango_url       = SchemaElement(basestring)
+#            self.barnesnoble_url    = SchemaElement(basestring)
+#            self.amazon_url         = SchemaElement(basestring)
+#
+#        def importSchema(self, schema):
+#
+#            if 'ntity' not in schema.__class__.__name__:
+#                raise NotImplementedError(type(schema))
+#
+#            validEntities = set([
+#                'BasicEntity',
+#                'PlaceEntity',
+#                'PersonEntity',
+#                'MediaCollectionEntity',
+#                'MediaItemEntity',
+#                'SoftwareEntity',
+#            ])
+#
+#            if schema.__class__.__name__ in validEntities:
+#
+#                self.entity_id          = schema.entity_id
+#                self.title              = schema.title
+#                self.subtitle           = schema.subtitle
+#                self.category           = schema.category
+#                self.subcategory        = schema.subcategory
+#                self.desc               = schema.desc
+#                self.last_modified      = schema.timestamp.created
+#
+#                self.phone              = schema.phone
+#                self.site               = schema.site
+#
+#                # TODO: Image
+#                if len(schema.images) > 0:
+#                    if len(schema.images[0].sizes) > 0:
+#                        self.image = self._handle_image(schema.images[0].sizes[0]['url'])
+#
+#                # Affiliates
+#
+#                if schema.sources.fandango_url is not None:
+#                    self.fandango_url   = schema.sources.fandango_url
+#
+#                if schema.sources.itunes_url is not None:
+#                    base        = "http://click.linksynergy.com/fs-bin/stat"
+#                    params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" % LINKSHARE_TOKEN
+#                    deep_url    = "%s?%s&RD_PARM1=%s" % (base, params, _encodeLinkShareDeepURL(schema.sources.itunes_url))
+#                    short_url   = _encodeiTunesShortURL(schema.sources.itunes_url)
+#                    self.itunes_url       = deep_url
+#                    self.itunes_short_url = short_url
+#
+#                if schema.sources.amazon_url is not None:
+#                    self.amazon_url     = _encodeAmazonURL(schema.sources.amazon_url)
+#
+#                if schema.sources.opentable_id is not None:
+#                    opentable_id = schema.sources.opentable_id
+#                    self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % opentable_id
+#                    self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % opentable_id
+#
+#            if schema.__class__.__name__ == 'PlaceEntity':
+#
+#                self.address            = schema.formatAddress()
+#                self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
+#
+#                if len(schema.cuisine) > 0:
+#                    self.cuisine        = ', '.join(unicode(i) for i in schema.cuisine)
+#
+#                if schema.price_range is not None:
+#                    self.price_scale    = '$' * schema.price_range
+#
+#            if schema.__class__.__name__ == 'PersonEntity':
+#
+#                if len(schema.genres) > 0:
+#                    self.genre          = ', '.join(unicode(i) for i in schema.genres)
+#
+#                if len(schema.tracks) > 0:
+#                    tracks = schema.tracks[:10]
+#                    for track in tracks:
+#                        self.songs.append(track['title'])
+#
+#                for album in schema.albums:
+#                    self.albums.append(album['title'])
+#
+#            if schema.__class__.__name__ in ['MediaCollectionEntity', 'MediaItemEntity']:
+#
+#                self.length             = schema.length
+#                self.rating             = schema.mpaa_rating
+#
+#                if schema.release_date is not None:
+#                    self.release_date   = schema.release_date.strftime("%h %d, %Y")
+#
+#                if len(schema.genres) > 0:
+#                    self.genre          = ', '.join(unicode(i) for i in schema.genres)
+#
+#
+#                if len(schema.authors) > 0:
+#                    self.author         = ', '.join(unicode(i['title']) for i in schema.authors)
+#
+#                if len(schema.artists) > 0:
+#                    self.artist_name    = ', '.join(unicode(i['title']) for i in schema.artists)
+#
+#                if len(schema.publishers) > 0:
+#                    self.publisher      = ', '.join(unicode(i['title']) for i in schema.publishers)
+#
+#                if len(schema.cast) > 0:
+#                    self.cast           = ', '.join(unicode(i['title']) for i in schema.cast)
+#
+#                if len(schema.directors) > 0:
+#                    self.director       = ', '.join(unicode(i['title']) for i in schema.directors)
+#
+#                if len(schema.networks) > 0:
+#                    self.network        = ', '.join(unicode(i['title']) for i in schema.networks)
+#
+#            if schema.__class__.__name__ == 'MediaItemEntity':
+#
+#                self.isbn               = schema.isbn
+#
+#            if schema.__class__.__name__ == 'SoftwareEntity':
+#
+#                pass
+#
+#            if schema.__class__.__name__ == 'EntityMini':
+#                data                = schema.value
+#                coordinates         = data.pop('coordinates', None)
+#                self.importData(data, overflow=True)
+#                self.coordinates    = _coordinatesDictToFlat(coordinates)
+#
+#            return self
+#
+#        def _handle_image(self, url):
+#            if url is not None:
+#                domain = urlparse.urlparse(url).netloc
+#
+#                if 'amzstatic.com' in domain:
+#                    # try to return the maximum-resolution apple photo possible if we have
+#                    # a lower-resolution version stored in our db
+#                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+#
+#                elif 'amazon.com' in domain:
+#                    # strip the 'look inside' image modifier
+#                    url = amazon_image_re.sub(r'\1.jpg', url)
+#
+#            return url
+#
