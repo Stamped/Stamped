@@ -472,7 +472,7 @@ class HTTPLinkedAccounts(Schema):
         schema.dataImport(self.dataExport(), overflow=True)
         schema.twitter = twitter 
         schema.facebook = facebook
-        
+
         return schema 
 
     def exportTwitterAuthSchema(self):
@@ -712,16 +712,6 @@ class HTTPUserMini(Schema):
             sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
 
         return self
-    
-    # def importSchema(self, schema):
-    #     if schema.__class__.__name__ == 'UserMini':
-    #         self.importData(schema.exportSparse(), overflow=True)
-    #         self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
-            
-    #         _initialize_image_sizes(self)
-    #     else:
-    #         raise NotImplementedError(type(schema))
-    #     return self
 
 class HTTPSuggestedUserRequest(Schema):
     @classmethod
@@ -883,32 +873,12 @@ class HTTPEntityMini(Schema):
         self.subcategory            = entity.subcategory
         _addImages(self, entity.images)
 
-
         try:
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
         except AttributeError:
             pass
 
         return self
-
-#        def importSchema(self, schema):
-#            if isinstance(schema, BasicEntity):
-#                self.entity_id          = schema.entity_id
-#                self.title              = schema.title
-#                self.subtitle           = schema.subtitle
-#                self.category           = schema.category
-#                self.subcategory        = schema.subcategory
-#                _addImages(self, schema.images)
-#
-#
-#                try:
-#                    if 'coordinates' in schema.value:
-#                        self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
-#                except Exception:
-#                    pass
-#            else:
-#                raise NotImplementedError(type(schema))
-#            return self
 
 class HTTPEntityRelated(Schema):
     @classmethod
@@ -1732,16 +1702,6 @@ class HTTPEntity(Schema):
             self.coordinates    = _coordinatesDictToFlat(mini.coordinates)
 
         return self
-#
-#        def importSchema(self, schema, client=None):
-#            if schema.__class__.__name__ == 'EntityMini':
-#                data                = schema.value
-#                coordinates         = data.pop('coordinates', None)
-#                self.importData(data, overflow=True)
-#                self.coordinates    = _coordinatesDictToFlat(coordinates)
-#            else:
-#                raise NotImplementedError(type(schema))
-#            return self
 
 # HTTPEntity Components
 
@@ -1867,22 +1827,6 @@ class HTTPEntityAutosuggest(Schema):
             self.distance       = distance
 
         return self
-
-#        def importSchema(self, schema, distance=None):
-#            if isinstance(schema, BasicEntity):
-#                self.search_id = schema.search_id
-#                assert self.search_id is not None
-#
-#                self.title          = schema.title
-#                self.subtitle       = schema.subtitle
-#                self.category       = schema.category
-#
-#                if isinstance(distance, float) and distance >= 0:
-#                    self.distance   = distance
-#            else:
-#                raise NotImplementedError(type(schema))
-#
-#            return self
 
 class HTTPEntityId(Schema):
     @classmethod
@@ -3082,218 +3026,4 @@ class HTTPMenu(Schema):
     def importMenuSchema(self, menu):
         self.dataImport(menu.dataExport(), overflow=True)
         return self
-
-        # ########## #
-        # Deprecated #
-        # ########## #
-
-#    class HTTPEntity_stampedtest(Schema):
-#        def setSchema(self):
-#            self.entity_id          = SchemaElement(basestring, required=True)
-#            self.title              = SchemaElement(basestring, required=True)
-#            self.subtitle           = SchemaElement(basestring, required=True)
-#            self.category           = SchemaElement(basestring, required=True)
-#            self.subcategory        = SchemaElement(basestring, required=True)
-#            self.desc               = SchemaElement(basestring)
-#            self.image              = SchemaElement(basestring)
-#            self.last_modified      = SchemaElement(basestring)
-#
-#            # Address
-#            self.address            = SchemaElement(basestring)
-#            self.address_street     = SchemaElement(basestring)
-#            self.address_city       = SchemaElement(basestring)
-#            self.address_state      = SchemaElement(basestring)
-#            self.address_country    = SchemaElement(basestring)
-#            self.address_zip        = SchemaElement(basestring)
-#
-#            self.neighborhood       = SchemaElement(basestring)
-#            self.coordinates        = SchemaElement(basestring)
-#
-#            # Contact
-#            self.phone              = SchemaElement(basestring)
-#            self.site               = SchemaElement(basestring)
-#            self.hours              = SchemaElement(basestring)
-#
-#            # Cross-Category
-#            self.release_date       = SchemaElement(basestring)
-#            self.length             = SchemaElement(basestring)
-#            self.rating             = SchemaElement(basestring)
-#            self.genre              = SchemaElement(basestring)
-#
-#            # Food
-#            self.cuisine            = SchemaElement(basestring)
-#            self.price_scale        = SchemaElement(basestring)
-#
-#            # Book
-#            self.author             = SchemaElement(basestring)
-#            self.isbn               = SchemaElement(basestring)
-#            self.publisher          = SchemaElement(basestring)
-#            self.format             = SchemaElement(basestring)
-#            self.language           = SchemaElement(basestring)
-#            self.edition            = SchemaElement(basestring)
-#
-#            # Film
-#            self.cast               = SchemaElement(basestring)
-#            self.director           = SchemaElement(basestring)
-#            self.network            = SchemaElement(basestring)
-#            self.in_theaters        = SchemaElement(basestring)
-#            self.run_dates          = SchemaElement(basestring)
-#
-#            # Music
-#            self.artist_name        = SchemaElement(basestring)
-#            self.album_name         = SchemaElement(basestring)
-#            self.label              = SchemaElement(basestring)
-#            self.albums             = SchemaList(SchemaElement(basestring))
-#            self.songs              = SchemaList(SchemaElement(basestring))
-#            self.preview_url        = SchemaElement(basestring)
-#
-#            # Affiliates
-#            self.opentable_url      = SchemaElement(basestring)
-#            self.opentable_m_url    = SchemaElement(basestring)
-#            self.itunes_url         = SchemaElement(basestring)
-#            self.itunes_short_url   = SchemaElement(basestring)
-#            self.netflix_url        = SchemaElement(basestring)
-#            self.fandango_url       = SchemaElement(basestring)
-#            self.barnesnoble_url    = SchemaElement(basestring)
-#            self.amazon_url         = SchemaElement(basestring)
-#
-#        def importSchema(self, schema):
-#
-#            if 'ntity' not in schema.__class__.__name__:
-#                raise NotImplementedError(type(schema))
-#
-#            validEntities = set([
-#                'BasicEntity',
-#                'PlaceEntity',
-#                'PersonEntity',
-#                'MediaCollectionEntity',
-#                'MediaItemEntity',
-#                'SoftwareEntity',
-#            ])
-#
-#            if schema.__class__.__name__ in validEntities:
-#
-#                self.entity_id          = schema.entity_id
-#                self.title              = schema.title
-#                self.subtitle           = schema.subtitle
-#                self.category           = schema.category
-#                self.subcategory        = schema.subcategory
-#                self.desc               = schema.desc
-#                self.last_modified      = schema.timestamp.created
-#
-#                self.phone              = schema.phone
-#                self.site               = schema.site
-#
-#                # TODO: Image
-#                if len(schema.images) > 0:
-#                    if len(schema.images[0].sizes) > 0:
-#                        self.image = self._handle_image(schema.images[0].sizes[0]['url'])
-#
-#                # Affiliates
-#
-#                if schema.sources.fandango_url is not None:
-#                    self.fandango_url   = schema.sources.fandango_url
-#
-#                if schema.sources.itunes_url is not None:
-#                    base        = "http://click.linksynergy.com/fs-bin/stat"
-#                    params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" % LINKSHARE_TOKEN
-#                    deep_url    = "%s?%s&RD_PARM1=%s" % (base, params, _encodeLinkShareDeepURL(schema.sources.itunes_url))
-#                    short_url   = _encodeiTunesShortURL(schema.sources.itunes_url)
-#                    self.itunes_url       = deep_url
-#                    self.itunes_short_url = short_url
-#
-#                if schema.sources.amazon_url is not None:
-#                    self.amazon_url     = _encodeAmazonURL(schema.sources.amazon_url)
-#
-#                if schema.sources.opentable_id is not None:
-#                    opentable_id = schema.sources.opentable_id
-#                    self.opentable_url = "http://www.opentable.com/single.aspx?rid=%s&ref=9166" % opentable_id
-#                    self.opentable_m_url = "http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166" % opentable_id
-#
-#            if schema.__class__.__name__ == 'PlaceEntity':
-#
-#                self.address            = schema.formatAddress()
-#                self.coordinates        = _coordinatesDictToFlat(schema.coordinates)
-#
-#                if len(schema.cuisine) > 0:
-#                    self.cuisine        = ', '.join(unicode(i) for i in schema.cuisine)
-#
-#                if schema.price_range is not None:
-#                    self.price_scale    = '$' * schema.price_range
-#
-#            if schema.__class__.__name__ == 'PersonEntity':
-#
-#                if len(schema.genres) > 0:
-#                    self.genre          = ', '.join(unicode(i) for i in schema.genres)
-#
-#                if len(schema.tracks) > 0:
-#                    tracks = schema.tracks[:10]
-#                    for track in tracks:
-#                        self.songs.append(track['title'])
-#
-#                for album in schema.albums:
-#                    self.albums.append(album['title'])
-#
-#            if schema.__class__.__name__ in ['MediaCollectionEntity', 'MediaItemEntity']:
-#
-#                self.length             = schema.length
-#                self.rating             = schema.mpaa_rating
-#
-#                if schema.release_date is not None:
-#                    self.release_date   = schema.release_date.strftime("%h %d, %Y")
-#
-#                if len(schema.genres) > 0:
-#                    self.genre          = ', '.join(unicode(i) for i in schema.genres)
-#
-#
-#                if len(schema.authors) > 0:
-#                    self.author         = ', '.join(unicode(i['title']) for i in schema.authors)
-#
-#                if len(schema.artists) > 0:
-#                    self.artist_name    = ', '.join(unicode(i['title']) for i in schema.artists)
-#
-#                if len(schema.publishers) > 0:
-#                    self.publisher      = ', '.join(unicode(i['title']) for i in schema.publishers)
-#
-#                if len(schema.cast) > 0:
-#                    self.cast           = ', '.join(unicode(i['title']) for i in schema.cast)
-#
-#                if len(schema.directors) > 0:
-#                    self.director       = ', '.join(unicode(i['title']) for i in schema.directors)
-#
-#                if len(schema.networks) > 0:
-#                    self.network        = ', '.join(unicode(i['title']) for i in schema.networks)
-#
-#            if schema.__class__.__name__ == 'MediaItemEntity':
-#
-#                self.isbn               = schema.isbn
-#
-#            if schema.__class__.__name__ == 'SoftwareEntity':
-#
-#                pass
-#
-#            if schema.__class__.__name__ == 'EntityMini':
-#                data                = schema.value
-#                coordinates         = data.pop('coordinates', None)
-#                self.importData(data, overflow=True)
-#                self.coordinates    = _coordinatesDictToFlat(coordinates)
-#
-#            return self
-#
-#        def _handle_image(self, url):
-#            if url is not None:
-#                domain = urlparse.urlparse(url).netloc
-#
-#                if 'amzstatic.com' in domain:
-#                    # try to return the maximum-resolution apple photo possible if we have
-#                    # a lower-resolution version stored in our db
-#                    url = url.replace('100x100', '200x200').replace('170x170', '200x200')
-#
-#                elif 'amazon.com' in domain:
-#                    # strip the 'look inside' image modifier
-#                    url = amazon_image_re.sub(r'\1.jpg', url)
-#
-#            return url
-#
-
 
