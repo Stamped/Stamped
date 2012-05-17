@@ -15,10 +15,36 @@
 @synthesize tempImageWidth = tempImageWidth_;
 
 - (NSMutableDictionary*)asDictionaryParams {
-  return [NSMutableDictionary dictionary];
+  NSMutableDictionary* params = [super asDictionaryParams];
+  id val = self.tempImageURL;
+  if (val) {
+    [params setObject:val forKey:@"temp_image_url"];
+  }
+  val = self.tempImageHeight;
+  if (val) {
+    [params setObject:val forKey:@"temp_image_height"];
+  }
+  val = self.tempImageWidth;
+  if (val) {
+    [params setObject:val forKey:@"temp_image_width"];
+  }
+  return params;
 }
 
 - (void)importDictionaryParams:(NSDictionary*)params {
+  id val = [params objectForKey:@"temp_image_url"];
+  if (val) {
+    self.tempImageURL = val;
+  }
+  val = [params objectForKey:@"temp_image_height"];
+  if (val) {
+    self.tempImageHeight = val;
+  }
+  val = [params objectForKey:@"temp_image_width"];
+  if (val) {
+    self.tempImageWidth = val;
+  }
+  [super importDictionaryParams:params];
 }
 
 @end
