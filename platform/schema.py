@@ -5,8 +5,10 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals
 import copy
 import pprint
+import logs
 
 class SchemaException(Exception):
     pass
@@ -291,7 +293,8 @@ class Schema(object):
                     if kwargs.pop('overflow', False):
                         continue
         except Exception as e:
-            print(e)
+            logs.warning(e)
+            raise
         return self
 
     @classmethod

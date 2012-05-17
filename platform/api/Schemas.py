@@ -357,7 +357,7 @@ class UserMini(Schema):
         cls.addProperty('color_primary',        basestring)
         cls.addProperty('color_secondary',      basestring)
         cls.addProperty('privacy',              bool)
-        cls.addProperty('timestamp',            UserTimestampSchema)
+        cls.addNestedProperty('timestamp',      UserTimestampSchema)
 
     def __init__(self):
         Schema.__init__(self)
