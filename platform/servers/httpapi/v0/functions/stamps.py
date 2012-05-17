@@ -16,6 +16,9 @@ def create(request, authUserId, data, **kwargs):
         'entity_id' : data.pop('entity_id', None),
         'search_id' : data.pop('search_id', None)
     }
+
+    if 'credit' in data and data['credit'] != None:
+        data['credit'] = data['credit'].split(',')
     
     stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
     stamp = HTTPStamp().importSchema(stamp)
