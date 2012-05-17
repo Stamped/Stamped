@@ -711,7 +711,112 @@ footer .copyright a, footer .copyright a {
 }
 
 .static-map-small {
-    /* TODO: non-zero border messes with map centering */
     .static-map(200px, 2px, 35deg, 200px);
+}
+
+.active() {
+    opacity: 1;
+}
+
+#stamp-category-nav-bar {
+    position: fixed;
+    display:  block;
+    z-index: 1000;
+    
+    background: #262626;
+    .rounded(8px);
+    .box-shadow(0, 0, 4px, 0, @shadow);
+    
+    top:   50%;
+    right: 40px;
+    margin: -180px 0 0;
+    padding: 0;
+    
+    ol {
+        text-decoration: none;
+        list-style: none;
+        text-indent: 0;
+        padding: 0;
+        margin: 0;
+        
+        li {
+            position: relative;
+            
+            a {
+                background: url(/assets/img/sidenav_sprite.png) no-repeat -192px 0;
+                
+                text-align: center;
+                display: block;
+                width:  60px;
+                height: 60px;
+                margin:  6px 0;
+                
+                position: relative;
+                z-index: 1000;
+                
+                opacity: 0;
+                .transition(opacity, .6s, ease-in-out);
+            }
+            
+            div {
+                background: url(/assets/img/sidenav_sprite.png) no-repeat;
+                position: absolute;
+                left: 14px;
+                top: 14px;
+                
+                display: block;
+                width:  32px;
+                height: 32px;
+                
+                z-index: 999;
+            }
+        }
+        
+        a:hover {
+            opacity: 1;
+            /*background-position: -252px 0;*/
+        }
+        a:active {
+            .active();
+        }
+        
+        li.default div {
+            background-position: 0 0;
+        }
+        
+        li.place div {
+            background-position: -32px 0;
+        }
+        
+        li.music div {
+            background-position: -64px 0;
+        }
+        
+        li.book div {
+            background-position: -96px 0;
+        }
+        
+        li.film div {
+            background-position: -128px 0;
+        }
+        
+        .other div {
+            background-position: -160px 0;
+        }
+    }
+}
+
+body.default    #stamp-category-nav-bar ol li.default, 
+body.place      #stamp-category-nav-bar ol li.place, 
+body.music      #stamp-category-nav-bar ol li.music, 
+body.book       #stamp-category-nav-bar ol li.book, 
+body.film       #stamp-category-nav-bar ol li.film, 
+body.other      #stamp-category-nav-bar ol li.other {
+    a, a:hover {
+        .active();
+        
+        pointer-events: none;
+        cursor: default;
+    }
 }
 

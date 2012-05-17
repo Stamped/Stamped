@@ -10,7 +10,8 @@
         // ---------------------------------------------------------------------
         
         $('.profile-nav a').each(function () {
-            $(this).click(function() {
+            $(this).click(function(event) {
+                event.stopPropagation();
                 var link = $(this);
                 
                 link.parents(".profile-sections").each(function() {
@@ -87,7 +88,9 @@
         var t2_h     = $target2.height();
         var duration = 1200;
          
-        $('.sign-in a.button').click(function() {
+        $('.sign-in a.button').click(function(event) {
+            event.stopPropagation();
+            
             $target1 = $target1.stop(true, false);
             $target2 = $target2.stop(true, false);
             
@@ -164,7 +167,9 @@
         var target_height   = $target.height();
         var duration        = 1200;
         
-        $('.sign-in a.button').click(function() {
+        $('.sign-in a.button').click(function(event) {
+            event.stopPropagation();
+            
             $target = $target.stop(true, false);
             
             // demo animation of profile header's body
@@ -200,6 +205,10 @@
                 });
             }
         });
+        
+        // ---------------------------------------------------------------------
+        // initialize responsive header that gets smaller as you scroll
+        // ---------------------------------------------------------------------
         
         var $user_logo          = $('header .user-logo-large');
         var user_logo_width     = parseFloat($user_logo.css('width'));
@@ -301,6 +310,24 @@
                 });
                 console.debug("cur_ratio: " + cur_ratio);
             }
+        });
+        
+        // ---------------------------------------------------------------------
+        // initialize stamp category nav bar
+        // ---------------------------------------------------------------------
+        
+        var $nav_bar = $('#stamp-category-nav-bar');
+        
+        $nav_bar.find('a').each(function () {
+            $(this).click(function(event) {
+                event.stopPropagation();
+                
+                var link     = $(this);
+                var category = link.parent().attr('class');
+                
+                // TODO: how to best update stamp-gallery contents
+                console.debug(category);
+            });
         });
         
         return;

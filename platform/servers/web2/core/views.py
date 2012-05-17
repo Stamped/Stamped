@@ -17,6 +17,16 @@ import travis_test
 def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
 
+def _get_body_classes(base, schema):
+    body_classes = base
+    
+    if schema.category is not None:
+        body_classes = "%s %s" % (body_classes, schema.category)
+    else:
+        body_classes = "%s %s" % (body_classes, "default")
+    
+    return body_classes
+
 # ensure friends and followers are randomly shuffled s.t. different users will 
 # appear every page refresh, with preferential treatment always going to users 
 # who have customized their profile image away from the default.
@@ -65,7 +75,15 @@ def profile(request, schema, **kwargs):
         user        = travis_test.user
         user_id     = user['user_id']
         
-        stamps      = travis_test.stamps[schema.offset : schema.offset + schema.limit]
+        stamps      = travis_test.stamps
+        
+        if schema.category is not None:
+            stamps  = filter(lambda s: s['entity']['category'] == schema.category or ('coordinates' in s['entity'] and s['entity']['coordinates'] is not None and schema.category == 'place'), stamps)
+        
+        if schema.subcategory is not None:
+            stamps  = filter(lambda s: s['entity']['subcategory'] == schema.subcategory, stamps)
+        
+        stamps      = stamps[schema.offset : schema.offset + schema.limit]
         friends     = travis_test.friends
         followers   = travis_test.followers
     else:
@@ -92,15 +110,18 @@ def profile(request, schema, **kwargs):
             'offset' : schema.offset + len(stamps), 
         })
     
+    body_classes = _get_body_classes('profile', schema)
+    
     return stamped_render(request, 'profile2.html', {
-        'user'      : user, 
-        'stamps'    : stamps, 
+        'user'          : user, 
+        'stamps'        : stamps, 
         
-        'friends'   : friends, 
-        'followers' : followers, 
+        'friends'       : friends, 
+        'followers'     : followers, 
         
-        'prev_url'  : prev_url, 
-        'next_url'  : next_url, 
+        'prev_url'      : prev_url, 
+        'next_url'      : next_url, 
+        'body_classes'  : body_classes, 
     }, preload=[ 'user' ])
 
 @stamped_view(schema=HTTPUserCollectionSlice)
@@ -148,15 +169,18 @@ def map(request, schema, **kwargs):
             'offset' : schema.offset + len(stamps), 
         })
     
+    body_classes = _get_body_classes('map', schema)
+    
     return stamped_render(request, 'map.html', {
-        'user'      : user, 
-        'stamps'    : stamps, 
+        'user'          : user, 
+        'stamps'        : stamps, 
         
-        'friends'   : friends, 
-        'followers' : followers, 
+        'friends'       : friends, 
+        'followers'     : followers, 
         
-        'prev_url'  : prev_url, 
-        'next_url'  : next_url, 
+        'prev_url'      : prev_url, 
+        'next_url'      : next_url, 
+        'body_classes'  : body_classes, 
     }, preload=[ 'user', 'stamps' ])
 
 @stamped_view(schema=HTTPUserCollectionSlice)

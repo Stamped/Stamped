@@ -568,8 +568,6 @@ a.pronounced-title {
   font-size: 2.2em;
 }
 .static-map-small {
-  /* TODO: non-zero border messes with map centering */
-
   display: block;
   width: 200px;
   padding: 30px;
@@ -766,4 +764,101 @@ a.pronounced-title {
 }
 .static-map-small:hover .dark-layer {
   opacity: 0;
+}
+#stamp-category-nav-bar {
+  position: fixed;
+  display: block;
+  z-index: 1000;
+  background: #262626;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  top: 50%;
+  right: 40px;
+  margin: -180px 0 0;
+  padding: 0;
+}
+#stamp-category-nav-bar ol {
+  text-decoration: none;
+  list-style: none;
+  text-indent: 0;
+  padding: 0;
+  margin: 0;
+}
+#stamp-category-nav-bar ol li {
+  position: relative;
+}
+#stamp-category-nav-bar ol li a {
+  background: url(/assets/img/sidenav_sprite.png) no-repeat -192px 0;
+  text-align: center;
+  display: block;
+  width: 60px;
+  height: 60px;
+  margin: 6px 0;
+  position: relative;
+  z-index: 1000;
+  opacity: 0;
+  -webkit-transition: opacity 0.6s ease-in-out;
+  -moz-transition: opacity 0.6s ease-in-out;
+  transition: opacity 0.6s ease-in-out;
+}
+#stamp-category-nav-bar ol li div {
+  background: url(/assets/img/sidenav_sprite.png) no-repeat;
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: block;
+  width: 32px;
+  height: 32px;
+  z-index: 999;
+}
+#stamp-category-nav-bar ol a:hover {
+  opacity: 1;
+  /*background-position: -252px 0;*/
+
+}
+#stamp-category-nav-bar ol a:active {
+  opacity: 1;
+}
+#stamp-category-nav-bar ol li.default div {
+  background-position: 0 0;
+}
+#stamp-category-nav-bar ol li.place div {
+  background-position: -32px 0;
+}
+#stamp-category-nav-bar ol li.music div {
+  background-position: -64px 0;
+}
+#stamp-category-nav-bar ol li.book div {
+  background-position: -96px 0;
+}
+#stamp-category-nav-bar ol li.film div {
+  background-position: -128px 0;
+}
+#stamp-category-nav-bar ol .other div {
+  background-position: -160px 0;
+}
+body.default #stamp-category-nav-bar ol li.default a,
+body.place #stamp-category-nav-bar ol li.place a,
+body.music #stamp-category-nav-bar ol li.music a,
+body.book #stamp-category-nav-bar ol li.book a,
+body.film #stamp-category-nav-bar ol li.film a,
+body.other #stamp-category-nav-bar ol li.other a,
+body.default #stamp-category-nav-bar ol li.default a:hover,
+body.place #stamp-category-nav-bar ol li.place a:hover,
+body.music #stamp-category-nav-bar ol li.music a:hover,
+body.book #stamp-category-nav-bar ol li.book a:hover,
+body.film #stamp-category-nav-bar ol li.film a:hover,
+body.other #stamp-category-nav-bar ol li.other a:hover {
+  opacity: 1;
+  pointer-events: none;
+  cursor: default;
 }

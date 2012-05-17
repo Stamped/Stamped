@@ -39,7 +39,7 @@
     {% endblock post_head %}
     
     {% block pre_body %}
-    <body>
+    <body {% if body_classes %}class="{{ body_classes }}"{% endif %}>
         {% endblock pre_body %}
         
         {% block pre_header %}
