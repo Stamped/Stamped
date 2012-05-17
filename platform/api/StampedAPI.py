@@ -317,8 +317,8 @@ class StampedAPI(AStampedAPI):
         # Remove friends / followers
         for followerId in followerIds:
             friendship              = Friendship()
-            friendship.user_id      = account.user_id
-            friendship.friend_id    = friendId
+            friendship.user_id      = followerId
+            friendship.friend_id    = account.user_id
             
             self._friendshipDB.removeFriendship(friendship)
             
@@ -1758,6 +1758,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             try:
                 stamp.entity = entityIds[stamp.entity.entity_id]
+                logs.info("ENRICH STAMP WITH USER: %s" % userIds[stamp.user.user_id])
                 stamp.user = userIds[stamp.user.user_id]
 
                 # Credit

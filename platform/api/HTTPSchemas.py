@@ -2027,6 +2027,8 @@ class HTTPStamp(Schema):
         cls.addProperty('is_fav',               bool)
 
     def importStamp(self, stamp):
+        logs.info("IMPORT STAMP: %s" % stamp)
+
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
         mentions                = getattr(stamp, 'mentions', [])
