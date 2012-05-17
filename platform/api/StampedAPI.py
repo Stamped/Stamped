@@ -347,7 +347,7 @@ class StampedAPI(AStampedAPI):
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         
         for stamp in stamps:
-            if len(stamp.credit) > 0:
+            if stamp.credit is not None and len(stamp.credit) > 0:
                 for creditedUser in stamp.credit:
                     self._stampDB.removeCredit(creditedUser['user_id'], stamp)
                     
