@@ -1981,6 +1981,7 @@ class HTTPStamp(Schema):
                     if len(img.sizes) == 0:
                         continue
                     source              = HTTPActionSource()
+                    source.name         = 'View image'
                     source.source       = 'stamped'
                     source.source_id    = img.sizes[0].url
 
