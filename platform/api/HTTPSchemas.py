@@ -1986,6 +1986,7 @@ class HTTPStamp(Schema):
                     source.source_id    = img.sizes[0].url
 
                     action              = HTTPAction()
+                    action.name         = 'View image'
                     action.type         = 'stamped_view_image'
                     action.sources      = [ source ]
                     img.action          = action
