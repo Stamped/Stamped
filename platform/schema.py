@@ -160,9 +160,15 @@ class Schema(object):
             info = self.__class__._propertyInfo[name]
             kind = info[_kindKey]
 
-            # Apply cast
-            if 'cast' in info:
-                value = info['cast'](value)
+            # Apply cast.  If we have a propertyList or nestedPropList, apply to all items
+            cast = info.get(_castKey, None)
+            if cast is not None:
+                t = info[_typeKey]
+                if t in [_propertyKey, _nestedPropertyKey]:
+                    value = cast(value)
+                else:
+                    value = tuple([ cast(v) for v in value])
+
 
             if value is None:
                 if name in self.__class__._required_fields:
@@ -174,12 +180,6 @@ class Schema(object):
                 t = info[_typeKey]
                 # Check if t is a scalar value or a list
                 if t == _propertyKey or t == _nestedPropertyKey:
-
-                    # if there is a cast function, apply it to the value
-                    cast = info.get(_castKey, None)
-                    if cast is not None:
-                        value = cast(value)
-
                     if isinstance(value, kind):
                         # Success!
                         if name in self.__class__._required_fields:
@@ -187,26 +187,18 @@ class Schema(object):
                             if name not in self.__properties or self.__properties[name] is None:
                                 self.__required_count += 1
                         self.__properties[name] = value
-
                     else:
                         raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
                 else:
-                    # if there is a cast function, apply it to all items in the list
-                    cast = info.get(_castKey, None)
-                    if cast is not None:
-                        value2 = tuple([ cast(v) for v in value])
-                    else:
-                        value2 = tuple(value)
-
                     valid = True
-                    for item in value2:
+                    for item in value:
                         if not isinstance(item, kind):
                             raise SchemaException('Bad type for field %s and value %s, should be %s' % (name, value, kind))
                     if name in self.__class__._required_fields:
                         # Increment __required_count if required
                         if name not in self.__properties or self.__properties[name] is None:
                             self.__required_count += 1
-                    self.__properties[name] = value2
+                    self.__properties[name] = value
         elif name in self.__class__._duplicates:
             raise SchemaException('Duplicate shortcut used')
         elif name in self.__class__._shortcuts:
@@ -271,27 +263,30 @@ class Schema(object):
     def dataImport(self, properties, **kwargs):
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
+        try:
+            for k, v in properties.items():
+                try:
+                    p = self.__class__._propertyInfo[k]
+                    if p[_typeKey] == _nestedPropertyKey:
+                        if k in self.__properties:
+                            nested = self.__properties[k]
+                        else:
+                            nested = p[_kindKey]()
+                        nested.dataImport(v)
+                        self.__setattr__(k, nested)
 
-        for k, v in properties.items():
-            try:
-                p = self.__class__._propertyInfo[k]
-                if p[_typeKey] == _nestedPropertyKey:
-                    if k in self.__properties:
-                        nested = self.__properties[k]
+                    elif p[_typeKey] == _nestedPropertyListKey:
+                        l = tuple(v)
+                        nestedKind = p[_kindKey]
+                        nestedPropList = tuple([nestedKind().dataImport(item) for item in l])
+                        self.__setattr__(k, nestedPropList)
                     else:
-                        nested = p[_kindKey]()
-                    nested.dataImport(v)
-                    self.__setattr__(k, nested)
-
-                elif p[_typeKey] == _nestedPropertyListKey:
-                    raise NotImplementedError('NESTED PROPERTY LIST') 
-
-                else:
-                    self.__setattr__(k, v)
-            except KeyError:
-                if kwargs.pop('overflow', False):
-                    continue
-
+                        self.__setattr__(k, v)
+                except KeyError:
+                    if kwargs.pop('overflow', False):
+                        continue
+        except Exception as e:
+            print(e)
         return self
 
     @classmethod
@@ -309,4 +304,3 @@ class Schema(object):
     @classmethod
     def addNestedPropertyList(cls, name, kind, required=False):
         cls.__addProperty(_nestedPropertyListKey, name, kind, required=required)
-
