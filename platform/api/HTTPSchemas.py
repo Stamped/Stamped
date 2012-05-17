@@ -2985,7 +2985,6 @@ class HTTPActivity(Schema):
 class HTTPActivitySlice(HTTPGenericSlice):
     @classmethod
     def setSchema(cls):
-        HTTPGenericSlice.setSchema(self)
         cls.addProperty('distance',             int)
 
 class HTTPLinkedURL(Schema):
@@ -3003,45 +3002,32 @@ class HTTPLinkedURL(Schema):
 # Menu #
 # #### #
 
-class HTTPMenu(Schema):
+class HTTPHours(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('disclaimer',               basestring)
-        cls.addProperty('attribution_image',        basestring)
-        cls.addProperty('attribution_image_link',   basestring)
-        cls.addNestedPropertyList('menus',          HTTPSubmenu)
+        cls.addProperty('open',                     basestring)
+        cls.addProperty('close',                    basestring)
+        cls.addProperty('desc',                     basestring)
 
-    def importMenuSchema(self, menu):
-        self.dataImport(menu.dataExport(), overflow=True)
-        return self
+class HTTPTimes(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('sun',            HTTPHours)
+        cls.addNestedPropertyList('mon',            HTTPHours)
+        cls.addNestedPropertyList('tue',            HTTPHours)
+        cls.addNestedPropertyList('wed',            HTTPHours)
+        cls.addNestedPropertyList('thu',            HTTPHours)
+        cls.addNestedPropertyList('fri',            HTTPHours)
+        cls.addNestedPropertyList('sat',            HTTPHours)
 
-#        def importSchema(self, schema):
-#            if schema.__class__.__name__ == 'MenuSchema':
-#                self.disclaimer = schema.disclaimer
-#                self.attribution_image = schema.attribution_image
-#                self.attribution_image_link = schema.attribution_image_link
-#                self.menus = schema.menus.value
-#            else:
-#                raise NotImplementedError
-#            return self
-
-class HTTPSubmenu(Schema):
+class HTTPMenuPrice(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('title',                    basestring)
-        cls.addNestedProperty('times',              HTTPTimes)
-        cls.addProperty('footnote',                 basestring)
-        cls.addProperty('desc',                     basestring)
-        cls.addProperty('short_desc',               basestring)
-        cls.addNestedPropertyList('sections',       HTTPMenuSection)
-
-class HTTPMenuSection(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('title',                    basestring)
-        cls.addProperty('desc',                     basestring)
-        cls.addProperty('short_desc',               basestring)
-        cls.addNestedPropertyList('items',          HTTPMenuItem)
+        cls.addProperty('price',                    basestring)
+        cls.addProperty('calories',                 int)
+        cls.addProperty('unit',                     basestring)
+        cls.addProperty('currency',                 basestring)
 
 class HTTPMenuItem(Schema):
     @classmethod
@@ -3056,32 +3042,35 @@ class HTTPMenuItem(Schema):
         cls.addPropertyList('restrictions',         basestring)
         cls.addNestedPropertyList('prices',         HTTPMenuPrice)
 
-class HTTPMenuPrice(Schema):
+class HTTPMenuSection(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('title',                    basestring)
-        cls.addProperty('price',                    basestring)
-        cls.addProperty('calories',                 int)
-        cls.addProperty('unit',                     basestring)
-        cls.addProperty('currency',                 basestring)
-
-class HTTPTimes(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('sun',            HTTPHours)
-        cls.addNestedPropertyList('mon',            HTTPHours)
-        cls.addNestedPropertyList('tue',            HTTPHours)
-        cls.addNestedPropertyList('wed',            HTTPHours)
-        cls.addNestedPropertyList('thu',            HTTPHours)
-        cls.addNestedPropertyList('fri',            HTTPHours)
-        cls.addNestedPropertyList('sat',            HTTPHours)
-
-class HTTPHours(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('open',                     basestring)
-        cls.addProperty('close',                    basestring)
         cls.addProperty('desc',                     basestring)
+        cls.addProperty('short_desc',               basestring)
+        cls.addNestedPropertyList('items',          HTTPMenuItem)
+
+class HTTPSubmenu(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('title',                    basestring)
+        cls.addNestedProperty('times',              HTTPTimes)
+        cls.addProperty('footnote',                 basestring)
+        cls.addProperty('desc',                     basestring)
+        cls.addProperty('short_desc',               basestring)
+        cls.addNestedPropertyList('sections',       HTTPMenuSection)
+
+class HTTPMenu(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('disclaimer',               basestring)
+        cls.addProperty('attribution_image',        basestring)
+        cls.addProperty('attribution_image_link',   basestring)
+        cls.addNestedPropertyList('menus',          HTTPSubmenu)
+
+    def importMenuSchema(self, menu):
+        self.dataImport(menu.dataExport(), overflow=True)
+        return self
 
         # ########## #
         # Deprecated #

@@ -564,7 +564,7 @@ class StampedAPI(AStampedAPI):
     def updateAlerts(self, authUserId, alerts):
         account = self._accountDB.getAccount(authUserId)
         
-        for k, v in alerts.iteritems():
+        for k, v in alerts.dataExport().iteritems():
             if v:
                 account['alerts'][k] = True
             else:
