@@ -772,6 +772,11 @@ class HTTPClientLogsEntry(Schema):
         cls.addProperty('comment_id',   basestring)
         cls.addProperty('activity_id',  basestring)
 
+    def exportClientLogsEntry(self):
+        entry = ClientLogsEntry()
+        entry.dataImport(self.dataExport(), overflow=True)
+        return entry
+
 # ################# #
 # Endpoint Response #
 # ################# #
@@ -964,7 +969,12 @@ class HTTPEntity(Schema):
             if 'action' in kwargs:
                 item.action = kwargs['action']
 
-            self.metadata.append(item)
+            metadata = self.metadata
+            if metadata is None:
+                metadata = []
+            metadata.append(item)
+
+            self.metadata = metadata
 
     def _formatReleaseDate(self, date):
         try:
@@ -1517,6 +1527,7 @@ class HTTPEntity(Schema):
 
             if entity.subcategory in ["album", "artist"] and entity.tracks is not None:
                 playlist = HTTPEntityPlaylist()
+                data = []
 
                 if entity.subcategory == 'album':
                     playlist.name = 'Tracks'
@@ -1587,12 +1598,13 @@ class HTTPEntity(Schema):
 
                             item.action = action
 
-                        playlist.data.append(item)
+                        data.append(item)
 
                     except Exception as e:
                         pass
 
-                if len(playlist.data) > 0:
+                if len(data) > 0:
+                    playlist.data = data
                     self.playlist = playlist
 
             # Albums
@@ -1691,7 +1703,7 @@ class HTTPEntity(Schema):
         if entity.kind == 'place':
             # Don't add an image if coordinates exist
             del(self.images)
-        elif len(entity.images) > 0:
+        elif entity.images is not None and len(entity.images) > 0:
             _addImages(self, entity.images)
 
         return self

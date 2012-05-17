@@ -1897,7 +1897,7 @@ class StampedAPI(AStampedAPI):
         stampExists = self._stampDB.checkStamp(user.user_id, entity.entity_id)
         
         # Check to make sure the user has stamps left
-        if not stampExists and user.num_stamps_left <= 0:
+        if not stampExists and user.stats.num_stamps_left <= 0:
             raise StampedIllegalActionError("No more stamps remaining")
 
         # Build content
@@ -1955,9 +1955,13 @@ class StampedAPI(AStampedAPI):
         if stampExists:
             stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
             stamp.timestamp.stamped     = now
+            stamp.timestamp.stamped     = now
             stamp.timestamp.modified    = now 
-            stamp.num_blurbs            = stamp.num_blurbs + 1 if stamp.num_blurbs is not None else 2
-            stamp.contents.append(content)
+            stamp.stats.num_blurbs      = stamp.stats.num_blurbs + 1 if stamp.num_blurbs is not None else 2
+
+            contents                    = stamp.contents 
+            contents.append(content)
+            stamp.contents              = contents
 
             ### TODO: Extract credit
             if creditData is not None:
@@ -1970,13 +1974,20 @@ class StampedAPI(AStampedAPI):
             stamp                       = Stamp()
             stamp.user_id               = user.user_id
             stamp.entity                = entity
-            stamp.timestamp.created     = now
-            stamp.timestamp.stamped     = now
-            stamp.timestamp.modified    = now 
-            stamp.stamp_num             = user.num_stamps_total + 1
-            stamp.num_blurbs            = 1
+            stamp.contents              = [ content ]
+
+            stats                       = StampStatsSchema()
+            stats.num_blurbs            = 1
+            stats.stamp_num             = user.stats.num_stamps_total + 1
+            stamp.stats                 = stats
+
+            timestamp                   = StampTimestampSchema()
+            timestamp.created           = now
+            timestamp.stamped           = now
+            timestamp.modified          = now 
+            stamp.timestamp             = timestamp
+            
             stamp.badges                = self.getStampBadges(stamp)
-            stamp.contents.append(content)
 
             # Extract credit
             if creditData is not None:

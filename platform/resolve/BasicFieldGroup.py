@@ -13,7 +13,7 @@ from logs import log, report
 try:
     from AFieldGroup    import AFieldGroup
     from pprint         import pformat, pprint
-    # from schema         import SchemaElement
+    from schema         import Schema
 except:
     report()
     raise
@@ -95,6 +95,8 @@ class BasicFieldGroup(AFieldGroup):
     
     def getValue(self, entity, path):
         cur = entity
+        if isinstance(cur, Schema):
+            cur = cur.dataExport()
         for p in path[:-1]:
             if p in cur:
                 cur = cur[p]

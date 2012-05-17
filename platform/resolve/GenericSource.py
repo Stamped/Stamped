@@ -430,7 +430,7 @@ class GenericSource(BasicSource):
 
         """
         proxy = None
-        if entity[self.idField] is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
+        if getattr(entity, self.idField) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
