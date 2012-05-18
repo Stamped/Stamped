@@ -706,10 +706,10 @@ class HTTPUserMini(Schema):
     def importUserMini(self, mini):
         self.dataImport(mini.dataExport(), overflow=True)
         logs.info("USER MINI: %s" % mini)
-        self.image_url = _profileImageURL(mini.screen_name, mini.image_cache)
+        self.image_url = _profileImageURL(mini.screen_name, mini.timestamp.image_cache)
 
         self.image = _buildProfileImage(self.screen_name,
-            cache=user.timestamp.image_cache,
+            cache=mini.timestamp.image_cache,
             sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
 
         return self
@@ -2007,7 +2007,7 @@ class HTTPStamp(Schema):
         cls.addProperty('stamp_id',             basestring, required=True)
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
-        cls.addNestedPropertyList('contents',   HTTPStampContent)
+        cls.addNestedPropertyList('contents',   HTTPStampContent, required=True)
         cls.addNestedPropertyList('credit',     CreditSchema)
         cls.addNestedProperty('previews',       HTTPStampPreviews)
         cls.addNestedPropertyList('badges',     HTTPBadge)
@@ -2022,11 +2022,10 @@ class HTTPStamp(Schema):
         cls.addProperty('num_todos',            int)
         cls.addProperty('num_credits',          int)
 
-
         cls.addProperty('is_liked',             bool)
         cls.addProperty('is_fav',               bool)
 
-    def importStamp(self, stamp):
+    def importStampMini(self, stamp):
         logs.info("IMPORT STAMP: %s" % stamp)
 
         entity                  = stamp.entity
@@ -2052,6 +2051,7 @@ class HTTPStamp(Schema):
         self.created            = stamp.timestamp.stamped
         self.modified           = stamp.timestamp.modified
         self.stamped            = stamp.timestamp.stamped
+        self.contents           = []
 
         for content in stamp.contents:
             item                    = HTTPStampContent()
@@ -2076,11 +2076,12 @@ class HTTPStamp(Schema):
 
                 item.blurb_references.append(reference)
 
-            for image in content.images:
-                img = HTTPImageSchema().dataImport(image)
-                # quick fix for now
-                # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                item.images.append(img)
+            if content.images is not None:
+                for image in content.images:
+                    img = HTTPImageSchema().dataImport(image)
+                    # quick fix for now
+                    # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
+                    item.images.append(img)
 
             # Insert contents in descending chronological order
             self.contents.insert(0, item)
@@ -2092,33 +2093,38 @@ class HTTPStamp(Schema):
 
         url_title = encodeStampTitle(stamp.entity.title)
         self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
-                   (stamp.user.screen_name, stamp.stamp_num, url_title)
-
-        if schema.__class__.__name__ == 'Stamp':
-            for comment in stamp.previews.comments:
-                comment = HTTPComment().importComment(comment)
-                #_initialize_comment_html(comment)
-
-                self.previews.comments.append(comment)
-
-            for user in stamp.previews.todos:
-                user    = HTTPUserMini().importUserMini(user).exportSparse()
-                self.previews.todos.append(user)
-
-            for user in schema.previews.likes:
-                user    = HTTPUserMini().importUserMini(user).exportSparse()
-                self.previews.likes.append(user)
-
-            for credit in schema.previews.credits:
-                credit  = HTTPStamp().importStamp(credit).minimize()
-                self.previews.credits.append(credit)
-
-            self.is_liked   = getattr(stamp, 'is_liked', False)
-            self.is_fav     = getattr(stamp, 'is_fav', False)
+                   (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
 
         return self
 
-#        def importSchema(self, schema):
+    def importStamp(self, stamp):
+        self.importStampMini(stamp)
+
+        for comment in stamp.previews.comment:
+            comment = HTTPComment().importComment(comment)
+            #_initialize_comment_html(comment)
+
+            self.previews.comments.append(comment)
+
+        for user in stamp.previews.todos:
+            user    = HTTPUserMini().importUserMini(user)
+            self.previews.todos.append(user)
+
+        for user in schema.previews.likes:
+            user    = HTTPUserMini().importUserMini(user)
+            self.previews.likes.append(user)
+
+        for credit in schema.previews.credits:
+            credit  = HTTPStamp().importStamp(credit).minimize()
+            self.previews.credits.append(credit)
+
+        self.is_liked   = getattr(stamp, 'is_liked', False)
+        self.is_fav     = getattr(stamp, 'is_fav', False)
+
+        return self
+
+
+            #        def importSchema(self, schema):
 #            if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
 #                data                = schema.exportSparse()
 #                coordinates         = data['entity'].pop('coordinates', None)
