@@ -2128,7 +2128,7 @@ class HTTPStamp(Schema):
 
         if stamp.previews.credits is not None:
             credits = []
-            for credit in schema.previews.credits:
+            for credit in stamp.previews.credits:
                 credit  = HTTPStamp().importStamp(credit).minimize()
                 credits.append(credit)
             previews.credits = credits
@@ -2429,7 +2429,7 @@ class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
 
     def exportConsumptionSlice(self):
         data = self._convertData(self.dataExport())
-        return ConsumptionSlice.dataImport(data)
+        return ConsumptionSlice().dataImport(data)
 
 class HTTPStampedBySlice(HTTPGenericCollectionSlice):
     @classmethod

@@ -37,7 +37,8 @@ def remove(request, authUserId, http_schema, **kwargs):
     return transformOutput(result)
 
 
-@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
+@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice,
+                  conversion=HTTPGenericCollectionSlice.exportGenericCollectionSlice)
 @require_http_methods(["GET"])
 def show(request, authUserId, schema, **kwargs):
     favorites = stampedAPI.getFavorites(authUserId, schema)
