@@ -2100,31 +2100,45 @@ class HTTPStamp(Schema):
     def importStamp(self, stamp):
         self.importStampMini(stamp)
 
-        for comment in stamp.previews.comment:
-            comment = HTTPComment().importComment(comment)
-            #_initialize_comment_html(comment)
+        previews = HTTPStampPreviews()
 
-            self.previews.comments.append(comment)
+        if stamp.previews.comments is not None:
+            comments = []
+            for comment in stamp.previews.comments:
+                comment = HTTPComment().importComment(comment)
+                #_initialize_comment_html(comment)
+                comments.append(comment)
+            previews.comments = comments
 
-        for user in stamp.previews.todos:
-            user    = HTTPUserMini().importUserMini(user)
-            self.previews.todos.append(user)
+        if stamp.previews.todos is not None:
+            todos = []
+            for user in stamp.previews.todos:
+                user    = HTTPUserMini().importUserMini(user).exportSparse()
+                todos.append(user)
+            previews.todos = todos
 
-        for user in schema.previews.likes:
-            user    = HTTPUserMini().importUserMini(user)
-            self.previews.likes.append(user)
+        if stamp.previews.likes is not None:
+            likes = []
+            for user in schema.previews.likes:
+                user    = HTTPUserMini().importUserMini(user).exportSparse()
+                likes.append(user)
+            previews.likes = likes
 
-        for credit in schema.previews.credits:
-            credit  = HTTPStamp().importStamp(credit).minimize()
-            self.previews.credits.append(credit)
+        if stamp.previews.credits is not None:
+            credits = []
+            for credit in schema.previews.credits:
+                credit  = HTTPStamp().importStamp(credit).minimize()
+                credits.append(credit)
+            previews.credits = credits
+
+        self.previews = previews
 
         self.is_liked   = getattr(stamp, 'is_liked', False)
         self.is_fav     = getattr(stamp, 'is_fav', False)
 
         return self
 
-
-            #        def importSchema(self, schema):
+#        def importSchema(self, schema):
 #            if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
 #                data                = schema.exportSparse()
 #                coordinates         = data['entity'].pop('coordinates', None)
@@ -2257,7 +2271,7 @@ class HTTPStampNew(HTTPImageUpload):
         cls.addProperty('entity_id',            basestring)
         cls.addProperty('search_id',            basestring)
         cls.addProperty('blurb',                basestring)
-        cls.addPropertyList('credit',           basestring) #delimiter=','
+        cls.addProperty('credit',               basestring) #delimiter=','
 
 class HTTPStampEdit(Schema):
     @classmethod

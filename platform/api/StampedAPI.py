@@ -349,10 +349,10 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             if stamp.credit is not None and len(stamp.credit) > 0:
                 for creditedUser in stamp.credit:
-                    self._stampDB.removeCredit(creditedUser['user_id'], stamp)
+                    self._stampDB.removeCredit(creditedUser.user_id, stamp)
                     
                     # Decrement user stats by one
-                    self._userDB.updateUserStats(creditedUser['user_id'], 'num_credits', increment=-1)
+                    self._userDB.updateUserStats(creditedUser.user_id, 'num_credits', increment=-1)
             
             # Remove activity on stamp
             self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -1595,13 +1595,13 @@ class StampedAPI(AStampedAPI):
             creditedUsers = self._userDB.lookupUsers(None, creditedScreenNames)
             
             for creditedUser in creditedUsers:
-                userId = creditedUser['user_id']
+                userId = creditedUser.user_id
                 if userId == user_id or userId in creditedUserIds:
                     continue
                 
-                result = CreditSchema()
-                result.user_id      = creditedUser['user_id']
-                result.screen_name  = creditedUser['screen_name']
+                result              = CreditSchema()
+                result.user_id      = creditedUser.user_id
+                result.screen_name  = creditedUser.screen_name
                 
                 # Add to user ids
                 userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
@@ -1657,9 +1657,9 @@ class StampedAPI(AStampedAPI):
         entities = self._entityDB.getEntities(list(missingEntityIds))
 
         for entity in entities:
-            if entity.tombstone_id is not None:
+            if entity.sources.tombstone_id is not None:
                 # Convert to newer entity
-                replacement = self._entityDB.getEntity(entity.tombstone_id)
+                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
                 ### TODO: Async process to replace reference
             else:
@@ -1769,10 +1769,10 @@ class StampedAPI(AStampedAPI):
                         item                    = CreditSchema()
                         item.user_id            = credit.user_id
                         item.stamp_id           = credit.stamp_id
-                        item.screen_name        = user['screen_name']
-                        item.color_primary      = user['color_primary']
-                        item.color_secondary    = user['color_secondary']
-                        item.privacy            = user['privacy']
+                        item.screen_name        = user.screen_name
+                        item.color_primary      = user.color_primary
+                        item.color_secondary    = user.color_secondary
+                        item.privacy            = user.privacy
                         credits.append(item)
                     stamp.credit = credits
 
@@ -2317,7 +2317,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Verify user has permission to delete
-        if stamp.user_id != authUserId:
+        if stamp.user.user_id != authUserId:
             raise StampedPermissionsError("Insufficient privileges to remove stamp")
         
         # Remove stamp
@@ -2493,10 +2493,17 @@ class StampedAPI(AStampedAPI):
         
         # Build comment
         comment                     = Comment()
-        comment.user_id             = user.user_id
         comment.stamp_id            = stamp.stamp_id
         comment.blurb               = blurb
-        comment.timestamp.created   = datetime.utcnow()
+
+        userMini                    = UserMini()
+        userMini.user_id            = user.user_id 
+        comment.user                = userMini 
+
+        timestamp                   = TimestampSchema()
+        timestamp.created           = datetime.utcnow()
+        comment.timestamp           = timestamp 
+
         if mentions is not None:
             comment.mentions = mentions
         
@@ -2605,11 +2612,11 @@ class StampedAPI(AStampedAPI):
         self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
 
         # Add user object
-        user = self._userDB.getUser(comment.user_id)
+        user = self._userDB.getUser(comment.user.user_id)
         comment.user = UserMini().dataImport(user.dataExport())
 
         # Update stamp stats
-        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[comment.stamp_id])
 
         return comment
     
@@ -3241,7 +3248,7 @@ class StampedAPI(AStampedAPI):
         body                    = None
         group                   = False
         groupRange              = None
-        requireRecipient       = False
+        requireRecipient        = False
         unique                  = False
 
         objects = ActivityObjectIds()

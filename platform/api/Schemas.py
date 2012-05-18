@@ -1215,56 +1215,56 @@ class EntitySuggested(Schema):
 class MenuPriceSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('title',                           basestring)
-        cls.addProperty('price',                           basestring)
-        cls.addProperty('calories',                        int)
-        cls.addProperty('unit',                            basestring)
-        cls.addProperty('currency',                        basestring)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('price',                            basestring)
+        cls.addProperty('calories',                         int)
+        cls.addProperty('unit',                             basestring)
+        cls.addProperty('currency',                         basestring)
 
 class MenuItemSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('title',                           basestring)
-        cls.addProperty('desc',                            basestring)
-        cls.addPropertyList('categories',               basestring)
-        cls.addProperty('short_desc',                      basestring)
-        cls.addProperty('spicy',                           int)
-        cls.addPropertyList('allergens',                      basestring)
-        cls.addPropertyList('allergen_free',                  basestring)
-        cls.addPropertyList('restrictions',                   basestring)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('desc',                             basestring)
+        cls.addPropertyList('categories',                   basestring)
+        cls.addProperty('short_desc',                       basestring)
+        cls.addProperty('spicy',                            int)
+        cls.addPropertyList('allergens',                    basestring)
+        cls.addPropertyList('allergen_free',                basestring)
+        cls.addPropertyList('restrictions',                 basestring)
         cls.addNestedPropertyList('prices',                 MenuPriceSchema)
 
 class MenuSectionSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('title',                           basestring)
-        cls.addProperty('desc',                            basestring)
-        cls.addProperty('short_desc',                      basestring)
-        cls.addNestedPropertyList('items'               , MenuItemSchema)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('desc',                             basestring)
+        cls.addProperty('short_desc',                       basestring)
+        cls.addNestedPropertyList('items',                  MenuItemSchema)
 
 class SubmenuSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('title',                           basestring)
-        cls.addNestedPropertyList('times'                          , TimesSchema)
-        cls.addProperty('footnote',                        basestring)
-        cls.addProperty('desc',                            basestring)
-        cls.addProperty('short_desc',                      basestring)
-        cls.addNestedPropertyList('sections'            , MenuSectionSchema)
+        cls.addProperty('title',                            basestring)
+        cls.addNestedPropertyList('times',                  TimesSchema)
+        cls.addProperty('footnote',                         basestring)
+        cls.addProperty('desc',                             basestring)
+        cls.addProperty('short_desc',                       basestring)
+        cls.addNestedPropertyList('sections',               MenuSectionSchema)
 
 class MenuSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',                       basestring)
-        cls.addProperty('source',                          basestring)
-        cls.addProperty('source_id',                       basestring)
-        cls.addProperty('source_info',                     basestring)
-        cls.addProperty('disclaimer',                      basestring)
-        cls.addProperty('attribution_image',               basestring)
-        cls.addProperty('attribution_image_link',          basestring)
-        cls.addProperty('timestamp',                       datetime)
-        cls.addProperty('quality',                         float)
-        cls.addNestedPropertyList('menus',              SubmenuSchema)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('source',                           basestring)
+        cls.addProperty('source_id',                        basestring)
+        cls.addProperty('source_info',                      basestring)
+        cls.addProperty('disclaimer',                       basestring)
+        cls.addProperty('attribution_image',                basestring)
+        cls.addProperty('attribution_image_link',           basestring)
+        cls.addProperty('timestamp',                        datetime)
+        cls.addProperty('quality',                          float)
+        cls.addNestedPropertyList('menus',                  SubmenuSchema)
 
 
 class PlaceEntity(Schema):
@@ -1279,21 +1279,21 @@ class PlaceEntity(Schema):
 class MentionSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('screen_name',          basestring, required=True)
-        cls.addProperty('user_id',              basestring)
-        cls.addPropertyList('indices',      int)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('user_id',                          basestring)
+        cls.addPropertyList('indices',                      int)
 
 class Comment(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('comment_id',         basestring)
-        cls.addNestedProperty('user',               UserMini, required=True)
-        cls.addProperty('stamp_id',           basestring, required=True)
-        cls.addProperty('restamp_id',         basestring)
-        cls.addProperty('blurb',              basestring, required=True)
-        cls.addProperty('blurb_formatted',    basestring)
-        cls.addNestedPropertyList('mentions',           MentionSchema)
-        cls.addNestedProperty('timestamp',          TimestampSchema)
+        cls.addProperty('comment_id',                       basestring)
+        cls.addNestedProperty('user',                       UserMini, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addProperty('restamp_id',                       basestring)
+        cls.addProperty('blurb',                            basestring, required=True)
+        cls.addProperty('blurb_formatted',                  basestring)
+        cls.addNestedPropertyList('mentions',               MentionSchema)
+        cls.addNestedProperty('timestamp',                  TimestampSchema)
 
 
 # ###### #
