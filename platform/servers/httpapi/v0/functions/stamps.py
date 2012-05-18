@@ -15,7 +15,7 @@ def create(request, authUserId, data, **kwargs):
         'entity_id' : data.pop('entity_id', None),
         'search_id' : data.pop('search_id', None)
     }
-    logs.info("CREATE STAMP: %s" % data)
+    
     if 'credit' in data and data['credit'] is not None:
         data['credit'] = data['credit'].split(',')
     

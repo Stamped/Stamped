@@ -2317,7 +2317,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Verify user has permission to delete
-        if stamp.user_id != authUserId:
+        if stamp.user.user_id != authUserId:
             raise StampedPermissionsError("Insufficient privileges to remove stamp")
         
         # Remove stamp
@@ -2616,7 +2616,7 @@ class StampedAPI(AStampedAPI):
         comment.user = UserMini().dataImport(user.dataExport())
 
         # Update stamp stats
-        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[comment.stamp_id])
 
         return comment
     
@@ -3248,7 +3248,7 @@ class StampedAPI(AStampedAPI):
         body                    = None
         group                   = False
         groupRange              = None
-        requireRecipient       = False
+        requireRecipient        = False
         unique                  = False
 
         objects = ActivityObjectIds()
