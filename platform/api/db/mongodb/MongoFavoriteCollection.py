@@ -49,8 +49,8 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
                 'user'      : { 'user_id' : stampData['user']['user_id'] },
             }
             document['stamp'] = sparse
-        
-        favorite = self._obj(document, overflow=self._overflow)
+
+        favorite = self._obj().dataImport(document, overflow=self._overflow)
         favorite.entity = entity
         if stampData is not None:
             favorite.stamp.entity = entity 

@@ -1788,7 +1788,7 @@ class StampedAPI(AStampedAPI):
                     likes = []
                     for like in stat.preview_likes:
                         try:
-                            previews.likes.append(userIds[str(like)])
+                            likes.append(userIds[str(like)])
                         except KeyError:
                             logs.warning("Key error for like (user_id = %s)" % like)
                             logs.debug("Stamp: %s" % stamp)
@@ -1799,7 +1799,7 @@ class StampedAPI(AStampedAPI):
                     todos = []
                     for todo in stat.preview_todos:
                         try:
-                            stamp.previews.todos.append(userIds[str(todo)])
+                            todos.append(userIds[str(todo)])
                         except KeyError:
                             logs.warning("Key error for todo (user_id = %s)" % todo)
                             logs.debug("Stamp: %s" % stamp)
@@ -1813,7 +1813,7 @@ class StampedAPI(AStampedAPI):
                             credit = underlyingStampIds[str(i)]
                             credit.user = userIds[str(credit.user.user_id)]
                             credit.entity = entityIds[str(stamp.entity.entity_id)]
-                            stamp.previews.credits.append(credit)
+                            credits.append(credit)
                         except KeyError, e:
                             logs.warning("Key error for credit (stamp_id = %s)" % i)
                             logs.warning("Error: %s" % e)
@@ -3089,6 +3089,7 @@ class StampedAPI(AStampedAPI):
         favorite                    = Favorite()
         favorite.entity             = entity
         favorite.user_id            = authUserId
+        favorite.timestamp          = TimestampSchema()
         favorite.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
