@@ -167,14 +167,14 @@ class Netflix(object):
                         term            = title,
                         start_index     = start,
                         max_results     = count,
-                        expand          ='synopsis,cast,directors,formats,format_availability,delivery_formats'
+                        expand          ='synopsis,cast,directors,formats,delivery_formats'
                     )
         return results.get('catalog_titles', None)
 
     def getTitleDetails(self, netflix_id):
         results = self.__get(
             service         = netflix_id,
-            expand          ='synopsis,cast,directors,formats'
+            expand          ='synopsis,cast,directors,formats,delivery_formats'
         )
         import pprint
         pprint.pprint (results)
