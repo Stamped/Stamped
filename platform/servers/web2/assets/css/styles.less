@@ -456,15 +456,23 @@ header {
 
 
 .static-map(@size: 200px, @b: 0, @angle: 35deg, @perspective: 200px) {
-    display: block;
-    width: @size;
-    padding: 30px;
+    position: relative;
+    display:  block;
+    width:   @size;
+    
+    @padding: 4px;
+    top:    -@padding;
+    left:   -@padding;
+    padding: @padding;
     
     .static-map-inner {
         margin: 0 auto;
         @colsize: @size / 4;
         
         position: relative;
+        top:  0;
+        left: -@b;
+        
         display: block;
         width:  @size;
         height: @size;
@@ -512,22 +520,22 @@ header {
         .r0 {
             .section(0);
             border-width: @b 0 @b @b;
-            .transform(perspective(@perspective) rotateY(-@angle));
+            .transform(perspective(@perspective) translate(12px, 0) rotateY(-@angle));
         }
         .r1 {
             .section(1);
             border-width: @b 0;
-            .transform(perspective(@perspective) translate(-5px,  0) rotateY(@angle));
+            .transform(perspective(@perspective) translate(7px,  0) rotateY(@angle));
         }
         .r2 {
             .section(2);
             border-width: @b 0;
-            .transform(perspective(@perspective) translate(-13px, 0) rotateY(-@angle));
+            .transform(perspective(@perspective) translate(-1px, 0) rotateY(-@angle));
         }
         .r3 {
             .section(3);
             border-width: @b @b @b 0;
-            .transform(perspective(@perspective) translate(-18px, 0) rotateY(@angle));
+            .transform(perspective(@perspective) translate(-6px, 0) rotateY(@angle));
         }
         .dark-layer {
             display: block;
@@ -560,7 +568,7 @@ header {
                 
                 position: relative;
                 top:  -16px;
-                left: -10px;
+                left: -8px;
                 
                 display: block;
                 width:  26px;
@@ -568,14 +576,14 @@ header {
             }
             
             .transition(all, .1s, linear);
-            .transform(perspective(@perspective) translate(-10px, 0));
+            .transform(perspective(@perspective) translate(-2px, 0) scale(.8, .8));
         }
     }
     
     &:hover {
         /*cursor: pointer;*/
         .r0, .r1, .r2, .r3, .pin {
-            .transform(translateZ(0));
+            .transform(perspective(@perspective));
         }
         .dark-layer {
             opacity: 0;
@@ -584,6 +592,7 @@ header {
 }
 
 .static-map-small {
+    /*.static-map(@size: 140px, @b: 2px, @angle: 35deg, @perspective: 200px)*/
     .static-map(140px, 2px, 35deg, 200px);
 }
 
@@ -878,30 +887,35 @@ footer .copyright a, footer .copyright a {
 
 .stamp-category-book .icon {
     background: url(/assets/img/entity-type-book.png) no-repeat;
+    display: inline-block;
     width:  19px;
     height: 15px;
 }
 
 .stamp-category-film .icon {
     background: url(/assets/img/entity-type-film.png) no-repeat;
+    display: inline-block;
     width:  15px;
     height: 15px;
 }
 
 .stamp-category-food .icon {
     background: url(/assets/img/entity-type-food.png) no-repeat;
+    display: inline-block;
     width:  21px;
     height: 15px;
 }
 
 .stamp-category-music .icon {
     background: url(/assets/img/entity-type-music.png) no-repeat;
+    display: inline-block;
     width:  15px;
     height: 15px;
 }
 
 .stamp-category-other .icon, .stamp-category- .icon {
     background: url(/assets/img/entity-type-other.png) no-repeat;
+    display: inline-block;
     width:  12px;
     height: 15px;
 }

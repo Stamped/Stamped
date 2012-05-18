@@ -42,7 +42,7 @@
 
 
 TODO:
-    * navbar animation -- come in quicker than fade out
+    * navbar animation -- fade in quicker than fade out
     
     * change category-loading to not go through stamped-api but rather fetch the page and extract the relevant content?
         * caching benefit?

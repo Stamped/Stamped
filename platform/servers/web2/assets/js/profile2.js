@@ -3,8 +3,10 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
-/*jslint plusplus: false */
-/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, Backbone, Handlebars, Persist */
+/*jslint plusplus: true */
+/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, Backbone, Handlebars, Persist, moment */
+
+g_update_stamps = null;
 
 (function() {
     $(document).ready(function() {
@@ -62,9 +64,118 @@
         // initialize stamp-gallery isotope / masonry layout and infinite scroll
         // ---------------------------------------------------------------------
         
-        
         var $gallery = null;
         var infinite_scroll = null;
+        
+        var destroy_gallery = function() {
+            if ($gallery !== null) {
+                $gallery = $(".stamp-gallery .stamps");
+                $gallery.stop(true, false);
+                
+                if (infinite_scroll !== null) {
+                    $gallery.infinitescroll('destroy');
+                    infinite_scroll = null;
+                }
+                
+                $gallery.isotope('destroy');
+                $gallery = null;
+            }
+        };
+        
+        var update_gallery = function(callback) {
+            if ($gallery !== null) {
+                $gallery = $(".stamp-gallery .stamps");
+                
+                $gallery.isotope('reLayout', callback);
+            }
+        };
+        
+        var update_timestamps = function() {
+            $('.timestamp_raw').each(function(i, elem) {
+                var $elem = $(elem);
+                var expl  = moment($elem.text()).fromNow();
+                
+                $elem.removeClass('timestamp_raw').text(expl).addClass('timestamp');
+            });
+        };
+        
+        var last_layout = null;
+        
+        var update_gallery_layout = function(force) {
+            force   = (typeof(force) === 'undefined' ? false : force);
+            var now = new Date().getTime();
+            
+            if (force || last_layout === null || now - last_layout > 100) {
+                last_layout = now;
+                
+                update_gallery(function() {
+                    last_layout = new Date().getTime();
+                });
+            }
+        };
+        
+        var update_stamps = function() {
+            update_timestamps();
+            
+            $('.stamp-preview').each(function(i, elem) {
+                var $this  = $(this);
+                
+                // enforce precedence of stamp preview images
+                var update_images = function() {
+                    var images = [];
+                    
+                    var find = function(selector) {
+                        var $elements = $this.find(selector);
+                        $elements     = $elements.filter(function() {
+                            return !$(this).hasClass('hidden');
+                        });
+                        
+                        $elements.each(function(i, element) {
+                            element.onerror = function() {
+                                var $element = $(element);
+                                $element.addClass('hidden');
+                                
+                                update_images();
+                            };
+                        });
+                        
+                        return $elements;
+                    };
+                    
+                    images.push.apply(images, $this.find('.stamp-map'));
+                    images.push.apply(images, find('.stamp-user-image img'));
+                    images.push.apply(images, find('.stamp-entity-image img'));
+                    images.push.apply(images, $this.find('.stamp-icon'));
+                    
+                    if (images.length > 0) {
+                        var preview  = images[0];
+                        var $preview = $(preview);
+                        var i;
+                        
+                        if ($preview.is("img")) {
+                            // ensure gallery's layout is updated whenever this 
+                            preview.onload = function() {
+                                setTimeout(update_gallery_layout, 100);
+                            };
+                        }
+                        
+                        $preview.show();
+                        
+                        for (i = 1; i < images.length; i++) {
+                            var $image = $(images[i]);
+                            
+                            $image.hide();
+                        }
+                    }
+                    
+                    update_gallery_layout(true);
+                };
+                
+                update_images();
+            });
+        };
+        
+        g_update_stamps = update_stamps;
         
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
@@ -94,35 +205,9 @@
                 
                 //$elements.emoji();
                 $gallery.isotope('appended', $elements);
-                update_timestamps();
+                update_stamps();
             });
         };
-        
-        var destroy_gallery = function() {
-            if ($gallery !== null) {
-                $gallery = $(".stamp-gallery .stamps");
-                $gallery.stop(true, false);
-                
-                if (infinite_scroll !== null) {
-                    $gallery.infinitescroll('destroy');
-                    infinite_scroll = null;
-                }
-                
-                $gallery.isotope('destroy');
-                $gallery = null;
-            }
-        };
-        
-        var update_gallery = function(callback) {
-            if ($gallery !== null) {
-                $gallery = $(".stamp-gallery .stamps");
-                
-                $gallery.isotope('reLayout', callback);
-            }
-        };
-        
-        // TODO: initial gallery opening animation by adding items one at a time
-        init_gallery();
         
         
         // ---------------------------------------------------------------------
@@ -131,31 +216,31 @@
         
         
         var parse_url = function(url) {
-            var _parts       = url.split('?');
-            var _base_url    = _parts[0];
-            var _base_uri0   = _base_url.split('/')
-            var _base_uri    = _base_uri0[_base_uri0.length - 1];
-            var _options     = {};
+            var parts       = url.split('?');
+            var base_url_s    = parts[0];
+            var base_uri0_s   = base_url_s.split('/');
+            var base_uri_s    = base_uri0_s[base_uri0_s.length - 1];
+            var options_s     = {};
             
-            if (_parts.length === 2) {
-                var _opts = _parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
+            if (parts.length === 2) {
+                var opts = parts[1].match(/[a-zA-Z_][a-zA-Z0-9_]*=[^&]*/g);
                 
-                $.each(_opts, function(i, opt) {
+                $.each(opts, function(i, opt) {
                     var opt_parts = opt.split('=');
                     var key = opt_parts[0];
                     
                     if (opt_parts.length === 2) {
                         var value = opt_parts[1];
                         
-                        _options[key] = value;
+                        options_s[key] = value;
                     }
                 });
             }
             
             return {
-                base_url : _base_url, 
-                options  : _options, 
-                base_uri : _base_uri
+                base_url : base_url_s, 
+                options  : options_s, 
+                base_uri : base_uri_s
             };
         };
         
@@ -209,8 +294,9 @@
             var custom_params = get_custom_params(params);
             var first = true;
             var str   = "/" + uri;
+            var key;
             
-            for (var key in custom_params) {
+            for (key in custom_params) {
                 if (custom_params.hasOwnProperty(key)) {
                     if (first) {
                         str += '?';
@@ -233,8 +319,9 @@
             
             var custom_params = get_custom_params(params);
             var first = true;
+            var key;
             
-            for (var key in custom_params) {
+            for (key in custom_params) {
                 if (custom_params.hasOwnProperty(key)) {
                     if (first) {
                         url += '?';
@@ -442,7 +529,7 @@
                                 //$('.inset-stamp .number').html(stamps.length);
                                 
                                 $gallery.append($elements);
-                                update_timestamps();
+                                update_stamps();
                                 
                                 $gallery.isotope('remove',   $items,    function() {
                                     $('.loading').hide();
@@ -497,7 +584,7 @@
                     
                     var title = "Stamped - " + screen_name;
                     if (category !== null) {
-                        text = category;
+                        var text = category;
                         
                         if (category === 'place') {
                             text = 'places';
@@ -521,17 +608,10 @@
             });
         });
         
-        var update_timestamps = function() {
-            $('.timestamp_raw').each(function(i, elem) {
-                var $elem = $(elem);
-                var expl  = moment($elem.text()).fromNow();
-                
-                $elem.removeClass('timestamp_raw').text(expl).addClass('timestamp');
-            });
-        };
+        update_stamps();
         
-        update_timestamps();
-        
+        // TODO: initial gallery opening animation by adding items one at a time
+        init_gallery();
         return;
         
         var userP = client.get_user_by_screen_name(screen_name);

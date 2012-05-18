@@ -81,15 +81,45 @@
             .sized(@width: 140px) {
                 display: block;
                 max-width: @width;
+                width:  @width;
                 height: auto;
+                background-size: 100% 100%;
             }
             
             .stamp-preview {
                 margin-left: 1em;
                 .sized();
                 
+                .preview-image {
+                    display: none;
+                    .sized();
+                }
+                
+                .stamp-map {
+                    z-index: 25;
+                }
+                .stamp-user-image {
+                    z-index: 24;
+                }
+                .stamp-entity-image {
+                    z-index: 23;
+                }
+                .stamp-icon {
+                    z-index: 22;
+                }
+                
                 img {
                     .sized();
+                    .rounded(8px);
+                }
+                
+                .stamp-category-book  .icon, 
+                .stamp-category-film  .icon, 
+                .stamp-category-food  .icon, 
+                .stamp-category-music .icon, 
+                .stamp-category-other .icon {
+                    .sized();
+                    height: 140px;
                 }
             }
         }
@@ -107,21 +137,6 @@
                 
                 .stamped-content {
                     margin: .2em 0 1em;
-                    
-                    .images {
-                        float: right;
-                        display: block;
-                        width:  128px;
-                        height: auto;
-                        margin: .2em 0 .2em .2em;
-                        
-                        img {
-                            border: 1px solid;
-                            display: inline-block;
-                            max-width: 128px;
-                            height: auto;
-                        }
-                    }
                 }
             }
             
@@ -146,14 +161,24 @@
                 div.like {
                     .preview-image(0, 0);
                 }
+                .inactive div.like {
+                    background-position: 0 20px;
+                }
                 
                 div.todo {
                     .preview-image(-19px, 0);
+                }
+                .inactive div.todo {
+                    background-position: -19px 20px;
                 }
                 
                 div.comments {
                     .preview-image(-38px, 0);
                 }
+                .inactive div.comments {
+                    background-position: -38px 20px;
+                }
+                
             }
         }
     }
