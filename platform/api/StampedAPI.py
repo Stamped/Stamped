@@ -1561,23 +1561,23 @@ class StampedAPI(AStampedAPI):
         
         # Run through and grab mentions
         for user in self._user_regex.finditer(text):
-            data = {}
-            data['indices'] = [user.start(), user.end()]
-            data['screen_name'] = user.groups()[0]
+            mention = MentionSchema()
+            mention.indices = [user.start(), user.end()]
+            mention.screen_name = user.groups()[0]
             
-            if data['screen_name'] in screenNames:
-                data['user_id'] = screenNames[data['screen_name']]
+            if mention.screen_name in screenNames:
+                mention.user_id = screenNames[mention.screen_name]
             else:
                 try:
-                    user = self._userDB.getUserByScreenName(data['screen_name'])
-                    data['user_id'] = user.user_id
+                    user = self._userDB.getUserByScreenName(mention.screen_name)
+                    mention.user_id = user.user_id
                 except Exception:
-                    logs.warning("User not found (%s)" % data['screen_name'])
+                    logs.warning("User not found (%s)" % mention.screen_name)
             
-            if data['screen_name'] not in screenNames.keys() and data['user_id'] is not None:
-                screenNames[data['screen_name']] = data['user_id']
+            if mention.screen_name not in screenNames.keys() and mention.user_id is not None:
+                screenNames[mention.screen_name] = mention.user_id
 
-            mentions.append(data)
+            mentions.append(mention)
         
         return mentions
     
@@ -1758,7 +1758,6 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             try:
                 stamp.entity = entityIds[stamp.entity.entity_id]
-                logs.info("ENRICH STAMP WITH USER: %s" % userIds[stamp.user.user_id])
                 stamp.user = userIds[stamp.user.user_id]
 
                 # Credit
@@ -2152,7 +2151,7 @@ class StampedAPI(AStampedAPI):
         creditData  = data.pop('credit', None)
         
         # Verify user can modify the stamp
-        if authUserId != stamp.user_id:
+        if authUserId != stamp.user.user_id:
             raise StampedPermissionsError("Insufficient privileges to modify stamp")
         
         # Collect user ids
@@ -2445,11 +2444,11 @@ class StampedAPI(AStampedAPI):
 
         restamps                = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
         stats.num_credits       = len(restamps)
-        stats.preview_credits   = map(lambda x: x['stamp_id'], restamps[:MAX_PREVIEW])
+        stats.preview_credits   = map(lambda x: x.stamp_id, restamps[:MAX_PREVIEW])
 
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
-        stats.preview_comments  = map(lambda x: x['comment_id'], comments[:MAX_PREVIEW])
+        stats.preview_comments  = map(lambda x: x.comment_id, comments[:MAX_PREVIEW])
 
         self._stampStatsDB.saveStampStats(stats)
 
@@ -2560,13 +2559,13 @@ class StampedAPI(AStampedAPI):
             if prevComment.restamp_id:
                 continue
             
-            repliedUserId = prevComment['user']['user_id']
+            repliedUserId = prevComment.user.user_id
             if repliedUserId not in commentedUserIds \
                 and repliedUserId not in mentionedUserIds \
                 and repliedUserId not in repliedUserIds \
                 and repliedUserId != authUserId:
                 
-                replied_user_id = prevComment['user']['user_id']
+                replied_user_id = prevComment.user.user_id
                 
                 # Check if block exists between user and previous commenter
                 friendship              = Friendship()
@@ -2720,6 +2719,7 @@ class StampedAPI(AStampedAPI):
             stamp.stats.num_likes = 0
         
         stamp.stats.num_likes += 1
+
         if stamp.attributes is None:
             stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True

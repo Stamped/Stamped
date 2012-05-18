@@ -11,6 +11,7 @@ from httpapi.v0.helpers import *
 @require_http_methods(["GET"])
 def show(request, authUserId, data, **kwargs):
     data['distance'] = 0
+    logs.info('DATA: %s' % data)
     activity = stampedAPI.getActivity(authUserId, **data)
     
     result = []
