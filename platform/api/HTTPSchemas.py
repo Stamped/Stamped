@@ -1956,6 +1956,43 @@ class HTTPActionComplete(Schema):
         cls.addProperty('user_id',              basestring)
         cls.addProperty('stamp_id',             basestring)
 
+# ######## #
+# Comments #
+# ######## #
+
+class HTTPComment(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',           basestring, required=True)
+        cls.addNestedProperty('user',           HTTPUserMini, required=True)
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('restamp_id',           basestring)
+        cls.addProperty('blurb',                basestring, required=True)
+        cls.addNestedPropertyList('mentions',   MentionSchema)
+        cls.addProperty('created',              basestring)
+
+    def importComment(self, comment):
+        self.dataImport(comment.dataExport(), overflow=True)
+        self.created = comment.timestamp.created
+        self.user = HTTPUserMini().importUserMini(comment.user)
+        return self
+
+class HTTPCommentNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('blurb',                basestring, required=True)
+
+class HTTPCommentId(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',           basestring, required=True)
+
+class HTTPCommentSlice(HTTPGenericSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
+
 
 # ###### #
 # Stamps #
@@ -2000,7 +2037,7 @@ class HTTPStampPreviews(Schema):
         cls.addNestedPropertyList('likes',              HTTPUserMini)
         cls.addNestedPropertyList('todos',              HTTPUserMini)
         cls.addNestedPropertyList('credits',            HTTPStampMini)
-        # cls.addNestedPropertyList('comments',           HTTPComment)
+        cls.addNestedPropertyList('comments',           HTTPComment)
 
 class HTTPStamp(Schema):
     @classmethod
@@ -2475,44 +2512,6 @@ class HTTPDeletedStamp(Schema):
 
 
 # ######## #
-# Comments #
-# ######## #
-
-class HTTPComment(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',           basestring, required=True)
-        cls.addNestedProperty('user',           HTTPUserMini, required=True)
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addProperty('restamp_id',           basestring)
-        cls.addProperty('blurb',                basestring, required=True)
-        cls.addNestedPropertyList('mentions',   MentionSchema)
-        cls.addProperty('created',              basestring)
-
-    def importComment(self, comment):
-        self.dataImport(comment.dataExport(), overflow=True)
-        self.created = comment.timestamp.created
-        self.user = HTTPUserMini().importUserMini(comment.user)
-        return self
-
-class HTTPCommentNew(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addProperty('blurb',                basestring, required=True)
-
-class HTTPCommentId(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',           basestring, required=True)
-
-class HTTPCommentSlice(HTTPGenericSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-
-
-# ######## #
 # Favorite #
 # ######## #
 
@@ -2527,11 +2526,11 @@ class HTTPFavorite(Schema):
         cls.addProperty('complete',             bool)
 
     def importFavorite(self, fav):
-        cls.favorite_id             = fav.favorite_id
-        cls.user_id                 = fav.user_id
-        cls.entity                  = HTTPEntityMini().importEntity(fav.entity)
-        cls.created                 = fav.timestamp.created
-        cls.complete                = fav.complete
+        self.favorite_id             = fav.favorite_id
+        self.user_id                 = fav.user_id
+        self.entity                  = HTTPEntityMini().importEntity(fav.entity)
+        self.created                 = fav.timestamp.created
+        self.complete                = fav.complete
 
         if fav.stamp is not None:
             self.stamp              = HTTPStamp().dataImport(fav.stamp)
