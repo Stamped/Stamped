@@ -1957,6 +1957,161 @@ class HTTPActionComplete(Schema):
         cls.addProperty('stamp_id',             basestring)
 
 # ######## #
+# Slices #
+# ######## #
+
+class HTTPGenericSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # paging
+        cls.addProperty('limit',                int)
+        cls.addProperty('offset',               int)
+
+        # sorting
+        # (relevance, popularity, proximity, created, modified, alphabetical)
+        cls.addProperty('sort',                 basestring)
+        cls.addProperty('reverse',              bool)
+        cls.addProperty('coordinates',          basestring)
+
+        # filtering
+        cls.addProperty('since',                int)
+        cls.addProperty('before',               int)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.sort = 'modified'
+        self.reverse = False
+
+    def _convertData(self, data):
+        if 'coordinates' in data:
+            try:
+                lat, lng = data['coordinates'].split(',')
+                data['coordinates'] = {
+                    'lat' : float(lat),
+                    'lng' : float(lng)
+                }
+            except Exception:
+                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
+
+        if 'since' in data:
+            try:
+                data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
+            except Exception:
+                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+
+        if 'before' in data:
+            try:
+                data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
+            except Exception:
+                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
+
+        # TODO: validate since <= before
+
+        if 'offset' not in data:
+            data['offset'] = 0
+
+        return data
+
+    def exportGenericSlice(self):
+        data = self._convertData(self.dataExport())
+
+        return GenericSlice().dataImport(data)
+
+class HTTPGenericCollectionSlice(HTTPGenericSlice):
+    @classmethod
+    def setSchema(cls):
+        # filtering
+        cls.addProperty('query',                basestring)
+        cls.addProperty('category',             basestring)
+        cls.addProperty('subcategory',          basestring)
+        cls.addProperty('viewport',             basestring) # "lat0,lng0,lat1,lng1"
+
+        # misc options
+        cls.addProperty('quality',              int)
+        cls.addProperty('deleted',              bool)
+        cls.addProperty('comments',             bool)
+        cls.addProperty('unique',               bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.quality            = 1
+        self.deleted            = False
+        self.comments           = True
+        self.unique             = False
+
+    def _convertData(self, data):
+        data = super(HTTPGenericCollectionSlice, self)._convertData(data)
+
+        if 'viewport' in data:
+            try:
+                lat0, lng0, lat1, lng1 = data['viewport'].split(',')
+
+                data['viewport'] = {
+                    'upperLeft' : {
+                        'lat' : float(lat0),
+                        'lng' : float(lng0),
+                        },
+                    'lowerRight' : {
+                        'lat' : float(lat1),
+                        'lng' : float(lng1),
+                        }
+                }
+
+                # TODO: validate viewport
+            except Exception:
+                raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
+
+        return data
+
+    def exportGenericCollectionSlice(self):
+        data = self._convertData(self.dataExport())
+        return GenericCollectionSlice().dataImport(data)
+
+class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',          basestring)
+        cls.addProperty('screen_name',      basestring)
+
+    def exportUserCollectionSlice(self):
+        data = self._convertData(self.dataExport())
+        return UserCollectionSlice().dataImport(data)
+
+class HTTPFriendsSlice(HTTPGenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('distance',         int)
+        cls.addProperty('inclusive',        bool)
+
+    def exportFriendsSlice(self):
+        data = self._convertData(self.dataExport())
+        return FriendsSlice().dataImport(data)
+
+class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('scope',            basestring) # you, friends, fof, everyone
+
+    def exportConsumptionSlice(self):
+        data = self._convertData(self.dataExport())
+        return ConsumptionSlice().dataImport(data)
+
+class HTTPStampedBySlice(HTTPGenericCollectionSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',        basestring, required=True)
+        cls.addProperty('group',            basestring)
+
+    def exportFriendsSlice(self):
+        data = self._convertData(self.dataExport())
+        return FriendsSlice().dataImport(data, overflow=True)
+
+    def exportGenericCollectionSlice(self):
+        data = self._convertData(self.dataExport())
+        return GenericCollectionSlice().dataImport(data, overflow=True)
+
+
+# ######## #
 # Comments #
 # ######## #
 
@@ -2331,157 +2486,6 @@ class HTTPStampId(Schema):
         #cls.addProperty('coordinates',          basestring) # "lat,lng"
         #cls.addProperty('category',             basestring)
 
-
-
-class HTTPGenericSlice(Schema):
-    @classmethod
-    def setSchema(cls):
-        # paging
-        cls.addProperty('limit',                int)
-        cls.addProperty('offset',               int)
-
-        # sorting
-        # (relevance, popularity, proximity, created, modified, alphabetical)
-        cls.addProperty('sort',                 basestring)
-        cls.addProperty('reverse',              bool)
-        cls.addProperty('coordinates',          basestring)
-
-        # filtering
-        cls.addProperty('since',                int)
-        cls.addProperty('before',               int)
-
-    def __init__(self):
-        Schema.__init__(self)
-        self.sort = 'modified'
-        self.reverse = False
-
-    def _convertData(self, data):
-        if 'coordinates' in data:
-            try:
-                lat, lng = data['coordinates'].split(',')
-                data['coordinates'] = {
-                    'lat' : float(lat),
-                    'lng' : float(lng)
-                }
-            except Exception:
-                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
-
-        if 'since' in data:
-            try:
-                data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
-            except Exception:
-                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
-
-        if 'before' in data:
-            try:
-                data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
-            except Exception:
-                raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
-
-        # TODO: validate since <= before
-
-        if 'offset' not in data:
-            data['offset'] = 0
-
-        return data
-
-    def exportGenericSlice(self):
-        data = self._convertData(self.dataExport())
-
-        return GenericSlice().dataImport(data)
-
-class HTTPGenericCollectionSlice(HTTPGenericSlice):
-    @classmethod
-    def setSchema(cls):
-        # filtering
-        cls.addProperty('query',                basestring)
-        cls.addProperty('category',             basestring)
-        cls.addProperty('subcategory',          basestring)
-        cls.addProperty('viewport',             basestring) # "lat0,lng0,lat1,lng1"
-
-        # misc options
-        cls.addProperty('quality',              int)
-        cls.addProperty('deleted',              bool)
-        cls.addProperty('comments',             bool)
-        cls.addProperty('unique',               bool)
-
-    def __init__(self):
-        Schema.__init__(self)
-        self.quality            = 1
-        self.deleted            = False
-        self.comments           = True
-        self.unique             = False
-
-    def _convertData(self, data):
-        data = super(HTTPGenericCollectionSlice, self)._convertData(data)
-
-        if 'viewport' in data:
-            try:
-                lat0, lng0, lat1, lng1 = data['viewport'].split(',')
-
-                data['viewport'] = {
-                    'upperLeft' : {
-                        'lat' : float(lat0),
-                        'lng' : float(lng0),
-                        },
-                    'lowerRight' : {
-                        'lat' : float(lat1),
-                        'lng' : float(lng1),
-                        }
-                }
-
-                # TODO: validate viewport
-            except Exception:
-                raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
-
-        return data
-
-    def exportGenericCollectionSlice(self):
-        data = self._convertData(self.dataExport())
-        return GenericCollectionSlice().dataImport(data)
-
-class HTTPUserCollectionSlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_id',          basestring)
-        cls.addProperty('screen_name',      basestring)
-
-    def exportUserCollectionSlice(self):
-        data = self._convertData(self.dataExport())
-        return UserCollectionSlice().dataImport(data)
-
-class HTTPFriendsSlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('distance',         int)
-        cls.addProperty('inclusive',        bool)
-
-    def exportFriendsSlice(self):
-        data = self._convertData(self.dataExport())
-        return FriendsSlice().dataImport(data)
-
-class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('scope',            basestring) # you, friends, fof, everyone
-
-    def exportConsumptionSlice(self):
-        data = self._convertData(self.dataExport())
-        return ConsumptionSlice().dataImport(data)
-
-class HTTPStampedBySlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('entity_id',        basestring, required=True)
-        cls.addProperty('group',            basestring)
-
-    def exportFriendsSlice(self):
-        data = self._convertData(self.dataExport())
-        return FriendsSlice().dataImport(data, overflow=True)
-
-    def exportGenericCollectionSlice(self):
-        data = self._convertData(self.dataExport())
-        return GenericCollectionSlice().dataImport(data, overflow=True)
 
 class HTTPStampedByGroup(Schema):
     @classmethod

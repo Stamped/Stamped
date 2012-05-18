@@ -1843,6 +1843,9 @@ class StampedAPI(AStampedAPI):
 
                 # User-specific attributes
                 if authUserId:
+                    if stamp.attributes is None:
+                        stamp.attributes = StampAttributesSchema()
+
                     # Mark as favorited
                     if stamp.entity.entity_id in favorites:
                         stamp.attributes.is_fav = True
@@ -2683,6 +2686,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addLike(self, authUserId, stampId):
+        logs.info('### calling api addLike')
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
         
@@ -2704,7 +2708,8 @@ class StampedAPI(AStampedAPI):
         # Check to verify that user hasn't already liked stamp
         if self._stampDB.checkLike(authUserId, stampId):
             raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
-        
+
+        logs.info('### calling stampDB.addLike()')
         # Add like
         self._stampDB.addLike(authUserId, stampId)
         

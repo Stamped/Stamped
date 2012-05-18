@@ -49,10 +49,17 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         # Convert single-blurb documents into new multi-blurb schema
         if 'stamped' not in document['timestamp']:
+            if 'created' in document['timestamp']:
+                created = document['timestamp']['created']
+            else:
+                try:
+                    created = ObjectId(document[self._primary_key]).generation_time.replace(tzinfo=None)
+                except:
+                    created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
                 'mentions'  : document.pop('mentions', None),
-                'timestamp' : { 'created' : document['timestamp']['created'] },
+                'timestamp' : { 'created' : created },
             }
             if 'image_dimensions' in document:
                 contents['images'] = [
@@ -63,8 +70,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     }
                 ]
             document['contents'] = [ contents ]
-            document['timestamp']['stamped'] = document['timestamp']['created']
-        
+            document['timestamp']['stamped'] = created
+
+        logs.info('stampId: %s' % document[self._primary_key] )
         entityData = document.pop('entity')
         entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
