@@ -817,8 +817,8 @@ class StampedAPI(AStampedAPI):
     ### PRIVATE
     
     def _getUserFromIdOrScreenName(self, userTiny):
-        # if not isinstance(userTiny, SchemaElement):
-        #     userTiny    = UserTiny(userTiny)
+        if not isinstance(userTiny, Schema):
+            userTiny = UserTiny().dataImport(userTiny)
         
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
@@ -1135,7 +1135,7 @@ class StampedAPI(AStampedAPI):
         
         # Note: This function returns data even if user is private
         
-        friends = self._friendshipDB.getFriends(user['user_id'])
+        friends = self._friendshipDB.getFriends(user.user_id)
         
         # Return data in reverse-chronological order
         friends.reverse()
@@ -1148,7 +1148,7 @@ class StampedAPI(AStampedAPI):
 
         # Note: This function returns data even if user is private
 
-        followers = self._friendshipDB.getFollowers(user['user_id'])
+        followers = self._friendshipDB.getFollowers(user.user_id)
 
         # Return data in reverse-chronological order
         followers.reverse()
@@ -2655,15 +2655,15 @@ class StampedAPI(AStampedAPI):
         
         comments = []
         for comment in commentData:
-            if userIds[comment.user_id] == 1:
+            if userIds[comment.user.user_id] == 1:
                 msg = 'Unable to get user_id %s for comment_id %s' % \
-                    (comment.user_id, comment.comment_id)
+                    (comment.user.user_id, comment.comment_id)
                 logs.warning(msg)
             else:
-                comment.user = userIds[comment.user_id]
+                comment.user = userIds[comment.user.user_id]
                 comments.append(comment)
         
-        comments = sorted(comments, key=lambda k: k['timestamp']['created'])
+        comments = sorted(comments, key=lambda k: k.timestamp.created)
         
         tasks.invoke(tasks.APITasks.getComments, args=[authUserId, stampId])
         
