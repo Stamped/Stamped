@@ -99,19 +99,19 @@ class BasicFieldGroup(AFieldGroup):
             cur = cur.dataExport()
         for p in path[:-1]:
             if p in cur:
-                cur = cur[p]
+                cur = getattr(cur, p)
             else:
                 return None
-        if path[-1] in cur:
-            return cur[path[-1]]
+        if hasattr(cur, path[-1]):
+            return getattr(cur, path[-1])
         else:
             return None
 
     def setValue(self, entity, path, value):
         cur = entity
         for p in path[:-1]:
-            cur = cur[p]
-        cur[path[-1]] = value
+            cur = getattr(cur, p)
+        setattr(cur, path[-1], value)
 
     def addNameField(self):
         self.addField([self.groupName])

@@ -678,13 +678,15 @@ class HTTPUser(Schema):
                 'app',
                 'other',
             ]
+            distribution = []
             for i in order:
                 d           = HTTPCategoryDistribution()
                 d.category  = i
                 d.name      = i.title()
                 d.count     = data.pop(i, 0)
                 d.icon      = _getIconURL('cat_%s' % i, client=client)
-                self.distribution.append(d)
+                distribution.append(d)
+            self.distribution = distribution
         
         return self
 
