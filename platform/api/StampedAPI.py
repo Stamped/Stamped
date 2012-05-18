@@ -2720,6 +2720,8 @@ class StampedAPI(AStampedAPI):
             stamp.stats.num_likes = 0
         
         stamp.stats.num_likes += 1
+        if stamp.attributes is None:
+            stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True
         
         # Give credit once a given threshold is hit

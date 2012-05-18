@@ -22,7 +22,8 @@ def transform_stamps(stamps):
     
     return transformOutput(result)
 
-@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
+@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice,
+                   conversion=HTTPGenericCollectionSlice.exportGenericCollectionSlice)
 @require_http_methods(["GET"])
 def inbox(request, authUserId, schema, **kwargs):
     before = time.time()
@@ -30,7 +31,9 @@ def inbox(request, authUserId, schema, **kwargs):
     logs.info('api.getInboxStamps() duration: %d seconds' % (time.time()-before))
     return transform_stamps(stamps)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserCollectionSlice, schema=UserCollectionSlice)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPUserCollectionSlice,
+                   conversion=HTTPUserCollectionSlice.exportUserCollectionSlice)
 @require_http_methods(["GET"])
 def user(request, authUserId, schema, **kwargs):
     before = time.time()
@@ -38,7 +41,8 @@ def user(request, authUserId, schema, **kwargs):
     logs.info('api.getUserStamps() duration: %d seconds' % (time.time()-before))
     return transform_stamps(stamps)
 
-@handleHTTPRequest(http_schema=HTTPUserCollectionSlice, schema=UserCollectionSlice)
+@handleHTTPRequest(http_schema=HTTPUserCollectionSlice,
+                   conversion=HTTPUserCollectionSlice.exportUserCollectionSlice)
 @require_http_methods(["GET"])
 def credit(request, authUserId, schema, **kwargs):
     before = time.time()
@@ -47,7 +51,8 @@ def credit(request, authUserId, schema, **kwargs):
 
     return transform_stamps(stamps)
 
-@handleHTTPRequest(http_schema=HTTPFriendsSlice, schema=FriendsSlice)
+@handleHTTPRequest(http_schema=HTTPFriendsSlice,
+                   conversion=HTTPFriendsSlice.exportFriendsSlice)
 @require_http_methods(["GET"])
 def friends(request, authUserId, schema, **kwargs):
     import datetime
@@ -60,7 +65,9 @@ def friends(request, authUserId, schema, **kwargs):
 
     return transform_stamps(stamps)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPGenericCollectionSlice,
+                   conversion=HTTPGenericCollectionSlice.exportGenericCollectionSlice)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     before = time.time()
@@ -69,7 +76,9 @@ def suggested(request, authUserId, schema, **kwargs):
     
     return transform_stamps(stamps)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPConsumptionSlice, schema=ConsumptionSlice)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPConsumptionSlice,
+                   conversion=HTTPConsumptionSlice.exportConsumptionSlice)
 @require_http_methods(["GET"])
 def consumption(request, authUserId, schema, **kwargs):
     stamps = None
