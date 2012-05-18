@@ -8,10 +8,10 @@ __license__   = "TODO"
 import Globals
 import os, utils
 
-from core.templatetags.stamped_tags import global_custom_template_library
+from core.templatetags.stamped_tags import global_handlebars_template_library
 
 def process_templates(output_path):
-    library   = global_custom_template_library()
+    library   = global_handlebars_template_library()
     templates = library.templates
     
     scripts   = []
@@ -24,7 +24,7 @@ def process_templates(output_path):
         indented_source = '\n'.join("%s%s" % (indent, line) for line in source.split('\n'))
         indented_source = "%s%s" % (indent, indented_source.strip())
         
-        wrapper = "%s\n<script id='%s' type='text/html' class='mustache-template'>\n%s\n</script>\n" % \
+        wrapper = "%s\n<script id='%s' type='text/html' class='handlebars-template'>\n%s\n</script>\n" % \
                   (path_comment, template, indented_source)
         
         scripts.append(wrapper)

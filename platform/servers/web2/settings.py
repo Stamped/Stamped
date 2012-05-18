@@ -117,7 +117,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'web2.urls'
 
 STAMPED_TEMPLATE_DIR  = os.path.join(PROJ_ROOT, "html")
-STAMPED_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR, "templates.generated.html")
+STAMPED_TEMPLATE_DIR2 = os.path.join(PROJ_ROOT, "templates")
+STAMPED_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR2, "templates.generated.html")
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -134,6 +135,7 @@ TEMPLATE_DIRS = (
 # {% ssi /home/html/foo.txt %} would work, but {% ssi /etc/passwd %} wouldn't.
 ALLOWED_INCLUDE_ROOTS = (
     STAMPED_TEMPLATE_DIR, 
+    STAMPED_TEMPLATE_DIR2, 
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

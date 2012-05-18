@@ -1094,7 +1094,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_is_instant_available == True and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -1664,9 +1664,9 @@ class HTTPEntityMini(Schema):
             self.subtitle           = schema.subtitle
             self.category           = schema.category
             self.subcategory        = schema.subcategory
+            
             _addImages(self, schema.images)
-
-
+            
             try:
                 if 'coordinates' in schema.value:
                     self.coordinates    = _coordinatesDictToFlat(schema.coordinates)
@@ -1978,13 +1978,25 @@ class HTTPStamp(Schema):
                     img.importSchema(image)
                     # quick fix for now
                     # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
+                    if len(img.sizes) == 0:
+                        continue
+                    source              = HTTPActionSource()
+                    source.name         = 'View image'
+                    source.source       = 'stamped'
+                    source.source_id    = img.sizes[0].url
+
+                    action              = HTTPAction()
+                    action.name         = 'View image'
+                    action.type         = 'stamped_view_image'
+                    action.sources      = [ source ]
+                    img.action          = action
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)
                 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
-            
+
             self.num_comments = 0
             if schema.num_comments > 0:
                 self.num_comments       = schema.num_comments

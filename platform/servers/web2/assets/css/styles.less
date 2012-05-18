@@ -6,41 +6,21 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
 @import "libs/h5bp.min.css";
 @import "libs/elements.less";
-
-@font-face {
-    font-family: "StampedEntityFallbackFont";
-    src: local("☺"),
-         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
-}
-
-@font-face {
-    font-family: "StampedScreenNameFont";
-    src: local("☺"),
-         url(/assets/fonts/TitlingGothicFBComp-Reg.otf) format("opentype");
-}
-
 @import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
-/*@import "http://pls.webtype.com/v.css?ct=10157&r=2592&p=1948&h=dQ9Z7h0SmDXhdQOSL1LjdQ%3d%3d";
-
-@font-face {
-    font-family: "StampedEntityFont";
-    font-style:  normal;
-    font-weight: normal;
-    
-    src: local("☺"), 
-         url("http://wac.1ac1.edgecastcdn.net/001AC1/webtype/ff/3/ac420a8b-8858-40c1-b708-3b2674e85e29") format("woff"), 
-         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
-}*/
 
 
-/*
-@font-face {
-    font-family: "StampedButtonFont";
-    src: local("☺"),
-         url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
-}*/
+/* **************************************************************************
+                            BASIC HIGH-LEVEL SETUP
+   ************************************************************************** */
+
 
 body, html {
     width:  100%;
@@ -74,9 +54,14 @@ a:hover {
 }
 
 .fullwidth {
-    width: 100%;
-    height: 100%;
     position: relative;
+    width: 100%;
+}
+
+.fullsize {
+    position: relative;
+    width:  100%;
+    height: 100%;
 }
 
 .floatleft {
@@ -87,113 +72,131 @@ a:hover {
     float: right;
 }
 
-header, footer, .fixedwidth {
+footer, .fixedwidth {
     width: 940px;
     margin: 0 auto;
-    padding: 0;
-    border: 0 none;
     position: relative;
 }
 
+
+/* **************************************************************************
+                                GENERIC FIXED HEADER
+   ************************************************************************** */
+
+
 header {
-    p {
-        float: right;
-        clear: both;
+    .fullwidth;
+    position: fixed;
+    z-index: 150;
+    background: #fff;
+     
+    .header-body {
+        .fixedwidth;
+        z-index: 25;
         
-        margin: 0.5em 0.5em 0.25em 0;
-        
-        .desc {
-            font-size: 90%;
+        p {
+            float: right;
+            clear: both;
+            position: relative;
+            
+            margin: 0.5em 0.5em 0.25em 0;
+            
+            .desc {
+                font-size: 90%;
+            }
         }
-    }
-    
-    @base: #3b84eb;
-    
-    /* TODO: use slight background gradient instead of flat color */
-    
-    p.join {
-        span.desc {
-            color: #438fed;
+        
+        /* TODO: use slight background gradient instead of flat color */
+        @base: #3b84eb;
+        
+        p.join {
+            z-index: 27;
+            span.desc {
+                color: #438fed;
+            }
+            
+            a.button {
+                color: #fff;
+                background: @base;
+                .box-shadow(0, 0, 4px, 0, @base);
+                .rounded(2px);
+                
+                &:hover {
+                    @c0: lighten(@base, 10%);
+                    @c1: darken(@base,  10%);
+                    
+                    text-decoration: none;
+                    background: @c0;
+                    .box-shadow(0, 0, 4px, 0, @c1);
+                }
+                
+                &:active {
+                    @c0: lighten(@base, 5%);
+                    @c1: darken(@base,  25%);
+                    
+                    text-decoration: none;
+                    background: @c1;
+                    .box-shadow(0, 0, 4px, 0, @c1);
+                }
+            }
+        }
+        
+        p.sign-in {
+            z-index: 26;
+            
+            span.desc {
+                color: #bbb;
+            }
+            
+            a.button {
+                .rounded(4px);
+                .box-shadow(0, 0, 4px, 0, #eee);
+                border: 1px solid #666;
+                background: #FEFEFE;
+                color: #666;
+                
+                &:hover {
+                    @c0: lighten(@base, 10%);
+                    @c1: darken(@base,  10%);
+                    
+                    color: #fff;
+                    border-color: @c0;
+                    
+                    background: @c0;
+                    text-decoration: none;
+                    .box-shadow(0, 0, 4px, 0, @c1);
+                }
+                
+                &:active {
+                    @c0: lighten(@base, 5%);
+                    @c1: darken(@base,  25%);
+                    color: #fff;
+                    border-color: @c1;
+                    
+                    background: @c1;
+                    text-decoration: none;
+                    .box-shadow(0, 0, 4px, 0, @c1);
+                }
+            }
         }
         
         a.button {
-            color: #fff;
-            background: @base;
-            .box-shadow(0, 0, 4px, 0, @base);
-            .rounded(2px);
+            font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+            letter-spacing: .1em;
+            text-align: center;
             
-            &:hover {
-                @c0: lighten(@base, 10%);
-                @c1: darken(@base,  10%);
-                
-                text-decoration: none;
-                background: @c0;
-                .box-shadow(0, 0, 4px, 0, @c1);
-            }
-            
-            &:active {
-                @c0: lighten(@base, 5%);
-                @c1: darken(@base,  25%);
-                
-                text-decoration: none;
-                background: @c1;
-                .box-shadow(0, 0, 4px, 0, @c1);
-            }
+            margin-left: .5em;
+            display: inline-block;
+            width: 5em;
         }
-    }
-    
-    p.sign-in {
-        span.desc {
-            color: #bbb;
-        }
-        
-        a.button {
-            .rounded(4px);
-            .box-shadow(0, 0, 4px, 0, #eee);
-            border: 1px solid #666;
-            background: #FEFEFE;
-            color: #666;
-            
-            &:hover {
-                @c0: lighten(@base, 10%);
-                @c1: darken(@base,  10%);
-                
-                color: #fff;
-                border-color: @c0;
-                
-                background: @c0;
-                text-decoration: none;
-                .box-shadow(0, 0, 4px, 0, @c1);
-            }
-            
-            &:active {
-                @c0: lighten(@base, 5%);
-                @c1: darken(@base,  25%);
-                color: #fff;
-                border-color: @c1;
-                
-                background: @c1;
-                text-decoration: none;
-                .box-shadow(0, 0, 4px, 0, @c1);
-            }
-        }
-    }
-    
-    a.button {
-        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
-        letter-spacing: .1em;
-        text-align: center;
-        
-        margin-left: .5em;
-        display: inline-block;
-        width: 5em;
     }
 }
 
 .user-logo-large {
     position: absolute;
     
-    top:  -125px;
+    display: block;
+    top:  -75px;
     left: -125px;
     
     width:  195px;
@@ -215,37 +218,73 @@ header {
     z-index: 101;
 }
 
+
+/* **************************************************************************
+                                PROFILE HEADER
+   ************************************************************************** */
+
+
+@outer: #E5E5E5;
+@inner: #FEFEFE;
+@shadow: rgba(50,50,50,0.35);
+
+.post-header {
+    .fullwidth;
+    .box-shadow(0, 3px, 3px, 0, @shadow);
+    
+    position: relative;
+    display:  block;
+    
+    height: 16px;
+}
+
 .profile-header-wrapper {
     .fullwidth;
     
+    padding: 5em 0 0;
+    
+    position: relative;
+    top:  0;
+    left: 0;
+    
     .profile-header {
-        @outer: #E5E5E5;
-        @inner: #FEFEFE;
-        @shadow: rgba(50,50,50,0.35);
-        
         .linear-gradient(left, @outer, @inner, @outer);
-        .innerbg {
-            /* darken the background */
-            /*background-color: rgba(0, 0, 0, 0.246094);*/
-            
-            /* TODO: get this mask working; kind of want blend-mode multiply... */
-            /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
-            
-            .profile-header-pre {
-                .box-shadow(0, 3px, 3px, 0, @shadow);
-            }
+        /* darken the background */
+        /*background-color: rgba(0, 0, 0, 0.246094);*/
+        
+        /* TODO: get this mask working; kind of want blend-mode multiply... */
+        /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
+        
+        .profile-content-page {
+            position: relative;
+            z-index: 50;
+            top:  0;
+            left: 0;
             
             .profile-header-body {
                 position: relative;
+                top:  0;
+                left: 0;
                 
-                .innerbg0 {
-                    background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
+                .innerbg {
+                    /*background: url(/assets/img/collage.940x256.jpg) no-repeat fixed center center;
                     background-size: 100%;
                     
                     position: absolute;
                     width:   100%;
                     height:  100%;
-                    opacity: 0.45;
+                    opacity: 0.45;*/
+                    
+                    /*$(document).ready(function() {
+                        $('.innerbg').css({
+                            position : 'absolute', 
+                            width    : '100%', 
+                            height   : '100%', 
+                            opacity  : '0.45', 
+                            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                            'background-size': '100%', 
+                        }).addClass('blur_8');
+                    });*/
                 }
                 
                 .profile-header-body-fixedwidth {
@@ -276,7 +315,7 @@ header {
                     
                     width: 167px;
                     min-height: 75px;
-                    z-index: 100;
+                    z-index: 52;
                     
                     margin: 0 auto;
                     padding: 18px 20px 0;
@@ -309,6 +348,12 @@ header {
     height: 16px;
 }
 
+
+/* **************************************************************************
+                                PROFILE IMAGES
+   ************************************************************************** */
+
+
 .profile-image-border(@size) {
     border: @size solid #fff;
     .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
@@ -340,6 +385,12 @@ header {
 .profile-image-small {
     .profile-image(24px,  2px);
 }
+
+
+/* **************************************************************************
+                                USER GALLERY
+   ************************************************************************** */
+
 
 .user-gallery {
     .user-gallery-item {
@@ -397,6 +448,344 @@ header {
     .floatright;
     width: 45%;
 }
+
+
+/* **************************************************************************
+                           CRINKLED STATIC GOOGLE MAP
+   ************************************************************************** */
+
+
+.static-map(@size: 200px, @b: 0, @angle: 35deg, @perspective: 200px) {
+    position: relative;
+    display:  block;
+    width:   @size;
+    
+    @padding: 4px;
+    top:    -@padding;
+    left:   -@padding;
+    padding: @padding;
+    
+    .static-map-inner {
+        margin: 0 auto;
+        @colsize: @size / 4;
+        
+        position: relative;
+        top:  0;
+        left: -@b;
+        
+        display: block;
+        width:  @size;
+        height: @size;
+        
+        /*.perspective(@perspective);*/
+        .transform-style(preserve-3d);
+        .backface-visibility(hidden);
+        
+        ._section(@x) {
+            /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+            /* TODO: remove this static background image */
+            background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
+            background-position: -(@x * @colsize);
+            
+            position: absolute;
+            display:  block;
+            
+            width:  @colsize;
+            height: @size;
+            
+            top:  0;
+            
+            border: @b solid rgba(0,0,0,0.9);
+            /*outline: 1px solid transparent;*/
+            /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
+            /*.transform-style(preserve-3d);*/
+            
+            .transition(all, .1s, linear);
+        }
+        
+        .__section(@x) when (@x > 0) {
+            left: @x * @colsize + @b;
+        }
+        .__section(@x) when (@x = 0) {
+            left: @x * @colsize;
+        }
+        
+        .section(@x) {
+            ._section(@x);
+            .__section(@x);
+        }
+        
+        /* TODO: make the map crinkle to a centered version of itself */
+        
+        .r0 {
+            .section(0);
+            border-width: @b 0 @b @b;
+            .transform(perspective(@perspective) translate(12px, 0) rotateY(-@angle));
+        }
+        .r1 {
+            .section(1);
+            border-width: @b 0;
+            .transform(perspective(@perspective) translate(7px,  0) rotateY(@angle));
+        }
+        .r2 {
+            .section(2);
+            border-width: @b 0;
+            .transform(perspective(@perspective) translate(-1px, 0) rotateY(-@angle));
+        }
+        .r3 {
+            .section(3);
+            border-width: @b @b @b 0;
+            .transform(perspective(@perspective) translate(-6px, 0) rotateY(@angle));
+        }
+        .dark-layer {
+            display: block;
+            width:  100%;
+            height: 100%;
+            background: #333;
+            
+            .transition(opacity, .1s, ease-in-out);
+            opacity: 0.10;
+        }
+        
+        .pin {
+            background: url(/assets/img/pin_shadow.png);
+            
+            position: absolute;
+            top:  50%;
+            left: 50%;
+            margin: -7px auto auto 0;
+            
+            display: block;
+            width:  24px;
+            height: 18px;
+            
+            &:hover {
+                cursor: pointer;
+            }
+            
+            .pin-inner {
+                background: url(/assets/img/pin.png);
+                
+                position: relative;
+                top:  -16px;
+                left: -8px;
+                
+                display: block;
+                width:  26px;
+                height: 36px;
+            }
+            
+            .transition(all, .1s, linear);
+            .transform(perspective(@perspective) translate(-2px, 0) scale(.8, .8));
+        }
+    }
+    
+    &:hover {
+        /*cursor: pointer;*/
+        .r0, .r1, .r2, .r3, .pin {
+            .transform(perspective(@perspective));
+        }
+        .dark-layer {
+            opacity: 0;
+        }
+    }
+}
+
+.static-map-small {
+    /*.static-map(@size: 140px, @b: 2px, @angle: 35deg, @perspective: 200px)*/
+    .static-map(140px, 2px, 35deg, 200px);
+}
+
+
+/* **************************************************************************
+                            STAMP CATEGORY NAV BAR
+   ************************************************************************** */
+
+
+.active() {
+    opacity: 1;
+}
+
+#stamp-category-nav-bar {
+    position: fixed;
+    display:  block;
+    z-index: 1000;
+    
+    background: #262626;
+    .rounded(8px);
+    .box-shadow(0, 0, 4px, 0, @shadow);
+    
+    top:   50%;
+    right: 40px;
+    margin: -180px 0 0;
+    padding: 0;
+    
+    ol {
+        text-decoration: none;
+        list-style: none;
+        text-indent: 0;
+        padding: 0;
+        margin:  0;
+        
+        li {
+            position: relative;
+            
+            a {
+                background: url(/assets/img/sidenav_sprite.png) no-repeat -192px 0;
+                
+                text-align: center;
+                display: block;
+                width:  60px;
+                height: 60px;
+                margin: 6px 0;
+                
+                position: relative;
+                z-index: 1000;
+                
+                opacity: 0;
+                .transition(opacity, .3s, ease-out);
+            }
+            
+            div {
+                background: url(/assets/img/sidenav_sprite.png) no-repeat;
+                position: absolute;
+                left: 14px;
+                top: 14px;
+                
+                display: block;
+                width:  32px;
+                height: 32px;
+                
+                z-index: 999;
+            }
+        }
+        
+        a:hover {
+            opacity: 1;
+            /*background-position: -252px 0;*/
+        }
+        a:active {
+            .active();
+        }
+        
+        li.default div {
+            background-position: 0 0;
+        }
+        
+        li.place div {
+            background-position: -32px 0;
+        }
+        
+        li.music div {
+            background-position: -64px 0;
+        }
+        
+        li.book div {
+            background-position: -96px 0;
+        }
+        
+        li.film div {
+            background-position: -128px 0;
+        }
+        
+        .other div {
+            background-position: -160px 0;
+        }
+    }
+}
+
+body.default    #stamp-category-nav-bar ol li.default, 
+body.place      #stamp-category-nav-bar ol li.place, 
+body.music      #stamp-category-nav-bar ol li.music, 
+body.book       #stamp-category-nav-bar ol li.book, 
+body.film       #stamp-category-nav-bar ol li.film, 
+body.other      #stamp-category-nav-bar ol li.other {
+    a, a:hover {
+        .active();
+        
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+
+/* **************************************************************************
+                             GENERIC BLUR FILTERS
+   ************************************************************************** */
+
+
+.blurred(@filter, @radius_px) {
+    /*blur.svg#gaussian_blur_@radius*/
+    filter: url(@filter);
+    -webkit-filter: blur(@radius_px);
+    
+    @duration: 1s;
+    @ease: ease-in-out;
+    
+    transition: filter @duration @ease;
+    -moz-transition: filter @duration @ease;
+    -webkit-transition: -webkit-filter @duration @ease;
+    
+    &:hover {
+        filter: none;
+        -webkit-filter: blur(0);
+    }
+}
+
+.blurred_ie(@radius, @radius_px) {
+    margin: -@radius_px;
+    filter: progid:DXImageTransform.Microsoft.blur(pixelradius=@radius);
+    zoom: 1;
+    
+    &:hover {
+        margin: 0;
+        filter: none;
+    }
+}
+
+.blur_0   { .blurred('blur.svg#gaussian_blur_0',   0px);   } .ie { .blur_0   { .blurred_ie(0,   0px);   } }
+.blur_1   { .blurred('blur.svg#gaussian_blur_1',   1px);   } .ie { .blur_1   { .blurred_ie(1,   1px);   } }
+.blur_2   { .blurred('blur.svg#gaussian_blur_2',   2px);   } .ie { .blur_2   { .blurred_ie(2,   2px);   } }
+.blur_3   { .blurred('blur.svg#gaussian_blur_3',   3px);   } .ie { .blur_3   { .blurred_ie(3,   3px);   } }
+.blur_4   { .blurred('blur.svg#gaussian_blur_4',   4px);   } .ie { .blur_4   { .blurred_ie(4,   4px);   } }
+.blur_5   { .blurred('blur.svg#gaussian_blur_5',   5px);   } .ie { .blur_5   { .blurred_ie(5,   5px);   } }
+.blur_6   { .blurred('blur.svg#gaussian_blur_6',   6px);   } .ie { .blur_6   { .blurred_ie(6,   6px);   } }
+.blur_7   { .blurred('blur.svg#gaussian_blur_7',   7px);   } .ie { .blur_7   { .blurred_ie(7,   7px);   } }
+.blur_8   { .blurred('blur.svg#gaussian_blur_8',   8px);   } .ie { .blur_8   { .blurred_ie(8,   8px);   } }
+.blur_9   { .blurred('blur.svg#gaussian_blur_9',   9px);   } .ie { .blur_9   { .blurred_ie(9,   9px);   } }
+.blur_10  { .blurred('blur.svg#gaussian_blur_10',  10px);  } .ie { .blur_10  { .blurred_ie(10,  10px);  } }
+.blur_11  { .blurred('blur.svg#gaussian_blur_11',  11px);  } .ie { .blur_11  { .blurred_ie(11,  11px);  } }
+.blur_12  { .blurred('blur.svg#gaussian_blur_12',  12px);  } .ie { .blur_12  { .blurred_ie(12,  12px);  } }
+.blur_13  { .blurred('blur.svg#gaussian_blur_13',  13px);  } .ie { .blur_13  { .blurred_ie(13,  13px);  } }
+.blur_14  { .blurred('blur.svg#gaussian_blur_14',  14px);  } .ie { .blur_14  { .blurred_ie(14,  14px);  } }
+.blur_15  { .blurred('blur.svg#gaussian_blur_15',  15px);  } .ie { .blur_15  { .blurred_ie(15,  15px);  } }
+.blur_16  { .blurred('blur.svg#gaussian_blur_16',  16px);  } .ie { .blur_16  { .blurred_ie(16,  16px);  } }
+.blur_17  { .blurred('blur.svg#gaussian_blur_17',  17px);  } .ie { .blur_17  { .blurred_ie(17,  17px);  } }
+.blur_18  { .blurred('blur.svg#gaussian_blur_18',  18px);  } .ie { .blur_18  { .blurred_ie(18,  18px);  } }
+.blur_19  { .blurred('blur.svg#gaussian_blur_19',  19px);  } .ie { .blur_19  { .blurred_ie(19,  19px);  } }
+.blur_20  { .blurred('blur.svg#gaussian_blur_20',  20px);  } .ie { .blur_20  { .blurred_ie(20,  20px);  } }
+.blur_21  { .blurred('blur.svg#gaussian_blur_21',  21px);  } .ie { .blur_21  { .blurred_ie(21,  21px);  } }
+.blur_22  { .blurred('blur.svg#gaussian_blur_22',  22px);  } .ie { .blur_22  { .blurred_ie(22,  22px);  } }
+.blur_23  { .blurred('blur.svg#gaussian_blur_23',  23px);  } .ie { .blur_23  { .blurred_ie(23,  23px);  } }
+.blur_24  { .blurred('blur.svg#gaussian_blur_24',  24px);  } .ie { .blur_24  { .blurred_ie(24,  24px);  } }
+.blur_25  { .blurred('blur.svg#gaussian_blur_25',  25px);  } .ie { .blur_25  { .blurred_ie(25,  25px);  } }
+.blur_26  { .blurred('blur.svg#gaussian_blur_26',  26px);  } .ie { .blur_26  { .blurred_ie(26,  26px);  } }
+.blur_27  { .blurred('blur.svg#gaussian_blur_27',  27px);  } .ie { .blur_27  { .blurred_ie(27,  27px);  } }
+.blur_28  { .blurred('blur.svg#gaussian_blur_28',  28px);  } .ie { .blur_28  { .blurred_ie(28,  28px);  } }
+.blur_29  { .blurred('blur.svg#gaussian_blur_29',  29px);  } .ie { .blur_29  { .blurred_ie(29,  29px);  } }
+.blur_30  { .blurred('blur.svg#gaussian_blur_30',  30px);  } .ie { .blur_30  { .blurred_ie(30,  30px);  } }
+.blur_31  { .blurred('blur.svg#gaussian_blur_31',  31px);  } .ie { .blur_31  { .blurred_ie(31,  31px);  } }
+.blur_32  { .blurred('blur.svg#gaussian_blur_32',  32px);  } .ie { .blur_32  { .blurred_ie(32,  32px);  } }
+.blur_48  { .blurred('blur.svg#gaussian_blur_48',  48px);  } .ie { .blur_48  { .blurred_ie(48,  48px);  } }
+.blur_64  { .blurred('blur.svg#gaussian_blur_64',  64px);  } .ie { .blur_64  { .blurred_ie(64,  64px);  } }
+.blur_96  { .blurred('blur.svg#gaussian_blur_96',  96px);  } .ie { .blur_96  { .blurred_ie(96,  96px);  } }
+.blur_128 { .blurred('blur.svg#gaussian_blur_128', 128px); } .ie { .blur_128 { .blurred_ie(128, 128px); } }
+
+
+/* **************************************************************************
+                              MISC / DEPRECATED
+   ************************************************************************** */
+
 
 .bold {
     color: #333;
@@ -498,30 +887,35 @@ footer .copyright a, footer .copyright a {
 
 .stamp-category-book .icon {
     background: url(/assets/img/entity-type-book.png) no-repeat;
+    display: inline-block;
     width:  19px;
     height: 15px;
 }
 
 .stamp-category-film .icon {
     background: url(/assets/img/entity-type-film.png) no-repeat;
+    display: inline-block;
     width:  15px;
     height: 15px;
 }
 
 .stamp-category-food .icon {
     background: url(/assets/img/entity-type-food.png) no-repeat;
+    display: inline-block;
     width:  21px;
     height: 15px;
 }
 
 .stamp-category-music .icon {
     background: url(/assets/img/entity-type-music.png) no-repeat;
+    display: inline-block;
     width:  15px;
     height: 15px;
 }
 
 .stamp-category-other .icon, .stamp-category- .icon {
     background: url(/assets/img/entity-type-other.png) no-repeat;
+    display: inline-block;
     width:  12px;
     height: 15px;
 }
@@ -546,97 +940,5 @@ footer .copyright a, footer .copyright a {
 
 .large {
     font-size: 2.2em;
-}
-
-.static-map(@size, @b, @angle) {
-    display: block;
-    width: @size;
-    padding: 30px;
-    background: #888;
-    
-    .static-map-inner {
-        margin: 0 auto;
-        @colsize: @size / 4;
-        
-        position: relative;
-        display: block;
-        width:  @size;
-        height: @size;
-        
-        /*.perspective(200px);*/
-        .transform-style(preserve-3d);
-        .backface-visibility(hidden);
-        
-        .section(@x) {
-            /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-            background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-            background-position: -(@x * @colsize);
-            
-            position: absolute;
-            display:  block;
-            
-            width:  @colsize;
-            height: @size;
-            
-            left: @x * @colsize;
-            top:  0;
-            
-            border: @b solid rgba(0,0,0,0.9);
-            /*outline: 1px solid transparent;*/
-            /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-            /*.transform-style(preserve-3d);*/
-            
-            .transition(all, .1s, linear);
-        }
-        
-        .r0 {
-            .section(0);
-            border-width: @b 0 @b @b;
-        }
-        .r1 {
-            .section(1);
-            border-width: @b 0;
-        }
-        .r2 {
-            .section(2);
-            border-width: @b 0;
-        }
-        .r3 {
-            .section(3);
-            border-width: @b @b @b 0;
-        }
-        .dark-layer {
-            display: block;
-            width:  100%;
-            height: 100%;
-            background: #333;
-            opacity: 0;
-            
-            .transition(opacity, .1s, ease-in-out);
-        }
-    }
-    
-    &:hover {
-        .r0 {
-            .transform(perspective(200px) rotateY(-@angle));
-        }
-        .r1 {
-            .transform(perspective(200px) translate(-6px,  0) rotateY(@angle));
-        }
-        .r2 {
-            .transform(perspective(200px) translate(-18px, 0) rotateY(-@angle));
-        }
-        .r3 {
-            .transform(perspective(200px) translate(-23px, 0) rotateY(@angle));
-        }
-        .dark-layer {
-            opacity: 0.10;
-        }
-    }
-}
-
-.static-map-small {
-    /* TODO: non-zero border messes with map centering */
-    .static-map(200px, 0px, 35deg);
 }
 

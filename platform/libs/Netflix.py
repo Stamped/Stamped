@@ -174,7 +174,7 @@ class Netflix(object):
     def getTitleDetails(self, netflix_id):
         results = self.__get(
             service         = netflix_id,
-            expand          ='synopsis,cast,directors'
+            expand          ='synopsis,cast,directors,formats,delivery_formats'
         )
         import pprint
         pprint.pprint (results)

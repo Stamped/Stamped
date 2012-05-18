@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STAction.h"
 
-@interface STSimpleAction : NSObject<STAction>
+@interface STSimpleAction : NSObject<STAction, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* type;
 @property (nonatomic, readwrite, retain) NSString* name;

@@ -16,5 +16,6 @@
 + (UIButton*)stampedToolbarButton;
 + (UIButton*)stampedBlueToolbarButton;
 + (UIButton*)stampedWhiteButton;
++ (UIButton*)stampedPillButtonWithFrame:(CGRect)frame;
 
 @end

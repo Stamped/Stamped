@@ -1924,25 +1924,40 @@ class StampedAPI(AStampedAPI):
                     raise StampedInputError("invalid external image format; content-type must be image/jpeg")
             """
             pass
-        
+
+        # Create the stamp or get the stamp object so we can use its stamp_id for image filenames
+        if stampExists:
+            stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
+        else:
+            stamp                       = Stamp()
+
+        # Resize image
         if imageUrl is not None:
             if imageWidth is None or imageHeight is None:
                 raise StampedInputError("invalid image dimensions")
-            
+
+            imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            size            = ImageSizeSchema()
-            #size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/users'
-            size.width      = imageWidth
-            size.height     = imageHeight
-            image.sizes.append(size)
+            sizes   = {
+                ''        : (imageWidth, imageHeight),   #original size
+                '-ios1x'  : (200, 200),
+                '-ios2x'  : (400, 400),
+                '-web'    : (580, 580),
+                '-mobile' : (572, 572),
+                }
+            for k,v in sizes.iteritems():
+                logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
+                size            = ImageSizeSchema()
+                size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                size.width      = v[0]
+                size.height     = v[1]
+                image.sizes.append(size)
             content.images.append(image)
-
-            imageExists     = True
+            imageExists = True
 
         # Update content if stamp exists
         if stampExists:
-            stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
             stamp.timestamp.stamped     = now
             stamp.timestamp.modified    = now 
             stamp.num_blurbs            = stamp.num_blurbs + 1 if stamp.num_blurbs is not None else 2
@@ -1956,7 +1971,6 @@ class StampedAPI(AStampedAPI):
 
         # Build new stamp
         else:
-            stamp                       = Stamp()
             stamp.user_id               = user.user_id
             stamp.entity                = entity
             stamp.timestamp.created     = now
@@ -1974,10 +1988,8 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        # Resize image
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
 
         # Add stats
@@ -2803,11 +2815,11 @@ class StampedAPI(AStampedAPI):
         
         if genericCollectionSlice.limit is None:
             genericCollectionSlice.limit = stampCap
-
+        
         # Buffer of 5 additional stamps
         limit = genericCollectionSlice.limit
         genericCollectionSlice.limit = limit + 5
-
+        
         # Adjustment for multiple blurbs to use "stamped" timestamp instead of "created"
         if genericCollectionSlice.sort == 'created':
             genericCollectionSlice.sort = 'stamped'
@@ -2816,8 +2828,8 @@ class StampedAPI(AStampedAPI):
         
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
-
-        if len(stampData) >= limit and len(stamps) >= limit:
+        
+        if len(stampData) >= limit and len(stamps) < limit:
             logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
         
         if self.__version == 0:

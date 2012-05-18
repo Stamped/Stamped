@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STCredit.h"
 
-@interface STSimpleCredit : NSObject <STCredit>
+@interface STSimpleCredit : NSObject <STCredit, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* userID;
 @property (nonatomic, readwrite, copy) NSString* screenName;

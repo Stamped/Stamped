@@ -10,7 +10,7 @@
 #import "STEntity.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleEntity : NSObject <STEntity>
+@interface STSimpleEntity : NSObject <STEntity, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* entityID;
 @property (nonatomic, readwrite, retain) NSString* title;

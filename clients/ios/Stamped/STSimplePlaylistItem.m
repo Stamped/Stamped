@@ -18,6 +18,18 @@
 @synthesize entityID = _entityID;
 @synthesize action = action_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    name_ = [[decoder decodeObjectForKey:@"name"] retain];
+    length_ = [decoder decodeIntegerForKey:@"length"];
+    icon_ = [[decoder decodeObjectForKey:@"icon"] retain];
+    _entityID = [[decoder decodeObjectForKey:@"entityID"] retain];
+    action_ = [[decoder decodeObjectForKey:@"action"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc {
   self.name = nil;
   self.icon = nil;
@@ -25,6 +37,14 @@
   self.entityID = nil;
   
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.name forKey:@"name"];
+  [encoder encodeInteger:self.length forKey:@"length"];
+  [encoder encodeObject:self.icon forKey:@"icon"];
+  [encoder encodeObject:self.action forKey:@"action"];
+  [encoder encodeObject:self.entityID forKey:@"entityID"];
 }
 
 + (RKObjectMapping*)mapping {

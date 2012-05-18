@@ -25,19 +25,12 @@
     
     <div class="profile-header-wrapper">
         <div class="profile-header">
-            <div class="innerbg">
-                <div class="profile-header-pre">
-                    <div class="ribbon-top"></div>
-                </div>
-                
+            <div class="profile-content-page">
                 <div class="profile-header-body">
-                    <div class="innerbg0"></div>
+                    <div class="innerbg"></div>
                     <div class="profile-header-body-fixedwidth clearfix">
-                        <div class="user-logo-large"></div>
-                        
                         <div class="profile-image-large floatleft">
                             <!-- TODO: link to lighthouse with full-resolution profile image -->
-                            
                             <img src="{{user.image_url_144}}" />
                         </div>
                         
@@ -66,7 +59,7 @@
                                     <p>following</p>
                                     
                                     {% with users=friends %}
-                                        {% custom_template "user-gallery" %}
+                                        {% mustache_template "user-gallery" %}
                                     {% endwith %}
                                 </div>
                                 
@@ -75,7 +68,7 @@
                                     <p>followers</p>
                                     
                                     {% with users=followers %}
-                                        {% custom_template "user-gallery" %}
+                                        {% mustache_template "user-gallery" %}
                                     {% endwith %}
                                 </div>
                             </div>
@@ -111,12 +104,43 @@
         </div>
     </div>
     
+    {% block stamp_category_nav_bar %}
+    <nav id="stamp-category-nav-bar" style="display: block;">
+        <ol>
+            <li class="default">
+                <a class="replaced" href="/{{user.screen_name}}"></a>
+                <div></div>
+            </li>
+            <li class="place">
+                <a class="replaced" href="/{{user.screen_name}}?category=place"></a>
+                <div></div>
+            </li>
+            <li class="music">
+                <a class="replaced" href="/{{user.screen_name}}?category=music"></a>
+                <div></div>
+            </li>
+            <li class="book">
+                <a class="replaced" href="/{{user.screen_name}}?category=book"></a>
+                <div></div>
+            </li>
+            <li class="film">
+                <a class="replaced" href="/{{user.screen_name}}?category=film"></a>
+                <div></div>
+            </li>
+            <li class="other">
+                <a class="replaced" href="/{{user.screen_name}}?category=other"></a>
+                <div></div>
+            </li>
+        </ol>
+    </nav>
+    {% endblock stamp_category_nav_bar %}
+    
     {% block pre_profile_main_content %}
     <div id="main-content" class="fixedwidth">
         {% endblock pre_profile_main_content %}
         
         {% block profile_main_content %}
-            {% custom_template "stamp-gallery2" %}
+            {% handlebars_template "stamp-gallery2" %}
         {% endblock profile_main_content %}
         
         {% block post_profile_main_content %}
@@ -132,10 +156,25 @@
     <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
     
-    <script src="{{ STATIC_URL }}js/libs/mustache.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
     <script src="{{ STATIC_URL }}js/client.js"></script>
     <script src="{{ STATIC_URL }}js/profile2.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('.innerbg').css({
+                position : 'absolute', 
+                width    : '100%', 
+                height   : '100%', 
+                opacity  : '0.45', 
+                background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                'background-size': '100%', 
+            }).addClass('blur_8');
+        });
+    </script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

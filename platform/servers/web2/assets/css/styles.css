@@ -8,6 +8,9 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
 /* elements.less
  * 
  * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
@@ -18,31 +21,9 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
-@font-face {
-  font-family: "StampedEntityFallbackFont";
-  src: local("☺"), url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
-}
-@font-face {
-  font-family: "StampedScreenNameFont";
-  src: local("☺"), url(/assets/fonts/TitlingGothicFBComp-Reg.otf) format("opentype");
-}
-/*@import "http://pls.webtype.com/v.css?ct=10157&r=2592&p=1948&h=dQ9Z7h0SmDXhdQOSL1LjdQ%3d%3d";
-
-@font-face {
-    font-family: "StampedEntityFont";
-    font-style:  normal;
-    font-weight: normal;
-    
-    src: local("☺"), 
-         url("http://wac.1ac1.edgecastcdn.net/001AC1/webtype/ff/3/ac420a8b-8858-40c1-b708-3b2674e85e29") format("woff"), 
-         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
-}*/
-/*
-@font-face {
-    font-family: "StampedButtonFont";
-    src: local("☺"),
-         url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
-}*/
+/* **************************************************************************
+                            BASIC HIGH-LEVEL SETUP
+   ************************************************************************** */
 body,
 html {
   width: 100%;
@@ -72,9 +53,13 @@ a:hover {
   overflow: hidden;
 }
 .fullwidth {
+  position: relative;
+  width: 100%;
+}
+.fullsize {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
 }
 .floatleft {
   float: left;
@@ -82,31 +67,46 @@ a:hover {
 .floatright {
   float: right;
 }
-header,
 footer,
 .fixedwidth {
   width: 940px;
   margin: 0 auto;
-  padding: 0;
-  border: 0 none;
   position: relative;
 }
+/* **************************************************************************
+                                GENERIC FIXED HEADER
+   ************************************************************************** */
 header {
+  position: relative;
+  width: 100%;
+  position: fixed;
+  z-index: 150;
+  background: #fff;
+}
+header .header-body {
+  width: 940px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 25;
   /* TODO: use slight background gradient instead of flat color */
 
 }
-header p {
+header .header-body p {
   float: right;
   clear: both;
+  position: relative;
   margin: 0.5em 0.5em 0.25em 0;
 }
-header p .desc {
+header .header-body p .desc {
   font-size: 90%;
 }
-header p.join span.desc {
+header .header-body p.join {
+  z-index: 27;
+}
+header .header-body p.join span.desc {
   color: #438fed;
 }
-header p.join a.button {
+header .header-body p.join a.button {
   color: #fff;
   background: #3b84eb;
   -webkit-box-shadow: 0 0 4px 0 #3b84eb;
@@ -121,7 +121,7 @@ header p.join a.button {
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-header p.join a.button:hover {
+header .header-body p.join a.button:hover {
   text-decoration: none;
   background: #69a1f0;
   -webkit-box-shadow: 0 0 4px 0 #1769dc;
@@ -130,7 +130,7 @@ header p.join a.button:hover {
   -o-box-shadow: 0 0 4px 0 #1769dc;
   box-shadow: 0 0 4px 0 #1769dc;
 }
-header p.join a.button:active {
+header .header-body p.join a.button:active {
   text-decoration: none;
   background: #0f4897;
   -webkit-box-shadow: 0 0 4px 0 #0f4897;
@@ -139,10 +139,13 @@ header p.join a.button:active {
   -o-box-shadow: 0 0 4px 0 #0f4897;
   box-shadow: 0 0 4px 0 #0f4897;
 }
-header p.sign-in span.desc {
+header .header-body p.sign-in {
+  z-index: 26;
+}
+header .header-body p.sign-in span.desc {
   color: #bbb;
 }
-header p.sign-in a.button {
+header .header-body p.sign-in a.button {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -158,7 +161,7 @@ header p.sign-in a.button {
   background: #FEFEFE;
   color: #666;
 }
-header p.sign-in a.button:hover {
+header .header-body p.sign-in a.button:hover {
   color: #fff;
   border-color: #69a1f0;
   background: #69a1f0;
@@ -169,7 +172,7 @@ header p.sign-in a.button:hover {
   -o-box-shadow: 0 0 4px 0 #1769dc;
   box-shadow: 0 0 4px 0 #1769dc;
 }
-header p.sign-in a.button:active {
+header .header-body p.sign-in a.button:active {
   color: #fff;
   border-color: #0f4897;
   background: #0f4897;
@@ -180,7 +183,7 @@ header p.sign-in a.button:active {
   -o-box-shadow: 0 0 4px 0 #0f4897;
   box-shadow: 0 0 4px 0 #0f4897;
 }
-header a.button {
+header .header-body a.button {
   font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
   letter-spacing: .1em;
   text-align: center;
@@ -190,7 +193,8 @@ header a.button {
 }
 .user-logo-large {
   position: absolute;
-  top: -125px;
+  display: block;
+  top: -75px;
   left: -125px;
   width: 195px;
   height: 195px;
@@ -205,10 +209,28 @@ header a.button {
   height: 44px;
   z-index: 101;
 }
-.profile-header-wrapper {
-  width: 100%;
-  height: 100%;
+/* **************************************************************************
+                                PROFILE HEADER
+   ************************************************************************** */
+.post-header {
   position: relative;
+  width: 100%;
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  position: relative;
+  display: block;
+  height: 16px;
+}
+.profile-header-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 5em 0 0;
+  position: relative;
+  top: 0;
+  left: 0;
 }
 .profile-header-wrapper .profile-header {
   background: #e5e5e5;
@@ -216,8 +238,6 @@ header a.button {
   background: -moz-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
   background: -ms-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
   background: -o-linear-gradient(left, #e5e5e5, #fefefe, #e5e5e5);
-}
-.profile-header-wrapper .profile-header .innerbg {
   /* darken the background */
 
   /*background-color: rgba(0, 0, 0, 0.246094);*/
@@ -227,39 +247,51 @@ header a.button {
   /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
 
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-pre {
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-}
-.profile-header-wrapper .profile-header .innerbg .profile-header-body {
+.profile-header-wrapper .profile-header .profile-content-page {
   position: relative;
+  z-index: 50;
+  top: 0;
+  left: 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .innerbg0 {
-  background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
-  background-size: 100%;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0.45;
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body {
+  position: relative;
+  top: 0;
+  left: 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .profile-header-body-fixedwidth {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg {
+  /*background: url(/assets/img/collage.940x256.jpg) no-repeat fixed center center;
+                    background-size: 100%;
+                    
+                    position: absolute;
+                    width:   100%;
+                    height:  100%;
+                    opacity: 0.45;*/
+
+  /*$(document).ready(function() {
+                        $('.innerbg').css({
+                            position : 'absolute', 
+                            width    : '100%', 
+                            height   : '100%', 
+                            opacity  : '0.45', 
+                            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                            'background-size': '100%', 
+                        }).addClass('blur_8');
+                    });*/
+
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   width: 940px;
   margin: 0 auto;
-  padding: 0;
-  border: 0 none;
   position: relative;
   padding: 34px 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .profile-header-body-fixedwidth .floatleft {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
   margin: 0 24px 0 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-body .profile-header-body-fixedwidth p {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth p {
   margin: 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post {
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -267,24 +299,24 @@ header a.button {
   box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   height: 16px;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post .inset-stamp {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp {
   background: url(/assets/img/insetstamp.png) center top no-repeat;
   text-align: center;
   position: relative;
   top: -75px;
   width: 167px;
   min-height: 75px;
-  z-index: 100;
+  z-index: 52;
   margin: 0 auto;
   padding: 18px 20px 0;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post .inset-stamp .number {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp .number {
   font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
   font-size: 2em;
   letter-spacing: .05em;
   margin: 0 0 -0.25em;
 }
-.profile-header-wrapper .profile-header .innerbg .profile-header-post .inset-stamp p {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp p {
   margin: 0 0 .5em;
   color: #000;
 }
@@ -296,6 +328,9 @@ header a.button {
   background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
   height: 16px;
 }
+/* **************************************************************************
+                                PROFILE IMAGES
+   ************************************************************************** */
 .profile-image-large {
   float: left;
   display: block;
@@ -344,6 +379,9 @@ header a.button {
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
 }
+/* **************************************************************************
+                                USER GALLERY
+   ************************************************************************** */
 .user-gallery .user-gallery-item {
   margin: 0 4px 4px 0;
 }
@@ -395,6 +433,1136 @@ header a.button {
   float: right;
   width: 45%;
 }
+/* **************************************************************************
+                           CRINKLED STATIC GOOGLE MAP
+   ************************************************************************** */
+.static-map-small {
+  /*.static-map(@size: 140px, @b: 2px, @angle: 35deg, @perspective: 200px)*/
+
+  position: relative;
+  display: block;
+  width: 140px;
+  top: -4px;
+  left: -4px;
+  padding: 4px;
+}
+.static-map-small .static-map-inner {
+  margin: 0 auto;
+  position: relative;
+  top: 0;
+  left: -2px;
+  display: block;
+  width: 140px;
+  height: 140px;
+  /*.perspective(@perspective);*/
+
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -o-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  /* TODO: make the map crinkle to a centered version of itself */
+
+}
+.static-map-small .static-map-inner .r0 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  /* TODO: remove this static background image */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
+  background-position: 0px;
+  position: absolute;
+  display: block;
+  width: 35px;
+  height: 140px;
+  top: 0;
+  border: 2px solid rgba(0, 0, 0, 0.9);
+  /*outline: 1px solid transparent;*/
+
+  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
+
+  /*.transform-style(preserve-3d);*/
+
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  left: 0px;
+  border-width: 2px 0 2px 2px;
+  -webkit-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  -moz-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  -o-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  -ms-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+}
+.static-map-small .static-map-inner .r1 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  /* TODO: remove this static background image */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
+  background-position: -35px;
+  position: absolute;
+  display: block;
+  width: 35px;
+  height: 140px;
+  top: 0;
+  border: 2px solid rgba(0, 0, 0, 0.9);
+  /*outline: 1px solid transparent;*/
+
+  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
+
+  /*.transform-style(preserve-3d);*/
+
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  left: 37px;
+  border-width: 2px 0;
+  -webkit-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  -moz-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  -o-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  -ms-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+}
+.static-map-small .static-map-inner .r2 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  /* TODO: remove this static background image */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
+  background-position: -70px;
+  position: absolute;
+  display: block;
+  width: 35px;
+  height: 140px;
+  top: 0;
+  border: 2px solid rgba(0, 0, 0, 0.9);
+  /*outline: 1px solid transparent;*/
+
+  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
+
+  /*.transform-style(preserve-3d);*/
+
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  left: 72px;
+  border-width: 2px 0;
+  -webkit-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  -moz-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  -o-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  -ms-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+}
+.static-map-small .static-map-inner .r3 {
+  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
+
+  /* TODO: remove this static background image */
+
+  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
+  background-position: -105px;
+  position: absolute;
+  display: block;
+  width: 35px;
+  height: 140px;
+  top: 0;
+  border: 2px solid rgba(0, 0, 0, 0.9);
+  /*outline: 1px solid transparent;*/
+
+  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
+
+  /*.transform-style(preserve-3d);*/
+
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  left: 107px;
+  border-width: 2px 2px 2px 0;
+  -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+}
+.static-map-small .static-map-inner .dark-layer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #333;
+  -webkit-transition: opacity 0.1s ease-in-out;
+  -moz-transition: opacity 0.1s ease-in-out;
+  transition: opacity 0.1s ease-in-out;
+  opacity: 0.10;
+}
+.static-map-small .static-map-inner .pin {
+  background: url(/assets/img/pin_shadow.png);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -7px auto auto 0;
+  display: block;
+  width: 24px;
+  height: 18px;
+  -webkit-transition: all 0.1s linear;
+  -moz-transition: all 0.1s linear;
+  transition: all 0.1s linear;
+  -webkit-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  -moz-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  -o-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  -ms-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+}
+.static-map-small .static-map-inner .pin:hover {
+  cursor: pointer;
+}
+.static-map-small .static-map-inner .pin .pin-inner {
+  background: url(/assets/img/pin.png);
+  position: relative;
+  top: -16px;
+  left: -8px;
+  display: block;
+  width: 26px;
+  height: 36px;
+}
+.static-map-small:hover {
+  /*cursor: pointer;*/
+
+}
+.static-map-small:hover .r0,
+.static-map-small:hover .r1,
+.static-map-small:hover .r2,
+.static-map-small:hover .r3,
+.static-map-small:hover .pin {
+  -webkit-transform: perspective(200px);
+  -moz-transform: perspective(200px);
+  -o-transform: perspective(200px);
+  -ms-transform: perspective(200px);
+  transform: perspective(200px);
+}
+.static-map-small:hover .dark-layer {
+  opacity: 0;
+}
+/* **************************************************************************
+                            STAMP CATEGORY NAV BAR
+   ************************************************************************** */
+#stamp-category-nav-bar {
+  position: fixed;
+  display: block;
+  z-index: 1000;
+  background: #262626;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  top: 50%;
+  right: 40px;
+  margin: -180px 0 0;
+  padding: 0;
+}
+#stamp-category-nav-bar ol {
+  text-decoration: none;
+  list-style: none;
+  text-indent: 0;
+  padding: 0;
+  margin: 0;
+}
+#stamp-category-nav-bar ol li {
+  position: relative;
+}
+#stamp-category-nav-bar ol li a {
+  background: url(/assets/img/sidenav_sprite.png) no-repeat -192px 0;
+  text-align: center;
+  display: block;
+  width: 60px;
+  height: 60px;
+  margin: 6px 0;
+  position: relative;
+  z-index: 1000;
+  opacity: 0;
+  -webkit-transition: opacity 0.3s ease-out;
+  -moz-transition: opacity 0.3s ease-out;
+  transition: opacity 0.3s ease-out;
+}
+#stamp-category-nav-bar ol li div {
+  background: url(/assets/img/sidenav_sprite.png) no-repeat;
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: block;
+  width: 32px;
+  height: 32px;
+  z-index: 999;
+}
+#stamp-category-nav-bar ol a:hover {
+  opacity: 1;
+  /*background-position: -252px 0;*/
+
+}
+#stamp-category-nav-bar ol a:active {
+  opacity: 1;
+}
+#stamp-category-nav-bar ol li.default div {
+  background-position: 0 0;
+}
+#stamp-category-nav-bar ol li.place div {
+  background-position: -32px 0;
+}
+#stamp-category-nav-bar ol li.music div {
+  background-position: -64px 0;
+}
+#stamp-category-nav-bar ol li.book div {
+  background-position: -96px 0;
+}
+#stamp-category-nav-bar ol li.film div {
+  background-position: -128px 0;
+}
+#stamp-category-nav-bar ol .other div {
+  background-position: -160px 0;
+}
+body.default #stamp-category-nav-bar ol li.default a,
+body.place #stamp-category-nav-bar ol li.place a,
+body.music #stamp-category-nav-bar ol li.music a,
+body.book #stamp-category-nav-bar ol li.book a,
+body.film #stamp-category-nav-bar ol li.film a,
+body.other #stamp-category-nav-bar ol li.other a,
+body.default #stamp-category-nav-bar ol li.default a:hover,
+body.place #stamp-category-nav-bar ol li.place a:hover,
+body.music #stamp-category-nav-bar ol li.music a:hover,
+body.book #stamp-category-nav-bar ol li.book a:hover,
+body.film #stamp-category-nav-bar ol li.film a:hover,
+body.other #stamp-category-nav-bar ol li.other a:hover {
+  opacity: 1;
+  pointer-events: none;
+  cursor: default;
+}
+/* **************************************************************************
+                             GENERIC BLUR FILTERS
+   ************************************************************************** */
+.blur_0 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_0');
+  -webkit-filter: blur(0px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_0:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_0 {
+  margin: 0px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_0:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_1 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_1');
+  -webkit-filter: blur(1px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_1:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_1 {
+  margin: -1px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_1:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_2 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_2');
+  -webkit-filter: blur(2px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_2:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_2 {
+  margin: -2px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_2:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_3 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_3');
+  -webkit-filter: blur(3px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_3:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_3 {
+  margin: -3px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_3:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_4 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_4');
+  -webkit-filter: blur(4px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_4:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_4 {
+  margin: -4px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_4:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_5 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_5');
+  -webkit-filter: blur(5px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_5:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_5 {
+  margin: -5px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_5:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_6 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_6');
+  -webkit-filter: blur(6px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_6:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_6 {
+  margin: -6px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_6:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_7 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_7');
+  -webkit-filter: blur(7px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_7:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_7 {
+  margin: -7px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_7:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_8 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_8');
+  -webkit-filter: blur(8px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_8:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_8 {
+  margin: -8px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_8:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_9 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_9');
+  -webkit-filter: blur(9px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_9:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_9 {
+  margin: -9px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_9:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_10 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_10');
+  -webkit-filter: blur(10px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_10:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_10 {
+  margin: -10px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_10:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_11 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_11');
+  -webkit-filter: blur(11px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_11:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_11 {
+  margin: -11px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_11:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_12 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_12');
+  -webkit-filter: blur(12px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_12:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_12 {
+  margin: -12px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_12:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_13 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_13');
+  -webkit-filter: blur(13px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_13:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_13 {
+  margin: -13px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_13:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_14 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_14');
+  -webkit-filter: blur(14px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_14:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_14 {
+  margin: -14px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_14:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_15 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_15');
+  -webkit-filter: blur(15px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_15:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_15 {
+  margin: -15px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_15:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_16 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_16');
+  -webkit-filter: blur(16px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_16:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_16 {
+  margin: -16px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_16:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_17 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_17');
+  -webkit-filter: blur(17px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_17:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_17 {
+  margin: -17px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_17:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_18 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_18');
+  -webkit-filter: blur(18px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_18:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_18 {
+  margin: -18px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_18:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_19 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_19');
+  -webkit-filter: blur(19px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_19:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_19 {
+  margin: -19px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_19:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_20 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_20');
+  -webkit-filter: blur(20px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_20:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_20 {
+  margin: -20px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_20:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_21 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_21');
+  -webkit-filter: blur(21px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_21:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_21 {
+  margin: -21px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_21:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_22 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_22');
+  -webkit-filter: blur(22px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_22:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_22 {
+  margin: -22px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_22:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_23 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_23');
+  -webkit-filter: blur(23px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_23:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_23 {
+  margin: -23px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_23:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_24 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_24');
+  -webkit-filter: blur(24px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_24:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_24 {
+  margin: -24px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_24:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_25 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_25');
+  -webkit-filter: blur(25px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_25:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_25 {
+  margin: -25px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_25:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_26 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_26');
+  -webkit-filter: blur(26px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_26:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_26 {
+  margin: -26px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_26:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_27 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_27');
+  -webkit-filter: blur(27px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_27:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_27 {
+  margin: -27px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_27:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_28 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_28');
+  -webkit-filter: blur(28px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_28:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_28 {
+  margin: -28px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_28:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_29 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_29');
+  -webkit-filter: blur(29px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_29:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_29 {
+  margin: -29px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_29:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_30 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_30');
+  -webkit-filter: blur(30px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_30:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_30 {
+  margin: -30px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_30:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_31 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_31');
+  -webkit-filter: blur(31px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_31:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_31 {
+  margin: -31px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_31:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_32 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_32');
+  -webkit-filter: blur(32px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_32:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_32 {
+  margin: -32px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_32:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_48 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_48');
+  -webkit-filter: blur(48px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_48:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_48 {
+  margin: -48px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_48:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_64 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_64');
+  -webkit-filter: blur(64px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_64:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_64 {
+  margin: -64px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_64:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_96 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_96');
+  -webkit-filter: blur(96px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_96:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_96 {
+  margin: -96px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_96:hover {
+  margin: 0;
+  filter: none;
+}
+.blur_128 {
+  /*blur.svg#gaussian_blur_@radius*/
+
+  filter: url('blur.svg#gaussian_blur_128');
+  -webkit-filter: blur(128px);
+  transition: filter 1s ease-in-out;
+  -moz-transition: filter 1s ease-in-out;
+  -webkit-transition: -webkit-filter 1s ease-in-out;
+}
+.blur_128:hover {
+  filter: none;
+  -webkit-filter: blur(0);
+}
+.ie .blur_128 {
+  margin: -128px;
+  filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
+  zoom: 1;
+}
+.ie .blur_128:hover {
+  margin: 0;
+  filter: none;
+}
+/* **************************************************************************
+                              MISC / DEPRECATED
+   ************************************************************************** */
 .bold {
   color: #333;
   font-weight: bold;
@@ -491,27 +1659,32 @@ footer .copyright a {
 }
 .stamp-category-book .icon {
   background: url(/assets/img/entity-type-book.png) no-repeat;
+  display: inline-block;
   width: 19px;
   height: 15px;
 }
 .stamp-category-film .icon {
   background: url(/assets/img/entity-type-film.png) no-repeat;
+  display: inline-block;
   width: 15px;
   height: 15px;
 }
 .stamp-category-food .icon {
   background: url(/assets/img/entity-type-food.png) no-repeat;
+  display: inline-block;
   width: 21px;
   height: 15px;
 }
 .stamp-category-music .icon {
   background: url(/assets/img/entity-type-music.png) no-repeat;
+  display: inline-block;
   width: 15px;
   height: 15px;
 }
 .stamp-category-other .icon,
 .stamp-category- .icon {
   background: url(/assets/img/entity-type-other.png) no-repeat;
+  display: inline-block;
   width: 12px;
   height: 15px;
 }
@@ -534,160 +1707,4 @@ a.pronounced-title {
 }
 .large {
   font-size: 2.2em;
-}
-.static-map-small {
-  /* TODO: non-zero border messes with map centering */
-
-  display: block;
-  width: 200px;
-  padding: 30px;
-  background: #888;
-}
-.static-map-small .static-map-inner {
-  margin: 0 auto;
-  position: relative;
-  display: block;
-  width: 200px;
-  height: 200px;
-  /*.perspective(200px);*/
-
-  -webkit-transform-style: preserve-3d;
-  -moz-transform-style: preserve-3d;
-  -o-transform-style: preserve-3d;
-  -ms-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-}
-.static-map-small .static-map-inner .r0 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: 0px;
-  position: absolute;
-  display: block;
-  width: 50px;
-  height: 200px;
-  left: 0px;
-  top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
-  -webkit-transition: all 0.1s linear;
-  -moz-transition: all 0.1s linear;
-  transition: all 0.1s linear;
-  border-width: 0px 0 0px 0px;
-}
-.static-map-small .static-map-inner .r1 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: -50px;
-  position: absolute;
-  display: block;
-  width: 50px;
-  height: 200px;
-  left: 50px;
-  top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
-  -webkit-transition: all 0.1s linear;
-  -moz-transition: all 0.1s linear;
-  transition: all 0.1s linear;
-  border-width: 0px 0;
-}
-.static-map-small .static-map-inner .r2 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: -100px;
-  position: absolute;
-  display: block;
-  width: 50px;
-  height: 200px;
-  left: 100px;
-  top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
-  -webkit-transition: all 0.1s linear;
-  -moz-transition: all 0.1s linear;
-  transition: all 0.1s linear;
-  border-width: 0px 0;
-}
-.static-map-small .static-map-inner .r3 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: -150px;
-  position: absolute;
-  display: block;
-  width: 50px;
-  height: 200px;
-  left: 150px;
-  top: 0;
-  border: 0px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
-  -webkit-transition: all 0.1s linear;
-  -moz-transition: all 0.1s linear;
-  transition: all 0.1s linear;
-  border-width: 0px 0px 0px 0;
-}
-.static-map-small .static-map-inner .dark-layer {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #333;
-  opacity: 0;
-  -webkit-transition: opacity 0.1s ease-in-out;
-  -moz-transition: opacity 0.1s ease-in-out;
-  transition: opacity 0.1s ease-in-out;
-}
-.static-map-small:hover .r0 {
-  -webkit-transform: perspective(200px) rotatey(-35deg);
-  -moz-transform: perspective(200px) rotatey(-35deg);
-  -o-transform: perspective(200px) rotatey(-35deg);
-  -ms-transform: perspective(200px) rotatey(-35deg);
-  transform: perspective(200px) rotatey(-35deg);
-}
-.static-map-small:hover .r1 {
-  -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-}
-.static-map-small:hover .r2 {
-  -webkit-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -moz-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -o-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -ms-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-}
-.static-map-small:hover .r3 {
-  -webkit-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  -moz-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  -o-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  -ms-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-}
-.static-map-small:hover .dark-layer {
-  opacity: 0.10;
 }

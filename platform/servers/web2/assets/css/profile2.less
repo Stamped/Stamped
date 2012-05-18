@@ -17,25 +17,6 @@
     position: relative;
     width: 100%;
     clear: both;
-}
-
-.stamp-gallery-item {
-    /*background: url(/assets/img/main-noise.png) left top repeat;*/
-    @inner: #FEFEFE;
-    
-    @shadow: rgba(125,125,125,0.15);
-    @args: 10px 0 4px -7px @shadow, -10px 0 4px -7px @shadow;
-    
-    -webkit-box-shadow: @args;
-    -moz-box-shadow: @args;
-    -ms-box-shadow: @args;
-    -o-box-shadow: @args;
-    box-shadow: @args;
-    
-    background: @inner;
-    float: left;
-    width: 100%;
-    margin: .5em 0;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -48,16 +29,112 @@
         height: 8px;
         margin: 0;
     }
+}
+
+.stamp-gallery-item {
+    /*background: url(/assets/img/main-noise.png) left top repeat;*/
+    
+    /*@shadow: rgba(125,125,125,0.15);
+    @args: 10px 0 4px -7px @shadow, -10px 0 4px -7px @shadow;
+    
+    -webkit-box-shadow: @args;
+    -moz-box-shadow: @args;
+    -ms-box-shadow: @args;
+    -o-box-shadow: @args;
+    box-shadow: @args;*/
+    
+    /*.transition(background-color, .5s, ease-in);*/
+    
+    .rounded(4px);
+    float: left;
+    width: 100%;
+    
+    border-bottom: 1px solid #bbb;
+    background-color: #FEFEFE;
+    
+    &:hover .content .rhs .timestamp {
+        opacity: 1;
+    }
     
     .content {
         padding: 2.5em 2em;
+        position: relative;
+        
+        .rhs {
+            display: block;
+            float: right;
+            
+            .timestamp_raw, .timestamp {
+                font-size: 80%;
+            }
+            
+            .timestamp_raw {
+                display: none;
+            }
+            .timestamp {
+                display: block;
+                opacity: 0;
+                
+                .transition(opacity, 0.2s, ease-out);
+            }
+            
+            .sized(@width: 140px) {
+                display: block;
+                max-width: @width;
+                width:  @width;
+                height: auto;
+                background-size: 100% 100%;
+            }
+            
+            .stamp-preview {
+                margin-left: 1em;
+                .sized();
+                
+                .preview-image {
+                    display: none;
+                    .sized();
+                }
+                
+                .stamp-map {
+                    z-index: 25;
+                }
+                .stamp-user-image {
+                    z-index: 24;
+                }
+                .stamp-entity-image {
+                    z-index: 23;
+                }
+                .stamp-icon {
+                    z-index: 22;
+                }
+                
+                img {
+                    .sized();
+                    .rounded(8px);
+                }
+                
+                .stamp-category-book  .icon, 
+                .stamp-category-film  .icon, 
+                .stamp-category-food  .icon, 
+                .stamp-category-music .icon, 
+                .stamp-category-other .icon {
+                    .sized();
+                    height: 140px;
+                    
+                    /* TEMP */
+                    text-align: center;
+                    color: red;
+                    font-weight: bold;
+                }
+            }
+        }
         
         .inner-content {
             display: block;
             text-align: left;
             float: left;
             margin-left: 2em;
-            max-width: 60%;
+            max-width: 55%;
             text-align: justify;
             
             .stamp-contents {
@@ -65,21 +142,6 @@
                 
                 .stamped-content {
                     margin: .2em 0 1em;
-                    
-                    .images {
-                        float: right;
-                        display: block;
-                        width:  128px;
-                        height: auto;
-                        margin: .2em 0 .2em .2em;
-                        
-                        img {
-                            border: 1px solid;
-                            display: inline-block;
-                            max-width: 128px;
-                            height: auto;
-                        }
-                    }
                 }
             }
             
@@ -101,87 +163,27 @@
                     margin: -1px .2em 0 .7em;
                 }
                 
-                div.count {
-                }
-                
                 div.like {
                     .preview-image(0, 0);
+                }
+                .inactive div.like {
+                    background-position: 0 20px;
                 }
                 
                 div.todo {
                     .preview-image(-19px, 0);
                 }
+                .inactive div.todo {
+                    background-position: -19px 20px;
+                }
                 
                 div.comments {
                     .preview-image(-38px, 0);
                 }
+                .inactive div.comments {
+                    background-position: -38px 20px;
+                }
                 
-                /*.profile-image-small {
-                    display: inline-block;
-                    float: none;
-                    
-                    position: relative;
-                    margin: 0 2px 4px 0;
-                    
-                    @width:  14px;
-                    @height: 14px;
-                    
-                    .preview-image(@bgleft, @bgtop) {
-                        background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
-                        background-position: @bgleft, @bgtop;
-                        
-                        position: absolute;
-                        bottom: -(@height / 3);
-                        right:  -(@width  / 3);
-                        
-                        display: block;
-                        width:  @width;
-                        height: @height;
-                        z-index: 100;
-                    }
-                    
-                    .like {
-                        .preview-image(0, 0);
-                    }
-                    
-                    .todo {
-                        .preview-image(-16px, 0);
-                    }
-                    
-                    .comment {
-                        .preview-image(-32px, 0);
-                    }
-                    
-                    .credit {
-                        position: absolute;
-                        bottom: -(@height / 3);
-                        right:  -(@width  / 3);
-                        
-                        display: block;
-                        width: 18px;
-                        height: 18px;
-                        z-index: 101;
-                        
-                        img {
-                            background: none;
-                            border: 0 none;
-                            
-                            -webkit-box-shadow: none;
-                            -moz-box-shadow: none;
-                            -ms-box-shadow: none;
-                            -o-box-shadow: none;
-                            box-shadow: none;
-                            
-                            display: block;
-                            width:  18px;
-                            height: 18px;
-                        }
-                    }
-                    
-                    .like img, .todo img, .comment img {
-                        .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
-                    }
-                }*/
             }
         }
     }
@@ -201,7 +203,6 @@
     position: relative;
     display: block;
     margin: 0 0 -.5em;
-    top: -4px;
     
     p {
         margin: 0;
@@ -219,6 +220,16 @@
         display: inline-block;
         margin: 0 4px 0 0;
     }
+}
+
+.loading {
+    background: url(/assets/img/loading.gif) no-repeat;
+    text-align: center;
+    display: none;
+    margin: 2em auto;
+    
+    width:  32px;
+    height: 32px;
 }
 
 .stamp-gallery-loading {

@@ -8,6 +8,7 @@
 
 #import "UIButton+Stamped.h"
 #import "UIColor+Stamped.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface UIButton (StampedInternal)
 + (UIButton*)stampedButtonWithBackgroundImage:(UIImage*)bg
@@ -120,6 +121,15 @@
   [button setTitleColor:[UIColor whiteColor] forState:UIControlStateDisabled];
   button.titleLabel.shadowOffset = CGSizeMake(0, 1);
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  return button;
+}
+
++ (UIButton*)stampedPillButtonWithFrame:(CGRect)frame {
+  UIButton* button = [[[UIButton alloc] initWithFrame:frame] autorelease];
+  button.layer.cornerRadius = MIN(frame.size.width / 2, frame.size.height / 2);
+  //button.backgroundColor = [UIColor whiteColor];
+  button.layer.borderColor = [UIColor colorWithWhite:229/255.0 alpha:1].CGColor;
+  button.layer.borderWidth = 1;
   return button;
 }
 

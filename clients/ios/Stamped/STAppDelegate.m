@@ -44,6 +44,8 @@
 #import "DDMenuController.h"
 #import "STWelcomeViewController.h"
 
+#import "STCreateStampViewController.h"
+
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
 static NSString* const kDataBaseURL = @"https://dev.stamped.com/v0";
@@ -439,7 +441,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   
   //Stamp Cell
   //[STStampCell setupConfigurations];
-
+  //[STStampCell setupConfigurations];
+  
+  //Create Stamp
+  [STCreateStampViewController setupConfigurations];
 }
 
 @end

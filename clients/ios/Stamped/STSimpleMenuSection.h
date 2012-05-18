@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STMenuSection.h"
 
-@interface STSimpleMenuSection : NSObject <STMenuSection>
+@interface STSimpleMenuSection : NSObject <STMenuSection, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* title;
 @property (nonatomic, readwrite, retain) NSString* desc;

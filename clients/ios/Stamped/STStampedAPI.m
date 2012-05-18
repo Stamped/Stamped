@@ -32,6 +32,8 @@
 #import "STActionManager.h"
 #import "STSimpleActivityCount.h"
 #import "STSimplePreviews.h"
+#import "STPersistentCacheSource.h"
+#import "STSimpleMenu.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -59,9 +61,9 @@
 
 @end
 
-@interface STStampedAPI () <STCacheModelSourceDelegate>
+@interface STStampedAPI () <STCacheModelSourceDelegate, STPersistentCacheSourceDelegate>
 
-@property (nonatomic, readonly, retain) STCacheModelSource* menuCache;
+@property (nonatomic, readonly, retain) STPersistentCacheSource* menuCache;
 @property (nonatomic, readonly, retain) STCacheModelSource* stampCache;
 @property (nonatomic, readonly, retain) STCacheModelSource* entityDetailCache;
 @property (nonatomic, readwrite, retain) id<STActivityCount> lastCount;
@@ -95,7 +97,7 @@ static STStampedAPI* _sharedInstance;
 {
   self = [super init];
   if (self) {
-    _menuCache = [[STCacheModelSource alloc] initWithDelegate:self];
+    _menuCache = [[STPersistentCacheSource alloc] initWithDelegate:self andDirectoryPath:@"Menus" relativeToCacheDir:YES];
     _stampCache = [[STCacheModelSource alloc] initWithDelegate:self];
     entityDetailCache_ = [[STCacheModelSource alloc] initWithDelegate:self];
   }
@@ -194,15 +196,16 @@ static STStampedAPI* _sharedInstance;
                                                }];
 }
 
-- (void)createStampWithStampNew:(STStampNew*)stampNew andCallback:(void(^)(id<STStamp> stamp, NSError* error))block {
+- (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
+                               andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block {
   NSString* path = @"/stamps/create.json";
-  [[STRestKitLoader sharedInstance] loadOneWithPath:path
-                                               post:YES
-                                             params:stampNew.asDictionaryParams
-                                            mapping:[STSimpleStamp mapping]
-                                        andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
-                                          block(stamp, error);
-                                        }];
+  return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                      post:YES
+                                                    params:stampNew.asDictionaryParams
+                                                   mapping:[STSimpleStamp mapping]
+                                               andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
+                                                 block(stamp, error, cancellation);
+                                               }];
 }
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block {
@@ -547,19 +550,19 @@ static STStampedAPI* _sharedInstance;
                                         }];
 }
 
-- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
-                          withKey:(NSString*)key 
-                 andCurrentObject:(id)object 
-                     withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block {
+- (STCancellation*)objectForPersistentCache:(STPersistentCacheSource *)cache 
+                                    withKey:(NSString *)key 
+                           andCurrentObject:(id)object
+                               withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
   if (cache == self.menuCache) {
     STCancellation* cancellation = [STCancellation cancellation];
     [[STMenuFactory sharedFactory] menuWithEntityId:key andCallbackBlock:^(id<STMenu> menu) {
       if (!cancellation.cancelled) {
         if (menu) {
-          block(menu, 1, nil, cancellation);
+          block((STSimpleMenu*)menu, nil, cancellation);
         }
         else {
-          block(nil, -1, [NSError errorWithDomain:[STStampedAPI errorDomain]
+          block(nil, [NSError errorWithDomain:[STStampedAPI errorDomain]
                                              code:STStampedAPIErrorUnavailable
                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"key",key, nil]], cancellation);
         }
@@ -567,7 +570,14 @@ static STStampedAPI* _sharedInstance;
     }];
     return cancellation;
   }
-  else if (cache == self.stampCache) {
+  return nil;
+}
+
+- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
+                          withKey:(NSString*)key 
+                 andCurrentObject:(id)object 
+                     withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block {
+  if (cache == self.stampCache) {
     NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamp_id"];
     NSString* path = @"/stamps/show.json";
     STCancellation* cancellation = [[STRestKitLoader sharedInstance] loadWithPath:path 
@@ -734,7 +744,7 @@ static STStampedAPI* _sharedInstance;
 - (void)fastPurge {
   [self.entityDetailCache fastPurge];
   [self.stampCache fastPurge];
-  [self.menuCache fastPurge];
+  //[self.menuCache purge];
 }
 
 @end

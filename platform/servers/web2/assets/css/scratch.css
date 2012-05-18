@@ -17,3 +17,102 @@
                 color: #FF0000;
             }*/
 
+/*@font-face {
+    font-family: "StampedEntityFallbackFont";
+    src: local("☺"),
+         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
+}
+
+@font-face {
+    font-family: "StampedScreenNameFont";
+    src: local("☺"),
+         url(/assets/fonts/TitlingGothicFBComp-Reg.otf) format("opentype");
+}*/
+
+/*@import "http://pls.webtype.com/v.css?ct=10157&r=2592&p=1948&h=dQ9Z7h0SmDXhdQOSL1LjdQ%3d%3d";
+
+@font-face {
+    font-family: "StampedEntityFont";
+    font-style:  normal;
+    font-weight: normal;
+    
+    src: local("☺"), 
+         url("http://wac.1ac1.edgecastcdn.net/001AC1/webtype/ff/3/ac420a8b-8858-40c1-b708-3b2674e85e29") format("woff"), 
+         url(/assets/fonts/TitlingGothicFBComp-Light.otf) format("opentype");
+}*/
+
+/*
+@font-face {
+    font-family: "StampedButtonFont";
+    src: local("☺"),
+         url("/assets/fonts/TitlingGothicFBWide-Stand.otf") format("opentype");
+}*/
+
+
+.profile-image-small {
+    display: inline-block;
+    float: none;
+    
+    position: relative;
+    margin: 0 2px 4px 0;
+    
+    @width:  14px;
+    @height: 14px;
+    
+    .preview-image(@bgleft, @bgtop) {
+        background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
+        background-position: @bgleft, @bgtop;
+        
+        position: absolute;
+        bottom: -(@height / 3);
+        right:  -(@width  / 3);
+        
+        display: block;
+        width:  @width;
+        height: @height;
+        z-index: 100;
+    }
+    
+    .like {
+        .preview-image(0, 0);
+    }
+    
+    .todo {
+        .preview-image(-16px, 0);
+    }
+    
+    .comment {
+        .preview-image(-32px, 0);
+    }
+    
+    .credit {
+        position: absolute;
+        bottom: -(@height / 3);
+        right:  -(@width  / 3);
+        
+        display: block;
+        width: 18px;
+        height: 18px;
+        z-index: 101;
+        
+        img {
+            background: none;
+            border: 0 none;
+            
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            -ms-box-shadow: none;
+            -o-box-shadow: none;
+            box-shadow: none;
+            
+            display: block;
+            width:  18px;
+            height: 18px;
+        }
+    }
+    
+    .like img, .todo img, .comment img {
+        .box-shadow(0, 6px, 4px, -4px, rgba(0, 0, 0, 0.15));
+    }
+}
+

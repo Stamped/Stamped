@@ -220,14 +220,12 @@ class GenericSource(BasicSource):
             if image is None or image == '':
                 logs.info('Caught an empty image from the proxy entity %s' % (proxy,))
                 continue
-            logs.info('\n### iterating over image %s' % image)
             img = ImageSchema()
             size = ImageSizeSchema()
             size.url = image
             img.sizes = [size]
             images.append(img)
         if len(images) > 0:
-            logs.info('\n### adding images to entity')
             entity.images = images
             timestamps['images'] = controller.now
         
@@ -291,7 +289,6 @@ class GenericSource(BasicSource):
             if proxy.length > 0:
                 entity.length = int(proxy.length)
                 timestamps['length'] = controller.now
-
             if len(proxy.genres) > 0:
                 entity.genres = proxy.genres
                 timestamps['genres'] = controller.now
@@ -378,7 +375,7 @@ class GenericSource(BasicSource):
             if proxy.sku_number is not None:
                 entity.sku_number = proxy.sku_number
                 timestamps['sku_number'] = controller.now
-        
+
         ### Software
         if entity.kind == 'software' and proxy.kind == 'software':
             setAttribute('release_date', 'release_date')

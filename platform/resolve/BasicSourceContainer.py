@@ -40,7 +40,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         if is_prod_stack():
             self.__global_max_age = timedelta(7)
         else:
-            self.__global_max_age = timedelta(minutes=100)
+            self.__global_max_age = timedelta(minutes=0)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2
@@ -111,8 +111,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                     if len(enrichedOutput) > 0:
                                         logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
-                            except Exception:
-                                logs.warning("Source '%s' threw an exception when enriching '%s'" % (source, pformat(entity) ) , exc_info=1 )
+                            except Exception as e:
+                                logs.warning("Source '%s' threw an exception when enriching '%s': %s" % (source, pformat(entity), e.message) , exc_info=1 )
                                 failedSources.add(source)
                                 self.__failedValues[source] += self.failedIncrement
                                 if self.__failedValues[source] < self.failedCutoff:

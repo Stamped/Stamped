@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STMetadataItem.h"
 
-@interface STSimpleMetadataItem : NSObject<STMetadataItem>
+@interface STSimpleMetadataItem : NSObject<STMetadataItem, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, retain) NSString* value;

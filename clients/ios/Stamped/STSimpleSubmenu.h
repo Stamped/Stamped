@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STSubmenu.h"
 
-@interface STSimpleSubmenu : NSObject <STSubmenu>
+@interface STSimpleSubmenu : NSObject <STSubmenu, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* title;
 @property (nonatomic, readwrite, retain) NSString* footnote;
