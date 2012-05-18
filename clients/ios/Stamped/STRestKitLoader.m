@@ -65,7 +65,7 @@
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   NSAssert1(!self.cancellation.cancelled, @"should have cancelled loader %@", self);
-  NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
+  //NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
   if ([self.cancellation finish]) {
     [Util executeOnMainThread:^{
       self.callback(objects, nil, self.cancellation);
@@ -260,7 +260,7 @@ static STRestKitLoader* _sharedInstance;
     
     objectLoader.params = [[params copy] autorelease];
     
-    NSLog(@"RestKit:%@-%@",path, params);
+   // NSLog(@"RestKit:%@-%@",path, params);
     
     [objectLoader send];
     STCancellation* can = [[helper.cancellation retain] autorelease];
@@ -272,7 +272,7 @@ static STRestKitLoader* _sharedInstance;
 - (STCancellation*)loadOneWithPath:(NSString*)path
                               post:(BOOL)post
                             params:(NSDictionary*)params 
-                           mapping:(RKObjectMapping*)mapping 
+                           mapping:(RKObjectMapping*)mapping
                        andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block {
   return [self loadWithPath:path 
                        post:post 

@@ -13,183 +13,221 @@
 #import "TTTAttributedLabel.h"
 #import "STPreviewsView.h"
 #import "STConfiguration.h"
+#import "STBlockUIView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "STImageCache.h"
+#import "QuartzUtils.h"
 
 @implementation STStampCell
 
-//Positions
-static NSString* const _normalCellHeightKey = @"STStampCell.normalCellHeight";
-static NSString* const _previewsDeltaHeightKey = @"STStampCell.previewsDeltaHeight";
-static NSString* const _userImageOriginKey = @"STStampCell.userImageOrigin";
-static NSString* const _headerTextOriginKey = @"STStampCell.headerTextOrigin";
-static NSString* const _titleTextOriginKey = @"STStampCell.titleTextOrigin";
-static NSString* const _categoryIconOriginKey = @"STStampCell.categoryIconOrigin";
-static NSString* const _subtitleTextOriginKey = @"STStampCell.subtitleTextOrigin";
-static NSString* const _dateTextTopRightKey = @"STStampCell.dateTextTopRight";
-static NSString* const _previewsOriginKey = @"STStampCell.previewsOrigin";
-static NSString* const _rightPaddingKey = @"STStampCell.rightPadding";
+@synthesize username=_username;
+@synthesize subcategory=_subcategory;
+@synthesize title=_title;
+@synthesize category=_category;
+@synthesize identifier=_identifier;
+@synthesize commentCount=_commentCount;
 
-//Fonts
-static NSString* const _headerUserFontKey = @"STStampCell.headerUserFont";
-static NSString* const _headerVerbFontKey = @"STStampCell.headerVerbFont";
-static NSString* const _titleFontKey = @"STStampCell.titleFont";
-static NSString* const _dateFontKey = @"STStampCell.dateFont";
-static NSString* const _subtitleFontKey = @"STStampCell.subtitleFont";
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+  if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
+      
+      self.accessoryType = UITableViewCellAccessoryNone;
+      
+      CGFloat originY = 10.0f;
+      
+      // user image view
+      UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
+      imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
+      imageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+      imageView.layer.shadowRadius = 1.0f;
+      imageView.layer.shadowOpacity = 0.2f;
+      imageView.layer.borderColor = [UIColor whiteColor].CGColor;
+      imageView.layer.borderWidth = 1.0f;
+      [self addSubview:imageView];
+      _userImageView = imageView;
+      [imageView release];
+      
+      STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.bounds];
+      background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+      background.contentMode = UIViewContentModeRedraw;
+      background.backgroundColor = [UIColor whiteColor];
+      [self addSubview:background];
+      [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+          
+          CGContextSaveGState(ctx);
+          CGContextAddRect(ctx, CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, 3.0f));
+          CGContextClip(ctx);
+          drawGradient([UIColor colorWithRed:0.8941f green:0.8941f blue:0.8941f alpha:1.0f].CGColor, [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor, ctx);
+          CGContextRestoreGState(ctx);
 
-//Colors
-static NSString* const _headerUserColorKey = @"STStampCell.headerUserColor";
-static NSString* const _headerVerbColorKey = @"STStampCell.headerVerbColor";
-static NSString* const _titleColorKey = @"STStampCell.titleColor";
-static NSString* const _dateColorKey = @"STStampCell.dateColor";
-static NSString* const _subtitleColorKey = @"STStampCell.subtitleColor";
-static NSString* const _gradientTopColorKey = @"STStampCell.gradientTopColor";
-static NSString* const _gradientBottomColorKey = @"STStampCell.gradientBottomColor";
+          drawGradientWithStartPoint([UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor, [UIColor colorWithRed:0.9494f green:0.9494f blue:0.9494f alpha:1.0f].CGColor, rect.size.height - 10.0f, ctx);
+          
+      }];
+      self.selectedBackgroundView = background;
+      [background release];
+      
+      // comment count
+      STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectZero];
+      commentView.backgroundColor = [UIColor clearColor];
+      [self addSubview:commentView];
+      [commentView setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+          
+          if (_commentCount > 0) {
+              
+              
+              
+          }
+          
+          
+      }];
+      [commentView release];
+      _commentView = commentView;
+      
+      // cell text
+      STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, originY, 200, 70.0f)];
+      view.backgroundColor = [UIColor whiteColor];
+      [self addSubview:view];
+      [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+         
+          if (_title) {
+              
+              UIFont *font = [UIFont stampedTitleLightFontWithSize:35];
+              CGSize size = [_title sizeWithFont:font];
 
+              if (_stampImage) {
+                  [_stampImage drawInRect:CGRectMake(floorf(size.width - 7), 19.0f, _stampImage.size.width, _stampImage.size.height)];
+              }
+              
+              [[UIColor stampedBlackColor] setFill];
+              size.width = MIN(rect.size.width - 6.0f, size.width);
+              [_title drawInRect:CGRectMake(rect.origin.x, 18.0f, size.width, size.height) withFont:font lineBreakMode:UILineBreakModeTailTruncation];
+          
+          }
 
-+ (CGFloat)heightForStamp:(id<STStamp>)stamp {
-  CGFloat defaultHeight = [[STConfiguration value:_normalCellHeightKey] floatValue];
-  if (stamp) {
-    if ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] > 0) {
-      defaultHeight += [[STConfiguration value:_previewsDeltaHeightKey] floatValue];
-    }
-  }
-  return defaultHeight;
-}
+          if (_username && _subcategory) {
+              [[UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f] setFill];
+              UIFont *font = [UIFont boldSystemFontOfSize:10];
+              CGSize size = [_username sizeWithFont:font];
+              [_username drawInRect:CGRectMake(rect.origin.x, rect.origin.y, size.width, size.height) withFont:font lineBreakMode:UILineBreakModeTailTruncation];
+              [_subcategory drawAtPoint:CGPointMake(size.width, rect.origin.y) withFont:[UIFont systemFontOfSize:10]];
+          }
+          
+          if (_category) {
+              if (_categoryImage) {
+                  [_categoryImage drawAtPoint:CGPointMake(rect.origin.x, 56.0f)];
+              }
+              [[UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f] setFill];
+              [_category drawAtPoint:CGPointMake((_categoryImage!=nil) ? _categoryImage.size.width + 5.0f : 0.0f, 54.0f) withFont:[UIFont systemFontOfSize:11]];
+          }
 
-- (id)initWithStamp:(id<STStamp>)stamp {
-  self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TODO"];
-  if (self) {
-    self.accessoryType = UITableViewCellAccessoryNone;
-    CGFloat width = [Util standardFrameWithNavigationBar:YES].size.width;
-    self.frame = CGRectMake(0, 0, width, [STStampCell heightForStamp:stamp]);
-    CGFloat rightPadding = [[STConfiguration value:_rightPaddingKey] floatValue];
-    // User Image
-    CGPoint userImageOrigin = [[STConfiguration value:_userImageOriginKey] CGPointValue];
-    UIView* imageView = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize46];
-    [Util reframeView:imageView withDeltas:CGRectMake(userImageOrigin.x, userImageOrigin.y, 0, 0)];
-    [self addSubview:imageView];
-    
-    
-    // Title
-    CGPoint titleOrigin = [[STConfiguration value:_titleTextOriginKey] CGPointValue];
-    UIFont* titleFont = [STConfiguration value:_titleFontKey];
-    UIView* titleView = [Util viewWithText:stamp.entity.title
-                                      font:titleFont
-                                     color:[STConfiguration value:_titleColorKey]
-                                      mode:UILineBreakModeTailTruncation
-                                andMaxSize:CGSizeMake(width - (titleOrigin.x + rightPadding), [Util lineHeightForFont:titleFont])];
-    [Util reframeView:titleView withDeltas:CGRectMake(titleOrigin.x, titleOrigin.y, 0, 0)];
-    [self addSubview:titleView];
-    UIImage* stampImage = [Util stampImageForUser:stamp.user withSize:STStampImageSize18];
-    UIImageView* stampView = [[[UIImageView alloc] initWithImage:stampImage] autorelease];
-    [Util reframeView:stampView withDeltas:CGRectMake(CGRectGetMaxX(titleView.frame) - 6, titleView.frame.origin.y - 1, 0, 0)];
-    [self addSubview:stampView];
-    
-    // Header text
-    CGPoint headerOrigin = [[STConfiguration value:_headerTextOriginKey] CGPointValue];
-    UIView* userNameView = [Util viewWithText:stamp.user.screenName
-                                         font:[STConfiguration value:_headerUserFontKey]
-                                        color:[STConfiguration value:_headerUserColorKey]
-                                         mode:UILineBreakModeTailTruncation
-                                   andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    [Util reframeView:userNameView withDeltas:CGRectMake(headerOrigin.x, headerOrigin.y, 0, 0)];
-    [self addSubview:userNameView];
-    UIView* verbPhraseView = [Util viewWithText:[NSString stringWithFormat:@" stamped a %@", stamp.entity.subcategory] //Improve
-                                           font:[STConfiguration value:_headerVerbFontKey]
-                                          color:[STConfiguration value:_headerVerbColorKey]
-                                           mode:UILineBreakModeTailTruncation
-                                     andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    [Util reframeView:verbPhraseView withDeltas:CGRectMake(CGRectGetMaxX(userNameView.frame), headerOrigin.y, 0, 0)];
-    [self addSubview:verbPhraseView];
-    
-    //Date text
-    CGPoint dateTopRight = [[STConfiguration value:_dateTextTopRightKey] CGPointValue];
-    NSString* dateString = [Util userReadableTimeSinceDate:stamp.created];
-    UIView* dateView = [Util viewWithText:dateString
-                                     font:[STConfiguration value:_dateFontKey]
-                                    color:[STConfiguration value:_dateColorKey]
-                                     mode:UILineBreakModeTailTruncation
-                               andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    [Util reframeView:dateView withDeltas:CGRectMake(dateTopRight.x - dateView.frame.size.width, dateTopRight.y, 0, 0)];
-    [self addSubview:dateView];
-    
-    // Footer text and category image
-    CGPoint categoryImageOrigin = [[STConfiguration value:_categoryIconOriginKey] CGPointValue];
-    UIImage* categoryImage = [Util imageForCategory:stamp.entity.category];
-    UIImageView* categoryView = [[[UIImageView alloc] initWithImage:categoryImage] autorelease];
-    [Util reframeView:categoryView withDeltas:CGRectMake(categoryImageOrigin.x, categoryImageOrigin.y, 0, 0)];
-    [self addSubview:categoryView];
-    
-    CGPoint subtitleOrigin = [[STConfiguration value:_subtitleTextOriginKey] CGPointValue];
-    UIView* footerTextView = [Util viewWithText:stamp.entity.subtitle
-                                           font:[STConfiguration value:_subtitleFontKey]
-                                          color:[STConfiguration value:_subtitleColorKey]
-                                           mode:UILineBreakModeTailTruncation
-                                     andMaxSize:CGSizeMake(width - (subtitleOrigin.x + rightPadding), CGFLOAT_MAX)];
-    [Util reframeView:footerTextView withDeltas:CGRectMake(subtitleOrigin.x, subtitleOrigin.y, 0, 0)];
-    [self addSubview:footerTextView];
-    
-    if ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] > 0) {
-      CGPoint previewsOrigin = [[STConfiguration value:_previewsOriginKey] CGPointValue];
-      STPreviewsView* previewsView = [[[STPreviewsView alloc] initWithStamp:stamp andMaxRows:1] autorelease];
-      [Util reframeView:previewsView withDeltas:CGRectMake(previewsOrigin.x, previewsOrigin.y, 0, 0)];
+      }];
+      _headerView = view;
+      [view release];
+      
+      // date label
+      UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+      label.font = [UIFont systemFontOfSize:9];
+      label.textColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
+      label.backgroundColor = [UIColor whiteColor];
+      [self addSubview:label];
+      _dateLabel = label;
+      [label release];
+      
+      STPreviewsView *previewsView = [[STPreviewsView alloc] initWithFrame:CGRectMake(70.0f, 95.0f, 0, 0)];
       [self addSubview:previewsView];
-    }
-    [Util addGradientToLayer:self.layer 
-                  withColors:[NSArray arrayWithObjects:
-                              [STConfiguration value:_gradientTopColorKey],
-                              [STConfiguration value:_gradientBottomColorKey],
-                              nil]
-                    vertical:YES];
-    self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+      _statsView = previewsView;
+      [previewsView release];
+      _statsView.hidden = YES;
+
   }
   return self;
 }
 
+- (void)dealloc {
+    
+    [_categoryImage release], _categoryImage=nil;
+    [_category release], _category=nil;
+    [_title release], _title = nil;
+    [_username release], _username = nil;
+    [_subcategory release], _subcategory = nil;
+    [_stampImage release], _stampImage = nil;
+    
+    _statsView = nil;
+    _dateLabel = nil;
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated
-{
-  [super setSelected:selected animated:animated];
-  
-  // Configure the view for the selected state
+    [super dealloc];
+    
+}
+
+- (void)setupWithStamp:(id<STStamp>)stamp {
+        
+    [_category release], _category=nil;
+    _category = [stamp.entity.subtitle copy];
+    
+    [_title release], _title = nil;
+    _title = [stamp.entity.title copy];
+    
+    [_username release], _username = nil;
+    _username = [stamp.user.screenName copy];
+    
+    [_subcategory release], _subcategory = nil;
+    _subcategory =  [[NSString stringWithFormat:@" stamped a %@", stamp.entity.subcategory] copy];
+    
+    [_categoryImage release], _categoryImage=nil;
+    _categoryImage = [[Util imageForCategory:stamp.entity.category] retain];
+    
+    [_stampImage release], _stampImage=nil;
+    _stampImage = [[Util stampImageForUser:stamp.user withSize:STStampImageSize14] retain];
+   
+    _commentCount = [stamp.numComments integerValue];
+    
+    [_headerView setNeedsDisplay];
+
+    // date
+    _dateLabel.text = [Util userReadableTimeSinceDate:stamp.created];
+    [_dateLabel sizeToFit];
+    CGRect frame = _dateLabel.frame;
+    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+10.0f)), 12);
+    _dateLabel.frame = frame;
+    
+    // user avatar
+    UIImage *cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:stamp.user size:STProfileImageSize46];
+    if (cachedImage) {
+        _userImageView.image = cachedImage;
+    } else {
+        [[STImageCache sharedInstance] userImageForUser:stamp.user size:STProfileImageSize46 andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            if (_userImageView) {
+                _userImageView.image = image;
+            }
+        }];
+    }
+    
+    // stats previews
+    _statsView.hidden = ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] <= 0.0f);
+    if (!_statsView.hidden) {
+        [_statsView setupWithStamp:stamp maxRows:1];
+    }
+    
+}
+
++ (NSString*)cellIdentifier {
+    return @"_inboxTableCell";
+}
+
++ (CGFloat)heightForStamp:(id<STStamp>)stamp {
+    CGFloat defaultHeight = 90.0f;
+    if (stamp) {
+        if ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] > 0) {
+            defaultHeight += 45.0f;
+        }
+    }
+    return defaultHeight;
 }
 
 + (STCancellation*)prepareForStamp:(id<STStamp>)stamp withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
-  NSArray* images = [STPreviewsView imagesForPreviewWithStamp:stamp andMaxRows:1];
-  NSMutableArray* allImages = [NSMutableArray arrayWithObject:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize46]];
-  [allImages addObjectsFromArray:images];
-  return [STCancellation loadImages:allImages withCallback:block];
-}
-
-+ (void)setupConfigurations {
-  [STConfiguration addNumber:[NSNumber numberWithFloat:91] forKey:_normalCellHeightKey];
-  [STConfiguration addNumber:[NSNumber numberWithFloat:45] forKey:_previewsDeltaHeightKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(11, 10)] forKey:_userImageOriginKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(69, 12)] forKey:_headerTextOriginKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(69, 27)] forKey:_titleTextOriginKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(69, 64)] forKey:_categoryIconOriginKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(85, 63.5)] forKey:_subtitleTextOriginKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(304, 12)] forKey:_dateTextTopRightKey];
-  [STConfiguration addNumber:[NSNumber numberWithFloat:16] forKey:_rightPaddingKey];
-  [STConfiguration addPoint:[NSValue valueWithCGPoint:CGPointMake(70, 95)] forKey:_previewsOriginKey];
-  
-  //Fonts
-  [STConfiguration addFont:[UIFont stampedBoldFontWithSize:9] forKey:_headerUserFontKey];
-  [STConfiguration addFont:[UIFont stampedFontWithSize:9] forKey:_headerVerbFontKey];
-  [STConfiguration addFont:[UIFont stampedTitleLightFontWithSize:35] forKey:_titleFontKey];
-  [STConfiguration addFont:[UIFont stampedFontWithSize:9] forKey:_dateFontKey];
-  [STConfiguration addFont:[UIFont stampedFontWithSize:9] forKey:_subtitleFontKey];
-  
-  //Colors
-  [STConfiguration addColor:[UIColor stampedGrayColor] forKey:_headerUserColorKey];
-  [STConfiguration addColor:[UIColor stampedGrayColor] forKey:_headerVerbColorKey];
-  [STConfiguration addColor:[UIColor stampedBlackColor] forKey:_titleColorKey];
-  [STConfiguration addColor:[UIColor stampedGrayColor] forKey:_dateColorKey];
-  [STConfiguration addColor:[UIColor stampedGrayColor] forKey:_subtitleColorKey];
-  
-  [STConfiguration addColor:[UIColor colorWithRed:.99 green:.99 blue:.99 alpha:1] forKey:_gradientTopColorKey];
-  [STConfiguration addColor:[UIColor colorWithRed:.90 green:.90 blue:.90 alpha:1] forKey:_gradientBottomColorKey];
-  
+    NSArray* images = [STPreviewsView imagesForPreviewWithStamp:stamp andMaxRows:1];
+    NSMutableArray* allImages = [NSMutableArray arrayWithObject:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize46]];
+    [allImages addObjectsFromArray:images];
+    return [STCancellation loadImages:allImages withCallback:block];
 }
 
 @end

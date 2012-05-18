@@ -427,9 +427,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     distanceLabel_.hidden = YES;
     timestampLabel_.hidden = NO;
     locationImageView_.hidden = YES;
-    STPreviewsView* previews = [[[STPreviewsView alloc] initWithStamp:stamp andMaxRows:1] autorelease];
-    [Util reframeView:previews withDeltas:CGRectMake(60, 90, 0, 0)];
-    [self addSubview:previews];
+    
+    //STPreviewsView* previews = [[[STPreviewsView alloc] initWithStamp:stamp andMaxRows:1] autorelease];
+    //[Util reframeView:previews withDeltas:CGRectMake(60, 90, 0, 0)];
+    //[self addSubview:previews];
     [self updateTimestamp];
   }
 }

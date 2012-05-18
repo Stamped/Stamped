@@ -780,23 +780,28 @@ static Rdio* _rdio;
 }
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
-  UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
-  imageView.layer.borderWidth = 1.5;
-  imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
-  imageView.layer.borderColor = [UIColor whiteColor].CGColor;
-  imageView.layer.shadowOffset = CGSizeMake(0,2);
-  imageView.layer.shadowOpacity = .3;
-  imageView.layer.shadowRadius = 2;
-  UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
-  if (cachedImage) {
-    imageView.image = cachedImage;
-  }
-  else {
-    [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-      imageView.image = image;
-    }];
-  }
-  return imageView;
+ 
+    UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
+    imageView.layer.borderWidth = 1.5;
+    imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
+    imageView.layer.borderColor = [UIColor whiteColor].CGColor;
+    imageView.layer.shadowOffset = CGSizeMake(0,2);
+    imageView.layer.shadowOpacity = .3;
+    imageView.layer.shadowRadius = 2;
+    imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
+
+ 
+    UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
+    if (cachedImage) {
+        imageView.image = cachedImage;
+    }
+    else {
+        [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            imageView.image = image;
+        }];
+    }
+    return imageView;
+    
 }
 
 /*
@@ -978,7 +983,7 @@ static Rdio* _rdio;
     if (count && count.numberUnread.integerValue >0) {
       UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
       UIView* label = [Util viewWithText:[NSString stringWithFormat:@"%d", count.numberUnread.integerValue]
-                                    font:[UIFont stampedFontWithSize:12]
+                                    font:[UIFont boldSystemFontOfSize:12]
                                    color:[UIColor whiteColor]
                                     mode:UILineBreakModeTailTruncation
                               andMaxSize:countView.frame.size];
@@ -988,6 +993,11 @@ static Rdio* _rdio;
       countView.layer.borderWidth = 1;
       countView.layer.borderColor = [UIColor whiteColor].CGColor;
       countView.layer.cornerRadius = countView.frame.size.width / 2;
+        countView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:countView.bounds cornerRadius:(countView.bounds.size.width/2)].CGPath;
+        countView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        countView.layer.shadowRadius = 2.0f;
+        countView.layer.shadowOpacity = 0.4f;
+        
       [Util addGradientToLayer:countView.layer
                     withColors:[NSArray arrayWithObjects:
                                 [UIColor colorWithRed:226/255.0 green:92/255.0 blue:65/255.0 alpha:1],

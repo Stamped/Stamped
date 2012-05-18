@@ -58,6 +58,9 @@
   CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
   CGContextFillRect(ctx, rect);
   
+    CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect byRoundingCorners:(UIRectCornerTopLeft | UIRectCornerTopRight) cornerRadii:CGSizeMake(2.0f, 2.0f)].CGPath);
+    CGContextClip(ctx);
+    
   //hideLogo_ = ![self.topItem.title isEqualToString:@"Stamps"];
   
   if (hideLogo_)

@@ -41,6 +41,8 @@
 #import "STStampCell.h"
 #import "STImageCache.h"
 #import "STStampedAPI.h"
+#import "DDMenuController.h"
+#import "STWelcomeViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -60,6 +62,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @implementation STAppDelegate
 
 @synthesize window = _window;
+@synthesize menuController = _menuController;
 @synthesize navigationController = _navigationController;
 @synthesize grid = grid_;
 
@@ -97,20 +100,39 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [self addConfigurations];
   [self customizeAppearance];
   [self performRestKitMappings];
-  self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-  // Override point for customization after application launch.
-  self.window.backgroundColor = [UIColor whiteColor];
-  _navigationController = [[STRootViewController alloc] init];
-  [self.window setRootViewController:_navigationController];
-  ECSlidingViewController* slider = [ECSlidingViewController sharedInstance];
-  NSLog(@"Slider:%f,%f vs %f",slider.view.frame.size.height, slider.view.frame.origin.y, self.window.frame.size.height);
-  slider.topViewController = _navigationController;
-  [self.window setRootViewController:slider];
-  [self.window makeKeyAndVisible];
-  slider.underLeftViewController = [[[STLeftMenuViewController alloc] init] autorelease];
-  slider.underRightViewController = [[[STRightMenuViewController alloc] init] autorelease];
-  [[AccountManager sharedManager] authenticate];
-  [_navigationController pushViewController:[[[STInboxViewController alloc] init] autorelease] animated:NO];
+
+    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    self.window.backgroundColor = [UIColor whiteColor];
+    [[AccountManager sharedManager] authenticate];
+
+    STInboxViewController *inboxController = [[STInboxViewController alloc] init];
+    STLeftMenuViewController *leftController = [[STLeftMenuViewController alloc] init];
+    STRightMenuViewController *rightController = [[STRightMenuViewController alloc] init];
+    
+    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:inboxController];
+    DDMenuController *menuController = [[DDMenuController alloc] initWithRootViewController:navController];
+    menuController.leftViewController = leftController;
+    menuController.rightViewController = rightController;
+    self.menuController = menuController;
+    
+    // still working on this..
+    //[inboxController release];
+    [leftController release];
+    [rightController release];
+    [menuController release];
+   // [navController release];
+
+    [self.window setRootViewController:menuController];
+    [self.window makeKeyAndVisible];
+    
+    /*
+    STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
+    [menuController.view addSubview:welcomeController.view];
+    welcomeController.view.frame = menuController.view.bounds;
+    [welcomeController animateIn];
+    */
+    
+  //[_navigationController pushViewController:[[[STInboxViewController alloc] init] autorelease] animated:NO];
   grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
   grid_.hidden = YES;
   [self.window addSubview:grid_];
@@ -416,7 +438,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [STIWantToViewController setupConfigurations];
   
   //Stamp Cell
-  [STStampCell setupConfigurations];
+  //[STStampCell setupConfigurations];
+
 }
 
 @end

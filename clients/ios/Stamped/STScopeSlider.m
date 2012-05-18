@@ -62,36 +62,38 @@
 }
 
 - (void)commonInit {
-  userImageView_ = [[STImageView alloc] initWithFrame:CGRectMake(0, 0, 26, 26)];
-  userImageView_.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize31];
-  userImageView_.layer.shadowOpacity = 0;
-  userImageView_.backgroundColor = [UIColor clearColor];
-  
-  UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
-  trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
-  [self insertSubview:trackImageView atIndex:0];
-  [trackImageView release];
-  [self setMinimumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
-  [self setMaximumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
-  [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
-  [self addTarget:self action:@selector(dragEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
-  [self addTarget:self action:@selector(dragBegan:) forControlEvents:UIControlEventTouchDown];
-  tooltipView_ = [[STTooltipView alloc] initWithText:@"your friends"];
-  tooltipView_.center = self.center;
-  tooltipView_.frame = CGRectOffset(tooltipView_.frame, 0, -57);
-  tooltipView_.alpha = 0;
-  [self addSubview:tooltipView_];
-  [tooltipView_ release];
-  self.trackButtons = [NSMutableArray array];
-  for (NSUInteger i = 0; i <= STStampedAPIScopeEveryone; ++i) {
-    UIButton* b = [UIButton buttonWithType:UIButtonTypeCustom];
-    b.tag = i;
-    b.frame = CGRectMake((i / 4.0) * (CGRectGetWidth(self.bounds) + 30) - 2, -10, 40, 40);
-    [b addTarget:self action:@selector(trackTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:b];
-    [trackButtons_ addObject:b];
-  }
-  [self setGranularity:STStampedAPIScopeFriends animated:NO];
+    
+    userImageView_ = [[STImageView alloc] initWithFrame:CGRectMake(0, 0, 26, 26)];
+    userImageView_.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize31];
+    userImageView_.layer.shadowOpacity = 0;
+    userImageView_.backgroundColor = [UIColor clearColor];
+    
+    UIImageView* trackImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_track"]];
+    trackImageView.center = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds) - 1);
+    [self insertSubview:trackImageView atIndex:0];
+    [trackImageView release];
+    [self setMinimumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
+    [self setMaximumTrackImage:[UIImage imageNamed:@"clear_image"] forState:UIControlStateNormal];
+    [self addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
+    [self addTarget:self action:@selector(dragEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
+    [self addTarget:self action:@selector(dragBegan:) forControlEvents:UIControlEventTouchDown];
+    tooltipView_ = [[STTooltipView alloc] initWithText:@"your friends"];
+    tooltipView_.center = self.center;
+    tooltipView_.frame = CGRectOffset(tooltipView_.frame, 0, -57);
+    tooltipView_.alpha = 0;
+    [self addSubview:tooltipView_];
+    [tooltipView_ release];
+    self.trackButtons = [NSMutableArray array];
+    for (NSUInteger i = 0; i <= STStampedAPIScopeEveryone; ++i) {
+        UIButton* b = [UIButton buttonWithType:UIButtonTypeCustom];
+        b.tag = i;
+        b.frame = CGRectMake((i / 4.0) * (CGRectGetWidth(self.bounds) + 30) - 2, -10, 40, 40);
+        [b addTarget:self action:@selector(trackTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:b];
+        [trackButtons_ addObject:b];
+    }
+    [self setGranularity:STStampedAPIScopeFriends animated:NO];
+
 }
 
 - (void)flashTooltip {

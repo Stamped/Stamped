@@ -19,22 +19,18 @@
 @synthesize tableView = _tableView;
 @synthesize headerHeight = _headerHeight;
 
-- (id)initWithHeaderHeight:(CGFloat)height
-{
-  self = [super init];
-  if (self) {
+- (id)initWithHeaderHeight:(CGFloat)height {
+  if ((self = [super init])) {
     _headerHeight = height;
   }
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [super dealloc];
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
   [super viewDidLoad];
   CGFloat deltaHeight = -_headerHeight;
   if (self.toolbar) {
@@ -45,8 +41,7 @@
   [self.scrollView appendChildView:_tableView];
 }
 
-- (void)viewDidUnload
-{
+- (void)viewDidUnload {
   [super viewDidUnload];
   [_tableView release];
 }
@@ -56,13 +51,9 @@
   return _tableView;
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  NSIndexPath* path = [self.tableView indexPathForSelectedRow];
-  if (path) {
-    NSLog(@"deselect");
-    [self.tableView deselectRowAtIndexPath:path animated:YES];
-  }
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
 }
 
 @end

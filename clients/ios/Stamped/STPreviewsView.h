@@ -12,8 +12,8 @@
 
 @interface STPreviewsView : UIView
 
-- (id)initWithStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows;
-- (id)initWithPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows;
+- (void)setupWithStamp:(id<STStamp>)stamp maxRows:(NSInteger)maxRows;
+- (void)setupWithPreview:(id<STPreviews>)previews maxRows:(NSInteger)maxRows;
 
 + (CGFloat)previewHeightForStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows;
 + (CGFloat)previewHeightForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows;

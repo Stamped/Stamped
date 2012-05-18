@@ -56,8 +56,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize navigationBarHidden = navigationBarHidden_;
 @dynamic headerOffset;
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
     retainedObjects_ = [[NSMutableArray alloc] init];
@@ -65,8 +64,7 @@ static const CGFloat kReloadHeight = 60.0;
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [_scrollView release];
   [_shelfView release];
   [_reloadLabel release];
@@ -160,10 +158,10 @@ static const CGFloat kReloadHeight = 60.0;
   }
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
+
 
 #pragma mark - UIScrollViewDelegate methods
 
@@ -205,7 +203,6 @@ static const CGFloat kReloadHeight = 60.0;
   self.lastUpdatedLabel.text = [NSString stringWithFormat:@"Last updated %@", [Util userReadableTimeSinceDate:date]];
   [self.lastUpdatedLabel setNeedsDisplay];
 }
-
 
 - (void)setLoading:(BOOL)loading {
   if (_loading == loading)
@@ -275,6 +272,7 @@ static const CGFloat kReloadHeight = 60.0;
   }
 }
 
+
 #pragma mark - To be implemented by subclasses.
 
 - (void)shouldFinishLoading {
@@ -306,6 +304,7 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)cancelPendingRequests {
   
 }
+
 
 #pragma mark - UITextFieldDelegate Methods.
 
