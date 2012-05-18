@@ -18,7 +18,7 @@ def create(request, authUserId, http_schema, **kwargs):
     }
     
     favorite = stampedAPI.addFavorite(authUserId, entityRequest, stampId)
-    favorite = HTTPFavorite().importSchema(favorite)
+    favorite = HTTPFavorite().importFavorite(favorite)
     
     return transformOutput(favorite.dataExport())
 
