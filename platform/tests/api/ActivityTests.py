@@ -49,7 +49,7 @@ class StampedAPIActivityTest(AStampedAPITestCase):
     def _assertBenefit(self, result):
         benefit = None
         for i in result:
-            if 'benefit' in i:
+            if 'benefit' in i and i['benefit'] is not None:
                 benefit = i['benefit']
         self.assertTrue(benefit is not None)
 

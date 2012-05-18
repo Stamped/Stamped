@@ -1556,15 +1556,17 @@ class StampedAPI(AStampedAPI):
     def _user_regex(self):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
     
-    def _extractMentions(self, text, screenNames={}):
+    def _extractMentions(self, text, screenNames=None):
         mentions = [] 
-        
+        if screenNames is None:
+            screenNames = {}
+
         # Run through and grab mentions
         for user in self._user_regex.finditer(text):
             mention = MentionSchema()
             mention.indices = [user.start(), user.end()]
             mention.screen_name = user.groups()[0]
-            
+
             if mention.screen_name in screenNames:
                 mention.user_id = screenNames[mention.screen_name]
             else:
@@ -1982,7 +1984,7 @@ class StampedAPI(AStampedAPI):
             stamp.timestamp.modified    = now 
             stamp.stats.num_blurbs      = stamp.stats.num_blurbs + 1 if stamp.stats.num_blurbs is not None else 2
 
-            contents                    = stamp.contents 
+            contents                    = list(stamp.contents)
             contents.append(content)
             stamp.contents              = contents
 
@@ -2121,9 +2123,10 @@ class StampedAPI(AStampedAPI):
         
         # Add activity for mentioned users
         mentionedUserIds = set()
-        for item in stamp.contents[-1].mentions:
-            if item.user_id is not None and item.user_id != authUserId and item.user_id not in creditedUserIds:
-                mentionedUserIds.add(item.user_id)
+        if stamp.contents[-1].mentions is not None:
+            for item in stamp.contents[-1].mentions:
+                if item.user_id is not None and item.user_id != authUserId and item.user_id not in creditedUserIds:
+                    mentionedUserIds.add(item.user_id)
         if len(mentionedUserIds) > 0:
             self._addActivity(verb          = 'mention', 
                               userId        = authUserId, 
@@ -3287,7 +3290,7 @@ class StampedAPI(AStampedAPI):
         elif verb == 'reply':
             objects.stamp_ids       = [ kwargs['stampId'] ]
             objects.comment_ids     = [ kwargs['commentId'] ]
-            requireRecipient       = True
+            requireRecipient        = True
 
         elif verb == 'mention':
             recipientIds = kwargs.pop('recipientIds', [])
@@ -3304,16 +3307,16 @@ class StampedAPI(AStampedAPI):
             objects.stamp_ids       = [ kwargs['stampId'] ]
             if 'commentId' in kwargs and kwargs['commentId'] is not None:
                 objects.comment_ids     = [ kwargs['commentId'] ]
-            requireRecipient       = True
+            requireRecipient        = True
 
         elif verb == 'invite':
             objects.user_ids        = [ kwargs['friendId'] ]
-            requireRecipient       = True
+            requireRecipient        = True
             unique                  = True
 
         elif verb.startswith('friend_'):
             body                    = kwargs.pop('body', None)
-            requireRecipient       = True
+            requireRecipient        = True
             unique                  = True
 
         elif verb.startswith('action_'):

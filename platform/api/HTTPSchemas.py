@@ -2095,6 +2095,7 @@ class HTTPStamp(Schema):
             item.created            = content.timestamp.created
             #item.modified          = content.timestamp.modified
 
+            blurb_references        = []
             for screenName in mention_re.finditer(content.blurb):
                 source                  = HTTPActionSource()
                 source.name             = 'View profile'
@@ -2110,7 +2111,10 @@ class HTTPStamp(Schema):
                 reference.indices   = [ screenName.start(), screenName.end() ]
                 reference.action    = action
 
-                item.blurb_references.append(reference)
+                blurb_references.append(reference)
+
+            if len(blurb_references) > 0:
+                item.blurb_references = blurb_references
 
             if content.images is not None:
                 for image in content.images:
@@ -2122,10 +2126,10 @@ class HTTPStamp(Schema):
             # Insert contents in descending chronological order
             self.contents.insert(0, item)
 
-        self.num_comments   = getattr(stamp, 'num_comments', 0)
-        self.num_likes      = getattr(stamp, 'num_likes', 0)
-        self.num_todos      = getattr(stamp, 'num_todos', 0)
-        self.num_credits    = getattr(stamp, 'num_credits', 0)
+        self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
+        self.num_likes      = getattr(stamp.stats, 'num_likes', 0)
+        self.num_todos      = getattr(stamp.stats, 'num_todos', 0)
+        self.num_credits    = getattr(stamp.stats, 'num_credits', 0)
 
         url_title = encodeStampTitle(stamp.entity.title)
         self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
@@ -2584,7 +2588,7 @@ class HTTPActivity(Schema):
         cls.addNestedPropertyList('footer_references',  HTTPTextReference)
 
     def importEnrichedActivity(self, activity):
-        data            = activity.dataExport()
+        data = activity.dataExport()
         data.pop('subjects')
         data.pop('objects')
 
@@ -2670,7 +2674,7 @@ class HTTPActivity(Schema):
             return action
 
         def _formatUserObjects(users, required=True, offset=0):
-            if len(users) == 0:
+            if users is None or len(users) == 0:
                 if required:
                     raise Exception("No user objects!")
                 return None, []
@@ -2709,7 +2713,7 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
-            if len(stamps) == 0:
+            if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
                 return None, []
@@ -2748,7 +2752,7 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatEntityObjects(entities, required=True, offset=0):
-            if len(entities) == 0:
+            if entities is None or len(entities) == 0:
                 if required:
                     raise Exception("No entity objects!")
                 return None, []
@@ -2787,7 +2791,7 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatCommentObjects(comments, required=True, offset=0):
-            if len(comments) == 0:
+            if comments is None or len(comments) == 0:
                 if required:
                     raise Exception("No comment objects!")
                 return None, []
@@ -2804,7 +2808,7 @@ class HTTPActivity(Schema):
             raise Exception("Too many comments! \n%s" % comments)
 
         def _formatStampBlurbObjects(stamps, required=True, offset=0):
-            if len(stamps) == 0:
+            if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
                 return None, []
