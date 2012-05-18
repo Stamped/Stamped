@@ -182,7 +182,7 @@ situation.
 
     def validate(self):
         if self.value == None and self._required == True:
-            msg = "Required field empty (%s)" % self._name
+            msg = "Required field empty (%s) parent type: %s" % (self._name, type(self._parent))
             logs.warning(msg)
             raise SchemaValidationError(msg)
         
