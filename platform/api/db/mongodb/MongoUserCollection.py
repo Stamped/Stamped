@@ -43,7 +43,6 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if '_id' in document:
             document['user_id'] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
-        logs.info("CONVERT USER FROM MONGO: %s" % document)
         return User().dataImport(document, overflow=True)
 
     def _getAllUserIds(self):

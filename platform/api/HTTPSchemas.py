@@ -707,7 +707,6 @@ class HTTPUserMini(Schema):
 
     def importUserMini(self, mini):
         self.dataImport(mini.dataExport(), overflow=True)
-        logs.info("USER MINI: %s" % mini)
         self.image_url = _profileImageURL(mini.screen_name, mini.timestamp.image_cache)
 
         self.image = _buildProfileImage(self.screen_name,
@@ -2028,8 +2027,6 @@ class HTTPStamp(Schema):
         cls.addProperty('is_fav',               bool)
 
     def importStampMini(self, stamp):
-        logs.info("IMPORT STAMP: %s" % stamp)
-
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
         mentions                = getattr(stamp, 'mentions', [])
@@ -2872,7 +2869,7 @@ class HTTPActivity(Schema):
             self.body_references = subjectReferences + stampObjectReferences
 
             if not activity.personal:
-                stampUsers = map(lambda x: x['user'], self.objects.stamps)
+                stampUsers = map(lambda x: x.user, self.objects.stamps)
                 stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                 self.footer = 'via %s' % stampUserObjects
                 self.footer_references = stampUserReferences

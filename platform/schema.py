@@ -102,6 +102,8 @@ class Schema(object):
         if 'cast' not in kwargs:
             if kind == bool:
                 def __castBool(x):
+                    if x is None:
+                        return None 
                     if x in set([True, 'true', 'True', 1]):
                         return True 
                     if x in set([False, 'false', 'False', 0]):
@@ -109,11 +111,11 @@ class Schema(object):
                     raise Exception("Cannot cast %s as bool" % x)
                 kwargs['cast'] = __castBool
             elif kind == int:
-                kwargs['cast'] = lambda x: int(x)
+                kwargs['cast'] = lambda x: int(x) if x is not None else None
             elif kind == float:
-                kwargs['cast'] = lambda x: float(x)
+                kwargs['cast'] = lambda x: float(x) if x is not None else None
             elif kind == basestring:
-                kwargs['cast'] = lambda x: unicode(x)
+                kwargs['cast'] = lambda x: unicode(x) if x is not None else None
         cls._propertyInfo[name] = kwargs
 
     def __shortcutHelper(self, name, create=False):
