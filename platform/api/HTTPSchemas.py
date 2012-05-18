@@ -288,14 +288,14 @@ def _initialize_comment_html(comment):
 class OAuthTokenRequest(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('refresh_token',      basestring, required=True)
-        cls.addProperty('grant_type',         basestring, required=True)
+        cls.addProperty('refresh_token',                basestring, required=True)
+        cls.addProperty('grant_type',                   basestring, required=True)
 
 class OAuthLogin(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('login',              basestring, required=True)
-        cls.addProperty('password',           basestring, required=True)
+        cls.addProperty('login',                        basestring, required=True)
+        cls.addProperty('password',                     basestring, required=True)
 
 # ####### #
 # Actions #
@@ -384,17 +384,17 @@ class HTTPAccount(Schema):
 class HTTPAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',               basestring, required=True)
-        cls.addProperty('email',              basestring, required=True)
-        cls.addProperty('password',           basestring, required=True)
-        cls.addProperty('screen_name',        basestring, required=True)
-        cls.addProperty('phone',              int)
-        cls.addProperty('profile_image',      basestring) ### TODO: normalize=False ?
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring, required=True)
+        cls.addProperty('password',                     basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         
         # for asynchronous image uploads
-        cls.addProperty('temp_image_url',     basestring)
-        cls.addProperty('temp_image_width',   int)
-        cls.addProperty('temp_image_height',  int)
+        cls.addProperty('temp_image_url',               basestring)
+        cls.addProperty('temp_image_width',             int)
+        cls.addProperty('temp_image_height',            int)
 
     def convertToAccount(self):
         return Account().dataImport(self.dataExport(), overflow=True)
@@ -2680,40 +2680,37 @@ class HTTPActivity(Schema):
                 return None, []
 
             if len(users) == 1:
-                text = unicode(users[0].screen_name)
-                refs = [
-                    {
-                        'indices'   : [offset, offset + len(text)],
-                        'action'    : _buildUserAction(users[0]),
-                    }
-                ]
-                return text, refs
+                text            = unicode(users[0].screen_name)
+
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(text)]
+                ref0.action     = _buildUserAction(users[0])
+
+                return text, [ ref0 ]
 
             if len(users) == 2:
-                text = '%s and %s' % (users[0].screen_name, users[1].screen_name)
-                refs = [
-                    {
-                        'indices'   : [offset, offset + len(users[0].screen_name)],
-                        'action'    : _buildUserAction(users[0]),
-                    },
-                    {
-                        'indices'   : [offset + len(text) - len(users[1].screen_name), offset + len(text)],
-                        'action'    : _buildUserAction(users[1]),
-                    }
-                ]
-                return text, refs
+                text            = '%s and %s' % (users[0].screen_name, users[1].screen_name)
 
-            text = '%s and %s others' % (users[0].screen_name, len(users) - 1)
-            refs = [
-                {
-                    'indices'   : [offset, offset + len(users[0].screen_name)],
-                    'action'    : _buildUserAction(users[0]),
-                },
-                {
-                    'indices'   : [offset + len(users[0].screen_name) + len(' and '), offset + len(text)],
-                }
-            ]
-            return text, refs
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(users[0].screen_name)]
+                ref0.action     = _buildUserAction(users[0])
+
+                ref1            = HTTPTextReference()
+                ref1.indices    = [offset + len(text) - len(users[1].screen_name), offset + len(text)]
+                ref1.action     = _buildUserAction(users[1])
+                
+                return text, [ ref0, ref1 ]
+
+            text            = '%s and %s others' % (users[0].screen_name, len(users) - 1)
+
+            ref0            = HTTPTextReference()
+            ref0.indices    = [offset, offset + len(users[0].screen_name)]
+            ref0.action     = _buildUserAction(users[0])
+
+            ref1            = HTTPTextReference()
+            ref1.indices    = [offset + len(users[0].screen_name) + len(' and '), offset + len(text)]
+
+            return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
             if len(stamps) == 0:
@@ -2722,38 +2719,37 @@ class HTTPActivity(Schema):
                 return None, []
 
             if len(stamps) == 1:
-                text = unicode(stamps[0].entity.title)
-                refs = [{
-                    'indices'   : [offset, offset + len(text)],
-                    'action'    : _buildStampAction(stamps[0]),
-                }]
-                return text, refs
+                text            = unicode(stamps[0].entity.title)
+
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(text)]
+                ref0.action     = _buildStampAction(stamps[0])
+
+                return text, [ ref0 ]
 
             if len(stamps) == 2:
-                text = '%s and %s' % (stamps[0].entity.title, stamps[1].entity.title)
-                refs = [
-                    {
-                        'indices'   : [offset, offset + len(stamps[0].entity.title)],
-                        'action'    : _buildStampAction(stamps[0]),
-                    },
-                    {
-                        'indices'   : [offset + len(text) - len(stamps[1].entity.title), offset + len(text)],
-                        'action'    : _buildStampAction(stamps[1]),
-                    }
-                ]
-                return text, refs
+                text            = '%s and %s' % (stamps[0].entity.title, stamps[1].entity.title)
 
-            text = '%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)
-            refs = [
-                {
-                    'indices'   : [offset, offset + len(stamps[0].entity.title)],
-                    'action'    : _buildStampAction(stamps[0]),
-                },
-                {
-                    'indices'   : [offset + len(stamps[0].entity.title) + len(' and '), offset + len(text)],
-                }
-            ]
-            return text, refs
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(stamps[0].entity.title)]
+                ref0.action     = _buildStampAction(stamps[0])
+
+                ref1            = HTTPTextReference()
+                ref1.indices    = [offset + len(text) - len(stamps[1].entity.title), offset + len(text)]
+                ref1.action     = _buildStampAction(stamps[1])
+
+                return text, [ ref0, ref1 ]
+
+            text            = '%s and %s other stamps' % (stamps[0].entity.title, len(stamps) - 1)
+
+            ref0            = HTTPTextReference()
+            ref0.indices    = [offset, offset + len(stamps[0].entity.title)]
+            ref0.action     = _buildStampAction(stamps[0])
+
+            ref1            = HTTPTextReference()
+            ref1.indices    = [offset + len(stamps[0].entity.title) + len(' and '), offset + len(text)]
+
+            return text, [ ref0, ref1 ]
 
         def _formatEntityObjects(entities, required=True, offset=0):
             if len(entities) == 0:
@@ -2762,38 +2758,37 @@ class HTTPActivity(Schema):
                 return None, []
 
             if len(entities) == 1:
-                text = unicode(entities[0].title)
-                refs = [{
-                    'indices'   : [offset, offset + len(text)],
-                    'action'    : _buildEntityAction(entities[0]),
-                }]
-                return text, refs
+                text            = unicode(entities[0].title)
+
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(text)]
+                ref0.action     = _buildEntityAction(entities[0])
+
+                return text, [ ref0 ]
 
             if len(entities) == 2:
-                text = '%s and %s' % (entities[0].title, entities[1].title)
-                refs = [
-                    {
-                        'indices'   : [offset, offset + len(entities[0].title)],
-                        'action'    : _buildEntityAction(entities[0]),
-                    },
-                    {
-                        'indices'   : [offset + len(text) - len(entities[1].title), offset + len(text)],
-                        'action'    : _buildEntityAction(entities[1]),
-                    }
-                ]
-                return text, refs
+                text            = '%s and %s' % (entities[0].title, entities[1].title)
 
-            text = '%s and %s others' % (entities[0].title, len(entities) - 1)
-            refs = [
-                {
-                    'indices'   : [offset, offset + len(entities[0].title)],
-                    'action'    : _buildEntityAction(entities[0]),
-                },
-                {
-                    'indices'   : [offset + len(entities[0].title) + len(' and '), offset + len(text)],
-                }
-            ]
-            return text, refs
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(entities[0].title)]
+                ref0.action     = _buildEntityAction(entities[0])
+
+                ref1            = HTTPTextReference()
+                ref1.indices    = [offset + len(text) - len(entities[1].title), offset + len(text)]
+                ref1.action     = _buildEntityAction(entities[1])
+
+                return text, [ ref0, ref1 ]
+
+            text            = '%s and %s others' % (entities[0].title, len(entities) - 1)
+
+            ref0            = HTTPTextReference()
+            ref0.indices    = [offset, offset + len(entities[0].title)]
+            ref0.action     = _buildEntityAction(entities[0])
+
+            ref1            = HTTPTextReference()
+            ref1.indices    = [offset + len(entities[0].title) + len(' and '), offset + len(text)]
+
+            return text, [ ref0, ref1 ]
 
         def _formatCommentObjects(comments, required=True, offset=0):
             if len(comments) == 0:
@@ -2802,12 +2797,13 @@ class HTTPActivity(Schema):
                 return None, []
 
             if len(comments) == 1:
-                text = '%s: %s' % (comments[0].user.screen_name, comments[0].blurb)
-                refs = [{
-                    'indices'   : [offset, offset + len(comments[0].user.screen_name) + 1],
-                    'action'    : _buildUserAction(comments[0].user),
-                }]
-                return text, refs
+                text            = '%s: %s' % (comments[0].user.screen_name, comments[0].blurb)
+
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(comments[0].user.screen_name) + 1]
+                ref0.action     = _buildUserAction(comments[0].user)
+
+                return text, [ ref0 ]
 
             raise Exception("Too many comments! \n%s" % comments)
 
@@ -2818,12 +2814,13 @@ class HTTPActivity(Schema):
                 return None, []
 
             if len(stamps) == 1:
-                text = '%s: %s' % (stamps[0].user.screen_name, stamps[0].contents[0].blurb)
-                refs = [{
-                    'indices'   : [offset, offset + len(stamps[0].user.screen_name) + 1],
-                    'action'    : _buildUserAction(stamps[0].user),
-                }]
-                return text, refs
+                text            = '%s: %s' % (stamps[0].user.screen_name, stamps[0].contents[0].blurb)
+
+                ref0            = HTTPTextReference()
+                ref0.indices    = [offset, offset + len(stamps[0].user.screen_name) + 1]
+                ref0.action     = _buildUserAction(stamps[0].user)
+
+                return text, [ ref0 ]
 
             raise Exception("Too many stamps! \n%s" % stamps)
 
