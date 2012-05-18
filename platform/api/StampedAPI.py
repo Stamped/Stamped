@@ -1984,7 +1984,7 @@ class StampedAPI(AStampedAPI):
             stamp.timestamp.modified    = now 
             stamp.stats.num_blurbs      = stamp.stats.num_blurbs + 1 if stamp.stats.num_blurbs is not None else 2
 
-            contents                    = stamp.contents 
+            contents                    = list(stamp.contents)
             contents.append(content)
             stamp.contents              = contents
 
