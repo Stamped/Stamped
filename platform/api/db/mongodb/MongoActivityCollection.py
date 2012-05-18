@@ -85,6 +85,8 @@ class MongoActivityCollection(AActivityDB):
         return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
+        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
+
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
         benefit         = kwargs.pop('benefit', None)
@@ -99,8 +101,6 @@ class MongoActivityCollection(AActivityDB):
         now             = datetime.utcnow()
         alerts          = []
         sentTo          = set()
-
-        logs.debug('\n ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
 
         try:
             objects = objects.dataExport()

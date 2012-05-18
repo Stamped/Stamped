@@ -11,8 +11,13 @@ from httpapi.v0.helpers import *
 @require_http_methods(["GET"])
 def show(request, authUserId, data, **kwargs):
     data['distance'] = 0
-    logs.info('DATA: %s' % data)
-    activity = stampedAPI.getActivity(authUserId, **data)
+
+    # Hack for python < 2.6.5 (doesn't support unicode as keyword args?!?)
+    newData = {}
+    for k, v in data.items():
+        newData[str(k)] = v
+
+    activity = stampedAPI.getActivity(authUserId, **newData)
     
     result = []
     for item in activity:
@@ -24,7 +29,13 @@ def show(request, authUserId, data, **kwargs):
 @require_http_methods(["GET"])
 def friends(request, authUserId, data, **kwargs):
     data['distance'] = 1
-    activity = stampedAPI.getActivity(authUserId, **data)
+
+    # Hack for python < 2.6.5 (doesn't support unicode as keyword args?!?)
+    newData = {}
+    for k, v in data.items():
+        newData[str(k)] = v
+
+    activity = stampedAPI.getActivity(authUserId, **newData)
     
     result = []
     for item in activity:
