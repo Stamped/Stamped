@@ -117,22 +117,19 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     menuController.rightViewController = rightController;
     self.menuController = menuController;
     
-    // still working on this..
-    //[inboxController release];
+    [inboxController release];
     [leftController release];
     [rightController release];
     [menuController release];
-   // [navController release];
+    [navController release];
 
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
     
-    /*
     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
     [menuController.view addSubview:welcomeController.view];
     welcomeController.view.frame = menuController.view.bounds;
     [welcomeController animateIn];
-    */
     
   //[_navigationController pushViewController:[[[STInboxViewController alloc] init] autorelease] animated:NO];
   grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];

@@ -85,7 +85,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self setRootViewController:_root]; // reset root
+    
+    if (_root) {
+        id root = [_root retain];
+        [self setRootViewController:root];
+        [root release];
+    }
+    
+    ; // reset root
     
     if (!_tap) {
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
