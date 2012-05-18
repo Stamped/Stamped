@@ -861,8 +861,8 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
-        if self.__version > 0 and len(user.distribution) == 0:
-            user.distribution = self._getUserStampDistribution(user.user_id)
+        if self.__version > 0 and user.stats.distribution is not None and len(user.stats.distribution) == 0:
+            user.stats.distribution = self._getUserStampDistribution(user.user_id)
         
         return user
     
