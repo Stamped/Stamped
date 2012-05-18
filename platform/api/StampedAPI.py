@@ -3101,7 +3101,8 @@ class StampedAPI(AStampedAPI):
         favorite.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
-            favorite.stamp = self._stampDB.getStamp(stampId)
+            stamp = self._stampDB.getStamp(stampId)
+            favorite.stamp = stamp
         
         # Check to verify that user hasn't already favorited entity
         try:
@@ -3126,9 +3127,8 @@ class StampedAPI(AStampedAPI):
         
         # Enrich stamp
         if stampId is not None:
-            entityIds = {entity.entity_id: entity}
-            favorite.stamp = self._enrichStampObjects(favorite.stamp, \
-                                authUserId=authUserId, entityIds=entityIds)
+            entityIds = { entity.entity_id: entity }
+            favorite.stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
         
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', increment=1)
@@ -3163,8 +3163,8 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_faves', increment=-1)
         
         # Enrich stamp
-        if favorite.stamp_id is not None:
-            stamp           = self._stampDB.getStamp(favorite.stamp_id)
+        if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
+            stamp           = self._stampDB.getStamp(favorite.stamp.stamp_id)
             favorite.stamp  = self._enrichStampObjects(stamp, authUserId=authUserId)
             
             # Just in case...
@@ -3173,8 +3173,8 @@ class StampedAPI(AStampedAPI):
             # Remove activity
             self._activityDB.removeActivity('todo', authUserId, stampId=stamp.stamp_id)
 
-        # Update stamp stats
-        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
         
         return favorite
     
@@ -3208,8 +3208,8 @@ class StampedAPI(AStampedAPI):
         for favorite in favoriteData:
             entityIds[str(favorite.entity.entity_id)] = 1
             
-            if favorite.stamp_id is not None:
-                stampIds[str(favorite.stamp_id)] = 1
+            if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
+                stampIds[str(favorite.stamp.stamp_id)] = 1
         
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3232,12 +3232,12 @@ class StampedAPI(AStampedAPI):
                 logs.warning('FAV (%s) MISSING ENTITY (%s)' % (favorite.favorite_id, favorite.entity.entity_id))
             
             # Add Stamp
-            if favorite.stamp_id is not None:
-                if stampIds[favorite.stamp_id] != 1:
-                    favorite.stamp = stampIds[favorite.stamp_id]
+            if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
+                if stampIds[favorite.stamp.stamp_id] != 1:
+                    favorite.stamp = stampIds[favorite.stamp.stamp_id]
                 else:
                     ### TODO: Clean these up if they're missing
-                    logs.warning('FAV (%s) MISSING STAMP (%s)' % (favorite.favorite_id, favorite.stamp_id))
+                    logs.warning('FAV (%s) MISSING STAMP (%s)' % (favorite.favorite_id, favorite.stamp.stamp_id))
                     favorite.stamp = Stamp()
             
             favorites.append(favorite)

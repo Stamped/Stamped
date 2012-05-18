@@ -27,7 +27,7 @@ def create(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     favorite = stampedAPI.removeFavorite(authUserId, http_schema.entity_id)
-    favorite = HTTPFavorite().importSchema(favorite)
+    favorite = HTTPFavorite().importFavorite(favorite)
     
     # Hack to force 'entity' to null for Bons
     ### TODO: Come up with a long-term solution
@@ -45,7 +45,7 @@ def show(request, authUserId, schema, **kwargs):
     
     result = []
     for favorite in favorites:
-        result.append(HTTPFavorite().importSchema(favorite).dataExport())
+        result.append(HTTPFavorite().importFavorite(favorite).dataExport())
     
     return transformOutput(result)
 

@@ -249,6 +249,10 @@ class Schema(object):
     def __str__(self):
         return '[%s %s]' % (self.__class__, self.dataExport())
 
+    def __unicode__(self):
+        return u'[%s %s]' % (self.__class__, self.dataExport())
+
+
     # def __contains__(self, item):
     #     for k, v in self.__properties.items():
     #         if item == k:
