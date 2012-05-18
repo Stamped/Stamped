@@ -399,12 +399,12 @@ class HTTPAccountNew(Schema):
     def convertToAccount(self):
         return Account().dataImport(self.dataExport(), overflow=True)
         
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Account':
-            schema.importData(self.exportSparse(), overflow=True)
-        else:
-            raise NotImplementedError(type(schema))
-        return schema
+    # def exportSchema(self, schema):
+    #     if schema.__class__.__name__ == 'Account':
+    #         schema.importData(self.exportSparse(), overflow=True)
+    #     else:
+    #         raise NotImplementedError(type(schema))
+    #     return schema
 
 class HTTPAccountSettings(Schema):
     @classmethod
@@ -2597,23 +2597,40 @@ class HTTPActivity(Schema):
         if self.icon is not None:
             self.icon = _getIconURL(self.icon)
 
-        for user in activity.subjects:
-            self.subjects.append(HTTPUserMini().importUserMini(user))
+        if activity.subjects is not None:
+            subjects = []
+            for user in activity.subjects:
+                subjects.append(HTTPUserMini().importUserMini(user))
+            self.subjects = subjects
 
-        for user in activity.objects.users:
-            self.objects.users.append(HTTPUserMini().importUserMini(user))
+        if activity.objects is not None:
+            self.objects = HTTPActivityObjects()
 
-        for stamp in activity.objects.stamps:
-            self.objects.stamps.append(HTTPStamp().importStamp(stamp))
+            if activity.objects.users is not None:
+                userobjects = []
+                for user in activity.objects.users:
+                    userobjects.append(HTTPUserMini().importUserMini(user))
+                self.objects.users = userobjects 
 
-        for entity in activity.objects.entities:
-            self.objects.entities.append(HTTPEntityMini().importEntity(entity))
+            if activity.objects.stamps is not None:
+                stampobjects = []
+                for stamp in activity.objects.stamps:
+                    stampobjects.append(HTTPStamp().importStamp(stamp))
+                self.objects.stamps = stampobjects 
 
-        for comment in activity.objects.comments:
-            comment = HTTPComment().importComment(comment)
-            _initialize_comment_html(comment)
+            if activity.objects.entities is not None:
+                entityobjects = []
+                for entity in activity.objects.entities:
+                    entityobjects.append(HTTPEntityMini().importEntity(entity))
+                self.objects.entities = entityobjects 
 
-            self.objects.comments.append(comment)
+            if activity.objects.comments is not None:
+                commentobjects = []
+                for comment in activity.objects.comments:
+                    comment = HTTPComment().importComment(comment)
+                    _initialize_comment_html(comment)
+                    commentobjects.append(comment)
+                self.objects.comments = commentobjects 
 
         def _buildStampAction(stamp):
             source              = HTTPActionSource()
@@ -2818,7 +2835,7 @@ class HTTPActivity(Schema):
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
-            if schema.personal:
+            if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
             else:
@@ -2832,7 +2849,7 @@ class HTTPActivity(Schema):
         elif self.verb == 'restamp':
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
-            if schema.personal:
+            if activity.personal:
                 self.body = '%s gave you credit.' % (subjects)
                 self.body_references = subjectReferences
                 self.image = _getIconURL('news_benefit_2')
@@ -2855,13 +2872,13 @@ class HTTPActivity(Schema):
             self.body = '%s %s %s.' % (subjects, verb, stampObjects)
             self.body_references = subjectReferences + stampObjectReferences
 
-            if not schema.personal:
+            if not activity.personal:
                 stampUsers = map(lambda x: x['user'], self.objects.stamps)
                 stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                 self.footer = 'via %s' % stampUserObjects
                 self.footer_references = stampUserReferences
 
-            if schema.personal and self.benefit is not None:
+            if activity.personal and self.benefit is not None:
                 self.image = _getIconURL('news_benefit_1')
             elif len(self.subjects) == 1:
                 self.image = self.subjects[0].image_url

@@ -110,8 +110,9 @@ class MongoActivityCollection(AActivityDB):
         activityId      = None
 
         def _buildActivity():
-            activity        = Activity()
-            activity.verb   = verb
+            activity            = Activity()
+            activity.verb       = verb
+            
             if subject is not None:
                 activity.subjects = [ subject ]
             if len(objects) > 0:
@@ -120,8 +121,12 @@ class MongoActivityCollection(AActivityDB):
                 activity.benefit = benefit
             if body is not None:
                 activity.body = body
-            activity.timestamp.created  = now
-            activity.timestamp.modified = now
+
+            timestamp           = TimestampSchema()
+            timestamp.created   = now
+            timestamp.modified  = now
+            activity.timestamp  = timestamp 
+
             return activity
 
         # Insert the activity item individually
