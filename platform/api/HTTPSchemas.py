@@ -1988,11 +1988,6 @@ class HTTPCommentId(Schema):
     def setSchema(cls):
         cls.addProperty('comment_id',           basestring, required=True)
 
-class HTTPCommentSlice(HTTPGenericSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-
 
 # ###### #
 # Stamps #
@@ -2513,6 +2508,11 @@ class HTTPDeletedStamp(Schema):
         self.dataImport(delStamp.dataExport(), overflow=True)
         self.modified = delStamp.timestamp.modified
         return self
+
+class HTTPCommentSlice(HTTPGenericSlice):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
 
 
 # ######## #
