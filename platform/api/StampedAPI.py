@@ -1715,7 +1715,7 @@ class StampedAPI(AStampedAPI):
             # Comments
             if stamp.previews is not None and stamp.previews.comments is not None:
                 for comment in stamp.previews.comments:
-                    allUserIds.add(comment.user_id)
+                    allUserIds.add(comment.user.user_id)
 
         for stat in stats:
             # Likes
@@ -2929,6 +2929,8 @@ class StampedAPI(AStampedAPI):
         stamps = []
         for stamp in stampData:
             if stamp.stamp_id in commentPreviews:
+                if stamp.previews is None:
+                    stamp.previews = StampPreviews()
                 stamp.previews.comments = commentPreviews[stamp.stamp_id]
             
             stamps.append(stamp)

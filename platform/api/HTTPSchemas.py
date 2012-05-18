@@ -2115,14 +2115,14 @@ class HTTPStamp(Schema):
         if stamp.previews.todos is not None:
             todos = []
             for user in stamp.previews.todos:
-                user    = HTTPUserMini().importUserMini(user).exportSparse()
+                user    = HTTPUserMini().importUserMini(user)
                 todos.append(user)
             previews.todos = todos
 
         if stamp.previews.likes is not None:
             likes = []
-            for user in schema.previews.likes:
-                user    = HTTPUserMini().importUserMini(user).exportSparse()
+            for user in stamp.previews.likes:
+                user    = HTTPUserMini().importUserMini(user)
                 likes.append(user)
             previews.likes = likes
 
