@@ -2652,15 +2652,15 @@ class StampedAPI(AStampedAPI):
         
         comments = []
         for comment in commentData:
-            if userIds[comment.user_id] == 1:
+            if userIds[comment.user.user_id] == 1:
                 msg = 'Unable to get user_id %s for comment_id %s' % \
-                    (comment.user_id, comment.comment_id)
+                    (comment.user.user_id, comment.comment_id)
                 logs.warning(msg)
             else:
-                comment.user = userIds[comment.user_id]
+                comment.user = userIds[comment.user.user_id]
                 comments.append(comment)
         
-        comments = sorted(comments, key=lambda k: k['timestamp']['created'])
+        comments = sorted(comments, key=lambda k: k.timestamp.created)
         
         tasks.invoke(tasks.APITasks.getComments, args=[authUserId, stampId])
         
