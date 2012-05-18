@@ -1479,12 +1479,12 @@ class Activity(Schema):
         cls.addProperty('footer',                   basestring)
 
     def enrich(self, **kwargs):
-        users       = kwargs.pop('users', {})
-        stamps      = kwargs.pop('stamps', {})
-        entities    = kwargs.pop('entities', {})
-        comments    = kwargs.pop('comments', {})
-        authUserId  = kwargs.pop('authUserId', None)
-        personal    = kwargs.pop('personal', False)
+        users               = kwargs.pop('users', {})
+        stamps              = kwargs.pop('stamps', {})
+        entities            = kwargs.pop('entities', {})
+        comments            = kwargs.pop('comments', {})
+        authUserId          = kwargs.pop('authUserId', None)
+        personal            = kwargs.pop('personal', False)
 
         result              = EnrichedActivity()
         result.activity_id  = self.activity_id
@@ -1493,20 +1493,38 @@ class Activity(Schema):
         result.timestamp    = self.timestamp 
         result.personal     = personal
 
-        for userId in self.subjects:
-            result.subjects.append(users[str(userId)])
+        if self.subjects is not None:
+            subjects = []
+            for userId in self.subjects:
+                subjects.append(users[str(userId)])
+            result.subjects = subjects
 
-        for userId in self.objects.user_ids:
-            result.objects.users.append(users[str(userId)])
+        if self.objects is not None:
+            result.objects = ActivityObjects()
 
-        for stampId in self.objects.stamp_ids:
-            result.objects.stamps.append(stamps[str(stampId)])
+            if self.objects.user_ids is not None:
+                userobjectss = []
+                for userId in self.objects.user_ids:
+                    userobjectss.append(users[str(userId)])
+                result.objects.users = userobjectss
 
-        for entityId in self.objects.entity_ids:
-            result.objects.entities.append(entities[str(entityId)])
+            if self.objects.stamp_ids is not None:
+                stampobjects = []
+                for stampId in self.objects.stamp_ids:
+                    stampobjects.append(stamps[str(stampId)])
+                result.objects.stamps = stampobjects
 
-        for commentId in self.objects.comment_ids:
-            result.objects.comments.append(comments[str(commentId)])
+            if self.objects.entity_ids is not None:
+                entityobjects = []
+                for entityId in self.objects.entity_ids:
+                    entityobjects.append(entities[str(entityId)])
+                result.objects.entities = entityobjects 
+
+            if self.objects.comment_ids is not None:
+                commentobjects = []
+                for commentId in self.objects.comment_ids:
+                    commentobjects.append(comments[str(commentId)])
+                result.objects.comments = commentobjects
 
         return result
 

@@ -2132,7 +2132,7 @@ class StampedAPI(AStampedAPI):
                               stampId       = stamp.stamp_id)
 
         # Update entity stats
-        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
 
     
     @API_CALL
@@ -2434,8 +2434,9 @@ class StampedAPI(AStampedAPI):
 
         likes                   = self._stampDB.getStampLikes(stampId)
         stats.num_likes         = len(likes)
-        stats.preview_likes     = likes[-MAX_PREVIEW:]
-        stats.preview_likes.reverse()
+        likes                   = likes[-MAX_PREVIEW:]
+        likes.reverse()
+        stats.preview_likes     = likes
 
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
         todos                   = self._favoriteDB.getFavoritesFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
@@ -3390,16 +3391,26 @@ class StampedAPI(AStampedAPI):
         entityIds   = {}
         commentIds  = {}
         for item in activityData:
-            for userId in item.subjects:
-                userIds[str(userId)] = None 
-            for userId in item.objects.user_ids:
-                userIds[str(userId)] = None 
-            for stampId in item.objects.stamp_ids:
-                stampIds[str(stampId)] = None 
-            for entityId in item.objects.entity_ids:
-                entityIds[str(entityId)] = None 
-            for commentId in item.objects.comment_ids:
-                commentIds[str(commentId)] = None 
+            if item.subjects is not None:
+                for userId in item.subjects:
+                    userIds[str(userId)] = None 
+
+            if item.objects is not None:
+                if item.objects.user_ids is not None:
+                    for userId in item.objects.user_ids:
+                        userIds[str(userId)] = None 
+
+                if item.objects.stamp_ids is not None:
+                    for stampId in item.objects.stamp_ids:
+                        stampIds[str(stampId)] = None 
+                        
+                if item.objects.entity_ids is not None:
+                    for entityId in item.objects.entity_ids:
+                        entityIds[str(entityId)] = None 
+                        
+                if item.objects.comment_ids is not None:
+                    for commentId in item.objects.comment_ids:
+                        commentIds[str(commentId)] = None 
         
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
