@@ -266,14 +266,25 @@ header {
                 top:  0;
                 left: 0;
                 
-                .innerbg0 {
-                    background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
+                .innerbg {
+                    /*background: url(/assets/img/collage.940x256.jpg) no-repeat fixed center center;
                     background-size: 100%;
                     
                     position: absolute;
                     width:   100%;
                     height:  100%;
-                    opacity: 0.45;
+                    opacity: 0.45;*/
+                    
+                    /*$(document).ready(function() {
+                        $('.innerbg').css({
+                            position : 'absolute', 
+                            width    : '100%', 
+                            height   : '100%', 
+                            opacity  : '0.45', 
+                            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                            'background-size': '100%', 
+                        }).addClass('blur_8');
+                    });*/
                 }
                 
                 .profile-header-body-fixedwidth {
@@ -445,15 +456,23 @@ header {
 
 
 .static-map(@size: 200px, @b: 0, @angle: 35deg, @perspective: 200px) {
-    display: block;
-    width: @size;
-    padding: 30px;
+    position: relative;
+    display:  block;
+    width:   @size;
+    
+    @padding: 4px;
+    top:    -@padding;
+    left:   -@padding;
+    padding: @padding;
     
     .static-map-inner {
         margin: 0 auto;
         @colsize: @size / 4;
         
         position: relative;
+        top:  0;
+        left: -@b;
+        
         display: block;
         width:  @size;
         height: @size;
@@ -496,25 +515,27 @@ header {
             .__section(@x);
         }
         
+        /* TODO: make the map crinkle to a centered version of itself */
+        
         .r0 {
             .section(0);
             border-width: @b 0 @b @b;
-            .transform(perspective(@perspective) rotateY(-@angle));
+            .transform(perspective(@perspective) translate(12px, 0) rotateY(-@angle));
         }
         .r1 {
             .section(1);
             border-width: @b 0;
-            .transform(perspective(@perspective) translate(-6px,  0) rotateY(@angle));
+            .transform(perspective(@perspective) translate(7px,  0) rotateY(@angle));
         }
         .r2 {
             .section(2);
             border-width: @b 0;
-            .transform(perspective(@perspective) translate(-18px, 0) rotateY(-@angle));
+            .transform(perspective(@perspective) translate(-1px, 0) rotateY(-@angle));
         }
         .r3 {
             .section(3);
             border-width: @b @b @b 0;
-            .transform(perspective(@perspective) translate(-23px, 0) rotateY(@angle));
+            .transform(perspective(@perspective) translate(-6px, 0) rotateY(@angle));
         }
         .dark-layer {
             display: block;
@@ -532,7 +553,7 @@ header {
             position: absolute;
             top:  50%;
             left: 50%;
-            margin: -9px auto auto 0;
+            margin: -7px auto auto 0;
             
             display: block;
             width:  24px;
@@ -547,7 +568,7 @@ header {
                 
                 position: relative;
                 top:  -16px;
-                left: -10px;
+                left: -8px;
                 
                 display: block;
                 width:  26px;
@@ -555,14 +576,14 @@ header {
             }
             
             .transition(all, .1s, linear);
-            .transform(perspective(@perspective) translate(-15px, 0));
+            .transform(perspective(@perspective) translate(-2px, 0) scale(.8, .8));
         }
     }
     
     &:hover {
         /*cursor: pointer;*/
         .r0, .r1, .r2, .r3, .pin {
-            .transform(translateZ(0));
+            .transform(perspective(@perspective));
         }
         .dark-layer {
             opacity: 0;
@@ -571,7 +592,8 @@ header {
 }
 
 .static-map-small {
-    .static-map(200px, 2px, 35deg, 200px);
+    /*.static-map(@size: 140px, @b: 2px, @angle: 35deg, @perspective: 200px)*/
+    .static-map(140px, 2px, 35deg, 200px);
 }
 
 
@@ -603,7 +625,7 @@ header {
         list-style: none;
         text-indent: 0;
         padding: 0;
-        margin: 0;
+        margin:  0;
         
         li {
             position: relative;
@@ -615,13 +637,13 @@ header {
                 display: block;
                 width:  60px;
                 height: 60px;
-                margin:  6px 0;
+                margin: 6px 0;
                 
                 position: relative;
                 z-index: 1000;
                 
                 opacity: 0;
-                .transition(opacity, .5s, ease-in-out);
+                .transition(opacity, .3s, ease-out);
             }
             
             div {
@@ -865,30 +887,35 @@ footer .copyright a, footer .copyright a {
 
 .stamp-category-book .icon {
     background: url(/assets/img/entity-type-book.png) no-repeat;
+    display: inline-block;
     width:  19px;
     height: 15px;
 }
 
 .stamp-category-film .icon {
     background: url(/assets/img/entity-type-film.png) no-repeat;
+    display: inline-block;
     width:  15px;
     height: 15px;
 }
 
 .stamp-category-food .icon {
     background: url(/assets/img/entity-type-food.png) no-repeat;
+    display: inline-block;
     width:  21px;
     height: 15px;
 }
 
 .stamp-category-music .icon {
     background: url(/assets/img/entity-type-music.png) no-repeat;
+    display: inline-block;
     width:  15px;
     height: 15px;
 }
 
 .stamp-category-other .icon, .stamp-category- .icon {
     background: url(/assets/img/entity-type-other.png) no-repeat;
+    display: inline-block;
     width:  12px;
     height: 15px;
 }

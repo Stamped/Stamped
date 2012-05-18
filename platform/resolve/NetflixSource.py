@@ -73,9 +73,12 @@ class _NetflixObject(object):
             formats = self._getFromLinks('href', 'format_availability', 'delivery_formats')
             for availableType in self._asList(formats['availability']):
                 if availableType['category']['term'] == 'instant':
+                    logs.info('### returning true for is_instant_available')
                     return True
+            logs.info('### returning false for is_instant_available')
             return False
         except Exception:
+            logs.info('### hit an exception in is_instant_available')
             return False
 
     @lazyProperty

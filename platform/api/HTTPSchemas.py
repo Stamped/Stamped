@@ -1978,21 +1978,24 @@ class HTTPStamp(Schema):
                     img.importSchema(image)
                     # quick fix for now
                     # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
+                    if len(img.sizes) == 0:
+                        continue
+                    source              = HTTPActionSource()
+                    source.name         = 'View image'
+                    source.source       = 'stamped'
+                    source.source_id    = img.sizes[0].url
+
+                    action              = HTTPAction()
+                    action.name         = 'View image'
+                    action.type         = 'stamped_view_image'
+                    action.sources      = [ source ]
+                    img.action          = action
                     item.images.append(img)
                 
                 #_initialize_blurb_html(item)
                 
                 # Insert contents in descending chronological order
                 self.contents.insert(0, item)
-
-            # handle old format image specifier
-            if 'image_dimensions' in data:
-                img = HTTPImageSchema()
-                imgSize = HTTPImageSizeSchema()
-                imgSize.url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                imgSize.width, imgSize.height = data['image_dimensions'].split(',')
-                img.sizes [ imgSize ]
-                item.images.append(img)
 
             self.num_comments = 0
             if schema.num_comments > 0:

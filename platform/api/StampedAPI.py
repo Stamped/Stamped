@@ -2815,11 +2815,11 @@ class StampedAPI(AStampedAPI):
         
         if genericCollectionSlice.limit is None:
             genericCollectionSlice.limit = stampCap
-
+        
         # Buffer of 5 additional stamps
         limit = genericCollectionSlice.limit
         genericCollectionSlice.limit = limit + 5
-
+        
         # Adjustment for multiple blurbs to use "stamped" timestamp instead of "created"
         if genericCollectionSlice.sort == 'created':
             genericCollectionSlice.sort = 'stamped'

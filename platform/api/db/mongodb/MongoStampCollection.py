@@ -58,15 +58,20 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             if 'image_dimensions' in document:
                 contents['images'] = [
                     {
-                        'width'     : document['image_dimensions'].split(',')[0],
-                        'height'    : document['image_dimensions'].split(',')[1],
-                        'image'     : document['stamp_id'],
+                        'sizes' :
+                        [
+                            {
+                                'width'     : document['image_dimensions'].split(',')[0],
+                                'height'    : document['image_dimensions'].split(',')[1],
+                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['stamp_id'],
+                            }
+                        ]
                     }
                 ]
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = document['timestamp']['created']
 
-        
+
         entityData = document.pop('entity')
         entity = buildEntity(entityData, mini=True)
         document['entity'] = {'entity_id': entity.entity_id}
