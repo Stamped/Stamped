@@ -424,13 +424,20 @@ class GenericSource(BasicSource):
     @property 
     def idName(self):
         return self.sourceName
+
+    def _getSourceId(self, entity):
+        try:
+            return getattr(entity.sources, self.idField)
+        except AttributeError:
+            return getattr(entity, self.idField)
     
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
 
         """
         proxy = None
-        if getattr(entity, self.idField) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
+
+        if self._getSourceId(entity) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
@@ -445,7 +452,7 @@ class GenericSource(BasicSource):
             except ValueError:
                 pass
 
-        source_id = entity[self.idField]
+        source_id = self._getSourceId(entity)
         if source_id is not None:
             try:
                 if proxy is None:

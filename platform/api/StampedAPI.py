@@ -2361,7 +2361,7 @@ class StampedAPI(AStampedAPI):
         if stamp.credit is not None and len(stamp.credit) > 0:
             for item in stamp.credit:
                 # Only run if user is flagged as credited
-                if 'user_id' not in item or item.user_id is None:
+                if item.user_id is None:
                     continue
                 
                 # Assign credit
@@ -2374,7 +2374,7 @@ class StampedAPI(AStampedAPI):
         stamp.timestamp.modified = datetime.utcnow()
 
         # Update entity stats
-        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
         
         return stamp
     
