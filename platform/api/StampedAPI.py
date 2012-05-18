@@ -817,8 +817,8 @@ class StampedAPI(AStampedAPI):
     ### PRIVATE
     
     def _getUserFromIdOrScreenName(self, userTiny):
-        # if not isinstance(userTiny, SchemaElement):
-        #     userTiny    = UserTiny(userTiny)
+        if not isinstance(userTiny, Schema):
+            userTiny = UserTiny().dataImport(userTiny)
         
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
@@ -1135,7 +1135,7 @@ class StampedAPI(AStampedAPI):
         
         # Note: This function returns data even if user is private
         
-        friends = self._friendshipDB.getFriends(user['user_id'])
+        friends = self._friendshipDB.getFriends(user.user_id)
         
         # Return data in reverse-chronological order
         friends.reverse()
@@ -1148,7 +1148,7 @@ class StampedAPI(AStampedAPI):
 
         # Note: This function returns data even if user is private
 
-        followers = self._friendshipDB.getFollowers(user['user_id'])
+        followers = self._friendshipDB.getFollowers(user.user_id)
 
         # Return data in reverse-chronological order
         followers.reverse()
