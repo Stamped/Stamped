@@ -48,8 +48,8 @@ const static NSInteger _histogramHeight = 100;
       background.layer.borderWidth = 1;
       [self.contentView addSubview:background];
       CGFloat x = item.count.integerValue;
-      CGFloat coeff = MIN((1 - (1 / powf((x + 6), .4)) - .5) * 2 * ( 40/33),1);
-      CGFloat height = MAX((coeff * barFrame.size.height), 3);
+      CGFloat coeff = MIN((.5 - (1 / powf((x + 6), .4))) * 80/33,1);
+      CGFloat height = MAX((coeff * barFrame.size.height), 2);
       UIView* histogram = [[[UIView alloc] initWithFrame:CGRectMake(barFrame.origin.x, barFrame.origin.y + barFrame.size.height - height, barFrame.size.width, height)] autorelease];
       
       histogram.layer.cornerRadius = 3;

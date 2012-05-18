@@ -13,6 +13,12 @@
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		1E6C3DBC141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */; };
 		1E6C3DBF141D8F0700AFEAFB /* welcome_stamp_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */; };
+		630426A91566A5EB006907E5 /* STPersistentCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426A81566A5EA006907E5 /* STPersistentCacheSource.m */; };
+		630426AA1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426A81566A5EA006907E5 /* STPersistentCacheSource.m */; };
+		630426AB1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426A81566A5EA006907E5 /* STPersistentCacheSource.m */; };
+		630426AE1566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
+		630426AF1566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
+		630426B01566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
 		63159A861544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A871544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A8A1544E95A008E75DD /* STRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A891544E959008E75DD /* STRightMenuViewController.m */; };
@@ -2932,6 +2938,10 @@
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple_bar@2x.png"; sourceTree = "<group>"; };
 		1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_stamp_logo@2x.png"; sourceTree = "<group>"; };
+		630426A71566A5EA006907E5 /* STPersistentCacheSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPersistentCacheSource.h; sourceTree = "<group>"; };
+		630426A81566A5EA006907E5 /* STPersistentCacheSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPersistentCacheSource.m; sourceTree = "<group>"; };
+		630426AC1566CB06006907E5 /* STHybridCacheSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHybridCacheSource.h; sourceTree = "<group>"; };
+		630426AD1566CB07006907E5 /* STHybridCacheSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHybridCacheSource.m; sourceTree = "<group>"; };
 		63159A841544A9A5008E75DD /* STActivityCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityCell.h; sourceTree = "<group>"; };
 		63159A851544A9A5008E75DD /* STActivityCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActivityCell.m; sourceTree = "<group>"; };
 		63159A881544E959008E75DD /* STRightMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRightMenuViewController.h; sourceTree = "<group>"; };
@@ -4644,6 +4654,10 @@
 				638D771A152A5EB0006E4988 /* STStampFactory.m */,
 				638D771E152B3908006E4988 /* STCacheModelSource.h */,
 				638D771F152B3908006E4988 /* STCacheModelSource.m */,
+				630426A71566A5EA006907E5 /* STPersistentCacheSource.h */,
+				630426A81566A5EA006907E5 /* STPersistentCacheSource.m */,
+				630426AC1566CB06006907E5 /* STHybridCacheSource.h */,
+				630426AD1566CB07006907E5 /* STHybridCacheSource.m */,
 				638D773B152B8848006E4988 /* STRestKitLoader.h */,
 				638D773C152B8849006E4988 /* STRestKitLoader.m */,
 				63C9835B154A1931000180DC /* STURLConnection.h */,
@@ -8740,6 +8754,8 @@
 				636273EA155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */,
 				637E748C155AF8620022CD2E /* STCommentButton.m in Sources */,
 				637E7491155AFBF70022CD2E /* STShareButton.m in Sources */,
+				630426AB1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
+				630426B01566CB07006907E5 /* STHybridCacheSource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9008,6 +9024,8 @@
 				636273E9155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */,
 				637E748B155AF8620022CD2E /* STCommentButton.m in Sources */,
 				637E7490155AFBF70022CD2E /* STShareButton.m in Sources */,
+				630426AA1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
+				630426AF1566CB07006907E5 /* STHybridCacheSource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9276,6 +9294,8 @@
 				636273E8155AB0D7006AF7B8 /* STSimpleImageList.m in Sources */,
 				637E748A155AF8620022CD2E /* STCommentButton.m in Sources */,
 				637E748F155AFBF70022CD2E /* STShareButton.m in Sources */,
+				630426A91566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
+				630426AE1566CB07006907E5 /* STHybridCacheSource.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

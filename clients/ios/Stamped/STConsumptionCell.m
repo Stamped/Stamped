@@ -184,7 +184,7 @@
     [self addSubview:rightButton];
     
     CGFloat imageMax = self.imageHeight + self.imageYOffset;
-    STSimplePreviews* previews = [STConsumptionCell adjustedPreviewsForStamp:stamp];
+    STSimplePreviews* previews = (STSimplePreviews*)[STConsumptionCell adjustedPreviewsForStamp:stamp];
     CGFloat previewHeight = [STPreviewsView previewHeightForPreviews:previews andMaxRows:1];
     CGRect previewFrame = CGRectMake(0, imageMax+12, 320, previewHeight);
     STPreviewsView* previewsView = [[[STPreviewsView alloc] initWithPreviews:previews andMaxRows:1] autorelease];

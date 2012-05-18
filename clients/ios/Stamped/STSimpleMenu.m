@@ -16,6 +16,33 @@
 @synthesize attributionImageLink = _attributionImageLink;
 @synthesize menus = _menus;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _disclaimer = [[decoder decodeObjectForKey:@"disclaimer"] retain];
+    _attributionImage = [[decoder decodeObjectForKey:@"attributiionImage"] retain];
+    _attributionImageLink = [[decoder decodeObjectForKey:@"attributionImageLink"] retain];
+    _menus = [[decoder decodeObjectForKey:@"menus"] retain];
+  }
+  return self;
+}
+
+- (void)dealloc
+{
+  [_disclaimer release];
+  [_attributionImage release];
+  [_attributionImageLink release];
+  [_menus release];
+  [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.disclaimer forKey:@"disclaimer"];
+  [encoder encodeObject:self.attributionImage forKey:@"attributionImage"];
+  [encoder encodeObject:self.attributionImageLink forKey:@"attributionImageLink"];
+  [encoder encodeObject:self.menus forKey:@"menus"];
+}
+
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleMenu class]];
   

@@ -24,12 +24,28 @@
   return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _type = [decoder decodeObjectForKey:@"type"];
+    _name = [decoder decodeObjectForKey:@"name"];
+    _sources = [decoder decodeObjectForKey:@"sources"];
+  }
+  return self;
+}
+
 - (void)dealloc {
   [_type release];
   [_name release];
   [_sources release];
   
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.type forKey:@"type"];
+  [encoder encodeObject:self.name forKey:@"name"];
+  [encoder encodeObject:self.sources forKey:@"sources"];
 }
 
 + (STSimpleAction*)actionWithType:(NSString*)type andSource:(id<STSource>)source {

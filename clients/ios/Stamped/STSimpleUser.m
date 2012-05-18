@@ -17,6 +17,19 @@
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _userID = [[decoder decodeObjectForKey:@"userID"] retain];
+    _screenName = [[decoder decodeObjectForKey:@"screenName"] retain];
+    _primaryColor = [[decoder decodeObjectForKey:@"primaryColor"] retain];
+    _secondaryColor = [[decoder decodeObjectForKey:@"secondaryColor"] retain];
+    _privacy = [[decoder decodeObjectForKey:@"privacy"] retain];
+    _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_userID release];
@@ -28,6 +41,14 @@
   [super dealloc];
 }
 
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.userID forKey:@"userID"];
+  [encoder encodeObject:self.screenName forKey:@"screenName"];
+  [encoder encodeObject:self.primaryColor forKey:@"primaryColor"];
+  [encoder encodeObject:self.secondaryColor forKey:@"secondaryColor"];
+  [encoder encodeObject:self.privacy forKey:@"privacy"];
+  [encoder encodeObject:self.imageURL forKey:@"imageURL"];
+}
 
 + (RKObjectMapping*)mapping {
   RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleUser class]];

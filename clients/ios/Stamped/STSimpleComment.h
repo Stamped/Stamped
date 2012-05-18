@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STComment.h"
 
-@interface STSimpleComment : NSObject <STComment>
+@interface STSimpleComment : NSObject <STComment, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* blurb;
 @property (nonatomic, readwrite, copy) NSString* commentID;

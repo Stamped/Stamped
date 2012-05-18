@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STMenu.h"
 
-@interface STSimpleMenu : NSObject <STMenu>
+@interface STSimpleMenu : NSObject <STMenu, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* disclaimer;
 @property (nonatomic, readwrite, retain) NSString* attributionImage;

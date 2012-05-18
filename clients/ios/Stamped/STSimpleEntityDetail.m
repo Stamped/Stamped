@@ -33,6 +33,25 @@
 @synthesize galleries = _galleries;
 @synthesize playlist = _playlist;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super initWithCoder:decoder];
+  if (self) {
+    _caption = [[decoder decodeObjectForKey:@"caption"] retain];
+    _address = [[decoder decodeObjectForKey:@"address"] retain];
+    _addressStreet = [[decoder decodeObjectForKey:@"addressStreet"] retain];
+    _addressCity = [[decoder decodeObjectForKey:@"addressCity"] retain];
+    _addressState = [[decoder decodeObjectForKey:@"addressState"] retain];
+    _addressZip = [[decoder decodeObjectForKey:@"addressZip"] retain];
+    _addressCountry = [[decoder decodeObjectForKey:@"addressCountry"] retain];
+    _neighborhood = [[decoder decodeObjectForKey:@"neighborhood"] retain];
+    _actions = [[decoder decodeObjectForKey:@"actions"] retain];
+    _metadata = [[decoder decodeObjectForKey:@"metadata"] retain];
+    _galleries = [[decoder decodeObjectForKey:@"galleries"] retain];
+    _playlist = [[decoder decodeObjectForKey:@"playlist"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc {
   [_caption release];
   
@@ -50,6 +69,20 @@
   [_playlist release];
   
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.caption forKey:@"caption"];
+  [encoder encodeObject:self.address forKey:@"address"];
+  [encoder encodeObject:self.addressStreet forKey:@"addressStreet"];
+  [encoder encodeObject:self.addressCity forKey:@"addressCity"];
+  [encoder encodeObject:self.addressState forKey:@"addressState"];
+  [encoder encodeObject:self.addressCountry forKey:@"addressCountry"];
+  [encoder encodeObject:self.neighborhood forKey:@"neighborhood"];
+  [encoder encodeObject:self.actions forKey:@"actions"];
+  [encoder encodeObject:self.metadata forKey:@"metadata"];
+  [encoder encodeObject:self.galleries forKey:@"galleries"];
+  [encoder encodeObject:self.playlist forKey:@"playlist"];
 }
 
 + (RKObjectMapping*)mapping {

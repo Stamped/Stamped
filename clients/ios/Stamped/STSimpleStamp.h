@@ -10,7 +10,7 @@
 #import "STStamp.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleStamp : NSObject <STStamp>
+@interface STSimpleStamp : NSObject <STStamp, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* blurb;
 @property (nonatomic, readwrite, copy) NSDate* created;

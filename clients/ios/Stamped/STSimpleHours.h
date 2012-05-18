@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STHours.h"
 
-@interface STSimpleHours : NSObject <STHours>
+@interface STSimpleHours : NSObject <STHours, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* open;
 @property (nonatomic, readwrite, retain) NSString* close;

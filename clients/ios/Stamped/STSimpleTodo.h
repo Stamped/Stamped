@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STTodo.h"
 
-@interface STSimpleTodo : NSObject <STTodo>
+@interface STSimpleTodo : NSObject <STTodo, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* todoID;
 @property (nonatomic, readwrite, copy) NSString* userID;

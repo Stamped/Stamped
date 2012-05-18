@@ -11,7 +11,7 @@
 #import "STPlaylistItem.h"
 #import "STAction.h"
 
-@interface STSimplePlaylistItem : NSObject<STPlaylistItem>
+@interface STSimplePlaylistItem : NSObject<STPlaylistItem, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, assign) NSInteger length;

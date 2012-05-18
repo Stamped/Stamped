@@ -61,7 +61,7 @@ static NSString* const _blurbFontKey = @"CreateStamp.blurbFont";
 @property (nonatomic, readwrite, retain) UIButton* shareTwitterButton;
 @property (nonatomic, readwrite, retain) UIButton* shareFacebookButton;
 @property (nonatomic, readwrite, retain) STButton* stampButton;
-@property (nonatomic, readwrite, retain) STButton* deletePhotoButton;
+@property (nonatomic, readwrite, retain) UIButton* deletePhotoButton;
 @property (nonatomic, readwrite, retain) STButton* creditView;
 @property (nonatomic, readwrite, retain) UIView* bottomBar;
 @property (nonatomic, readwrite, assign) CGRect bodyFrameNormal;
@@ -128,7 +128,14 @@ static const CGFloat _maxPhotoButtonOffset = 135;
   STStampNew* stampNew = [[[STStampNew alloc] init] autorelease];
   stampNew.blurb = self.blurbTextView.text;
   stampNew.entityID = self.entity.entityID;
-  [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error) {
+  UIImage* image = self.blurbImageView.image;
+  NSString* tempURL = self.tempPhotoURL;
+  if (image && tempURL) {
+    stampNew.tempImageURL = tempURL;
+    stampNew.tempImageWidth = [NSNumber numberWithInteger:image.size.width];
+    stampNew.tempImageHeight = [NSNumber numberWithInteger:image.size.height];
+  }
+  [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
     if (stamp) {
       STPostStampViewController* controller = [[[STPostStampViewController alloc] initWithStamp:stamp] autorelease];
       UIViewController* inbox = [[[[STConfiguration value:@"Root.inbox"] alloc] init] autorelease];
@@ -275,10 +282,9 @@ static const CGFloat _maxPhotoButtonOffset = 135;
   self.blurbImageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)] autorelease];
   [Util reframeView:self.blurbImageView withDeltas:CGRectMake(71, _minPhotoOffset, 0, 0)];
   self.blurbImageView.hidden = YES;
-  self.deletePhotoButton = [STButton buttonWithNormalImage:[UIImage imageNamed:@"delete_comment_icon"]
-                                               activeImage:[UIImage imageNamed:@"delete_comment_icon"]
-                                                    target:self 
-                                                 andAction:@selector(deletePhotoButtonClicked:)];
+  self.deletePhotoButton = [[[UIButton alloc] initWithFrame:CGRectMake(-14, -14, 28, 28)] autorelease];
+  [self.deletePhotoButton setImage:[UIImage imageNamed:@"delete_comment_icon"] forState:UIControlStateNormal];
+  [self.deletePhotoButton addTarget:self action:@selector(deletePhotoButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
   [self.blurbImageView addSubview:self.deletePhotoButton];
   [self.blurbView addSubview:self.blurbImageView];
 }
@@ -661,12 +667,24 @@ static const CGFloat _maxPhotoButtonOffset = 135;
   [self editorCameraButtonPressed:nil];
 }
 
+- (UIImage*)imageWithImage:(UIImage*)image 
+              scaledToSize:(CGSize)newSize
+{
+  UIGraphicsBeginImageContext( newSize );
+  [image drawInRect:CGRectMake(0,0,newSize.width,newSize.height)];
+  UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  
+  return newImage;
+}
+
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
   [[Util sharedNavigationController] dismissModalViewControllerAnimated:YES]; 
-  UIImage* image = [info objectForKey:UIImagePickerControllerEditedImage];
+  UIImage* image =  nil;
   if (!image) {
     image = [info objectForKey:UIImagePickerControllerOriginalImage];
   }
+  image = [self imageWithImage:image scaledToSize:image.size];
   if (image) {
     [self handleImage:image];
   }
@@ -692,7 +710,6 @@ static const CGFloat _maxPhotoButtonOffset = 135;
   bounds.origin.x = x;
   self.blurbImageView.frame = bounds;
   self.blurbImageView.hidden = NO;
-  [self.blurbImageView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(deletePhotoButtonClicked:)] autorelease]];
   [self repositionCommentButton];
   [self repositionImage];
   self.blurbImageView.userInteractionEnabled = YES;
@@ -738,6 +755,9 @@ static const CGFloat _maxPhotoButtonOffset = 135;
   CGSize contentSize = self.blurbView.contentSize;
   contentSize.height = CGRectGetMaxY(self.blurbImageView.frame) + 10;
   self.blurbView.contentSize = contentSize;
+  CGRect deleteFrame = self.deletePhotoButton.frame;
+  deleteFrame.origin.x = self.blurbImageView.frame.size.width - self.deletePhotoButton.frame.size.width / 2;
+  self.deletePhotoButton.frame = deleteFrame;
 }
 
 - (void)repositionCommentButton {

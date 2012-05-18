@@ -44,7 +44,7 @@ NSInteger height;
 NSInteger zoom;
 } STTileRect;
 
-@interface STConsumptionMapTile : NSObject <MKOverlay>
+@interface STConsumptionMapTile : NSObject <MKOverlay, NSCoding>
 
 - (id)initWithX:(NSInteger)x y:(NSInteger)y andZoom:(NSInteger)zoom;
 
@@ -66,7 +66,7 @@ NSInteger zoom;
 
 @end
 
-@interface STConsumptionAnnotation : NSObject <MKAnnotation>
+@interface STConsumptionAnnotation : NSObject <MKAnnotation, NSCoding>
 
 - (id)initWithStamp:(id<STStamp>)stamp;
 
@@ -356,9 +356,9 @@ NSInteger zoom;
 - (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
   
   // Calculate delta of origins across longitudinal distance.
-  CGFloat originDelta = MKMetersBetweenMapPoints(lastMapRect_.origin, mapView.visibleMapRect.origin);
-  MKMapPoint upperRight = MKMapPointMake(MKMapRectGetMaxX(lastMapRect_), MKMapRectGetMinY(lastMapRect_));
-  CGFloat span = MKMetersBetweenMapPoints(lastMapRect_.origin, upperRight);
+  //CGFloat originDelta = MKMetersBetweenMapPoints(lastMapRect_.origin, mapView.visibleMapRect.origin);
+  //MKMapPoint upperRight = MKMapPointMake(MKMapRectGetMaxX(lastMapRect_), MKMapRectGetMinY(lastMapRect_));
+  //CGFloat span = MKMetersBetweenMapPoints(lastMapRect_.origin, upperRight);
   
   //NSLog(@"%d",[self zoomLevel]);
   //if ((originDelta / span) < kMapSpanHysteresisPercentage)
@@ -366,8 +366,8 @@ NSInteger zoom;
   
   //if (searchField_.text.length > 0)
   //return;
-  lastMapRect_ = mapView.visibleMapRect;
-  MKCoordinateRegion region = self.mapView.region;
+  //lastMapRect_ = mapView.visibleMapRect;
+  //MKCoordinateRegion region = self.mapView.region;
   //NSLog(@"%f,%f,%f,%f",region.center.latitude, region.center.longitude, region.span.latitudeDelta, region.span.longitudeDelta);
   
   //CGRect frame = [self tileFrame];
@@ -753,6 +753,33 @@ NSInteger zoom;
   return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    x_ = [decoder decodeIntegerForKey:@"x"];
+    y_ = [decoder decodeIntegerForKey:@"y"];
+    zoom_ = [decoder decodeIntegerForKey:@"zoom"];
+    stamps_ = [decoder decodeObjectForKey:@"stamps"];
+    key_ = [decoder decodeObjectForKey:@"key"];
+  }
+  return self;
+}
+
+- (void)dealloc
+{
+  [stamps_ release];
+  [key_ release];
+  [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeInteger:self.x forKey:@"x"];
+  [encoder encodeInteger:self.y forKey:@"y"];
+  [encoder encodeInteger:self.zoom forKey:@"zoom"];
+  [encoder encodeObject:self.stamps forKey:@"stamps"];
+  [encoder encodeObject:self.key forKey:@"key"];
+}
+
 + (NSString*)keyForX:(NSInteger)x y:(NSInteger)y andZoom:(NSInteger)zoom {
   return [NSString stringWithFormat:@"%d,%d,%d", x, y, zoom];
 }
@@ -808,10 +835,19 @@ NSInteger zoom;
   return self;
 }
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  id<STStamp> stamp = [decoder decodeObjectForKey:@"stamp"];
+  return [self initWithStamp:stamp];
+}
+
 - (void)dealloc
 {
   [stamp_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.stamp forKey:@"stamp"];
 }
 
 - (NSString *)title {
