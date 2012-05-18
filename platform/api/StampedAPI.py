@@ -381,7 +381,7 @@ class StampedAPI(AStampedAPI):
             self._stampDB.removeLike(account.user_id, stamp.stamp_id)
             
             # Decrement user stats by one
-            self._userDB.updateUserStats(stamp.user_id, 'num_likes', increment=-1)
+            self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=-1)
             
             # Decrement stamp stats by one
             self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
@@ -1728,7 +1728,7 @@ class StampedAPI(AStampedAPI):
 
         for stampId, stamp in underlyingStampIds.iteritems():
             # Credit received
-            allUserIds.add(stamp.user_id)
+            allUserIds.add(stamp.user.user_id)
 
         # Enrich missing user ids
         missingUserIds = allUserIds.difference(set(userIds.keys()))
@@ -1844,11 +1844,11 @@ class StampedAPI(AStampedAPI):
                 if authUserId:
                     # Mark as favorited
                     if stamp.entity.entity_id in favorites:
-                        stamp.is_fav = True
+                        stamp.attributes.is_fav = True
                     
                     # Mark as liked
                     if stamp.stamp_id in likes:
-                        stamp.is_liked = True
+                        stamp.attributes.is_liked = True
 
                 stamps.append(stamp)
 
@@ -1981,7 +1981,7 @@ class StampedAPI(AStampedAPI):
             stamp.timestamp.stamped     = now
             stamp.timestamp.stamped     = now
             stamp.timestamp.modified    = now 
-            stamp.stats.num_blurbs      = stamp.stats.num_blurbs + 1 if stamp.num_blurbs is not None else 2
+            stamp.stats.num_blurbs      = stamp.stats.num_blurbs + 1 if stamp.stats.num_blurbs is not None else 2
 
             contents                    = stamp.contents 
             contents.append(content)
@@ -2384,7 +2384,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Check privacy of stamp
-        if stamp.user_id != authUserId and stamp.user.privacy == True:
+        if stamp.user.user_id != authUserId and stamp.user.privacy == True:
             friendship              = Friendship()
             friendship.user_id      = user.user_id
             friendship.friend_id    = authUserId
@@ -2412,7 +2412,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Verify user has permission to add image
-        if stamp.user_id != authUserId:
+        if stamp.user.user_id != authUserId:
             raise StampedPermissionsError("Insufficient privileges to update stamp image")
         
         image = self._imageDB.getImage(data)
@@ -2685,9 +2685,9 @@ class StampedAPI(AStampedAPI):
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Verify user has the ability to 'like' the stamp
-        if stamp.user_id != authUserId:
+        if stamp.user.user_id != authUserId:
             friendship              = Friendship()
-            friendship.user_id      = stamp.user_id
+            friendship.user_id      = stamp.user.user_id
             friendship.friend_id    = authUserId
             
             # Check if stamp is private; if so, must be a follower
@@ -2710,40 +2710,40 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.stamps.likes')
         
         # Increment user stats by one
-        self._userDB.updateUserStats(stamp.user_id, 'num_likes',    increment=1)
+        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
         
         # Increment stamp stats by one
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=1)
         
-        if stamp.num_likes is None:
-            stamp.num_likes = 0
+        if stamp.stats.num_likes is None:
+            stamp.stats.num_likes = 0
         
-        stamp.num_likes += 1
-        stamp.is_liked = True
+        stamp.stats.num_likes += 1
+        stamp.attributes.is_liked = True
         
         # Give credit once a given threshold is hit
         benefit = None
-        if stamp.num_likes >= 3 and not stamp.like_threshold_hit:
+        if stamp.stats.num_likes >= 3 and not stamp.stats.like_threshold_hit:
             benefit = LIKE_BENEFIT
             
             # Update stamp stats
             self._stampDB.giveLikeCredit(stamp.stamp_id)
-            stamp.like_threshold_hit = True
+            stamp.stats.like_threshold_hit = True
             
             # Update user stats with new credit
-            self._userDB.updateUserStats(stamp.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
+            self._userDB.updateUserStats(stamp.user.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
         
         # Add activity for stamp owner (if not self)
-        if stamp.user_id != authUserId:
+        if stamp.user.user_id != authUserId:
             self._addActivity(verb          = 'like', 
                               userId        = authUserId, 
                               stampId       = stamp.stamp_id,
-                              friendId      = stamp.user_id,
+                              friendId      = stamp.user.user_id,
                               benefit       = benefit)
 
         # Update entity stats
-        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity_id])
+        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
@@ -2761,19 +2761,19 @@ class StampedAPI(AStampedAPI):
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Decrement user stats by one
-        self._userDB.updateUserStats(stamp.user_id, 'num_likes',    increment=-1)
+        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
         
         # Decrement stamp stats by one
         self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
         
-        if stamp.num_likes is None:
-            stamp.num_likes = 0
+        if stamp.stats.num_likes is None:
+            stamp.stats.num_likes = 0
         
-        if stamp.num_likes > 0:
-            stamp.num_likes -= 1
+        if stamp.stats.num_likes > 0:
+            stamp.stats.num_likes -= 1
         else:
-            stamp.num_likes  = 0
+            stamp.stats.num_likes  = 0
         
         # Remove activity
         self._activityDB.removeActivity('like', authUserId, stampId=stampId)
@@ -2789,9 +2789,9 @@ class StampedAPI(AStampedAPI):
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
         
         # Verify user has the ability to view the stamp's likes
-        if stamp.user_id != authUserId:
+        if stamp.user.user_id != authUserId:
             friendship              = Friendship()
-            friendship.user_id      = stamp.user_id
+            friendship.user_id      = stamp.user.user_id
             friendship.friend_id    = authUserId
             
             # Check if stamp is private; if so, must be a follower
@@ -3123,12 +3123,12 @@ class StampedAPI(AStampedAPI):
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
         ### TODO: Make async
-        if stampId is not None and favorite.stamp.user_id != authUserId:
+        if stampId is not None and favorite.stamp.user.user_id != authUserId:
 
             self._addActivity(verb          = 'todo', 
                               userId        = authUserId, 
                               entityId      = entity.entity_id,
-                              friendId      = favorite.stamp.user_id, 
+                              friendId      = favorite.stamp.user.user_id,
                               stampId       = stampId)
 
             # Update stamp stats
@@ -3155,7 +3155,7 @@ class StampedAPI(AStampedAPI):
             favorite.stamp  = self._enrichStampObjects(stamp, authUserId=authUserId)
             
             # Just in case...
-            favorite.stamp.is_fav = False
+            favorite.stamp.attributes.is_fav = False
             
             # Remove activity
             self._activityDB.removeActivity('todo', authUserId, stampId=stamp.stamp_id)
