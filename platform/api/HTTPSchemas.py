@@ -304,26 +304,26 @@ class OAuthLogin(Schema):
 class HTTPActionCompletionData(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('action',                 basestring)
-        cls.addProperty('source',                 basestring)
-        cls.addProperty('source_id',              basestring)
-        cls.addProperty('entity_id',              basestring)
-        cls.addProperty('user_id',                basestring)
-        cls.addProperty('stamp_id',               basestring)
+        cls.addProperty('action',                       basestring)
+        cls.addProperty('source',                       basestring)
+        cls.addProperty('source_id',                    basestring)
+        cls.addProperty('entity_id',                    basestring)
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('stamp_id',                     basestring)
 
 class HTTPActionSource(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                   basestring, required=True)
-        cls.addProperty('source',                 basestring, required=True)
-        cls.addProperty('source_id',              basestring)
-        cls.addProperty('source_data',            dict)
-        cls.addProperty('endpoint',               basestring)
-        cls.addProperty('endpoint_data',          dict)
-        cls.addProperty('link',                   basestring)
-        cls.addProperty('icon',                   basestring)
-        cls.addProperty('completion_endpoint',    basestring)
-        cls.addProperty('completion_data',        dict) # dictionary?
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('source',                       basestring, required=True)
+        cls.addProperty('source_id',                    basestring)
+        cls.addProperty('source_data',                  dict)
+        cls.addProperty('endpoint',                     basestring)
+        cls.addProperty('endpoint_data',                dict)
+        cls.addProperty('link',                         basestring)
+        cls.addProperty('icon',                         basestring)
+        cls.addProperty('completion_endpoint',          basestring)
+        cls.addProperty('completion_data',              dict) # dictionary?
     
     def setCompletion(self, **kwargs):
         self.completion_endpoint    = COMPLETION_ENDPOINT
@@ -332,9 +332,9 @@ class HTTPActionSource(Schema):
 class HTTPAction(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('type',                     basestring, required=True)
-        cls.addProperty('name',                     basestring, required=True)
-        cls.addNestedPropertyList('sources',        HTTPActionSource, required=True)
+        cls.addProperty('type',                         basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addNestedPropertyList('sources',            HTTPActionSource, required=True)
 
 
 
@@ -345,22 +345,22 @@ class HTTPAction(Schema):
 class HTTPImageSizeSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('url',                      basestring)
-        cls.addProperty('width',                    int)
-        cls.addProperty('height',                   int)
+        cls.addProperty('url',                          basestring)
+        cls.addProperty('width',                        int)
+        cls.addProperty('height',                       int)
 
 class HTTPImageSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('sizes',          HTTPImageSizeSchema)
-        cls.addProperty('caption',                  basestring)
-        cls.addNestedProperty('action',             HTTPAction)
+        cls.addNestedPropertyList('sizes',              HTTPImageSizeSchema)
+        cls.addProperty('caption',                      basestring)
+        cls.addNestedProperty('action',                 HTTPAction)
 
 class HTTPTextReference(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addPropertyList('indices',          int)
-        cls.addNestedProperty('action',         HTTPAction)
+        cls.addPropertyList('indices',                  int, required=True)
+        cls.addNestedProperty('action',                 HTTPAction)
 
 
 # ####### #
@@ -370,12 +370,12 @@ class HTTPTextReference(Schema):
 class HTTPAccount(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',            basestring, required=True)
-        cls.addProperty('name',               basestring, required=True)
-        cls.addProperty('email',              basestring, required=True)
-        cls.addProperty('screen_name',        basestring, required=True)
-        cls.addProperty('privacy',            bool, required=True)
-        cls.addProperty('phone',              int)
+        cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('privacy',                      bool, required=True)
+        cls.addProperty('phone',                        int)
 
     def importAccount(self, account):
         self.dataImport(account.dataExport(), overflow=True)
