@@ -174,7 +174,7 @@ def handleHTTPRequest(requires_auth=True,
                     
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
-                    elif params['http_schema'] is not None:
+                    elif http_schema is not None:
                         params['data']          = params['http_schema'].dataExport()
                 
                 kwargs.update(params)
