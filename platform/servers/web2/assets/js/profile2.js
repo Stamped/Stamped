@@ -61,7 +61,7 @@ g_update_stamps = null;
         
         
         // ---------------------------------------------------------------------
-        // initialize stamp-gallery isotope / masonry layout and infinite scroll
+        // initialize stamp-gallery, isotope layout, and infinite scroll
         // ---------------------------------------------------------------------
         
         var $gallery = null;
@@ -90,6 +90,8 @@ g_update_stamps = null;
             }
         };
         
+        // use moment.js to make every stamps's timestamp human-readable and 
+        // relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
         var update_timestamps = function() {
             $('.timestamp_raw').each(function(i, elem) {
                 var $elem = $(elem);
@@ -101,6 +103,11 @@ g_update_stamps = null;
         
         var last_layout = null;
         
+        // lazily relayout the stamp gallery using isotope
+        // NOTE: we apply time-based coalescing here s.t. if this function is 
+        // called several times, it will attempt to only update the layout once
+        // to avoid doing extra, unnecessary work / rendering that could result 
+        // in a choppier end-user experience.
         var update_gallery_layout = function(force) {
             force   = (typeof(force) === 'undefined' ? false : force);
             var now = new Date().getTime();
@@ -109,16 +116,22 @@ g_update_stamps = null;
                 last_layout = now;
                 
                 update_gallery(function() {
+                    update_navbar_layout(true);
                     last_layout = new Date().getTime();
                 });
             }
         };
         
+        // post-processing of newly added stamps, including:
+        //   1) using moment.js to make the stamp's timestamp human-readable and 
+        //      relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
+        //   2) enforce predence of rhs stamp preview images
+        //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function() {
             update_timestamps();
             
             $('.stamp-preview').each(function(i, elem) {
-                var $this  = $(this);
+                var $this = $(this);
                 
                 // enforce precedence of stamp preview images
                 var update_images = function() {
@@ -173,16 +186,21 @@ g_update_stamps = null;
                 
                 update_images();
             });
+            
+            $('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
+                var $this = $(this);
+            });
         };
         
         g_update_stamps = update_stamps;
         
+        // initialize the stamp gallery's layout with isotope and infinite scroll
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
             
             $gallery.isotope({
                 itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "straightDown"
+                layoutMode      : "fitRows"
             });
             
             // TODO: customize loading image
@@ -215,8 +233,9 @@ g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
+        // parse the given URL for its base URL and parameters
         var parse_url = function(url) {
-            var parts       = url.split('?');
+            var parts         = url.split('?');
             var base_url_s    = parts[0];
             var base_uri0_s   = base_url_s.split('/');
             var base_uri_s    = base_uri0_s[base_uri0_s.length - 1];
@@ -251,6 +270,10 @@ g_update_stamps = null;
         var options     = parsed_url.options;
         var base_uri    = parsed_url.base_uri;
         
+        // Returns a new dictionary of parameters, comprised of (opts | params) 
+        // with values in params taking precedence over the default values in 
+        // opts. Note that if no opts are passed in, the options parsed from 
+        // this page's URL will be used as the defaults.
         var get_custom_params = function(params, opts) {
             if (typeof(opts) === 'undefined') {
                 opts = options;
@@ -346,6 +369,8 @@ g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
+        // collect the default, static positions and sizes of all header 
+        // elements that we'll be animating
         var $user_logo          = $('header .user-logo-large');
         var user_logo_width     = parseFloat($user_logo.css('width'));
         var user_logo_height    = parseFloat($user_logo.css('height'));
@@ -375,6 +400,9 @@ g_update_stamps = null;
         var sign_in_width       = $sign_in.width()  + pad;
         var sign_in_height      = $sign_in.height() + pad;
         
+        // now that we have the static positions and sizes of the dynamic header  
+        // elements, initialize their new positioning /sizing to absolute and 
+        // non-auto, respectively.
         $header.height(header_height);
         
         $join.css({
@@ -397,8 +425,10 @@ g_update_stamps = null;
         
         var last_ratio = null;
         
+        // whenever the window scrolls, check if the header's layout needs to be updated
         $window.bind("scroll", function(n) {
-            var cur_ratio = Math.min(Math.max((header_height - $window.scrollTop()) / header_height, 0.0), 1.0);
+            var cur_ratio = (header_height - $window.scrollTop()) / header_height;
+            cur_ratio     = Math.min(Math.max(cur_ratio, 0.0), 1.0);
             
             if (cur_ratio !== last_ratio) {
                 last_ratio = cur_ratio;
@@ -412,11 +442,12 @@ g_update_stamps = null;
                     $header.height(cur_header_height);
                 }
                 
+                var cur_opacity = cur_ratio * cur_ratio;
                 var style = {
-                    opacity : cur_ratio
+                    opacity : cur_opacity
                 };
                 
-                if (cur_ratio < 0.1) {
+                if (cur_opacity <= 0.2) {
                     style['visibility'] = 'hidden';
                 } else {
                     style['visibility'] = 'visible';
@@ -434,6 +465,7 @@ g_update_stamps = null;
                     top : cur_top
                 });
                 
+                
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width  / 4.0);
                 var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_height / 4.0);
                 var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_height + 'px';
@@ -444,7 +476,8 @@ g_update_stamps = null;
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size
                 });
-                //console.debug("cur_ratio: " + cur_ratio);
+                
+                //console.debug("DYNAMIC HEADER: ratio=" + cur_ratio);
             }
         });
         
@@ -462,6 +495,9 @@ g_update_stamps = null;
             
             $body.removeClass(categories).addClass(category);
         };
+        
+        // TODO: if history is disabled but JS is enabled, user will be unable 
+        // to navigate categories
         
         if (History && History.enabled) {
             History.Adapter.bind(window, 'statechange', function() {
@@ -559,6 +595,7 @@ g_update_stamps = null;
             });
         }
         
+        // handle nav bar click routing
         $nav_bar.find('a').each(function () {
             $(this).click(function(event) {
                 event.stopPropagation();
@@ -608,10 +645,73 @@ g_update_stamps = null;
             });
         });
         
-        update_stamps();
+        var fixed_width     = 940;
+        var fixed_padding   = 80;
+        var min_col_width   = 305;
+        var last_nav_pos    = null;
+        
+        var update_navbar_layout = function(should_update_gallery) {
+            should_update_gallery = (typeof(should_update_gallery) !== 'boolean' ? true : should_update_gallery);
+            
+            var nav_bar_width   = $nav_bar.width();
+            var $stamp_gallery  = $('.stamp-gallery');
+            var gallery_x       = $stamp_gallery.offset().left;
+            var gallery_width   = $stamp_gallery.width();
+            var wide_gallery    = 'wide-gallery';
+            
+            var width = window.innerWidth;
+            var right = (width - (gallery_x + fixed_width + nav_bar_width + fixed_padding));
+            var pos   = Math.max((width - (gallery_x + gallery_width + nav_bar_width + fixed_padding)), fixed_padding / 2);
+            var update= false;
+            var large = false;
+            
+            if (right < fixed_padding / 2) {
+                console.debug("SMALL GALLERY: width=" + width + ", pos=" + pos);
+                
+                if ($stamp_gallery.hasClass(wide_gallery)) {
+                    $stamp_gallery.removeClass(wide_gallery);
+                    update = true;
+                }
+            } else {
+                console.debug("LARGE GALLERY: width=" + width + ", pos=" + pos);
+                large = true;
+                
+                if (!$stamp_gallery.hasClass(wide_gallery)) {
+                    $stamp_gallery.addClass(wide_gallery);
+                    update = true;
+                }
+            }
+            
+            if (update || last_nav_pos !== pos) {
+                last_nav_pos = pos;
+                
+                if (!large) {
+                    var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
+                    var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
+                    
+                    $('.fixedwidth').width(new_fixed_width);
+                    update = true;
+                } else {
+                    $('.fixedwidth').width("940px");
+                }
+            }
+            
+            if (should_update_gallery) {
+                update_gallery_layout(update);
+            }
+            
+            $nav_bar.css({
+                right : pos + "px"
+            });
+        };
+        
+        $(window).resize(update_navbar_layout);
         
         // TODO: initial gallery opening animation by adding items one at a time
-        init_gallery();
+        update_stamps();
+        init_gallery ();
+        update_navbar_layout();
+        
         return;
         
         var userP = client.get_user_by_screen_name(screen_name);

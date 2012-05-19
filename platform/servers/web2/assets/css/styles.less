@@ -22,6 +22,12 @@
    ************************************************************************** */
 
 
+@fixed-width: 940px;
+
+html {
+	overflow-y: scroll;
+}
+
 body, html {
     width:  100%;
     height: 100%;
@@ -73,9 +79,13 @@ a:hover {
 }
 
 footer, .fixedwidth {
-    width: 940px;
-    margin: 0 auto;
     position: relative;
+    display: block;
+    
+    max-width: @fixed-width;
+    width: @fixed-width;
+    
+    margin: 0 auto;
 }
 
 
@@ -91,7 +101,6 @@ header {
     background: #fff;
      
     .header-body {
-        .fixedwidth;
         z-index: 25;
         
         p {
@@ -206,10 +215,10 @@ header {
 }
 
 .user-logo-small {
-    position: relative;
+    position: absolute;
     
-    top:  -10px;
-    left: -10px;
+    top:   -10px;
+    right: -22px;
     
     display: inline-block;
     width:  44px;
@@ -288,8 +297,6 @@ header {
                 }
                 
                 .profile-header-body-fixedwidth {
-                    .fixedwidth;
-                    
                     padding: 34px 0;
                     
                     .floatleft {
@@ -619,6 +626,8 @@ header {
     
     top:   50%;
     right: 40px;
+    
+    .transition(all, 0.6s, ease-in-out);
     margin: -180px 0 0;
     padding: 0;
     

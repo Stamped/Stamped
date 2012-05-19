@@ -24,6 +24,9 @@
 /* **************************************************************************
                             BASIC HIGH-LEVEL SETUP
    ************************************************************************** */
+html {
+  overflow-y: scroll;
+}
 body,
 html {
   width: 100%;
@@ -69,9 +72,11 @@ a:hover {
 }
 footer,
 .fixedwidth {
+  position: relative;
+  display: block;
+  max-width: 940px;
   width: 940px;
   margin: 0 auto;
-  position: relative;
 }
 /* **************************************************************************
                                 GENERIC FIXED HEADER
@@ -84,9 +89,6 @@ header {
   background: #fff;
 }
 header .header-body {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
   z-index: 25;
   /* TODO: use slight background gradient instead of flat color */
 
@@ -201,9 +203,9 @@ header .header-body a.button {
   z-index: 101;
 }
 .user-logo-small {
-  position: relative;
+  position: absolute;
   top: -10px;
-  left: -10px;
+  right: -22px;
   display: inline-block;
   width: 44px;
   height: 44px;
@@ -280,9 +282,6 @@ header .header-body a.button {
 
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
   padding: 34px 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
@@ -664,6 +663,9 @@ header .header-body a.button {
   box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   top: 50%;
   right: 40px;
+  -webkit-transition: all 0.6s ease-in-out;
+  -moz-transition: all 0.6s ease-in-out;
+  transition: all 0.6s ease-in-out;
   margin: -180px 0 0;
   padding: 0;
 }

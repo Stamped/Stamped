@@ -7,7 +7,12 @@
         
         <div class="inner-content">
             <div class="stamp-category-{{entity.category}}">
-                <div class="pronounced-title"><a href="{{url}}">{{#entity}}{{title}}{{/entity}}</a><span class='user-logo-small'></span></div>
+                <div class='title clearfloat'>
+                    <div class="pronounced-title">
+                        <a href="{{url}}" title="{{entity.title}}">{{entity.title}}</a>
+                    </div>
+                    <span class='user-logo-small'></span>
+                </div>
                 
                 <div class="subtitle-line">
                     <p>
@@ -19,35 +24,32 @@
                 <div class="stamp-contents">
                     {{#contents}}
                     <div class="stamped-content">
-                        <div>
-                            {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
-                        </div>
+                        {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
                     </div>
                     {{/contents}}
                 </div>
                 
                 <div class="previews count_{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}_{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}_{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}">
-                        
-                        <div class='preview count_{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}'>
-                            <div class='like'></div>
-                            <span class='count'>
-                                {{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}
-                            </span>
-                        </div>
-                        
-                        <div class='preview count_{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}'>
-                            <div class='todo'></div>
-                            <span class='count'>
-                                {{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}
-                            </span>
-                        </div>
-                        
-                        <div class='preview count_{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}'>
-                            <div class='comments'></div>
-                            <span class='count'>
-                                {{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}
-                            </span>
-                        </div>
+                    <div class='preview count_{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}'>
+                        <div class='like'></div>
+                        <span class='count'>
+                            {{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}
+                        </span>
+                    </div>
+                    
+                    <div class='preview count_{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}'>
+                        <div class='todo'></div>
+                        <span class='count'>
+                            {{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}
+                        </span>
+                    </div>
+                    
+                    <div class='preview count_{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}'>
+                        <div class='comments'></div>
+                        <span class='count'>
+                            {{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
