@@ -146,8 +146,22 @@
 .stamp-gallery-item .content .rhs .stamp-preview .stamp-user-image {
   z-index: 24;
 }
+.stamp-gallery-item .content .rhs .stamp-preview .stamp-user-image img {
+  -webkit-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  -moz-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  -ms-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  -o-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+}
 .stamp-gallery-item .content .rhs .stamp-preview .stamp-entity-image {
   z-index: 23;
+}
+.stamp-gallery-item .content .rhs .stamp-preview .stamp-entity-image img {
+  -webkit-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  -moz-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  -ms-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  -o-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
+  box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
 }
 .stamp-gallery-item .content .rhs .stamp-preview .stamp-icon {
   z-index: 22;
@@ -196,50 +210,60 @@
 .stamp-gallery-item .content .inner-content .stamp-contents .stamped-content {
   margin: .2em 0 1em;
 }
+.stamp-gallery-item .content .inner-content .count_0_0_0 {
+  display: none;
+}
 .stamp-gallery-item .content .inner-content .previews {
   font-size: 80%;
 }
-.stamp-gallery-item .content .inner-content .previews div {
-  display: block;
-  float: left;
+.stamp-gallery-item .content .inner-content .previews .preview {
+  display: inline;
+  margin: 0 .8em 0 0;
+}
+.stamp-gallery-item .content .inner-content .previews .count {
+  position: relative;
+  top: -4px;
 }
 .stamp-gallery-item .content .inner-content .previews div.like {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: 0 0;
+  display: inline-block;
   width: 17px;
   height: 17px;
   z-index: 100;
-  margin: -1px 0.2em 0 0.7em;
 }
-.stamp-gallery-item .content .inner-content .previews .inactive div.like {
-  background-position: 0 20px;
+.stamp-gallery-item .content .inner-content .previews .count_0 div.like {
+  background-position: 0 -20px;
 }
 .stamp-gallery-item .content .inner-content .previews div.todo {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -19px 0;
+  display: inline-block;
   width: 17px;
   height: 17px;
   z-index: 100;
-  margin: -1px 0.2em 0 0.7em;
 }
-.stamp-gallery-item .content .inner-content .previews .inactive div.todo {
-  background-position: -19px 20px;
+.stamp-gallery-item .content .inner-content .previews .count_0 div.todo {
+  background-position: -19px -20px;
 }
 .stamp-gallery-item .content .inner-content .previews div.comments {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -38px 0;
+  display: inline-block;
   width: 17px;
   height: 17px;
   z-index: 100;
-  margin: -1px 0.2em 0 0.7em;
 }
-.stamp-gallery-item .content .inner-content .previews .inactive div.comments {
-  background-position: -38px 20px;
+.stamp-gallery-item .content .inner-content .previews .count_0 div.comments {
+  background-position: -38px -20px;
 }
 .blurb {
-  display: inline;
+  display: inline-block;
   text-align: left;
   quotes: "\201C" "\201D";
+  /*height: 4em;
+    overflow: hidden;*/
+
 }
 .blurb:before {
   content: open-quote;

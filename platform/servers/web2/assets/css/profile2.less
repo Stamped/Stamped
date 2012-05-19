@@ -100,9 +100,17 @@
                 }
                 .stamp-user-image {
                     z-index: 24;
+                    
+                    img {
+                        .box-shadow(4px, 4px, 8px, 0, rgba(30,30,30,0.85));
+                    }
                 }
                 .stamp-entity-image {
                     z-index: 23;
+                    
+                    img {
+                        .box-shadow(4px, 4px, 8px, 0, rgba(30,30,30,0.85));
+                    }
                 }
                 .stamp-icon {
                     z-index: 22;
@@ -145,54 +153,65 @@
                 }
             }
             
+            .count_0_0_0 {
+                display: none;
+            }
+            
             .previews {
                 font-size: 80%;
                 
-                div {
-                    display: block;
-                    float: left;
+                .preview {
+                    display: inline;
+                    margin: 0 .8em 0 0;
                 }
                 
                 .preview-image(@l, @t) {
                     background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
                     background-position: @l @t;
                     
+                    display: inline-block;
                     width:  17px;
                     height: 17px;
                     z-index: 100;
-                    margin: -1px .2em 0 .7em;
+                }
+                
+                .count {
+                    position: relative;
+                    top: -4px;
                 }
                 
                 div.like {
                     .preview-image(0, 0);
                 }
-                .inactive div.like {
-                    background-position: 0 20px;
+                .count_0 div.like {
+                    background-position: 0 -20px;
                 }
                 
                 div.todo {
                     .preview-image(-19px, 0);
                 }
-                .inactive div.todo {
-                    background-position: -19px 20px;
+                .count_0 div.todo {
+                    background-position: -19px -20px;
                 }
                 
                 div.comments {
                     .preview-image(-38px, 0);
                 }
-                .inactive div.comments {
-                    background-position: -38px 20px;
+                .count_0 div.comments {
+                    background-position: -38px -20px;
                 }
-                
             }
         }
     }
 }
 
 .blurb {
-    display: inline;
+    display: inline-block;
     text-align: left;
     quotes: "\201C" "\201D";
+    
+    /*height: 4em;
+    overflow: hidden;*/
 }
 
 .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }

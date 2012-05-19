@@ -42,8 +42,6 @@
 
 
 TODO:
-    * navbar animation -- fade in quicker than fade out
-    
     * change category-loading to not go through stamped-api but rather fetch the page and extract the relevant content?
         * caching benefit?
     
@@ -93,7 +91,6 @@ POLISH:
     * link stamp image to lightboxed full-resolution version
     * move all clearfix, fullwidth, fixedwidth definitions over to stylesheets!
     * experiment with :before and :after instead of top-wave and bottom-wave
-    
 
 OPTIMIZE:
     * 
@@ -107,4 +104,8 @@ OLD:
     * get full stamp inset image from anthony
     * how to reference a specific stamp-gallery-item via stamp_id, entity_id, or filter
         * (unnecessary for now)
+    * navbar animation -- fade in quicker than fade out
+
+NOTES:
+    * no feedback icons in case of no feedback looks inconsistent
 
