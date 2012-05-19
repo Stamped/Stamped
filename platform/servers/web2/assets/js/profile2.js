@@ -187,9 +187,10 @@ g_update_stamps = null;
                 update_images();
             });
             
-            $('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
+            /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
-            });
+                $this.fitText();
+            });*/
         };
         
         g_update_stamps = update_stamps;

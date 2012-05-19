@@ -42,6 +42,7 @@
 
 
 TODO:
+    * what to do when entity title is cutoff
     * change category-loading to not go through stamped-api but rather fetch the page and extract the relevant content?
         * caching benefit?
     
