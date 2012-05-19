@@ -1050,7 +1050,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Reserve on OpenTable'
                 source.source       = 'opentable'
                 source.source_id    = entity.sources.opentable_id
-                source.link         = _buildOpenTableURL(entity.opentable_id, entity.opentable_nickname, client)
+                source.link         = _buildOpenTableURL(entity.sources.opentable_id, entity.opentable_nickname, client)
                 source.icon         = _getIconURL('src_opentable', client=client)
                 source.setCompletion(
                     action      = actionType,
@@ -1068,14 +1068,14 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_call', client=client)
             sources     = []
 
-            if entity.contact.phone is not None:
+            if entity.phone is not None:
                 source              = HTTPActionSource()
                 source.source       = 'phone'
-                source.source_id    = entity.contact.phone
-                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.contact.phone)
+                source.source_id    = entity.phone
+                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.phone)
                 sources.append(source)
 
-            self._addAction(actionType, entity.contact.phone, sources, icon=actionIcon)
+            self._addAction(actionType, entity.phone, sources, icon=actionIcon)
 
             # Actions: View Menu
 
@@ -1083,7 +1083,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
 
-            if entity.singleplatform_id is not None:
+            if entity.sources.singleplatform_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'stamped'
@@ -1137,14 +1137,14 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_call', client=client)
             sources     = []
 
-            if entity.contact.phone is not None:
+            if entity.phone is not None:
                 source              = HTTPActionSource()
                 source.source       = 'phone'
-                source.source_id    = entity.contact.phone
-                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.contact.phone)
+                source.source_id    = entity.phone
+                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.phone)
                 sources.append(source)
 
-            self._addAction(actionType, entity.contact.phone, sources, icon=actionIcon)
+            self._addAction(actionType, entity.phone, sources, icon=actionIcon)
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
@@ -1778,7 +1778,8 @@ class HTTPEntityNew(Schema):
         addField(entity, 'release_date', self.release_date, now)
 
         if _coordinatesFlatToDict(self.coordinates) is not None:
-            addField(entity, 'coordinates', _coordinatesFlatToDict(self.coordinates), now)
+            coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
+            addField(entity, 'coordinates', coords, now)
 
         entity.user_generated_id            = authUserId
         entity.user_generated_subtitle      = self.subtitle
@@ -1870,7 +1871,8 @@ class HTTPEntitySearch(Schema):
     def exportEntitySearch(self):
         entSearch = EntitySearch().dataImport(self.dataExport(), overflow=True)
         if self.coordinates is not None:
-            entSearch.coordinates = _coordinatesFlatToDict(self.coordinates)
+            coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
+            entSearch.coordinates = coordinates 
         return entSearch
 
 #        def exportSchema(self, schema):
@@ -1898,8 +1900,13 @@ class HTTPEntityNearby(Schema):
         self.page = 0
 
     def exportEntityNearby(self):
-        entityNearby = EntityNearby().dataImport(self.dataExport(), overflow=True)
-        entityNearby.coordinates = _coordinatesFlatToDict(self.coordinates)
+        data = self.dataExport()
+        del(data['coordinates'])
+
+        entityNearby = EntityNearby().dataImport(data, overflow=True)
+
+        coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
+        entityNearby.coordinates = coords
         return entityNearby
 
 #        def exportSchema(self, schema):
@@ -1923,7 +1930,8 @@ class HTTPEntitySuggested(Schema):
     def exportEntitySuggested(self):
         entitySuggested = EntitySuggested().dataImport(self.dataExport(), overflow=True)
         if self.coordinates is not None:
-            entitySuggested.coordinates = _coordinatesFlatToDict(self.coordinates)
+            coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
+            entitySuggested.coordinates = coords
         return entitySuggested
 
 #        def exportSchema(self, schema):

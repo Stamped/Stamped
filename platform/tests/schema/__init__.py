@@ -1,4 +1,0 @@
-
-import SchemaTests
-import StampedSchemaTests
-

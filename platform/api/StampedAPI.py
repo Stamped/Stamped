@@ -1245,6 +1245,9 @@ class StampedAPI(AStampedAPI):
     """
 
     def _getEntityFromRequest(self, entityRequest):
+        if isinstance(entityRequest, Schema):
+            entityRequest = entityRequest.dataExport()
+            
         entityId    = entityRequest.pop('entity_id', None)
         searchId    = entityRequest.pop('search_id', None)
         
@@ -1266,7 +1269,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addEntity(self, entity):
-        entity.timestamp.created = datetime.utcnow()
+        timestamp = TimestampSchema()
+        timestamp.created = datetime.utcnow()
+        entity.timestamp = timestamp 
         entity = self._entityDB.addEntity(entity)
         return entity
     

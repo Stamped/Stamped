@@ -276,8 +276,8 @@ class NetflixSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.netflix_is_instant_available = proxy.is_instant_available
-        entity.netflix_instant_available_until = proxy.instant_available_until
+        entity.sources.netflix_is_instant_available = proxy.is_instant_available
+        entity.sources.netflix_instant_available_until = proxy.instant_available_until
         return True
 
 
