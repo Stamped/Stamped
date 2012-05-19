@@ -52,7 +52,7 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (_baseurl, path, params)
         
-        utils.log("GET:  %s" % url)
+        # utils.log("GET:  %s" % url)
         raw = self._opener.open(url).read()
         
         try:

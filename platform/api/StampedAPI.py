@@ -3089,20 +3089,32 @@ class StampedAPI(AStampedAPI):
     #       #    #  #  #  #      #    # 
     #       #    #   ##   ######  ####  
     """
+
+    def _enrichFavorite(self, rawFavorite, user=None, entity=None, stamp=None, authUserId=None):
+        if user is None or user.user_id != rawFavorite.user_id:
+            user = UserMini().dataImport(self._userDB.getUser(rawFavorite.user_id).dataExport())
+
+        if entity is None or entity.entity_id != rawFavorite.entity.entity_id:
+            entity = self._entityDB.getEntity(rawFavorite.entity.entity_id)
+
+        if rawFavorite.stamp_id is not None:
+            stamp = self._stampDB.getStamp(rawFavorite.stamp_id)
+            stamp = self._enrichStampObjects(stamp, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
+
+        return rawFavorite.enrich(user, entity, stamp)
     
     @API_CALL
     def addFavorite(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        favorite                    = Favorite()
+        favorite                    = RawFavorite()
         favorite.entity             = entity
         favorite.user_id            = authUserId
         favorite.timestamp          = TimestampSchema()
         favorite.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
-            stamp = self._stampDB.getStamp(stampId)
-            favorite.stamp = stamp
+            favorite.stamp_id = stampId
         
         # Check to verify that user hasn't already favorited entity
         try:
@@ -3125,10 +3137,8 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.favorites')
         
-        # Enrich stamp
-        if stampId is not None:
-            entityIds = { entity.entity_id: entity }
-            favorite.stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
+        # Enrich favorite
+        favorite = self._enrichFavorite(favorite, entity=entity, authUserId=authUserId)
         
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', increment=1)
@@ -3152,35 +3162,31 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeFavorite(self, authUserId, entityId):
         ### TODO: Fail gracefully if favorite doesn't exist
-        favorite = self._favoriteDB.getFavorite(authUserId, entityId)
+        rawFavorite = self._favoriteDB.getFavorite(authUserId, entityId)
         
-        if not favorite or not favorite.favorite_id:
-            raise StampedUnavailableError('Invalid favorite: %s' % favorite)
+        if not rawFavorite or not rawFavorite.favorite_id:
+            raise StampedUnavailableError('Invalid favorite: %s' % rawFavorite)
         
         self._favoriteDB.removeFavorite(authUserId, entityId)
         
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', increment=-1)
         
-        # Enrich stamp
+        # Enrich favorite
+        favorite = self._enrichFavorite(rawFavorite, authUserId=authUserId)
+
         if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
-            stamp           = self._stampDB.getStamp(favorite.stamp.stamp_id)
-            favorite.stamp  = self._enrichStampObjects(stamp, authUserId=authUserId)
-            
-            # Just in case...
-            favorite.stamp.attributes.is_fav = False
-            
             # Remove activity
-            self._activityDB.removeActivity('todo', authUserId, stampId=stamp.stamp_id)
+            self._activityDB.removeActivity('todo', authUserId, stampId=favorite.stamp.stamp_id)
 
             # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[favorite.stamp.stamp_id])
         
         return favorite
     
     @API_CALL
     def getFavorites(self, authUserId, genericCollectionSlice):
-        quality     = genericCollectionSlice.quality
+        quality = genericCollectionSlice.quality
         
         # Set quality
         if quality == 1:
@@ -3203,13 +3209,15 @@ class StampedAPI(AStampedAPI):
         # Extract entities & stamps
         entityIds   = {}
         stampIds    = {}
-        favorites   = []
         
-        for favorite in favoriteData:
-            entityIds[str(favorite.entity.entity_id)] = 1
+        for rawFavorite in favoriteData:
+            entityIds[str(rawFavorite.entity.entity_id)] = None
             
-            if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
-                stampIds[str(favorite.stamp.stamp_id)] = 1
+            if rawFavorite.stamp_id is not None:
+                stampIds[str(rawFavorite.stamp_id)] = None
+
+        # User
+        user = UserMini().dataImport(self._userDB.getUser(authUserId).dataExport())
         
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3224,25 +3232,21 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
         
-        for favorite in favoriteData:
-            # Enrich Entity
-            if entityIds[favorite.entity.entity_id] != 1:
-                favorite.entity = entityIds[favorite.entity.entity_id]
-            else:
-                logs.warning('FAV (%s) MISSING ENTITY (%s)' % (favorite.favorite_id, favorite.entity.entity_id))
-            
-            # Add Stamp
-            if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
-                if stampIds[favorite.stamp.stamp_id] != 1:
-                    favorite.stamp = stampIds[favorite.stamp.stamp_id]
-                else:
-                    ### TODO: Clean these up if they're missing
-                    logs.warning('FAV (%s) MISSING STAMP (%s)' % (favorite.favorite_id, favorite.stamp.stamp_id))
-                    favorite.stamp = Stamp()
-            
-            favorites.append(favorite)
+        result = []
+        for rawFavorite in favoriteData:
+            try:
+                entity      = entityIds[rawFavorite.entity.entity_id]
+                stamp       = None
+                if rawFavorite.stamp_id is not None:
+                    stamp = stampIds[rawFavorite.stamp_id] 
+                favorite    = self._enrichFavorite(rawFavorite, user, entity, stamp, authUserId=authUserId)
+                result.append(favorite)
+            except Exception as e:
+                logs.debug("RAW FAVORITE: %s" % rawFavorite)
+                logs.warning("Enrich favorite failed: %s" % e)
+                continue
         
-        return favorites
+        return result
     
     """
        #                                        

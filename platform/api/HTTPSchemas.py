@@ -2535,13 +2535,13 @@ class HTTPFavorite(Schema):
 
     def importFavorite(self, fav):
         self.favorite_id             = fav.favorite_id
-        self.user_id                 = fav.user_id
+        self.user_id                 = fav.user.user_id
         self.entity                  = HTTPEntityMini().importEntity(fav.entity)
         self.created                 = fav.timestamp.created
         self.complete                = fav.complete
 
         if fav.stamp is not None:
-            self.stamp              = HTTPStamp().dataImport(fav.stamp)
+            self.stamp              = HTTPStamp().dataImport(fav.stamp.dataExport())
 
         return self
 

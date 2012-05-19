@@ -1393,11 +1393,31 @@ class Stamp(Schema):
 # Favorite #
 # ######## #
 
-class Favorite(Schema):
+class RawFavorite(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('favorite_id',              basestring)
         cls.addProperty('user_id',                  basestring, required=True)
+        cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addProperty('stamp_id',                 basestring)
+        cls.addNestedProperty('timestamp',          TimestampSchema)
+        cls.addProperty('complete',                 bool)
+
+    def enrich(self, user, entity, stamp=None):
+        favorite = Favorite()
+        favorite.dataImport(self.dataExport(), overflow=True)
+        favorite.user   = user 
+        favorite.entity = entity 
+        if stamp is not None:
+            favorite.stamp  = stamp
+
+        return favorite 
+
+class Favorite(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('favorite_id',              basestring)
+        cls.addProperty('user',                     UserMini, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
         cls.addNestedProperty('stamp',              Stamp)
         cls.addNestedProperty('timestamp',          TimestampSchema)
