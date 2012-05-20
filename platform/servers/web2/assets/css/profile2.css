@@ -94,6 +94,10 @@
   -webkit-transition: all 0.8s ease-in-out;
   -moz-transition: all 0.8s ease-in-out;
   transition: all 0.8s ease-in-out;
+  /* TODO: keep this to enable GPU acceleration or not? Profile! */
+
+  /*.transform(perspective(200px) translate(0,0));*/
+
   border-bottom: 1px solid #bbb;
   background-color: #FEFEFE;
 }
@@ -128,10 +132,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.stamp-gallery-item .content .content_0 .entity-header .title .pronounced-title:hover {
+  text-overflow: clip;
+}
 .stamp-gallery-item .content .content_1 {
   display: block;
   text-align: left;
-  float: left;
+  float: right;
   clear: left;
   margin-left: 86px;
   width: 50%;
@@ -190,25 +197,34 @@
   background-position: -38px -20px;
 }
 .stamp-gallery-item .content .content_2 {
+  border: 1px solid green;
+  position: relative;
   display: block;
   float: right;
+  top: 0;
+  left: 0;
 }
 .stamp-gallery-item .content .content_2 .timestamp_raw,
 .stamp-gallery-item .content .content_2 .timestamp {
+  display: block;
+  text-align: right;
+  font-weight: bold;
   font-size: 80%;
+  position: absolute;
+  left: -60%;
 }
 .stamp-gallery-item .content .content_2 .timestamp_raw {
   display: none;
 }
 .stamp-gallery-item .content .content_2 .timestamp {
-  display: block;
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
 }
 .stamp-gallery-item .content .content_2 .stamp-preview {
-  margin-left: 1em;
+  /*margin-left: 24px;*/
+
   display: block;
   max-width: 140px;
   width: 140px;
@@ -279,20 +295,38 @@
   color: red;
   font-weight: bold;
 }
-.wide-gallery {
+.wide-gallery,
+.narrow-gallery {
   width: 100%;
 }
-.wide-gallery .stamp-gallery-item {
+.wide-gallery .stamp-gallery-item,
+.narrow-gallery .stamp-gallery-item {
   width: 305px;
-  margin-right: 8px;
+  margin: 0 24px 24px 0;
 }
-.wide-gallery .stamp-gallery-item .content .content_1 {
+.wide-gallery .stamp-gallery-item .content .content_1,
+.narrow-gallery .stamp-gallery-item .content .content_1 {
   margin-left: 0;
-  max-width: 40%;
+  max-width: 149px;
+  /* 305px - 144px - 12px; */
+
+  width: 149px;
+  /* 305px - 144px - 12px; */
+
+}
+.wide-gallery .stamp-gallery-item .content .content_2,
+.narrow-gallery .stamp-gallery-item .content .content_2 {
+  margin: 1em 0 0;
+}
+.wide-gallery .stamp-gallery-item .content .content_2 .timestamp,
+.narrow-gallery .stamp-gallery-item .content .content_2 .timestamp {
+  left: auto;
+  right: 0;
+  top: -1.5em;
 }
 .blurb {
   display: inline-block;
-  text-align: left;
+  text-align: justify;
   quotes: "\201C" "\201D";
   /*height: 4em;
     overflow: hidden;*/
@@ -309,7 +343,7 @@
   width: auto;
   white-space: inherit;
   overflow: inherit;
-  text-overflow: inherit;
+  text-overflow: clip;
 }
 .blurb:before {
   content: open-quote;

@@ -47,6 +47,9 @@
     .rounded(4px);
     .transition(all, 0.8s, ease-in-out);
     
+    /* TODO: keep this to enable GPU acceleration or not? Profile! */
+    /*.transform(perspective(200px) translate(0,0));*/
+    
     border-bottom: 1px solid #bbb;
     background-color: #FEFEFE;
     
@@ -84,6 +87,10 @@
                         overflow: hidden;
                         text-overflow: ellipsis;
                     }
+                    
+                    .pronounced-title:hover {
+                        text-overflow: clip;
+                    }
                 }
             }
         }
@@ -92,7 +99,7 @@
             //border: 1px solid blue;
             display: block;
             text-align: left;
-            float: left;
+            float: right;
             clear: left;
             margin-left: 62px + 24px;
             width: 50%;
@@ -157,19 +164,28 @@
         }
         
         .content_2 {
-            //border: 1px solid green;
+            border: 1px solid green;
+            position: relative;
             display: block;
             float: right;
+            top:  0;
+            left: 0;
             
             .timestamp_raw, .timestamp {
+                display: block;
+                
+                text-align: right;
+                font-weight: bold;
                 font-size: 80%;
+                
+                position: absolute;
+                left: -60%;
             }
             
             .timestamp_raw {
                 display: none;
             }
             .timestamp {
-                display: block;
                 opacity: 0;
                 
                 .transition(opacity, 0.2s, ease-out);
@@ -184,7 +200,7 @@
             }
             
             .stamp-preview {
-                margin-left: 1em;
+                /*margin-left: 24px;*/
                 .sized();
                 
                 .preview-image {
@@ -236,17 +252,28 @@
     }
 }
 
-.wide-gallery {
+.wide-gallery, .narrow-gallery {
     width: 100%;
     
     .stamp-gallery-item {
         width: @stamp-gallery-item-min-width;
-        margin-right: 8px;
+        margin: 0 24px 24px 0;
         
         .content {
             .content_1 {
                 margin-left: 0;
-                max-width: 40%;
+                max-width: 149px; /* 305px - 144px - 12px; */
+                width: 149px; /* 305px - 144px - 12px; */
+            }
+            
+            .content_2 {
+                margin: 1em 0 0;
+                
+                .timestamp {
+                    left: auto;
+                    right: 0;
+                    top: -1.5em;
+                }
             }
         }
     }
@@ -254,7 +281,7 @@
 
 .blurb {
     display: inline-block;
-    text-align: left;
+    text-align: justify;
     quotes: "\201C" "\201D";
     
     /*height: 4em;
@@ -274,7 +301,7 @@
         width: auto;
         white-space: inherit;
         overflow: inherit;
-        text-overflow: inherit;
+        text-overflow: clip;
     }
 }
 

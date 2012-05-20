@@ -6,7 +6,7 @@
 /*jslint plusplus: true */
 /*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, Backbone, Handlebars, Persist, moment */
 
-g_update_stamps = null;
+var g_update_stamps = null;
 
 (function() {
     $(document).ready(function() {
@@ -17,6 +17,7 @@ g_update_stamps = null;
         
         var client      = new StampedClient();
         var screen_name = STAMPED_PRELOAD.user.screen_name;
+        var update_navbar_layout = null;
         
         
         // ---------------------------------------------------------------------
@@ -646,12 +647,12 @@ g_update_stamps = null;
             });
         });
         
-        var fixed_width     = 940;
+        var fixed_width     = 1000;
         var fixed_padding   = 80;
         var min_col_width   = 305;
         var last_nav_pos    = null;
         
-        var update_navbar_layout = function(should_update_gallery) {
+        update_navbar_layout = function(should_update_gallery) {
             should_update_gallery = (typeof(should_update_gallery) !== 'boolean' ? true : should_update_gallery);
             
             var nav_bar_width   = $nav_bar.width();
@@ -659,6 +660,9 @@ g_update_stamps = null;
             var gallery_x       = $stamp_gallery.offset().left;
             var gallery_width   = $stamp_gallery.width();
             var wide_gallery    = 'wide-gallery';
+            var narrow_gallery  = 'wide-gallery';
+            var max_blurb_width = "149px";
+            var min_blurb_width = (gallery_width - (62 + 24 + 140 + 24)) + "px";
             
             var width = window.innerWidth;
             var left  = gallery_x + gallery_width + fixed_padding;
@@ -667,67 +671,81 @@ g_update_stamps = null;
             var pos   = left;
             var update= false;
             var large = false;
+            var force_no_update = false;
             
+            var reset_stamp_gallery_items = function(desired_width) {
+                $stamp_gallery.find('.content').each(function(i, elem) {
+                    var $elem = $(elem);
+                    
+                    $elem.find('.content_1').css({
+                        'width'     : desired_width, 
+                        'max-width' : desired_width
+                    });
+                });
+            };
+            
+            /*if (gallery_width <= min_col_width + 144) {
+                if (!$stamp_gallery.hasClass(narrow_gallery)) {
+                    $stamp_gallery.removeClass(wide_gallery).addClass(narrow_gallery);
+                    update = true;
+                    
+                    reset_stamp_gallery_items(max_blurb_width);
+                } else {
+                    force_no_update = true;
+                }
+            } else */
             if (right < fixed_padding / 2) {
                 console.debug("SMALL GALLERY: width=" + width + ", pos=" + pos);
                 
-                if ($stamp_gallery.hasClass(wide_gallery)) {
-                    $stamp_gallery.removeClass(wide_gallery);
+                if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
+                    $stamp_gallery.removeClass(wide_gallery + " " + narrow_gallery);
                     update = true;
-                    
                 }
                 
-                $stamp_gallery.find('.content_1').each(function(i, elem) {
-                    var $this = $(elem);
-                    var max_content_1_width = (gallery_width - (62 + 24 + 140 + 24)) + "px";
-                    
-                    $this.css({
-                        'width' : max_content_1_width, 
-                        'max-width' : max_content_1_width
-                    });
-                });
+                reset_stamp_gallery_items(min_blurb_width);
             } else {
                 console.debug("LARGE GALLERY: width=" + width + ", pos=" + pos);
                 large = true;
                 
                 if (!$stamp_gallery.hasClass(wide_gallery)) {
-                    $stamp_gallery.addClass(wide_gallery);
+                    $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
                     update = true;
                     
-                    $stamp_gallery.find('.content_1').each(function(i, elem) {
-                        var $this = $(elem);
-                        var max_content_1_width = "auto";
+                    reset_stamp_gallery_items(max_blurb_width);
+                }
+            }
+            
+            if (!force_no_update) {
+                if (update || last_nav_pos !== pos) {
+                    
+                    if (!large) {
+                        var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
+                        var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
                         
-                        $this.css({
-                            'width' : max_content_1_width, 
-                            'max-width' : max_content_1_width
-                        });
-                    });
+                        $('.fixedwidth').width(new_fixed_width);
+                        update = true;
+                    } else {
+                        $('.fixedwidth').width("1000px");
+                    }
                 }
-            }
-            
-            if (update || last_nav_pos !== pos) {
-                last_nav_pos = pos;
                 
-                if (!large) {
-                    var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
-                    var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
-                    
-                    $('.fixedwidth').width(new_fixed_width);
-                    update = true;
-                } else {
-                    $('.fixedwidth').width("940px");
+                if (should_update_gallery) {
+                    update_gallery_layout(update);
                 }
             }
             
-            if (should_update_gallery) {
-                update_gallery_layout(update);
+            if (last_nav_pos !== pos) {
+                var style = {
+                    left  : pos + "px"
+                };
+                
+                if (last_nav_pos === null) {
+                    style['right'] = 'auto';
+                }
+                
+                last_nav_pos = pos;
+                $nav_bar.css(style);
             }
-            
-            $nav_bar.css({
-                right : "auto", 
-                left  : pos + "px"
-            });
         };
         
         $(window).resize(update_navbar_layout);

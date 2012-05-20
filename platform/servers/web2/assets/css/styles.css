@@ -74,9 +74,9 @@ footer,
 .fixedwidth {
   position: relative;
   display: block;
-  max-width: 940px;
+  max-width: 1000px;
   min-width: 360px;
-  width: 940px;
+  width: 1000px;
   margin: 0 auto;
 }
 /* **************************************************************************
@@ -1626,7 +1626,7 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
 .card {
   margin: 45px auto 0;
   padding: 0;
-  width: 940px;
+  width: 1000px;
   background: none repeat scroll 0 0 #FFFFFF;
   border: 0 none;
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
