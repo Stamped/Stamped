@@ -404,42 +404,42 @@ def upgradeEntityData(entityData):
     subcategory = old['subcategory']
     if subcategory == 'song':
         subcategory = 'track'
-    new.types.append(subcategory)
-    
+    new.types += (subcategory,)
+
     # Sources
-    setBasicGroup(sources, new['sources'], 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'fandango', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'stamped', 'tombstone', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources.pop('tmdb', {}), new['sources'], 'tmdb', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources.pop('factual', {}), new['sources'], 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'fandango', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'stamped', 'tombstone', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('tmdb', {}), new.sources, 'tmdb', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('factual', {}), new.sources, 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     # TODO: Add factual_crosswalk
-    setBasicGroup(sources.pop('singleplatform', {}), new['sources'], 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('singleplatform', {}), new.sources, 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     
     # Apple / iTunes
-    setBasicGroup(sources, new['sources'], 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.itunes_id is None:
         apple = sources.pop('apple', {})
-        setBasicGroup(apple, new['sources'], 'aid', 'itunes', newSuffix='id')
-        setBasicGroup(apple, new['sources'], 'view_url', 'itunes', newSuffix='url')
+        setBasicGroup(apple, new.sources, 'aid', 'itunes', newSuffix='id')
+        setBasicGroup(apple, new.sources, 'view_url', 'itunes', newSuffix='url')
     
     # Amazon
-    setBasicGroup(sources, new['sources'], 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.amazon_id is None:
         amazon = sources.pop('amazon', {})
-        setBasicGroup(amazon, new['sources'], 'asin', 'amazon', newSuffix='id')
-        setBasicGroup(amazon, new['sources'], 'amazon_link', 'amazon', newSuffix='url')
+        setBasicGroup(amazon, new.sources, 'asin', 'amazon', newSuffix='id')
+        setBasicGroup(amazon, new.sources, 'amazon_link', 'amazon', newSuffix='url')
     
     # OpenTable
-    setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
+    setBasicGroup(sources, new.sources, 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
     if new.sources.opentable_id is None:
-        setBasicGroup(sources.pop('openTable', {}), new['sources'], 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
+        setBasicGroup(sources.pop('openTable', {}), new.sources, 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
     
     # Google Places
     googleplaces = sources.pop('googlePlaces', {})
-    setBasicGroup(googleplaces, new['sources'], 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(googleplaces, new.sources, 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.googleplaces_id is None:
-        setBasicGroup(googleplaces, new['sources'], 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
+        setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
     
     # User Generated
     userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)
@@ -454,16 +454,16 @@ def upgradeEntityData(entityData):
             new.sources.user_generated_subtitle = subtitle
     
     # Contacts
-    setBasicGroup(contact, new.contact, 'phone')
-    setBasicGroup(contact, new.contact, 'site')
-    setBasicGroup(contact, new.contact, 'email')
-    setBasicGroup(contact, new.contact, 'fax')
+    setBasicGroup(contact, new, 'phone')
+    setBasicGroup(contact, new, 'site')
+    setBasicGroup(contact, new, 'email')
+    setBasicGroup(contact, new, 'fax')
     
     # Places
     if kind == 'place':
         coordinates = old.pop('coordinates', None)
         if coordinates is not None:
-            new.coordinates = coordinates
+            new.coordinates = CoordinatesSchema().dataImport(coordinates)
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents, seed=False)
@@ -484,7 +484,7 @@ def upgradeEntityData(entityData):
             entityMini = MediaItemEntityMini()
             entityMini.title = song['song_name']
             entityMini.kind = 'media_item'
-            entityMini.types.append('track')
+            entityMini.types += ('track',)
             if 'id' in song and 'source' in song and song['source'] == 'itunes':
                 itunesSource = True
                 entityMini.sources.itunes_id = song['id']
