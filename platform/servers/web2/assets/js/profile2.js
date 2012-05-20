@@ -693,6 +693,16 @@ g_update_stamps = null;
                 if (!$stamp_gallery.hasClass(wide_gallery)) {
                     $stamp_gallery.addClass(wide_gallery);
                     update = true;
+                    
+                    $stamp_gallery.find('.content_1').each(function(i, elem) {
+                        var $this = $(elem);
+                        var max_content_1_width = "auto";
+                        
+                        $this.css({
+                            'width' : max_content_1_width, 
+                            'max-width' : max_content_1_width
+                        });
+                    });
                 }
             }
             
