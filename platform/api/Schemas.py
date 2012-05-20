@@ -427,24 +427,6 @@ class EntityStatsSchema(Schema):
         cls.addProperty('distancev',                       float)
         cls.addProperty('totalv',                          float)
 
-class EntityContactSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('site',                            basestring)
-        cls.addProperty('site_source',                     basestring)
-        cls.addProperty('site_timestamp',                  datetime)
-
-        cls.addProperty('email',                           basestring)
-        cls.addProperty('email_source',                    basestring)
-        cls.addProperty('email_timestamp',                 datetime)
-
-        cls.addProperty('fax',                             basestring)
-        cls.addProperty('fax_source',                      basestring)
-        cls.addProperty('fax_timestamp',                   datetime)
-
-        cls.addProperty('phone',                           basestring)
-        cls.addProperty('phone_source',                    basestring)
-        cls.addProperty('phone_timestamp',                 datetime)
 
 class EntitySourcesSchema(Schema):
     @classmethod
@@ -628,14 +610,29 @@ class BasicEntity(BasicEntityMini):
         # cls.addNestedPropertyList('images',                 ImageSchema)
         cls.addProperty('images_source',                    basestring)
         cls.addProperty('images_timestamp',                 datetime)
+
+        cls.addProperty('site',                            basestring)
+        cls.addProperty('site_source',                     basestring)
+        cls.addProperty('site_timestamp',                  datetime)
+
+        cls.addProperty('email',                           basestring)
+        cls.addProperty('email_source',                    basestring)
+        cls.addProperty('email_timestamp',                 datetime)
+
+        cls.addProperty('fax',                             basestring)
+        cls.addProperty('fax_source',                      basestring)
+        cls.addProperty('fax_timestamp',                   datetime)
+
+        cls.addProperty('phone',                           basestring)
+        cls.addProperty('phone_source',                    basestring)
+        cls.addProperty('phone_timestamp',                 datetime)
         
-        cls.addNestedProperty('contact',                    EntityContactSchema)
         cls.addNestedProperty('stats',                      EntityStatsSchema)
         # cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
         cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
 
     def __init__(self):
-        Schema.__init__(self)
+        BasicEntityMini.__init__(self)
         self.schema_version = 0
         self.kind = 'other'
         self.types = []
@@ -1267,10 +1264,6 @@ class MenuSchema(Schema):
         cls.addNestedPropertyList('menus',                  SubmenuSchema)
 
 
-class PlaceEntity(Schema):
-    pass
-
-
 
 # ######## #
 # Comments #
@@ -1398,11 +1391,31 @@ class Stamp(Schema):
 # Favorite #
 # ######## #
 
-class Favorite(Schema):
+class RawFavorite(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('favorite_id',              basestring)
         cls.addProperty('user_id',                  basestring, required=True)
+        cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addProperty('stamp_id',                 basestring)
+        cls.addNestedProperty('timestamp',          TimestampSchema)
+        cls.addProperty('complete',                 bool)
+
+    def enrich(self, user, entity, stamp=None):
+        favorite = Favorite()
+        favorite.dataImport(self.dataExport(), overflow=True)
+        favorite.user   = user 
+        favorite.entity = entity 
+        if stamp is not None:
+            favorite.stamp  = stamp
+
+        return favorite 
+
+class Favorite(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('favorite_id',              basestring)
+        cls.addProperty('user',                     UserMini, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
         cls.addNestedProperty('stamp',              Stamp)
         cls.addNestedProperty('timestamp',          TimestampSchema)

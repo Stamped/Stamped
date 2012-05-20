@@ -207,7 +207,7 @@ class TMDBSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.tmdb_id = proxy.key
+        entity.sources.tmdb_id = proxy.key
         return True
 
     def movieSource(self, query):

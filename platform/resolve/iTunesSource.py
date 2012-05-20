@@ -711,7 +711,7 @@ class iTunesSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.itunes_id = proxy.key
+        entity.sources.itunes_id = proxy.key
         try:
             if proxy.preview is not None:
                 entity.itunes_preview = proxy.preview

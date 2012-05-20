@@ -333,11 +333,11 @@ class GooglePlacesSource(GenericSource):
         
         details = self.__details(entity)
         if details is None:
-            entity['googleplaces_id'] = None
+            entity.googleplaces_id = None
             timestamps['googleplaces'] = controller.now
             return True
         else:
-            entity['googleplaces_id'] = details['reference']
+            entity.googleplaces_id = details['reference']
         
         reformatted = self.__reformatAddress(details)
         if reformatted is not None:
@@ -345,26 +345,26 @@ class GooglePlacesSource(GenericSource):
         
         neighborhood = self.__neighborhood(details)
         if neighborhood is not None:
-            entity['neighborhood'] = neighborhood
+            entity.neighborhood = neighborhood
         
         if 'formatted_phone_number' in details and details['formatted_phone_number'] != '':
-            entity['phone'] = details['formatted_phone_number']
+            entity.phone = details['formatted_phone_number']
         
         if 'website' in details and details['website'] != '':
-            entity['site'] = details['website']
+            entity.site = details['website']
         
         return True
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.googleplaces_id = proxy.key
+        entity.sources.googleplaces_id = proxy.key
         return True
     
     def __details(self, entity):
         try:
             details = None
-            if 'lng' in entity and 'lat' in entity and 'title' in entity:
-                gdata = self.__places.getSearchResultsByLatLng((entity['lat'],entity['lng']),{'name':entity['title']})
+            if 'coordinates' in entity and 'title' in entity:
+                gdata = self.__places.getSearchResultsByLatLng((entity.coordinates.lat, entity.coordinates.lng),{'name':entity.title})
                 if gdata is not None and len(gdata) > 0:
                     gdatum = gdata[0]
                     if 'reference' in gdatum:

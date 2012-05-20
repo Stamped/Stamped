@@ -19,7 +19,7 @@ from Entity                         import buildEntity
 class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
     
     def __init__(self):
-        AMongoCollectionView.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
+        AMongoCollectionView.__init__(self, collection='favorites', primary_key='favorite_id', obj=RawFavorite)
         AFavoriteDB.__init__(self)
 
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), \
@@ -42,18 +42,10 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
 
         stampData = document.pop('stamp', None)
         if stampData is not None:
-            stampData.pop('entity')
-            sparse = {
-                'stamp_id'  : stampData['stamp_id'],
-                'entity'    : { 'entity_id' : entity.entity_id },
-                'user'      : { 'user_id' : stampData['user']['user_id'] },
-            }
-            document['stamp'] = sparse
+            document['stamp_id'] = stampData['stamp_id']
 
         favorite = self._obj().dataImport(document, overflow=self._overflow)
         favorite.entity = entity
-        if stampData is not None:
-            favorite.stamp.entity = entity 
         
         return favorite 
     
