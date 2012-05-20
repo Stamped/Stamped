@@ -138,9 +138,9 @@
 .stamp-gallery-item .content .content_1 {
   display: block;
   text-align: left;
-  float: right;
+  float: left;
   clear: left;
-  margin-left: 86px;
+  margin-left: 62px;
   width: 50%;
   max-width: 50%;
   text-align: justify;
