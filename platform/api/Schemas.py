@@ -1323,6 +1323,11 @@ class StampAttributesSchema(Schema):
         cls.addProperty('is_liked',                     bool)
         cls.addProperty('is_fav',                       bool)
 
+    def init(self):
+        Schema.__init__(self)
+        self.is_liked       = False
+        self.is_fav         = False
+
 class StampContent(Schema):
     @classmethod
     def setSchema(cls):

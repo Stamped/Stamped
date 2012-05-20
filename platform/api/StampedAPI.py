@@ -1787,15 +1787,15 @@ class StampedAPI(AStampedAPI):
 
                 if stat is not None and stamp.previews is not None:
                     # Likes
-                    likes = []
+                    likeobjects = []
                     for like in stat.preview_likes:
                         try:
-                            likes.append(userIds[str(like)])
+                            likeobjects.append(userIds[str(like)])
                         except KeyError:
                             logs.warning("Key error for like (user_id = %s)" % like)
                             logs.debug("Stamp: %s" % stamp)
                             continue
-                    previews.likes = likes
+                    previews.likes = likeobjects
                     
                     # Todos
                     todos = []
@@ -1847,12 +1847,10 @@ class StampedAPI(AStampedAPI):
                         stamp.attributes = StampAttributesSchema()
 
                     # Mark as favorited
-                    if stamp.entity.entity_id in favorites:
-                        stamp.attributes.is_fav = True
-                    
+                    stamp.attributes.is_fav = stamp.entity.entity_id in favorites
+
                     # Mark as liked
-                    if stamp.stamp_id in likes:
-                        stamp.attributes.is_liked = True
+                    stamp.attributes.is_liked =  stamp.stamp_id in likes
 
                 stamps.append(stamp)
 
@@ -2868,7 +2866,6 @@ class StampedAPI(AStampedAPI):
     def _getStampCollection(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
         if stampIds is not None and genericCollectionSlice.offset >= len(stampIds):
             return []
-        
         quality         = genericCollectionSlice.quality
         
         # Set quality
@@ -2894,7 +2891,7 @@ class StampedAPI(AStampedAPI):
             genericCollectionSlice.sort = 'stamped'
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
-        
+
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
 

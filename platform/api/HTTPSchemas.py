@@ -2213,6 +2213,11 @@ class HTTPStamp(Schema):
         cls.addProperty('is_liked',             bool)
         cls.addProperty('is_fav',               bool)
 
+    def __init__(self):
+        Schema.__init__(self)
+        self.is_liked           = False
+        self.is_fav             = False
+
     def importStampMini(self, stamp):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
@@ -2285,11 +2290,14 @@ class HTTPStamp(Schema):
         self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
                    (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
 
+        if stamp.attributes is not None:
+            self.is_liked   = getattr(stamp.attributes, 'is_liked', False)
+            self.is_fav     = getattr(stamp.attributes, 'is_fav', False)
+
         return self
 
     def importStamp(self, stamp):
         self.importStampMini(stamp)
-
         previews = HTTPStampPreviews()
 
         if stamp.previews.comments is not None:
@@ -2322,9 +2330,6 @@ class HTTPStamp(Schema):
             previews.credits = credits
 
         self.previews = previews
-
-        self.is_liked   = getattr(stamp, 'is_liked', False)
-        self.is_fav     = getattr(stamp, 'is_fav', False)
 
         return self
 

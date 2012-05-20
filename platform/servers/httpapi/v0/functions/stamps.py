@@ -72,7 +72,7 @@ def remove(request, authUserId, http_schema, **kwargs):
 def likesCreate(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
     stamp = HTTPStamp().importStamp(stamp)
-    
+
     return transformOutput(stamp.dataExport())
 
 
