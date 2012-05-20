@@ -68,15 +68,22 @@ var g_update_stamps = null;
         var $gallery = null;
         var infinite_scroll = null;
         
+        var destroy_infinite_scroll = function() {
+            if (infinite_scroll !== null) {
+                if ($gallery !== null) {
+                    $gallery.infinitescroll('destroy');
+                }
+                
+                infinite_scroll = null;
+            }
+        };
+        
         var destroy_gallery = function() {
             if ($gallery !== null) {
                 $gallery = $(".stamp-gallery .stamps");
                 $gallery.stop(true, false);
                 
-                if (infinite_scroll !== null) {
-                    $gallery.infinitescroll('destroy');
-                    infinite_scroll = null;
-                }
+                destroy_infinite_scroll();
                 
                 $gallery.isotope('destroy');
                 $gallery = null;
@@ -195,23 +202,16 @@ var g_update_stamps = null;
         };
         
         g_update_stamps = update_stamps;
+        var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
-        // initialize the stamp gallery's layout with isotope and infinite scroll
-        var init_gallery = function() {
-            $gallery = $(".stamp-gallery .stamps");
-            
-            $gallery.isotope({
-                itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "fitRows"
-            });
-            
+        var init_infinit_scroll = function() {
             // TODO: customize loading image
             infinite_scroll = $gallery.infinitescroll({
                 debug           : STAMPED_PRELOAD.DEBUG, 
                 bufferPx        : 200, 
                 
                 navSelector     : "div.stamp-gallery-nav", 
-                nextSelector    : "div.stamp-gallery-nav a:last", 
+                nextSelector    : infinite_scroll_next_selector, 
                 itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
                 
                 loading         : {
@@ -227,6 +227,18 @@ var g_update_stamps = null;
                 $gallery.isotope('appended', $elements);
                 update_stamps();
             });
+        };
+        
+        // initialize the stamp gallery's layout with isotope and infinite scroll
+        var init_gallery = function() {
+            $gallery = $(".stamp-gallery .stamps");
+            
+            $gallery.isotope({
+                itemSelector    : '.stamp-gallery-item', 
+                layoutMode      : "fitRows"
+            });
+            
+            init_infinit_scroll();
         };
         
         
@@ -517,15 +529,12 @@ var g_update_stamps = null;
                     category = null;
                 }
                 
-                var params   = get_custom_params({
+                var params    = get_custom_params({
                     category : category
                 });
                 
+                var url       = get_custom_url(params);
                 var $items    = $('.stamp-gallery-item');
-                var completed = false;
-                completed = true;
-                
-                // TODO: address scrollbar forcing whole page resize after removing isotope items
                 
                 $gallery.css({
                     visibility : 'hidden', 
@@ -545,6 +554,50 @@ var g_update_stamps = null;
                     $(this).attr('href', url);
                 });
                 
+                var $target = $("<div></div>");
+                
+                $target.load(url + " .stamp-gallery", params, function() {
+                    var $elements = $target.find('.stamp-gallery-item').remove();
+                    
+                    //$('.stamp-gallery-nav').show();
+                    //$('.inset-stamp .number').html(stamps.length);
+                    console.debug($target);
+                    var s = ".stamp-gallery-nav a";
+                    console.debug("H: " + $target.find(s).get(0));
+                    var href = $($target.find(s).get(0)).attr('href');
+                    if (typeof(href) === 'undefined') {
+                        href = "#";
+                    }
+                    console.debug("NEW HREF: " + href);
+                    
+                    $(infinite_scroll_next_selector).attr('href', href);
+                    
+                    destroy_infinite_scroll();
+                    init_infinit_scroll();
+                    
+                    $gallery.append($elements);
+                    update_stamps();
+                    
+                    $gallery.isotope('remove',   $items,    function() {
+                        $('.loading').hide();
+                    });
+                    
+                    $gallery.isotope('appended', $elements, function() {
+                    });
+                    
+                    $gallery.stop(true, false).css({
+                        visibility : 'visible'
+                    }).animate({
+                        opacity : 1
+                    }, {
+                        duration : 200, 
+                        specialEasing : { 
+                            opacity : 'easeInCubic'
+                        }
+                    });
+                });
+                
+                /*
                 // load stamps for new category selection via AJAX
                 client.get_user_stamps_by_screen_name(screen_name, params).done(function(stamps) {
                     //console.debug("num_stamps: " + stamps.length);
@@ -557,43 +610,35 @@ var g_update_stamps = null;
                             el : $target
                         });
                         
-                        var complete_animation = function() {
-                            if (completed) {
-                                stamps_view.render();
-                                
-                                var $elements = $target.find('.stamp-gallery-item').remove();
-                                
-                                //$('.stamp-gallery-nav').show();
-                                //$('.inset-stamp .number').html(stamps.length);
-                                
-                                $gallery.append($elements);
-                                update_stamps();
-                                
-                                $gallery.isotope('remove',   $items,    function() {
-                                    $('.loading').hide();
-                                });
-                                
-                                $gallery.isotope('appended', $elements, function() {
-                                });
-                                
-                                $gallery.stop(true, false).css({
-                                    visibility : 'visible'
-                                }).animate({
-                                    opacity : 1
-                                }, {
-                                    duration : 200, 
-                                    specialEasing : { 
-                                        opacity : 'easeInCubic'
-                                    }
-                                });
-                            } else {
-                                setTimeout(complete_animation, 50);
-                            }
-                        };
+                        stamps_view.render();
                         
-                        complete_animation();
+                        var $elements = $target.find('.stamp-gallery-item').remove();
+                        
+                        //$('.stamp-gallery-nav').show();
+                        //$('.inset-stamp .number').html(stamps.length);
+                        
+                        $gallery.append($elements);
+                        update_stamps();
+                        
+                        $gallery.isotope('remove',   $items,    function() {
+                            $('.loading').hide();
+                        });
+                        
+                        $gallery.isotope('appended', $elements, function() {
+                        });
+                        
+                        $gallery.stop(true, false).css({
+                            visibility : 'visible'
+                        }).animate({
+                            opacity : 1
+                        }, {
+                            duration : 200, 
+                            specialEasing : { 
+                                opacity : 'easeInCubic'
+                            }
+                        });
                     }
-                });
+                });*/
             });
         }
         
@@ -652,6 +697,7 @@ var g_update_stamps = null;
         var min_col_width   = 305;
         var last_nav_pos    = null;
         
+        // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
             should_update_gallery = (typeof(should_update_gallery) !== 'boolean' ? true : should_update_gallery);
             
