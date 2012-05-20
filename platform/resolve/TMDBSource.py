@@ -107,15 +107,19 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def cast(self):
-        return [
-            {
+        try:
+            return [
+                {
                 'name':entry['name'],
                 'character':entry['character'],
                 'source':self.source,
                 'key':entry['id'],
-            }
-                for entry in self._castsRaw['cast']
-        ]
+                }
+            for entry in self._castsRaw['cast']
+            ]
+        except Exception:
+            pass
+        return []
 
     @lazyProperty
     def directors(self):
@@ -214,6 +218,8 @@ class TMDBSource(GenericSource):
         def gen():
             try:
                 results = self.__tmdb.movie_search(query.name)
+                if results is None:
+                    return
                 for movie in results['results']:
                     yield movie
                 pages = results['total_pages']

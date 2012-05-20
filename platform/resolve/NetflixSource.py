@@ -311,6 +311,8 @@ class NetflixSource(GenericSource):
                         yield title
             except GeneratorExit:
                 pass
+            except KeyError:
+                return
         return gen()
 
     def movieSource(self, query):

@@ -115,7 +115,7 @@ class StampedAPIStampTests(StampedAPITest):
             self._dropCollection("stamps")
     
     def _getStamps(self, httpGenericCollectionSlice):
-        self._params['genericCollectionSlice'] = httpGenericCollectionSlice.exportSchema(GenericCollectionSlice())
+        self._params['genericCollectionSlice'] = httpGenericCollectionSlice.exportGenericCollectionSlice()
         
         ret = self.stampedAPI._getStampCollection(**self._params)
         self.assertIsInstance(ret, list)
