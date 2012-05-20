@@ -661,8 +661,10 @@ g_update_stamps = null;
             var wide_gallery    = 'wide-gallery';
             
             var width = window.innerWidth;
+            var left  = gallery_x + gallery_width + fixed_padding;
             var right = (width - (gallery_x + fixed_width + nav_bar_width + fixed_padding));
-            var pos   = Math.max((width - (gallery_x + gallery_width + nav_bar_width + fixed_padding)), fixed_padding / 2);
+            
+            var pos   = left;
             var update= false;
             var large = false;
             
@@ -672,7 +674,18 @@ g_update_stamps = null;
                 if ($stamp_gallery.hasClass(wide_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery);
                     update = true;
+                    
                 }
+                
+                $stamp_gallery.find('.content_1').each(function(i, elem) {
+                    var $this = $(elem);
+                    var max_content_1_width = (gallery_width - (62 + 24 + 140 + 24)) + "px";
+                    
+                    $this.css({
+                        'width' : max_content_1_width, 
+                        'max-width' : max_content_1_width
+                    });
+                });
             } else {
                 console.debug("LARGE GALLERY: width=" + width + ", pos=" + pos);
                 large = true;
@@ -702,7 +715,8 @@ g_update_stamps = null;
             }
             
             $nav_bar.css({
-                right : pos + "px"
+                right : "auto", 
+                left  : pos + "px"
             });
         };
         

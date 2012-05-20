@@ -9,11 +9,11 @@
 @import "libs/elements.less";
 @import "libs/isotope.less";
 
+@stamp-gallery-item-min-width: 305px;
+
 #main-content {
     position: relative;
 }
-
-@stamp-gallery-item-min-width: 305px;
 
 .stamp-gallery {
     position: relative;
@@ -50,35 +50,54 @@
     border-bottom: 1px solid #bbb;
     background-color: #FEFEFE;
     
-    &:hover .content .rhs .timestamp {
+    &:hover .content .content_2 .timestamp {
         opacity: 1;
     }
     
     .content {
         position: relative;
         padding: 1em 0;
+        width: 100%;
+        //border: 4px dotted black;
         
-        .inner-content {
+        .content_0 {
+            //border: 1px solid red;
+            display: block;
+            float: left;
+            
+            .entity-header {
+                margin-left: 24px;
+                display: block;
+                float: right;
+                text-align: left;
+                max-width: @stamp-gallery-item-min-width - 24px - 62px;
+                
+                .title {
+                    position: relative;
+                    display:  inline-block;
+                    max-width: 100%;
+                    
+                    .pronounced-title {
+                        display: inline-block;
+                        max-width: 100%;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+        }
+        
+        .content_1 {
+            //border: 1px solid blue;
             display: block;
             text-align: left;
             float: left;
-            margin-left: 2em;
-            max-width: 55%;
+            clear: left;
+            margin-left: 62px + 24px;
+            width: 50%;
+            max-width: 50%;
             text-align: justify;
-            
-            .title {
-                position: relative;
-                display:  inline-block;
-                max-width: 100%;
-                
-                .pronounced-title {
-                    display: inline-block;
-                    max-width: 100%;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-            }
             
             .stamp-contents {
                 font-size: 80%;
@@ -137,7 +156,8 @@
             }
         }
         
-        .rhs {
+        .content_2 {
+            //border: 1px solid green;
             display: block;
             float: right;
             
@@ -224,8 +244,9 @@
         margin-right: 8px;
         
         .content {
-            .inner-content {
-                margin-left: 24px;
+            .content_1 {
+                margin-left: 0;
+                max-width: 40%;
             }
         }
     }
@@ -238,6 +259,22 @@
     
     /*height: 4em;
     overflow: hidden;*/
+    
+    display: inline-block;
+    max-width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wide-gallery {
+    .blurb {
+        display: inline-block;
+        max-width: inherit;
+        white-space: inherit;
+        overflow: inherit;
+        text-overflow: inherit;
+    }
 }
 
 .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }

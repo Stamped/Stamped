@@ -97,52 +97,66 @@
   border-bottom: 1px solid #bbb;
   background-color: #FEFEFE;
 }
-.stamp-gallery-item:hover .content .rhs .timestamp {
+.stamp-gallery-item:hover .content .content_2 .timestamp {
   opacity: 1;
 }
 .stamp-gallery-item .content {
   position: relative;
   padding: 1em 0;
+  width: 100%;
 }
-.stamp-gallery-item .content .inner-content {
+.stamp-gallery-item .content .content_0 {
   display: block;
-  text-align: left;
   float: left;
-  margin-left: 2em;
-  max-width: 55%;
-  text-align: justify;
 }
-.stamp-gallery-item .content .inner-content .title {
+.stamp-gallery-item .content .content_0 .entity-header {
+  margin-left: 24px;
+  display: block;
+  float: right;
+  text-align: left;
+  max-width: 219px;
+}
+.stamp-gallery-item .content .content_0 .entity-header .title {
   position: relative;
   display: inline-block;
   max-width: 100%;
 }
-.stamp-gallery-item .content .inner-content .title .pronounced-title {
+.stamp-gallery-item .content .content_0 .entity-header .title .pronounced-title {
   display: inline-block;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.stamp-gallery-item .content .inner-content .stamp-contents {
+.stamp-gallery-item .content .content_1 {
+  display: block;
+  text-align: left;
+  float: left;
+  clear: left;
+  margin-left: 86px;
+  width: 50%;
+  max-width: 50%;
+  text-align: justify;
+}
+.stamp-gallery-item .content .content_1 .stamp-contents {
   font-size: 80%;
   margin: .2em 0 0;
 }
-.stamp-gallery-item .content .inner-content .count_0_0_0 {
+.stamp-gallery-item .content .content_1 .count_0_0_0 {
   display: none;
 }
-.stamp-gallery-item .content .inner-content .previews {
+.stamp-gallery-item .content .content_1 .previews {
   font-size: 80%;
 }
-.stamp-gallery-item .content .inner-content .previews .preview {
+.stamp-gallery-item .content .content_1 .previews .preview {
   display: inline;
   margin: 0 .8em 0 0;
 }
-.stamp-gallery-item .content .inner-content .previews .count {
+.stamp-gallery-item .content .content_1 .previews .count {
   position: relative;
   top: -4px;
 }
-.stamp-gallery-item .content .inner-content .previews div.like {
+.stamp-gallery-item .content .content_1 .previews div.like {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: 0 0;
   display: inline-block;
@@ -150,10 +164,10 @@
   height: 17px;
   z-index: 100;
 }
-.stamp-gallery-item .content .inner-content .previews .count_0 div.like {
+.stamp-gallery-item .content .content_1 .previews .count_0 div.like {
   background-position: 0 -20px;
 }
-.stamp-gallery-item .content .inner-content .previews div.todo {
+.stamp-gallery-item .content .content_1 .previews div.todo {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -19px 0;
   display: inline-block;
@@ -161,10 +175,10 @@
   height: 17px;
   z-index: 100;
 }
-.stamp-gallery-item .content .inner-content .previews .count_0 div.todo {
+.stamp-gallery-item .content .content_1 .previews .count_0 div.todo {
   background-position: -19px -20px;
 }
-.stamp-gallery-item .content .inner-content .previews div.comments {
+.stamp-gallery-item .content .content_1 .previews div.comments {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -38px 0;
   display: inline-block;
@@ -172,28 +186,28 @@
   height: 17px;
   z-index: 100;
 }
-.stamp-gallery-item .content .inner-content .previews .count_0 div.comments {
+.stamp-gallery-item .content .content_1 .previews .count_0 div.comments {
   background-position: -38px -20px;
 }
-.stamp-gallery-item .content .rhs {
+.stamp-gallery-item .content .content_2 {
   display: block;
   float: right;
 }
-.stamp-gallery-item .content .rhs .timestamp_raw,
-.stamp-gallery-item .content .rhs .timestamp {
+.stamp-gallery-item .content .content_2 .timestamp_raw,
+.stamp-gallery-item .content .content_2 .timestamp {
   font-size: 80%;
 }
-.stamp-gallery-item .content .rhs .timestamp_raw {
+.stamp-gallery-item .content .content_2 .timestamp_raw {
   display: none;
 }
-.stamp-gallery-item .content .rhs .timestamp {
+.stamp-gallery-item .content .content_2 .timestamp {
   display: block;
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
 }
-.stamp-gallery-item .content .rhs .stamp-preview {
+.stamp-gallery-item .content .content_2 .stamp-preview {
   margin-left: 1em;
   display: block;
   max-width: 140px;
@@ -201,7 +215,7 @@
   height: auto;
   background-size: 100% 100%;
 }
-.stamp-gallery-item .content .rhs .stamp-preview .preview-image {
+.stamp-gallery-item .content .content_2 .stamp-preview .preview-image {
   display: none;
   display: block;
   max-width: 140px;
@@ -209,33 +223,33 @@
   height: auto;
   background-size: 100% 100%;
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-map {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-map {
   z-index: 25;
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-user-image {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-user-image {
   z-index: 24;
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-user-image img {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-user-image img {
   -webkit-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   -moz-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   -ms-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   -o-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-entity-image {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-entity-image {
   z-index: 23;
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-entity-image img {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-entity-image img {
   -webkit-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   -moz-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   -ms-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   -o-box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
   box-shadow: 4px 4px 8px 0 rgba(30, 30, 30, 0.85);
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-icon {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-icon {
   z-index: 22;
 }
-.stamp-gallery-item .content .rhs .stamp-preview img {
+.stamp-gallery-item .content .content_2 .stamp-preview img {
   display: block;
   max-width: 140px;
   width: 140px;
@@ -248,11 +262,11 @@
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-category-book .icon,
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-category-film .icon,
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-category-food .icon,
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-category-music .icon,
-.stamp-gallery-item .content .rhs .stamp-preview .stamp-category-other .icon {
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-category-book .icon,
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-category-film .icon,
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-category-food .icon,
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-category-music .icon,
+.stamp-gallery-item .content .content_2 .stamp-preview .stamp-category-other .icon {
   display: block;
   max-width: 140px;
   width: 140px;
@@ -272,8 +286,9 @@
   width: 305px;
   margin-right: 8px;
 }
-.wide-gallery .stamp-gallery-item .content .inner-content {
-  margin-left: 24px;
+.wide-gallery .stamp-gallery-item .content .content_1 {
+  margin-left: 0;
+  max-width: 40%;
 }
 .blurb {
   display: inline-block;
@@ -282,6 +297,18 @@
   /*height: 4em;
     overflow: hidden;*/
 
+  display: inline-block;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wide-gallery .blurb {
+  display: inline-block;
+  max-width: inherit;
+  white-space: inherit;
+  overflow: inherit;
+  text-overflow: inherit;
 }
 .blurb:before {
   content: open-quote;
