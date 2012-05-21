@@ -452,7 +452,7 @@ class GenericSource(BasicSource):
                     proxy = self.entityProxyFromKey(source_id, entity=entity)
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
-                print 'Error: %s' % e
+                report()
 
         return True
 
