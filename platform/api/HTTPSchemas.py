@@ -1166,7 +1166,7 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', ', '.join(unicode(i['title']) for i in entity.publishers))
+            self._addMetadata('Publisher', ', '.join(unicode(i.title) for i in entity.publishers))
 
             # Actions: Buy
 
@@ -1197,8 +1197,8 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
@@ -1239,15 +1239,15 @@ class HTTPEntity(Schema):
                     self.caption = length
 
             if entity.subcategory == 'tv' and len(entity.networks) > 0:
-                self.caption = ', '.join(unicode(i['title']) for i in entity.networks)
+                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
@@ -2372,8 +2372,19 @@ class HTTPStampId(Schema):
 class HTTPStampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('count',            int)
-        cls.addNestedPropertyList('stamps', HTTPStamp)
+        cls.addProperty('count',                int)
+        cls.addNestedPropertyList('stamps',     HTTPStamp)
+
+    def importStampedByGroup(self, group):
+        if group.count is not None:
+            self.count = group.count 
+
+        if group.stamps is not None:
+            httpStamps = []
+            for stamp in group.stamps:
+                httpStamps.append(HTTPStamp().importStamp(stamp))
+
+        return self
 
     def importStampedByGroup(self, stampedbygroup):
         self.count = stampedbygroup.count
@@ -2383,9 +2394,21 @@ class HTTPStampedByGroup(Schema):
 class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('friends',    HTTPStampedByGroup)
-        cls.addNestedProperty('fof',        HTTPStampedByGroup)
-        cls.addNestedProperty('all',        HTTPStampedByGroup)
+        cls.addNestedProperty('friends',        HTTPStampedByGroup)
+        cls.addNestedProperty('fof',            HTTPStampedByGroup)
+        cls.addNestedProperty('all',            HTTPStampedByGroup)
+
+    def importStampedBy(self, stampedBy):
+        if stampedBy.friends is not None:
+            self.friends    = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
+
+        if stampedBy.fof is not None:
+            self.fof        = HTTPStampedByGroup().importStampedByGroup(stampedBy.fof)
+
+        if stampedBy.all is not None:
+            self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
+
+        return self
 
     def importStampedBy(self, stampedby):
         self.friends = HTTPStampedByGroup()

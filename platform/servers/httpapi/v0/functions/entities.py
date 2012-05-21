@@ -150,7 +150,6 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         if count is not None:
             result.friends.count = count
 
-
     elif http_schema.group == 'fof' and authUserId is not None:
         requestSlice = http_schema.exportFriendsSlice()
         requestSlice.distance = 2
