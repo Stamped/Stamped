@@ -32,7 +32,7 @@ import Globals
 from logs import report
 
 try:
-    import utils, re, string
+    import utils, re, string, sys, traceback
     import logs, sys, math
     import unicodedata
     # from EntityProxyContainer import EntityProxyContainer
@@ -241,29 +241,16 @@ def regexRemoval(string, patterns):
     
     return string
 
+
+_whitespace_regexp = re.compile("\s+")
+
 def format(string):
     """
     Whitespace unification
-
     Replaces all non-space whitespace with spaces.
-    Also ensures single-spacing and no leading or trailing whitespace.
-
-    Multipass safe and partially optimzed
+    Removes any double-spacing or leading or trailing whitespace.
     """
-    modified = True
-    li = [ '\t' , '\n', '\r', '  ', ]
-    
-    while modified:
-        modified = False
-        
-        for ch in li:
-            string2 = string.replace(ch, ' ')
-            
-            if string2 != string:
-                modified = True
-                string = string2
-    
-    return string.strip()
+    return _whitespace_regexp.replace(" ", string).strip()
 
 def simplify(string):
     """
@@ -407,7 +394,7 @@ def setComparison(a, b, symmetric=False, strict=False):
             clean.add(simplify(i).lower())
         return clean
     
-    def symmetricComparion(a, b):
+    def symmetricComparison(a, b):
         return (asymmetricComparison(a, b) + asymmetricComparison(b, a)) / 2.0
     
     def asymmetricComparison(a, b):
@@ -443,7 +430,7 @@ def setComparison(a, b, symmetric=False, strict=False):
         return 0
     
     if symmetric:
-        return symmetricComparion(a, b)
+        return symmetricComparison(a, b)
     else:
         return asymmetricComparison(a, b)
 
@@ -494,7 +481,7 @@ def weightedDictComparison(a, b, symmetric=False, strict=False):
         return 0
     
     if symmetric:
-        return _symmetricComparion(a, b)
+        return _symmetricComparison(a, b)
     else:
         return _asymmetricComparison(a, b)
 
@@ -715,10 +702,6 @@ class Resolver(object):
         return self.nameComparison(self.artistSimplify(q), self.artistSimplify(m))
     
     def albumComparison(self, q, m):
-        """ Album specific comparison metric. """
-        return self.nameComparison(self.albumSimplify(q), self.albumSimplify(m))
-    
-    def simpleTitleComparison(self, q, m):
         """ Album specific comparison metric. """
         return self.nameComparison(self.albumSimplify(q), self.albumSimplify(m))
     
@@ -964,20 +947,23 @@ class Resolver(object):
         self.genericCheck(tests, weights, results, query, match, options, order)
     
     def genericCheck(self, tests, weights, results, query, match, options, order):
-        mins = options['mins']
-        if self.verbose:
-            print("Comparing %s and %s" % (match.name,query.name))
-        
-        success, similarities = self.__compareAll(query, match, tests, options)
-        
-        if success:
-            self.__addTotal(similarities, weights, query, match, options)
+        try:
+            mins = options['mins']
+            if self.verbose:
+                print("Comparing %s and %s" % (match.name,query.name))
             
-            if 'total' not in mins or similarities['total'] >= mins['total']:
-                #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
-                result = (similarities, match)
-                results.append(result)
-                options['callback'](result, order)
+            success, similarities = self.__compareAll(query, match, tests, options)
+            
+            if success:
+                self.__addTotal(similarities, weights, query, match, options)
+                
+                if 'total' not in mins or similarities['total'] >= mins['total']:
+                    #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
+                    result = (similarities, match)
+                    results.append(result)
+                    options['callback'](result, order)
+        except Exception:
+            report()
     
     def resolve(self, query, source, **options):
         options = self.parseGeneralOptions(query, options)
