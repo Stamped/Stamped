@@ -1881,18 +1881,6 @@ class HTTPEntitySearch(Schema):
             entSearch.coordinates = coordinates 
         return entSearch
 
-#        def exportSchema(self, schema):
-#            if schema.__class__.__name__ == 'EntitySearch':
-#                schema.importData({'q': self.q})
-#                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-#                schema.importData({'category': self.category})
-#                schema.importData({'subcategory': self.subcategory})
-#                schema.importData({'local': self.local})
-#                schema.importData({'page': self.page})
-#            else:
-#                raise NotImplementedError(type(schema))
-#            return schema
-
 class HTTPEntityNearby(Schema):
     @classmethod
     def setSchema(cls):
@@ -1915,16 +1903,6 @@ class HTTPEntityNearby(Schema):
         entityNearby.coordinates = coords
         return entityNearby
 
-#        def exportSchema(self, schema):
-#            if schema.__class__.__name__ == 'EntityNearby':
-#                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-#                schema.importData({'category': self.category})
-#                schema.importData({'subcategory': self.subcategory})
-#                schema.importData({'page': self.page})
-#            else:
-#                raise NotImplementedError(type(schema))
-#            return schema
-
 class HTTPEntitySuggested(Schema):
     @classmethod
     def setSchema(cls):
@@ -1944,18 +1922,6 @@ class HTTPEntitySuggested(Schema):
             entitySuggested.coordinates = coords
 
         return entitySuggested
-
-#        def exportSchema(self, schema):
-#            if schema.__class__.__name__ == 'EntitySuggested':
-#                if self.coordinates:
-#                    schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-#
-#                schema.importData({'category': self.category})
-#                schema.importData({'subcategory': self.subcategory})
-#            else:
-#                raise NotImplementedError(type(schema))
-#
-#            return schema
 
 
 class HTTPEntityActionEndpoint(Schema):
@@ -2351,7 +2317,7 @@ class HTTPStamp(Schema):
         if stamp.previews.credits is not None:
             credits = []
             for credit in stamp.previews.credits:
-                credit  = HTTPStamp().importStamp(credit).minimize()
+                credit  = HTTPStamp().importStampMini(credit).minimize()
                 credits.append(credit)
             previews.credits = credits
 
@@ -2359,122 +2325,8 @@ class HTTPStamp(Schema):
 
         return self
 
-#        def importSchema(self, schema):
-#            if schema.__class__.__name__ in set(['Stamp', 'StampMini']):
-#                data                = schema.exportSparse()
-#                coordinates         = data['entity'].pop('coordinates', None)
-#                mentions            = data.pop('mentions', [])
-#                credit              = data.pop('credit', [])
-#                contents            = data.pop('contents', [])
-#
-#                previews            = data.pop('previews', {})
-#                comments            = previews.pop('comments', [])
-#                likes               = previews.pop('likes', [])
-#                todos               = previews.pop('todos', [])
-#                credits             = previews.pop('credits', [])
-#
-#                if len(credit) > 0:
-#                    data['credit'] = credit
-#
-#                data['entity'] = HTTPEntityMini().importSchema(schema.entity).exportSparse()
-#
-#                self.importData(data, overflow=True)
-#                self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
-#                self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
-#                self.created                = schema.timestamp.stamped # Temp
-#                self.modified               = schema.timestamp.modified
-#                self.stamped                = schema.timestamp.stamped
-#
-#                for content in schema.contents:
-#                    item            = HTTPStampContent()
-#                    item.blurb      = content.blurb
-#                    item.created    = content.timestamp.created
-#                    # item.modified   = content.timestamp.modified
-#
-#                    for screenName in mention_re.finditer(content.blurb):
-#                        source              = HTTPActionSource()
-#                        source.name         = 'View profile'
-#                        source.source       = 'stamped'
-#                        source.source_id    = screenName.groups()[0]
-#
-#                        action              = HTTPAction()
-#                        action.type         = 'stamped_view_screen_name'
-#                        action.name         = 'View profile'
-#                        action.sources      = [ source ]
-#
-#                        reference           = HTTPTextReference()
-#                        reference.indices   = [ screenName.start(), screenName.end() ]
-#                        reference.action    = action
-#
-#                        item.blurb_references.append(reference)
-#
-#                    for image in content.images:
-#                        img = HTTPImageSchema()
-#                        img.importSchema(image)
-#                        # quick fix for now
-#                        # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-#                        item.images.append(img)
-#
-#                    #_initialize_blurb_html(item)
-#
-#                    # Insert contents in descending chronological order
-#                    self.contents.insert(0, item)
-#
-#                self.num_comments = 0
-#                if schema.num_comments > 0:
-#                    self.num_comments       = schema.num_comments
-#
-#                self.num_likes = 0
-#                if schema.num_likes > 0:
-#                    self.num_likes          = schema.num_likes
-#
-#                self.num_todos = 0
-#                if schema.num_todos > 0:
-#                    self.num_todos          = schema.num_todos
-#
-#                self.num_credits = 0
-#                if schema.num_credits > 0:
-#                    self.num_credits        = schema.num_credits
-#
-#                url_title = encodeStampTitle(schema.entity.title)
-#                self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
-#                    (schema.user.screen_name, schema.stamp_num, url_title)
-#
-#                if schema.__class__.__name__ == 'Stamp':
-#                    for comment in schema.previews.comments:
-#                        comment = HTTPComment().importSchema(comment)
-#                        #_initialize_comment_html(comment)
-#
-#                        self.previews.comments.append(comment)
-#
-#                    for user in schema.previews.todos:
-#                        user    = HTTPUserMini().importSchema(user).exportSparse()
-#                        self.previews.todos.append(user)
-#
-#                    for user in schema.previews.likes:
-#                        user    = HTTPUserMini().importSchema(user).exportSparse()
-#                        self.previews.likes.append(user)
-#
-#                    for credit in schema.previews.credits:
-#                        credit  = HTTPStamp().importSchema(credit).minimize().exportSparse()
-#                        self.previews.credits.append(credit)
-#
-#                    self.is_liked = False
-#                    if schema.is_liked:
-#                        self.is_liked = True
-#
-#                    self.is_fav = False
-#                    if schema.is_fav:
-#                        self.is_fav = True
-#            else:
-#                logs.warning("unknown import class '%s'; expected 'Stamp'" % schema.__class__.__name__)
-#                raise NotImplementedError
-#
-#            return self
-
     def minimize(self):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
-#            return HTTPStampMini(self.value, overflow=True)
 
 class HTTPImageUpload(Schema):
     @classmethod

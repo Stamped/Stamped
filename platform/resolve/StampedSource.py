@@ -51,16 +51,16 @@ class _EntityProxyObject(object):
     @lazyProperty
     def name(self):
         try:
-            return self.entity['title']
+            return self.entity.title
         except Exception:
             return ''
 
     @lazyProperty
     def key(self):
         try:
-            return self.entity['entity_id']
+            return self.entity.entity_id
         except Exception:
-            return ''
+            return None
 
     @property 
     def source(self):
