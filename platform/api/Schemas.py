@@ -319,7 +319,7 @@ class Account(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.privacy    = False 
+        self.privacy    = False
         self.timestamp  = UserTimestampSchema()
         self.stats      = UserStatsSchema()
 
@@ -376,11 +376,11 @@ class SuggestedUserRequest(Schema):
         # paging
         cls.addProperty('limit',                int)
         cls.addProperty('offset',               int)
-        
+
         cls.addProperty('personalized',         bool)
         cls.addProperty('coordinates',          CoordinatesSchema)
-        
-        # third party keys for optionally augmenting friend suggestions with 
+
+        # third party keys for optionally augmenting friend suggestions with
         # knowledge from other social networks
         cls.addProperty('twitter_key',          basestring)
         cls.addProperty('twitter_secret',       basestring)
@@ -388,7 +388,7 @@ class SuggestedUserRequest(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.limit          = 10 
+        self.limit          = 10
         self.offset         = 0
         self.personalized   = False
 
@@ -440,12 +440,12 @@ class EntitySourcesSchema(Schema):
 
         * url       A url pointing to the entity provided by the source.
 
-        * source    The source of the id. This will usually be the source iteslf, but can be 
+        * source    The source of the id. This will usually be the source iteslf, but can be
                     a different third-party (e.g. TMDB provides IMDB ids).
 
         * timestamp The timestamp of when the source was last checked.
 
-        Additional fields may also be stored by appending the key to the source name (e.g. opentable_nickname). 
+        Additional fields may also be stored by appending the key to the source name (e.g. opentable_nickname).
 
         Note: The tombstone is a stamped entity that points to a newer, "better" entity.
         """
@@ -473,19 +473,19 @@ class EntitySourcesSchema(Schema):
         cls.addProperty('rdio_url',                        basestring)
         cls.addProperty('rdio_source',                     basestring)
         cls.addProperty('rdio_timestamp',                  datetime)
-        
+
         cls.addProperty('amazon_id',                       basestring)
         cls.addProperty('amazon_url',                      basestring)
         cls.addProperty('amazon_underlying',               basestring)
         cls.addProperty('amazon_source',                   basestring)
         cls.addProperty('amazon_timestamp',                datetime)
-        
+
         cls.addProperty('opentable_id',                    basestring)
         cls.addProperty('opentable_url',                   basestring)
         cls.addProperty('opentable_source',                basestring)
         cls.addProperty('opentable_nickname',              basestring)
         cls.addProperty('opentable_timestamp',             datetime)
-        
+
         cls.addProperty('fandango_id',                     basestring)
         cls.addProperty('fandango_url',                    basestring)
         cls.addProperty('fandango_source',                 basestring)
@@ -522,17 +522,17 @@ class EntitySourcesSchema(Schema):
         cls.addProperty('tmdb_url',                        basestring)
         cls.addProperty('tmdb_source',                     basestring)
         cls.addProperty('tmdb_timestamp',                  datetime)
-        
+
         cls.addProperty('thetvdb_id',                      basestring)
         cls.addProperty('thetvdb_url',                     basestring)
         cls.addProperty('thetvdb_source',                  basestring)
         cls.addProperty('thetvdb_timestamp',               datetime)
-        
+
         cls.addProperty('imdb_id',                         basestring)
         cls.addProperty('imdb_url',                        basestring)
         cls.addProperty('imdb_source',                     basestring)
         cls.addProperty('imdb_timestamp',                  datetime)
-        
+
         cls.addProperty('googleplaces_id',                 basestring)
         cls.addProperty('googleplaces_reference',          basestring)
         cls.addProperty('googleplaces_url',                basestring)
@@ -593,7 +593,7 @@ class BasicEntity(BasicEntityMini):
 
     @classmethod
     def setSchema(cls):
-        # cls.addProperty('schema_version',                   int, required=True) 
+        # cls.addProperty('schema_version',                   int, required=True)
 
         # cls.addProperty('entity_id',                        basestring)
         # cls.addProperty('title',                            basestring)
@@ -603,11 +603,11 @@ class BasicEntity(BasicEntityMini):
         cls.addProperty('desc',                             basestring)
         cls.addProperty('desc_source',                      basestring)
         cls.addProperty('desc_timestamp',                   datetime)
-        
+
         # cls.addPropertyList('types',                        basestring)
         cls.addProperty('types_source',                     basestring)
         cls.addProperty('types_timestamp',                  datetime)
-        
+
         # cls.addNestedPropertyList('images',                 ImageSchema)
         cls.addProperty('images_source',                    basestring)
         cls.addProperty('images_timestamp',                 datetime)
@@ -627,7 +627,7 @@ class BasicEntity(BasicEntityMini):
         cls.addProperty('phone',                           basestring)
         cls.addProperty('phone_source',                    basestring)
         cls.addProperty('phone_timestamp',                 datetime)
-        
+
         cls.addNestedProperty('stats',                      EntityStatsSchema)
         # cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
         cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
@@ -640,46 +640,46 @@ class BasicEntity(BasicEntityMini):
         self.images = [] # Temp
         self.sources = EntitySourcesSchema()
         self.timestamp = TimestampSchema()
-    
-    @property 
+
+    @property
     def subtitle(self):
         return self._genericSubtitle()
-    
-    @property 
+
+    @property
     def category(self):
         return 'other'
-    
-    @property 
+
+    @property
     def subcategory(self):
         return 'other'
-    
+
     @lazyProperty
     def search_id(self):
         _is_valid_id = lambda x: x is not None and len(x) > 0
-        
+
         ids = [
-            (self.sources.tombstone_id,             ''), 
-            (self.entity_id,                        ''), 
-            (self.sources.itunes_id,                'T_ITUNES_'), 
-            (self.sources.rdio_id,                  'T_RDIO_'), 
-            (self.sources.spotify_id,               'T_SPOTIFY_'), 
-            (self.sources.opentable_id,             'T_OPENTABLE_'), 
+            (self.sources.tombstone_id,             ''),
+            (self.entity_id,                        ''),
+            (self.sources.itunes_id,                'T_ITUNES_'),
+            (self.sources.rdio_id,                  'T_RDIO_'),
+            (self.sources.spotify_id,               'T_SPOTIFY_'),
+            (self.sources.opentable_id,             'T_OPENTABLE_'),
             (self.sources.googleplaces_reference,   'T_GOOGLEPLACES_'),
-            (self.sources.factual_id,               'T_FACTUAL_'), 
-            (self.sources.tmdb_id,                  'T_TMDB_'), 
-            (self.sources.thetvdb_id,               'T_THETVDB_'), 
-            (self.sources.amazon_id,                'T_AMAZON_'), 
+            (self.sources.factual_id,               'T_FACTUAL_'),
+            (self.sources.tmdb_id,                  'T_TMDB_'),
+            (self.sources.thetvdb_id,               'T_THETVDB_'),
+            (self.sources.amazon_id,                'T_AMAZON_'),
             (self.sources.fandango_id,              'T_FANDANGO_'),
             (self.sources.netflix_id,               'T_NETFLIX_'),
         ]
-        
+
         for (id, prefix) in ids:
             if _is_valid_id(id):
                 return "%s%s" % (prefix, id)
-        
-        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" % 
+
+        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" %
                              pformat(self.dataExport()))
-    
+
     def _genericSubtitle(self):
         if self.sources.user_generated_subtitle is not None:
             return self.sources.user_generated_subtitle
@@ -713,11 +713,11 @@ class BasicEntity(BasicEntityMini):
         except:
             pass
         return False
-    
+
     # def __str__(self):
     #     t = list(self.types)
     #     # if len(t) == 1: t = t[0]
-        
+
     #     return "%s: %s (%s)" % (self.__class__.__name__, self.title, '; '.join(unicode(i) for i in t))
 
 
@@ -757,8 +757,8 @@ class PlaceEntity(BasicEntity):
     def setSchema(cls):
         cls.addNestedProperty('coordinates',                CoordinatesSchema)
         cls.addProperty('coordinates_source',               basestring)
-        cls.addProperty('coordinates_timestamp',            datetime) 
-        
+        cls.addProperty('coordinates_timestamp',            datetime)
+
         cls.addProperty('address_street',                   basestring)
         cls.addProperty('address_street_ext',               basestring)
         cls.addProperty('address_locality',                 basestring)
@@ -767,11 +767,11 @@ class PlaceEntity(BasicEntity):
         cls.addProperty('address_country',                  basestring)
         cls.addProperty('address_source',                   basestring)
         cls.addProperty('address_timestamp',                datetime)
-        
+
         cls.addProperty('formatted_address',                basestring)
         cls.addProperty('formatted_address_source',         basestring)
         cls.addProperty('formatted_address_timestamp',      datetime)
-        
+
         cls.addProperty('neighborhood',                     basestring)
         cls.addProperty('neighborhood_source',              basestring)
         cls.addProperty('neighborhood_timestamp',           datetime)
@@ -779,27 +779,27 @@ class PlaceEntity(BasicEntity):
         cls.addNestedPropertyList('gallery',                ImageSchema)
         cls.addProperty('gallery_source',                   basestring)
         cls.addProperty('gallery_timestamp',                datetime)
-        
-        cls.addNestedProperty('hours',                      TimesSchema)
+
+        cls.addNestedProperty('hours',                      HoursSchema)
         cls.addProperty('hours_source',                     basestring)
         cls.addProperty('hours_timestamp',                  datetime)
-        
+
         cls.addPropertyList('cuisine',                      basestring)
         cls.addProperty('cuisine_source',                   basestring)
         cls.addProperty('cuisine_timestamp',                datetime)
-        
+
         cls.addProperty('menu',                             bool)
         cls.addProperty('menu_source',                      basestring)
         cls.addProperty('menu_timestamp',                   datetime)
-        
+
         cls.addProperty('price_range',                      int)
         cls.addProperty('price_range_source',               basestring)
         cls.addProperty('price_range_timestamp',            datetime)
-        
+
         cls.addProperty('alcohol_flag',                     bool)
         cls.addProperty('alcohol_flag_source',              basestring)
         cls.addProperty('alcohol_flag_timestamp',           datetime)
-        
+
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'place'
@@ -817,14 +817,14 @@ class PlaceEntity(BasicEntity):
 
         if country is not None:
             country = country.upper()
-        
+
         delimiter = '\n' if breakLines else ', '
-        
+
         if street is not None and locality is not None and country is not None:
-            # Expand street 
+            # Expand street
             if extendStreet == True and street_ext is not None:
                 street = '%s %s' % (street, street_ext)
-            
+
             # Use state if in US
             if country == 'US':
                 if region is not None and postcode is not None:
@@ -833,7 +833,7 @@ class PlaceEntity(BasicEntity):
                     return '%s%s%s, %s' % (street, delimiter, locality, postcode)
                 elif postcode is not None:
                     return '%s%s%s, %s' % (street, delimiter, locality, region)
-            
+
             # Use country if outside US
             else:
                 countries = libs.CountryData.countries
@@ -841,16 +841,16 @@ class PlaceEntity(BasicEntity):
                     return '%s%s%s, %s' % (street, delimiter, locality, countries[country])
                 else:
                     return '%s%s%s, %s' % (street, delimiter, locality, country)
-        
+
         if self.formatted_address is not None:
             return self.formatted_address
-        
+
         if self.neighborhood is not None:
             return self.neighborhood
-        
+
         return None
-    
-    @property 
+
+    @property
     def subtitle(self):
         # Check if address components exist
         if self.address_country is not None and self.address_locality is not None:
@@ -863,11 +863,11 @@ class PlaceEntity(BasicEntity):
                 if self.address_country.upper() in countries:
                     country = countries[self.address_country.upper()]
                 return "%s, %s" % (self.address_locality, country)
-        
+
         # Extract city / state with regex as fallback
         if self.formatted_address is not None:
             match = city_state_re.match(self.formatted_address)
-            
+
             if match is not None:
                 # city, state
                 return "%s, %s" % match.groups()
@@ -875,14 +875,14 @@ class PlaceEntity(BasicEntity):
         # Fallback to generic
         return self._genericSubtitle()
 
-    @property 
+    @property
     def category(self):
         food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
         if len(food.intersection(self.types)) > 0:
             return 'food'
         return 'other'
 
-    @property 
+    @property
     def subcategory(self):
         for t in self.types:
             return t
@@ -900,19 +900,19 @@ class PersonEntity(BasicEntity):
         cls.addNestedPropertyList('tracks',                 MediaItemEntityMini)
         cls.addProperty('tracks_source',                    basestring)
         cls.addProperty('tracks_timestamp',                 datetime)
-        
+
         cls.addNestedPropertyList('albums',                 MediaCollectionEntityMini)
         cls.addProperty('albums_source',                    basestring)
         cls.addProperty('albums_timestamp',                 datetime)
-        
+
         cls.addNestedPropertyList('movies',                 MediaItemEntityMini)
         cls.addProperty('movies_source',                    basestring)
         cls.addProperty('movies_timestamp',                 datetime)
-        
+
         cls.addNestedPropertyList('books',                  MediaItemEntityMini)
         cls.addProperty('books_source',                     basestring)
         cls.addProperty('books_timestamp',                  datetime)
-        
+
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'person'
@@ -923,19 +923,19 @@ class PersonEntity(BasicEntity):
         self.movies         = []
         self.books          = []
 
-    @property 
+    @property
     def subtitle(self):
         if self.isType('artist'):
             return 'Artist'
         return self._genericSubtitle()
 
-    @property 
+    @property
     def category(self):
         if self.isType('artist'):
             return 'music'
         return 'other'
 
-    @property 
+    @property
     def subcategory(self):
         if self.isType('artist'):
             return 'artist'
@@ -949,47 +949,47 @@ class BasicMediaEntity(BasicEntity):
         cls.addProperty('release_date',                     datetime)
         cls.addProperty('release_date_source',              basestring)
         cls.addProperty('release_date_timestamp',           datetime)
-        
+
         cls.addProperty('length',                           int)
         cls.addProperty('length_source',                    basestring)
         cls.addProperty('length_timestamp',                 datetime)
-        
+
         cls.addPropertyList('genres',                       basestring)
         cls.addProperty('genres_source',                    basestring)
         cls.addProperty('genres_timestamp',                 datetime)
-        
+
         cls.addNestedPropertyList('artists',                PersonEntityMini)
         cls.addProperty('artists_source',                   basestring)
         cls.addProperty('artists_timestamp',                datetime)
-        
+
         cls.addNestedPropertyList('authors',                PersonEntityMini)
         cls.addProperty('authors_source',                   basestring)
         cls.addProperty('authors_timestamp',                datetime)
-        
+
         cls.addNestedPropertyList('directors',              PersonEntityMini)
         cls.addProperty('directors_source',                 basestring)
         cls.addProperty('directors_timestamp',              datetime)
-        
+
         cls.addNestedPropertyList('cast',                   PersonEntityMini)
         cls.addProperty('cast_source',                      basestring)
         cls.addProperty('cast_timestamp',                   datetime)
-        
+
         cls.addNestedPropertyList('publishers',             BasicEntityMini)
         cls.addProperty('publishers_source',                basestring)
         cls.addProperty('publishers_timestamp',             datetime)
-        
+
         cls.addNestedPropertyList('studios',                BasicEntityMini)
         cls.addProperty('studios_source',                   basestring)
         cls.addProperty('studios_timestamp',                datetime)
-        
+
         cls.addNestedPropertyList('networks',               BasicEntityMini)
         cls.addProperty('networks_source',                  basestring)
         cls.addProperty('networks_timestamp',               datetime)
-        
+
         cls.addProperty('mpaa_rating',                      basestring)
         cls.addProperty('mpaa_rating_source',               basestring)
         cls.addProperty('mpaa_rating_timestamp',            datetime)
-        
+
         cls.addProperty('parental_advisory',                basestring)
         cls.addProperty('parental_advisory_source',         basestring)
         cls.addProperty('parental_advisory_timestamp',      datetime)
@@ -1013,38 +1013,38 @@ class MediaCollectionEntity(BasicMediaEntity):
         cls.addNestedPropertyList('tracks',                 MediaItemEntityMini)
         cls.addProperty('tracks_source',                    basestring)
         cls.addProperty('tracks_timestamp',                 datetime)
-        
+
     def __init__(self):
         BasicMediaEntity.__init__(self)
         self.kind = 'media_collection'
         ### TEMP: Set all lists to lists by default (not None)
         self.tracks = []
-    
-    @property 
+
+    @property
     def subtitle(self):
         if self.isType('album'):
             if len(self.artists) > 0:
                 return 'Album by %s' % ', '.join(unicode(i.title) for i in self.artists)
-            
+
             return 'Album'
-        
+
         if self.isType('tv'):
             if len(self.networks) > 0:
                 return 'TV Show (%s)' % ', '.join(unicode(i.title) for i in self.networks)
-            
+
             return 'TV Show'
-        
+
         return self._genericSubtitle()
-    
-    @property 
+
+    @property
     def category(self):
         if self.isType('album'):
             return 'music'
         if self.isType('tv'):
             return 'film'
         return 'other'
-    
-    @property 
+
+    @property
     def subcategory(self):
         if self.isType('album'):
             return 'album'
@@ -1060,16 +1060,16 @@ class MediaItemEntity(BasicMediaEntity):
         cls.addNestedPropertyList('albums',                 MediaCollectionEntityMini)
         cls.addProperty('albums_source',                    basestring)
         cls.addProperty('albums_timestamp',                 datetime)
-        
+
         # Books
         cls.addProperty('isbn',                             basestring)
         cls.addProperty('isbn_source',                      basestring)
         cls.addProperty('isbn_timestamp',                   datetime)
-        
+
         cls.addProperty('sku_number',                       basestring)
         cls.addProperty('sku_number_source',                basestring)
         cls.addProperty('sku_number_timestamp',             datetime)
-        
+
     def __init__(self):
         BasicMediaEntity.__init__(self)
         self.kind = 'media_item'
@@ -1078,8 +1078,8 @@ class MediaItemEntity(BasicMediaEntity):
 
     def minimize(self):
         return BasicEntity.minimize(self, 'length')
-    
-    @property 
+
+    @property
     def subtitle(self):
         if self.isType('movie'):
             if self.release_date is not None:
@@ -1098,7 +1098,7 @@ class MediaItemEntity(BasicMediaEntity):
 
         return self._genericSubtitle()
 
-    @property 
+    @property
     def category(self):
         if self.isType('movie'):
             return 'film'
@@ -1108,7 +1108,7 @@ class MediaItemEntity(BasicMediaEntity):
             return 'book'
         return 'other'
 
-    @property 
+    @property
     def subcategory(self):
         if self.isType('movie'):
             return 'movie'
@@ -1138,7 +1138,7 @@ class SoftwareEntity(BasicEntity):
         cls.addNestedPropertyList('authors',                PersonEntityMini)
         cls.addProperty('authors_source',                   basestring)
         cls.addProperty('authors_timestamp',                datetime)
-        
+
         cls.addNestedPropertyList('publishers',             BasicEntityMini)
         cls.addProperty('publishers_source',                basestring)
         cls.addProperty('publishers_timestamp',             datetime)
@@ -1146,7 +1146,7 @@ class SoftwareEntity(BasicEntity):
         cls.addPropertyList('supported_devices',            basestring)
         cls.addProperty('supported_devices_source',         basestring)
         cls.addProperty('supported_devices_timestamp',      datetime)
-        
+
         cls.addProperty('platform',                         basestring)
         cls.addProperty('platform_source',                  basestring)
         cls.addProperty('platform_timestamp',               datetime)
@@ -1160,35 +1160,35 @@ class SoftwareEntity(BasicEntity):
         self.authors            = []
         self.publishers         = []
         self.supported_devices  = []
-    
-    @property 
+
+    @property
     def subtitle(self):
         if self.isType('app'):
             suffix = ''
             if len(self.authors) > 0:
                 suffix = ' (%s)' % ', '.join(unicode(i.title) for i in self.authors)
-            
+
             return 'App%s' % suffix
         elif 'video_game' in self.types:
             suffix = ''
             if self.platform:
                 suffix = ' (%s)' % self.platform
-            
+
             return 'Video Game%s' % suffix
-        
+
         return self._genericSubtitle()
-    
-    @property 
+
+    @property
     def category(self):
         return 'other'
-    
-    @property 
+
+    @property
     def subcategory(self):
         if self.isType('app'):
             return 'app'
         elif 'video_game' in self.types:
             return 'video_game'
-        
+
         return 'other'
 
 class EntitySuggested(Schema):
@@ -1417,12 +1417,12 @@ class RawFavorite(Schema):
     def enrich(self, user, entity, stamp=None):
         favorite = Favorite()
         favorite.dataImport(self.dataExport(), overflow=True)
-        favorite.user   = user 
-        favorite.entity = entity 
+        favorite.user   = user
+        favorite.entity = entity
         if stamp is not None:
             favorite.stamp  = stamp
 
-        return favorite 
+        return favorite
 
 class Favorite(Schema):
     @classmethod
@@ -1519,9 +1519,9 @@ class Activity(Schema):
 
         result              = EnrichedActivity()
         result.activity_id  = self.activity_id
-        result.verb         = self.verb 
+        result.verb         = self.verb
         result.benefit      = self.benefit
-        result.timestamp    = self.timestamp 
+        result.timestamp    = self.timestamp
         result.personal     = personal
 
         if self.subjects is not None:
@@ -1549,7 +1549,7 @@ class Activity(Schema):
                 entityobjects = []
                 for entityId in self.objects.entity_ids:
                     entityobjects.append(entities[str(entityId)])
-                result.objects.entities = entityobjects 
+                result.objects.entities = entityobjects
 
             if self.objects.comment_ids is not None:
                 commentobjects = []
@@ -1599,12 +1599,12 @@ class GenericSlice(Schema):
         # paging
         cls.addProperty('limit',                    int)
         cls.addProperty('offset',                   int)
-        
+
         # sorting
         cls.addProperty('sort',                     basestring)
         cls.addProperty('reverse',                  bool)
         cls.addNestedProperty('coordinates',        CoordinatesSchema)
-        
+
         # filtering
         cls.addProperty('since',                    datetime)
         cls.addProperty('before',                   datetime)
@@ -1626,7 +1626,7 @@ class GenericCollectionSlice(GenericSlice):
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
         cls.addNestedProperty('viewport',           ViewportSchema)
-        
+
         # misc options
         cls.addProperty('quality',                  int)
         cls.addProperty('deleted',                  bool)
@@ -1636,8 +1636,8 @@ class GenericCollectionSlice(GenericSlice):
     def __init__(self):
         GenericSlice.__init__(self)
         self.quality = 1
-        self.deleted = False 
-        self.comments = True 
+        self.deleted = False
+        self.comments = True
         self.unique = False
 
 class UserCollectionSlice(GenericCollectionSlice):

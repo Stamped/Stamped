@@ -275,7 +275,7 @@ class TMDBSource(GenericSource):
                         pass
         return result
 
-    def entityProxyFromKey(self, tmdb_id):
+    def entityProxyFromKey(self, tmdb_id, **kwargs):
         # Todo: Make sure we fail gracefully if id is invalid
         try:
             return TMDBMovie(tmdb_id)
