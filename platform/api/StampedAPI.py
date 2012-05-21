@@ -1799,39 +1799,42 @@ class StampedAPI(AStampedAPI):
                 if stat is not None and stamp.previews is not None:
                     # Likes
                     likeobjects = []
-                    for like in stat.preview_likes:
-                        try:
-                            likeobjects.append(userIds[str(like)])
-                        except KeyError:
-                            logs.warning("Key error for like (user_id = %s)" % like)
-                            logs.debug("Stamp: %s" % stamp)
-                            continue
+                    if stat.preview_likes is not None:
+                        for like in stat.preview_likes:
+                            try:
+                                likeobjects.append(userIds[str(like)])
+                            except KeyError:
+                                logs.warning("Key error for like (user_id = %s)" % like)
+                                logs.debug("Stamp: %s" % stamp)
+                                continue
                     previews.likes = likeobjects
                     
                     # Todos
                     todos = []
-                    for todo in stat.preview_todos:
-                        try:
-                            todos.append(userIds[str(todo)])
-                        except KeyError:
-                            logs.warning("Key error for todo (user_id = %s)" % todo)
-                            logs.debug("Stamp: %s" % stamp)
-                            continue
+                    if stat.preview_todos is not None:
+                        for todo in stat.preview_todos:
+                            try:
+                                todos.append(userIds[str(todo)])
+                            except KeyError:
+                                logs.warning("Key error for todo (user_id = %s)" % todo)
+                                logs.debug("Stamp: %s" % stamp)
+                                continue
                     previews.todos = todos
 
                     # Credits
                     credits = []
-                    for i in stat.preview_credits:
-                        try:
-                            credit = underlyingStampIds[str(i)]
-                            credit.user = userIds[str(credit.user.user_id)]
-                            credit.entity = entityIds[str(stamp.entity.entity_id)]
-                            credits.append(credit)
-                        except KeyError, e:
-                            logs.warning("Key error for credit (stamp_id = %s)" % i)
-                            logs.warning("Error: %s" % e)
-                            logs.debug("Stamp: %s" % stamp)
-                            continue
+                    if stat.preview_credits is not None:
+                        for i in stat.preview_credits:
+                            try:
+                                credit = underlyingStampIds[str(i)]
+                                credit.user = userIds[str(credit.user.user_id)]
+                                credit.entity = entityIds[str(stamp.entity.entity_id)]
+                                credits.append(credit)
+                            except KeyError, e:
+                                logs.warning("Key error for credit (stamp_id = %s)" % i)
+                                logs.warning("Error: %s" % e)
+                                logs.debug("Stamp: %s" % stamp)
+                                continue
                     previews.credits = credits
 
                 else:
