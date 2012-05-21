@@ -1166,7 +1166,7 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', ', '.join(unicode(i['title']) for i in entity.publishers))
+            self._addMetadata('Publisher', ', '.join(unicode(i.title) for i in entity.publishers))
 
             # Actions: Buy
 
@@ -1197,8 +1197,8 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
@@ -1239,15 +1239,15 @@ class HTTPEntity(Schema):
                     self.caption = length
 
             if entity.subcategory == 'tv' and len(entity.networks) > 0:
-                self.caption = ', '.join(unicode(i['title']) for i in entity.networks)
+                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i['title']) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i['title']) for i in entity.directors), optional=True)
+            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
