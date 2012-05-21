@@ -52,7 +52,7 @@
       cancelled_ = YES;
       if (self.delegate) {
         [self.delegate cancellationWasCancelled:self];
-        NSLog(@"cancelling: %@", self.decoration);
+        //NSLog(@"cancelling: %@", self.decoration);
       }
     }
   }

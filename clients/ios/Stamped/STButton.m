@@ -74,17 +74,17 @@
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
-  NSLog(@"touchesBegan");
+  //NSLog(@"touchesBegan");
   self.touched = YES;
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {  
-  NSLog(@"touchesCancelled");
+  //NSLog(@"touchesCancelled");
   self.touched = NO;
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  NSLog(@"touchesEnded");
+  //NSLog(@"touchesEnded");
   self.touched = NO;
   //TODO fix for cancellation
   UITouch* touch = [touches anyObject];

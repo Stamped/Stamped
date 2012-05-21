@@ -125,6 +125,7 @@
     ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
     [self.layer addSublayer:ripplesLayer_];
     [ripplesLayer_ release];
+
 }
 
 - (void)setBlack:(BOOL)black {

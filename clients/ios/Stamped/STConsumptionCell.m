@@ -347,7 +347,7 @@
 
 - (void)handleEntityDetail:(id<STEntityDetail>)entityDetail andError:(NSError*)error {
   [self.activityView stopAnimating];
-  NSLog(@"array:%@",entityDetail.images);
+  //NSLog(@"array:%@",entityDetail.images);
   entityDetail_ = [entityDetail retain];
   if (self.imageView) {
     [self handleCombo];

@@ -98,6 +98,7 @@ static const CGFloat kReloadHeight = 60.0;
     _shelfView = [[UIView alloc] initWithFrame:CGRectMake(0, -356, self.view.bounds.size.width, 360)];
     _shelfView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [_shelfView addSubview:shelfBackground];
+
   
   _arrowImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
   _arrowImageView.frame = CGRectMake(60, CGRectGetMaxY(_shelfView.bounds) - 58 - bottomPadding, 18, 40);
@@ -143,7 +144,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)viewWillUnload {
-  NSLog(@"warning SHOULD IMPLEMENT");
+  //NSLog(@"warning SHOULD IMPLEMENT");
 }
 
 - (void)viewDidAppear:(BOOL)animated {

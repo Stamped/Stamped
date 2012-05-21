@@ -15,7 +15,6 @@
 @required
 - (STCancellation*)objectForHybridCache:(STHybridCacheSource*)cache 
                                 withKey:(NSString*)key
-                       andCurrentObject:(id)object 
                            withCallback:(void(^)(id<NSCoding> model, NSError* error, STCancellation* cancellation))block;
 @end
 
@@ -24,7 +23,7 @@
 @property (nonatomic, readwrite, assign) id<STHybridCacheSourceDelegate> delegate;
 @property (nonatomic, readwrite, assign) NSInteger maxMemoryCount;
 @property (nonatomic, readwrite, assign) NSInteger maxPersistentCost;
-@property (nonatomic, readwrite, assign) NSNumber* maxAge;
+@property (nonatomic, readwrite, copy) NSNumber* maxAge;
 
 - (id)initWithCachePath:(NSString*)path relativeToCacheDir:(BOOL)relative;
 
@@ -39,5 +38,7 @@
 - (void)removeObjectForKey:(NSString*)key;
 
 - (void)setObject:(id<NSCoding>)object forKey:(NSString*)key;
+
+- (void)fastMemoryPurge;
 
 @end

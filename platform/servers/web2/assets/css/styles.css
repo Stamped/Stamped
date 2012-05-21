@@ -24,6 +24,9 @@
 /* **************************************************************************
                             BASIC HIGH-LEVEL SETUP
    ************************************************************************** */
+html {
+  overflow-y: scroll;
+}
 body,
 html {
   width: 100%;
@@ -69,9 +72,12 @@ a:hover {
 }
 footer,
 .fixedwidth {
-  width: 940px;
-  margin: 0 auto;
   position: relative;
+  display: block;
+  max-width: 1000px;
+  min-width: 360px;
+  width: 1000px;
+  margin: 0 auto;
 }
 /* **************************************************************************
                                 GENERIC FIXED HEADER
@@ -84,9 +90,6 @@ header {
   background: #fff;
 }
 header .header-body {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
   z-index: 25;
   /* TODO: use slight background gradient instead of flat color */
 
@@ -201,9 +204,9 @@ header .header-body a.button {
   z-index: 101;
 }
 .user-logo-small {
-  position: relative;
+  position: absolute;
   top: -10px;
-  left: -10px;
+  right: -22px;
   display: inline-block;
   width: 44px;
   height: 44px;
@@ -280,9 +283,6 @@ header .header-body a.button {
 
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
   padding: 34px 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
@@ -664,6 +664,9 @@ header .header-body a.button {
   box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   top: 50%;
   right: 40px;
+  -webkit-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  -moz-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
   margin: -180px 0 0;
   padding: 0;
 }
@@ -687,9 +690,14 @@ header .header-body a.button {
   position: relative;
   z-index: 1000;
   opacity: 0;
-  -webkit-transition: opacity 0.3s ease-out;
-  -moz-transition: opacity 0.3s ease-out;
-  transition: opacity 0.3s ease-out;
+  -webkit-transform: scale(0.8, 0.8);
+  -moz-transform: scale(0.8, 0.8);
+  -o-transform: scale(0.8, 0.8);
+  -ms-transform: scale(0.8, 0.8);
+  transform: scale(0.8, 0.8);
+  -webkit-transition: all 0.3s ease-out;
+  -moz-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
 }
 #stamp-category-nav-bar ol li div {
   background: url(/assets/img/sidenav_sprite.png) no-repeat;
@@ -703,11 +711,27 @@ header .header-body a.button {
 }
 #stamp-category-nav-bar ol a:hover {
   opacity: 1;
+  -webkit-transition: all 0s linear;
+  -moz-transition: all 0s linear;
+  transition: all 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
   /*background-position: -252px 0;*/
 
 }
 #stamp-category-nav-bar ol a:active {
   opacity: 1;
+  -webkit-transition: all 0s linear;
+  -moz-transition: all 0s linear;
+  transition: all 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
 }
 #stamp-category-nav-bar ol li.default div {
   background-position: 0 0;
@@ -740,6 +764,14 @@ body.book #stamp-category-nav-bar ol li.book a:hover,
 body.film #stamp-category-nav-bar ol li.film a:hover,
 body.other #stamp-category-nav-bar ol li.other a:hover {
   opacity: 1;
+  -webkit-transition: all 0s linear;
+  -moz-transition: all 0s linear;
+  transition: all 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
   pointer-events: none;
   cursor: default;
 }
@@ -1594,7 +1626,7 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
 .card {
   margin: 45px auto 0;
   padding: 0;
-  width: 940px;
+  width: 1000px;
   background: none repeat scroll 0 0 #FFFFFF;
   border: 0 none;
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
