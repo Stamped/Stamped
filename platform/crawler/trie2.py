@@ -11,7 +11,7 @@ import gzip, json, math, re, string, time, sys, threading
 
 from MongoStampedAPI    import MongoStampedAPI
 from HTTPSchemas        import *
-from Schemas            import *
+from api.Schemas        import *
 from gevent.pool        import Pool
 from optparse           import OptionParser
 from pprint             import pprint, pformat

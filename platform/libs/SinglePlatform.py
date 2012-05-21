@@ -16,11 +16,11 @@ import datetime, logs, sys, time
 from pprint         import pprint
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
-from Schemas        import MenuSchema
-from Schemas        import SubmenuSchema
-from Schemas        import MenuSectionSchema
-from Schemas        import MenuItemSchema
-from Schemas        import MenuPriceSchema
+from api.Schemas    import MenuSchema
+from api.Schemas    import SubmenuSchema
+from api.Schemas    import MenuSectionSchema
+from api.Schemas    import MenuItemSchema
+from api.Schemas    import MenuPriceSchema
 from urllib2        import HTTPError
 from threading      import Lock
 from gevent         import sleep

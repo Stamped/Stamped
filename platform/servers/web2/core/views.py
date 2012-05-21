@@ -10,7 +10,7 @@ import api.HTTPSchemas
 import os, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
-from Schemas        import *
+from api.Schemas    import *
 from helpers        import *
 
 import travis_test

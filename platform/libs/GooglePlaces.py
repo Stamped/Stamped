@@ -12,7 +12,7 @@ from optparse       import OptionParser
 from Geocoder       import Geocoder
 from AKeyBasedAPI   import AKeyBasedAPI
 from AEntitySource  import AExternalServiceEntitySource
-from Schemas        import PlaceEntity
+from api.Schemas    import PlaceEntity
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
 

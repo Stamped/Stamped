@@ -15,7 +15,7 @@ from logs import log, report
 try:
     from MongoStampedAPI                import MongoStampedAPI
     from AStampedAPITestCase            import *
-    from Schemas                        import Entity
+    from api.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime
 except:

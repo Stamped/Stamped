@@ -66,7 +66,7 @@ import logs
 from urlparse               import urlparse, parse_qsl
 from LRUCache               import lru_cache
 from Memcache               import memcached_function
-from Schemas                import BasicEntity
+from api.Schemas            import BasicEntity
 from SinglePlatform         import StampedSinglePlatform
 from pprint                 import pprint
 from pymongo                import Connection

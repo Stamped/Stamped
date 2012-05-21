@@ -11,7 +11,7 @@ import copy, gevent, os, re, string, sys
 
 from BeautifulSoup  import BeautifulSoup
 from optparse       import OptionParser
-from Schemas        import BasicEntity
+from api.Schemas    import BasicEntity
 from lxml           import objectify, etree
 from bottlenose     import Amazon
 from errors         import Fail

@@ -33,7 +33,7 @@ try:
     from gevent.pool                import Pool
     from pprint                     import pprint
     from libs.LibUtils              import parseDateString
-    from Schemas                    import BasicEntity
+    from api.Schemas                import BasicEntity
     from datetime                   import datetime
     from optparse                   import OptionParser
     from bson                       import ObjectId

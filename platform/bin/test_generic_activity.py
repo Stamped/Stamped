@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 
 from datetime           import datetime
-from Schemas            import *
+from api.Schemas        import *
 from MongoStampedAPI    import MongoStampedAPI
 
 user_ids = set([ 

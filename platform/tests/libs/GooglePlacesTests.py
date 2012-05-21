@@ -16,7 +16,7 @@ try:
     from libs.GooglePlacesSource        import GooglePlacesSource
     from libs.ExternalSourceController  import ExternalSourceController
     from AStampedAPITestCase            import *
-    from Schemas                        import Entity
+    from api.Schemas                    import Entity
     from pprint                         import pformat
     from datetime                       import datetime
 except:

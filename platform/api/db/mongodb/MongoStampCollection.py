@@ -10,7 +10,7 @@ import bson, logs, pprint, pymongo, re
 
 from datetime                       import datetime
 from utils                          import lazyProperty
-from Schemas                        import *
+from api.Schemas                    import *
 from Entity                         import buildEntity
 
 from api.AStampDB                   import AStampDB

@@ -16,7 +16,7 @@ try:
     from libs.CleanerSource             import CleanerSource
     from libs.ExternalSourceController  import ExternalSourceController
     from AStampedAPITestCase            import *
-    from Schemas                        import Entity
+    from api.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime
 except:

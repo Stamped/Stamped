@@ -11,7 +11,7 @@ import logs
 from AStampedAPI            import AStampedAPI
 from utils                  import abstract, AttributeDict
 from GeocoderEntityProxy    import GeocoderEntityProxy
-from Schemas                import Entity
+from api.Schemas            import Entity
 from Entity                 import setFields, isEqual, getSimplifiedTitle
 from datetime               import datetime
 from pprint                 import pprint

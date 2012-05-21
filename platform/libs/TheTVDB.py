@@ -10,13 +10,13 @@ __all__       = [ 'TheTVDB', 'globalTheTVDB' ]
 import Globals
 import string, sys, urllib, utils
 
-from Schemas    import *
-from optparse   import OptionParser
-from LibUtils   import parseDateString
-from lxml       import objectify, etree
-from pprint     import pprint
-from LRUCache   import lru_cache
-from Memcache   import memcached_function
+from api.Schemas    import *
+from optparse       import OptionParser
+from LibUtils       import parseDateString
+from lxml           import objectify, etree
+from pprint         import pprint
+from LRUCache       import lru_cache
+from Memcache       import memcached_function
 
 class TheTVDB(object):
     

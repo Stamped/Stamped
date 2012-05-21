@@ -25,7 +25,7 @@ try:
     from utils                      import lazyProperty
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
-    from Schemas                    import BasicEntity
+    from api.Schemas                import BasicEntity
     from datetime                   import datetime
     from bson                       import ObjectId
     from Entity                     import buildEntity

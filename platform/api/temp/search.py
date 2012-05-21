@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals
 from MongoStampedAPI import MongoStampedAPI
 from HTTPSchemas import *
-from Schemas import *
+from api.Schemas import *
 from pprint import pprint
 import Entity
 

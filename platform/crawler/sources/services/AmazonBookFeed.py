@@ -10,7 +10,7 @@ import feedparser, gevent, os, re
 
 from AEntitySource import AExternalDumpEntitySource
 from BeautifulSoup import BeautifulSoup
-from Schemas       import Entity
+from api.Schemas   import Entity
 from pprint        import pprint
 from gevent.pool   import Pool
 
