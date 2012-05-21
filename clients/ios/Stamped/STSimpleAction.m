@@ -27,9 +27,9 @@
 - (id)initWithCoder:(NSCoder *)decoder {
   self = [super init];
   if (self) {
-    _type = [decoder decodeObjectForKey:@"type"];
-    _name = [decoder decodeObjectForKey:@"name"];
-    _sources = [decoder decodeObjectForKey:@"sources"];
+    _type = [[decoder decodeObjectForKey:@"type"] retain];
+    _name = [[decoder decodeObjectForKey:@"name"] retain];
+    _sources = [[decoder decodeObjectForKey:@"sources"] retain];
   }
   return self;
 }

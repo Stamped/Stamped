@@ -87,7 +87,7 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)viewDidLoad {
   [super viewDidLoad];
   UIView* toolbar = self.toolbar;
-  NSLog(@"loaded:%@",toolbar);
+  //NSLog(@"loaded:%@",toolbar);
   CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height - 1: 0;
   STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, self.view.frame.size.height - toolbarHeight)] autorelease];
   CGFloat bottomPadding = 0;
@@ -138,7 +138,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)viewWillUnload {
-  NSLog(@"warning SHOULD IMPLEMENT");
+  //NSLog(@"warning SHOULD IMPLEMENT");
 }
 
 - (void)viewDidAppear:(BOOL)animated {

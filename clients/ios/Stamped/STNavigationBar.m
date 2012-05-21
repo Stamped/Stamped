@@ -114,7 +114,7 @@
 }
 
 - (void)initialize {
-  NSLog(@"initializing navbar");
+  //NSLog(@"initializing navbar");
   self.layer.masksToBounds = NO;
 
   CGFloat ripplesY = CGRectGetMaxY(self.bounds);

@@ -43,6 +43,7 @@
 #import "STStampedAPI.h"
 #import "DDMenuController.h"
 #import "STWelcomeViewController.h"
+#import "STIWantToViewController.h"
 
 #import "STCreateStampViewController.h"
 
@@ -112,6 +113,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     STRightMenuViewController *rightController = [[STRightMenuViewController alloc] init];
     
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:inboxController];
+  _navigationController = [navController retain];
     DDMenuController *menuController = [[DDMenuController alloc] initWithRootViewController:navController];
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
@@ -131,7 +133,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     welcomeController.view.frame = menuController.view.bounds;
     [welcomeController animateIn];
     
-  //[_navigationController pushViewController:[[[STInboxViewController alloc] init] autorelease] animated:NO];
+  [[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
   grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
   grid_.hidden = YES;
   [self.window addSubview:grid_];
