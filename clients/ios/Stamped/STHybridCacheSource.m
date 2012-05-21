@@ -220,7 +220,8 @@
 - (STCancellation*)objectForKey:(NSString*)key 
                     forceUpdate:(BOOL)update 
                    withCallback:(void (^)(id<NSCoding>, NSError*, STCancellation*))block {
-  id<NSCoding> fastResult = [self fastCachedObjectForKey:key];
+  id<NSCoding> fastResult = nil;
+  [self fastCachedObjectForKey:key];
   if (fastResult) {
     //NSLog(@"Fast cached %@ for %@", [fastResult title], self.path);
     STCancellation* fastCancellation = [STCancellation cancellation];
@@ -233,30 +234,33 @@
   }
   else {
     STCancellation* slowCancellation = [STCancellation cancellationWithDelegate:self];
-    [Util executeOnMainThread:^{
+    [Util executeAsync:^{
       id<NSCoding> slowResult = [self cachedObjectForKey:key];
       if (slowResult) {
-        //NSLog(@"Slow cached %@ for %@", [slowResult title], self.path);
-        if (slowCancellation.finish) {
-          block(slowResult, nil, slowCancellation);
-        }
+        [Util executeOnMainThread:^{
+          if (slowCancellation.finish) {
+            block(slowResult, nil, slowCancellation);
+          }
+        }];
       }
       else {
-        id cancellationKey = [NSValue valueWithPointer:slowCancellation];
-        void (^delegateBlock)(id<NSCoding>, NSError*, STCancellation*) = ^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
-          [self.delegateCancellations removeObjectForKey:cancellationKey];
-          if (model) {
-            //NSLog(@"Fetched %@ for %@", [model title], self.path);
-            [self setObject:model forKey:key];
-          }
-          if (slowCancellation.finish) {
-            block(model, error, slowCancellation);
-          }
-        };
-        STCancellation* delegateCancellation = [self.delegate objectForHybridCache:self
-                                                                           withKey:key
-                                                                      withCallback:delegateBlock];
-        [self.delegateCancellations setObject:delegateCancellation forKey:cancellationKey];
+        [Util executeOnMainThread:^{
+          id cancellationKey = [NSValue valueWithPointer:slowCancellation];
+          void (^delegateBlock)(id<NSCoding>, NSError*, STCancellation*) = ^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+            [self.delegateCancellations removeObjectForKey:cancellationKey];
+            if (model) {
+              //NSLog(@"Fetched %@ for %@", [model title], self.path);
+              [self setObject:model forKey:key];
+            }
+            if (slowCancellation.finish) {
+              block(model, error, slowCancellation);
+            }
+          };
+          STCancellation* delegateCancellation = [self.delegate objectForHybridCache:self
+                                                                             withKey:key
+                                                                        withCallback:delegateBlock];
+          [self.delegateCancellations setObject:delegateCancellation forKey:cancellationKey];
+        }];
       }
     }];
     return slowCancellation;

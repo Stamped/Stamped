@@ -41,15 +41,6 @@
 
 #pragma mark - Stamps Loading
 
-- (void)loadWithPath:(NSString*)path {
-
-
-    
-    
-
-    
-}
-
 - (void)reloadData {
     if (_reloading) return;
     _reloading = YES;
@@ -66,7 +57,7 @@
 }
 
 - (void)loadNextPage {
-    
+  
 }
 
 - (void)cancel {
@@ -108,7 +99,7 @@
     }
     
     slice.query = _searchQuery;
-    slice.sort = @"relevance";
+    slice.sort = @"stamped";
     
     [_slice release], _slice = nil;
     _slice = (id)[slice retain];
