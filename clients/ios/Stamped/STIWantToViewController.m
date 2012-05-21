@@ -57,7 +57,7 @@
       cellView.layer.shadowOpacity = .4;
       cellView.layer.shadowRadius = 2;
       cellView.layer.shadowOffset = CGSizeMake(0, 2);
-        cellView.layer.shadowPath = [UIBezierPath bezierPathWithRect:cellView.bounds].CGPath;
+        cellView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:cellView.bounds cornerRadius:5].CGPath;
       
       NSArray* colors;
       if (k == 0) {

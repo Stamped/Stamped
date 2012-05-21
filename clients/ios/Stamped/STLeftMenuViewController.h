@@ -10,9 +10,16 @@
 
 @interface STLeftMenuViewController : UIViewController {
     NSArray *_dataSource;
+    NSArray *_anchorDataSource;
+    
     NSDictionary *_controllerStore;
+    NSDictionary *_anchorControllerStore;
+    
+    NSInteger _unreadCount;
+    NSIndexPath *_selectedIndexPath;
 }
 
 @property(nonatomic,retain) UITableView *tableView;
+@property(nonatomic,retain) UITableView *anchorTableView;
 
 @end
