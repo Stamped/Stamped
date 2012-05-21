@@ -1934,6 +1934,7 @@ class HTTPEntitySuggested(Schema):
         cls.addProperty('limit',                int)
 
     def exportEntitySuggested(self):
+        logs.info(self.dataExport())
         entitySuggested = EntitySuggested().dataImport(self.dataExport(), overflow=True)
         if self.coordinates is not None:
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
@@ -2291,11 +2292,13 @@ class HTTPStamp(Schema):
                 item.blurb_references = blurb_references
 
             if content.images is not None:
+                newImages = []
                 for image in content.images:
                     img = HTTPImageSchema().dataImport(image.dataExport())
                     # quick fix for now
                     # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
-                    item.images.append(img)
+                    newImages.append(img)
+                item.images = newImages
 
             # Insert contents in descending chronological order
             self.contents.insert(0, item)
