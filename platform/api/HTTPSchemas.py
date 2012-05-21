@@ -1991,25 +1991,20 @@ class HTTPGenericSlice(Schema):
         self.reverse = False
 
     def _convertData(self, data):
-        coordinates = getattr(data, 'coordinates', None)
+        coordinates = data.pop('coordinates', None)
         if coordinates is not None:
-            try:
-                lat, lng = coordinates.split(',')
-                data['coordinates'] = {
-                    'lat' : float(lat),
-                    'lng' : float(lng)
-                }
-            except Exception:
+            data['coordinates'] = _coordinatesFlatToDict(coordinates)
+            if data['coordinates'] is None:
                 raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
 
-        since = getattr(data, 'since', None)
+        since = data.pop('since', None)
         if since is not None:
             try:
                 data['since'] = datetime.utcfromtimestamp(int() - 2)
             except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
 
-        before = getattr(data, 'before', None)
+        before = data.pop('before', None)
         if before is not None:
             try:
                 data['before'] = datetime.utcfromtimestamp(int(before) + 2)
@@ -2053,7 +2048,7 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
     def _convertData(self, data):
         data = super(HTTPGenericCollectionSlice, self)._convertData(data)
 
-        viewport = getattr(data, 'viewport', None)
+        viewport = data.pop('viewport', None)
         if viewport is not None:
             try:
                 lat0, lng0, lat1, lng1 = viewport.split(',')
@@ -2072,6 +2067,12 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
                 # TODO: validate viewport
             except Exception:
                 raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
+
+#        coordinates = getattr(data, 'coordinates', None)
+#        if coordinates is not None:
+#            data['coordinates'] = _coordinatesFlatToDict(coordinates)
+#            if data['coordinates'] is None:
+#                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
 
         return data
 

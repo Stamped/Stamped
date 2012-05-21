@@ -116,6 +116,7 @@ class StampedAPIStampTests(StampedAPITest):
     
     def _getStamps(self, httpGenericCollectionSlice):
         self._params['genericCollectionSlice'] = httpGenericCollectionSlice.exportGenericCollectionSlice()
+
         
         ret = self.stampedAPI._getStampCollection(**self._params)
         self.assertIsInstance(ret, list)
@@ -314,8 +315,8 @@ class StampedAPIStampTests(StampedAPITest):
         # the -180 / 180 longitude border, but this test is purposefully 
         # centered around NYC to avoid this pitfall.
         for s in ret0:
-            self.assertTrue(s.lat <= viewport[0] and s.lat >= viewport[2])
-            self.assertTrue(s.lng >= viewport[1] and s.lng <= viewport[3])
+            self.assertTrue(s.entity.coordinates.lat <= viewport[0] and s.entity.coordinates.lat >= viewport[2])
+            self.assertTrue(s.entity.coordinates.lng >= viewport[1] and s.entity.coordinates.lng <= viewport[3])
         
         # test reverse
         self._test_reverse(genericCollectionSlice, ret0)

@@ -2689,7 +2689,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addLike(self, authUserId, stampId):
-        logs.info('### calling api addLike')
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
         
@@ -2712,7 +2711,6 @@ class StampedAPI(AStampedAPI):
         if self._stampDB.checkLike(authUserId, stampId):
             raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
 
-        logs.info('### calling stampDB.addLike()')
         # Add like
         self._stampDB.addLike(authUserId, stampId)
         

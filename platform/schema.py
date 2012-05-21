@@ -279,6 +279,10 @@ class Schema(object):
         try:
             for k, v in properties.items():
                 try:
+                    if v is None:
+                        self.__setattr__(k, None)
+                        continue
+
                     p = self.__class__._propertyInfo[k]
                     if p[_typeKey] == _nestedPropertyKey:
                         if k in self.__properties:
