@@ -218,9 +218,15 @@ class Schema(object):
             elif t == _nestedPropertyKey:
                 properties[k] = v.dataExport()
             elif t == _propertyListKey:
-                properties[k] = tuple([ copy.deepcopy(v2) for v2 in v])
+                if v is None:
+                    properties[k] = None
+                else:
+                    properties[k] = tuple([ copy.deepcopy(v2) for v2 in v])
             else:
-                properties[k] = tuple([ v2.dataExport() for v2 in v])
+                if v is None:
+                    properties[k] = None 
+                else:
+                    properties[k] = tuple([ v2.dataExport() for v2 in v])
         return properties
 
     def dataImport(self, properties, **kwargs):
