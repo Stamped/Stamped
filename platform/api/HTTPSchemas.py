@@ -1418,8 +1418,8 @@ class HTTPEntity(Schema):
                 actionTitle = 'Listen to song'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
-            if entity.sources.itunes_id is not None and entity.sources.itunes_preview:
+            if getattr(entity.sources, 'itunes_id', None) is not None \
+               and getattr(entity.sources, 'itunes_preview', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Listen on iTunes'
                 source.source       = 'itunes'
@@ -1436,7 +1436,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            if entity.sources.rdio_id is not None:
+            if getattr(entity.sources, 'rdio_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Listen on Rdio'
                 source.source       = 'rdio'
@@ -1452,7 +1452,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            if entity.sources.spotify_id is not None:
+            if getattr(entity.sources, 'spotify_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Listen on Spotify'
                 source.source       = 'spotify'
@@ -1479,7 +1479,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_playlist_music', client=client)
             sources     = []
 
-            if entity.sources.rdio_id is not None:
+            if getattr(entity.sources, 'rdio_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Add to playlist on Rdio'
                 source.source       = 'rdio'
@@ -1492,7 +1492,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            if entity.sources.spotify_id is not None:
+            if getattr(entity.sources, 'spotify_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Add to playlist on Spotify'
                 source.source       = 'spotify'
@@ -1514,7 +1514,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_download', client=client)
             sources     = []
 
-            if entity.sources.itunes_id is not None:
+            if getattr(entity.sources, 'itunes_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
@@ -1555,7 +1555,8 @@ class HTTPEntity(Schema):
 
                         sources = []
 
-                        if song.sources.itunes_id is not None and song.sources.itunes_preview is not None:
+                        if getattr(song.sources, 'itunes_id', None) is not None     \
+                           and getattr(song.sources, 'itunes_preview', None) is not None:
                             source                      = HTTPActionSource()
                             source.name                 = 'Listen on iTunes'
                             source.source               = 'itunes'
@@ -1567,7 +1568,7 @@ class HTTPEntity(Schema):
                             if item.entity_id is None:
                                 item.entity_id = 'T_ITUNES_%s' % song.itunes_id
 
-                        if song.sources.rdio_id is not None:
+                        if getattr(song.sources, 'rdio_id', None) is not None:
                             source                      = HTTPActionSource()
                             source.name                 = 'Listen on Rdio'
                             source.source               = 'rdio'
@@ -1578,7 +1579,7 @@ class HTTPEntity(Schema):
                             if item.entity_id is None:
                                 item.entity_id = 'T_RDIO_%s' % song.rdio_id
 
-                        if song.sources.spotify_id is not None:
+                        if getattr(song.sources, 'spotify_id', None) is not None:
                             source                      = HTTPActionSource()
                             source.name                 = 'Listen on Spotify'
                             source.source               = 'spotify'
@@ -1668,7 +1669,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_download_primary', client=client)
             sources     = []
 
-            if entity.sources.itunes_id is not None:
+            if getattr(entity.sources, 'itunes_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
