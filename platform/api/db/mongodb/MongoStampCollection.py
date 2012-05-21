@@ -72,7 +72,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = created
 
-        logs.info('stampId: %s' % document[self._primary_key] )
         entityData = document.pop('entity')
         entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}

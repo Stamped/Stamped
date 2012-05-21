@@ -54,7 +54,6 @@ class Schema(object):
 
     @classmethod
     def _postSetSchema(cls):
-        cls._shortcuts         = {}
         cls._duplicates        = set()
         cls._required_fields   = set()
 
@@ -62,20 +61,6 @@ class Schema(object):
         for name, info in properties.items():
             kind = info[_kindKey]
             t = info[_typeKey]
-            # set up for shortcuts for nested properties
-            if t == _nestedPropertyKey and issubclass(kind, Schema):
-                shortcuts = cls._shortcuts
-                for shortcut, path in shortcuts:
-                    # only consider shortcuts that don't conflict with local properties
-                    if shortcut not in properties:
-                        # ensure duplicates are added to duplicate set
-                        if shortcut in cls.__shortcuts:
-                            cls._duplicates.add(shortcut)
-                        else:
-                            # create shortcut path prefixed with property name
-                            path = [name]
-                            path.extend(shortcut)
-                            cls._shortcuts[shortcut] = path
             if info['required']:
                 cls._required_fields.add(name)
         for dup in cls._duplicates:
@@ -118,22 +103,6 @@ class Schema(object):
                 kwargs['cast'] = lambda x: unicode(x) if x is not None else None
         cls._propertyInfo[name] = kwargs
 
-    def __shortcutHelper(self, name, create=False):
-        path = self.__class__._shortcuts[name]
-        cur = self
-        for key in path[:-1]:
-            next = cur.__getattr__(key)
-            if next is None:
-                if create:
-                    info = self.__class__._propertyInfo[key]
-                    kind = info[_kindKey]
-                    next = kind()
-                    cur.__setattr__(key, next)
-                else:
-                    return None
-            cur = next
-        return cur, path[-1]
-
     def __getattr__(self, name):
         # Special case
         if name in set(['_Schema__required_count', '__class__', '_Schema__properties']):
@@ -153,13 +122,7 @@ class Schema(object):
                 else:
                     return None
         elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate shortcut used')
-        elif name in self.__class__._shortcuts:
-            last, lastKey = self.__shortcutHelper(name, create=False)
-            if last is not None:
-                return last.__getattr__(lastKey)
-            else:
-                return None
+            raise SchemaException('Duplicate attribute used')
         else:
             return object.__getattribute__(self, name)
 
@@ -209,10 +172,7 @@ class Schema(object):
                             self.__required_count += 1
                     self.__properties[name] = value
         elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate shortcut used')
-        elif name in self.__class__._shortcuts:
-            last, lastKey = self.__shortcutHelper(name, create=True)
-            last.__setattr__(lastKey, value)
+            raise SchemaException('Duplicate attribute used')
         else:
             object.__setattr__(self, name, value)
 
@@ -225,11 +185,7 @@ class Schema(object):
                         self.__required_count -= 1
                 del self.__properties[name]
         elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate shortcut used')
-        elif name in self.__class__._shortcuts:
-            last, lastKey = self.__shortcutHelper(name, create=False)
-            if last is not None:
-                last.__delattr__(lastKey)
+            raise SchemaException('Duplicate attribute used')
         else:
             object.__delattr__(self, name)
 
@@ -251,12 +207,6 @@ class Schema(object):
 
     def __unicode__(self):
         return u'[%s %s]' % (self.__class__, self.dataExport())
-
-
-    # def __contains__(self, item):
-    #     for k, v in self.__properties.items():
-    #         if item == k:
-    #             return True 
 
     def dataExport(self):
         properties = {}
