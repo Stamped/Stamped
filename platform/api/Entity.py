@@ -476,8 +476,10 @@ def upgradeEntityData(entityData):
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents, seed=False)
-        
+
+
         setBasicGroup(place, new, 'address', 'formatted_address')
+        place['hours'] = HoursSchema().dataImport(place['hours'].dataExport(), overflow=True)
         setBasicGroup(place, new, 'hours', seed=False)
         setBasicGroup(restaurant, new, 'menu', seed=False)
         setBasicGroup(restaurant, new, 'price_range', seed=False)
