@@ -15,7 +15,7 @@ from utils                      import lazyProperty
 from pprint                     import pformat
 from errors                     import *
 
-from Schemas                    import *
+from api.Schemas                import *
 from AMongoCollection           import AMongoCollection
 from MongoFollowersCollection   import MongoFollowersCollection
 from MongoFriendsCollection     import MongoFriendsCollection
@@ -43,7 +43,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if '_id' in document:
             document['user_id'] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
-        return User(document, overflow=True)
+        return User().dataImport(document, overflow=True)
 
     def _getAllUserIds(self):
         documents = self._collection.find({}, {})

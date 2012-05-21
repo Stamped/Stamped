@@ -176,7 +176,7 @@ class AMongoCollection(object):
             assert obj.__class__.__name__ == self._obj.__name__
         
         try:
-            document = obj.value
+            document = obj.dataExport()
         except:
             document = obj
         
@@ -197,7 +197,7 @@ class AMongoCollection(object):
             del(document['_id'])
         
         if self._obj is not None:
-            return self._obj(document, overflow=self._overflow)
+            return self._obj().dataImport(document, overflow=self._overflow)
         else:
             return document
     
@@ -208,14 +208,13 @@ class AMongoCollection(object):
             assert obj.__class__.__name__ == self._obj.__name__
         
         #from pprint import pformat
-        #logs.warning(pformat(obj.value))
         document = self._convertToMongo(obj)
         document = self._addMongoDocument(document)
         
         #pprint(document)
         #logs.warning(pformat(document))
         
-        obj      = self._convertFromMongo(document)
+        obj = self._convertFromMongo(document)
         
         if self._obj is not None:
             assert obj.__class__.__name__ == self._obj.__name__

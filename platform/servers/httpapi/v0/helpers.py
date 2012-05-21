@@ -60,7 +60,7 @@ if duration > 2:
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False, 
                       http_schema=None, 
-                      schema=None, 
+                      conversion=None,
                       upload=None, 
                       parse_request_kwargs=None, 
                       parse_request=True):
@@ -172,10 +172,10 @@ def handleHTTPRequest(requires_auth=True,
                     else:
                         params['http_schema']   = parseRequest(None, request, **parse_kwargs)
                     
-                    if schema is not None:
-                        params['schema']        = params['http_schema'].exportSchema(schema())
-                    elif params['http_schema']:
-                        params['data']          = params['http_schema'].exportSparse()
+                    if conversion is not None:
+                        params['schema']        = conversion(params['http_schema'])
+                    elif http_schema is not None:
+                        params['data']          = params['http_schema'].dataExport()
                 
                 kwargs.update(params)
                 ret = fn(request, *args, **kwargs)
@@ -272,14 +272,13 @@ def checkClient(request):
         logs.client(client_id)
         if not stampedAuth.verifyClientCredentials(client_id, client_secret):
             raise
-        
+
         client = stampedAuth.getClientDetails(client_id)
         stampedAPI.setVersion(client.api_version)
         
         return client_id
-    except Exception:
-        msg = "Invalid client credentials"
-        raise StampedAuthError("access_denied", "Client credentials not included")
+    except Exception, e:
+        raise StampedAuthError("access_denied", "Invalid client credentials")
 
 def optionalOAuth(request):
     try:
@@ -318,7 +317,8 @@ def checkOAuth(request):
         return authenticated_user_id, client_id
     except StampedHTTPError:
         raise
-    except Exception:
+    except Exception, e:
+        logs.warning("Error: %s" % e)
         raise StampedAuthError("invalid_token", "Invalid access token")
 
 def parseRequest(schema, request, **kwargs):
@@ -356,7 +356,7 @@ def parseRequest(schema, request, **kwargs):
                 raise
             return
         
-        schema.importData(data)
+        schema.dataImport(data)
         
         logs.debug("Parsed request data")
         return schema
@@ -414,7 +414,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
                 raise
             return
         
-        schema.importData(data)
+        schema.dataImport(data)
         
         logs.debug("Parsed request data")
         return schema

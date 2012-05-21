@@ -107,15 +107,19 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def cast(self):
-        return [
-            {
+        try:
+            return [
+                {
                 'name':entry['name'],
                 'character':entry['character'],
                 'source':self.source,
                 'key':entry['id'],
-            }
-                for entry in self._castsRaw['cast']
-        ]
+                }
+            for entry in self._castsRaw['cast']
+            ]
+        except Exception:
+            pass
+        return []
 
     @lazyProperty
     def directors(self):
@@ -207,13 +211,15 @@ class TMDBSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.tmdb_id = proxy.key
+        entity.sources.tmdb_id = proxy.key
         return True
 
     def movieSource(self, query):
         def gen():
             try:
                 results = self.__tmdb.movie_search(query.name)
+                if results is None:
+                    return
                 for movie in results['results']:
                     yield movie
                 pages = results['total_pages']

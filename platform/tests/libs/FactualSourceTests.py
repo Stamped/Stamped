@@ -52,7 +52,7 @@ class FactualSourceResolveTest(AFactualSourceTest):
     def test_ino_resolve(self):
         modified = self.source.resolveEntity(self.ino,self.controller)
         if _verbose:
-            print('\n%s\n' % (pformat(self.ino.value),))
+            print('\n%s\n' % (pformat(self.ino),))
         self.assertEqual(modified,True)
         self.assertEqual(self.ino.factual_id,'4333b825-8573-422c-89c5-26927e717dac')
         self.assertEqual(self.ino.factual_source,'factual')
@@ -82,7 +82,7 @@ class FactualSourceEnrichTest(AFactualSourceTest):
         self.assertEqual(self.ino.singleplatform_timestamp,now)
         modified = self.source.enrichEntity(self.ino,self.controller)
         if _verbose:
-            print('\n%s\n' % (pformat(self.ino.value),))
+            print('\n%s\n' % (pformat(self.ino),))
         self.assertEqual(modified,True)
         self.assertEqual(self.ino.address_country, 'US')
         self.assertEqual(self.ino.address_locality, 'New York')

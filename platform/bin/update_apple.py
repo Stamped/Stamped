@@ -145,7 +145,7 @@ def handle_music_feed(feed, matcher, appleRSS, aids, options):
             entity.tracks = list(result.entity.title for result in results)
         
         if options.noop:
-            pprint(entity.value)
+            pprint(entity)
         else:
             matcher.addOne(entity)
         
@@ -195,7 +195,7 @@ def handle_app_feed(feed, matcher, appleRSS, aids, options):
         entity.a_popular = True
         
         if options.noop:
-            pprint(entity.value)
+            pprint(entity)
         else:
             matcher.addOne(entity)
 

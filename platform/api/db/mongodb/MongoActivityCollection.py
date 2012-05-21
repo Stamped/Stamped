@@ -9,7 +9,7 @@ import Globals, logs, copy, pymongo
 
 from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
-from Schemas                            import *
+from api.Schemas                            import *
 
 from AActivityDB                        import AActivityDB
 from MongoAlertQueueCollection          import MongoAlertQueueCollection
@@ -85,6 +85,8 @@ class MongoActivityCollection(AActivityDB):
         return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
+        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
+
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
         benefit         = kwargs.pop('benefit', None)
@@ -100,28 +102,31 @@ class MongoActivityCollection(AActivityDB):
         alerts          = []
         sentTo          = set()
 
-        logs.info('\n ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
-
         try:
-            objects = objects.value
+            objects = objects.dataExport()
         except Exception:
             pass
 
         activityId      = None
 
         def _buildActivity():
-            activity        = Activity()
-            activity.verb   = verb
+            activity            = Activity()
+            activity.verb       = verb
+            
             if subject is not None:
                 activity.subjects = [ subject ]
             if len(objects) > 0:
-                activity.objects = ActivityObjectIds(objects)
+                activity.objects = ActivityObjectIds().dataImport(objects)
             if benefit is not None:
                 activity.benefit = benefit
             if body is not None:
                 activity.body = body
-            activity.timestamp.created  = now
-            activity.timestamp.modified = now
+
+            timestamp           = TimestampSchema()
+            timestamp.created   = now
+            timestamp.modified  = now
+            activity.timestamp  = timestamp 
+
             return activity
 
         # Insert the activity item individually
@@ -170,9 +175,6 @@ class MongoActivityCollection(AActivityDB):
                 continue
             
             self.activity_links_collection.saveActivityLink(activityId, recipientId)
-
-
-            logs.info('\nSENDING ALERT TO %s' % (recipientId))
 
             sentTo.add(recipientId)
 

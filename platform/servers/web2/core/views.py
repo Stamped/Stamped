@@ -91,7 +91,7 @@ def profile(request, schema, **kwargs):
         user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+        stamps      = stampedAPIProxy.getUserStamps(**schema.dataExport())
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     
@@ -222,7 +222,7 @@ def map(request, schema, **kwargs):
         user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+        stamps      = stampedAPIProxy.getUserStamps(**schema.dataExport())
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     

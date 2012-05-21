@@ -65,7 +65,7 @@ class EnrichMovieTest(AEnrichTest):
     def test_enrich_movie(self):
         modified = self.api._entityDB.enrichEntity(self.media1)
         if _verbose:
-            pprint(self.media1.value)
+            pprint(self.media1)
         self.assertEqual(modified,True)
         release_date = datetime(2011,8,26)
         self.assertEqual(self.media1.release_date,release_date)

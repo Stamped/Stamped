@@ -199,7 +199,7 @@ def runAlerts(options):
 
                     # Build push notification
                     for token in recipient.devices.ios_device_tokens:
-                        result = buildPushNotification(user, activity, token.value)
+                        result = buildPushNotification(user, activity, token.dataExport())
                         if token not in userPushQueue:
                             userPushQueue[token] = []
                         userPushQueue[token].append(result)
@@ -336,7 +336,7 @@ def runInvites(options):
                 if not IS_PROD:
                     email['subject'] = u'DEV: %s' % email['subject']
                 
-                params = HTTPUser().importSchema(user).value
+                params = HTTPUser().importSchema(user).dataExport()
                 html = parseTemplate(template, params)
                 email['body'] = html
 
@@ -417,7 +417,7 @@ def _setBody(user, activity, emailAddress, settingsToken):
         ### TODO: Add error logging?
         raise
 
-    params = HTTPUser().importSchema(user).value
+    params = HTTPUser().dataImport(user.dataExport()).dataExport()
     params['title'] = activity['subject']
     params['blurb'] = activity['blurb']
 

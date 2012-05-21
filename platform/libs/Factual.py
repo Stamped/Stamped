@@ -94,7 +94,7 @@ _API_V3_Secret = '9hIItS9RQAlinpyfD6FR9HjmI3tBidMCMxhtAjNd'
 _limit = 20
 
 
-def _path(path_string,entity,subfunc=None):
+def _path(path_string, entity, subfunc=None):
     """
     Helper function for creating resolve filters
 
@@ -103,7 +103,7 @@ def _path(path_string,entity,subfunc=None):
     except for leafs and wildcard iterables
     """
     path = path_string.split()
-    cur = entity
+    cur = entity.dataExport()
     for k in path:
         # wildcard support for list elements
         if k == '*':
@@ -895,7 +895,7 @@ if __name__ == '__main__':
             f = Factual()
             entity = f.entity(sys.argv[2])
             if entity != None:
-                pprint(entity.value)
+                pprint(entity)
             else:
                 print("No data found for given factual_id")
         elif arg == 'enrichAll':

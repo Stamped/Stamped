@@ -8,7 +8,7 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 from Schemas            import ClientLogsEntry
 
-@handleHTTPRequest(http_schema=HTTPClientLogsEntry, schema=ClientLogsEntry)
+@handleHTTPRequest(http_schema=HTTPClientLogsEntry, conversion=HTTPClientLogsEntry.exportClientLogsEntry)
 @require_http_methods(["POST"])
 def create(request, authUserId, schema, **kwargs):
     result = stampedAPI.addClientLogsEntry(authUserId, schema)

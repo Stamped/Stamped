@@ -67,8 +67,8 @@ def show(request, **kwargs):
         if entity.opentable_url and opentable_url is not None:
             entity.opentable_url = opentable_url
         
-        params = HTTPStamp().importSchema(stamp).value
-        params['entity'] = entity.value
+        params = HTTPStamp().dataImport(stamp).dataExport()
+        params['entity'] = entity.dataExport()
         
         if entity.genre == 'film' and entity.length:
             params['entity']['duration'] = formatDuration(entity.length)

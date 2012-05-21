@@ -81,14 +81,14 @@ def demo(default_title='Katy Perry', object_id=None):
     
     result = cursor[index]
     entity = db._convertFromMongo(result)
-    print( "Before:\n%s" % pformat( entity.value ) )
+    print( "Before:\n%s" % pformat( entity ) )
     
     container = FullResolveContainer()
     
     decorations = {}
     container.enrichEntity( entity, decorations )
     
-    print( "After:\n%s" % pformat( entity.value ) )
+    print( "After:\n%s" % pformat( entity ) )
     if len(decorations) > 0:
         print( "With decorations:")
         
@@ -96,7 +96,7 @@ def demo(default_title='Katy Perry', object_id=None):
             print( "%s decoration:" % k )
             
             try:
-                print( "%s" % pformat(v.value) )
+                print( "%s" % pformat(v.dataExport()) )
             except Exception:
                 print( "%s" % pformat(v) )
 
