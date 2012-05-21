@@ -1687,8 +1687,9 @@ class StampedAPI(AStampedAPI):
         allUnderlyingStampIds   = set()
 
         for stat in stats:
-            for credit in stat.preview_credits:
-                allUnderlyingStampIds.add(credit)
+            if stat.preview_credits is not None:
+                for credit in stat.preview_credits:
+                    allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
         underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds))
