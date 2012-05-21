@@ -1934,6 +1934,7 @@ class HTTPEntitySuggested(Schema):
         cls.addProperty('limit',                int)
 
     def exportEntitySuggested(self):
+        logs.info(self.dataExport())
         entitySuggested = EntitySuggested().dataImport(self.dataExport(), overflow=True)
         if self.coordinates is not None:
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
