@@ -441,6 +441,11 @@ def upgradeEntityData(entityData):
         setBasicGroup(amazon, new['sources'], 'asin', 'amazon', newSuffix='id')
         setBasicGroup(amazon, new['sources'], 'amazon_link', 'amazon', newSuffix='url')
     
+    # Netflix
+    if netflix:
+        setBasicGroup(netflix, new['sources'], 'nid', 'netflix', newSuffix='id')
+        setBasicGroup(netflix, new['sources'], 'nurl', 'netflix', newSuffix='url')
+
     # OpenTable
     setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
     if new.sources.opentable_id is None:
