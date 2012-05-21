@@ -3762,7 +3762,9 @@ class StampedAPI(AStampedAPI):
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
-                trackList.append(track.minimize())
+                if isinstance(track, MediaItemEntity):
+                    track = track.minimize()
+                trackList.append(track)
 
                 # Compare entity id before and after
                 if trackId != track.entity_id:
@@ -3792,7 +3794,9 @@ class StampedAPI(AStampedAPI):
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
-                albumList.append(album.minimize())
+                if isinstance(album, MediaCollectionEntity):
+                    album = album.minimize()
+                albumList.append(album)
 
                 # Compare entity id before and after
                 if albumId != album.entity_id:
@@ -3822,7 +3826,9 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
-                artistList.append(artist.minimize())
+                if isinstance(artist, PersonEntity):
+                    artist = artist.minimize()
+                artistList.append(artist)
 
                 # Compare entity id before and after
                 if artistId != artist.entity_id:
