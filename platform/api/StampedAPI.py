@@ -1506,24 +1506,30 @@ class StampedAPI(AStampedAPI):
 
         stampedby = StampedBy()
 
-        stampedby.all.stamps = self._enrichStampObjects(popularStamps)
-        stampedby.all.count  = stats.num_stamps
+        allUsers            = StampedByGroup()
+        allUsers.stamps     = self._enrichStampObjects(popularStamps)
+        allUsers.count      = stats.num_stamps
+        stampedby.all       = allUsers
 
         if authUserId is None:
             return stampedby
 
-        friendUserIds   = self._friendshipDB.getFriends(authUserId)
-        friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
+        friendUserIds       = self._friendshipDB.getFriends(authUserId)
+        friendStamps        = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
-        stampedby.friends.stamps    = self._enrichStampObjects(friendStamps[:limit])
-        stampedby.friends.count     = len(friendStamps)
+        friendUsers         = StampedByGroup()
+        friendUsers.stamps  = self._enrichStampObjects(friendStamps[:limit])
+        friendUsers.count   = len(friendStamps)
+        stampedby.friends   = friendUsers 
 
-        fofUserIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
-        fofOverlap = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
-        fofStamps = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
+        fofUserIds          = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
+        fofOverlap          = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
+        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
 
-        stampedby.fof.stamps   = self._enrichStampObjects(fofStamps[:limit])
-        stampedby.fof.count    = len(fofStamps)
+        fofUsers            = StampedByGroup()
+        fofUsers.stamps     = self._enrichStampObjects(fofStamps[:limit])
+        fofUsers.count      = len(fofStamps)
+        stampedby.fof       = fofUsers
 
         return stampedby
 
