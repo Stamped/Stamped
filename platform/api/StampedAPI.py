@@ -1692,7 +1692,7 @@ class StampedAPI(AStampedAPI):
                     allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
-        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds))
+        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds), limit=len(allUnderlyingStampIds))
 
         for stamp in underlyingStamps:
             underlyingStampIds[stamp.stamp_id] = stamp
@@ -1796,7 +1796,7 @@ class StampedAPI(AStampedAPI):
                 else:
                     stat = None
 
-                if stat is not None and stamp.previews is not None:
+                if stat is not None:
                     # Likes
                     likeobjects = []
                     if stat.preview_likes is not None:
