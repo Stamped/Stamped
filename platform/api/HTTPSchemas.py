@@ -1934,11 +1934,15 @@ class HTTPEntitySuggested(Schema):
         cls.addProperty('limit',                int)
 
     def exportEntitySuggested(self):
-        logs.info(self.dataExport())
-        entitySuggested = EntitySuggested().dataImport(self.dataExport(), overflow=True)
-        if self.coordinates is not None:
-            coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
+        data = self.dataExport()
+        coordinates = data.pop('coordinates', None)
+
+        entitySuggested = EntitySuggested().dataImport(data, overflow=True)
+
+        if coordinates is not None:
+            coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(coordinates))
             entitySuggested.coordinates = coords
+
         return entitySuggested
 
 #        def exportSchema(self, schema):
