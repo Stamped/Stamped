@@ -1730,12 +1730,14 @@ class StampedAPI(AStampedAPI):
 
         for stat in stats:
             # Likes
-            for like in stat.preview_likes:
-                allUserIds.add(like)
+            if stat.preview_likes is not None:
+                for like in stat.preview_likes:
+                    allUserIds.add(like)
 
             # To-Dos
-            for todo in stat.preview_todos:
-                allUserIds.add(todo)
+            if stat.preview_todos is not None:
+                for todo in stat.preview_todos:
+                    allUserIds.add(todo)
 
         for stampId, stamp in underlyingStampIds.iteritems():
             # Credit received
