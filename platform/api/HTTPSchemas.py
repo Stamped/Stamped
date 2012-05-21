@@ -2382,7 +2382,7 @@ class HTTPStampedByGroup(Schema):
         if group.stamps is not None:
             httpStamps = []
             for stamp in group.stamps:
-                httpStamps.append(HTTPStamp.importStamp(stamp))
+                httpStamps.append(HTTPStamp().importStamp(stamp))
 
         return self
 
