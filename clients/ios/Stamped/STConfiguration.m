@@ -233,8 +233,7 @@ static STConfiguration* _sharedInstance;
   return _sharedInstance;
 }
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
     objects_ = [[NSMutableDictionary alloc] init];
@@ -244,8 +243,7 @@ static STConfiguration* _sharedInstance;
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [objects_ release];
   [sections_ release];
   [orderedSections_ release];

@@ -10,7 +10,6 @@
 #import "STRootViewController.h"
 #import "BWQuincyManager.h"
 #import <RestKit/RestKit.h>
-#import "STRootMenuView.h"
 #import "STLegacyInboxViewController.h"
 #import "OAuthToken.h"
 #import "DetailedEntity.h"

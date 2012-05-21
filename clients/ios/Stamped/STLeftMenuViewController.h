@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STLeftMenuViewController : UIViewController
+@interface STLeftMenuViewController : UIViewController {
+    NSArray *_dataSource;
+    NSDictionary *_controllerStore;
+}
+
+@property(nonatomic,retain) UITableView *tableView;
 
 @end

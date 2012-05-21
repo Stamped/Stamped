@@ -32,13 +32,14 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  CGFloat deltaHeight = -_headerHeight;
+  CGFloat deltaHeight = self.view.bounds.size.height-_headerHeight;
   if (self.toolbar) {
     deltaHeight -= self.toolbar.frame.size.height;
   }
-  _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, _headerHeight, 320, 416 + deltaHeight)];
+  _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, _headerHeight, 320, deltaHeight)];
   self.scrollView.scrollsToTop = NO;
   [self.scrollView appendChildView:_tableView];
+    
 }
 
 - (void)viewDidUnload {

@@ -7,7 +7,6 @@
 //
 
 #import "STUniversalNewsController.h"
-#import "STRootMenuView.h"
 #import "STStampedAPI.h"
 #import "STActivity.h"
 #import "STActionManager.h"

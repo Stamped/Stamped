@@ -276,7 +276,9 @@
     CGPoint pos = [[sender layer] position];
     pos.y -= 30.0f;
     [view showFromView:self.superview position:[self convertPoint:pos toView:self.superview] animated:YES];
-   
+    [view hideDelayed:1.0f];
+    [view release];
+    
     return;
     NSInteger index = [_itemViews indexOfObject:sender];
     if (index != NSNotFound) {

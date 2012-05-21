@@ -191,6 +191,7 @@
         view.backgroundColor = [UIColor colorWithPatternImage:[[UIImage imageNamed:@"search_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         view.textField.delegate = self;
+        view.delegate = (id<STSearchViewDelegate>)self;
         self.tableView.tableHeaderView = view;
         _searchView = view;
         [view release];
@@ -333,7 +334,7 @@
         
         CGFloat barHeight = _searchView.bounds.size.height;
 
-        self.tableView.contentOffset = CGPointMake(0.0f, -barHeight);
+        //self.tableView.contentOffset = CGPointMake(0.0f, -barHeight);
         
         if (!_searchOverlay) {
             
@@ -346,7 +347,7 @@
             CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
             animation.fromValue = (id)[UIColor clearColor].CGColor;
             animation.toValue = (id)color.CGColor;
-            animation.duration = 0.25f;
+            animation.duration = 0.3f;
             animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
             [_searchOverlay.layer addAnimation:animation forKey:nil];
             _searchOverlay.layer.backgroundColor = color.CGColor;
@@ -367,7 +368,7 @@
             _searchOverlay = nil;
             
             [CATransaction begin];
-            [CATransaction setAnimationDuration:0.25f];
+            [CATransaction setAnimationDuration:0.3f];
             [CATransaction setCompletionBlock:^{
                 [view removeFromSuperview];
             }];
@@ -376,7 +377,7 @@
             CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
             animation.fromValue = (id)cgColor;
             animation.toValue = (id)[UIColor clearColor].CGColor;
-            animation.duration = 0.25f;
+            animation.duration = 0.3f;
             animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
             [view.layer addAnimation:animation forKey:nil];
             view.layer.backgroundColor = [UIColor clearColor].CGColor;
@@ -387,6 +388,16 @@
         
     }
     
+    _searchView.showCancelButton = _searching;
+    
+}
+
+
+#pragma mark STSearchViewDelegate
+
+- (void)stSearchViewDidCancel:(STSearchView*)view {
+ 
+    [self setSearching:NO];
     
 }
 
