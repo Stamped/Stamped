@@ -9,15 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "STStampedAPI.h"
 
-@interface Stamps : NSObject {
-    NSArray *_data;
-    STGenericCollectionSlice *_slice;
-}
+extern NSString* const StampsChangedNotification;
 
-@property (nonatomic, readonly, getter = isReloading) BOOL reloading;
-@property (nonatomic, readonly, getter = hasMoreData) BOOL moreData;
-@property (nonatomic, assign) STStampedAPIScope scope;
-@property (nonatomic, copy) NSString *searchQuery;
+@interface Stamps : NSObject
+
+@property (nonatomic, readwrite, assign) STStampedAPIScope scope;
+@property (nonatomic, readwrite, copy) NSString *searchQuery;
 
 /*
  * Stamps loading
@@ -29,9 +26,12 @@
 /*
  * Stamps data source
  */
-- (id)stampAtIndex:(NSInteger)index;
+- (NSString*)stampIDAtIndex:(NSInteger)index;
 - (NSInteger)numberOfStamps;
 - (BOOL)isEmpty;
+- (BOOL)hasMoreData;
+- (BOOL)isReloading;
 
++ (Stamps*)sharedInstance;
 
 @end

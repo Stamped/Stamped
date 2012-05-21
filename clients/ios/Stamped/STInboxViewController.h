@@ -11,11 +11,5 @@
 #import "STRestViewController.h"
 #import "Stamps.h"
 
-@class STSliderScopeView, Stamps;
-@interface STInboxViewController : STRestViewController {
-    STSliderScopeView *_slider;
-    Stamps *_stamps;
-    STStampedAPIScope _scope;
-}
-
+@interface STInboxViewController : STRestViewController
 @end

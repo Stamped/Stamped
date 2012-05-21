@@ -28,6 +28,7 @@
 @property (nonatomic, readonly, copy) NSNumber* isTodod;
 @property (nonatomic, readonly, copy) NSNumber* isLiked;
 @property (nonatomic, readonly, copy) NSDate* modified;
+@property (nonatomic, readonly, copy) NSDate* stamped;
 @property (nonatomic, readonly, copy) NSNumber* numComments;
 @property (nonatomic, readonly, copy) NSNumber* numLikes;
 @property (nonatomic, readonly, copy) NSString* stampID;

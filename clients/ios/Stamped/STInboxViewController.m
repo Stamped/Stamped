@@ -26,6 +26,7 @@
 #import "STSearchField.h"
 #import "STEveryoneStampsList.h"
 #import "STSliderScopeView.h"
+#import "STStampedActions.h"
 
 #import "EntityDetailViewController.h"
 #import "STStampCell.h"
@@ -40,6 +41,9 @@
 @property (nonatomic, readonly, retain) STTableDelegator* tableDelegator;
 @property (nonatomic, readwrite, copy) NSString* query;
 
+@property (nonatomic, readonly, retain) STSliderScopeView* slider;
+@property (nonatomic, readonly, retain) Stamps* stamps;
+
 @end
 
 @implementation STInboxViewController
@@ -47,157 +51,106 @@
 @synthesize tableDelegate = tableDelegate_;
 @synthesize tableDelegator = tableDelegator_;
 @synthesize query = query_;
+@synthesize slider = _slider;
+@synthesize stamps = _stamps;
 
 - (id)init {
-  //self = [super initWithHeaderHeight:0];
   if (self = [super init]) {
-    // Custom initialization
-      /*
-    tableDelegator_ = [[STTableDelegator alloc] init];
+    _stamps = [[Stamps sharedInstance] retain];
+    if ([AccountManager sharedManager].currentUser == nil) {
+      _stamps.scope = STStampedAPIScopeEveryone;
+    } else {
+      _stamps.scope = STStampedAPIScopeFriends;
+    }
     
-    STSingleViewSource* searchSource = [[[STSingleViewSource alloc] initWithView:searchBar] autorelease];
-    [tableDelegator_ appendTableDelegate:searchSource];
-    
-    tableDelegate_ = [[STGenericTableDelegate alloc] init];
-    tableDelegate_.preloadBufferSize = 30;
-    tableDelegate_.pageSize = 10;
-    __block STInboxViewController* weakSelf = self;
-    tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
-      [weakSelf.tableView reloadData];
-    };
-    tableDelegate_.selectedCallback = ^(STGenericTableDelegate* tableDelegate, UITableView* tableView, NSIndexPath* path) {
-      id data = [tableDelegate_.lazyList objectAtIndex:path.row];
-      if (data) {
-        id<STStamp> stamp = data;
-        STActionContext* context = [STActionContext context];
-        context.stamp = stamp;
-        id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
-        [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
-      }
-    };
-    [tableDelegator_ appendTableDelegate:tableDelegate_];
-       */
-      
-      if ([AccountManager sharedManager].currentUser == nil) {
-          _scope = STStampedAPIScopeEveryone;
-      } else {
-          _scope = STStampedAPIScopeFriends;
-      }
-
   }
   return self;
 }
 
 - (void)dealloc {
-    [tableDelegate_ release];
-    [tableDelegator_ release];
-    [query_ release];
-    
-    _slider = nil;
-    [super dealloc];
+  [tableDelegate_ release];
+  [tableDelegator_ release];
+  [query_ release];
+  
+  [_stamps release];
+  [_slider release];
+  [super dealloc];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-    
-    
-    tableDelegate_.lazyList = [STFriendsStampsList sharedInstance];
-    tableDelegate_.tableViewCellFactory = [STGenericCellFactory sharedInstance];
-    //self.tableView.delegate = tableDelegator_;
-    //self.tableView.dataSource = tableDelegator_;
-    self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-   
-    [Util addHomeButtonToController:self withBadge:YES];
-    [Util addCreateStampButtonToController:self];
-
-    if (!_slider) {
-        STSliderScopeView *slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
-        slider.delegate = (id<STSliderScopeViewDelegate>)self;
-        self.footerView = slider;
-        slider.scope = _scope;
-        _slider = slider;
-    }
-    [self setScope:_scope];
-    self.showsSearchBar = YES;
-
-    
+  
+  self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
+  
+  [Util addHomeButtonToController:self withBadge:YES];
+  [Util addCreateStampButtonToController:self];
+  
+  if (!_slider) {
+    _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
+    _slider.delegate = (id<STSliderScopeViewDelegate>)self;
+    self.footerView = _slider;
+    _slider.scope = _stamps.scope;
+  }
+  self.showsSearchBar = YES;
 }
 
 - (void)viewDidUnload {
-    [super viewDidUnload];
-    _slider = nil;
-    //[toolbar_ release];
-    //toolbar_ = nil;
+  [super viewDidUnload];
+  [_slider release];
+}
+
+- (void)stampsChanged:(NSNotification *)notification {
+  NSLog(@"Stamps Changed");
+  [self.tableView reloadData];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self.tableView reloadData];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stampsChanged:) name:StampsChangedNotification object:nil];
+  [self.stamps reloadData];
 }
 
-
-#pragma mark - Setters
-
-- (void)setScope:(STStampedAPIScope)scope {
-    [_stamps setScope:scope];
-    
-    /*
-    [instance.tableDelegate.lazyList cancelPendingRequests];
-  id<STLazyList> lazyList = nil;
-  if (instance.query) {
-      }
-  else {
-    lazyList = [[STStampedAPI sharedInstance] globalListByScope:scope];
-  }
-  instance.tableDelegate.lazyList = lazyList;
-  [instance.tableView reloadData];
-  if (instance.tableDelegate.lazyList.count > 0) {
-      instance.tableView.contentOffset = CGPointZero;
-  }
-    */
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
 
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
-    [self setScope:scope];
-    
+  [_stamps setScope:scope];
 }
 
 
 #pragma mark - UITableViewDataSouce
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    return [_stamps numberOfStamps];
+  return [_stamps numberOfStamps];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    static NSString *CellIdentifier = @"CellIdentifier";
-    
-    STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-    }
-    
-    id stamp = [_stamps stampAtIndex:indexPath.row];
-    [cell setupWithStamp:stamp];
-    
-    return cell;
-    
+  
+  static NSString *CellIdentifier = @"CellIdentifier";
+  
+  STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  if (cell == nil) {
+    cell = [[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+  }
+  
+  NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
+  id<STStamp> stamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stampID];
+  [cell setupWithStamp:stamp];
+  
+  return cell;
+  
 }
 
 
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    id stamp = [_stamps stampAtIndex:indexPath.row];
-    EntityDetailViewController *controller = [[EntityDetailViewController alloc] initWithEntityID:[stamp sourceID]];
-    [self.navigationController pushViewController:controller animated:YES];
-    [controller release];
-    
+  NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
+  [[STStampedActions sharedInstance] viewStampWithStampID:stampID];
 }
 
 
@@ -211,58 +164,51 @@
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-    [super textFieldDidBeginEditing:textField];
+  [super textFieldDidBeginEditing:textField];
   //Override collapsing behavior
   //[[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
   //[self.tableDelegate cancelPendingRequests];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-    [super textFieldDidEndEditing:textField];
+  [super textFieldDidEndEditing:textField];
   //Override collapsing behavior
   _stamps.searchQuery = [textField.text isEqualToString:@""] ? nil : textField.text;
-  [self setScope:_scope];
- // [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
+  // [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
-    [super textFieldShouldReturn:textField];
-    [textField resignFirstResponder];
-    return YES;
+  [super textFieldShouldReturn:textField];
+  [textField resignFirstResponder];
+  return YES;
 }
 
 
 #pragma mark - STRestController 
 
 - (BOOL)dataSourceReloading {
-    return [_stamps isReloading];
+  return [_stamps isReloading];
 }
 
 - (void)loadNextPage {
-    [_stamps loadNextPage];
+  [_stamps loadNextPage];
 }
 
 - (BOOL)dataSourceHasMoreData {
-    return [_stamps hasMoreData];
+  return [_stamps hasMoreData];
 }
 
 - (void)reloadDataSource {
-    [_stamps reloadData];
-    [super reloadDataSource];
+  [_stamps reloadData];
+  [super reloadDataSource];
 }
 
 - (BOOL)dataSourceIsEmpty {
-    return [_stamps isEmpty];
+  return [_stamps isEmpty];
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-    
-    [view setTitle:@"No Stamps" detailedTitle:@"No stamps found." imageName:nil];
-    
+  [view setTitle:@"No Stamps" detailedTitle:@"No stamps found." imageName:nil];  
 }
-
-
-
-
 
 @end
