@@ -397,7 +397,6 @@ class HTTPAccountNew(Schema):
         cls.addProperty('temp_image_height',            int)
 
     def convertToAccount(self):
-        logs.info(self.dataExport())
         return Account().dataImport(self.dataExport(), overflow=True)
         
     # def exportSchema(self, schema):
@@ -1276,7 +1275,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available == True and
+                entity.sources.netflix_is_instant_available is not None and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -1720,6 +1719,9 @@ class HTTPEntity(Schema):
 
 # HTTPEntity Components
 
+
+
+
 class HTTPEntityNew(Schema):
     @classmethod
     def setSchema(cls):
@@ -1925,6 +1927,26 @@ class HTTPEntitySuggested(Schema):
         cls.addProperty('subcategory',          basestring)
         cls.addProperty('limit',                int)
 
+    def exportEntitySuggested(self):
+        entitySuggested = EntitySuggested().dataImport(self.dataExport(), overflow=True)
+        if self.coordinates is not None:
+            coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
+            entitySuggested.coordinates = coords
+        return entitySuggested
+
+#        def exportSchema(self, schema):
+#            if schema.__class__.__name__ == 'EntitySuggested':
+#                if self.coordinates:
+#                    schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+#
+#                schema.importData({'category': self.category})
+#                schema.importData({'subcategory': self.subcategory})
+#            else:
+#                raise NotImplementedError(type(schema))
+#
+#            return schema
+
+
 class HTTPEntityActionEndpoint(Schema):
     @classmethod
     def setSchema(cls):
@@ -2116,6 +2138,18 @@ class HTTPComment(Schema):
         cls.addProperty('blurb',                basestring, required=True)
         cls.addNestedPropertyList('mentions',   MentionSchema)
         cls.addProperty('created',              basestring)
+
+    def importComment(self, comment):
+        self.dataImport(comment.dataExport(), overflow=True)
+        self.created = comment.timestamp.created
+        self.user = HTTPUserMini().importUserMini(comment.user)
+        return self
+
+class HTTPCommentNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('blurb',                basestring, required=True)
 
 class HTTPCommentId(Schema):
     @classmethod
@@ -2465,15 +2499,12 @@ class HTTPStampId(Schema):
         #cls.addProperty('coordinates',          basestring) # "lat,lng"
         #cls.addProperty('category',             basestring)
 
+
 class HTTPStampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('count',            int)
         cls.addNestedPropertyList('stamps', HTTPStamp)
-
-    def importSchema(self, stampedbygroup):
-        self.count = stampedbygroup.count
-        self.stamps = [HTTPStamp().importStamp(s).dataExport() for s in stampedbygroup.stamps]
 
 class HTTPStampedBy(Schema):
     @classmethod
@@ -2481,17 +2512,6 @@ class HTTPStampedBy(Schema):
         cls.addNestedProperty('friends',    HTTPStampedByGroup)
         cls.addNestedProperty('fof',        HTTPStampedByGroup)
         cls.addNestedProperty('all',        HTTPStampedByGroup)
-
-    def importComment(self, comment):
-        self.dataImport(comment.dataExport(), overflow=True)
-        self.created = comment.timestamp.created
-        self.user = HTTPUserMini().importUserMini(comment.user)
-        return self
-
-    def importStampedByGroup(self, stampedby):
-        self.friends.importStampedByGroup(stampedby.friends)
-        self.fof.importStampedByGroup(schema.fof)
-        self.all.importStampedByGroup(schema.all)
 
 class HTTPStampImage(Schema):
     @classmethod
@@ -3080,4 +3100,3 @@ class HTTPMenu(Schema):
     def importMenuSchema(self, menu):
         self.dataImport(menu.dataExport(), overflow=True)
         return self
-

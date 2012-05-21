@@ -319,13 +319,36 @@ class Account(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.privacy    = False
+        self.privacy    = False 
         self.timestamp  = UserTimestampSchema()
         self.stats      = UserStatsSchema()
+
+
 
 # ##### #
 # Users #
 # ##### #
+
+class User(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',              basestring)
+        cls.addProperty('name',                 basestring, required=True)
+        cls.addProperty('screen_name',          basestring, required=True)
+        cls.addProperty('color_primary',        basestring)
+        cls.addProperty('color_secondary',      basestring)
+        cls.addProperty('bio',                  basestring)
+        cls.addProperty('website',              basestring)
+        cls.addProperty('location',             basestring)
+        cls.addProperty('privacy',              bool, required=True)
+        cls.addNestedProperty('stats',          UserStatsSchema, required=True)
+        cls.addNestedProperty('timestamp',      UserTimestampSchema, required=True)
+        cls.addProperty('identifier',           basestring)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.stats = UserStatsSchema()
+        self.timestamp = UserTimestampSchema()
 
 class UserMini(Schema):
     @classmethod
@@ -1363,20 +1386,18 @@ class Stamp(Schema):
     def minimize(self):
         return StampMini().dataImport(self.dataExport(), overflow=True)
 
-
 class StampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('count',            int)
-        cls.addNestedPropertyList('stamps', Stamp)
+        cls.addProperty('count',                    int)
+        cls.addNestedPropertyList('stamps',         Stamp)
 
 class StampedBy(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('friends',    StampedByGroup)
-        cls.addNestedProperty('fof',        StampedByGroup)
-        cls.addNestedProperty('all',        StampedByGroup)
-
+        cls.addNestedProperty('friends',            StampedByGroup)
+        cls.addNestedProperty('fof',                StampedByGroup)
+        cls.addNestedProperty('all',                StampedByGroup)
 
 
 # ######## #
@@ -1655,4 +1676,3 @@ class EntitySearch(Schema):
     def __init__(self):
         Schema.__init__(self)
         self.page = 0
-
