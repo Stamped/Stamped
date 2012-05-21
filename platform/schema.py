@@ -288,7 +288,7 @@ class Schema(object):
                         nested.dataImport(v)
                         self.__setattr__(k, nested)
 
-                    elif p[_typeKey] == _nestedPropertyListKey:
+                    elif p[_typeKey] == _nestedPropertyListKey and v is not None:
                         l = tuple(v)
                         nestedKind = p[_kindKey]
                         nestedPropList = tuple([nestedKind().dataImport(item) for item in l])

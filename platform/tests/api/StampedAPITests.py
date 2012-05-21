@@ -123,11 +123,11 @@ class StampedAPIStampTests(StampedAPITest):
         return ret
     
     def _assertStampsEqual(self, s0, s1):
-        self.assertEqual(s0["stamp_id"],                s1["stamp_id"])
-        self.assertEqual(s0["contents"][-1]["blurb"],   s1["contents"][-1]["blurb"])
-        self.assertEqual(s0["user"]["user_id"],         s1["user"]["user_id"])
-        self.assertEqual(s0["entity"]["title"],         s1["entity"]["title"])
-        self.assertEqual(s0["entity"]["entity_id"],     s1["entity"]["entity_id"])
+        self.assertEqual(s0.stamp_id,             s1.stamp_id)
+        self.assertEqual(s0.contents[-1].blurb,   s1.contents[-1].blurb)
+        self.assertEqual(s0.user.user_id,         s1.user.user_id)
+        self.assertEqual(s0.entity.title,         s1.entity.title)
+        self.assertEqual(s0.entity.entity_id,     s1.entity.entity_id)
     
     def _test_reverse(self, genericCollectionSlice, results0):
         genericCollectionSlice.reverse    = True

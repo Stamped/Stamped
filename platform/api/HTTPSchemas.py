@@ -1991,9 +1991,10 @@ class HTTPGenericSlice(Schema):
         self.reverse = False
 
     def _convertData(self, data):
-        if 'coordinates' in data:
+        coordinates = getattr(data, 'coordinates', None)
+        if coordinates is not None:
             try:
-                lat, lng = data['coordinates'].split(',')
+                lat, lng = coordinates.split(',')
                 data['coordinates'] = {
                     'lat' : float(lat),
                     'lng' : float(lng)
@@ -2001,21 +2002,23 @@ class HTTPGenericSlice(Schema):
             except Exception:
                 raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
 
-        if 'since' in data:
+        since = getattr(data, 'since', None)
+        if since is not None:
             try:
-                data['since'] = datetime.utcfromtimestamp(int(data['since']) - 2)
+                data['since'] = datetime.utcfromtimestamp(int() - 2)
             except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
 
-        if 'before' in data:
+        before = getattr(data, 'before', None)
+        if before is not None:
             try:
-                data['before'] = datetime.utcfromtimestamp(int(data['before']) + 2)
+                data['before'] = datetime.utcfromtimestamp(int(before) + 2)
             except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
 
         # TODO: validate since <= before
 
-        if 'offset' not in data:
+        if 'offset' not in data or data['offset'] == None:
             data['offset'] = 0
 
         return data
@@ -2050,9 +2053,10 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
     def _convertData(self, data):
         data = super(HTTPGenericCollectionSlice, self)._convertData(data)
 
-        if 'viewport' in data:
+        viewport = getattr(data, 'viewport', None)
+        if viewport is not None:
             try:
-                lat0, lng0, lat1, lng1 = data['viewport'].split(',')
+                lat0, lng0, lat1, lng1 = viewport.split(',')
 
                 data['viewport'] = {
                     'upperLeft' : {
