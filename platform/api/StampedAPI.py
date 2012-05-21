@@ -3681,7 +3681,7 @@ class StampedAPI(AStampedAPI):
             modified    = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=4)
             
             # Return successor if entity is tombstoned
-            if entity.sources.tombstone_id is not None:
+            if entity.sources.tombstone_id is not None and entity.sources.tombstone_id != '': # HACK: Why is tombstone_id == ''?
                 successor, modified_successor = _getSuccessor(entity.sources.tombstone_id)
 
                 if entity.entity_id is not None:
