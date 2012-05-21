@@ -2372,15 +2372,38 @@ class HTTPStampId(Schema):
 class HTTPStampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('count',            int)
-        cls.addNestedPropertyList('stamps', HTTPStamp)
+        cls.addProperty('count',                int)
+        cls.addNestedPropertyList('stamps',     HTTPStamp)
+
+    def importStampedByGroup(self, group):
+        if group.count is not None:
+            self.count = group.count 
+
+        if group.stamps is not None:
+            httpStamps = []
+            for stamp in stamps:
+                httpStamps.append(HTTPStamp.importStamp(stamp))
+
+        return self
 
 class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('friends',    HTTPStampedByGroup)
-        cls.addNestedProperty('fof',        HTTPStampedByGroup)
-        cls.addNestedProperty('all',        HTTPStampedByGroup)
+        cls.addNestedProperty('friends',        HTTPStampedByGroup)
+        cls.addNestedProperty('fof',            HTTPStampedByGroup)
+        cls.addNestedProperty('all',            HTTPStampedByGroup)
+
+    def importStampedBy(self, stampedBy):
+        if stampedBy.friends is not None:
+            self.friends    = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
+
+        if stampedBy.fof is not None:
+            self.fof        = HTTPStampedByGroup().importStampedByGroup(stampedBy.fof)
+
+        if stampedBy.all is not None:
+            self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
+
+        return self
 
 class HTTPStampImage(Schema):
     @classmethod
