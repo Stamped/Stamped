@@ -88,13 +88,10 @@ class Schema(object):
             if kind == bool:
                 def __castBool(x):
                     if x is None:
-                        print 'BOOL SET TO NONE: %s' % x
                         return None 
                     if x in set([True, 'true', 'True', 1]):
-                        print 'BOOL SET TO TRUE: %s' % x
                         return True 
                     if x in set([False, 'false', 'False', 0]):
-                        print 'BOOL SET TO FALSE: %s' % x
                         return False
                     raise Exception("Cannot cast %s as bool" % x)
                 kwargs['cast'] = __castBool
@@ -112,8 +109,8 @@ class Schema(object):
             return object.__getattribute__(self, name)
 
         if self.__required_count < len(self.__class__._required_fields):
-            print 'Object: %s' % pprint.pformat(self)
-            print 'Required: %s' % self.__class__._required_fields
+            logs.info('Object: %s' % pprint.pformat(self))
+            logs.info('Required: %s' % self.__class__._required_fields)
             raise SchemaException('Invalid access, required properties not set')
         if name in self.__class__._propertyInfo:
             info = self.__class__._propertyInfo[name]
@@ -233,7 +230,6 @@ class Schema(object):
             for k, v in properties.items():
                 try:
                     if v is None:
-                        print('### setting %s to none' % k)
                         self.__setattr__(k, None)
                         continue
 

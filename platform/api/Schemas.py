@@ -323,14 +323,9 @@ class Account(Schema):
         self.timestamp  = UserTimestampSchema()
         self.stats      = UserStatsSchema()
 
-# ######## #
-# Comments #
-# ######## #
-
-    def __init__(self):
-        Schema.__init__(self)
-        self.stats = UserStatsSchema()
-        self.timestamp = UserTimestampSchema()
+# ##### #
+# Users #
+# ##### #
 
 class UserMini(Schema):
     @classmethod
