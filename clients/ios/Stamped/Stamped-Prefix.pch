@@ -13,4 +13,6 @@
     #import <Foundation/Foundation.h>
     #import <QuartzCore/QuartzCore.h>
     #import "STAppDelegate.h"
+    #import "UIFont+Stamped.h"
+    #import "UIColor+Stamped.h"
 #endif

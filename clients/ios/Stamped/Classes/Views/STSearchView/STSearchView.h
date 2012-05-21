@@ -9,7 +9,16 @@
 #import <UIKit/UIKit.h>
 #import "STSearchField.h"
 
-@interface STSearchView : UIView
+@protocol STSearchViewDelegate;
+@interface STSearchView : UIView {
+    UIButton *_cancelButton;
+}
+
+@property(nonatomic,assign) id <STSearchViewDelegate> delegate;
 @property(nonatomic,retain) UITextField *textField;
 @property(nonatomic,assign,getter = showingCancel) BOOL showCancelButton;
+
+@end
+@protocol STSearchViewDelegate
+- (void)stSearchViewDidCancel:(STSearchView*)view;
 @end

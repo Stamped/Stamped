@@ -28,6 +28,7 @@
 
 #define kMenuFullWidth 320.0f
 #define kMenuDisplayedWidth 280.0f
+#define kRightMenuDisplayedWidth 210.0f
 #define kMenuOverlayWidth (self.view.bounds.size.width - kMenuDisplayedWidth)
 #define kMenuBounceOffset 10.0f
 #define kMenuBounceDuration .3f
@@ -588,7 +589,7 @@
     [self.view insertSubview:view atIndex:0];
     
     frame = _root.view.frame;
-    frame.origin.x = -(frame.size.width - kMenuOverlayWidth);
+    frame.origin.x = -(frame.size.width - kRightMenuDisplayedWidth);
     
     BOOL _enabled = [UIView areAnimationsEnabled];
     if (!animated) {
@@ -630,7 +631,9 @@
 }
 
 - (void)setRootViewController:(UIViewController *)rootViewController {
-    UIViewController *tempRoot = _root;
+    
+    [self showShadow:NO];
+    UIViewController *tempRoot = [_root retain];
     [_root release], _root = nil;
     _root = [rootViewController retain];
     
@@ -638,7 +641,7 @@
         
         if (tempRoot) {
             [tempRoot.view removeFromSuperview];
-            tempRoot = nil;
+            [tempRoot release], tempRoot = nil;
         }
         
         UIView *view = _root.view;
@@ -654,7 +657,7 @@
         
         if (tempRoot) {
             [tempRoot.view removeFromSuperview];
-            tempRoot = nil;
+            [tempRoot release], tempRoot = nil;
         }
         
     }

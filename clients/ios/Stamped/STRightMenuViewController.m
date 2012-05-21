@@ -7,117 +7,153 @@
 //
 
 #import "STRightMenuViewController.h"
-#import "STViewContainer.h"
-#import "Util.h"
-#import "STButton.h"
-#import "UIFont+Stamped.h"
-#import "UIColor+Stamped.h"
-#import <QuartzCore/QuartzCore.h>
 #import "STEntitySearchController.h"
-#import "ECSlidingViewController.h"
+#import "DDMenuController.h"
 
 @interface STRightMenuViewController ()
-
-@property (nonatomic, readonly, retain) NSArray* categories;
-
+@property (nonatomic,readonly,retain) NSArray *categories;
+@property(nonatomic,strong) UIScrollView *scrollView;
 @end
 
 @implementation STRightMenuViewController
 
-@synthesize categories = categories_;
+@synthesize categories = _categories;
+@synthesize scrollView = _scrollView;
 
-- (id)init
-{
-  self = [super init];
-  if (self) {
-    categories_ = [[NSArray arrayWithObjects:
-                           @"music",
-                           @"food",
-                           @"book",
-                           @"film",
-                           @"other",
-                           nil] retain];
+- (id)init {
+  if ((self = [super init])) {
+      _categories = [[NSArray alloc] initWithObjects:@"music", @"food", @"book", @"film", @"other", nil];
+      _buttons = [[NSMutableArray alloc] init];
   }
   return self;
 }
 
-- (void)dealloc
-{
-  [categories_ release];
-  [super dealloc];
+- (void)dealloc {
+    [_categories release], _categories=nil;
+    self.scrollView = nil;
+    [super dealloc];
 }
 
-- (void)buttonClicked:(STButton*)button {
-  NSString* category = [self.categories objectAtIndex:button.tag];
-  STEntitySearchController* controller = [[[STEntitySearchController alloc] initWithCategory:category andQuery:nil] autorelease];
-  [self.slidingViewController resetTopViewWithAnimations:^{
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
-  } onComplete:^{
-  }];
-}
-
-- (void)loadView {
-  UIScrollView* scroller = [[[UIScrollView alloc] initWithFrame:[Util standardFrameWithNavigationBar:NO]] autorelease];
-  scroller.contentSize = CGSizeMake(scroller.frame.size.width, scroller.frame.size.height + 1);
-  scroller.backgroundColor = [UIColor colorWithWhite:.3 alpha:1];
-  STViewContainer* view = [[[STViewContainer alloc] initWithFrame:CGRectMake(0, 0, scroller.frame.size.width, 0)] autorelease];
-  CGFloat buttonWidth = 70;
-  CGFloat buttonPadding = ( scroller.frame.size.height - buttonWidth * self.categories.count ) / ( self.categories.count + 1);
-  CGRect buttonFrame = CGRectMake(0, 0, buttonWidth, buttonWidth);
-  
-  for (NSInteger i = 0; i < self.categories.count; i++) {
-    NSString* category = [self.categories objectAtIndex:i];
-    UIView* views[2];
-    for (NSInteger i = 0; i < 2; i++) {
-      UIView* buttonView = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
-      UIImage* image = [Util imageForCategory:category];
-      UIImageView* imageView = [[[UIImageView alloc] initWithImage:image] autorelease];
-      imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:buttonFrame];
-      [buttonView addSubview:imageView];
-      NSArray* colors;
-      UIColor* borderColor;
-      if (i == 0) {
-        colors = [UIColor stampedGradient];
-        borderColor = [UIColor stampedGrayColor];
-      }
-      else {
-        colors = [UIColor stampedDarkGradient];
-        borderColor = [UIColor stampedDarkGrayColor];
-      }
-      buttonView.layer.borderColor = borderColor.CGColor;
-      buttonView.layer.borderWidth = 1;
-      buttonView.layer.cornerRadius = 5;
-      [Util addGradientToLayer:buttonView.layer withColors:colors vertical:YES];
-      views[i] = buttonView;
-    }
-    STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
-                                             normalView:views[0] 
-                                             activeView:views[1] 
-                                                 target:self 
-                                              andAction:@selector(buttonClicked:)] autorelease];
-    button.tag = i;
-    NSLog(@"%f",[Util fullscreenFrame].size.width - buttonWidth);
-    [Util reframeView:button withDeltas:CGRectMake([Util fullscreenFrame].size.width - buttonWidth, buttonPadding, 0, 0)];
-    [view appendChildView:button];
-  }
-  [scroller addSubview:view];
-  scroller.scrollsToTop = NO;
-  self.view = scroller;
-}
-
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
   [super viewDidLoad];
+    
+    if (!_scrollView) {
+        
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+        scrollView.backgroundColor = [UIColor darkGrayColor];
+        scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        scrollView.showsVerticalScrollIndicator = NO;
+        scrollView.showsHorizontalScrollIndicator = NO;
+        scrollView.alwaysBounceVertical = YES;
+        scrollView.alwaysBounceHorizontal = NO;
+        [self.view addSubview:scrollView];
+        _scrollView = [scrollView retain];
+        [scrollView release];
+        
+        CGRect frame = CGRectMake(self.scrollView.frame.size.width - 86.0f, 20.0f, 70.0f, 70.0f);
+        
+        for (NSInteger i = 0; i < self.categories.count; i++) {
+            
+            NSString *category = [self.categories objectAtIndex:i];
+
+            //UIImage *image = nil; // need images
+            //UIImage *imageHi = nil; // need images
+            
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+            [button setTitle:category forState:UIControlStateNormal];
+            button.titleLabel.font = [UIFont systemFontOfSize:10];
+            
+            button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+            // [button setImage:image forState:UIControlStateNormal];
+            //  [button setImage:image forState:UIControlStateHighlighted];
+            [button addTarget:self action:@selector(buttonHit:) forControlEvents:UIControlEventTouchUpInside];
+            button.frame = frame;
+            button.tag = i;
+            [_scrollView addSubview:button];
+            [_buttons addObject:button];
+            frame.origin.y += 80.0f;
+
+        }
+
+        
+    }
+
+    
+
 }
 
-- (void)viewDidUnload
-{
-  [super viewDidUnload];
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    [_buttons removeAllObjects];
+    self.scrollView = nil;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self animateIn];
 }
+
+
+#pragma mark - Animations
+
+- (void)popInView:(UIView*)view withDelay:(CGFloat)delay {
+    
+    [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
+    
+    [CATransaction begin];
+    [CATransaction setAnimationDuration:0.1f];
+    [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
+    [CATransaction setCompletionBlock:^{
+        [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
+    }];
+    
+    CAAnimationGroup *groupAnimation = [CAAnimationGroup animation];
+    groupAnimation.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
+    groupAnimation.removedOnCompletion = NO;
+    groupAnimation.fillMode = kCAFillModeForwards;
+
+    //CAKeyframeAnimation *scale = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+    //scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.1f], [NSNumber numberWithFloat:1.0f], nil];
+    
+    CABasicAnimation *scale = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    scale.fromValue = [NSNumber numberWithFloat:0.0f];
+    scale.toValue = [NSNumber numberWithFloat:1.0f];
+
+    CABasicAnimation *opacity = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacity.fromValue = [NSNumber numberWithFloat:0.0f];
+    opacity.toValue = [NSNumber numberWithFloat:1.0f];
+    
+    [groupAnimation setAnimations:[NSArray arrayWithObjects:scale, opacity, nil]];
+    [view.layer addAnimation:groupAnimation forKey:nil];
+
+    [CATransaction commit];
+    
+}
+
+- (void)animateIn {
+    if (_hasAnimated) return;
+    _hasAnimated = NO;
+    
+    float delay = 0.1f;
+    for (UIView *view in _buttons) {
+        [self popInView:view withDelay:delay];
+        delay += 0.04f;
+    }
+    
+}
+
+
+#pragma mark - Actions
+
+- (void)buttonHit:(UIButton*)button {
+   
+    NSString *category = [self.categories objectAtIndex:button.tag];
+    STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
+    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    [menuController setRootController:controller animated:YES];
+    [controller release];
+    
+}
+
 
 @end

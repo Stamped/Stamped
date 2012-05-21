@@ -57,7 +57,6 @@
 }
 
 - (void)loadNextPage {
-  
 }
 
 - (void)cancel {

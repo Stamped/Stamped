@@ -10,7 +10,6 @@
 #import "STStampedAPI.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
-#import "STRootMenuView.h"
 #import "STDebug.h"
 #import "ECSlidingViewController.h"
 

@@ -86,7 +86,7 @@ NSInteger zoom;
 - (STCancellation*)stampsForRegion:(MKCoordinateRegion)region
                        andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-+ (NSString*)keyForSubcategory:(NSString*)subcategory 
++ (NSString*)keyForSubcategory:(NSString*)subcategory
                          scope:(STStampedAPIScope)scope 
                         filter:(NSString*)filter
                          query:(NSString*)query;
@@ -106,7 +106,7 @@ NSInteger zoom;
 
 @end
 
-@interface STConsumptionMapViewController () <MKMapViewDelegate, STScopeSliderDelegate, STConsumptionToolbarDelegate>
+@interface STConsumptionMapViewController () <MKMapViewDelegate, STConsumptionToolbarDelegate>
 
 - (void)update;
 
@@ -212,7 +212,7 @@ NSInteger zoom;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  self.consumptionToolbar.slider.delegate = self;
+  self.consumptionToolbar.slider.delegate = (id<STSliderScopeViewDelegate>)self;
   self.consumptionToolbar.delegate = self;
   self.zoomToUserLocation = YES;
   UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
@@ -497,6 +497,14 @@ NSInteger zoom;
   [self.cancellations addObject:cancellation];
 }
 
+
+#pragma mark - STSliderScopeViewDelegate
+
+- (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
+    self.scope = scope;
+}
+
+
 #pragma mark - UITextFieldDelegate Methods.
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
@@ -535,10 +543,6 @@ NSInteger zoom;
     scope_ = scope;
     [self update];
   }
-}
-
-- (void)scopeSlider:(STScopeSlider *)slider didChangeGranularity:(STStampedAPIScope)granularity {
-  self.scope = granularity;
 }
 
 - (void)toolbar:(STConsumptionToolbar *)toolbar didMoveToItem:(STConsumptionToolbarItem *)item from:(STConsumptionToolbarItem *)previous {

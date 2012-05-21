@@ -10,7 +10,7 @@
 #import "STConsumptionToolbarItem.h"
 #import "STStampedAPI.h"
 #import "STToolbarView.h"
-#import "STScopeSlider.h"
+#import "STSliderScopeView.h"
 
 @class STConsumptionToolbar;
 
@@ -27,7 +27,7 @@
 - (id)initWithRootItem:(STConsumptionToolbarItem*)item andScope:(STStampedAPIScope)scope;
 
 @property (nonatomic, readwrite, assign) id<STConsumptionToolbarDelegate> delegate;
-@property (nonatomic, readonly, retain) STScopeSlider* slider;
+@property (nonatomic, readonly, retain) STSliderScopeView* slider;
 
 + (void)setupConfigurations;
 

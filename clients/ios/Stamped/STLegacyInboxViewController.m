@@ -12,7 +12,6 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "Util.h"
-#import "STRootMenuView.h"
 #import "STLegacyMapViewController.h"
 #import "STScopeSlider.h"
 #import "STToolbarView.h"

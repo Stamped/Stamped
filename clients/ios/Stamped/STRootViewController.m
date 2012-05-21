@@ -38,8 +38,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)toggleGrid:(id)nothing {
-  STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
-  app.grid.hidden = !app.grid.hidden;
+    STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+    app.grid.hidden = !app.grid.hidden;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
