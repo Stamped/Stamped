@@ -249,9 +249,10 @@ static STRdio* _sharedInstance;
     NSString* stampedPlaylistID = nil;
     if ([data respondsToSelector:@selector(objectForKey:)]) {
       id owned = [data objectForKey:@"owned"];
-      if (owned != nil && [owned respondsToSelector:@selector(count)] && [owned respondsToSelector:@selector(objectAtIndex:)]) {
-        for (NSInteger i=0; i < [owned count]; i++) {
-          id playlist = [owned objectAtIndex:i];
+      if (owned != nil && [owned isKindOfClass:[NSArray class]]) {
+        NSArray* ownedArray = (NSArray*) owned;
+        for (NSInteger i=0; i < ownedArray.count; i++) {
+          id playlist = [ownedArray objectAtIndex:i];
           if (playlist != nil && [playlist respondsToSelector:@selector(objectForKey:)]) {
             id name = [playlist objectForKey:@"name"];
             if (name != nil && [name isEqualToString:playlistName]) {

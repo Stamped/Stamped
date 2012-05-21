@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STRightMenuViewController : UIViewController
+@interface STRightMenuViewController : UIViewController {
+    NSMutableArray *_buttons;
+    BOOL _hasAnimated;
+}
 
 @end

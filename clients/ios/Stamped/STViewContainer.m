@@ -25,8 +25,7 @@
 
 static int _count = 0;
 
-- (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame
-{
+- (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
     _count++;

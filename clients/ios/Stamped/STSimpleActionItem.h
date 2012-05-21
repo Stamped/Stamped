@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STActionItem.h"
 
-@interface STSimpleActionItem : NSObject
+@interface STSimpleActionItem : NSObject <STActionItem, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* icon;
 @property (nonatomic, readwrite, retain) NSString* name;

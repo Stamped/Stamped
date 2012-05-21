@@ -141,11 +141,21 @@ class HandlebarsTemplateLibrary(object):
             logs.info("[%s] loaded '%s'" % (self, t))
     
     def render(self, template_name, context):
-        def missing(context, name):
+        pad = "-" * 20
+        pad = "%s %s(%s) %s" % (pad, self, template_name, pad)
+        
+        def debug(scope, *args, **kwargs):
+            logs.info("\n%s\n%s\n%s" % (pad, pformat(scope.context), pad))
+        
+        def missing(scope, name):
             logs.warn("[%s] '%s' missing key '%s'" % (self, template_name, name))
             return ""
         
-        helpers = dict(helperMissing=missing)
+        helpers = dict(
+            helperMissing=missing, 
+            debug=debug
+        )
+        
         return self._compiled[template_name](context, helpers=helpers, partials=self._partials)
     
     def __str__(self):

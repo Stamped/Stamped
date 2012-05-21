@@ -56,8 +56,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize navigationBarHidden = navigationBarHidden_;
 @dynamic headerOffset;
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
     retainedObjects_ = [[NSMutableArray alloc] init];
@@ -65,8 +64,7 @@ static const CGFloat kReloadHeight = 60.0;
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [_scrollView release];
   [_shelfView release];
   [_reloadLabel release];
@@ -88,14 +86,19 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  UIView* toolbar = self.toolbar;
-  NSLog(@"loaded:%@",toolbar);
-  CGFloat toolbarHeight = toolbar ? toolbar.frame.size.height - 1: 0;
-  STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, 320, self.view.frame.size.height - toolbarHeight)] autorelease];
-  CGFloat bottomPadding = 0;
-  UIImageView* shelfBackground = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_background"]] autorelease];
-  _shelfView = [[UIView alloc] initWithFrame:CGRectMake(0, -356, 320, 360)];
-  [_shelfView addSubview:shelfBackground];
+ 
+    UIView* toolbar = self.toolbar;
+    NSLog(@"loaded:%@",toolbar);
+    CGFloat toolbarHeight = toolbar ? toolbar.bounds.size.height - 1: 0;
+    STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height - toolbarHeight)] autorelease];
+    container.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    CGFloat bottomPadding = 0;
+    UIImage *image = [UIImage imageNamed:@"shelf_background"];
+    UIImageView* shelfBackground = [[[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]] autorelease];
+    _shelfView = [[UIView alloc] initWithFrame:CGRectMake(0, -356, self.view.bounds.size.width, 360)];
+    _shelfView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [_shelfView addSubview:shelfBackground];
+
   
   _arrowImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
   _arrowImageView.frame = CGRectMake(60, CGRectGetMaxY(_shelfView.bounds) - 58 - bottomPadding, 18, 40);
@@ -135,18 +138,23 @@ static const CGFloat kReloadHeight = 60.0;
   [self.view addSubview:container];
   if (toolbar) {
     [Util reframeView:toolbar withDeltas:CGRectMake(0, CGRectGetMaxY(container.frame), 0, 0)];
+      toolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:toolbar];
   }
 }
 
 - (void)viewWillUnload {
-  NSLog(@"warning SHOULD IMPLEMENT");
+  //NSLog(@"warning SHOULD IMPLEMENT");
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   if (self.navigationBarHidden) {
-    [[Util sharedNavigationController] setNavigationBarHidden:YES];
+      if (self.navigationController) {
+          [self.navigationController setNavigationBarHidden:YES];
+      } else {
+          [[Util sharedNavigationController] setNavigationBarHidden:YES];
+      }
   }
 }
 
@@ -156,14 +164,18 @@ static const CGFloat kReloadHeight = 60.0;
     [self cancelPendingRequests];
   }
   if (self.navigationBarHidden) {
-    [[Util sharedNavigationController] setNavigationBarHidden:NO];
+      if (self.navigationController) {
+          [self.navigationController setNavigationBarHidden:NO];
+      } else {
+          [[Util sharedNavigationController] setNavigationBarHidden:NO];
+      }
   }
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
+
 
 #pragma mark - UIScrollViewDelegate methods
 
@@ -205,7 +217,6 @@ static const CGFloat kReloadHeight = 60.0;
   self.lastUpdatedLabel.text = [NSString stringWithFormat:@"Last updated %@", [Util userReadableTimeSinceDate:date]];
   [self.lastUpdatedLabel setNeedsDisplay];
 }
-
 
 - (void)setLoading:(BOOL)loading {
   if (_loading == loading)
@@ -275,6 +286,7 @@ static const CGFloat kReloadHeight = 60.0;
   }
 }
 
+
 #pragma mark - To be implemented by subclasses.
 
 - (void)shouldFinishLoading {
@@ -306,6 +318,7 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)cancelPendingRequests {
   
 }
+
 
 #pragma mark - UITextFieldDelegate Methods.
 

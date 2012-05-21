@@ -184,10 +184,11 @@
     [self addSubview:rightButton];
     
     CGFloat imageMax = self.imageHeight + self.imageYOffset;
-    STSimplePreviews* previews = [STConsumptionCell adjustedPreviewsForStamp:stamp];
+    STSimplePreviews* previews = (STSimplePreviews*)[STConsumptionCell adjustedPreviewsForStamp:stamp];
     CGFloat previewHeight = [STPreviewsView previewHeightForPreviews:previews andMaxRows:1];
     CGRect previewFrame = CGRectMake(0, imageMax+12, 320, previewHeight);
-    STPreviewsView* previewsView = [[[STPreviewsView alloc] initWithPreviews:previews andMaxRows:1] autorelease];
+    STPreviewsView* previewsView = [[[STPreviewsView alloc] initWithFrame:CGRectZero] autorelease];
+    [previewsView setupWithPreview:previews maxRows:1];
     previewsView.frame = [Util centeredAndBounded:previewsView.frame.size inFrame:previewFrame];
     [self addSubview:previewsView];
     CGFloat textYOffset = CGRectGetMaxY(previewsView.frame) + 5;
@@ -346,7 +347,7 @@
 
 - (void)handleEntityDetail:(id<STEntityDetail>)entityDetail andError:(NSError*)error {
   [self.activityView stopAnimating];
-  NSLog(@"array:%@",entityDetail.images);
+  //NSLog(@"array:%@",entityDetail.images);
   entityDetail_ = [entityDetail retain];
   if (self.imageView) {
     [self handleCombo];

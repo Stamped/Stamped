@@ -17,6 +17,18 @@
 @synthesize created = _created;
 @synthesize user = _user;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _blurb = [[decoder decodeObjectForKey:@"blurb"] retain];
+    _commentID = [[decoder decodeObjectForKey:@"commentID"] retain];
+    _stampID = [[decoder decodeObjectForKey:@"stampID"] retain];
+    _created = [[decoder decodeObjectForKey:@"created"] retain];
+    _user = [[decoder decodeObjectForKey:@"user"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_blurb release];
@@ -25,6 +37,14 @@
   [_created release];
   [_user release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.blurb forKey:@"blurb"];
+  [encoder encodeObject:self.commentID forKey:@"commentID"];
+  [encoder encodeObject:self.stampID forKey:@"stampID"];
+  [encoder encodeObject:self.created forKey:@"create"];
+  [encoder encodeObject:self.user forKey:@"user"];
 }
 
 + (RKObjectMapping*)mapping {

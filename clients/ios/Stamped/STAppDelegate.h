@@ -8,9 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+@class DDMenuController;
 @interface STAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) DDMenuController *menuController;
 @property (nonatomic, retain) UINavigationController* navigationController;
 @property (nonatomic, readonly, retain) UIImageView* grid;
 

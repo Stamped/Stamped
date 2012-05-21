@@ -8,7 +8,14 @@
 
 #import "STTableViewController.h"
 #import "STLazyList.h"
+#import "STRestViewController.h"
+#import "Stamps.h"
 
-@interface STInboxViewController : STTableViewController
+@class STSliderScopeView, Stamps;
+@interface STInboxViewController : STRestViewController {
+    STSliderScopeView *_slider;
+    Stamps *_stamps;
+    STStampedAPIScope _scope;
+}
 
 @end

@@ -33,7 +33,14 @@ static STStampCellFactory* _sharedInstance;
       return [[[STConsumptionCell alloc] initWithStamp:data] autorelease];
     }
     else {
-      return [[[STStampCell alloc] initWithStamp:data] autorelease];
+        
+        STStampCell *cell = [tableView dequeueReusableCellWithIdentifier:[STStampCell cellIdentifier]];
+        if (cell == nil) {
+            cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[STStampCell cellIdentifier]] autorelease];
+        }
+        [cell setupWithStamp:data];
+        return cell;
+    
     }
   }
   else {

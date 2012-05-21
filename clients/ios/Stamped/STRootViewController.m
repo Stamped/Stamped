@@ -21,53 +21,38 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 #endif
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
-
 @interface STRootViewController ()
-
 @end
 
 @implementation STRootViewController
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
   [super viewDidLoad];
-  
-  self.view.layer.shadowOpacity = .75;
-  self.view.layer.shadowRadius = 10;
-  self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-  [self setValue:[[[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease] forKey:@"navigationBar"];
+
+    self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
+    STNavigationBar *bar = [[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 44)];
+    bar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [self setValue:bar forKey:@"navigationBar"];
+    [bar release];
+    
 }
 
 - (void)toggleGrid:(id)nothing {
-  STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
-  app.grid.hidden = !app.grid.hidden;
+    STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+    app.grid.hidden = !app.grid.hidden;
 }
 
-- (void)viewWillAppear:(BOOL)animated
-{
+- (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  [self.navigationBar addGestureRecognizer:self.slidingViewController.panGesture];
-  UITapGestureRecognizer* gridRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleGrid:)] autorelease];
-  gridRecognizer.numberOfTapsRequired = 3;
-  gridRecognizer.numberOfTouchesRequired = 2;
-  [self.navigationBar addGestureRecognizer:gridRecognizer];
-  //[self.view addGestureRecognizer:self.slidingViewController.panGesture];
-  [self.slidingViewController setAnchorRightRevealAmount:260.0f];
-  [self.slidingViewController setAnchorLeftRevealAmount:70.0f];
+
+    UITapGestureRecognizer* gridRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleGrid:)] autorelease];
+    gridRecognizer.numberOfTapsRequired = 3;
+    gridRecognizer.numberOfTouchesRequired = 2;
+    [self.navigationBar addGestureRecognizer:gridRecognizer];
+  
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-  [self.navigationBar removeGestureRecognizer:self.slidingViewController.panGesture];
-}
-
-- (void)viewDidUnload
-{
-  [super viewDidUnload];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 

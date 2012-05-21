@@ -58,6 +58,9 @@
   CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
   CGContextFillRect(ctx, rect);
   
+    CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect byRoundingCorners:(UIRectCornerTopLeft | UIRectCornerTopRight) cornerRadii:CGSizeMake(2.0f, 2.0f)].CGPath);
+    CGContextClip(ctx);
+    
   //hideLogo_ = ![self.topItem.title isEqualToString:@"Stamps"];
   
   if (hideLogo_)
@@ -111,16 +114,18 @@
 }
 
 - (void)initialize {
-  NSLog(@"initializing navbar");
-  self.layer.masksToBounds = NO;
 
-  CGFloat ripplesY = CGRectGetMaxY(self.bounds);
-  ripplesLayer_ = [[CALayer alloc] init];
-  ripplesLayer_.frame = CGRectMake(0, ripplesY, 320, 3);
-  ripplesLayer_.contentsGravity = kCAGravityResizeAspect;
-  ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
-  [self.layer addSublayer:ripplesLayer_];
-  [ripplesLayer_ release];
+    self.layer.masksToBounds = NO;
+
+    CGFloat ripplesY = CGRectGetMaxY(self.bounds);
+    ripplesLayer_ = [[CALayer alloc] init];
+    ripplesLayer_.contentsScale = [[UIScreen mainScreen] scale];
+    ripplesLayer_.frame = CGRectMake(0, ripplesY, 320, 3);
+    ripplesLayer_.contentsGravity = kCAGravityResizeAspect;
+    ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
+    [self.layer addSublayer:ripplesLayer_];
+    [ripplesLayer_ release];
+
 }
 
 - (void)setBlack:(BOOL)black {

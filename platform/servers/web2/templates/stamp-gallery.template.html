@@ -1,12 +1,17 @@
 
-<div class="stamp-gallery">
-    <div class="stamps clearfix">
+<div class="stamp-gallery wide-gallery">
+    <div class="bottom-wave"></div>
+    
+    <div class="loading"></div>
+    
+    <div class="stamps">
         {{#stamps}}
             {{> stamp-gallery-item}}
         {{/stamps}}
     </div>
     
     <div class="stamp-gallery-loading"></div>
+    
     <div class="stamp-gallery-nav">
         <ul>
             {{#prev_url}}

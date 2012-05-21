@@ -183,7 +183,7 @@ static NSString* const _filterType = @"filter";
     };
     STConsumptionToolbarItem* rootItem = [self setupToolbarItems];
     consumptionToolbar_ = [[STConsumptionToolbar alloc] initWithRootItem:rootItem andScope:STStampedAPIScopeFriends];
-    consumptionToolbar_.slider.delegate = self;
+    consumptionToolbar_.slider.delegate = (id<STSliderScopeViewDelegate>)self;
     consumptionToolbar_.delegate = self;
     [self update];
   }
@@ -216,10 +216,6 @@ static NSString* const _filterType = @"filter";
 
 - (UIView *)loadToolbar {
   return self.consumptionToolbar;
-}
-
-- (void)scopeSlider:(STScopeSlider *)slider didChangeGranularity:(STStampedAPIScope)granularity {
-  self.scope = granularity;
 }
 
 - (void)setScope:(STStampedAPIScope)scope {
@@ -293,6 +289,14 @@ static NSString* const _filterType = @"filter";
   [STConfiguration addString:@"cat_icon_eDetail_music" forKey:_songBackIconKey];
   
   [STConsumptionToolbar setupConfigurations];
+}
+
+#pragma mark - STSliderScopeViewDelegate
+
+- (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
+
+    self.scope = scope;
+
 }
 
 @end

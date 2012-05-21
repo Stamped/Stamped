@@ -125,8 +125,8 @@ static STActionManager* _singleton;
   }
   BOOL handled = FALSE;
   //if (flag) {
-  NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
-  NSLog(@"%@", source.completionData);
+  //NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
+  //NSLog(@"%@", source.completionData);
 
   //}
   id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];

@@ -32,6 +32,9 @@
 #import "STActionManager.h"
 #import "STSimpleActivityCount.h"
 #import "STSimplePreviews.h"
+#import "STPersistentCacheSource.h"
+#import "STSimpleMenu.h"
+#import "STHybridCacheSource.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -59,11 +62,11 @@
 
 @end
 
-@interface STStampedAPI () <STCacheModelSourceDelegate>
+@interface STStampedAPI () <STCacheModelSourceDelegate, STPersistentCacheSourceDelegate, STHybridCacheSourceDelegate>
 
-@property (nonatomic, readonly, retain) STCacheModelSource* menuCache;
+@property (nonatomic, readonly, retain) STPersistentCacheSource* menuCache;
 @property (nonatomic, readonly, retain) STCacheModelSource* stampCache;
-@property (nonatomic, readonly, retain) STCacheModelSource* entityDetailCache;
+@property (nonatomic, readonly, retain) STHybridCacheSource* entityDetailCache;
 @property (nonatomic, readwrite, retain) id<STActivityCount> lastCount;
 
 - (void)path:(NSString*)path WithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
@@ -95,9 +98,12 @@ static STStampedAPI* _sharedInstance;
 {
   self = [super init];
   if (self) {
-    _menuCache = [[STCacheModelSource alloc] initWithDelegate:self];
+    _menuCache = [[STPersistentCacheSource alloc] initWithDelegate:self andDirectoryPath:@"Menus" relativeToCacheDir:YES];
     _stampCache = [[STCacheModelSource alloc] initWithDelegate:self];
-    entityDetailCache_ = [[STCacheModelSource alloc] initWithDelegate:self];
+    entityDetailCache_ = [[STHybridCacheSource alloc] initWithCachePath:@"Entities" relativeToCacheDir:YES];
+    entityDetailCache_.delegate = self;
+    entityDetailCache_.maxMemoryCount = 20;
+    entityDetailCache_.maxAge = [NSNumber numberWithInteger:60];
   }
   return self;
 }
@@ -194,15 +200,16 @@ static STStampedAPI* _sharedInstance;
                                                }];
 }
 
-- (void)createStampWithStampNew:(STStampNew*)stampNew andCallback:(void(^)(id<STStamp> stamp, NSError* error))block {
+- (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
+                               andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block {
   NSString* path = @"/stamps/create.json";
-  [[STRestKitLoader sharedInstance] loadOneWithPath:path
-                                               post:YES
-                                             params:stampNew.asDictionaryParams
-                                            mapping:[STSimpleStamp mapping]
-                                        andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
-                                          block(stamp, error);
-                                        }];
+  return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                      post:YES
+                                                    params:stampNew.asDictionaryParams
+                                                   mapping:[STSimpleStamp mapping]
+                                               andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
+                                                 block(stamp, error, cancellation);
+                                               }];
 }
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block {
@@ -279,8 +286,16 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (STCancellation*)entityDetailForEntityID:(NSString*)entityID 
+                               andCallback:(void(^)(id<STEntityDetail>, NSError*, STCancellation*))block {
+  return [self entityDetailForEntityID:entityID forceUpdate:NO andCallback:block];
+}
+
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID
+                               forceUpdate:(BOOL)forceUpdate
                                andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block {
-  return [self.entityDetailCache fetchWithKey:entityID callback:block];
+  return [self.entityDetailCache objectForKey:entityID forceUpdate:forceUpdate withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+    block((id<STEntityDetail>)model, error, cancellation);
+  }];
 }
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block{
@@ -547,19 +562,19 @@ static STStampedAPI* _sharedInstance;
                                         }];
 }
 
-- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
-                          withKey:(NSString*)key 
-                 andCurrentObject:(id)object 
-                     withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block {
+- (STCancellation*)objectForPersistentCache:(STPersistentCacheSource *)cache 
+                                    withKey:(NSString *)key 
+                           andCurrentObject:(id)object
+                               withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
   if (cache == self.menuCache) {
     STCancellation* cancellation = [STCancellation cancellation];
     [[STMenuFactory sharedFactory] menuWithEntityId:key andCallbackBlock:^(id<STMenu> menu) {
       if (!cancellation.cancelled) {
         if (menu) {
-          block(menu, 1, nil, cancellation);
+          block((STSimpleMenu*)menu, nil, cancellation);
         }
         else {
-          block(nil, -1, [NSError errorWithDomain:[STStampedAPI errorDomain]
+          block(nil, [NSError errorWithDomain:[STStampedAPI errorDomain]
                                              code:STStampedAPIErrorUnavailable
                                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"key",key, nil]], cancellation);
         }
@@ -567,7 +582,14 @@ static STStampedAPI* _sharedInstance;
     }];
     return cancellation;
   }
-  else if (cache == self.stampCache) {
+  return nil;
+}
+
+- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
+                          withKey:(NSString*)key 
+                 andCurrentObject:(id)object 
+                     withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block {
+  if (cache == self.stampCache) {
     NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamp_id"];
     NSString* path = @"/stamps/show.json";
     STCancellation* cancellation = [[STRestKitLoader sharedInstance] loadWithPath:path 
@@ -589,17 +611,6 @@ static STStampedAPI* _sharedInstance;
                                                                         }
                                                                       }];
     return cancellation;
-  }
-  else if (cache == self.entityDetailCache) {
-    NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"entity_id"];
-    NSString* path = @"/entities/show.json";
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
-                                                        post:NO
-                                                      params:params
-                                                     mapping:[STSimpleEntityDetail mapping]
-                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                   block(result, 1, error, cancellation);
-                                                 }];
   }
   NSAssert2(NO, @"unknown cache (%@) asked for key %@", cache, key);
   return nil;
@@ -708,6 +719,24 @@ static STStampedAPI* _sharedInstance;
   return handled;
 }
 
+- (STCancellation *)objectForHybridCache:(STHybridCacheSource *)cache 
+                                 withKey:(NSString *)key
+                            withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
+  if (cache == self.entityDetailCache) {
+    NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"entity_id"];
+    NSString* path = @"/entities/show.json";
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                        post:NO
+                                                      params:params
+                                                     mapping:[STSimpleEntityDetail mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                   block(result, error, cancellation);
+                                                 }];
+  }
+  NSAssert1(NO, @"Unknown hybrid cache %@", cache);
+  return nil;
+}
+
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context {
   return [self didChooseSource:source forAction:action withContext:context execute:NO];
 }
@@ -732,9 +761,9 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (void)fastPurge {
-  [self.entityDetailCache fastPurge];
+  [self.entityDetailCache fastMemoryPurge];
   [self.stampCache fastPurge];
-  [self.menuCache fastPurge];
+  //[self.menuCache purge];
 }
 
 @end

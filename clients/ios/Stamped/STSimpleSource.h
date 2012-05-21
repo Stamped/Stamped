@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STSource.h"
 
-@interface STSimpleSource : NSObject<STSource>
+@interface STSimpleSource : NSObject<STSource, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* name;
 @property (nonatomic, readwrite, copy) NSString* source;
