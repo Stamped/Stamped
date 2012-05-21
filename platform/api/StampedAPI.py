@@ -1796,7 +1796,7 @@ class StampedAPI(AStampedAPI):
                 else:
                     stat = None
 
-                if stat is not None and stamp.previews is not None:
+                if stat is not None:
                     # Likes
                     likeobjects = []
                     if stat.preview_likes is not None:
