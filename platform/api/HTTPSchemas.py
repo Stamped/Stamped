@@ -2351,7 +2351,7 @@ class HTTPStamp(Schema):
         if stamp.previews.credits is not None:
             credits = []
             for credit in stamp.previews.credits:
-                credit  = HTTPStamp().importStamp(credit).minimize()
+                credit  = HTTPStamp().importStampMini(credit).minimize()
                 credits.append(credit)
             previews.credits = credits
 
