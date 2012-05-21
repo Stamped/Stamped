@@ -214,6 +214,9 @@ class TMDBSource(GenericSource):
         def gen():
             try:
                 results = self.__tmdb.movie_search(query.name)
+                if results is None:
+                    yield self.emptySource
+                    return
                 for movie in results['results']:
                     yield movie
                 pages = results['total_pages']
@@ -269,13 +272,6 @@ class TMDBSource(GenericSource):
                         pass
         return result
 
-    def entityProxyFromKey(self, tmdb_id):
-        # Todo: Make sure we fail gracefully if id is invalid
-        try:
-            return TMDBMovie(tmdb_id)
-        except Exception as e:
-            logs.warning("Error: %s" % e)
-            raise
 
     # def enrichEntity(self, entity, controller, decorations, timestamps):
     #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
