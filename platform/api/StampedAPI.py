@@ -3651,6 +3651,7 @@ class StampedAPI(AStampedAPI):
     def _resolveEntity(self, entity):
 
         def _getSuccessor(tombstoneId):
+            logs.info("Get successor: %s" % tombstoneId)
             successor_id = tombstoneId
             successor    = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
