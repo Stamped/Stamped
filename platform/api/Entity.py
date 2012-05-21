@@ -479,7 +479,8 @@ def upgradeEntityData(entityData):
 
 
         setBasicGroup(place, new, 'address', 'formatted_address')
-        place['hours'] = HoursSchema().dataImport(place['hours'].dataExport(), overflow=True)
+        if 'hours' in place:
+            place['hours'] = HoursSchema().dataImport(place['hours'].dataExport(), overflow=True)
         setBasicGroup(place, new, 'hours', seed=False)
         setBasicGroup(restaurant, new, 'menu', seed=False)
         setBasicGroup(restaurant, new, 'price_range', seed=False)
