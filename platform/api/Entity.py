@@ -337,14 +337,14 @@ def upgradeEntityData(entityData):
                 sourceName = 'seed'
 
             if newName != 'tombstone':
-                target['%s_source' % newName] = source.pop('%s_source' % oldName, sourceName)
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
+                setattr(target, '%s_source' % newName, source.pop('%s_source' % oldName, sourceName))
+            setattr(target, '%s_timestamp' % newName, source.pop('%s_timestamp' % oldName, seedTimestamp))
 
             if additionalSuffixes is not None:
                 for s in additionalSuffixes:
                     t = source.pop('%s_%s' % (oldName, s), None)
                     if t is not None:
-                        target['%s_%s' % (newName, s)] = t 
+                        setattr(target, '%s_%s' % (newName, s), t)
     
     def setListGroup(source, target, oldName, newName=None, delimiter=',', wrapper=None, seed=True):
         if newName is None:
@@ -361,14 +361,14 @@ def upgradeEntityData(entityData):
                     items.append(entityMini)
                 else:
                     items.append(i.strip())
-            target[newName] = items 
+            setattr(target, newName, items)
 
             sourceName = 'format'
             if seed:
                 sourceName = 'seed'
 
-            target['%s_source' % newName]     = source.pop('%s_source' % oldName, sourceName)
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
+            setattr(target, '%s_source' % newName, source.pop('%s_source' % oldName, sourceName))
+            setattr(target, '%s_timestamp' % newName, source.pop('%s_timestamp' % oldName, seedTimestamp))
     
     sources                 = old.pop('sources', {})
     details                 = old.pop('details', {})
@@ -489,6 +489,7 @@ def upgradeEntityData(entityData):
     if kind == 'person':
         songs = artist.pop('songs', [])
         itunesSource = False
+        newSongs = []
         for song in songs:
             entityMini = MediaItemEntityMini()
             entityMini.title = song['song_name']
@@ -499,14 +500,16 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_id = song['id']
                 entityMini.sources.itunes_source = 'itunes'
                 entityMini.sources.itunes_timestamp = song.pop('timestamp', seedTimestamp)
-            new.tracks.append(entityMini)
-        if len(songs) > 0:
+            newSongs.append(entityMini)
+        if len(newSongs) > 0:
+            new.tracks = newSongs
             sourceName = 'itunes' if itunesSource else 'format'
             new.tracks_source = artist.pop('songs_source', sourceName)
             new.tracks_timestamp = artist.pop('songs_timestamp', seedTimestamp)
 
         albums = artist.pop('albums', [])
         itunesSource = False
+        newAlbums = []
         for item in albums:
             entityMini = MediaCollectionEntityMini()
             entityMini.title = item['album_name']
@@ -514,8 +517,9 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_id = item['id']
                 entityMini.sources.itunes_source = 'itunes'
                 entityMini.sources.itunes_timestamp = item.pop('timestamp', seedTimestamp)
-            new.albums.append(entityMini)
-        if len(albums) > 0:
+            newAlbums.append(entityMini)
+        if len(newAlbums) > 0:
+            new.albums = albums
             sourceName = 'itunes' if itunesSource else 'format'
             new.albums_source = artist.pop('albums_source', sourceName)
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
@@ -553,11 +557,13 @@ def upgradeEntityData(entityData):
     # Album
     if 'album' in types:
         songs = album.pop('tracks', [])
+        newSongs = []
         for song in songs:
             entityMini = MediaItemEntityMini()
             entityMini.title = song
-            new.tracks.append(entityMini)
-        if len(songs) > 0:
+            newSongs.append(entityMini)
+        if len(newSongs) > 0:
+            new.tracks = newSongs
             new.tracks_source = album.pop('songs_source', 'format')
             new.tracks_timestamp = album.pop('songs_timestamp', seedTimestamp)
     
@@ -572,7 +578,7 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_id = albumId 
                 entityMini.sources.itunes_source = 'seed'
                 entityMini.sources.itunes_timestamp = seedTimestamp
-            new.albums.append(entityMini)
+            new.albums = [ entityMini ]
             new.albums_source = song.pop('album_name_source', 'format')
             new.albums_timestamp = song.pop('album_name_timestamp', seedTimestamp)
     
@@ -582,13 +588,15 @@ def upgradeEntityData(entityData):
         setListGroup(media, new, 'artist_display_name', 'authors', wrapper=PersonEntityMini, seed=False)
 
         screenshots = media.pop('screenshots', [])
+        newScreenshots = []
         for screenshot in screenshots:
             imageSchema = ImageSchema()
             imageSizeSchema = ImageSizeSchema()
             imageSizeSchema.url = screenshot
-            imageSchema.sizes.append(imageSizeSchema)
-            new.screenshots.append(imageSchema)
-        if len(screenshots) > 0:
+            imageSchema.sizes = [ imageSizeSchema ]
+            newScreenshots.append(imageSchema)
+        if len(newScreenshots) > 0:
+            new.screenshots = newScreenshots
             new.screenshots_source = media.pop('screenshots_source', 'format')
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
     
