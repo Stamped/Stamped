@@ -1829,7 +1829,7 @@ class StampedAPI(AStampedAPI):
                                 credit = underlyingStampIds[str(i)]
                                 credit.user = userIds[str(credit.user.user_id)]
                                 credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                credits.append(credit)
+                                credits.append(credit.minimize())
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
