@@ -101,8 +101,6 @@ class _NetflixObject(object):
     def cast(self):
         try:
             cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
-            for entry in cast:
-                print("\nCAST MEMBER: %s" % entry['title'])
             return [
                 {
                 'name':         entry['title'],
@@ -281,8 +279,8 @@ class NetflixSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.netflix_is_instant_available = proxy.is_instant_available
-        entity.netflix_instant_available_until = proxy.instant_available_until
+        entity.sources.netflix_is_instant_available = proxy.is_instant_available
+        entity.sources.netflix_instant_available_until = proxy.instant_available_until
         return True
 
 
@@ -308,7 +306,7 @@ class NetflixSource(GenericSource):
 
                 # return all remaining results through separate page calls to the api
                 while result_counter < num_results:
-                    results = self.__netflix.searchTitles(query, start_index=result_counter)
+                    results = self.__netflix.searchTitles(query, start=result_counter)
                     result_counter += results['results_per_page']
 
                     # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.
@@ -316,6 +314,8 @@ class NetflixSource(GenericSource):
                         yield title
             except GeneratorExit:
                 pass
+            except KeyError:
+                return
         return gen()
 
     def movieSource(self, query):

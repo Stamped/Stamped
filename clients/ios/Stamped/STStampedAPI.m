@@ -287,7 +287,13 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)entityDetailForEntityID:(NSString*)entityID 
                                andCallback:(void(^)(id<STEntityDetail>, NSError*, STCancellation*))block {
-  return [self.entityDetailCache objectForKey:entityID forceUpdate:NO withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+  return [self entityDetailForEntityID:entityID forceUpdate:NO andCallback:block];
+}
+
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID
+                               forceUpdate:(BOOL)forceUpdate
+                               andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block {
+  return [self.entityDetailCache objectForKey:entityID forceUpdate:forceUpdate withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
     block((id<STEntityDetail>)model, error, cancellation);
   }];
 }

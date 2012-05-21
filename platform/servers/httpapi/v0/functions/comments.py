@@ -11,18 +11,18 @@ from httpapi.v0.helpers import *
 @require_http_methods(["POST"])
 def create(request, authUserId, http_schema, **kwargs):
     comment = stampedAPI.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
-    comment = HTTPComment().importSchema(comment)
+    comment = HTTPComment().importComment(comment)
     
-    return transformOutput(comment.exportSparse())
+    return transformOutput(comment.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPCommentId)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     comment = stampedAPI.removeComment(authUserId, http_schema.comment_id)
-    comment = HTTPComment().importSchema(comment)
+    comment = HTTPComment().importComment(comment)
     
-    return transformOutput(comment.exportSparse())
+    return transformOutput(comment.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPCommentSlice)
@@ -34,7 +34,7 @@ def show(request, authUserId, http_schema, data, **kwargs):
     results  = []
     
     for comment in comments:
-        results.append(HTTPComment().importSchema(comment).exportSparse())
+        results.append(HTTPComment().importComment(comment).dataExport())
     
     results = sorted(results, key=lambda k: k['created'])
     return transformOutput(results)

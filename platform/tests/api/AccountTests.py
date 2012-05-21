@@ -171,7 +171,7 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         
         with expected_exception():
             self.handlePOST(path, data)
-
+"""
 class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
     def test_twitter(self):
         path = "account/linked/twitter/update.json"
@@ -291,7 +291,7 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
-
+"""
 class StampedAPIAccountChangePassword(StampedAPIAccountTest):
     def test_change_password(self):
         path = "account/change_password.json"

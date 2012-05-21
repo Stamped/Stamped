@@ -668,8 +668,8 @@ class iTunesSource(GenericSource):
                     entity = kwargs.pop('entity', None)
                     if entity is not None: 
                         url = None
-                        if entity.itunes_url is not None:
-                            url = entity.itunes_url
+                        if entity.sources.itunes_url is not None:
+                            url = entity.sources.itunes_url
                         else:
                             for t in self.__mapper:
                                 if entity.isType(t[0]):
@@ -713,10 +713,11 @@ class iTunesSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.itunes_id = proxy.key
+        entity.sources.itunes_id = proxy.key
+
         try:
             if proxy.preview is not None:
-                entity.itunes_preview = proxy.preview
+                entity.sources.itunes_preview = proxy.preview
         except:
             pass
         return True

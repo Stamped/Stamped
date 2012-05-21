@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals
 from MongoStampedAPI import MongoStampedAPI
 from HTTPSchemas import *
-from Schemas import *
+from api.Schemas import *
 from pprint import pprint
 import Entity
 
@@ -64,13 +64,12 @@ album = stampedAPI.getEntity({'search_id': 'T_ITUNES_474912044'})   # Childish G
 # stampedAPI._enrichEntityAsync('4f7a111ca265375be500002b')
 
 # e = stampedAPI._entityDB.getEntity('4f7a111ca265375be500002b')
-# stampedAPI.mergeEntityAsync(e.value, True)
 
 """
 album = stampedAPI._mergeEntity(album, True)
 
 print '\n\nBEGIN\n%s\n' % ('='*40)
-# pprint(e.value)
+# pprint(e)
 
 # if len(e.tracks) > 0:
 #     for track in e.tracks:
@@ -129,7 +128,7 @@ for stub in album.tracks:
     # Update track's album with album entity_id
     collectionUpdated = False
     for collection in track.albums:
-        commonSources = set(album.sources.value.keys()).intersection(set(collection.sources.value.keys()))
+        commonSources = set(album.sources.exportData().keys()).intersection(set(collection.sources.exportData().keys()))
         for commonSource in commonSources:
             if commonSource[-3:] == '_id' and album.sources[commonSource] == collection.sources[commonSource]:
                 collection.entity_id = album.entity_id
@@ -158,8 +157,8 @@ print e
 # results = stampedAPI.searchEntities(q, coords=coords, category=None)
 
 # for i in range(len(results)):
-#     # pprint(results[i][0].value)
-#     entity = HTTPEntityAutosuggest().importSchema(results[i][0], results[i][1]).exportSparse()
+#     # pprint(results[i][0])
+#     entity = HTTPEntityAutosuggest().importSchema(results[i][0], results[i][1]).dataExport()
 
 #     print '%2s. %s' % (i+1, entity['search_id'])
 #     print '    title:     %s' % entity['title']
@@ -174,6 +173,6 @@ print e
 #     print 
 
 # if len(results) > 0:
-#     pprint(results[0][0].value)
+#     pprint(results[0][0])
 # else:
 #     print'\n\nNO RESULTS\n\n'

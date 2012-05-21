@@ -279,14 +279,14 @@ class StampedAuth(AStampedAuth):
                     raise
                 attempt += 1
 
-        accessToken = self.addAccessToken(refreshToken.client_id, \
-                                            refreshToken.user_id, \
-                                            refreshToken.token_id)
+        accessTokenData = self.addAccessToken(refreshToken.client_id, \
+                                                refreshToken.user_id, \
+                                                refreshToken.token_id)
         
         ret = {
-            'access_token': accessToken['access_token'],
-            'expires_in': accessToken['expires_in'],
-            'refresh_token': refreshToken['token_id']
+            'access_token': accessTokenData['access_token'],
+            'expires_in': accessTokenData['expires_in'],
+            'refresh_token': refreshToken.token_id,
         }
         return ret
     
@@ -355,14 +355,15 @@ class StampedAuth(AStampedAuth):
             token = self._accessTokenDB.getAccessToken(token)
             logs.debug("Access token matched")
 
-            if token['expires'] > datetime.utcnow():
+            if token.expires > datetime.utcnow():
                 logs.info("Authenticated user id: %s" % token.user_id)
                 return token.user_id, token.client_id
             
             logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(token.token_id)
             raise
-        except:
+        except Exception, e:
+            logs.warning("Error: %s" % e)
             msg = "Invalid Access Token"
             logs.warning(msg)
             raise StampedAuthError("invalid_token", msg)

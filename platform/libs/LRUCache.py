@@ -48,13 +48,13 @@ def lru_cache(maxsize=100):
             key = '%s' % user_function.__name__
             for arg in args:
                 try:
-                    arg = arg.value
+                    arg = arg.dataExport()
                 except Exception:
                     pass
                 key = "%s - %s" % (key, arg)
             for k, v in sorted(kwds.iteritems()):
                 try:
-                    v = v.value
+                    v = v.dataExport()
                 except Exception:
                     pass
                 key = "%s - %s (%s)" % (key, k, v)

@@ -9,7 +9,7 @@ import datetime, copy
 import Globals, utils, logs
 
 from errors import *
-from Schemas import *
+from api.Schemas import *
 
 from AMongoCollection import AMongoCollection
 from AAuthAccessTokenDB import AAuthAccessTokenDB
@@ -21,7 +21,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         AAuthAccessTokenDB.__init__(self)
     
     def _convertToMongo(self, token):
-        document = token.value
+        document = token.dataExport()
         if 'token_id' in document:
             document['_id'] = document['token_id']
             del(document['token_id'])
@@ -32,7 +32,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
             if '_id' in document:
                 document['token_id'] = document['_id']
                 del(document['_id'])
-        return AccessToken(document)
+        return AccessToken().dataImport(document)
 
     ### PUBLIC
 

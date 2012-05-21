@@ -81,7 +81,7 @@ class FandangoSource(GenericSource):
 
     def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.fandango_id = wrapper.key
+        entity.sources.fandango_id = wrapper.key
         return True
 
 

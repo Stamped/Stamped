@@ -25,7 +25,7 @@ try:
     from utils                      import lazyProperty
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
-    from Schemas                    import BasicEntity
+    from api.Schemas                import BasicEntity
     from datetime                   import datetime
     from bson                       import ObjectId
     from Entity                     import buildEntity
@@ -42,7 +42,7 @@ class _EntityProxyObject(object):
     """
 
     def __init__(self, entity):
-        self.__entity = buildEntity(entity.value)
+        self.__entity = buildEntity(entity.dataExport())
 
     @property
     def entity(self):
@@ -51,16 +51,16 @@ class _EntityProxyObject(object):
     @lazyProperty
     def name(self):
         try:
-            return self.entity['title']
+            return self.entity.title
         except Exception:
             return ''
 
     @lazyProperty
     def key(self):
         try:
-            return self.entity['entity_id']
+            return self.entity.entity_id
         except Exception:
-            return ''
+            return None
 
     @property 
     def source(self):
@@ -74,7 +74,7 @@ class _EntityProxyObject(object):
             return 'other'
 
     def __repr__(self):
-        return pformat( self.entity.value )
+        return pformat( self.entity )
 
 
 class EntityProxyArtist(_EntityProxyObject, ResolverPerson):
@@ -165,7 +165,7 @@ def _fixCast(cast):
             for name in names:
                 cast.append( {'title': name} )
             print('converted cast: %s' % cast)
-        for item in [c.value for c in cast]:
+        for item in cast:
             name = item.get('title', None)
             character = item.get('character', None)
             if name is None:

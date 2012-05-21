@@ -1674,7 +1674,7 @@ def demo(generic_source, default_title, subcategory=None):
             # entityProxy = EntityProxyContainer(new_query)
             # blank = entityProxy.buildEntity()
 
-            # pprint(blank.value)
+            # pprint(blank)
             return results[0]
         print('\nFound results, but none are resolved')
     else:

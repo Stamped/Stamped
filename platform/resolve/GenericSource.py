@@ -23,7 +23,7 @@ try:
     from Resolver                   import *
     from ResolverObject             import *
     from ASourceController          import *
-    from Schemas                    import *
+    from api.Schemas                import *
     from EntityGroups               import *
     from Entity                     import buildEntity
 except Exception:
@@ -153,11 +153,12 @@ class GenericSource(BasicSource):
             try:
                 entityMini  = MediaCollectionEntityMini()
                 entityMini.title = album['name']
+                entityMini.types = ['album']
                 if 'key' in album:
-                    entityMini.sources['%s_id' % artist.source] = album['key']
-                    entityMini.sources['%s_source' % artist.source] = artist.source
+                    setattr(entityMini.sources, '%s_id' % artist.source, album['key'])
+                    setattr(entityMini.sources, '%s_source' % artist.source, artist.source)
                 if 'url' in album:
-                    entityMini.sources['%s_url' % artist.source] = album['url']
+                    setattr(entityMini.sources, '%s_url' % artist.source, album['url'])
                 albums.append(entityMini)
             except Exception:
                 report()
@@ -174,12 +175,12 @@ class GenericSource(BasicSource):
             try:
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
-                entityMini.types.append('track')
+                entityMini.types = ['track']
                 if 'key' in track:
-                    entityMini.sources['%s_id' % artist.source] = track['key']
-                    entityMini.sources['%s_source' % artist.source] = artist.source
+                    setattr(entityMini.sources, '%s_id' % artist.source, track['key'])
+                    setattr(entityMini.sources, '%s_source' % artist.source, artist.source)
                 if 'url' in track:
-                    entityMini.sources['%s_url' % artist.source] = track['url']
+                    setattr(entityMini.sources, '%s_url' % artist.source, track['url'])
                 tracks.append(entityMini)
             except Exception:
                 report()
@@ -204,7 +205,7 @@ class GenericSource(BasicSource):
             try:
                 item = getattr(proxy, source)
                 if item is not None and item != '':
-                    entity[target] = item
+                    setattr(entity, target, item)
                     timestamps[target] = controller.now
             except Exception as e:
                 pass
@@ -214,11 +215,10 @@ class GenericSource(BasicSource):
         setAttribute('email',           'email')
         setAttribute('url',             'site')
 
-        logs.info('\n### about to enrich images and len(proxy.images) = %d' % len(proxy.images))
         images = []
         for image in proxy.images:
             if image is None or image == '':
-                logs.info('Caught an empty image from the proxy entity %s' % (proxy,))
+                logs.warning('Caught an empty image from the proxy entity %s' % (proxy,))
                 continue
             img = ImageSchema()
             size = ImageSizeSchema()
@@ -234,8 +234,10 @@ class GenericSource(BasicSource):
             setAttribute('formatted_address', 'formatted_address')
 
             if proxy.coordinates is not None:
-                entity.coordinates.lat = proxy.coordinates[0]
-                entity.coordinates.lng = proxy.coordinates[1]
+                coordinates = CoordinatesSchema()
+                coordinates.lat = proxy.coordinates[0]
+                coordinates.lng = proxy.coordinates[1]
+                entity.coordinates = coordinates
 
             if len(proxy.address) > 0:
                 address_set = set([
@@ -251,7 +253,7 @@ class GenericSource(BasicSource):
                     if k in proxy.address:
                         v = proxy.address[k]
                     if v is not None:
-                        entity['address_%s' % k] = v
+                        setattr(entity, 'address_%s' % k, v)
                 timestamps['address'] = controller.now
 
             gallery = []
@@ -262,7 +264,7 @@ class GenericSource(BasicSource):
                 size.url        = image['url']
                 size.height     = image['height']
                 size.width      = image['width']
-                img.sizes.append(size)
+                img.sizes       = [size]
                 gallery.append(img)
             if len(gallery) > 0:
                 entity.gallery = gallery
@@ -333,12 +335,12 @@ class GenericSource(BasicSource):
             for artist in proxy.artists:
                 entityMini = PersonEntityMini()
                 entityMini.title = artist['name']
-                entityMini.types.append('artist')
+                entityMini.types = ['artist']
                 if 'key' in artist:
-                    entityMini.sources['%s_id' % proxy.source] = artist['key']
-                    entityMini.sources['%s_source' % proxy.source] = proxy.source
+                    setattr(entityMini.sources, '%s_id' % proxy.source, artist['key'])
+                    setattr(entityMini.sources, '%s_source' % proxy.source,  proxy.source)
                 if 'url' in artist:
-                    entityMini.sources['%s_url' % proxy.source] = artist['url']
+                    setattr(entityMini.sources, '%s_url' % proxy.source, artist['url'])
                 artists.append(entityMini)
             if len(artists) > 0:
                 entity.artists = artists
@@ -357,12 +359,12 @@ class GenericSource(BasicSource):
             for album in proxy.albums:
                 entityMini = MediaCollectionEntityMini()
                 entityMini.title = album['name']
-                entityMini.types.append('album')
+                entityMini.types = ['album']
                 if 'key' in album:
-                    entityMini.sources['%s_id' % proxy.source] = album['key']
-                    entityMini.sources['%s_source' % proxy.source] = proxy.source
+                    setattr(entityMini.sources, '%s_id' % proxy.source, album['key'])
+                    setattr(entityMini.sources, '%s_source' % proxy.source, proxy.source)
                 if 'url' in album:
-                    entityMini.sources['%s_url' % proxy.source] = album['url']
+                    setattr(entityMini.sources, '%s_url' % proxy.source, album['url'])
                 albums.append(entityMini)
             if len(albums) > 0:
                 entity.albums = albums
@@ -407,7 +409,7 @@ class GenericSource(BasicSource):
                 img = ImageSchema()
                 size = ImageSizeSchema()
                 size.url = screenshot
-                img.sizes.append(size)
+                img.sizes = [size]
                 screenshots.append(img)
             if len(screenshots) > 0:
                 entity.screenshots = screenshots
@@ -430,7 +432,8 @@ class GenericSource(BasicSource):
 
         """
         proxy = None
-        if entity[self.idField] is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
+
+        if getattr(entity.sources, self.idField) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
@@ -438,14 +441,14 @@ class GenericSource(BasicSource):
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:
-                        entity[self.idField] = best[1].key
+                        setattr(entity.sources, self.idField, best[1].key)            
                         if self.urlField is not None and best[1].url is not None:
-                            entity[self.urlField] = best[1].url
+                            setattr(entity.sources, self.urlField, best[1].url)
                         proxy = best[1]
             except ValueError:
                 pass
 
-        source_id = entity[self.idField]
+        source_id = getattr(entity.sources, self.idField)
         if source_id is not None:
             try:
                 if proxy is None:
