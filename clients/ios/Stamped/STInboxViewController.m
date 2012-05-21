@@ -56,7 +56,7 @@
 
 - (id)init {
   if (self = [super init]) {
-    _stamps = [[Stamps sharedInstance] retain];
+    _stamps = [[Stamps alloc] init];
     if ([AccountManager sharedManager].currentUser == nil) {
       _stamps.scope = STStampedAPIScopeEveryone;
     } else {
@@ -151,8 +151,8 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   //
-  NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
-  [[STStampedActions sharedInstance] viewStampWithStampID:stampID];
+  //NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
+  //[[STStampedActions sharedInstance] viewStampWithStampID:stampID];
 }
 
 
