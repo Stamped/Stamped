@@ -305,7 +305,7 @@ class EntitySearch(object):
             
             if source not in self._sources_map:
                 source = 'stamped'
-            
+
             entityProxy = EntityProxyContainer(item[1].target)
             entity = entityProxy.buildEntity()
 

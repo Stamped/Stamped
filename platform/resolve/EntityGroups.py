@@ -117,61 +117,62 @@ class FactualGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'factual')
-        self.addField(['factual_id'])
+        self.addField(['sources', 'factual_id'])
 
 class FoursquareGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'foursquare')
-        self.addField(['foursquare_id'])
-        self.addField(['foursquare_url'])
+        self.addField(['sources', 'foursquare_id'])
+        self.addField(['sources', 'foursquare_url'])
 
 class InstagramGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'instagram')
-        self.addField(['instagram_id'])
+        self.addField(['sources', 'instagram_id'])
 
 
 class OpenTableGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'opentable')
-        self.addField(['opentable_id'])
-        self.addField(['opentable_url'])
+        self.addField(['sources', 'opentable_id'])
+        self.addField(['sources', 'opentable_url'])
 
 class OpenTableNicknameGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'opentable_nickname')
-        self.addNameField()
+        self.addField(['sources', 'opentable_nickname'])
 
 class SinglePlatformGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'singleplatform')
-        self.addField(['singleplatform_id'])
-        self.addField(['singleplatform_url'])
+        self.addField(['sources', 'singleplatform_id'])
+        self.addField(['sources', 'singleplatform_url'])
 
 class GooglePlacesGroup(APlaceGroup):
 
     def __init__(self):
         APlaceGroup.__init__(self, 'googleplaces')
-        self.addField(['googleplaces_id'])
+        self.addField(['sources', 'googleplaces_id'])
+        self.addField(['sources', 'googleplaces_reference'])
 
 class TMDBGroup(AMovieGroup):
 
     def __init__(self):
         AMovieGroup.__init__(self, 'tmdb')
-        self.addField(['tmdb_id'])
-        self.addField(['tmdb_url'])
+        self.addField(['sources', 'tmdb_id'])
+        self.addField(['sources', 'tmdb_url'])
 
 class FandangoGroup(AMovieGroup):
 
     def __init__(self):
         AMovieGroup.__init__(self, 'fandango')
-        self.addField(['fandango_id'])
-        self.addField(['fandango_url'])
+        self.addField(['sources', 'fandango_id'])
+        self.addField(['sources', 'fandango_url'])
 
 class NetflixGroup(AKindTypeGroup):
 
@@ -182,10 +183,10 @@ class NetflixGroup(AKindTypeGroup):
         self.addType('movie')
         self.addType('tv')
 
-        self.addField(['netflix_id'])
-        self.addField(['netflix_url'])
-        self.addField(['netflix_is_instant_available'])
-        self.addField(['netflix_instant_available_until'])
+        self.addField(['sources', 'netflix_id'])
+        self.addField(['sources', 'netflix_url'])
+        self.addField(['sources', 'netflix_is_instant_available'])
+        self.addField(['sources', 'netflix_instant_available_until'])
 
 class RdioGroup(AKindTypeGroup):
     
@@ -198,8 +199,8 @@ class RdioGroup(AKindTypeGroup):
         self.addKind('media_item')
         self.addType('track')
 
-        self.addField(['rdio_id'])
-        self.addField(['rdio_url'])
+        self.addField(['sources', 'rdio_id'])
+        self.addField(['sources', 'rdio_url'])
 
 class TheTVDBGroup(AKindTypeGroup):
     
@@ -210,8 +211,8 @@ class TheTVDBGroup(AKindTypeGroup):
         self.addKind('media_collection')
         self.addType('tv')
 
-        self.addField(['thetvdb_id'])
-        self.addField(['imdb_id'])
+        self.addField(['sources', 'thetvdb_id'])
+        self.addField(['sources', 'imdb_id'])
 
 class SpotifyGroup(AKindTypeGroup):
 
@@ -224,8 +225,8 @@ class SpotifyGroup(AKindTypeGroup):
         self.addKind('media_item')
         self.addType('track')
 
-        self.addField(['spotify_id'])
-        self.addField(['spotify_url'])
+        self.addField(['sources', 'spotify_id'])
+        self.addField(['sources', 'spotify_url'])
 
 class iTunesGroup(AKindTypeGroup):
 
@@ -243,8 +244,8 @@ class iTunesGroup(AKindTypeGroup):
         self.addKind('software')
         self.addType('app')
 
-        self.addField(['itunes_id'])
-        self.addField(['itunes_url'])
+        self.addField(['sources', 'itunes_id'])
+        self.addField(['sources', 'itunes_url'])
 
 class AddressGroup(APlaceGroup):
 
@@ -379,7 +380,7 @@ class IMDBGroup(AFilmGroup):
 
     def __init__(self, *args, **kwargs):
         AFilmGroup.__init__(self, 'imdb')
-        self.addField(['imdb_id'])
+        self.addField(['sources', 'imdb_id'])
 
 class AAmazonGroup(AKindTypeGroup):
 
@@ -397,9 +398,9 @@ class AmazonGroup(AAmazonGroup):
 
     def __init__(self):
         AAmazonGroup.__init__(self, 'amazon')
-        self.addField(['amazon_id'])
-        self.addField(['amazon_url'])
-        self.addField(['amazon_underlying'])
+        self.addField(['sources', 'amazon_id'])
+        self.addField(['sources', 'amazon_url'])
+        self.addField(['sources', 'amazon_underlying'])
  
 class DirectorsGroup(AFilmGroup):
 
@@ -426,7 +427,7 @@ class StampedTombstoneGroup(BasicFieldGroup):
 
     def __init__(self):
         BasicFieldGroup.__init__(self, 'tombstone')
-        self.addField(['tombstone_id'])
+        self.addField(['sources', 'tombstone_id'])
 
     def eligible(self, entity):
         return True

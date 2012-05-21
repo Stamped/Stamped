@@ -176,7 +176,6 @@ class GenericSource(BasicSource):
                 entityMini  = MediaItemEntityMini()
                 entityMini.title = track['name']
                 entityMini.types = ['track']
-                print entityMini
                 if 'key' in track:
                     setattr(entityMini.sources, '%s_id' % artist.source, track['key'])
                     setattr(entityMini.sources, '%s_source' % artist.source, artist.source)
@@ -235,8 +234,10 @@ class GenericSource(BasicSource):
             setAttribute('formatted_address', 'formatted_address')
 
             if proxy.coordinates is not None:
-                entity.coordinates.lat = proxy.coordinates[0]
-                entity.coordinates.lng = proxy.coordinates[1]
+                coordinates = CoordinatesSchema()
+                coordinates.lat = proxy.coordinates[0]
+                coordinates.lng = proxy.coordinates[1]
+                entity.coordinates = coordinates
 
             if len(proxy.address) > 0:
                 address_set = set([
@@ -441,7 +442,7 @@ class GenericSource(BasicSource):
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:
-                        setattr(entity.sources, self.idField, best[1].key)
+                        setattr(entity.sources, self.idField, best[1].key)            
                         if self.urlField is not None and best[1].url is not None:
                             setattr(entity.sources, self.urlField, best[1].url)
                         proxy = best[1]

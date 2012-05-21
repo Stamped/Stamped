@@ -9,6 +9,7 @@ __all__ = [ 'BasicFieldGroup' ]
 
 import Globals
 from logs import log, report
+import logs
 
 try:
     from AFieldGroup    import AFieldGroup
@@ -99,11 +100,11 @@ class BasicFieldGroup(AFieldGroup):
             cur = cur.dataExport()
         for p in path[:-1]:
             if p in cur:
-                cur = getattr(cur, p)
+                cur = cur[p]
             else:
                 return None
-        if hasattr(cur, path[-1]):
-            return getattr(cur, path[-1])
+        if path[-1] in cur:
+            return cur[path[-1]]
         else:
             return None
 

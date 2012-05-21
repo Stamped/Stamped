@@ -1832,14 +1832,14 @@ class HTTPEntityAutosuggest(Schema):
 
     def importEntity(self, entity, distance=None):
         self.search_id          = entity.search_id
-        assert self.search_id is not None
-
         self.title              = entity.title
         self.subtitle           = entity.subtitle
         self.category           = entity.category
 
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance
+            
+        assert self.search_id is not None
 
         return self
 

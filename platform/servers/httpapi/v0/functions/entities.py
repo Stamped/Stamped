@@ -84,7 +84,7 @@ def search(request, authUserId, schema, **kwargs):
             item = HTTPEntityAutosuggest().importEntity(item[0], item[1]).dataExport()
             autosuggest.append(item)
         except Exception as e:
-            logs.warning('Error: %s\n%s' % (e, item[1]))
+            logs.warning('HTTPEntityAutosuggest Import Error: %s (entity = %s)' % (e, item[1]))
     
     return transformOutput(autosuggest)
 

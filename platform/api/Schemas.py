@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import copy, re
 
+from errors     import *
 from datetime   import datetime
 from schema     import *
 from utils      import lazyProperty
@@ -657,19 +658,19 @@ class BasicEntity(BasicEntityMini):
         _is_valid_id = lambda x: x is not None and len(x) > 0
         
         ids = [
-            (self.sources.tombstone_id, ''), 
-            (self.entity_id,            ''), 
-            (self.itunes_id,            'T_ITUNES_'), 
-            (self.rdio_id,              'T_RDIO_'), 
-            (self.spotify_id,           'T_SPOTIFY_'), 
-            (self.opentable_id,         'T_OPENTABLE_'), 
-            (self.googleplaces_reference,'T_GOOGLEPLACES_'),
-            (self.factual_id,           'T_FACTUAL_'), 
-            (self.tmdb_id,              'T_TMDB_'), 
-            (self.thetvdb_id,           'T_THETVDB_'), 
-            (self.amazon_id,            'T_AMAZON_'), 
-            (self.fandango_id,          'T_FANDANGO_'),
-            (self.netflix_id,           'T_NETFLIX_'),
+            (self.sources.tombstone_id,             ''), 
+            (self.entity_id,                        ''), 
+            (self.sources.itunes_id,                'T_ITUNES_'), 
+            (self.sources.rdio_id,                  'T_RDIO_'), 
+            (self.sources.spotify_id,               'T_SPOTIFY_'), 
+            (self.sources.opentable_id,             'T_OPENTABLE_'), 
+            (self.sources.googleplaces_reference,   'T_GOOGLEPLACES_'),
+            (self.sources.factual_id,               'T_FACTUAL_'), 
+            (self.sources.tmdb_id,                  'T_TMDB_'), 
+            (self.sources.thetvdb_id,               'T_THETVDB_'), 
+            (self.sources.amazon_id,                'T_AMAZON_'), 
+            (self.sources.fandango_id,              'T_FANDANGO_'),
+            (self.sources.netflix_id,               'T_NETFLIX_'),
         ]
         
         for (id, prefix) in ids:

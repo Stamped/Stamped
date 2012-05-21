@@ -609,7 +609,7 @@ def fast_id_dedupe(entities, seen=None):
         # ensure that the same source id doesn't appear twice in the result set
         # (source ids are supposed to be unique)
         for key in keys:
-            value = str(entity[key])
+            value = str(getattr(entity.sources, key))
             
             if value in seen[key]:
                 keep = False

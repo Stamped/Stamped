@@ -333,11 +333,11 @@ class GooglePlacesSource(GenericSource):
         
         details = self.__details(entity)
         if details is None:
-            entity.googleplaces_id = None
+            entity.sources.googleplaces_id = None
             timestamps['googleplaces'] = controller.now
             return True
         else:
-            entity.googleplaces_id = details['reference']
+            entity.sources.googleplaces_reference = details['reference']
         
         reformatted = self.__reformatAddress(details)
         if reformatted is not None:
@@ -358,6 +358,8 @@ class GooglePlacesSource(GenericSource):
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.sources.googleplaces_id = proxy.key
+        entity.sources.googleplaces_reference = proxy.key
+        ### NOTE: It looks like the proxy.key is actually the reference. Shouldn't this be the id?
         return True
     
     def __details(self, entity):
