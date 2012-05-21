@@ -1024,13 +1024,13 @@ class MediaCollectionEntity(BasicMediaEntity):
     def subtitle(self):
         if self.isType('album'):
             if len(self.artists) > 0:
-                return 'Album by %s' % ', '.join(unicode(i['title']) for i in self.artists)
+                return 'Album by %s' % ', '.join(unicode(i.title) for i in self.artists)
             
             return 'Album'
         
         if self.isType('tv'):
             if len(self.networks) > 0:
-                return 'TV Show (%s)' % ', '.join(unicode(i['title']) for i in self.networks)
+                return 'TV Show (%s)' % ', '.join(unicode(i.title) for i in self.networks)
             
             return 'TV Show'
         
@@ -1088,12 +1088,12 @@ class MediaItemEntity(BasicMediaEntity):
 
         if self.isType('track'):
             if len(self.artists) > 0:
-                return 'Song by %s' % ', '.join(unicode(i['title']) for i in self.artists)
+                return 'Song by %s' % ', '.join(unicode(i.title) for i in self.artists)
             return 'Song'
 
         if self.isType('book'):
             if len(self.authors) > 0:
-                return '%s' % ', '.join(unicode(i['title']) for i in self.authors)
+                return '%s' % ', '.join(unicode(i.title) for i in self.authors)
             return 'Book'
 
         return self._genericSubtitle()
@@ -1166,7 +1166,7 @@ class SoftwareEntity(BasicEntity):
         if self.isType('app'):
             suffix = ''
             if len(self.authors) > 0:
-                suffix = ' (%s)' % ', '.join(unicode(i['title']) for i in self.authors)
+                suffix = ' (%s)' % ', '.join(unicode(i.title) for i in self.authors)
             
             return 'App%s' % suffix
         elif 'video_game' in self.types:

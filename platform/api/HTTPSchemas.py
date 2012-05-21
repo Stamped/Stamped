@@ -2292,7 +2292,7 @@ class HTTPStamp(Schema):
 
             if content.images is not None:
                 for image in content.images:
-                    img = HTTPImageSchema().dataImport(image)
+                    img = HTTPImageSchema().dataImport(image.dataExport())
                     # quick fix for now
                     # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     item.images.append(img)
