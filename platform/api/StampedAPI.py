@@ -1692,7 +1692,7 @@ class StampedAPI(AStampedAPI):
                     allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
-        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds))
+        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds), limit=len(allUnderlyingStampIds))
 
         for stamp in underlyingStamps:
             underlyingStampIds[stamp.stamp_id] = stamp
