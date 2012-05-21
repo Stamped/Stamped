@@ -328,9 +328,9 @@ def upgradeEntityData(entityData):
                     pass
 
             if newSuffix is None:
-                target[newName] = item 
+                setattr(target, newName, item)
             else:
-                target['%s_%s' % (newName, newSuffix)] = item
+                setattr(target, '%s_%s' % (newName, newSuffix), item)
 
             sourceName = 'format'
             if seed:
@@ -402,8 +402,8 @@ def upgradeEntityData(entityData):
             image = ImageSchema()
             size  = ImageSizeSchema()
             size.url = oldImage
-            image.sizes.append(size)
-            new.images.append(image)
+            image.sizes = [ size ]
+            new.images = [ image ]
             break
     if len(new.images) > 0:
         new.images_source = 'seed'
