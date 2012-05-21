@@ -1506,6 +1506,7 @@ class StampedAPI(AStampedAPI):
 
         stampedby = StampedBy()
 
+        stampedby.all        = StampedByGroup()
         stampedby.all.stamps = self._enrichStampObjects(popularStamps)
         stampedby.all.count  = stats.num_stamps
 
@@ -1515,6 +1516,7 @@ class StampedAPI(AStampedAPI):
         friendUserIds   = self._friendshipDB.getFriends(authUserId)
         friendStamps    = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
+        stampedby.friends           = StampedByGroup()
         stampedby.friends.stamps    = self._enrichStampObjects(friendStamps[:limit])
         stampedby.friends.count     = len(friendStamps)
 
@@ -1522,8 +1524,9 @@ class StampedAPI(AStampedAPI):
         fofOverlap = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
         fofStamps = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
 
-        stampedby.fof.stamps   = self._enrichStampObjects(fofStamps[:limit])
-        stampedby.fof.count    = len(fofStamps)
+        stampedby.fof           = StampedByGroup()
+        stampedby.fof.stamps    = self._enrichStampObjects(fofStamps[:limit])
+        stampedby.fof.count     = len(fofStamps)
 
         return stampedby
 

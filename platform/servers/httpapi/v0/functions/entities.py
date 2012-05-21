@@ -137,8 +137,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 
     if http_schema.group is None:
         stampedby = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
-        logs.info(stampedby)
-        result.importSchema(stampedby)
+        result.importStampedBy(stampedby)
 
     elif http_schema.group == 'friends' and authUserId is not None:
         requestSlice = http_schema.exportFriendsSlice()
@@ -146,10 +145,11 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
 
-        for stamp in stamps:
-            result.friends.stamps.append(HTTPStamp().importStamp(stamp).dataExport())
+        result.friends          = HTTPStampedByGroup()
+        result.friends.stamps   = [HTTPStamp().importStamp(s) for s in stamps]
         if count is not None:
             result.friends.count = count
+
 
     elif http_schema.group == 'fof' and authUserId is not None:
         requestSlice = http_schema.exportFriendsSlice()
@@ -158,8 +158,8 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
 
-        for stamp in stamps:
-            result.fof.stamps.append(HTTPStamp().importStamp(stamp).dataExport())
+        result.fof          = HTTPStampedByGroup()
+        result.fof.stamps   = [HTTPStamp().importStamp(s) for s in stamps]
         if count is not None:
             result.fof.count = count
 
@@ -167,8 +167,8 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
         requestSlice  = http_schema.exportGenericCollectionSlice()
         stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
 
-        for stamp in stamps:
-            result.all.stamps.append(HTTPStamp().importStamp(stamp).dataExport())
+        result.all          = HTTPStampedByGroup()
+        result.all.stamps   = [HTTPStamp().importStamp(s) for s in stamps]
         if count is not None:
             result.all.count = count
     
