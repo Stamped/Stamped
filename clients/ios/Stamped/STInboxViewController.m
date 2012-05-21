@@ -106,13 +106,13 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stampsChanged:) name:StampsChangedNotification object:nil];
+  //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stampsChanged:) name:StampsChangedNotification object:nil];
   [self.stamps reloadData];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  //[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - STSliderScopeViewDelegate
@@ -137,9 +137,10 @@
     cell = [[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
   }
   
-  NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
-  id<STStamp> stamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stampID];
-  [cell setupWithStamp:stamp];
+  //TODO fix
+  //NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
+  //id<STStamp> stamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stampID];
+  //[cell setupWithStamp:stamp];
   
   return cell;
   
@@ -149,6 +150,7 @@
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+  //
   NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
   [[STStampedActions sharedInstance] viewStampWithStampID:stampID];
 }

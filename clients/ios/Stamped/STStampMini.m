@@ -6,15 +6,27 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STSimpleStampMini.h"
+#import "STStampMini.h"
 
-@implementation STSimpleStampMini
+@implementation STStampMini
 
 @synthesize stampID = _stampID;
 @synthesize created = _created;
 @synthesize modified = _modified;
 @synthesize stamped = _stamped;
 @synthesize updated = _updated;
+
+- (id)initWithStamp:(id<STStamp>)stamp {
+  self = [super init];
+  if (self) {
+    _stampID = [stamp.stampID retain];
+    _created = [stamp.created retain];
+    _modified = [stamp.modified retain];
+    _stamped = [stamp.stamped retain];
+    _updated = [NSDate date];
+  }
+  return self;
+}
 
 - (id)initWithCoder:(NSCoder *)decoder {
   self = [super init];
