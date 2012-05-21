@@ -10,7 +10,7 @@ from logs import report
 
 try:
     from AMongoCollection               import AMongoCollection
-    from Schemas                        import *
+    from api.Schemas                        import *
 except:
     report()
     raise

@@ -75,6 +75,7 @@ typedef enum {
 - (void)showRootController:(BOOL)animated; // reset to "home" view controller
 - (void)showRightController:(BOOL)animated;  // show right
 - (void)showLeftController:(BOOL)animated;  // show left
+- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated;
 
 @end
 

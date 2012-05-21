@@ -307,7 +307,7 @@ def format_url(url_format, schema, diff = None):
     import string
     formatter = string.Formatter()
     
-    data = schema.exportSparse()
+    data = schema.dataExport()
     url  = ""
     
     if diff is not None:

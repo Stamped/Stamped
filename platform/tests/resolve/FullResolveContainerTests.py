@@ -15,7 +15,7 @@ from logs import report
 try:
     from resolve.FullResolveContainer   import FullResolveContainer
     from AStampedAPITestCase            import *
-    from Schemas                        import Entity
+    from api.Schemas                    import Entity
     from pprint                         import pformat
     from datetime                       import datetime
 except:
@@ -272,13 +272,13 @@ class ResolveCasesTest(AResolveTest):
         for before, after in self.cases:
             decorations = {}
             if _verbose:
-                before_string = 'Before:\n%s' % (pformat(before.value),)
+                before_string = 'Before:\n%s' % (pformat(before),)
             modified = self.container.enrichEntity(before,decorations,timestamp=_now)
             if _verbose:
                 print(before_string)
-                print('After\n%s' % (pformat(before.value),))
+                print('After\n%s' % (pformat(before),))
                 print(pformat(decorations))
-            self.compare(before.value, after)
+            self.compare(before, after)
 
 if __name__ == '__main__':
     _verbose = True

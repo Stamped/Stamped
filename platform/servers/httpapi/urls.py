@@ -152,8 +152,6 @@ urlpatterns = patterns('',
     (r'v0/ping.json',                               'v0.functions.ping.ping'),
     
     ### TEMP
-    (r'v0/temp/friends.json',                       'v0.functions.temp.friends'),
-    (r'v0/temp/followers.json',                     'v0.functions.temp.followers'),
     (r'v0/temp/timeout.json',                       'v0.functions.temp.timeout'),
     
     ### SETTINGS

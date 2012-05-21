@@ -16,11 +16,11 @@ import datetime, logs, sys, time
 from pprint         import pprint
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
-from Schemas        import MenuSchema
-from Schemas        import SubmenuSchema
-from Schemas        import MenuSectionSchema
-from Schemas        import MenuItemSchema
-from Schemas        import MenuPriceSchema
+from api.Schemas    import MenuSchema
+from api.Schemas    import SubmenuSchema
+from api.Schemas    import MenuSectionSchema
+from api.Schemas    import MenuItemSchema
+from api.Schemas    import MenuPriceSchema
 from urllib2        import HTTPError
 from threading      import Lock
 from gevent         import sleep
@@ -203,7 +203,7 @@ if __name__ == '__main__':
         results = sp.get_menu(sp_id)
         #pprint(results)
         results = toMenuSchema(results)
-        pprint(results.value)
+        pprint(results)
     else:
         # Search for Nobu NY by its phone number
         #results = sp.search(query='2122190500')

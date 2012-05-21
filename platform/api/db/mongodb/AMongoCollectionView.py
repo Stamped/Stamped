@@ -34,8 +34,8 @@ class AMongoCollectionView(AMongoCollection):
         
         if relaxed:
             center = {
-                'lat' : (genericCollectionSlice.upperLeft.lat + genericCollectionSlice.lowerRight.lat) / 2.0, 
-                'lng' : (genericCollectionSlice.upperLeft.lng + genericCollectionSlice.lowerRight.lng) / 2.0, 
+                'lat' : (genericCollectionSlice.viewport.upperLeft.lat + genericCollectionSlice.viewport.lowerRight.lat) / 2.0,
+                'lng' : (genericCollectionSlice.viewport.upperLeft.lng + genericCollectionSlice.viewport.lowerRight.lng) / 2.0,
             }
         
         def add_or_query(args):
@@ -173,7 +173,7 @@ class AMongoCollectionView(AMongoCollection):
                 ])
 
         #utils.log(pprint.pformat(query))
-        #utils.log(pprint.pformat(genericCollectionSlice.value))
+        #utils.log(pprint.pformat(genericCollectionSlice))
         
         # find, sort, and truncate results
         # --------------------------------
@@ -234,14 +234,14 @@ class AMongoCollectionView(AMongoCollection):
                         }, 
                     }
                 else:
-                    scope['viewport'] = genericCollectionSlice.viewport.value
+                    scope['viewport'] = genericCollectionSlice.viewport.dataExport()
             
             logs.debug("js scope: %s" % pprint.pformat(scope))
             
             if genericCollectionSlice.sort == 'proximity':
                 # handle proximity-based sort
                 # ---------------------------
-                scope['center'] = genericCollectionSlice.coordinates.exportSparse()
+                scope['center'] = genericCollectionSlice.coordinates.dataExport()
                 
                 # TODO: handle +180 / -180 meridian special case 
                 _map = bson.code.Code("""function ()

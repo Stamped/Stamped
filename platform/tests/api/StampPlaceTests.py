@@ -50,50 +50,50 @@ class StampedAPIStampPlacesShow(StampedAPIStampPlaceTest):
 #         result = self.handlePOST(path, data)
 #         self.assertEqual(result['blurb'], blurb)
 
-class StampedAPIStampPlaceMentionsTest(AStampedAPITestCase):
-    def setUp(self):
-        (self.userA, self.tokenA) = self.createAccount('UserA')
-        (self.userB, self.tokenB) = self.createAccount('UserB')
-        (self.userC, self.tokenC) = self.createAccount('UserC')
-        self.createFriendship(self.tokenB, self.userA)
-        self.entity = self.createPlaceEntity(self.tokenA)
-        self.stampData = {
-            "oauth_token": self.tokenA['access_token'],
-            "entity_id": self.entity['entity_id'],
-            "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
-            "credit": self.userB['screen_name']
-        }
-        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], \
-            self.stampData)
+# class StampedAPIStampPlaceMentionsTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.userA, self.tokenA) = self.createAccount('UserA')
+#         (self.userB, self.tokenB) = self.createAccount('UserB')
+#         (self.userC, self.tokenC) = self.createAccount('UserC')
+#         self.createFriendship(self.tokenB, self.userA)
+#         self.entity = self.createPlaceEntity(self.tokenA)
+#         self.stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": self.entity['entity_id'],
+#             "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
+#             "credit": self.userB['screen_name']
+#         }
+#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], \
+#             self.stampData)
 
-    def tearDown(self):
-        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-        self.deleteEntity(self.tokenA, self.entity['entity_id'])
-        self.deleteFriendship(self.tokenB, self.userA)
-        self.deleteAccount(self.tokenA)
-        self.deleteAccount(self.tokenB)
-        self.deleteAccount(self.tokenC)
+#     def tearDown(self):
+#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
+#         self.deleteFriendship(self.tokenB, self.userA)
+#         self.deleteAccount(self.tokenA)
+#         self.deleteAccount(self.tokenB)
+#         self.deleteAccount(self.tokenC)
 
-class StampedAPIStampPlacesMentionsShow(StampedAPIStampPlaceMentionsTest):
-    def test_show(self):
-        path = "stamps/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id']
-        }
-        result = self.handleGET(path, data)
+# class StampedAPIStampPlacesMentionsShow(StampedAPIStampPlaceMentionsTest):
+#     def test_show(self):
+#         path = "stamps/show.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id']
+#         }
+#         result = self.handleGET(path, data)
 
-        self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
-        self.assertTrue(len(result['credit']) == 1)
-        self.assertEqual(
-            result['credit'][0]['screen_name'], 
-            self.stampData['credit']
-            )
-        self.assertTrue(len(result['mentions']) == 1)
-        self.assertEqual(
-            result['mentions'][0]['screen_name'], 
-            self.userB['screen_name']
-            )
+#         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
+#         self.assertTrue(len(result['credit']) == 1)
+#         self.assertEqual(
+#             result['credit'][0]['screen_name'], 
+#             self.stampData['credit']
+#             )
+#         self.assertTrue(len(result['mentions']) == 1)
+#         self.assertEqual(
+#             result['mentions'][0]['screen_name'], 
+#             self.userB['screen_name']
+#             )
 
 # class StampedAPIStampPlacesMentionsUpdate(StampedAPIStampPlaceMentionsTest):
 #     def test_no_mentions(self):

@@ -127,12 +127,16 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
     
+    // 1st run debugging code..
+    /*
     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
     [menuController.view addSubview:welcomeController.view];
     welcomeController.view.frame = menuController.view.bounds;
     [welcomeController animateIn];
     
   //[[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
+    */
+     
   grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
   grid_.hidden = YES;
   [self.window addSubview:grid_];

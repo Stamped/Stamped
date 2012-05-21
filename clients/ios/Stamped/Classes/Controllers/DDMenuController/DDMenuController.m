@@ -465,8 +465,8 @@
             UIView *view = [[UIView alloc] initWithFrame:_root.view.frame];
             view.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:view.bounds cornerRadius:2.0f].CGPath;
             view.layer.shadowOffset = CGSizeZero;
-            view.layer.shadowRadius = 4.0f;
-            view.layer.shadowOpacity = 0.8f;
+            view.layer.shadowRadius = 10.0f;
+            view.layer.shadowOpacity = 0.5f;
             [self.view insertSubview:view belowSubview:_root.view];
             _shadowView = view;
             [view release];

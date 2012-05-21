@@ -19,7 +19,6 @@ try:
     import re
     from datetime       import datetime
     from libs.LibUtils           import months
-    from schema         import SchemaElement
 except:
     report()
     raise

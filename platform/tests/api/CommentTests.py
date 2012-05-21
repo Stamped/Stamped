@@ -87,23 +87,6 @@ class StampedAPICommentsMentions(StampedAPICommentTest):
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-    def test_fake_double_mention(self):
-        self.blurb = "Nice job @%s! You rock @%s." % \
-            (self.userA['screen_name'], self.userA['screen_name'])
-        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
-            self.blurb)
-
-        path = "comments/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "stamp_id": self.stamp['stamp_id']
-        }
-        result = self.handleGET(path, data)
-        self.assertIn('mentions', result[2])
-        self.assertTrue(len(result[2]['mentions']) == 1)
-
-        self.deleteComment(self.tokenB, self.comment['comment_id'])
-
     def test_double_mention(self):
         self.blurb = "Nice job @%s! You rock @%s." % \
             (self.userA['screen_name'], self.userB['screen_name'])
@@ -178,7 +161,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue('mentions' not in result[2])
+        self.assertTrue('mentions' not in result[2] or len(result[2]['mentions']) == 0)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -193,7 +176,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue('mentions' not in result[2])
+        self.assertTrue('mentions' not in result[2] or len(result[2]['mentions']) == 0)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 

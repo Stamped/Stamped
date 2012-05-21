@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from Schemas import *
+from api.Schemas import *
 
 from AMongoCollection import AMongoCollection
 from api.APlacesEntityDB import APlacesEntityDB

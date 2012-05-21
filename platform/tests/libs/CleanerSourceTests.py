@@ -16,7 +16,7 @@ try:
     from libs.CleanerSource             import CleanerSource
     from libs.ExternalSourceController  import ExternalSourceController
     from AStampedAPITestCase            import *
-    from Schemas                        import Entity
+    from api.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime
 except:
@@ -69,7 +69,7 @@ class CleanerSourceReleaseDateTest(ACleanerSourceTest):
         now = self.controller.now()
         modified = self.source.enrichEntity(self.media1,self.controller)
         if _verbose:
-            pprint(self.media1.value)
+            pprint(self.media1)
         self.assertEqual(modified,True)
         release_date = datetime(2011,8,26)
         self.assertEqual(self.media1.release_date,release_date)

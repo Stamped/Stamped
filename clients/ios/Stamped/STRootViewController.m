@@ -12,6 +12,7 @@
 #import "ECSlidingViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STAppDelegate.h"
+#import "STNavigationItem.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -29,6 +30,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)viewDidLoad {
   [super viewDidLoad];
 
+    self.delegate = (id<UINavigationControllerDelegate>)self;
     self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
     STNavigationBar *bar = [[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 44)];
     bar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -54,6 +56,28 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+
+#pragma mark - UINavigationControllerDelegate
+
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    
+    NSInteger index = [self.viewControllers indexOfObject:viewController];
+    if (index > 0 && viewController.navigationItem.leftBarButtonItem == nil) {        
+        
+        UIViewController *prevController = [self.viewControllers objectAtIndex:index-1];
+        STNavigationItem *button = [[STNavigationItem alloc] initWithBackButtonTitle:prevController.title style:UIBarButtonItemStyleBordered target:self action:@selector(pop:)];
+        viewController.navigationItem.leftBarButtonItem = button;
+        
+    }
+    
+}
+
+- (void)pop:(id)sender {
+    
+    [self popViewControllerAnimated:YES];
+    
 }
 
 @end

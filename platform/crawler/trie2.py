@@ -11,7 +11,7 @@ import gzip, json, math, re, string, time, sys, threading
 
 from MongoStampedAPI    import MongoStampedAPI
 from HTTPSchemas        import *
-from Schemas            import *
+from api.Schemas        import *
 from gevent.pool        import Pool
 from optparse           import OptionParser
 from pprint             import pprint, pformat
@@ -203,7 +203,7 @@ def main():
             
             autosuggest = []
             for item in results:
-                item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+                item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).dataExport()
                 autosuggest.append(item)
             
             value = json.dumps(autosuggest, sort_keys=True)

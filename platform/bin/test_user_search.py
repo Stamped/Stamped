@@ -16,5 +16,5 @@ user_id = '4e57048dccc2175fca000005'
 users   = api._userDB.searchUsers(user_id, query, limit = 10)
 
 for user in users:
-    pprint(user.value)
+    pprint(user)
 

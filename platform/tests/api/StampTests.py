@@ -416,6 +416,29 @@ class StampedAPILikesFail(StampedAPIStampLikesTest):
             result = self.handlePOST(path, data)
 
 
+class StampedAPIEntitiesStampedBy(StampedAPIStampTest):
+    def test_stampedby_nogroup(self):
+        # User B queries the entity User A created and Stamped
+        path = "entities/stamped_by.json"
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "entity_id": self.entity['entity_id']
+        }
+        result = self.handleGET(path, data)
+
+        import pprint
+        print('entity_id: %s' % self.entity['entity_id'])
+        pprint.pprint(result)
+        self.assertEqual(result['friends']['count'], 1)
+        self.assertEqual(result['friends']['stamps'][0]['entity']['entity_id'], self.entity['entity_id'])
+        self.assertEqual(result['friends']['stamps'][0]['stamp_id'], self.stamp['stamp_id'])
+        self.assertEqual(result['friends']['stamps'][0]['user']['screen_name'], 'UserA')
+        #self.assertEqual(result[0]['title'].lower(), self.entity['title'].lower())
+
+#        import time
+#        time.sleep(100000)
+
+
 if __name__ == '__main__':
     main()
 

@@ -203,7 +203,7 @@ class FactualSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.factual_id = proxy.key
+        entity.sources.factual_id = proxy.key
         return True
 
     def matchSource(self, query):
@@ -277,10 +277,10 @@ class FactualSource(GenericSource):
         """
         #Override and ignores GenericSource.enrichEntity
         try:
-            factual_id = entity['factual_id']
+            factual_id = entity.sources.factual_id
             if controller.shouldEnrich('factual', self.sourceName, entity):
                 factual_id = self.__factual.factual_from_entity(entity)
-                entity['factual_id'] = factual_id
+                entity.sources.factual_id = factual_id
                 timestamps['factual'] = controller.now
             else:
                 return False
@@ -289,12 +289,12 @@ class FactualSource(GenericSource):
                 return True
             if controller.shouldEnrich('singleplatform', self.sourceName, entity):
                 singleplatform_id = self.__factual.singleplatform(factual_id)
-                entity['singleplatform_id'] = singleplatform_id
+                entity.sources.singleplatform_id = singleplatform_id
                 timestamps['singleplatform'] = controller.now
 
             if controller.shouldEnrich('foursquare', self.sourceName, entity):
                 foursquare_id = self.__factual.foursquare(factual_id)
-                entity['foursquare_id'] = foursquare_id
+                entity.sources.foursquare_id = foursquare_id
                 timestamps['foursquare'] = controller.now
 
             # all further enrichments require place/restaurant data so return if not present
@@ -308,7 +308,7 @@ class FactualSource(GenericSource):
             # set all simple mappings
             for k,v in self.__simple_fields.items():
                 if v in data:
-                    entity[k] = data[v]
+                    setattr(entity, k, data[v])
 
             # set address group
             self.writeFields(entity, data, self.__address_fields)
@@ -325,7 +325,7 @@ class FactualSource(GenericSource):
             if 'price' in data:
                 try:
                     price = int(float(data['price']))
-                    entity['price_range'] = price
+                    entity.price_range = price
                 except:
                     logs.warning('bad formatting on Factual price data: %s', data['price'],exc_info=1)
 
@@ -352,7 +352,7 @@ class FactualSource(GenericSource):
                             broken = True
                             break
                     if not broken and len(hours) > 0:
-                        entity['hours'] = hours
+                        entity.hours = hours
                 except ValueError:
                     logs.warning('bad json for hours')
 
@@ -362,16 +362,16 @@ class FactualSource(GenericSource):
                 for result in crosswalk_results:
                     if result['namespace'] == 'opentable':
                         if 'namespace_id' in result and result['namespace_id'] != '':
-                            entity['opentable_id'] = result['namespace_id']
+                            entity.sources.opentable_id = result['namespace_id']
                         else:
                             url = result['url']
                             match = re.match(r'^http://www.opentable.com/([^./]+)$',url)
                             if match is not None:
-                                entity['opentable_nickname'] = match.group(1)
+                                entity.sources.opentable_nickname = match.group(1)
             except:
                 pass
         except HTTPError as e:
-            logs.warning("Factual threw an %s error for %s (%s)" % (e.code, entity['title'], entity['entity_id']))
+            logs.warning("Factual threw an %s error for %s (%s)" % (e.code, entity.title, entity.entity_id))
             #timestamps['factual'] = controller.now
             # Let container deal with it
             raise
