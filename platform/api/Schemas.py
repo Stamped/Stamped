@@ -681,8 +681,8 @@ class BasicEntity(BasicEntityMini):
                              pformat(self.dataExport()))
     
     def _genericSubtitle(self):
-        if self.user_generated_subtitle is not None:
-            return self.user_generated_subtitle
+        if self.sources.user_generated_subtitle is not None:
+            return self.sources.user_generated_subtitle
         return unicode(self.subcategory).replace('_', ' ').title()
 
     def minimize(self, *args):
