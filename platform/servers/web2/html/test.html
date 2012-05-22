@@ -2,10 +2,37 @@
 {% load stamped_tags %}
 {% load ssi from future %}
 
+{% block head %}
+    {{ block.super }}
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/test.css">
+{% endblock head %}
+
 {% block main %}
     {{ block.super }}
     
     <div id="main-content" class="fixedwidth">
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        
+        <p class='pronounced-title'>
+            TEST0
+        </p>
+        
+        <p>
+            TEST1
+            
+            {% with coordinates="40.714728,-73.998672" %}
+                {% handlebars_template "rotated-static-map-small" %}
+            {% endwith %}
+        </p>
+        
+        
+        
+        <!--
         <div>
             TEST1
             
@@ -19,6 +46,7 @@
             
             <img class="blur_16" src="http://drublic.de/blog/wp-content/uploads/2011/12/Unsch%C3%A4rfe-via-CSS-Filter-SVG-Mozilla-Firefox_2011-12-18_21-18-59.png" />
         </div>
+        -->
         
         <!--
         <div class="static-map-small">
@@ -38,11 +66,7 @@
      <!-- jQuery plugins -->
     <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-    
-    <script src="{{ STATIC_URL }}js/libs/mustache.js"></script>
-    <script src="{{ STATIC_URL }}js/client.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

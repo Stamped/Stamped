@@ -226,7 +226,15 @@ class CustomCSSTemplateLibrary(object):
 
 def custom_template(parser, token, template_library):
     try:
-        tag_name, template_name = token.split_contents()
+        parts = token.split_contents()
+        context_variable = None
+        
+        if len(parts) == 2:
+            tag_name, template_name = parts
+        elif len(parts) == 3:
+            tag_name, template_name, context_variable = parts
+        else:
+            raise ValueError
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
     
@@ -239,7 +247,7 @@ def custom_template(parser, token, template_library):
         raise template.TemplateDoesNotExist("%r '%s' not found" % (template_name, 
                                                                    token.contents.split()[0]));
     
-    return CustomTemplateNode(template_name, template_library)
+    return CustomTemplateNode(template_name, template_library, context_variable)
 
 @register.tag
 def mustache_template(parser, token):
@@ -309,14 +317,22 @@ class CustomTemplateNode(AStampedNode):
         context.
     """
     
-    def __init__(self, name, library):
+    def __init__(self, name, library, context_variable=None):
         AStampedNode.__init__(self)
         self._name = name
         self._library = library
+        
+        if context_variable is not None:
+            self._context_variable = template.Variable(context_variable)
+        else:
+            self._context_variable = None
     
     def render(self, context):
         try:
-            context_dict = self._simplify_context(context)
+            if self._context_variable is None:
+                context_dict = self._simplify_context(context)
+            else:
+                context_dict = self._context_variable.resolve(context)
             
             result = unicode(self._library.render(self._name, context_dict))
             if len(result.strip()) == 0:

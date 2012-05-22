@@ -1,0 +1,136 @@
+{% extends "base2.html" %}
+{% load stamped_tags %}
+
+<!-- 
+    NOTE: this is a workaround because the built-in ssi tag doesn't support 
+    context variables as arguments. We use ssi to include other html files 
+    which contain non-django templates that the django templating system 
+    should not attempt to parse. Note that we would use the built-in include 
+    tag if we wanted to parse an external template before inclusion.
+-->
+{% load ssi from future %}
+
+{% block head %}
+    {{ block.super }}
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+    
+    <style>
+        {% custom_css "profile" %}
+    </style>
+{% endblock head %}
+
+{% block main %}
+    {{ block.super }}
+    
+    {% block pre_sdetail_main_content %}
+    <div id="main-content" class="fixedwidth">
+        {% endblock pre_sdetail_main_content %}
+        
+        {% block sdetail_main_content %}
+            <div class="sdetail clearfix">
+                <div class="lhs">
+                    {% handlebars_template "stamp-image" stamp %}
+                </div>
+                
+                <div class="rhs">
+                    {% handlebars_template "social-sharing" %}
+                </div>
+                
+                <div class="inner">
+                    <div class="entity-header">
+                        <div class="stamp-category-{{stamp.entity.category}}">
+                            <div class='title clearfloat'>
+                                <div class="pronounced-title">
+                                    <a href="{{stamp.url}}" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
+                                </div>
+                                <span class='user-logo-small'></span>
+                            </div>
+                            
+                            <div class="subtitle-line">
+                                <p>
+                                    <span class="icon"></span>
+                                    <span class="subtitle">{{stamp.entity.subtitle}}</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="stamp-card">
+                            <div class="stamp-card-pre">
+                                <div class="ribbon-bottom"></div>
+                            </div>
+                            
+                            <div class='stamp-contents'>
+                                <div class='stamp-header'>
+                                    <div class='name'>
+                                        {% if stamp.user.name %}
+                                            {{stamp.user.name}}
+                                        {% else %}
+                                            @{{stamp.user.screen_name}}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if stamp.modified %}
+                                        <div class="timestamp_raw">{{.}}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class='stamp-inner-content clearfix'>
+                                    <div class="profile-image-medium">
+                                        <img alt="{% if stamp.user.name %}{{stamp.user.name}} {% endif %}(@{{stamp.user.screen_name}})" src="{{stamp.user.image_url_72}}" />
+                                    </div>
+                                    
+                                    {% for content in stamp.contents %}
+                                        {% if content.blurb %}
+                                            <p class="blurb">{{content.blurb}}</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                
+                                {% if stamp.previews.credits %}
+                                <div class="credits">
+                                    <!--background:url('http://static.stamped.com/logos/{{ credit.0.color_primary }}-{{ credit.0.color_secondary }}-credit-18x18.png') left top no-repeat;
+                                    background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png') left top no-repeat;-->
+                                    {% for credit in stamp.previews.credits %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            
+                            <div class="stamp-card-post">
+                                <div class="ribbon-top"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock sdetail_main_content %}
+        
+        {% block post_sdetail_main_content %}
+    </div>
+    {% endblock post_sdetail_main_content %}
+{% endblock main %}
+
+{% block scripts %}
+    {{ block.super }}
+     
+     <!-- jQuery plugins -->
+    <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
+    
+    <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
+    <script src="{{ STATIC_URL }}js/client.js"></script>
+    <script src="{{ STATIC_URL }}js/profile.js"></script>
+    <script src="{{ STATIC_URL }}js/sdetail.js"></script>
+    
+    {% ssi STAMPED_TEMPLATE_FILE %}
+{% endblock scripts %}
+

@@ -19,12 +19,18 @@ def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
 
 def _get_body_classes(base, schema):
+    has_category = False
     body_classes = base
     
-    if schema.category is not None:
-        body_classes = "%s %s" % (body_classes, schema.category)
+    try:
+        has_category = (schema.category is not None)
+    except:
+        pass
+    
+    if has_category:
+        body_classes += " %s" % schema.category
     else:
-        body_classes = "%s %s" % (body_classes, "default")
+        body_classes += " default"
     
     return body_classes
 
@@ -183,7 +189,7 @@ def profile(request, schema, **kwargs):
     
     body_classes = _get_body_classes('profile', schema)
     
-    return stamped_render(request, 'profile2.html', {
+    return stamped_render(request, 'profile.html', {
         'user'                  : user, 
         'stamps'                : stamps, 
         
@@ -256,6 +262,43 @@ def map(request, schema, **kwargs):
         
         'body_classes'  : body_classes, 
     }, preload=[ 'user', 'stamps' ])
+
+@stamped_view(schema=HTTPStampDetail)
+def sdetail(request, schema, **kwargs):
+    body_classes = _get_body_classes('sdetail', schema)
+    
+    logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
+    stamp = stampedAPIProxy.getStampFromUser(schema.screen_name, schema.stamp_num)
+    
+    
+    if not IS_PROD and schema.screen_name == 'travis':
+        user = travis_test.user
+    else:
+        user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        user_id     = user['user_id']
+    
+    if stamp is None:
+        raise StampedUnavailableError("stamp does not exist")
+    
+    stamp = HTTPStamp(stamp)
+    '''
+    encodedStampTitle = encodeStampTitle(stamp.entity.title)
+    
+    if encodedStampTitle != schema.stamp_title:
+        i = encodedStampTitle.find('.')
+        if i != -1:
+            encodedStampTitle = encodedStampTitle[:i]
+        
+        if encodedStampTitle != schema.stamp_title:
+            raise Exception("Invalid stamp title: '%s' (received) vs '%s' (stored)" % 
+                            (schema.stamp_title, encodedStampTitle))
+    '''
+    
+    return stamped_render(request, 'sdetail.html', {
+        'user'  : user, 
+        'stamp' : stamp.exportSparse()
+    })
+
 
 @stamped_view(schema=HTTPUserCollectionSlice)
 def test_view(request, schema, **kwargs):

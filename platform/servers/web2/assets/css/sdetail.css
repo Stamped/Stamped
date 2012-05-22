@@ -1,0 +1,104 @@
+/* sdetail.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/* elements.less
+ * 
+ * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
+ * (http://lesselements.com)
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+.subtitle-line {
+  position: relative;
+  display: block;
+  margin: 0 0 -0.5em;
+}
+.subtitle-line p {
+  margin: 0;
+  padding: 0;
+}
+.subtitle-line .subtitle {
+  display: inline;
+  font-size: 80%;
+  position: relative;
+  top: -2px;
+}
+.subtitle-line .icon {
+  display: inline-block;
+  margin: 0 4px 0 0;
+}
+.sdetail {
+  padding: 150px 0 0;
+}
+.sdetail .lhs {
+  float: left;
+  width: 33%;
+  border: 2px solid red;
+}
+.sdetail .inner {
+  position: relative;
+  top: 0;
+  left: 0;
+  float: right;
+  width: 50%%;
+  min-width: 50%;
+  border: 2px solid green;
+}
+.sdetail .inner .entity-header {
+  float: none;
+}
+.sdetail .inner .stamp-card {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
+  -ms-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
+  -o-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
+  box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
+  margin: .5em 0 0;
+}
+.sdetail .inner .stamp-card .stamp-card-pre,
+.sdetail .inner .stamp-card .stamp-card-post {
+  display: block;
+  width: 100%;
+  height: 16px;
+}
+.sdetail .inner .stamp-card .stamp-contents {
+  -webkit-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  -ms-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  -o-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+}
+.sdetail .inner .stamp-card .stamp-contents .stamp-header {
+  margin: .5em;
+}
+.sdetail .inner .stamp-card .stamp-contents .stamp-inner-content {
+  margin: 0 .5em .5em;
+}
+.sdetail .inner .stamp-card .stamp-contents .stamp-inner-content .profile-image-medium {
+  margin: 0 24px 24px 0;
+}
+.sdetail .inner .stamp-card .stamp-contents .credits {
+  border-top: 1px solid #bbb;
+}
+.sdetail .rhs {
+  border: 2px solid blue;
+  float: right;
+  width: 12%;
+  padding: .5em;
+}
+.sdetail .rhs p.share {
+  font-size: 80%;
+}

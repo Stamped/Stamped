@@ -14,7 +14,17 @@
 
 @import "libs/h5bp.min.css";
 @import "libs/elements.less";
+
 @import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
+
+@font-face {
+    font-family: StampedFallbackFont;
+    font-style:  normal;
+    font-weight: 400;
+    
+    src: local("☺"),
+         url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+}
 
 
 /* **************************************************************************
@@ -34,10 +44,11 @@ body, html {
 }
 
 body {
-    background: #fff;
     font-family: 'arial', sans-serif;
-    color: #666;
     font-size: 1em;
+    
+    background: #fff;
+    color: #666;
 }
 
 a, a:focus {
@@ -126,6 +137,7 @@ header {
             }
             
             a.button {
+                /*background: url(/assets/img/join_sign_up_buttons_sprite.png) no-repeat;*/
                 color: #fff;
                 background: @base;
                 .box-shadow(0, 0, 4px, 0, @base);
@@ -191,7 +203,10 @@ header {
         }
         
         a.button {
-            font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+            font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+            font-style:  normal;
+            font-weight: normal;
+            
             letter-spacing: .1em;
             text-align: center;
             
@@ -316,7 +331,7 @@ header {
                 height: 16px;
                 
                 .inset-stamp {
-                    background: url(/assets/img/insetstamp.png) center top no-repeat;
+                    background: url(/assets/img/insetstamp2.png) center top no-repeat;
                     text-align: center;
                     position: relative;
                     top: -75px;
@@ -329,7 +344,9 @@ header {
                     padding: 18px 20px 0;
                     
                     .number {
-                        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+                        font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+                        font-style:  normal;
+                        font-weight: normal;
                         
                         font-size: 2em;
                         letter-spacing: .05em;
@@ -445,7 +462,9 @@ header {
     width: 18%;
     
     .number {
-        font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+        font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+        font-style:  normal;
+        font-weight: normal;
         font-size: 2em;
         letter-spacing: .05em;
         color: #000;
@@ -731,12 +750,11 @@ body.other      #stamp-category-nav-bar ol li.other {
 
 
 .blurred(@filter, @radius_px) {
-    /*blur.svg#gaussian_blur_@radius*/
     filter: url(@filter);
     -webkit-filter: blur(@radius_px);
     
     @duration: 1s;
-    @ease: ease-in-out;
+    @ease: ease-out;
     
     transition: filter @duration @ease;
     -moz-transition: filter @duration @ease;
@@ -759,7 +777,7 @@ body.other      #stamp-category-nav-bar ol li.other {
     }
 }
 
-.blur_0   { .blurred('blur.svg#gaussian_blur_0',   0px);   } .ie { .blur_0   { .blurred_ie(0,   0px);   } }
+.blur_0   { .blurred('blur.svg#gaussian_blur_0',   0  );   } .ie { .blur_0   { .blurred_ie(0,   0  );   } }
 .blur_1   { .blurred('blur.svg#gaussian_blur_1',   1px);   } .ie { .blur_1   { .blurred_ie(1,   1px);   } }
 .blur_2   { .blurred('blur.svg#gaussian_blur_2',   2px);   } .ie { .blur_2   { .blurred_ie(2,   2px);   } }
 .blur_3   { .blurred('blur.svg#gaussian_blur_3',   3px);   } .ie { .blur_3   { .blurred_ie(3,   3px);   } }
@@ -872,7 +890,7 @@ footer {
 
 footer a {
     color: #7a9ccc;
-    margin-left: 0px;
+    margin-left: 0;
     margin-right: 15px;
     font-weight: bold;
     display: inline-block;
@@ -948,9 +966,18 @@ footer .copyright a, footer .copyright a {
 
 .pronounced-title {
     position: relative;
-    font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+    
+    font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+    font-style:  normal;
+    font-weight: normal;
+    
+    /*font-smooth: always;
+    -webkit-font-smoothing: antialiased;*/
+    
     font-size: 2em;
-    letter-spacing: .025em;
+    letter-spacing: .05em;
+    color: #000;
+    
     /*text-shadow: 0.05em 0.05em 0.03em #aaa;*/
 }
 

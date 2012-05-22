@@ -21,6 +21,12 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+@font-face {
+  font-family: StampedFallbackFont;
+  font-style: normal;
+  font-weight: 400;
+  src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+}
 /* **************************************************************************
                             BASIC HIGH-LEVEL SETUP
    ************************************************************************** */
@@ -33,10 +39,10 @@ html {
   height: 100%;
 }
 body {
-  background: #fff;
   font-family: 'arial', sans-serif;
-  color: #666;
   font-size: 1em;
+  background: #fff;
+  color: #666;
 }
 a,
 a:focus {
@@ -110,6 +116,8 @@ header .header-body p.join span.desc {
   color: #438fed;
 }
 header .header-body p.join a.button {
+  /*background: url(/assets/img/join_sign_up_buttons_sprite.png) no-repeat;*/
+
   color: #fff;
   background: #3b84eb;
   -webkit-box-shadow: 0 0 4px 0 #3b84eb;
@@ -187,7 +195,9 @@ header .header-body p.sign-in a.button:active {
   box-shadow: 0 0 4px 0 #0f4897;
 }
 header .header-body a.button {
-  font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
   letter-spacing: .1em;
   text-align: center;
   margin-left: .5em;
@@ -300,7 +310,7 @@ header .header-body a.button {
   height: 16px;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp {
-  background: url(/assets/img/insetstamp.png) center top no-repeat;
+  background: url(/assets/img/insetstamp2.png) center top no-repeat;
   text-align: center;
   position: relative;
   top: -75px;
@@ -311,7 +321,9 @@ header .header-body a.button {
   padding: 18px 20px 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp .number {
-  font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
   font-size: 2em;
   letter-spacing: .05em;
   margin: 0 0 -0.25em;
@@ -424,7 +436,9 @@ header .header-body a.button {
 }
 .profile-section1 .number,
 .profile-section2 .number {
-  font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
   font-size: 2em;
   letter-spacing: .05em;
   color: #000;
@@ -779,20 +793,18 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
                              GENERIC BLUR FILTERS
    ************************************************************************** */
 .blur_0 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_0');
-  -webkit-filter: blur(0px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  -webkit-filter: blur(0);
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_0:hover {
   filter: none;
   -webkit-filter: blur(0);
 }
 .ie .blur_0 {
-  margin: 0px;
+  margin: 0;
   filter: progid:dximagetransform.microsoft.blur(pixelradius=0);
   zoom: 1;
 }
@@ -801,13 +813,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_1 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_1');
   -webkit-filter: blur(1px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_1:hover {
   filter: none;
@@ -823,13 +833,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_2 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_2');
   -webkit-filter: blur(2px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_2:hover {
   filter: none;
@@ -845,13 +853,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_3 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_3');
   -webkit-filter: blur(3px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_3:hover {
   filter: none;
@@ -867,13 +873,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_4 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_4');
   -webkit-filter: blur(4px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_4:hover {
   filter: none;
@@ -889,13 +893,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_5 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_5');
   -webkit-filter: blur(5px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_5:hover {
   filter: none;
@@ -911,13 +913,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_6 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_6');
   -webkit-filter: blur(6px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_6:hover {
   filter: none;
@@ -933,13 +933,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_7 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_7');
   -webkit-filter: blur(7px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_7:hover {
   filter: none;
@@ -955,13 +953,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_8 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_8');
   -webkit-filter: blur(8px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_8:hover {
   filter: none;
@@ -977,13 +973,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_9 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_9');
   -webkit-filter: blur(9px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_9:hover {
   filter: none;
@@ -999,13 +993,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_10 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_10');
   -webkit-filter: blur(10px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_10:hover {
   filter: none;
@@ -1021,13 +1013,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_11 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_11');
   -webkit-filter: blur(11px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_11:hover {
   filter: none;
@@ -1043,13 +1033,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_12 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_12');
   -webkit-filter: blur(12px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_12:hover {
   filter: none;
@@ -1065,13 +1053,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_13 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_13');
   -webkit-filter: blur(13px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_13:hover {
   filter: none;
@@ -1087,13 +1073,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_14 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_14');
   -webkit-filter: blur(14px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_14:hover {
   filter: none;
@@ -1109,13 +1093,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_15 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_15');
   -webkit-filter: blur(15px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_15:hover {
   filter: none;
@@ -1131,13 +1113,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_16 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_16');
   -webkit-filter: blur(16px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_16:hover {
   filter: none;
@@ -1153,13 +1133,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_17 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_17');
   -webkit-filter: blur(17px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_17:hover {
   filter: none;
@@ -1175,13 +1153,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_18 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_18');
   -webkit-filter: blur(18px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_18:hover {
   filter: none;
@@ -1197,13 +1173,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_19 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_19');
   -webkit-filter: blur(19px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_19:hover {
   filter: none;
@@ -1219,13 +1193,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_20 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_20');
   -webkit-filter: blur(20px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_20:hover {
   filter: none;
@@ -1241,13 +1213,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_21 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_21');
   -webkit-filter: blur(21px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_21:hover {
   filter: none;
@@ -1263,13 +1233,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_22 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_22');
   -webkit-filter: blur(22px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_22:hover {
   filter: none;
@@ -1285,13 +1253,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_23 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_23');
   -webkit-filter: blur(23px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_23:hover {
   filter: none;
@@ -1307,13 +1273,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_24 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_24');
   -webkit-filter: blur(24px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_24:hover {
   filter: none;
@@ -1329,13 +1293,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_25 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_25');
   -webkit-filter: blur(25px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_25:hover {
   filter: none;
@@ -1351,13 +1313,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_26 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_26');
   -webkit-filter: blur(26px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_26:hover {
   filter: none;
@@ -1373,13 +1333,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_27 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_27');
   -webkit-filter: blur(27px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_27:hover {
   filter: none;
@@ -1395,13 +1353,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_28 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_28');
   -webkit-filter: blur(28px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_28:hover {
   filter: none;
@@ -1417,13 +1373,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_29 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_29');
   -webkit-filter: blur(29px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_29:hover {
   filter: none;
@@ -1439,13 +1393,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_30 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_30');
   -webkit-filter: blur(30px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_30:hover {
   filter: none;
@@ -1461,13 +1413,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_31 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_31');
   -webkit-filter: blur(31px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_31:hover {
   filter: none;
@@ -1483,13 +1433,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_32 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_32');
   -webkit-filter: blur(32px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_32:hover {
   filter: none;
@@ -1505,13 +1453,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_48 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_48');
   -webkit-filter: blur(48px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_48:hover {
   filter: none;
@@ -1527,13 +1473,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_64 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_64');
   -webkit-filter: blur(64px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_64:hover {
   filter: none;
@@ -1549,13 +1493,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_96 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_96');
   -webkit-filter: blur(96px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_96:hover {
   filter: none;
@@ -1571,13 +1513,11 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   filter: none;
 }
 .blur_128 {
-  /*blur.svg#gaussian_blur_@radius*/
-
   filter: url('blur.svg#gaussian_blur_128');
   -webkit-filter: blur(128px);
-  transition: filter 1s ease-in-out;
-  -moz-transition: filter 1s ease-in-out;
-  -webkit-transition: -webkit-filter 1s ease-in-out;
+  transition: filter 1s ease-out;
+  -moz-transition: filter 1s ease-out;
+  -webkit-transition: -webkit-filter 1s ease-out;
 }
 .blur_128:hover {
   filter: none;
@@ -1663,7 +1603,7 @@ footer {
 }
 footer a {
   color: #7a9ccc;
-  margin-left: 0px;
+  margin-left: 0;
   margin-right: 15px;
   font-weight: bold;
   display: inline-block;
@@ -1731,9 +1671,15 @@ a.pronounced-title {
 }
 .pronounced-title {
   position: relative;
-  font-family: "TitlingGothicFB", "StampedEntityFallbackFont", helvetica, sans-serif;
+  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  /*font-smooth: always;
+    -webkit-font-smoothing: antialiased;*/
+
   font-size: 2em;
-  letter-spacing: .025em;
+  letter-spacing: .05em;
+  color: #000;
   /*text-shadow: 0.05em 0.05em 0.03em #aaa;*/
 
 }

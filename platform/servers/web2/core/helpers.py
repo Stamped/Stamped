@@ -75,6 +75,19 @@ class StampedAPIProxy(object):
             else:
                 return []
     
+    def getStampFromUser(self, screen_name, stamp_num):
+        if self._prod:
+            raise NotImplementedError
+        else:
+            stamps = self._handle_get("collections/user.json", {
+                'screen_name' : screen_name, 
+                'limit'       : 1, 
+                'offset'      : stamp_num, 
+                'sort'        : 'created', 
+            })
+            
+            return stamps[0] if len(stamps) > 0 else None
+    
     def _handle_local_get(self, func, params):
         pass
     

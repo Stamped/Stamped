@@ -29,39 +29,7 @@
         <div class="content_2">
             {{#modified}}<div class="timestamp_raw">{{.}}</div>{{/modified}}
             
-            <div class="stamp-preview">
-                <div class='preview-image stamp-user-image'>
-                    {{#contents}}
-                        {{#images}}
-                            {{#sizes}}
-                                <img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" />
-                            {{/sizes}}
-                        {{/images}}
-                    {{/contents}}
-                </div>
-                
-                {{#entity}}
-                    <div class='preview-image stamp-entity-image'>
-                        {{#images}}
-                            {{#sizes}}
-                                <img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" />
-                            {{/sizes}}
-                        {{/images}}
-                    </div>
-                    
-                    {{#if coordinates}}
-                        <div class='preview-image stamp-map'>
-                            {{> static-map-small}}
-                        </div>
-                    {{/if}}
-                    
-                    <div class="preview-image stamp-icon">
-                        <div class="stamp-category-{{category}}">
-                            <span class="icon">STANDIN</span>
-                        </div>
-                    </div>
-                {{/entity}}
-            </div>
+            {{> stamp-image}}
         </div>
         
         <div class="content_1">

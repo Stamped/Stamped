@@ -102,8 +102,23 @@ var g_update_stamps = null;
         // relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
         var update_timestamps = function() {
             $('.timestamp_raw').each(function(i, elem) {
-                var $elem = $(elem);
-                var expl  = moment($elem.text()).fromNow();
+                var expl  = "";
+                
+                try {
+                    var $elem = $(elem);
+                    var ts    = moment($elem.text())
+                    var now   = moment();
+                    
+                    if (now.diff(ts, 'months') < 1) { // within 1 month
+                        expl = ts.fromNow();
+                    } else if (now.diff(ts, 'years') <= 1) { // within 1 year
+                        expl = ts.format("MMM Do");
+                    } else { // after 1 year
+                        expl = ts.format("MMM Do YYYY");
+                    }
+                } catch(e) { 
+                    return;
+                }
                 
                 $elem.removeClass('timestamp_raw').text(expl).addClass('timestamp');
             });
@@ -195,6 +210,23 @@ var g_update_stamps = null;
                 update_images();
             });
             
+            $('.stamp-gallery-item').click(function(event) {
+                event.stopPropagation();
+                
+                var $this = $(this);
+                $this.find('.pronounced-title a').each(function(i, elem) {
+                    var $elem = $(elem);
+                    var href  = $elem.attr('href');
+                    href      = href.replace('http://www.stamped.com', '');
+                    
+                    console.debug(href);
+                    window.location = href;
+                    /*$.colorbox({
+                        'href' : href
+                    });*/
+                });
+            });
+            
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
                 $this.fitText();
@@ -235,7 +267,7 @@ var g_update_stamps = null;
             
             $gallery.isotope({
                 itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "fitRows"
+                layoutMode      : "masonry"
             });
             
             init_infinit_scroll();
@@ -701,6 +733,11 @@ var g_update_stamps = null;
             
             var nav_bar_width   = $nav_bar.width();
             var $stamp_gallery  = $('.stamp-gallery');
+            
+            if (typeof($stamp_gallery.get(0)) === 'undefined') {
+                return;
+            }
+            
             var gallery_x       = $stamp_gallery.offset().left;
             var gallery_width   = $stamp_gallery.width();
             var wide_gallery    = 'wide-gallery';

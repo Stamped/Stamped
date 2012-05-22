@@ -3147,3 +3147,9 @@ class HTTPEntity_stampedtest(Schema):
             
         return url
 
+class HTTPStampDetail(Schema):
+    def setSchema(self):
+        self.screen_name        = SchemaElement(basestring, required=True)
+        self.stamp_num          = SchemaElement(int, required=True)
+        self.stamp_title        = SchemaElement(basestring, required=True)
+

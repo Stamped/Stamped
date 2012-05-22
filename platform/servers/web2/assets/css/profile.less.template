@@ -25,8 +25,8 @@
 @user_light: color(`(@{l0} >  @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
 @user_dark:  color(`(@{l0} <= @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
 
-@primary:   lighten(@user_light, 25%);
-@secondary: darken( @user_dark,  10%);
+@primary:   fade(lighten(@user_light, 25%), 80%);
+@secondary: fade(darken( @user_dark,  10%), 80%);
 
 .user-gradient(@angle: 135deg) {
     background: -webkit-linear-gradient(@angle, @primary, @secondary);
@@ -35,14 +35,14 @@
     background: linear-gradient(@angle, @primary, @secondary);
 }
 
-.post-header {
+.post-header, .stamp-card-pre {
     .user-gradient(135deg);
     
     width:  100%;
     margin: 0;
 }
 
-.profile-header-post {
+.profile-header-post, .stamp-card-post {
     .user-gradient(135deg);
     
     width:  100%;
@@ -69,11 +69,11 @@
 }
 
 .stamp-gallery-item:hover {
-    background-color: @primary;
+    background-color: fade(@primary, 50%);
 }
 
 .stamp-gallery-item:active {
-    background-color: @secondary;
+    background-color: fade(@primary, 80%);
 }
 
 /* target webkit-browsers */
