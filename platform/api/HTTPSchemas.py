@@ -488,7 +488,8 @@ class HTTPLinkedAccounts(Schema):
     def exportNetflixAuthSchema(self):
         schema = NetflixAuthSchema()
         schema.dataImport(self.dataExport(), overflow=True)
-        return schema 
+        return schema
+
 
 class HTTPAvailableLinkedAccounts(Schema):
     @classmethod
@@ -598,6 +599,18 @@ class HTTPFindFacebookUser(Schema):
     def setSchema(cls):
         cls.addProperty('q',                    basestring) # Comma delimited
         cls.addProperty('facebook_token',       basestring)
+
+class HTTPFacebookLoginResponse(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('state',                basestring) # passed back state value to prevent csrf attacks
+        cls.addProperty('code',                 basestring) # code we'll exchange for a user token
+
+class HTTPFacebookAuthResponse(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('access_token',         basestring)
+        cls.addProperty('expires',              int)        # seconds until token expires
 
 class HTTPNetflixId(Schema):
     @classmethod
