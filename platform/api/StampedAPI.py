@@ -3024,7 +3024,7 @@ class StampedAPI(AStampedAPI):
         elif timeSlice.scope == 'friends':
             stampIds = self._collectionDB.getInboxStampIds(authUserId)
         elif timeSlice.scope == 'fof':
-            stampIds = self._collectionDB.getFofStamps(authUserId)
+            stampIds = self._collectionDB.getFofStampIds(authUserId)
         else:
             stampIds = None
 
