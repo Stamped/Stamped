@@ -2652,7 +2652,7 @@ class HTTPActivityObjects(Schema):
     def setSchema(cls):
         cls.addNestedPropertyList('users',      HTTPUserMini)
         cls.addNestedPropertyList('stamps',     HTTPStamp)
-        cls.addNestedPropertyList('entities',   HTTPEntity)
+        cls.addNestedPropertyList('entities',   HTTPEntityMini)
         cls.addNestedPropertyList('comments',   HTTPComment)
 
 class HTTPActivity(Schema):

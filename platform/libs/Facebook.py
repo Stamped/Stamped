@@ -58,6 +58,16 @@ class Facebook(object):
                 'code'            : code
         })
 
+__globalFacebook = None
+
+def globalFacebook():
+    global __globalFacebook
+
+    if __globalFacebook is None:
+        __globalFacebook = Facebook()
+
+    return __globalFacebook
+
 def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
     from pprint import pprint
     netflix = Netflix()

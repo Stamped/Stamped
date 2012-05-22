@@ -159,9 +159,10 @@ def removeTwitter(request, authUserId, **kwargs):
 @require_http_methods(["GET"])
 def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
     logs.info('\n### HIT facebookLoginCallback  request: %s  oauth_token: %s   secret: %s' % (request, http_schema.oauth_token, http_schema.secret))
-    netflix = globalNetflix()
+    fb = globalFacebook()
 
-    result = facebook.requestUserAuth(http_schema.oauth_token, http_schema.secret)
+    result = facebook.authorize(http_schema.oauth_token, http_schema.secret)
+
     logs.info('\n### request auth result: %s' % result)
 
     netflixAuth = NetflixAuthSchema()
