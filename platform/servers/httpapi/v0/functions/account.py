@@ -31,6 +31,15 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
+@handleHTTPRequest(requires_auth=False,
+                   #requires_client=True,
+                   http_schema=HTTPAccountNew,
+                   conversion=HTTPAccountNew.convertToAccount,
+                   upload='profile_image')
+def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
+
+
+    return
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])

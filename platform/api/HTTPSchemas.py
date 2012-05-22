@@ -406,6 +406,24 @@ class HTTPAccountNew(Schema):
     #         raise NotImplementedError(type(schema))
     #     return schema
 
+class HTTPFacebookAccountNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring)#, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+
+        # for asynchronous image uploads
+        cls.addProperty('temp_image_url',               basestring)
+        cls.addProperty('temp_image_width',             int)
+        cls.addProperty('temp_image_height',            int)
+
+    def convertToAccount(self):
+        return Account().dataImport(self.dataExport(), overflow=True)
+
+
 class HTTPAccountSettings(Schema):
     @classmethod
     def setSchema(cls):
@@ -1032,7 +1050,10 @@ class HTTPEntity(Schema):
         self.subcategory        = entity.subcategory
 
         self.caption            = self.subtitle # Default
-        self.last_modified      = entity.timestamp.created
+        if entity.timestamp.created is not None:
+            self.last_modified      = entity.timestamp.created
+        else:
+            self.last_modified      = utils.timestampFromObjectId(self.entity_id)
 
         subcategory             = self._formatSubcategory(self.subcategory)
 
