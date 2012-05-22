@@ -89,6 +89,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
     
     def getEntity(self, entityId):
+        logs.info('### MongoEntityCollection getEntity invoked')
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)
