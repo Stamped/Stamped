@@ -1592,6 +1592,54 @@ class ViewportSchema(Schema):
         cls.addNestedProperty('upperLeft',          CoordinatesSchema)
         cls.addNestedProperty('lowerRight',         CoordinatesSchema)
 
+class HTTPTimeSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('before',                   datetime)
+        cls.addProperty('limit',                    int)
+        cls.addProperty('offset',                   int)
+
+        # Filtering
+        cls.addProperty('category',                 basestring)
+        cls.addProperty('subcategory',              basestring)
+        cls.addPropertyList('properties',           basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema) 
+
+        # Scope
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+
+class HTTPSearchSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('limit',                    int) # Max 50
+
+        # Filtering
+        cls.addProperty('category',                 basestring)
+        cls.addProperty('subcategory',              basestring)
+        cls.addPropertyList('properties',           basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema) 
+
+        # Scope
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+
+class HTTPRelevanceSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Filtering
+        cls.addProperty('category',                 basestring)
+        cls.addProperty('subcategory',              basestring)
+        cls.addPropertyList('properties',           basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema) 
+
+        # Scope
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+
+
 
 class GenericSlice(Schema):
     @classmethod

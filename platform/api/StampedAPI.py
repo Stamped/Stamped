@@ -2894,7 +2894,41 @@ class StampedAPI(AStampedAPI):
         except Exception:
             return cap
     
-    def _getStampCollection(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
+    def _getStampCollection(self, stampIds, timeSlice, authUserId=None, enrich=True):
+        
+        stampCap    = 50
+        commentCap  = 10
+        
+        if timeSlice.limit is None or timeSlice.limit > stampCap:
+            timeSlice.limit = stampCap
+        
+        # Buffer of 10 additional stamps
+        limit = timeSlice.limit
+        timeSlice.limit = limit + 10
+        
+        stampData = self._stampDB.getStampTimeSlice(stampIds, timeSlice)
+
+        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        stamps = stamps[:limit]
+        
+        if len(stampData) >= limit and len(stamps) < limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+        
+        if self.__version == 0:
+            if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created', 'stamped']):
+                if len(stamps) >= genericCollectionSlice.limit:
+                    genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
+                
+                deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
+                
+                if len(deleted) > 0:
+                    stamps = stamps + deleted
+                    ### TODO: Fails if sort == 'stamped' since it doesn't exist in deletedStamp objects
+                    stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
+        
+        return stamps
+    
+    def _getStampCollection_DEPRECATED(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
         if stampIds is not None and genericCollectionSlice.offset >= len(stampIds):
             return []
         
@@ -2976,6 +3010,41 @@ class StampedAPI(AStampedAPI):
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId, nofilter=True)
 
         return stamps
+
+    @API_CALL
+    def getStampCollection(self, timeSlice, authUserId=None):
+
+        # User
+        if timeSlice.user_id is not None:
+            user        = self._userDB.getUser(timeSlice.user_id)
+            ### TODO: Check privacy
+
+            stampIds    = self._collectionDB.getUserStampIds(user.user_id)
+            result      = self._getStampCollection(authUserId, stampIds, timeSlice)
+
+            return result
+
+        # Inbox
+        if authUserId is None:
+            raise StampedPermissionsError("Must be logged in to inbox")
+
+        if timeSlice.scope == 'me':
+            stampIds    = self._collectionDB.getUserStampIds(authUserId)
+        elif timeSlice.scope == 'friends':
+            stampIds    = self._collectionDB.getInboxStampIds(authUserId)
+        elif timeSlice.scope == 'fof':
+            stampIds    = self._collectionDB.getFofStamps(authUserId)
+        else:
+            stampIds    = None
+
+        result      = self._getStampCollection(authUserId, stampIds, timeSlice)
+
+        # Inbox
+
+        # User
+
+        # Credit?
+        pass
     
     @API_CALL
     def getInboxStamps(self, authUserId, genericCollectionSlice):
@@ -2984,7 +3053,7 @@ class StampedAPI(AStampedAPI):
         # TODO: deprecate with new clients going forward
         # genericCollectionSlice.deleted = True
         
-        return self._getStampCollection(authUserId, stampIds, genericCollectionSlice)
+        return self._getStampCollection_DEPRECATED(authUserId, stampIds, genericCollectionSlice)
     
     @API_CALL
     def getUserStamps(self, authUserId, userSlice):
@@ -3003,7 +3072,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
-        result   = self._getStampCollection(authUserId, stampIds, userSlice)
+        result   = self._getStampCollection_DEPRECATED(authUserId, stampIds, userSlice)
         
         ### TEMP
         # Fixes infinite loop where client (1.0.3) mistakenly passes "modified" instead
@@ -3017,7 +3086,7 @@ class StampedAPI(AStampedAPI):
                 if modified.replace(microsecond=0) + timedelta(seconds=round(modified.microsecond / 1000000.0)) == before \
                     and result[-1].timestamp.created + timedelta(hours=1) < before:
                     userSlice.before = int(calendar.timegm(result[-1].timestamp.created.timetuple()))
-                    result = self._getStampCollection(authUserId, stampIds, userSlice)
+                    result = self._getStampCollection_DEPRECATED(authUserId, stampIds, userSlice)
             except Exception as e:
                 logs.warning('Error: %s' % e)
                 pass
@@ -3042,7 +3111,7 @@ class StampedAPI(AStampedAPI):
         
         stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
         
-        return self._getStampCollection(authUserId, stampIds, userSlice)
+        return self._getStampCollection_DEPRECATED(authUserId, stampIds, userSlice)
     
     @API_CALL
     def getFriendsStamps(self, authUserId, friendsSlice):
@@ -3051,7 +3120,7 @@ class StampedAPI(AStampedAPI):
         
         friend_stamps = self._collectionDB.getFriendsStamps(authUserId, friendsSlice)
         stamp_ids = friend_stamps.keys()
-        stamps    = self._getStampCollection(authUserId, stamp_ids, friendsSlice)
+        stamps    = self._getStampCollection_DEPRECATED(authUserId, stamp_ids, friendsSlice)
         
         for stamp in stamps:
             try:
@@ -3074,7 +3143,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getSuggestedStamps(self, authUserId, genericCollectionSlice):
-        return self._getStampCollection(authUserId, None, genericCollectionSlice)
+        return self._getStampCollection_DEPRECATED(authUserId, None, genericCollectionSlice)
     
     @API_CALL
     def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
@@ -3101,12 +3170,6 @@ class StampedAPI(AStampedAPI):
         stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId=authUserId)
 
         return stamps, count
-    
-    @API_CALL
-    def getUserMentions(self, userID, limit=None):
-        ### TODO: Implement
-        raise NotImplementedError
-        return self._collectionDB.getUserMentions(userID, limit)
     
     
     """
