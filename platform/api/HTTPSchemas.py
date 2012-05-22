@@ -973,7 +973,7 @@ class HTTPEntity(Schema):
                 action = HTTPAction()
                 action.type = 'link'
                 action.name = 'View link'
-                action.sources.append(actionSource)
+                action.sources = [actionSource]
 
                 item.action = action
 
