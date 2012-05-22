@@ -68,12 +68,14 @@ def globalFacebook():
 
     return __globalFacebook
 
+
+MIKE_ID = '100003940534060'
+
 def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
     from pprint import pprint
     netflix = Netflix()
 
-    netflix_id = BIGLEB_ID
-    title = 'ghostbusters'
+    user_id = MIKE_ID
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
 

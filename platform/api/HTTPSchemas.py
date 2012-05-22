@@ -415,7 +415,6 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('facebook_id',                  basestring, required=True)
         cls.addProperty('facebook_token',               basestring, required=True)
 
         # for asynchronous image uploads
@@ -1660,6 +1659,7 @@ class HTTPEntity(Schema):
 
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
+                images = []
                 for album in entity.albums:
                     try:
                         item            = HTTPImageSchema()
@@ -1682,10 +1682,12 @@ class HTTPEntity(Schema):
 
                             item.action         = action
 
-                        gallery.images.append(item)
+                        images.append(item)
                     except Exception as e:
                         logs.info(e.message)
                         pass
+
+                gallery.images = images
                 if len(gallery.images) > 0:
                     self.galleries.append(gallery)
 
