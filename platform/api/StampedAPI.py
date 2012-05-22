@@ -3770,9 +3770,9 @@ class StampedAPI(AStampedAPI):
             else:
                 for sourceName in sources:
                     try:
-                        if stub.sources['%s_id' % sourceName] is not None:
+                        if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
                             source = sources[sourceName]()
-                            source_id = stub.sources['%s_id' % sourceName]
+                            source_id = getattr(stub.sources, '%s_id' % sourceName)
                             # Attempt to resolve against the Stamped DB (quick)
                             entity_id = stampedSource.resolve_fast(source, source_id)
                             if entity_id is None:
@@ -3782,9 +3782,9 @@ class StampedAPI(AStampedAPI):
                                 if len(results) > 0 and results[0][0]['resolved']:
                                     entity_id = results[0][1].key
                             break
-                    except:
-#                        logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
-                        raise
+                    except Exception as e:
+                        logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
+                        pass
             if entity_id is not None:
                 entity = self._entityDB.getEntity(entity_id)
             elif source_id is not None and proxy is not None:
