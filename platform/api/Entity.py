@@ -292,9 +292,7 @@ def buildEntity(data=None, kind=None, mini=False):
         else:
             new = getEntityObjectFromKind(kind)
         if data is not None:
-            logs.info('### calling dataimport for buildEntity')
             return new().dataImport(data, overflow=True)
-        logs.info('### creating skeletal object for buildEntity')
     except Exception as e:
         logs.info(e.message)
         raise
@@ -394,7 +392,8 @@ def upgradeEntityData(entityData):
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
-    
+    new.timestamp           = TimestampSchema().dataImport(timestamp)
+
     # Images
     netflixImages = netflix.pop('images', {})
     oldImages = [
@@ -614,9 +613,7 @@ def upgradeEntityData(entityData):
             new.screenshots_source = media.pop('screenshots_source', 'format')
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
 
-    logs.info('### returning from upgradeEntity and timestamp is: %s' % new.timestamp)
-    new.timestamp = TimestampSchema().dataImport(timestamp)
-    return new 
+    return new
 
 def fast_id_dedupe(entities, seen=None):
     """

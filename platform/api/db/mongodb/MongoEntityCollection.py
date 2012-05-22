@@ -63,12 +63,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         document.pop('titlel')
 
-        logs.info('timestamp before buildEntity: %s' % document['timestamp'])
-
         entity = buildEntity(document)
 
-        logs.info('timestamp after buildEntity: %s' % entity.timestamp)
-        
         return entity
     
     def _convertToMongo(self, entity):
@@ -89,7 +85,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
     
     def getEntity(self, entityId):
-        logs.info('### MongoEntityCollection getEntity invoked')
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)

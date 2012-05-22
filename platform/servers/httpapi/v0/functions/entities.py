@@ -32,7 +32,6 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 def show(request, authUserId, authClientId, http_schema, **kwargs):
     entity      = stampedAPI.getEntity(http_schema, authUserId)
-    logs.info('entity.timestamp: %s' % entity.timestamp)
     entity      = _convertHTTPEntity(entity, authClientId)
     
     return transformOutput(entity.dataExport())
