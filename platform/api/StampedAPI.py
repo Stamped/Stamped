@@ -3784,6 +3784,7 @@ class StampedAPI(AStampedAPI):
                             break
                     except Exception as e:
                         logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
+                        raise
                         pass
             if entity_id is not None:
                 entity = self._entityDB.getEntity(entity_id)
