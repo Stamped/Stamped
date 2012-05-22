@@ -3,15 +3,15 @@
     <div class="content clearfix">
         
         <div class="content_0 clearfix">
-            <div class="profile-image-medium">
-                <img alt="{{#if user.name}}{{user.name}} {{/if}}(@{{user.screen_name}})" src="{{user.image_url_72}}" />
-            </div>
+            {{#user}}
+                {{> profile-image-medium }}
+            {{/user}}
             
             <div class="entity-header">
                 <div class="stamp-category-{{entity.category}}">
                     <div class='title clearfloat'>
                         <div class="pronounced-title">
-                            <a href="{{url}}" title="{{entity.title}}">{{entity.title}}</a>
+                            <a class='sdetail' href="{{url}}" title="{{entity.title}}">{{entity.title}}</a>
                         </div>
                         <span class='user-logo-small'></span>
                     </div>

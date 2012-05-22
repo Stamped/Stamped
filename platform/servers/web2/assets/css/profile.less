@@ -45,7 +45,7 @@
     
     /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
-    .transition(all, 0.8s, ease-in-out);
+    .transition(all, 0.8s, ease-out);
     
     /* TODO: keep this to enable GPU acceleration or not? Profile! */
     /*.transform(perspective(200px) translate(0,0));*/
@@ -167,6 +167,31 @@
     }
 }
 
+.zoom {
+    background: url(/assets/img/zoom-icon.png) no-repeat;
+    pointer-events: none;
+    position: absolute;
+    
+    top:   8px;
+    right: 16px;
+    
+    display: block;
+    width:  25px;
+    height: 25px;
+    
+    z-index: 101;
+    opacity: 0;
+    .transition(opacity, 0.2s, ease-out);
+}
+
+.stamp-user-image:hover, .stamp-entity-image:hover {
+    cursor: pointer;
+    
+    .zoom {
+        opacity: 1;
+    }
+}
+
 .entity-header {
     margin-left: 24px;
     display: block;
@@ -237,6 +262,7 @@
     .sized(@preview-wrapper-width);
     
     .preview-image {
+        position: relative;
         display: none;
         .sized(@preview-wrapper-width);
     }
@@ -284,14 +310,13 @@
 }
 
 
-.blurb {
+.blurb, .normal_blurb {
     display: inline-block;
     text-align: justify;
     quotes: "\201C" "\201D";
-    
-    /*height: 4em;
-    overflow: hidden;*/
-    
+}
+
+.blurb {
     display: inline-block;
     max-width: 90%;
     white-space: nowrap;

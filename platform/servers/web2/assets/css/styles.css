@@ -50,8 +50,13 @@ a:focus {
 }
 a,
 a:visited {
-  color: #3366cc;
+  color: #666;
+  /* #3366cc; */
+
   text-decoration: none;
+}
+a:visited {
+  color: #444;
 }
 a:hover {
   text-decoration: underline;
@@ -378,10 +383,26 @@ header .header-body a.button {
 .profile-image-small {
   float: left;
   display: block;
+  width: 48px;
+  height: 48px;
+}
+.profile-image-small img {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-tiny {
+  float: left;
+  display: block;
   width: 28px;
   height: 28px;
 }
-.profile-image-small img {
+.profile-image-tiny img {
   width: 24px;
   height: 24px;
   border: 2px solid #ffffff;

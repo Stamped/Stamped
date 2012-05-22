@@ -4,7 +4,7 @@
         {{#contents}}
             {{#images}}
                 {{#sizes}}
-                    <img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" />
+                    <a class='lightbox' href="{{url}}"><img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" /></a><div class='zoom'></div>
                 {{/sizes}}
             {{/images}}
         {{/contents}}
@@ -14,7 +14,7 @@
         <div class='preview-image stamp-entity-image'>
             {{#images}}
                 {{#sizes}}
-                    <img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" />
+                    <a class='lightbox' href="{{url}}"><img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" /></a><div class='zoom'></div>
                 {{/sizes}}
             {{/images}}
         </div>

@@ -27,7 +27,7 @@ var g_update_stamps = null;
         
         $('.profile-nav a').each(function () {
             $(this).click(function(event) {
-                event.stopPropagation();
+                event.preventDefault();
                 var link = $(this);
                 
                 link.parents(".profile-sections").each(function() {
@@ -210,9 +210,26 @@ var g_update_stamps = null;
                 update_images();
             });
             
-            $('.stamp-gallery-item').click(function(event) {
-                event.stopPropagation();
+            $('a.sdetail').click(function(event) {
+                event.preventDefault();
                 
+                var $this = $(this);
+                var $link  = $($this.find('.pronounced-title a').get(0));
+                var href  = $link.attr('href');
+                href      = href.replace('http://www.stamped.com', '');
+                
+                console.debug(href);
+                $.colorbox({
+                    'href' : href
+                });
+                
+                return false;
+            });
+            
+            /*$('.stamp-gallery-item').click(function(event) {
+                //event.preventDefault();
+                
+                return;
                 var $this = $(this);
                 $this.find('.pronounced-title a').each(function(i, elem) {
                     var $elem = $(elem);
@@ -221,11 +238,24 @@ var g_update_stamps = null;
                     
                     console.debug(href);
                     window.location = href;
-                    /*$.colorbox({
-                        'href' : href
-                    });*/
+                    //$.colorbox({
+                    //    'href' : href
+                    //});
                 });
-            });
+            });*/
+            
+			$("a.lightbox").fancybox({
+                openEffect      : 'elastic', 
+                openEasing      : 'easeOutBack', 
+                openSpeed       : 300, 
+                
+                closeEffect     : 'elastic', 
+                closeEasing     : 'easeInBack', 
+                closeSpeed      : 300, 
+                
+				closeClick      : true, 
+                maxWidth        : (2 * window.innerWidth) / 3
+			});
             
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
@@ -236,7 +266,7 @@ var g_update_stamps = null;
         g_update_stamps = update_stamps;
         var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
-        var init_infinit_scroll = function() {
+        var init_infinite_scroll = function() {
             // TODO: customize loading image
             infinite_scroll = $gallery.infinitescroll({
                 debug           : STAMPED_PRELOAD.DEBUG, 
@@ -270,7 +300,7 @@ var g_update_stamps = null;
                 layoutMode      : "masonry"
             });
             
-            init_infinit_scroll();
+            init_infinite_scroll();
         };
         
         
@@ -603,7 +633,7 @@ var g_update_stamps = null;
                     $(infinite_scroll_next_selector).attr('href', href);
                     
                     destroy_infinite_scroll();
-                    init_infinit_scroll();
+                    init_infinite_scroll();
                     
                     $gallery.append($elements);
                     update_stamps();
@@ -675,7 +705,7 @@ var g_update_stamps = null;
         // handle nav bar click routing
         $nav_bar.find('a').each(function () {
             $(this).click(function(event) {
-                event.stopPropagation();
+                event.preventDefault();
                 
                 var link     = $(this);
                 var orig_category = link.parent().attr('class');

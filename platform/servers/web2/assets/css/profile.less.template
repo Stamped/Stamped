@@ -76,6 +76,13 @@
     background-color: fade(@primary, 80%);
 }
 
+.action:hover {
+    background-color: fade(@primary, 50%);
+}
+.action:active {
+    background-color: fade(@primary, 80%);
+}
+
 /* target webkit-browsers */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     .user-logo-large {

@@ -33,13 +33,68 @@
     }
 }
 
+.normal_blurb {
+    margin: 0;
+}
+
 .sdetail {
     padding: 150px 0 0;
     
     .lhs {
         float: left;
-        width: 33%;
-        border: 2px solid red;
+        width: 30%;
+        //border: 2px solid red;
+        padding: .25em;
+        
+        .stamp-preview {
+            margin: 1em auto;
+        }
+        
+        .actions {
+            margin: 2em auto;
+            
+            .action {
+                
+                .rounded(4px);
+                padding: 2px;
+                
+                .sources {
+                    .source {
+                        margin: 0 1em 1em;
+                        
+                        .metadata {
+                            display: none;
+                        }
+                        
+                        a.link {
+                            .action-icon {
+                                display: inline-block;
+                                min-width: 48px;
+                                text-align: center;
+                                
+                                img {
+                                    margin: 0 auto;
+                                }
+                            }
+                            
+                            div.name {
+                                display: inline-block;
+                                font-size: 80%;
+                                
+                                img.source-icon {
+                                    max-width: 32px;
+                                }
+                            }
+                        }
+                        a.link:hover, a.link:active, a.link:visited {
+                            text-decoration: none;
+                        }
+                    }
+                    
+                    clear: both;
+                }
+            }
+        }
     }
     
     .inner {
@@ -47,50 +102,130 @@
         top:  0;
         left: 0;
         float: right;
-        width: 50%%;
-        min-width: 50%;
-        border: 2px solid green;
+        width: 45%;
+        min-width: 45%;
+        //border: 2px solid green;
+        margin: 0 2em 1em;
         
         .entity-header {
             float: none;
         }
         
         .stamp-card {
-            .rounded(4px);
+            @round: 8px;
             .box-shadow(0, 0, 16px, 0, @shadow);
+            .rounded(@round);
             
-            margin: .5em 0 0;
+            @space: 1.5em;
+            
+            margin: @space 0 0;
             
             .stamp-card-pre, .stamp-card-post {
                 display: block;
                 width:  100%;
                 height: 16px;
+                .rounded(@round);
             }
             
             .stamp-contents {
-                .stamp-header {
-                    margin: .5em;
+                .user-header {
+                    .name {
+                        float: left;
+                    }
+                    
+                    .timestamp {
+                        float: right;
+                    }
+                }
+                
+                .user-header-0 {
+                    margin: .5em @space .5em;
+                }
+                
+                .timestamp, .timestamp_raw {
+                    text-align: right;
+                    font-weight: bold;
+                    font-size: 80%;
                 }
                 
                 .stamp-inner-content {
-                    margin: 0 .5em .5em;
+                    margin: 0 @space @space;
                     
                     .profile-image-medium {
                         margin: 0 24px 24px 0;
+                        float: left;
+                    }
+                    
+                    .normal_blurb {
+                        display: block;
                     }
                 }
                 
                 .credits {
                     border-top: 1px solid #bbb;
+                    padding: .5em @space;
+                    
+                    .stamp_0 {
+                        display: inline-block;
+                        width:  18px;
+                        height: 18px;
+                    }
+                    .stamp_1 {
+                        display: inline-block;
+                        margin: 0 0 0 -9px;
+                        width:  18px;
+                        height: 18px;
+                    }
+                    
+                    .credits-detail {
+                        display: none;
+                    }
                 }
                 
-                .box-shadow(0, 3px, 8px, -4px, @shadow);
+                .comments {
+                    /*.box-shadow(0, 3px, 8px, -4px, @shadow);*/
+                    //border: 1px solid red;
+                    
+                    .comments-nav {
+                        border-bottom: 1px dashed #bbb;
+                    }
+                    
+                    ol.comment-list {
+                        text-decoration: none;
+                        list-style: none;
+                        text-indent: 0;
+                        padding: .5em @space;
+                        margin:  0;
+                        
+                        li {
+                            border-top: 1px solid #bbb;
+                            padding: .5em 0;
+                            
+                            .profile-image-small {
+                                float: left;
+                                margin: 0 12px 0 0;
+                            }
+                            
+                            .comment-inner {
+                                display: block;
+                                
+                                .user-header {
+                                    display: block;
+                                }
+                                
+                                p.normal_blurb {
+                                    display: block;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
     
     .rhs {
-        border: 2px solid blue;
+        //border: 2px solid blue;
         float: right;
         width: 12%;
         padding: .5em;

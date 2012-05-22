@@ -91,9 +91,9 @@
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: all 0.8s ease-in-out;
-  -moz-transition: all 0.8s ease-in-out;
-  transition: all 0.8s ease-in-out;
+  -webkit-transition: all 0.8s ease-out;
+  -moz-transition: all 0.8s ease-out;
+  transition: all 0.8s ease-out;
   /* TODO: keep this to enable GPU acceleration or not? Profile! */
 
   /*.transform(perspective(200px) translate(0,0));*/
@@ -196,6 +196,29 @@
   -moz-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
 }
+.zoom {
+  background: url(/assets/img/zoom-icon.png) no-repeat;
+  pointer-events: none;
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  display: block;
+  width: 25px;
+  height: 25px;
+  z-index: 101;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s ease-out;
+  -moz-transition: opacity 0.2s ease-out;
+  transition: opacity 0.2s ease-out;
+}
+.stamp-user-image:hover,
+.stamp-entity-image:hover {
+  cursor: pointer;
+}
+.stamp-user-image:hover .zoom,
+.stamp-entity-image:hover .zoom {
+  opacity: 1;
+}
 .entity-header {
   margin-left: 24px;
   display: block;
@@ -258,6 +281,7 @@
   background-size: 100% 100%;
 }
 .stamp-preview .preview-image {
+  position: relative;
   display: none;
   display: block;
   max-width: 148px;
@@ -318,13 +342,13 @@
   color: red;
   font-weight: bold;
 }
-.blurb {
+.blurb,
+.normal_blurb {
   display: inline-block;
   text-align: justify;
   quotes: "\201C" "\201D";
-  /*height: 4em;
-    overflow: hidden;*/
-
+}
+.blurb {
   display: inline-block;
   max-width: 90%;
   white-space: nowrap;
