@@ -282,18 +282,22 @@ def deriveCategoryFromTypes(types):
     return 'other'
 
 def buildEntity(data=None, kind=None, mini=False):
-    if data is not None:
-        if 'schema_version' not in data:
-            return upgradeEntityData(data)
-        kind = data.pop('kind', kind)
-    if mini:
-        new = getEntityMiniObjectFromKind(kind)
-    else:
-        new = getEntityObjectFromKind(kind)
-    if data is not None:
-        logs.info('### calling dataimport for buildEntity')
-        return new().dataImport(data, overflow=True)
-    logs.info('### creating skeletal object for buildEntity')
+    try:
+        if data is not None:
+            if 'schema_version' not in data:
+                return upgradeEntityData(data)
+            kind = data.pop('kind', kind)
+        if mini:
+            new = getEntityMiniObjectFromKind(kind)
+        else:
+            new = getEntityObjectFromKind(kind)
+        if data is not None:
+            logs.info('### calling dataimport for buildEntity')
+            return new().dataImport(data, overflow=True)
+        logs.info('### creating skeletal object for buildEntity')
+    except Exception as e:
+        logs.info(e.message)
+        raise
     return new()
 
 def upgradeEntityData(entityData):
