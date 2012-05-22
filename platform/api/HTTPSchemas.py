@@ -1059,7 +1059,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Reserve on OpenTable'
                 source.source       = 'opentable'
                 source.source_id    = entity.sources.opentable_id
-                source.link         = _buildOpenTableURL(entity.sources.opentable_id, entity.opentable_nickname, client)
+                source.link         = _buildOpenTableURL(entity.sources.opentable_id, entity.sources.opentable_nickname, client)
                 source.icon         = _getIconURL('src_opentable', client=client)
                 source.setCompletion(
                     action      = actionType,
