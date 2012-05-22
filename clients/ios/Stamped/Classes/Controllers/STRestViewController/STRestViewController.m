@@ -6,7 +6,6 @@
 //
 
 #import "STRestViewController.h"
-#import "STSearchView.h"
 
 @implementation STRestViewController
 
