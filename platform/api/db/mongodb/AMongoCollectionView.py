@@ -25,6 +25,8 @@ class AMongoCollectionView(AMongoCollection):
         
         if timeSlice.limit is None:
             timeSlice.limit = 0
+        if timeSlice.offset is None:
+            timeSlice.offset = 0
         
         def add_or_query(args):
             if "$or" not in query:
