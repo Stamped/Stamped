@@ -3877,6 +3877,8 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
+                import pprint
+                logs.info('stub: \n%s' % pprint.pformat(stub))
                 artistList.append(artist.minimize())
 
                 # Compare entity id before and after
