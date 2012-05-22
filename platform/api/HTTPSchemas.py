@@ -1070,28 +1070,28 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Reserve a table', sources, icon=actionIcon)
-
+            
             # Actions: Call
-
+            
             actionType  = 'phone'
             actionIcon  = _getIconURL('act_call', client=client)
             sources     = []
-
+            
             if entity.phone is not None:
                 source              = HTTPActionSource()
                 source.source       = 'phone'
                 source.source_id    = entity.phone
                 source.link         = 'tel:%s' % non_numeric_re.sub('', entity.phone)
                 sources.append(source)
-
+            
             self._addAction(actionType, entity.phone, sources, icon=actionIcon)
-
+            
             # Actions: View Menu
-
+            
             actionType  = 'menu'
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
-
+            
             if entity.sources.singleplatform_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
@@ -1104,9 +1104,9 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-
+            
             self._addAction(actionType, 'View menu', sources, icon=actionIcon)
-
+        
         # Generic Place
         elif entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
