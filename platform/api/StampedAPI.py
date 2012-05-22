@@ -1266,7 +1266,7 @@ class StampedAPI(AStampedAPI):
             entityId = self._convertSearchId(entityId)
         else:
             self.mergeEntityId(entityId)
-        
+
         return self._entityDB.getEntity(entityId)
     
     @API_CALL
@@ -3692,7 +3692,6 @@ class StampedAPI(AStampedAPI):
     def _mergeEntity(self, entity, link=True):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         modified = self._resolveEntity(entity)
-
         if link:
             modified = self._resolveEntityLinks(entity) | modified
 
@@ -3770,9 +3769,9 @@ class StampedAPI(AStampedAPI):
             else:
                 for sourceName in sources:
                     try:
-                        if stub.sources['%s_id' % sourceName] is not None:
+                        if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
                             source = sources[sourceName]()
-                            source_id = stub.sources['%s_id' % sourceName]
+                            source_id = getattr(stub.sources, '%s_id' % sourceName)
                             # Attempt to resolve against the Stamped DB (quick)
                             entity_id = stampedSource.resolve_fast(source, source_id)
                             if entity_id is None:
@@ -3782,7 +3781,8 @@ class StampedAPI(AStampedAPI):
                                 if len(results) > 0 and results[0][0]['resolved']:
                                     entity_id = results[0][1].key
                             break
-                    except Exception:
+                    except Exception as e:
+                        logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
                         pass
             if entity_id is not None:
                 entity = self._entityDB.getEntity(entity_id)
@@ -3817,7 +3817,15 @@ class StampedAPI(AStampedAPI):
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
-                trackList.append(track.minimize())
+                if track is None:
+                    continue
+                # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(track, BasicEntity):
+                    track = track.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                trackList.append(track)
 
                 # Compare entity id before and after
                 if trackId != track.entity_id:
@@ -3847,7 +3855,15 @@ class StampedAPI(AStampedAPI):
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
-                albumList.append(album.minimize())
+                if album is None:
+                    continue
+                # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(album, BasicEntity):
+                    album = album.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                albumList.append(album)
 
                 # Compare entity id before and after
                 if albumId != album.entity_id:
@@ -3877,7 +3893,13 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
-                artistList.append(artist.minimize())
+                # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(artist, BasicEntity):
+                    artist = artist.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                artistList.append(artist)
 
                 # Compare entity id before and after
                 if artistId != artist.entity_id:

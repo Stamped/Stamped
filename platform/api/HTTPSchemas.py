@@ -1050,10 +1050,7 @@ class HTTPEntity(Schema):
         self.subcategory        = entity.subcategory
 
         self.caption            = self.subtitle # Default
-        if entity.timestamp.created is not None:
-            self.last_modified      = entity.timestamp.created
-        else:
-            self.last_modified      = utils.timestampFromObjectId(self.entity_id)
+        self.last_modified      = entity.timestamp.created
 
         subcategory             = self._formatSubcategory(self.subcategory)
 

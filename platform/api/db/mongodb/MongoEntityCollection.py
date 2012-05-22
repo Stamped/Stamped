@@ -11,6 +11,7 @@ from logs       import report
 try:
     from datetime                       import datetime
     from utils                          import lazyProperty
+    from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
     from Entity                         import getSimplifiedTitle, buildEntity
@@ -63,7 +64,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document.pop('titlel')
 
         entity = buildEntity(document)
-        
+
         return entity
     
     def _convertToMongo(self, entity):
