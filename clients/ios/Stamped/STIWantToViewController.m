@@ -33,86 +33,75 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [Util addHomeButtonToController:self withBadge:YES];
-  [Util addCreateStampButtonToController:self];
-  CGRect scrollFrame = self.scrollView.frame;
-  CGFloat sidePadding = 5;
-  CGFloat topPadding = 10;
-  CGFloat padding = 10;
-  CGFloat cellWidth = ( scrollFrame.size.width - (2 * sidePadding + padding) ) / 2;
-  CGFloat cellHeight = 125;
-  NSArray* categories = [Util categories];
-  for (NSInteger i = 0; i < categories.count; i++) {
-    NSString* category = [categories objectAtIndex:i];
-    NSInteger row = i / 2;
-    NSInteger col = i % 2;
+ 
+    [Util addHomeButtonToController:self withBadge:YES];
+    [Util addCreateStampButtonToController:self];
     
-    UIView* views[2];
-    CGRect buttonFrame = CGRectMake(0, 0, cellWidth, cellHeight);
-    for (NSInteger k = 0; k < 2; k++) {
-      UIView* cellView = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
-      cellView.layer.cornerRadius = 5;
-      cellView.layer.borderWidth = 1;
-      cellView.layer.borderColor = [UIColor colorWithWhite:.8 alpha:1].CGColor;
-      cellView.layer.shadowOpacity = .4;
-      cellView.layer.shadowRadius = 2;
-      cellView.layer.shadowOffset = CGSizeMake(0, 2);
-        cellView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:cellView.bounds cornerRadius:5].CGPath;
-      
-      NSArray* colors;
-      if (k == 0) {
-        colors = [UIColor stampedLightGradient];
-      }
-      else {
-        colors = [UIColor stampedDarkGradient];
-      }
-      [Util addGradientToLayer:cellView.layer withColors:colors vertical:YES];
-      views[k] = cellView;
+    self.view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
+   
+    CGFloat cellWidth = (self.scrollView.frame.size.width-10.0f)/2;
+    NSArray *categories = [Util categories];
+    UIImage *image = [UIImage imageNamed:@"want_btn_bg.png"];
+    UIImage *imageHi = [UIImage imageNamed:@"want_btn_bg_hi.png"];
+    CGRect buttonFrame = CGRectMake(5, 8, cellWidth, image.size.height);
+
+    for (NSInteger i = 1; i <= categories.count; i++) {
+        
+        NSString *category = [categories objectAtIndex:i-1];
+        NSString *imageName = [NSString stringWithFormat:@"consumption_%@", category];
+        
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.frame = buttonFrame;
+        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
+        [button setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(buttonHit:) forControlEvents:UIControlEventTouchUpInside];
+        [self.scrollView addSubview:button];
+        button.tag = (i*100);
+        
+        if (i%2 == 0) {
+            buttonFrame.origin.y += (image.size.height+4.0f);
+            buttonFrame.origin.x = 4.0f;
+        } else {
+            buttonFrame.origin.x += (cellWidth+2.0f);
+        }
+        
     }
-    STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
-                                             normalView:views[0] 
-                                             activeView:views[1] 
-                                                 target:self 
-                                              andAction:@selector(buttonClicked:)] autorelease];
-    button.message = category;
-    NSString* imageName = [NSString stringWithFormat:@"consumption_%@", category];
-    UIImageView* imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imageName]] autorelease];
-    [button addSubview:imageView];
-    [Util reframeView:button withDeltas:CGRectMake(sidePadding + col * (cellWidth + padding), topPadding + row * (cellHeight + padding), 0, 0)];
-    [self.scrollView addSubview:button];
-  }
+
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  // Release any retained subviews of the main view.
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
 
-- (void)buttonClicked:(NSString*)category {
-  UIViewController* controller = nil;
-  if (category) {
-    if ([category isEqualToString:@"food"]) {
-      controller = [[[STConsumptionMapViewController alloc] init] autorelease];
+#pragma mark - Actions
+
+- (void)buttonHit:(UIButton*)sender {
+ 
+    NSString *category = [[Util categories] objectAtIndex:([sender tag] / 100)];
+    UIViewController *controller = nil;
+  
+    if (category) {
+        if ([category isEqualToString:@"food"]) {
+            controller = [[[STConsumptionMapViewController alloc] init] autorelease];
+        }
+        else {
+            controller = [[[STConsumptionViewController alloc] initWithCategory:category] autorelease];
+        }
     }
-    else {
-      controller = [[[STConsumptionViewController alloc] initWithCategory:category] autorelease];
+    
+    if (controller) {
+        [self.navigationController pushViewController:controller animated:YES];
+    } else {
+        [Util warnWithMessage:[NSString stringWithFormat:@"controller for %@ not implemented yet...", category] andBlock:nil];
     }
-  }
-  if (controller) {
-    [self.navigationController pushViewController:controller animated:YES];
-  }
-  else {
-    [Util warnWithMessage:[NSString stringWithFormat:@"controller for %@ not implemented yet...", category] andBlock:nil];
-  }
+ 
 }
 
 + (void)setupConfigurations {
-  [STConsumptionMapViewController setupConfigurations];
-  [STConsumptionViewController setupConfigurations];
+    [STConsumptionMapViewController setupConfigurations];
+    [STConsumptionViewController setupConfigurations];
 }
 
 @end

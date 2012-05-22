@@ -45,25 +45,15 @@
 
 @implementation STDebugViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+    // Custom initialization
+  }
+  return self;
 }
 
-- (void)backButtonClicked:(id)button {
-    [self.slidingViewController anchorTopViewTo:ECRight];
-}
-
-- (void)rightButtonClicked:(id)button {
-    [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
-}
-
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -75,14 +65,24 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
     [self.tableView reloadData];
 }
 
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
+
+#pragma mark - Actions
+
+- (void)backButtonClicked:(id)button {
+    [self.slidingViewController anchorTopViewTo:ECRight];
 }
+
+- (void)rightButtonClicked:(id)button {
+    [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
+}
+
+
+#pragma mark - UITableViewDataSource
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [STDebug sharedInstance].logCount;
 }
@@ -95,6 +95,9 @@
     STDebugDatum* datum = [[STDebug sharedInstance] logItemAtIndex:([STDebug sharedInstance].logCount - (indexPath.row + 1))];
     return [[[STDebugCell alloc] initWithDatum:datum] autorelease];
 }
+
+
+#pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     STDebugDatum* datum = [[STDebug sharedInstance] logItemAtIndex:([STDebug sharedInstance].logCount - (indexPath.row + 1))];
