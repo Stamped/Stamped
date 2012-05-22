@@ -9,7 +9,7 @@ import Globals, logs, re
 import unicodedata, utils
 
 try:
-    from api.Schemas        import *
+    from api.Schemas    import *
     from difflib        import SequenceMatcher
     from libs.LibUtils  import parseDateString
     from datetime       import datetime
@@ -615,7 +615,7 @@ def upgradeEntityData(entityData):
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
 
     logs.info('### returning from upgradeEntity and timestamp is: %s' % new.timestamp)
-    new.timestamp = TimeStampSchema().dataImport(timestamp)
+    new.timestamp = TimestampSchema().dataImport(timestamp)
     return new 
 
 def fast_id_dedupe(entities, seen=None):
