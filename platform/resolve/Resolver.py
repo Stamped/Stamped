@@ -250,7 +250,7 @@ def format(string):
     Replaces all non-space whitespace with spaces.
     Removes any double-spacing or leading or trailing whitespace.
     """
-    return _whitespace_regexp.replace(" ", string).strip()
+    return _whitespace_regexp.sub(" ", string).strip()
 
 def simplify(string):
     """
