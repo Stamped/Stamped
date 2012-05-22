@@ -390,6 +390,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+
         
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
@@ -414,6 +415,8 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('facebook_id',                  basestring, required=True)
+        cls.addProperty('facebook_token',               basestring, required=True)
 
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
