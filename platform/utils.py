@@ -928,3 +928,5 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
         
         print "invalid input"
 
+def timestampFromObjectId(oid_str):
+    return ObjectId(oid_str).generation_time.replace(tzinfo=None)

@@ -42,22 +42,17 @@
 
 
 TODO:
-    * change category-loading to not go through stamped-api but rather fetch the page and extract the relevant content?
-        * caching benefit?
+    * fix infinite scroll after returning to default category
     
     * hide stamp blurb quotes if blurb is empty
-    * what to do when entity title is cutoff
+    * what to do when entity title is cut off
     
-    * fix infinite scroll to fetch correct next page!
     * separate # STAMPS header from user.num_stamps
     
     * use a Backbone model to hold StampedClient state s.t. you could bind log-in / log-out to body-level CSS tags?
     * experiment with making innerbg fixed for parallax
     * experiment with static map styling
     * is it possible to use the n in nth-child?
-    
-    * figure out how to install less on Ubuntu and have it actually work..
-        * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
     
     * experiment with the idea of having no stamped-specific likes at all -- just FB likes?
     
@@ -108,6 +103,12 @@ OLD:
     * how to reference a specific stamp-gallery-item via stamp_id, entity_id, or filter
         * (unnecessary for now)
     * navbar animation -- fade in quicker than fade out
+    * change category-loading to not go through stamped-api but rather fetch the page and extract the relevant content?
+        * caching benefit?
+    * figure out how to install less on Ubuntu and have it actually work..
+        * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
+    * change moment.js to only be relative after a month
+
 
 NOTES:
     * no feedback icons in case of no feedback looks inconsistent

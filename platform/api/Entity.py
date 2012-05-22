@@ -439,6 +439,11 @@ def upgradeEntityData(entityData):
         setBasicGroup(amazon, new.sources, 'asin', 'amazon', newSuffix='id')
         setBasicGroup(amazon, new.sources, 'amazon_link', 'amazon', newSuffix='url')
     
+    # Netflix
+    if netflix:
+        setBasicGroup(netflix, new.sources, 'nid', 'netflix', newSuffix='id')
+        setBasicGroup(netflix, new.sources, 'nurl', 'netflix', newSuffix='url')
+
     # OpenTable
     setBasicGroup(sources, new.sources, 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
     if new.sources.opentable_id is None:
@@ -522,7 +527,7 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_timestamp = item.pop('timestamp', seedTimestamp)
             newAlbums.append(entityMini)
         if len(newAlbums) > 0:
-            new.albums = albums
+            new.albums = newAlbums
             sourceName = 'itunes' if itunesSource else 'format'
             new.albums_source = artist.pop('albums_source', sourceName)
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)

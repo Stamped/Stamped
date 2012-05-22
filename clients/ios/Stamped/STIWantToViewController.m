@@ -42,6 +42,7 @@
     CGFloat cellWidth = (self.scrollView.frame.size.width-10.0f)/2;
     NSArray *categories = [Util categories];
     UIImage *image = [UIImage imageNamed:@"want_btn_bg.png"];
+    UIImage *imageHi = [UIImage imageNamed:@"want_btn_bg_hi.png"];
     CGRect buttonFrame = CGRectMake(5, 8, cellWidth, image.size.height);
 
     for (NSInteger i = 1; i <= categories.count; i++) {
@@ -52,6 +53,7 @@
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.frame = buttonFrame;
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [button setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
         [button addTarget:self action:@selector(buttonHit:) forControlEvents:UIControlEventTouchUpInside];
         [self.scrollView addSubview:button];

@@ -33,7 +33,7 @@ class TMDB(object):
     
     def __init__(self):
         self.__key = 'b4aaa79e39e12f8d066903b8574ee538'
-        self.__limiter = RateLimiter(cps=10)
+        self.__limiter = RateLimiter(cps=5)
     
     def configuration(self):
         return self.__tmdb('configuration')

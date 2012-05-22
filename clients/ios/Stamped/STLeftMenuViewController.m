@@ -112,7 +112,7 @@
         frame = corner.frame;
         frame.origin.y = (self.view.bounds.size.height-corner.bounds.size.height);
         corner.frame = frame;
-        
+
     }
     
     if (!_anchorTableView) {
@@ -142,6 +142,7 @@
         frame.size.width = self.view.bounds.size.width;
         frame.origin.y = (tableView.frame.origin.y - frame.size.height);
         shadow.frame = frame;
+
         
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -151,15 +152,15 @@
         [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
 
             drawGradient([UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, [UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, ctx);
-            
+
         }];
         tableView.backgroundView = view;
         [view release];
         [tableView release];
-
+        
     }
-
-
+    
+    
 }
 
 - (void)viewDidUnload {
@@ -234,7 +235,7 @@
     cell.icon = [UIImage imageNamed:[NSString stringWithFormat:@"left_menu_icon_%@.png", [cell.titleLabel.text lowercaseString]]];
 
     return cell;
-  
+    
 }
 
 
@@ -276,8 +277,6 @@
         _selectedIndexPath = [indexPath retain];
         
     }
- 
-
 }
 
 

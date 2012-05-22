@@ -31,6 +31,15 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
+@handleHTTPRequest(requires_auth=False,
+                   #requires_client=True,
+                   http_schema=HTTPAccountNew,
+                   conversion=HTTPAccountNew.convertToAccount,
+                   upload='profile_image')
+def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
+
+
+    return
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])
@@ -132,7 +141,7 @@ def linked_accounts(request, authUserId, http_schema, **kwargs):
     twitterAuth     = http_schema.exportTwitterAuthSchema()
     facebookAuth    = http_schema.exportFacebookAuthSchema()
     netflixAuth     = http_schema.exportNetflixAuthSchema()
-    
+
     data = {
         'twitter'       : linked.twitter, 
         'facebook'      : linked.facebook, 
@@ -151,6 +160,30 @@ def removeTwitter(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
     
     return transformOutput(True)
+
+
+
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPFacebookAuthResponse)
+    #parse_request_kwargs={'allow_oauth_token': True})
+@require_http_methods(["GET"])
+def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
+    logs.info('\n### HIT facebookLoginCallback  request: %s  oauth_token: %s   secret: %s' % (request, http_schema.oauth_token, http_schema.secret))
+    fb = globalFacebook()
+
+    result = facebook.authorize(http_schema.oauth_token, http_schema.secret)
+
+    logs.info('\n### request auth result: %s' % result)
+
+    netflixAuth = NetflixAuthSchema()
+    netflixAuth.netflix_token       = result['oauth_token']
+    netflixAuth.netflix_secret      = result['oauth_token_secret']
+    netflixAuth.netflix_user_id     = result['user_id']
+
+    logs.info('\nnetflixAuth %s' % netflixAuth)
+
+    stampedAPI.updateLinkedAccounts(http_schema.stamped_oauth_token, netflixAuth=netflixAuth)
+
+    return createNetflixLoginResponse(authUserId)
 
 
 @handleHTTPRequest()
@@ -223,7 +256,6 @@ def createNetflixLoginResponse(authUserId):
 @handleHTTPRequest()
 @require_http_methods(["GET"])
 def netflixLogin(request, authUserId, http_schema, **kwargs):
-    logs.info('\n### HIT netflixLogin')
     return createNetflixLoginResponse(authUserId)
 
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
@@ -246,6 +278,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     stampedAPI.updateLinkedAccounts(http_schema.stamped_oauth_token, netflixAuth=netflixAuth)
 
     return createNetflixLoginResponse(authUserId)
+
+
 
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)

@@ -15,6 +15,7 @@
 #import "WebViewController.h"
 #import "TOSViewController.h"
 #import "ECSlidingViewController.h"
+#import "Util.h"
 
 @implementation SettingsViewController
 

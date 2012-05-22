@@ -27,7 +27,7 @@ var g_update_stamps = null;
         
         $('.profile-nav a').each(function () {
             $(this).click(function(event) {
-                event.stopPropagation();
+                event.preventDefault();
                 var link = $(this);
                 
                 link.parents(".profile-sections").each(function() {
@@ -100,10 +100,29 @@ var g_update_stamps = null;
         
         // use moment.js to make every stamps's timestamp human-readable and 
         // relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
-        var update_timestamps = function() {
-            $('.timestamp_raw').each(function(i, elem) {
-                var $elem = $(elem);
-                var expl  = moment($elem.text()).fromNow();
+        var update_timestamps = function($scope) {
+            if (typeof($scope) === 'undefined') {
+                $scope = $(document);
+            }
+            
+            $scope.find('.timestamp_raw').each(function(i, elem) {
+                var expl  = "";
+                
+                try {
+                    var $elem = $(elem);
+                    var ts    = moment($elem.text())
+                    var now   = moment();
+                    
+                    if (now.diff(ts, 'months') < 1) { // within 1 month
+                        expl = ts.fromNow();
+                    } else if (now.diff(ts, 'years') <= 1) { // within 1 year
+                        expl = ts.format("MMM Do");
+                    } else { // after 1 year
+                        expl = ts.format("MMM Do YYYY");
+                    }
+                } catch(e) { 
+                    return;
+                }
                 
                 $elem.removeClass('timestamp_raw').text(expl).addClass('timestamp');
             });
@@ -135,10 +154,14 @@ var g_update_stamps = null;
         //      relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
-        var update_stamps = function() {
-            update_timestamps();
+        var update_stamps = function($scope) {
+            if (typeof($scope) === 'undefined') {
+                $scope = $(document);
+            }
             
-            $('.stamp-preview').each(function(i, elem) {
+            update_timestamps($scope);
+            
+            $scope.find('.stamp-preview').each(function(i, elem) {
                 var $this = $(this);
                 
                 // enforce precedence of stamp preview images
@@ -195,6 +218,67 @@ var g_update_stamps = null;
                 update_images();
             });
             
+            $scope.find('a.sdetail').click(function(event) {
+                event.preventDefault();
+                
+                var $this = $(this);
+                var href  = $this.attr('href');
+                
+                href = href.replace('http://www.stamped.com', '');
+                href = '/travis/stamps/4/TEMPORARY';
+                
+                var $target = $("<div></div>");
+                
+                $target.load(href + " .sdetail_body", {}, function() {
+                    var $sdetail = $target.find('.sdetail_body').remove();
+                    update_stamps($sdetail);
+                    init_social_sharing();
+                    
+                    $.colorbox({
+                        inline      : true, 
+                        href        : $sdetail, 
+                        
+                        maxWidth    : (2 * window.innerWidth) / 3, 
+                        transition  : "elastic", 
+                        fixed       : true, 
+                        scrolling   : false
+                    });
+                });
+                
+                return false;
+            });
+            
+            /*$('.stamp-gallery-item').click(function(event) {
+                //event.preventDefault();
+                
+                return;
+                var $this = $(this);
+                $this.find('.pronounced-title a').each(function(i, elem) {
+                    var $elem = $(elem);
+                    var href  = $elem.attr('href');
+                    href      = href.replace('http://www.stamped.com', '');
+                    
+                    console.debug(href);
+                    window.location = href;
+                    //$.colorbox({
+                    //    'href' : href
+                    //});
+                });
+            });*/
+            
+			$scope.find("a.lightbox").fancybox({
+                openEffect      : 'elastic', 
+                openEasing      : 'easeOutBack', 
+                openSpeed       : 300, 
+                
+                closeEffect     : 'elastic', 
+                closeEasing     : 'easeInBack', 
+                closeSpeed      : 300, 
+                
+				closeClick      : true, 
+                maxWidth        : (2 * window.innerWidth) / 3
+			});
+            
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
                 $this.fitText();
@@ -204,7 +288,7 @@ var g_update_stamps = null;
         g_update_stamps = update_stamps;
         var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
-        var init_infinit_scroll = function() {
+        var init_infinite_scroll = function() {
             // TODO: customize loading image
             infinite_scroll = $gallery.infinitescroll({
                 debug           : STAMPED_PRELOAD.DEBUG, 
@@ -235,10 +319,10 @@ var g_update_stamps = null;
             
             $gallery.isotope({
                 itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "fitRows"
+                layoutMode      : "masonry"
             });
             
-            init_infinit_scroll();
+            init_infinite_scroll();
         };
         
         
@@ -571,7 +655,7 @@ var g_update_stamps = null;
                     $(infinite_scroll_next_selector).attr('href', href);
                     
                     destroy_infinite_scroll();
-                    init_infinit_scroll();
+                    init_infinite_scroll();
                     
                     $gallery.append($elements);
                     update_stamps();
@@ -643,7 +727,7 @@ var g_update_stamps = null;
         // handle nav bar click routing
         $nav_bar.find('a').each(function () {
             $(this).click(function(event) {
-                event.stopPropagation();
+                event.preventDefault();
                 
                 var link     = $(this);
                 var orig_category = link.parent().attr('class');
@@ -701,6 +785,11 @@ var g_update_stamps = null;
             
             var nav_bar_width   = $nav_bar.width();
             var $stamp_gallery  = $('.stamp-gallery');
+            
+            if (typeof($stamp_gallery.get(0)) === 'undefined') {
+                return;
+            }
+            
             var gallery_x       = $stamp_gallery.offset().left;
             var gallery_width   = $stamp_gallery.width();
             var wide_gallery    = 'wide-gallery';

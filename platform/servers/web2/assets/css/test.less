@@ -1,0 +1,113 @@
+/* test.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "libs/elements.less";
+
+
+/* **************************************************************************
+                           ROTATED STATIC GOOGLE MAP
+   ************************************************************************** */
+
+
+.rotated-static-map(@size: 200px, @angle: 35deg, @perspective: 200px) {
+    position: relative;
+    display:  block;
+    width:   @size;
+    
+    @padding: 4px;
+    top:    -@padding;
+    left:   -@padding;
+    padding: @padding;
+    
+    .rotated-static-map-inner {
+        margin: 0 auto;
+        @colsize: @size / 4;
+        
+        position: relative;
+        top:  0;
+        left: -@b;
+        
+        display: block;
+        width:  @size;
+        height: @size;
+        
+        /*.perspective(@perspective);*/
+        .transform-style(preserve-3d);
+        .backface-visibility(hidden);
+        
+        background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200');
+        
+        .transition(all, .1s, linear);
+        .transform(perspective(@perspective) rotate3d(3.5, 1, -1, @angle));
+        
+        .dark-layer {
+            display: block;
+            width:  100%;
+            height: 100%;
+            background: #333;
+            
+            .transition(opacity, .1s, ease-in-out);
+            opacity: 0.10;
+        }
+        
+        .pin {
+            background: url(/assets/img/pin_shadow.png);
+            
+            position: absolute;
+            top:  50%;
+            left: 50%;
+            margin: -7px auto auto 0;
+            
+            display: block;
+            width:  24px;
+            height: 18px;
+            
+            &:hover {
+                cursor: pointer;
+            }
+            
+            .pin-inner {
+                background: url(/assets/img/pin.png);
+                
+                position: relative;
+                top:  -16px;
+                left: -8px;
+                
+                display: block;
+                width:  26px;
+                height: 36px;
+            }
+            
+            .transition(all, .1s, linear);
+            .transform(perspective(@perspective) translate(-2px, 0) scale(.8, .8));
+        }
+    }
+    
+    &:hover {
+        /*cursor: pointer;*/
+        .pin {
+            .transform(perspective(@perspective));
+        }
+        
+        .transform(perspective(@perspective));
+        .dark-layer {
+            opacity: 0;
+        }
+    }
+}
+
+.rotated-static-map-small {
+    .rotated-static-map(200px, 2px, 35deg, 200px);
+}
+
