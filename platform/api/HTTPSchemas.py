@@ -1076,10 +1076,12 @@ class HTTPEntity(Schema):
 
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
+                images = []
                 for image in entity.gallery:
                     item = HTTPImageSchema().dataImport(image)
-                    gallery.images.append(item)
-                self.galleries.append(gallery)
+                    images.append(item)
+                gallery.images = images
+                self.galleries += (gallery,)
 
             # Actions: Reservation
 
@@ -1159,6 +1161,7 @@ class HTTPEntity(Schema):
 
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
+                images = []
                 for image in entity.gallery:
                     item = HTTPImageSchema()
                     item.importSchema(image)
@@ -1170,8 +1173,9 @@ class HTTPEntity(Schema):
                     action.type         = 'stamped_view_image'
                     action.sources.append(source)
                     item.action     = action
-                    gallery.images.append(item)
-                self.galleries.append(gallery)
+                    images.append(item)
+                gallery.images = images
+                self.galleries += (gallery,)
 
             # Actions: Call
 
@@ -1689,7 +1693,7 @@ class HTTPEntity(Schema):
 
                 gallery.images = images
                 if len(gallery.images) > 0:
-                    self.galleries.append(gallery)
+                    self.galleries += (gallery,)
 
         elif entity.kind == 'software' and entity.isType('app'):
 
@@ -1730,10 +1734,12 @@ class HTTPEntity(Schema):
 
             if entity.screenshots is not None and len(entity.screenshots) > 0:
                 gallery = HTTPEntityGallery()
+                images = []
                 for screenshot in entity.screenshots:
                     item = HTTPImageSchema().dataImport(screenshot)
-                    gallery.images.append(item)
-                self.galleries.append(gallery)
+                    images.append(item)
+                gallery.images = images
+                self.galleries += (gallery,)
 
 
         # Generic item
