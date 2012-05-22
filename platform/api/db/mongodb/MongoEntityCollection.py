@@ -63,7 +63,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         document.pop('titlel')
 
+        logs.info('timestamp before buildEntity: %s' % document['timestamp'])
+
         entity = buildEntity(document)
+
+        logs.info('timestamp after buildEntity: %s' % entity.timestamp)
         
         return entity
     
