@@ -2931,7 +2931,7 @@ class StampedAPI(AStampedAPI):
         if authUserId is None:
             return None
 
-        if scope == 'you':
+        if scope == 'me':
             return self._collectionDB.getUserStampIds(authUserId)
 
         if scope == 'inbox':

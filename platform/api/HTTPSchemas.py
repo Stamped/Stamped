@@ -2003,7 +2003,7 @@ class HTTPTimeSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
+        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
@@ -2053,13 +2053,13 @@ class HTTPSearchSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
+        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
         cls.addProperty('user_id',              basestring)
         cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
-        cls.addProperty('query',                basestring)
+        cls.addProperty('query',                basestring, required=True)
 
     def exportSearchSlice(self):
         data                = self.dataExport()
