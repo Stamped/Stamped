@@ -240,6 +240,7 @@ var g_update_stamps = null;
                         
                         maxWidth    : (2 * window.innerWidth) / 3, 
                         transition  : "elastic", 
+                        fixed       : true, 
                         scrolling   : false
                     });
                 });
