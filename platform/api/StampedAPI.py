@@ -3803,7 +3803,7 @@ class StampedAPI(AStampedAPI):
                 track, trackModified = _resolveStub(stub, musicSources)
             except KeyError as e:
                 logs.warning('Track resolution failed: %s' % e)
-                return None
+                return stub
 
             # Merge track if it wasn't resolved
             if track.entity_id is None:
@@ -3819,7 +3819,10 @@ class StampedAPI(AStampedAPI):
                 track = _resolveTrack(stub)
                 if track is None:
                     continue
-                trackList.append(track.minimize())
+                # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(track, BasicEntity):
+                    track = track.minimize()
+                trackList.append(track)
 
                 # Compare entity id before and after
                 if trackId != track.entity_id:
@@ -3835,7 +3838,7 @@ class StampedAPI(AStampedAPI):
                 album, albumModified = _resolveStub(stub, musicSources)
             except KeyError:
                 logs.warning('Album resolution failed')
-                return None
+                return stub
 
             # Merge album if it wasn't resolved
             if album.entity_id is None:
@@ -3851,7 +3854,10 @@ class StampedAPI(AStampedAPI):
                 album = _resolveAlbum(stub)
                 if album is None:
                     continue
-                albumList.append(album.minimize())
+                # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(album, BasicEntity):
+                    album = album.minimize()
+                albumList.append(album)
 
                 # Compare entity id before and after
                 if albumId != album.entity_id:
@@ -3867,7 +3873,7 @@ class StampedAPI(AStampedAPI):
                 artist, artistModified = _resolveStub(stub, musicSources)
             except KeyError:
                 logs.warning('Artist resolution failed')
-                return None
+                return stub
 
             # Merge artist if it wasn't resolved
             # if artist.entity_id is None:
@@ -3881,9 +3887,11 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
-                if artist is None:
-                    continue
-                artistList.append(artist.minimize())
+                # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(artist, BasicEntity):
+                    artist = artist.minimize()
+
+                artistList.append(artist)
 
                 # Compare entity id before and after
                 if artistId != artist.entity_id:
