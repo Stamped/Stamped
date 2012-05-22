@@ -61,10 +61,10 @@ class AExternalSource(object):
                 cur = entity[k]
         if data is None:
             if path[-1] in cur:
-                del cur[path[-1]]
+                delattr(cur, path[-1])
         else:
-            cur[path[-1]] = data
-    
+            setattr(cur, path[-1], data)
+
     def writeFields(self, entity, data, fields):
         """
         For each path-function pair in fields, the value of function(data) is written to the field identified by path.
