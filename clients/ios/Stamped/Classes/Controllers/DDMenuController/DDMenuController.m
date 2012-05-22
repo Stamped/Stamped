@@ -181,7 +181,7 @@
     if (gesture.state == UIGestureRecognizerStateBegan) {
         
         [self showShadow:YES];
-        _panOriginX = self.view.frame.origin.x;        
+        _panOriginX = _root.view.frame.origin.x;
         _panVelocity = CGPointMake(0.0f, 0.0f);
         
         if([gesture velocityInView:self.view].x > 0) {
@@ -204,6 +204,11 @@
         CGRect frame = _root.view.frame;
         frame.origin.x = _panOriginX + translation.x;
         
+        if (frame.origin.x < -(frame.size.width - kRightMenuDisplayedWidth)) {
+            frame.origin.x = MAX(-(frame.size.width - kRightMenuDisplayedWidth), frame.origin.x);
+            _panDirection = DDMenuPanDirectionLeft;
+        }
+
         if (frame.origin.x > 0.0f && !_menuFlags.showingLeftView) {
             
             if(_menuFlags.showingRightView) {
@@ -310,7 +315,7 @@
                 
             } else if (completion == DDMenuPanCompletionRight) {
                 
-                [values addObject:[NSValue valueWithCGPoint:CGPointMake(-((width/2) - (kMenuOverlayWidth-kMenuBounceOffset)), pos.y)]];
+                [values addObject:[NSValue valueWithCGPoint:CGPointMake(-((width/2) - (kRightMenuDisplayedWidth-kMenuBounceOffset)), pos.y)]];
                 
             } else {
                 
@@ -329,7 +334,7 @@
         if (completion == DDMenuPanCompletionLeft) {
             [values addObject:[NSValue valueWithCGPoint:CGPointMake((width/2) + span, pos.y)]];
         } else if (completion == DDMenuPanCompletionRight) {
-            [values addObject:[NSValue valueWithCGPoint:CGPointMake(-((width/2) - kMenuOverlayWidth), pos.y)]];
+            [values addObject:[NSValue valueWithCGPoint:CGPointMake(-((width/2) - kRightMenuDisplayedWidth), pos.y)]];
         } else {
             [values addObject:[NSValue valueWithCGPoint:CGPointMake(width/2, pos.y)]];
         }
@@ -339,12 +344,16 @@
         
         animation.timingFunctions = timingFunctions;
         animation.keyTimes = keyTimes;
-        //animation.calculationMode = @"cubic";
         animation.values = values;
         animation.duration = duration;   
         animation.removedOnCompletion = NO;
         animation.fillMode = kCAFillModeForwards;
         [_root.view.layer addAnimation:animation forKey:nil];
+        
+        if (_shadowView) {
+            [_shadowView.layer addAnimation:animation forKey:nil];
+        }
+        
         [CATransaction commit];   
     
     }    
@@ -391,9 +400,25 @@
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+        
     if (gestureRecognizer==_tap) {
-        return YES;
-    }     
+        
+        if (otherGestureRecognizer!=_pan && (_menuFlags.showingLeftView || _menuFlags.showingRightView)) {
+            [otherGestureRecognizer setEnabled:NO];
+            [otherGestureRecognizer setEnabled:YES];
+        }
+        
+        return (otherGestureRecognizer==_pan);
+    }
+    if (gestureRecognizer==_pan) {
+        
+        if (_menuFlags.showingLeftView || _menuFlags.showingRightView) {
+            [otherGestureRecognizer setEnabled:NO];
+            [otherGestureRecognizer setEnabled:YES];
+        }
+        
+        return NO;
+    }
     return NO;
 }
 
@@ -554,7 +579,7 @@
         [UIView setAnimationsEnabled:NO];
     }
     
-    _root.view.userInteractionEnabled = NO;
+    //_root.view.userInteractionEnabled = NO;
     [UIView animateWithDuration:.3 animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {
@@ -596,7 +621,7 @@
         [UIView setAnimationsEnabled:NO];
     }
     
-    _root.view.userInteractionEnabled = NO;
+   // _root.view.userInteractionEnabled = NO;
     [UIView animateWithDuration:.3 animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {

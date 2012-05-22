@@ -115,6 +115,7 @@
   //[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
@@ -123,6 +124,10 @@
 
 
 #pragma mark - UITableViewDataSouce
+
+- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {    
+    return 44.0f;
+}
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   return [_stamps numberOfStamps];

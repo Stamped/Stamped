@@ -228,7 +228,6 @@
         cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
     
-    //cell.titleLabel.font = [UIFont boldSystemFontOfSize:15];
     cell.titleLabel.textColor = [UIColor colorWithRed:0.4f green:0.4f blue:0.4f alpha:1.0f];
     cell.topBorder = (indexPath.row==1);
     cell.titleLabel.text = [_anchorDataSource objectAtIndex:indexPath.row];
