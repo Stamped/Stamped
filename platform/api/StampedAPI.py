@@ -2908,23 +2908,11 @@ class StampedAPI(AStampedAPI):
         
         stampData = self._stampDB.getStampTimeSlice(stampIds, timeSlice)
 
-        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        stamps = self._enrichStampCollection(stampData, timeSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
             logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
-        
-        if self.__version == 0:
-            if genericCollectionSlice.deleted and (genericCollectionSlice.sort in ['modified', 'created', 'stamped']):
-                if len(stamps) >= genericCollectionSlice.limit:
-                    genericCollectionSlice.since = stamps[-1]['timestamp'][genericCollectionSlice.sort] 
-                
-                deleted = self._stampDB.getDeletedStamps(stampIds, genericCollectionSlice)
-                
-                if len(deleted) > 0:
-                    stamps = stamps + deleted
-                    ### TODO: Fails if sort == 'stamped' since it doesn't exist in deletedStamp objects
-                    stamps.sort(key=lambda k: k['timestamp'][genericCollectionSlice.sort], reverse=not genericCollectionSlice.reverse)
         
         return stamps
     
@@ -2981,20 +2969,23 @@ class StampedAPI(AStampedAPI):
     def _enrichStampCollection(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
         commentPreviews = {}
         
-        if genericCollectionSlice.comments:
-            # Only grab comments for slice
-            realizedStampIds = []
-            for stamp in stampData:
-                realizedStampIds.append(stamp.stamp_id)
-            
-            commentData = self._commentDB.getCommentsAcrossStamps(realizedStampIds, commentCap)
-            
-            # Group previews by stamp_id
-            for comment in commentData:
-                if comment.stamp_id not in commentPreviews:
-                    commentPreviews[comment.stamp_id] = []
+        try:
+            if genericCollectionSlice.comments:
+                # Only grab comments for slice
+                realizedStampIds = []
+                for stamp in stampData:
+                    realizedStampIds.append(stamp.stamp_id)
                 
-                commentPreviews[comment.stamp_id].append(comment)
+                commentData = self._commentDB.getCommentsAcrossStamps(realizedStampIds, commentCap)
+                
+                # Group previews by stamp_id
+                for comment in commentData:
+                    if comment.stamp_id not in commentPreviews:
+                        commentPreviews[comment.stamp_id] = []
+                    
+                    commentPreviews[comment.stamp_id].append(comment)
+        except Exception as e:
+            logs.warning(e)
 
         # Add user object and preview to stamps
         stamps = []
@@ -3020,7 +3011,7 @@ class StampedAPI(AStampedAPI):
             ### TODO: Check privacy
 
             stampIds    = self._collectionDB.getUserStampIds(user.user_id)
-            result      = self._getStampCollection(authUserId, stampIds, timeSlice)
+            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
             return result
 
@@ -3037,7 +3028,7 @@ class StampedAPI(AStampedAPI):
         else:
             stampIds    = None
 
-        result      = self._getStampCollection(authUserId, stampIds, timeSlice)
+        result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
         # Inbox
 
