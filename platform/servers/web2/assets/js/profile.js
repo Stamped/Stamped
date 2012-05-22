@@ -219,9 +219,9 @@ var g_update_stamps = null;
                 href      = href.replace('http://www.stamped.com', '');
                 
                 console.debug(href);
-                $.colorbox({
-                    'href' : href
-                });
+                //$.colorbox({
+                //    'href' : href
+                //});
                 
                 return false;
             });
