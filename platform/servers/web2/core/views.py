@@ -268,17 +268,21 @@ def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail', schema)
     
     logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
-    stamp = stampedAPIProxy.getStampFromUser(schema.screen_name, schema.stamp_num)
-    
     
     if not IS_PROD and schema.screen_name == 'travis':
-        user = travis_test.user
+        user  = travis_test.user
+        stamp = travis_test.stamps[-schema.stamp_num]
     else:
-        user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
-        user_id     = user['user_id']
+        user  = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        stamp = stampedAPIProxy.getStampFromUser(schema.screen_name, schema.stamp_num)
     
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")
+    
+    entity = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
+    
+    #from pprint import pprint
+    #pprint(stamp)
     
     #stamp = Stamp().importData(stamp)
     '''
@@ -295,8 +299,9 @@ def sdetail(request, schema, **kwargs):
     '''
     
     return stamped_render(request, 'sdetail.html', {
-        'user'  : user, 
-        'stamp' : stamp
+        'user'   : user, 
+        'stamp'  : stamp, 
+        'entity' : entity
     })
 
 

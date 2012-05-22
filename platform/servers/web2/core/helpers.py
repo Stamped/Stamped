@@ -88,6 +88,14 @@ class StampedAPIProxy(object):
             
             return stamps[0] if len(stamps) > 0 else None
     
+    def getEntity(self, entity_id):
+        if self._prod:
+            raise NotImplementedError
+        else:
+            return self._handle_get("entities/show.json", {
+                'entity_id' : entity_id
+            })
+    
     def _handle_local_get(self, func, params):
         pass
     

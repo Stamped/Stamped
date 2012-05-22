@@ -110,7 +110,7 @@ urlpatterns = patterns('',
     (r'v0/entities/menu.json',                      'v0.functions.entities.menu'),
     (r'v0/entities/stamped_by.json',                'v0.functions.entities.stampedBy'),
     (r'v0/entities/suggested.json',                 'v0.functions.entities.suggested'),
-
+    
     ### ACTIONS
     (r'v0/actions/complete.json',                   'v0.functions.entities.completeAction'),
 

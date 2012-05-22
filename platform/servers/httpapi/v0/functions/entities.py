@@ -9,12 +9,13 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 def _convertHTTPEntity(entity, authClientId=None):
-    client = stampedAuth.getClientDetails(authClientId)
+    if authClientId is not None:
+        client = stampedAuth.getClientDetails(authClientId)
+        
+        if client.api_version < 1:
+            raise NotImplementedError
     
-    if client.api_version < 1:
-        raise NotImplementedError
-    else:
-        return HTTPEntity().importEntity(entity, client)
+    return HTTPEntity().importEntity(entity, client)
 
 
 @handleHTTPRequest(http_schema=HTTPEntityNew)
