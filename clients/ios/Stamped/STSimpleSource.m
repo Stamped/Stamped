@@ -21,6 +21,22 @@
 @synthesize completionEndpoint = completionEndpoint_;
 @synthesize completionData = completionData_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    name_ = [[decoder decodeObjectForKey:@"name"] retain];
+    source_ = [[decoder decodeObjectForKey:@"source"] retain];
+    sourceData_ = [[decoder decodeObjectForKey:@"sourceData"] retain];
+    sourceID_ = [[decoder decodeObjectForKey:@"sourceID"] retain];
+    link_ = [[decoder decodeObjectForKey:@"link"] retain];
+    icon_ = [[decoder decodeObjectForKey:@"icon"] retain];
+    endpoint_ = [[decoder decodeObjectForKey:@"endpoint"] retain];
+    endpointData_ = [[decoder decodeObjectForKey:@"endpointData"] retain];
+    completionEndpoint_ = [[decoder decodeObjectForKey:@"completionEndpoint"] retain];
+    completionData_ = [[decoder decodeObjectForKey:@"completionData"] retain];
+  }
+  return self;
+}
 
 - (void)dealloc {
   self.name = nil;
@@ -34,6 +50,18 @@
   [completionEndpoint_ release];
   [completionData_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.name forKey:@"name"];
+  [encoder encodeObject:self.source forKey:@"source"];
+  [encoder encodeObject:self.sourceID forKey:@"sourceID"];
+  [encoder encodeObject:self.link forKey:@"link"];
+  [encoder encodeObject:self.icon forKey:@"icon"];
+  [encoder encodeObject:self.sourceData forKey:@"sourceData"];
+  [encoder encodeObject:self.endpoint forKey:@"endpoint"];
+  [encoder encodeObject:self.completionEndpoint forKey:@"completionEndpoint"];
+  [encoder encodeObject:self.completionData forKey:@"completionData"];
 }
 
 + (RKObjectMapping*)mapping {

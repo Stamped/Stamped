@@ -9,7 +9,6 @@ import MongoCommentCollection
 import MongoDeletedEntityCollection
 import MongoCreditGiversCollection
 import MongoCreditReceivedCollection
-import MongoDirectedStampedCollection
 import MongoEntityCollection
 import MongoFavoriteCollection
 import MongoFollowersCollection

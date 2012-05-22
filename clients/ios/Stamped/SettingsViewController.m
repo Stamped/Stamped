@@ -14,7 +14,6 @@
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
 #import "TOSViewController.h"
-#import "STRootMenuView.h"
 #import "ECSlidingViewController.h"
 
 @implementation SettingsViewController
@@ -84,7 +83,7 @@
 #pragma mark - Custom methods.
 
 - (IBAction)doneButtonPressed:(id)sender {
-  [[STRootMenuView sharedInstance] toggle];
+  //[[STRootMenuView sharedInstance] toggle];
   //[self.presentingViewController dismissModalViewControllerAnimated:YES];
 }
 

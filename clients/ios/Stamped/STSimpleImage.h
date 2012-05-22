@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STImage.h"
 
-@interface STSimpleImage : NSObject <STImage>
+@interface STSimpleImage : NSObject <STImage, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* url;
 @property (nonatomic, readwrite, copy) NSNumber* width;

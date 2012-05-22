@@ -115,7 +115,8 @@ class StampedAPIStampTests(StampedAPITest):
             self._dropCollection("stamps")
     
     def _getStamps(self, httpGenericCollectionSlice):
-        self._params['genericCollectionSlice'] = httpGenericCollectionSlice.exportSchema(GenericCollectionSlice())
+        self._params['genericCollectionSlice'] = httpGenericCollectionSlice.exportGenericCollectionSlice()
+
         
         ret = self.stampedAPI._getStampCollection(**self._params)
         self.assertIsInstance(ret, list)
@@ -123,11 +124,11 @@ class StampedAPIStampTests(StampedAPITest):
         return ret
     
     def _assertStampsEqual(self, s0, s1):
-        self.assertEqual(s0["stamp_id"],                s1["stamp_id"])
-        self.assertEqual(s0["contents"][-1]["blurb"],   s1["contents"][-1]["blurb"])
-        self.assertEqual(s0["user"]["user_id"],         s1["user"]["user_id"])
-        self.assertEqual(s0["entity"]["title"],         s1["entity"]["title"])
-        self.assertEqual(s0["entity"]["entity_id"],     s1["entity"]["entity_id"])
+        self.assertEqual(s0.stamp_id,             s1.stamp_id)
+        self.assertEqual(s0.contents[-1].blurb,   s1.contents[-1].blurb)
+        self.assertEqual(s0.user.user_id,         s1.user.user_id)
+        self.assertEqual(s0.entity.title,         s1.entity.title)
+        self.assertEqual(s0.entity.entity_id,     s1.entity.entity_id)
     
     def _test_reverse(self, genericCollectionSlice, results0):
         genericCollectionSlice.reverse    = True
@@ -314,8 +315,8 @@ class StampedAPIStampTests(StampedAPITest):
         # the -180 / 180 longitude border, but this test is purposefully 
         # centered around NYC to avoid this pitfall.
         for s in ret0:
-            self.assertTrue(s.lat <= viewport[0] and s.lat >= viewport[2])
-            self.assertTrue(s.lng >= viewport[1] and s.lng <= viewport[3])
+            self.assertTrue(s.entity.coordinates.lat <= viewport[0] and s.entity.coordinates.lat >= viewport[2])
+            self.assertTrue(s.entity.coordinates.lng >= viewport[1] and s.entity.coordinates.lng <= viewport[3])
         
         # test reverse
         self._test_reverse(genericCollectionSlice, ret0)

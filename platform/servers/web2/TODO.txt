@@ -42,9 +42,15 @@
 
 
 TODO:
-    * fix infinite scroll to fetch correct next page!
+    * change category-loading to not go through stamped-api but rather fetch the page and extract the relevant content?
+        * caching benefit?
     
+    * hide stamp blurb quotes if blurb is empty
+    * what to do when entity title is cutoff
+    
+    * fix infinite scroll to fetch correct next page!
     * separate # STAMPS header from user.num_stamps
+    
     * use a Backbone model to hold StampedClient state s.t. you could bind log-in / log-out to body-level CSS tags?
     * experiment with making innerbg fixed for parallax
     * experiment with static map styling
@@ -54,8 +60,6 @@ TODO:
         * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
     
     * experiment with the idea of having no stamped-specific likes at all -- just FB likes?
-    
-    * how to reference a specific stamp-gallery-item via stamp_id, entity_id, or filter
     
     * audit box-shadow usage and replace w/ more efficient image-border where appropriate
     * add ability to retain login
@@ -90,7 +94,6 @@ POLISH:
     * link stamp image to lightboxed full-resolution version
     * move all clearfix, fullwidth, fixedwidth definitions over to stylesheets!
     * experiment with :before and :after instead of top-wave and bottom-wave
-    
 
 OPTIMIZE:
     * 
@@ -102,4 +105,10 @@ OLD:
     * customize infowindow to not look like shit
     * generate stamp collage images
     * get full stamp inset image from anthony
+    * how to reference a specific stamp-gallery-item via stamp_id, entity_id, or filter
+        * (unnecessary for now)
+    * navbar animation -- fade in quicker than fade out
+
+NOTES:
+    * no feedback icons in case of no feedback looks inconsistent
 

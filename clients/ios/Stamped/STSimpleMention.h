@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STMention.h"
 
-@interface STSimpleMention : NSObject <STMention>
+@interface STSimpleMention : NSObject <STMention, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* screenName;
 @property (nonatomic, readwrite, copy) NSString* userID;

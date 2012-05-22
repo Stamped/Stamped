@@ -24,6 +24,9 @@
 /* **************************************************************************
                             BASIC HIGH-LEVEL SETUP
    ************************************************************************** */
+html {
+  overflow-y: scroll;
+}
 body,
 html {
   width: 100%;
@@ -69,9 +72,12 @@ a:hover {
 }
 footer,
 .fixedwidth {
-  width: 940px;
-  margin: 0 auto;
   position: relative;
+  display: block;
+  max-width: 1000px;
+  min-width: 360px;
+  width: 1000px;
+  margin: 0 auto;
 }
 /* **************************************************************************
                                 GENERIC FIXED HEADER
@@ -84,9 +90,6 @@ header {
   background: #fff;
 }
 header .header-body {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
   z-index: 25;
   /* TODO: use slight background gradient instead of flat color */
 
@@ -201,9 +204,9 @@ header .header-body a.button {
   z-index: 101;
 }
 .user-logo-small {
-  position: relative;
+  position: absolute;
   top: -10px;
-  left: -10px;
+  right: -22px;
   display: inline-block;
   width: 44px;
   height: 44px;
@@ -258,18 +261,28 @@ header .header-body a.button {
   top: 0;
   left: 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg0 {
-  background: url(/assets/img/collage.940x256.jpg) no-repeat fixed left top;
-  background-size: 100%;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0.45;
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg {
+  /*background: url(/assets/img/collage.940x256.jpg) no-repeat fixed center center;
+                    background-size: 100%;
+                    
+                    position: absolute;
+                    width:   100%;
+                    height:  100%;
+                    opacity: 0.45;*/
+
+  /*$(document).ready(function() {
+                        $('.innerbg').css({
+                            position : 'absolute', 
+                            width    : '100%', 
+                            height   : '100%', 
+                            opacity  : '0.45', 
+                            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+                            'background-size': '100%', 
+                        }).addClass('blur_8');
+                    });*/
+
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
-  width: 940px;
-  margin: 0 auto;
-  position: relative;
   padding: 34px 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
@@ -424,16 +437,23 @@ header .header-body a.button {
                            CRINKLED STATIC GOOGLE MAP
    ************************************************************************** */
 .static-map-small {
+  /*.static-map(@size: 140px, @b: 2px, @angle: 35deg, @perspective: 200px)*/
+
+  position: relative;
   display: block;
-  width: 200px;
-  padding: 30px;
+  width: 140px;
+  top: -4px;
+  left: -4px;
+  padding: 4px;
 }
 .static-map-small .static-map-inner {
   margin: 0 auto;
   position: relative;
+  top: 0;
+  left: -2px;
   display: block;
-  width: 200px;
-  height: 200px;
+  width: 140px;
+  height: 140px;
   /*.perspective(@perspective);*/
 
   -webkit-transform-style: preserve-3d;
@@ -442,6 +462,8 @@ header .header-body a.button {
   -ms-transform-style: preserve-3d;
   transform-style: preserve-3d;
   backface-visibility: hidden;
+  /* TODO: make the map crinkle to a centered version of itself */
+
 }
 .static-map-small .static-map-inner .r0 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -452,8 +474,8 @@ header .header-body a.button {
   background-position: 0px;
   position: absolute;
   display: block;
-  width: 50px;
-  height: 200px;
+  width: 35px;
+  height: 140px;
   top: 0;
   border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
@@ -467,11 +489,11 @@ header .header-body a.button {
   transition: all 0.1s linear;
   left: 0px;
   border-width: 2px 0 2px 2px;
-  -webkit-transform: perspective(200px) rotatey(-35deg);
-  -moz-transform: perspective(200px) rotatey(-35deg);
-  -o-transform: perspective(200px) rotatey(-35deg);
-  -ms-transform: perspective(200px) rotatey(-35deg);
-  transform: perspective(200px) rotatey(-35deg);
+  -webkit-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  -moz-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  -o-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  -ms-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
+  transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r1 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -479,11 +501,11 @@ header .header-body a.button {
   /* TODO: remove this static background image */
 
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: -50px;
+  background-position: -35px;
   position: absolute;
   display: block;
-  width: 50px;
-  height: 200px;
+  width: 35px;
+  height: 140px;
   top: 0;
   border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
@@ -495,13 +517,13 @@ header .header-body a.button {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 52px;
+  left: 37px;
   border-width: 2px 0;
-  -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
-  transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -webkit-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  -moz-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  -o-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  -ms-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
+  transform: perspective(200px) translate(7px, 0) rotatey(35deg);
 }
 .static-map-small .static-map-inner .r2 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -509,11 +531,11 @@ header .header-body a.button {
   /* TODO: remove this static background image */
 
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: -100px;
+  background-position: -70px;
   position: absolute;
   display: block;
-  width: 50px;
-  height: 200px;
+  width: 35px;
+  height: 140px;
   top: 0;
   border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
@@ -525,13 +547,13 @@ header .header-body a.button {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 102px;
+  left: 72px;
   border-width: 2px 0;
-  -webkit-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -moz-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -o-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  -ms-transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
-  transform: perspective(200px) translate(-18px, 0) rotatey(-35deg);
+  -webkit-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  -moz-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  -o-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  -ms-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
+  transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r3 {
   /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
@@ -539,11 +561,11 @@ header .header-body a.button {
   /* TODO: remove this static background image */
 
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
-  background-position: -150px;
+  background-position: -105px;
   position: absolute;
   display: block;
-  width: 50px;
-  height: 200px;
+  width: 35px;
+  height: 140px;
   top: 0;
   border: 2px solid rgba(0, 0, 0, 0.9);
   /*outline: 1px solid transparent;*/
@@ -555,13 +577,13 @@ header .header-body a.button {
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 152px;
+  left: 107px;
   border-width: 2px 2px 2px 0;
-  -webkit-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  -moz-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  -o-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  -ms-transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
-  transform: perspective(200px) translate(-23px, 0) rotatey(35deg);
+  -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -o-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  -ms-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
+  transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
 }
 .static-map-small .static-map-inner .dark-layer {
   display: block;
@@ -578,18 +600,18 @@ header .header-body a.button {
   position: absolute;
   top: 50%;
   left: 50%;
-  margin: -9px auto auto 0;
+  margin: -7px auto auto 0;
   display: block;
   width: 24px;
   height: 18px;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  -webkit-transform: perspective(200px) translate(-15px, 0);
-  -moz-transform: perspective(200px) translate(-15px, 0);
-  -o-transform: perspective(200px) translate(-15px, 0);
-  -ms-transform: perspective(200px) translate(-15px, 0);
-  transform: perspective(200px) translate(-15px, 0);
+  -webkit-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  -moz-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  -o-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  -ms-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
+  transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
 }
 .static-map-small .static-map-inner .pin:hover {
   cursor: pointer;
@@ -598,7 +620,7 @@ header .header-body a.button {
   background: url(/assets/img/pin.png);
   position: relative;
   top: -16px;
-  left: -10px;
+  left: -8px;
   display: block;
   width: 26px;
   height: 36px;
@@ -612,11 +634,11 @@ header .header-body a.button {
 .static-map-small:hover .r2,
 .static-map-small:hover .r3,
 .static-map-small:hover .pin {
-  -webkit-transform: translatez(0);
-  -moz-transform: translatez(0);
-  -o-transform: translatez(0);
-  -ms-transform: translatez(0);
-  transform: translatez(0);
+  -webkit-transform: perspective(200px);
+  -moz-transform: perspective(200px);
+  -o-transform: perspective(200px);
+  -ms-transform: perspective(200px);
+  transform: perspective(200px);
 }
 .static-map-small:hover .dark-layer {
   opacity: 0;
@@ -642,6 +664,9 @@ header .header-body a.button {
   box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   top: 50%;
   right: 40px;
+  -webkit-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  -moz-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
   margin: -180px 0 0;
   padding: 0;
 }
@@ -665,9 +690,14 @@ header .header-body a.button {
   position: relative;
   z-index: 1000;
   opacity: 0;
-  -webkit-transition: opacity 0.5s ease-in-out;
-  -moz-transition: opacity 0.5s ease-in-out;
-  transition: opacity 0.5s ease-in-out;
+  -webkit-transform: scale(0.8, 0.8);
+  -moz-transform: scale(0.8, 0.8);
+  -o-transform: scale(0.8, 0.8);
+  -ms-transform: scale(0.8, 0.8);
+  transform: scale(0.8, 0.8);
+  -webkit-transition: all 0.3s ease-out;
+  -moz-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
 }
 #stamp-category-nav-bar ol li div {
   background: url(/assets/img/sidenav_sprite.png) no-repeat;
@@ -681,11 +711,27 @@ header .header-body a.button {
 }
 #stamp-category-nav-bar ol a:hover {
   opacity: 1;
+  -webkit-transition: all 0s linear;
+  -moz-transition: all 0s linear;
+  transition: all 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
   /*background-position: -252px 0;*/
 
 }
 #stamp-category-nav-bar ol a:active {
   opacity: 1;
+  -webkit-transition: all 0s linear;
+  -moz-transition: all 0s linear;
+  transition: all 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
 }
 #stamp-category-nav-bar ol li.default div {
   background-position: 0 0;
@@ -718,6 +764,14 @@ body.book #stamp-category-nav-bar ol li.book a:hover,
 body.film #stamp-category-nav-bar ol li.film a:hover,
 body.other #stamp-category-nav-bar ol li.other a:hover {
   opacity: 1;
+  -webkit-transition: all 0s linear;
+  -moz-transition: all 0s linear;
+  transition: all 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
   pointer-events: none;
   cursor: default;
 }
@@ -1572,7 +1626,7 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
 .card {
   margin: 45px auto 0;
   padding: 0;
-  width: 940px;
+  width: 1000px;
   background: none repeat scroll 0 0 #FFFFFF;
   border: 0 none;
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
@@ -1637,27 +1691,32 @@ footer .copyright a {
 }
 .stamp-category-book .icon {
   background: url(/assets/img/entity-type-book.png) no-repeat;
+  display: inline-block;
   width: 19px;
   height: 15px;
 }
 .stamp-category-film .icon {
   background: url(/assets/img/entity-type-film.png) no-repeat;
+  display: inline-block;
   width: 15px;
   height: 15px;
 }
 .stamp-category-food .icon {
   background: url(/assets/img/entity-type-food.png) no-repeat;
+  display: inline-block;
   width: 21px;
   height: 15px;
 }
 .stamp-category-music .icon {
   background: url(/assets/img/entity-type-music.png) no-repeat;
+  display: inline-block;
   width: 15px;
   height: 15px;
 }
 .stamp-category-other .icon,
 .stamp-category- .icon {
   background: url(/assets/img/entity-type-other.png) no-repeat;
+  display: inline-block;
   width: 12px;
   height: 15px;
 }

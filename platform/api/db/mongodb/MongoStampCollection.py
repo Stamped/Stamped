@@ -10,7 +10,7 @@ import bson, logs, pprint, pymongo, re
 
 from datetime                       import datetime
 from utils                          import lazyProperty
-from Schemas                        import *
+from api.Schemas                    import *
 from Entity                         import buildEntity
 
 from api.AStampDB                   import AStampDB
@@ -50,28 +50,39 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         # Convert single-blurb documents into new multi-blurb schema
         if 'stamped' not in document['timestamp']:
+            if 'created' in document['timestamp']:
+                created = document['timestamp']['created']
+            else:
+                try:
+                    created = ObjectId(document[self._primary_key]).generation_time.replace(tzinfo=None)
+                except:
+                    created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
                 'mentions'  : document.pop('mentions', None),
-                'timestamp' : { 'created' : document['timestamp']['created'] },
+                'timestamp' : { 'created' : created },
             }
             if 'image_dimensions' in document:
                 contents['images'] = [
                     {
-                        'width'     : document['image_dimensions'].split(',')[0],
-                        'height'    : document['image_dimensions'].split(',')[1],
-                        'image'     : document['stamp_id'],
+                        'sizes' :
+                        [
+                            {
+                                'width'     : document['image_dimensions'].split(',')[0],
+                                'height'    : document['image_dimensions'].split(',')[1],
+                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['stamp_id'],
+                            }
+                        ]
                     }
                 ]
             document['contents'] = [ contents ]
-            document['timestamp']['stamped'] = document['timestamp']['created']
+            document['timestamp']['stamped'] = created
 
-        
         entityData = document.pop('entity')
-        entity = buildEntity(entityData, mini=True)
+        entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
         
-        stamp = self._obj(document, overflow=self._overflow)
+        stamp = self._obj().dataImport(document, overflow=self._overflow)
         stamp.entity = entity
 
         return stamp 
@@ -106,10 +117,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def user_likes_collection(self):
         return MongoUserLikesCollection()
     
-    @lazyProperty
-    def deleted_stamp_collection(self):
-        return MongoDeletedStampCollection()
-    
     def addStamp(self, stamp):
         return self._addObject(stamp)
     
@@ -124,8 +131,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def removeStamp(self, stampId):
         documentId = self._getObjectIdFromString(stampId)
         result = self._removeMongoDocument(documentId)
-
-        self.deleted_stamp_collection.addStamp(stampId)
 
         return result
     
@@ -211,9 +216,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 query['user.user_id'] = { '$in' : userIds }
 
         return self._collection.find(query).count()
-    
-    def getDeletedStamps(self, stampIds, genericCollectionSlice):
-        return self.deleted_stamp_collection.getStamps(stampIds, genericCollectionSlice)
     
     def checkStamp(self, userId, entityId):
         try:

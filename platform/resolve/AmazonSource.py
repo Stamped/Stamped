@@ -619,7 +619,7 @@ class AmazonSource(GenericSource):
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.amazon_id = proxy.key
+        entity.sources.amazon_id = proxy.key
         try:
             if entity.isType('book'):
                 entity.amazon_underlying = proxy.underlying.key

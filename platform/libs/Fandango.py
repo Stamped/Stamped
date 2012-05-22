@@ -11,7 +11,7 @@ import feedparser, gevent, os, re
 from datetime       import datetime
 from optparse       import OptionParser
 from libs.LibUtils  import parseDateString
-from Schemas        import *
+from api.Schemas    import *
 
 __all__ = [ "Fandango" ]
 
@@ -203,7 +203,7 @@ def main():
     
     for entity in results:
         from pprint import pprint
-        pprint(entity.value)
+        pprint(entity)
 
 if __name__ == '__main__':
     main()

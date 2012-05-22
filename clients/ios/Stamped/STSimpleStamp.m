@@ -27,6 +27,7 @@
 @synthesize isTodod = _isTodod;
 @synthesize isLiked = _isLiked;
 @synthesize modified = _modified;
+@synthesize stamped = _stamped;
 @synthesize numComments = _numComments;
 @synthesize numLikes = _numLikes;
 @synthesize stampID = _stampID;
@@ -41,6 +42,35 @@
 @synthesize badges = _badges;
 @synthesize contents = contents_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _blurb = [[decoder decodeObjectForKey:@"blurb"] retain];
+    _created = [[decoder decodeObjectForKey:@"created"] retain];
+    _deleted = [[decoder decodeObjectForKey:@"deleted"] retain];
+    _imageDimensions = [[decoder decodeObjectForKey:@"imageDimensions"] retain];
+    _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+    _isTodod = [[decoder decodeObjectForKey:@"isTodod"] retain];
+    _isLiked = [[decoder decodeObjectForKey:@"isLiked"] retain];
+    _modified = [[decoder decodeObjectForKey:@"modified"] retain];
+    _stamped = [[decoder decodeObjectForKey:@"stamped"] retain];
+    _numComments = [[decoder decodeObjectForKey:@"numComments"] retain];
+    _numLikes = [[decoder decodeObjectForKey:@"numLikes"] retain];
+    _stampID = [[decoder decodeObjectForKey:@"stampID"] retain];
+    _URL = [[decoder decodeObjectForKey:@"URL"] retain];
+    _via = [[decoder decodeObjectForKey:@"via"] retain];
+    
+    _entity = [[decoder decodeObjectForKey:@"entity"] retain];
+    _user = [[decoder decodeObjectForKey:@"user"] retain];
+    previews_ = [[decoder decodeObjectForKey:@"previews"] retain];
+    _mentions = [[decoder decodeObjectForKey:@"mentions"] retain];
+    _credits = [[decoder decodeObjectForKey:@"credits"] retain];
+    _badges = [[decoder decodeObjectForKey:@"badges"] retain];
+    contents_ = [[decoder decodeObjectForKey:@"contents"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_blurb release];
@@ -51,6 +81,7 @@
   [_isTodod release];
   [_isLiked release];
   [_modified release];
+  [_stamped release];
   [_numComments release];
   [_numLikes release];
   [_stampID release];
@@ -65,6 +96,31 @@
   [_badges release];
   [contents_ release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.blurb forKey:@"blurb"];
+  [encoder encodeObject:self.created forKey:@"created"];
+  [encoder encodeObject:self.deleted forKey:@"deleted"];
+  [encoder encodeObject:self.imageDimensions forKey:@"imageDimensions"];
+  [encoder encodeObject:self.imageURL forKey:@"imageURL"];
+  [encoder encodeObject:self.isTodod forKey:@"isTodod"];
+  [encoder encodeObject:self.isLiked forKey:@"isLiked"];
+  [encoder encodeObject:self.modified forKey:@"modified"];
+  [encoder encodeObject:self.stamped forKey:@"stamped"];
+  [encoder encodeObject:self.numComments forKey:@"numComments"];
+  [encoder encodeObject:self.numLikes forKey:@"numLikes"];
+  [encoder encodeObject:self.stampID forKey:@"stampID"];
+  [encoder encodeObject:self.URL forKey:@"URL"];
+  [encoder encodeObject:self.via forKey:@"via"];
+  
+  [encoder encodeObject:self.entity forKey:@"entity"];
+  [encoder encodeObject:self.user forKey:@"user"];
+  [encoder encodeObject:self.previews forKey:@"previews"];
+  [encoder encodeObject:self.mentions forKey:@"mentions"];
+  [encoder encodeObject:self.credits forKey:@"credits"];
+  [encoder encodeObject:self.badges forKey:@"badges"];
+  [encoder encodeObject:self.contents forKey:@"contents"];
 }
 
 + (RKObjectMapping*)mapping {
@@ -90,6 +146,7 @@
    @"created",
    @"deleted",
    @"modified",
+   @"stamped",
    @"via",
    nil];
   
@@ -112,6 +169,7 @@
   copy.isTodod = stamp.isTodod;
   copy.isLiked = stamp.isLiked;
   copy.modified = stamp.modified;
+  copy.stamped = stamp.stamped;
   copy.numComments = stamp.numComments;
   copy.numLikes = stamp.numLikes;
   copy.stampID = stamp.stampID;

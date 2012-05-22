@@ -111,14 +111,14 @@ class SearchResultConstraint(ASearchResultConstraint):
             
             if valid:
                 t0 = list(self.types)
-                t1 = list(map(lambda t: t.value, result.types))
+                t1 = list(result.types)
                 
                 if len(t0) == 1: t0 = t0[0]
                 if len(t1) == 1: t1 = t1[0]
                 
                 utils.log("VALIDATE %s/%s) %s vs %s (%s vs %s)" % 
                           (i, self.index, self.title, result.title, t0, t1))
-                utils.log(pformat(utils.normalize(result.value, strict=True)))
+                utils.log(pformat(utils.normalize(result.dataExport(), strict=True)))
             
             # optionally verify the validity of this result's title
             if self.title  is not None and not self._eq(self.title, result.title):
@@ -140,7 +140,7 @@ class SearchResultConstraint(ASearchResultConstraint):
                 for t in self.types:
                     for t2 in result.types:
                         try:
-                            t2 = t2.value
+                            t2 = t2.dataExport()
                         except Exception:
                             pass
                         

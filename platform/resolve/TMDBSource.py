@@ -107,15 +107,19 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def cast(self):
-        return [
-            {
+        try:
+            return [
+                {
                 'name':entry['name'],
                 'character':entry['character'],
                 'source':self.source,
                 'key':entry['id'],
-            }
-                for entry in self._castsRaw['cast']
-        ]
+                }
+            for entry in self._castsRaw['cast']
+            ]
+        except Exception:
+            pass
+        return []
 
     @lazyProperty
     def directors(self):
@@ -207,7 +211,7 @@ class TMDBSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.tmdb_id = proxy.key
+        entity.sources.tmdb_id = proxy.key
         return True
 
     def movieSource(self, query):
@@ -215,7 +219,6 @@ class TMDBSource(GenericSource):
             try:
                 results = self.__tmdb.movie_search(query.name)
                 if results is None:
-                    yield self.emptySource
                     return
                 for movie in results['results']:
                     yield movie
@@ -272,6 +275,16 @@ class TMDBSource(GenericSource):
                         pass
         return result
 
+<<<<<<< HEAD
+=======
+    def entityProxyFromKey(self, tmdb_id, **kwargs):
+        # Todo: Make sure we fail gracefully if id is invalid
+        try:
+            return TMDBMovie(tmdb_id)
+        except Exception as e:
+            logs.warning("Error: %s" % e)
+            raise
+>>>>>>> bd75fd4784c78165ac369065f217463ac776f5fa
 
     # def enrichEntity(self, entity, controller, decorations, timestamps):
     #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)

@@ -8,13 +8,13 @@
 
 #import "AccountManager.h"
 
-#import "GTMOAuthViewControllerTouch.h"
 #import "STAppDelegate.h"
 #import "FirstRunViewController.h"
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 #import "Util.h"
 #import "SocialManager.h"
+#import "GTMOAuthViewControllerTouch.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
 NSString* const kUserHasLoggedOutNotification = @"KUserHasLoggedOutNotification";

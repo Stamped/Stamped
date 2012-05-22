@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STPlaylist.h"
 
-@interface STSimplePlaylist : NSObject<STPlaylist>
+@interface STSimplePlaylist : NSObject<STPlaylist, NSCoding>
 
 @property (nonatomic, readwrite, retain) NSString* name;
 @property (nonatomic, readwrite, assign) NSInteger overflow;

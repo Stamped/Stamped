@@ -11,18 +11,18 @@ from httpapi.v0.helpers import *
 @require_http_methods(["POST"])
 def create(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.addFriendship(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.removeFriendship(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserRelationship)
@@ -57,18 +57,18 @@ def followers(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def approve(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.approveFriendship(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
 
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserId)
 @require_http_methods(["POST"])
 def blocksCreate(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.addBlock(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserId)
@@ -92,9 +92,9 @@ def blocking(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 def blocksRemove(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.removeBlock(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEmail)

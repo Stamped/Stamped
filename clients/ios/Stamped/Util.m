@@ -22,6 +22,7 @@
 #import "ECSlidingViewController.h"
 #import "STStampedAPI.h"
 #import "STConfiguration.h"
+#import "DDMenuController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -502,8 +503,8 @@ static Rdio* _rdio;
 }
 
 + (UINavigationController*)sharedNavigationController {
-  STAppDelegate* delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
-  return delegate.navigationController;
+  STAppDelegate *delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+  return (UINavigationController*)delegate.menuController.rootViewController;
 }
 
 + (void)globalLoadingLock {
@@ -780,23 +781,28 @@ static Rdio* _rdio;
 }
 
 + (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
-  UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
-  imageView.layer.borderWidth = 1.5;
-  imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
-  imageView.layer.borderColor = [UIColor whiteColor].CGColor;
-  imageView.layer.shadowOffset = CGSizeMake(0,2);
-  imageView.layer.shadowOpacity = .3;
-  imageView.layer.shadowRadius = 2;
-  UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
-  if (cachedImage) {
-    imageView.image = cachedImage;
-  }
-  else {
-    [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-      imageView.image = image;
-    }];
-  }
-  return imageView;
+ 
+    UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
+    imageView.layer.borderWidth = 1.5;
+    imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
+    imageView.layer.borderColor = [UIColor whiteColor].CGColor;
+    imageView.layer.shadowOffset = CGSizeMake(0,2);
+    imageView.layer.shadowOpacity = .3;
+    imageView.layer.shadowRadius = 2;
+    imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
+
+ 
+    UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
+    if (cachedImage) {
+        imageView.image = cachedImage;
+    }
+    else {
+        [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            imageView.image = image;
+        }];
+    }
+    return imageView;
+    
 }
 
 /*
@@ -960,17 +966,26 @@ static Rdio* _rdio;
 }
 
 + (void)_homeButtonClicked:(id)button {
-  [[ECSlidingViewController sharedInstance] anchorTopViewTo:ECRight];
+    
+    [((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController showLeftController:YES];
+    
 }
 
 + (void)addHomeButtonToController:(UIViewController*)controller withBadge:(BOOL)flag {
-  UIImage* normalImage = [UIImage imageNamed:@"nav_btn_menu"];
-  UIImage* activeImage = [Util gradientImage:[UIImage imageNamed:@"nav_btn_menu"] withPrimaryColor:@"99AACC" secondary:@"CCDDFF"];
-  STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(_homeButtonClicked:)];
-  if (flag) {
-    [Util addUnreadBadgeToView:button origin:CGPointMake(button.frame.size.width - 20 * .5, -20 * .3)];
-  }
-  controller.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:button] autorelease];
+  
+    UIImage* normalImage = [UIImage imageNamed:@"nav_btn_menu"];
+    UIImage* activeImage = [Util gradientImage:[UIImage imageNamed:@"nav_btn_menu"] withPrimaryColor:@"99AACC" secondary:@"CCDDFF"];
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(0.0f, 0.0f, 44.0f, 44.0f);
+    [button setImage:normalImage forState:UIControlStateNormal];
+    [button setImage:activeImage forState:UIControlStateHighlighted];
+    [button addTarget:self action:@selector(_homeButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:button];
+    controller.navigationItem.leftBarButtonItem = item;
+    [item release];
+    
 }
 
 + (STCancellation*)addUnreadBadgeToView:(UIView*)view origin:(CGPoint)origin {
@@ -978,7 +993,7 @@ static Rdio* _rdio;
     if (count && count.numberUnread.integerValue >0) {
       UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
       UIView* label = [Util viewWithText:[NSString stringWithFormat:@"%d", count.numberUnread.integerValue]
-                                    font:[UIFont stampedFontWithSize:12]
+                                    font:[UIFont boldSystemFontOfSize:12]
                                    color:[UIColor whiteColor]
                                     mode:UILineBreakModeTailTruncation
                               andMaxSize:countView.frame.size];
@@ -988,6 +1003,11 @@ static Rdio* _rdio;
       countView.layer.borderWidth = 1;
       countView.layer.borderColor = [UIColor whiteColor].CGColor;
       countView.layer.cornerRadius = countView.frame.size.width / 2;
+        countView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:countView.bounds cornerRadius:(countView.bounds.size.width/2)].CGPath;
+        countView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        countView.layer.shadowRadius = 2.0f;
+        countView.layer.shadowOpacity = 0.4f;
+        
       [Util addGradientToLayer:countView.layer
                     withColors:[NSArray arrayWithObjects:
                                 [UIColor colorWithRed:226/255.0 green:92/255.0 blue:65/255.0 alpha:1],
@@ -1001,18 +1021,38 @@ static Rdio* _rdio;
 }
 
 + (void)_createStampButtonClicked:(id)notImportant {
-  [[ECSlidingViewController sharedInstance] anchorTopViewTo:ECLeft];
+    
+    [((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController showRightController:YES];
+    
 }
 
 + (void)addCreateStampButtonToController:(UIViewController*)controller {
-  id<STUser> user = [STStampedAPI sharedInstance].currentUser;
-  UIImage* baseImage = [UIImage imageNamed:@"nav_btn_createStamp_color"];
-  UIImage* normalImage = [Util gradientImage:baseImage withPrimaryColor:user.primaryColor secondary:user.secondaryColor];
-  UIImage* activeImage = [Util whiteMaskedImageUsingImage:baseImage];
-  STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(_createStampButtonClicked:)];
-  [button addSubview:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_btn_createStamp_overlay"]] autorelease]];
-  //button.backgroundColor = [UIColor blackColor];
-  controller.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:button] autorelease];
+ 
+    id<STUser> user = [STStampedAPI sharedInstance].currentUser;
+  
+    UIImage* baseImage = [UIImage imageNamed:@"nav_btn_createStamp_color"];
+    UIImage* normalImage = [Util gradientImage:baseImage withPrimaryColor:user.primaryColor secondary:user.secondaryColor];
+    UIImage* activeImage = [Util whiteMaskedImageUsingImage:baseImage];
+ 
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(0.0f, 0.0f, 44.0f, 44.0f);
+    [button setImage:normalImage forState:UIControlStateNormal];
+    [button setImage:activeImage forState:UIControlStateHighlighted];
+    [button addTarget:self action:@selector(_createStampButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIImageView *overlay = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"nav_btn_createStamp_overlay"]];
+    [button addSubview:overlay];
+    [overlay release];
+    
+    CGRect frame = overlay.frame;
+    frame.origin.x = floorf((button.bounds.size.width-frame.size.width)/2);
+    frame.origin.y = floorf((button.bounds.size.height-frame.size.height)/2);
+    overlay.frame = frame;
+                     
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:button];
+    controller.navigationItem.rightBarButtonItem = item;
+    [item release];
+
 }
 
 + (void)_configurationButtonClicked:(id)notImportant {

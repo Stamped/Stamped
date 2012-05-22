@@ -35,8 +35,7 @@
 @synthesize prepareCancellations = prepareCancellations_;
 @synthesize failed = failed_;
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
     preloadBufferSize_ = 20;
@@ -46,8 +45,7 @@
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [self cancelAndClearPreparations];
   [self cancelPendingRequests];
   [lazyList_ removeDelegate:self];

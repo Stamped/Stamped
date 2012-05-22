@@ -57,8 +57,7 @@ static const NSInteger _batchSize = 20;
 @synthesize delegate = _delegate;
 @synthesize cancellations = cancellations_;
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
     _loadingText = @"Loading...";
@@ -69,8 +68,7 @@ static const NSInteger _batchSize = 20;
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [_slice release];
   [_stamps release];
   [_loadingText release];
@@ -180,11 +178,13 @@ static const NSInteger _batchSize = 20;
   }
   else {
     if (indexPath.row >= self.firstStampOffset) {
-      id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row + self.firstStampOffset];
-      STStampCell* cell = [[[STStampCell alloc] initWithStamp:stamp] autorelease];
-      self.maxRow = MAX(self.maxRow, indexPath.row);
-      [self populateStamps];
-      return cell;
+        static NSString *CellIdentifier = @"CellIdentifier";
+        id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row + self.firstStampOffset];
+        STStampCell* cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        [cell setupWithStamp:stamp];
+        self.maxRow = MAX(self.maxRow, indexPath.row);
+        [self populateStamps];
+        return cell;
     }
     else {
       NSAssert(NO,@"Not implemented yet");

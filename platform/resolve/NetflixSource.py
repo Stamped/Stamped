@@ -73,9 +73,12 @@ class _NetflixObject(object):
             formats = self._getFromLinks('href', 'format_availability', 'delivery_formats')
             for availableType in self._asList(formats['availability']):
                 if availableType['category']['term'] == 'instant':
+                    logs.info('### returning true for is_instant_available')
                     return True
+            logs.info('### returning false for is_instant_available')
             return False
         except Exception:
+            logs.info('### hit an exception in is_instant_available')
             return False
 
     @lazyProperty
@@ -98,8 +101,6 @@ class _NetflixObject(object):
     def cast(self):
         try:
             cast = filter(lambda link : link['title'] ==  u'cast',  self._titleObj['link'])[0]['people']['link']
-            # for entry in cast:
-            #     print("\nCAST MEMBER: %s" % entry['title'])
             return [
                 {
                 'name':         entry['title'],
@@ -278,8 +279,8 @@ class NetflixSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.netflix_is_instant_available = proxy.is_instant_available
-        entity.netflix_instant_available_until = proxy.instant_available_until
+        entity.sources.netflix_is_instant_available = proxy.is_instant_available
+        entity.sources.netflix_instant_available_until = proxy.instant_available_until
         return True
 
 
@@ -313,6 +314,8 @@ class NetflixSource(GenericSource):
                         yield title
             except GeneratorExit:
                 pass
+            except KeyError:
+                return
         return gen()
 
     def movieSource(self, query):

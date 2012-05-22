@@ -12,14 +12,14 @@
 @implementation STConsumptionLazyList
 
 - (void)setGenericSlice:(STGenericSlice *)genericSlice {
-  NSLog(@"consumptionSlice:%@",genericSlice);
+  //NSLog(@"consumptionSlice:%@",genericSlice);
   NSAssert1([genericSlice isMemberOfClass:[STConsumptionSlice class]], @"slice must be a consumption slice; was %@", genericSlice);
   [super setGenericSlice:genericSlice];
 }
 
 - (STCancellation*)makeStampedAPICallWithSlice:(STGenericSlice*)slice 
                                    andCallback:(void (^)(NSArray* results, NSError* error, STCancellation* cancellation))block {
-  NSLog(@"Consumption:%@,%@",slice.offset, slice.limit);
+  //NSLog(@"Consumption:%@,%@",slice.offset, slice.limit);
   return [[STStampedAPI sharedInstance] stampsForConsumptionSlice:(id)slice andCallback:block];
 }
 

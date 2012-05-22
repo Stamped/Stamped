@@ -10,7 +10,7 @@ import feedparser, gevent, os, re
 
 from AEntitySource import AExternalDumpEntitySource
 from BeautifulSoup import BeautifulSoup
-from Schemas       import Entity
+from api.Schemas   import Entity
 from pprint        import pprint
 from gevent.pool   import Pool
 
@@ -109,7 +109,7 @@ class AmazonBookFeed(AExternalDumpEntitySource):
                                 entity.author = author
                                 pass
                 
-                #pprint(entity.value)
+                #pprint(entity)
                 #self._globals['books'] = entry
                 
                 if asin in self.seen:

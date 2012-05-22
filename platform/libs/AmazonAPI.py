@@ -11,7 +11,7 @@ import copy, gevent, os, re, string, sys
 
 from BeautifulSoup  import BeautifulSoup
 from optparse       import OptionParser
-from Schemas        import BasicEntity
+from api.Schemas    import BasicEntity
 from lxml           import objectify, etree
 from bottlenose     import Amazon
 from errors         import Fail
@@ -62,7 +62,7 @@ class AmazonAPI(object):
         
         """
         for entity in entities:
-            pprint(entity.value)
+            pprint(entity)
         print '\n\n\n'
         """
         
@@ -103,7 +103,7 @@ class AmazonAPI(object):
                 entity.subcategory = self._subcategory_map[product_group]
             except:
                 #print product_group
-                #pprint(entity.value)
+                #pprint(entity)
                 return None
             
             attribute_elems = {
@@ -345,7 +345,7 @@ def main():
         print etree.tostring(results, pretty_print=True)
     else:
         for entity in results:
-            pprint(entity.value)
+            pprint(entity)
 
 if __name__ == '__main__':
     main()

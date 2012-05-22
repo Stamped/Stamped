@@ -9,7 +9,7 @@ import Globals, logs, re
 import unicodedata, utils
 
 try:
-    from Schemas        import *
+    from api.Schemas        import *
     from difflib        import SequenceMatcher
     from libs.LibUtils  import parseDateString
     from datetime       import datetime
@@ -270,16 +270,12 @@ def deriveTypesFromSubcategories(subcategories):
     return result 
 
 def deriveSubcategoryFromTypes(types):
-    if isinstance(types, SchemaElement):
-        types = types.value
     for t in types:
         if t in subcategories.keys():
             return t 
     return 'other'
 
 def deriveCategoryFromTypes(types):
-    if isinstance(types, SchemaElement):
-        types = types.value
     subcategory = deriveSubcategoryFromTypes(types)
     if subcategory in subcategories:
         return subcategories[subcategory]
@@ -294,7 +290,9 @@ def buildEntity(data=None, kind=None, mini=False):
         new = getEntityMiniObjectFromKind(kind)
     else:
         new = getEntityObjectFromKind(kind)
-    return new(data, overflow=True)
+    if data is not None:
+        return new().dataImport(data, overflow=True)
+    return new()
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
@@ -330,23 +328,23 @@ def upgradeEntityData(entityData):
                     pass
 
             if newSuffix is None:
-                target[newName] = item 
+                setattr(target, newName, item)
             else:
-                target['%s_%s' % (newName, newSuffix)] = item
+                setattr(target, '%s_%s' % (newName, newSuffix), item)
 
             sourceName = 'format'
             if seed:
                 sourceName = 'seed'
 
             if newName != 'tombstone':
-                target['%s_source' % newName] = source.pop('%s_source' % oldName, sourceName)
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
+                setattr(target, '%s_source' % newName, source.pop('%s_source' % oldName, sourceName))
+            setattr(target, '%s_timestamp' % newName, source.pop('%s_timestamp' % oldName, seedTimestamp))
 
             if additionalSuffixes is not None:
                 for s in additionalSuffixes:
                     t = source.pop('%s_%s' % (oldName, s), None)
                     if t is not None:
-                        target['%s_%s' % (newName, s)] = t 
+                        setattr(target, '%s_%s' % (newName, s), t)
     
     def setListGroup(source, target, oldName, newName=None, delimiter=',', wrapper=None, seed=True):
         if newName is None:
@@ -363,14 +361,14 @@ def upgradeEntityData(entityData):
                     items.append(entityMini)
                 else:
                     items.append(i.strip())
-            target[newName] = items 
+            setattr(target, newName, items)
 
             sourceName = 'format'
             if seed:
                 sourceName = 'seed'
 
-            target['%s_source' % newName]     = source.pop('%s_source' % oldName, sourceName)
-            target['%s_timestamp' % newName]  = source.pop('%s_timestamp' % oldName, seedTimestamp)
+            setattr(target, '%s_source' % newName, source.pop('%s_source' % oldName, sourceName))
+            setattr(target, '%s_timestamp' % newName, source.pop('%s_timestamp' % oldName, seedTimestamp))
     
     sources                 = old.pop('sources', {})
     details                 = old.pop('details', {})
@@ -404,8 +402,8 @@ def upgradeEntityData(entityData):
             image = ImageSchema()
             size  = ImageSizeSchema()
             size.url = oldImage
-            image.sizes.append(size)
-            new.images.append(image)
+            image.sizes = [ size ]
+            new.images = [ image ]
             break
     if len(new.images) > 0:
         new.images_source = 'seed'
@@ -415,31 +413,31 @@ def upgradeEntityData(entityData):
     subcategory = old['subcategory']
     if subcategory == 'song':
         subcategory = 'track'
-    new.types.append(subcategory)
-    
+    new.types += (subcategory,)
+
     # Sources
-    setBasicGroup(sources, new['sources'], 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'fandango', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources, new['sources'], 'stamped', 'tombstone', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources.pop('tmdb', {}), new['sources'], 'tmdb', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    setBasicGroup(sources.pop('factual', {}), new['sources'], 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'spotify', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'rdio', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'fandango', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'stamped', 'tombstone', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('tmdb', {}), new.sources, 'tmdb', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('factual', {}), new.sources, 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     # TODO: Add factual_crosswalk
-    setBasicGroup(sources.pop('singleplatform', {}), new['sources'], 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources.pop('singleplatform', {}), new.sources, 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     
     # Apple / iTunes
-    setBasicGroup(sources, new['sources'], 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.itunes_id is None:
         apple = sources.pop('apple', {})
-        setBasicGroup(apple, new['sources'], 'aid', 'itunes', newSuffix='id')
-        setBasicGroup(apple, new['sources'], 'view_url', 'itunes', newSuffix='url')
+        setBasicGroup(apple, new.sources, 'aid', 'itunes', newSuffix='id')
+        setBasicGroup(apple, new.sources, 'view_url', 'itunes', newSuffix='url')
     
     # Amazon
-    setBasicGroup(sources, new['sources'], 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(sources, new.sources, 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.amazon_id is None:
         amazon = sources.pop('amazon', {})
-        setBasicGroup(amazon, new['sources'], 'asin', 'amazon', newSuffix='id')
-        setBasicGroup(amazon, new['sources'], 'amazon_link', 'amazon', newSuffix='url')
+        setBasicGroup(amazon, new.sources, 'asin', 'amazon', newSuffix='id')
+        setBasicGroup(amazon, new.sources, 'amazon_link', 'amazon', newSuffix='url')
     
     # Netflix
     if netflix:
@@ -447,15 +445,15 @@ def upgradeEntityData(entityData):
         setBasicGroup(netflix, new['sources'], 'nurl', 'netflix', newSuffix='url')
 
     # OpenTable
-    setBasicGroup(sources, new['sources'], 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
+    setBasicGroup(sources, new.sources, 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
     if new.sources.opentable_id is None:
-        setBasicGroup(sources.pop('openTable', {}), new['sources'], 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
+        setBasicGroup(sources.pop('openTable', {}), new.sources, 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
     
     # Google Places
     googleplaces = sources.pop('googlePlaces', {})
-    setBasicGroup(googleplaces, new['sources'], 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(googleplaces, new.sources, 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.googleplaces_id is None:
-        setBasicGroup(googleplaces, new['sources'], 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
+        setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
     
     # User Generated
     userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)
@@ -470,21 +468,24 @@ def upgradeEntityData(entityData):
             new.sources.user_generated_subtitle = subtitle
     
     # Contacts
-    setBasicGroup(contact, new.contact, 'phone')
-    setBasicGroup(contact, new.contact, 'site')
-    setBasicGroup(contact, new.contact, 'email')
-    setBasicGroup(contact, new.contact, 'fax')
+    setBasicGroup(contact, new, 'phone')
+    setBasicGroup(contact, new, 'site')
+    setBasicGroup(contact, new, 'email')
+    setBasicGroup(contact, new, 'fax')
     
     # Places
     if kind == 'place':
         coordinates = old.pop('coordinates', None)
         if coordinates is not None:
-            new.coordinates = coordinates
+            new.coordinates = CoordinatesSchema().dataImport(coordinates)
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents, seed=False)
-        
+
+
         setBasicGroup(place, new, 'address', 'formatted_address')
+        if 'hours' in place:
+            place['hours'] = HoursSchema().dataImport(place['hours'], overflow=True)
         setBasicGroup(place, new, 'hours', seed=False)
         setBasicGroup(restaurant, new, 'menu', seed=False)
         setBasicGroup(restaurant, new, 'price_range', seed=False)
@@ -496,24 +497,27 @@ def upgradeEntityData(entityData):
     if kind == 'person':
         songs = artist.pop('songs', [])
         itunesSource = False
+        newSongs = []
         for song in songs:
             entityMini = MediaItemEntityMini()
             entityMini.title = song['song_name']
             entityMini.kind = 'media_item'
-            entityMini.types.append('track')
+            entityMini.types = [ 'track' ]
             if 'id' in song and 'source' in song and song['source'] == 'itunes':
                 itunesSource = True
                 entityMini.sources.itunes_id = song['id']
                 entityMini.sources.itunes_source = 'itunes'
                 entityMini.sources.itunes_timestamp = song.pop('timestamp', seedTimestamp)
-            new.tracks.append(entityMini)
-        if len(songs) > 0:
+            newSongs.append(entityMini)
+        if len(newSongs) > 0:
+            new.tracks = newSongs
             sourceName = 'itunes' if itunesSource else 'format'
             new.tracks_source = artist.pop('songs_source', sourceName)
             new.tracks_timestamp = artist.pop('songs_timestamp', seedTimestamp)
 
         albums = artist.pop('albums', [])
         itunesSource = False
+        newAlbums = []
         for item in albums:
             entityMini = MediaCollectionEntityMini()
             entityMini.title = item['album_name']
@@ -521,8 +525,9 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_id = item['id']
                 entityMini.sources.itunes_source = 'itunes'
                 entityMini.sources.itunes_timestamp = item.pop('timestamp', seedTimestamp)
-            new.albums.append(entityMini)
-        if len(albums) > 0:
+            newAlbums.append(entityMini)
+        if len(newAlbums) > 0:
+            new.albums = albums
             sourceName = 'itunes' if itunesSource else 'format'
             new.albums_source = artist.pop('albums_source', sourceName)
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
@@ -560,11 +565,13 @@ def upgradeEntityData(entityData):
     # Album
     if 'album' in types:
         songs = album.pop('tracks', [])
+        newSongs = []
         for song in songs:
             entityMini = MediaItemEntityMini()
             entityMini.title = song
-            new.tracks.append(entityMini)
-        if len(songs) > 0:
+            newSongs.append(entityMini)
+        if len(newSongs) > 0:
+            new.tracks = newSongs
             new.tracks_source = album.pop('songs_source', 'format')
             new.tracks_timestamp = album.pop('songs_timestamp', seedTimestamp)
     
@@ -579,7 +586,7 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_id = albumId 
                 entityMini.sources.itunes_source = 'seed'
                 entityMini.sources.itunes_timestamp = seedTimestamp
-            new.albums.append(entityMini)
+            new.albums = [ entityMini ]
             new.albums_source = song.pop('album_name_source', 'format')
             new.albums_timestamp = song.pop('album_name_timestamp', seedTimestamp)
     
@@ -589,13 +596,15 @@ def upgradeEntityData(entityData):
         setListGroup(media, new, 'artist_display_name', 'authors', wrapper=PersonEntityMini, seed=False)
 
         screenshots = media.pop('screenshots', [])
+        newScreenshots = []
         for screenshot in screenshots:
             imageSchema = ImageSchema()
             imageSizeSchema = ImageSizeSchema()
             imageSizeSchema.url = screenshot
-            imageSchema.sizes.append(imageSizeSchema)
-            new.screenshots.append(imageSchema)
-        if len(screenshots) > 0:
+            imageSchema.sizes = [ imageSizeSchema ]
+            newScreenshots.append(imageSchema)
+        if len(newScreenshots) > 0:
+            new.screenshots = newScreenshots
             new.screenshots_source = media.pop('screenshots_source', 'format')
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
     
@@ -618,13 +627,14 @@ def fast_id_dedupe(entities, seen=None):
     output = []
     for entity in entities:
 
-        keys = [ k for k in entity.sources if k.endswith('_id') ]
+        sources = entity.sources.dataExport()
+        keys = [ k for k in sources if k.endswith('_id') ]
         keep = True
         
         # ensure that the same source id doesn't appear twice in the result set
         # (source ids are supposed to be unique)
         for key in keys:
-            value = str(entity[key])
+            value = str(getattr(entity.sources, key))
             
             if value in seen[key]:
                 keep = False

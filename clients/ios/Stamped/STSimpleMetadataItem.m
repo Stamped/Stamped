@@ -17,6 +17,18 @@
 @synthesize link = link_;
 @synthesize action = action_;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    name_ = [[decoder decodeObjectForKey:@"name"] retain];
+    value_ = [[decoder decodeObjectForKey:@"value"] retain];
+    icon_ = [[decoder decodeObjectForKey:@"icon"] retain];
+    link_ = [[decoder decodeObjectForKey:@"link"] retain];
+    action_ = [[decoder decodeObjectForKey:@"action"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc {
   self.name = nil;
   self.value = nil;
@@ -25,6 +37,14 @@
   self.action = nil;
   
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.name forKey:@"name"];
+  [encoder encodeObject:self.value forKey:@"value"];
+  [encoder encodeObject:self.icon forKey:@"icon"];
+  [encoder encodeObject:self.link forKey:@"link"];
+  [encoder encodeObject:self.action forKey:@"action"];
 }
 
 + (RKObjectMapping*)mapping {

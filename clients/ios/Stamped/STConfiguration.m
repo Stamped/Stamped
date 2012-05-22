@@ -233,8 +233,7 @@ static STConfiguration* _sharedInstance;
   return _sharedInstance;
 }
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
     objects_ = [[NSMutableDictionary alloc] init];
@@ -244,8 +243,7 @@ static STConfiguration* _sharedInstance;
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [objects_ release];
   [sections_ release];
   [orderedSections_ release];
@@ -355,10 +353,10 @@ static STConfiguration* _sharedInstance;
       [f setNumberStyle:NSNumberFormatterDecimalStyle];
       NSNumber* number = [f numberFromString:[components objectAtIndex:1]];
       if (number) {
-        return [UIFont fontWithName:[components objectAtIndex:0] size:number.floatValue];
+        return (id)[UIFont fontWithName:[components objectAtIndex:0] size:number.floatValue];
       }
     }
-    return (id) nil;
+    return (id)nil;
   };
   item.toString = ^(id value) {
     UIFont* theFont = value;
@@ -395,7 +393,7 @@ static STConfiguration* _sharedInstance;
         CGFloat rgb[3];
         BOOL success = [Util splitHexString:hexString toRGB:rgb];
         if (success) {
-          return [UIColor colorWithRed:rgb[0] green:rgb[1] blue:rgb[2] alpha:alpha.floatValue];
+          return (id)[UIColor colorWithRed:rgb[0] green:rgb[1] blue:rgb[2] alpha:alpha.floatValue];
         }
       }
     }
@@ -443,7 +441,7 @@ static STConfiguration* _sharedInstance;
       NSNumber* x = [Util numberFromString:[comps objectAtIndex:0]];
       NSNumber* y = [Util numberFromString:[comps objectAtIndex:1]];
       if (x && y) {
-        return [NSValue valueWithCGPoint:CGPointMake(x.floatValue, y.floatValue)];
+        return (id)[NSValue valueWithCGPoint:CGPointMake(x.floatValue, y.floatValue)];
       }
     }
     return (id) nil;

@@ -11,7 +11,7 @@ from datetime import datetime
 from utils import lazyProperty
 from errors import *
 
-from Schemas import *
+from api.Schemas import *
 
 from AMongoCollection import AMongoCollection
 
@@ -44,14 +44,14 @@ class MongoInviteQueueCollection(AMongoCollection):
     
 
     def addInvite(self, invite):
-        result = self._collection.insert_one(invite.value)
+        result = self._collection.insert_one(invite.dataExport())
         return result
     
 
     def addInvites(self, invites):
         objects = []
         for invite in invites:
-            objects.append(invite.value)
+            objects.append(invite.dataExport())
         result = self._collection.insert(objects)
         return result
 

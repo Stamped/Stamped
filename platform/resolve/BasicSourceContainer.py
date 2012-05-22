@@ -40,7 +40,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         if is_prod_stack():
             self.__global_max_age = timedelta(7)
         else:
-            self.__global_max_age = timedelta(minutes=100)
+            self.__global_max_age = timedelta(minutes=0)
         self.__failedValues = {}
         self.failedIncrement = 10
         self.passedDecrement = 2
@@ -69,7 +69,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             modified = False
             for source in self.__sources:
                 if entity.kind == 'search' or entity.kind in source.kinds:
-                    if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types.value).intersection(source.types)) == 0:
+                    if len(entity.types) > 0 and len(source.types) > 0 and len(set(entity.types).intersection(source.types)) == 0:
                         continue
                     # check if a source failed, and if so, whether it has cooled down for reuse
                     if source not in failedSources and self.__failedValues[source] < self.failedCutoff:
@@ -80,7 +80,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 targetGroups.add(group)
                         if len(targetGroups) > 0:
                             #  We have groups that are eligible for enrichment.  We'll modify a deep-copy of the entity
-                            copy = buildEntity(entity.value)
+                            copy = buildEntity(entity.dataExport())
                             # timestamps - { GROUP - timestamp }
                             # empty, single-use timestamps map for specifying failed attempts,
                             # assignment regardless of current value,

@@ -37,14 +37,14 @@ class SinglePlatformSource(BasicSource):
         return StampedSinglePlatform()
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
-        singleplatform_id = entity['singleplatform_id']
+        singleplatform_id = getattr(entity.sources, 'singleplatform_id')
         try:
             if singleplatform_id is not None:
                 if controller.shouldEnrich('menu', self.sourceName, entity):
                     menu = self.__singleplatform.get_menu_schema(singleplatform_id)
-                    entity['menu'] = menu != None
+                    entity.menu = menu != None
                     if menu is not None:
-                        menu['entity_id'] = entity['entity_id']
+                        menu['entity_id'] = entity.entity_id
                         decorations['menu'] = menu
                         logs.debug('Regenerated menu for %s' % singleplatform_id)
         except HTTPError as e:
@@ -55,6 +55,6 @@ class SinglePlatformSource(BasicSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.singleplatform_id = proxy.key
+        entity.sources.singleplatform_id = proxy.key
         return True
 

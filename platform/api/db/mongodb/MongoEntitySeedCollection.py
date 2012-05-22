@@ -12,7 +12,7 @@ try:
     from datetime                       import datetime
     from utils                          import lazyProperty
 
-    from Schemas                        import *
+    from api.Schemas                        import *
     from Entity                         import getSimplifiedTitle, buildEntity
 
     from AMongoCollection               import AMongoCollection

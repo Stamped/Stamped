@@ -10,7 +10,7 @@
 #import "STStamp.h"
 #import <RestKit/RestKit.h>
 
-@interface STSimpleStamp : NSObject <STStamp>
+@interface STSimpleStamp : NSObject <STStamp, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* blurb;
 @property (nonatomic, readwrite, copy) NSDate* created;
@@ -20,6 +20,7 @@
 @property (nonatomic, readwrite, copy) NSNumber* isTodod;
 @property (nonatomic, readwrite, copy) NSNumber* isLiked;
 @property (nonatomic, readwrite, copy) NSDate* modified;
+@property (nonatomic, readwrite, copy) NSDate* stamped;
 @property (nonatomic, readwrite, copy) NSNumber* numComments;
 @property (nonatomic, readwrite, copy) NSNumber* numLikes;
 @property (nonatomic, readwrite, copy) NSString* stampID;

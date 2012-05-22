@@ -24,16 +24,14 @@
 
 @implementation STIWantToViewController
 
-- (id)init
-{
+- (id)init {
   self = [super init];
   if (self) {
   }
   return self;
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
   [super viewDidLoad];
   [Util addHomeButtonToController:self withBadge:YES];
   [Util addCreateStampButtonToController:self];
@@ -59,6 +57,7 @@
       cellView.layer.shadowOpacity = .4;
       cellView.layer.shadowRadius = 2;
       cellView.layer.shadowOffset = CGSizeMake(0, 2);
+        cellView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:cellView.bounds cornerRadius:5].CGPath;
       
       NSArray* colors;
       if (k == 0) {
@@ -84,14 +83,12 @@
   }
 }
 
-- (void)viewDidUnload
-{
+- (void)viewDidUnload {
   [super viewDidUnload];
   // Release any retained subviews of the main view.
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
@@ -106,7 +103,7 @@
     }
   }
   if (controller) {
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [self.navigationController pushViewController:controller animated:YES];
   }
   else {
     [Util warnWithMessage:[NSString stringWithFormat:@"controller for %@ not implemented yet...", category] andBlock:nil];

@@ -10,7 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STGallery.h"
 
-@interface STSimpleGallery : NSObject
+@interface STSimpleGallery : NSObject <STGallery, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* layout;
 @property (nonatomic, readwrite, copy) NSString* name;

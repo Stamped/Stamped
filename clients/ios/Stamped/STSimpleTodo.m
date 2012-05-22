@@ -19,6 +19,19 @@
 @synthesize created = _created;
 @synthesize complete = _complete;
 
+- (id)initWithCoder:(NSCoder *)decoder {
+  self = [super init];
+  if (self) {
+    _todoID = [[decoder decodeObjectForKey:@"todoID"] retain];
+    _userID = [[decoder decodeObjectForKey:@"userID"] retain];
+    _entity = [[decoder decodeObjectForKey:@"entity"] retain];
+    _stamp = [[decoder decodeObjectForKey:@"stamp"] retain];
+    _created = [[decoder decodeObjectForKey:@"created"] retain];
+    _complete = [[decoder decodeObjectForKey:@"complete"] retain];
+  }
+  return self;
+}
+
 - (void)dealloc
 {
   [_todoID release];
@@ -28,6 +41,15 @@
   [_created release];
   [_complete release];
   [super dealloc];
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder {
+  [encoder encodeObject:self.todoID forKey:@"todoID"];
+  [encoder encodeObject:self.userID forKey:@"userID"];
+  [encoder encodeObject:self.entity forKey:@"entity"];
+  [encoder encodeObject:self.stamp forKey:@"stamp"];
+  [encoder encodeObject:self.created forKey:@"created"];
+  [encoder encodeObject:self.complete forKey:@"complete"];
 }
 
 + (RKObjectMapping*)mapping {

@@ -82,14 +82,19 @@ typedef enum {
 - (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
                                   andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
 
-- (void)createStampWithStampNew:(STStampNew*)stampNew andCallback:(void(^)(id<STStamp> stamp, NSError* error))block;
+- (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
+                               andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block;
 
 - (STCancellation*)entityForEntityID:(NSString*)entityID 
                          andCallback:(void(^)(id<STEntity> entity, NSError* error, STCancellation* cancellation))block;
 
-- (STCancellation*)entityDetailForEntityID:(NSString*)entityID 
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID
+                               andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID
+                               forceUpdate:(BOOL)forceUpdate
                                andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 

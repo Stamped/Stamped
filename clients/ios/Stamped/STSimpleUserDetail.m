@@ -30,7 +30,7 @@
 @synthesize distribution = _distribution;
 
 - (id)initWithCoder:(NSCoder *)decoder {
-  self = [super init];
+  self = [super initWithCoder:decoder];
   if (self) {
     _name = [[decoder decodeObjectForKey:@"name"] retain];
     _bio = [[decoder decodeObjectForKey:@"bio"] retain];
@@ -77,6 +77,7 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
+  [super encodeWithCoder:encoder];
   [encoder encodeObject:self.name forKey:@"name"];
   [encoder encodeObject:self.bio forKey:@"bio"];
   [encoder encodeObject:self.website forKey:@"website"];

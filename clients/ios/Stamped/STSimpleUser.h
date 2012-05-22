@@ -11,7 +11,7 @@
 #import "STUser.h"
 #import "User.h"
 
-@interface STSimpleUser : NSObject <STUser>
+@interface STSimpleUser : NSObject <STUser, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* userID;
 @property (nonatomic, readwrite, copy) NSString* screenName;
