@@ -1592,7 +1592,7 @@ class ViewportSchema(Schema):
         cls.addNestedProperty('upperLeft',          CoordinatesSchema)
         cls.addNestedProperty('lowerRight',         CoordinatesSchema)
 
-class HTTPTimeSlice(Schema):
+class TimeSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
@@ -1610,7 +1610,7 @@ class HTTPTimeSlice(Schema):
         cls.addProperty('user_id',                  basestring)
         cls.addProperty('scope',                    basestring) # me, friends, fof, popular
 
-class HTTPSearchSlice(Schema):
+class SearchSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
@@ -1626,7 +1626,7 @@ class HTTPSearchSlice(Schema):
         cls.addProperty('user_id',                  basestring)
         cls.addProperty('scope',                    basestring) # me, friends, fof, popular
 
-class HTTPRelevanceSlice(Schema):
+class RelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Filtering
