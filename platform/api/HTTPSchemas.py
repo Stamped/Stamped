@@ -2008,7 +2008,7 @@ class HTTPTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportTimeSlice(self):
         data                = self.dataExport()
@@ -2058,7 +2058,7 @@ class HTTPSearchSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportSearchSlice(self):
         data                = self.dataExport()
@@ -2102,7 +2102,7 @@ class HTTPRelevanceSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportRelevanceSlice(self):
         data                = self.dataExport()
