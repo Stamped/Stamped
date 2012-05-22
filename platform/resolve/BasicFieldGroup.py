@@ -97,11 +97,11 @@ class BasicFieldGroup(AFieldGroup):
     def getValue(self, entity, path):
         cur = entity
         for p in path[:-1]:
-            if p in cur:
+            if hasattr(cur, p):
                 cur = getattr(cur, p)
             else:
                 return None
-        if path[-1] in cur:
+        if hasattr(cur, path[-1]):
             return getattr(cur, path[-1])
         else:
             return None
