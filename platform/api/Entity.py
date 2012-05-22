@@ -615,7 +615,7 @@ def upgradeEntityData(entityData):
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
 
     logs.info('### returning from upgradeEntity and timestamp is: %s' % new.timestamp)
-    new['timestamp'] = timestamp
+    new.timestamp = TimeStampSchema.dataImport(timestamp)
     return new 
 
 def fast_id_dedupe(entities, seen=None):
