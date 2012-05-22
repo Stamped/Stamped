@@ -1833,9 +1833,9 @@ class HTTPEntityNew(Schema):
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
             addField(entity, 'coordinates', coords, now)
 
-        entity.user_generated_id            = authUserId
-        entity.user_generated_subtitle      = self.subtitle
-        entity.user_generated_timestamp     = now
+        entity.sources.user_generated_id            = authUserId
+        entity.sources.user_generated_subtitle      = self.subtitle
+        entity.sources.user_generated_timestamp     = now
 
         addListField(entity, 'directors', self.director, PersonEntityMini, now)
         addListField(entity, 'cast', self.cast, PersonEntityMini, now)
@@ -2059,6 +2059,7 @@ class HTTPSearchSlice(Schema):
         # Scope
         cls.addProperty('user_id',              basestring)
         cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
+        cls.addProperty('query',                basestring)
 
     def exportSearchSlice(self):
         data                = self.dataExport()

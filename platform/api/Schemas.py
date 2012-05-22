@@ -1625,6 +1625,7 @@ class SearchSlice(Schema):
         # Scope
         cls.addProperty('user_id',                  basestring)
         cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+        cls.addProperty('query',                    basestring) 
 
 class RelevanceSlice(Schema):
     @classmethod

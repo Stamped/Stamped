@@ -96,7 +96,7 @@ def collection(request, authUserId, schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
 @require_http_methods(["GET"])
 def search(request, authUserId, schema, **kwargs):
-    stamps = stampedAPI.searchStampCollection(authUserId, schema)
+    stamps = stampedAPI.searchStampCollection(schema, authUserId)
     return transformStamps(stamps)
 
 

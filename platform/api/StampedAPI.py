@@ -2887,12 +2887,10 @@ class StampedAPI(AStampedAPI):
      #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
     """
     
-    def _getStampCollection(self, stampIds, timeSlice, authUserId=None, enrich=True):
+    def _getStampCollection(self, stampIds, timeSlice, authUserId=None):
         
-        stampCap    = 50
-        
-        if timeSlice.limit is None or timeSlice.limit > stampCap:
-            timeSlice.limit = stampCap
+        if timeSlice.limit is None or timeSlice.limit <= 0 or timeSlice.limit > 50:
+            timeSlice.limit = 50
         
         # Buffer of 10 additional stamps
         limit = timeSlice.limit
@@ -2906,41 +2904,81 @@ class StampedAPI(AStampedAPI):
             logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
         
         return stamps
+    
+    def _searchStampCollection(self, stampIds, searchSlice, authUserId=None):
+        
+        if searchSlice.limit is None or searchSlice.limit <= 0 or searchSlice.limit > 50:
+            searchSlice.limit = 50
+        
+        # Buffer of 10 additional stamps
+        limit = searchSlice.limit
+        searchSlice.limit = limit + 10
+        
+        stampData = self._stampDB.searchStampCollectionSlice(stampIds, searchSlice)
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = stamps[:limit]
+        
+        if len(stampData) >= limit and len(stamps) < limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+        
+        return stamps
+
+    def _getUserStampIds(self, userId, authUserId=None):
+        user = self._userDB.getUser(userId)
+        return self._collectionDB.getUserStampIds(user.user_id)
+
+    def _getScopeStampIds(self, scope, authUserId=None):
+        if authUserId is None:
+            return None
+
+        if scope == 'you':
+            return self._collectionDB.getUserStampIds(authUserId)
+
+        if scope == 'inbox':
+            return self._collectionDB.getInboxStampIds(authUserId)
+
+        if scope == 'friends':
+            raise NotImplementedError()
+
+        if scope == 'fof':
+            return self._collectionDB.getFofStampIds(authUserId)
+
+        return None
 
     @API_CALL
     def getStampCollection(self, timeSlice, authUserId=None):
 
         # User
         if timeSlice.user_id is not None:
-            user        = self._userDB.getUser(timeSlice.user_id)
-            ### TODO: Check privacy
-
-            stampIds    = self._collectionDB.getUserStampIds(user.user_id)
+            stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
             result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
             return result
 
         # Inbox
-        if authUserId is None:
-            stampIds = None
-        elif timeSlice.scope == 'me':
-            stampIds = self._collectionDB.getUserStampIds(authUserId)
-        elif timeSlice.scope == 'inbox':
-            stampIds = self._collectionDB.getInboxStampIds(authUserId)
-        elif timeSlice.scope == 'friends':
-            raise NotImplementedError()
-        elif timeSlice.scope == 'fof':
-            stampIds = self._collectionDB.getFofStampIds(authUserId)
         else:
-            stampIds = None
+            stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
+            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
-        result = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-        return result
+            return result
 
     @API_CALL
     def searchStampCollection(self, searchSlice, authUserId=None):
-        pass
+        print searchSlice
+        # User
+        if searchSlice.user_id is not None:
+            stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
+            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+            return result
+
+        # Inbox
+        else:
+            stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
+            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+            return result
+
 
 
 

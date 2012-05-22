@@ -91,8 +91,21 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
                    lambda x: self.assertTrue(x[0]['contents'][-1]['blurb'] == self.stampC['contents'][-1]['blurb']), 
         ])
 
+class StampedAPICollectionsSearch(StampedAPICollectionTest):
+    def test_inbox(self):
+        path = "stamps/search.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "scope" : "inbox",
+            "query" : "america",
+        }
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 3), 
+        ])
 
-class StampedAPICollectionsActions(StampedAPICollectionTest):
+
+class StampedAPICollectionsLikes(StampedAPICollectionTest):
     def test_like(self):
         path = "stamps/likes/create.json"
         data = {
@@ -134,6 +147,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         
         self.async(lambda: self.handleGET(path, data), _validate_result2)
     
+class StampedAPICollectionsFavs(StampedAPICollectionTest):
     def test_fav(self):
         favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
         
