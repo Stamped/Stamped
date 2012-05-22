@@ -51,6 +51,7 @@
         NSString *imageName = [NSString stringWithFormat:@"consumption_%@", category];
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.adjustsImageWhenHighlighted = NO;
         button.frame = buttonFrame;
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];

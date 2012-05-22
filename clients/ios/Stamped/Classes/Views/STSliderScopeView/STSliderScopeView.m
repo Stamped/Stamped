@@ -560,8 +560,6 @@
             [_textPopover showFromView:self position:position animated:YES];
         }
         
-        //[self showAll];
-        
     }
     
     if (_textPopover) {
@@ -572,10 +570,9 @@
         [_textPopover showFromView:self position:viewPosition animated:NO];
     }
     
-    if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
+    if (!_dragging && (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled)) {
         
         _firstPress = NO;
-       // [self hideAll];
         
         if (_textPopover) {
             [_textPopover removeFromSuperview];
@@ -622,7 +619,7 @@
             _prevScope = scope;
         }
 
-        if (!_firstPan) {
+        if (!_firstPan && (gesture.state == UIGestureRecognizerStateBegan || gesture.state == UIGestureRecognizerStateChanged)) {
             
             __block UIImageView *view = _draggingView;
             __block CGPoint viewPosition = view.layer.position;
@@ -637,12 +634,16 @@
             
         } else {
             
+            CGFloat maxX = [self positionForIndex:3].x;
+            CGFloat minX = [self positionForIndex:0].x;
+
             UIImageView *view = _draggingView;
             CGPoint viewPosition = view.layer.position;
             viewPosition.y -= 46.0f;
             [_textPopover showFromView:self position:viewPosition animated:NO];
             viewPosition = view.layer.position;
-            viewPosition.x = position.x;
+            viewPosition.x = MIN(position.x, maxX);
+            viewPosition.x = MAX(minX, viewPosition.x);
             view.layer.position = viewPosition;
             
         }
@@ -742,11 +743,15 @@
     if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
         return YES;
     }
+    
     if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-        return NO;
+        if ([otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+            return NO;
+        }
+        return (gestureRecognizer.view == self);
     }
     
-    return YES;
+    return NO;
     
 }
 

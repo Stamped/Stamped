@@ -18,6 +18,9 @@
     
     UITableViewStyle _tableStyle;
     UITableView *_tableView;
+    UITableView *_searchResultsTableView;
+    UILabel *_searchNoResultsLabel;
+    
     EGORefreshTableFooterView *_footerRefreshView;
     EGORefreshTableHeaderView *_headerRefreshView;
     UIView *_searchOverlay;
@@ -42,6 +45,7 @@
 @property(strong, nonatomic) UIView *footerView;
 @property(readonly, nonatomic) STSearchView *searchView;
 @property(nonatomic, assign, getter = isShowingSearch) BOOL showsSearchBar;
+@property(nonatomic, readonly, getter = isSearching) BOOL searching;
 
 - (void)setContentInset:(UIEdgeInsets)inset;
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView;

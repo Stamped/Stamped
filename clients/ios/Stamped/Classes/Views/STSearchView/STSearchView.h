@@ -15,14 +15,19 @@
     UIImageView *_topLeftCorner;
     UIImageView *_topRightCorner;
     UITapGestureRecognizer *_tap;
+    UITextField *_textField;
 }
 
 @property(nonatomic,assign) id <STSearchViewDelegate> delegate;
-@property(nonatomic,retain) UITextField *textField;
 @property(nonatomic,assign,getter = showingCancel) BOOL showCancelButton;
+
+- (void)cancelSearch;
+- (void)setPlaceholderTitle:(NSString*)title;
 
 @end
 @protocol STSearchViewDelegate
 - (void)stSearchViewDidCancel:(STSearchView*)view;
-- (void)stSearchViewShouldBeginSearching:(STSearchView*)view;
+- (void)stSearchViewDidBeginSearching:(STSearchView*)view;
+- (void)stSearchViewDidEndSearching:(STSearchView*)view;
+- (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text;
 @end
