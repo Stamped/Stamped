@@ -3822,6 +3822,9 @@ class StampedAPI(AStampedAPI):
                 # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
                 if isinstance(track, BasicEntity):
                     track = track.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
                 trackList.append(track)
 
                 # Compare entity id before and after
@@ -3857,6 +3860,9 @@ class StampedAPI(AStampedAPI):
                 # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
                 if isinstance(album, BasicEntity):
                     album = album.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
                 albumList.append(album)
 
                 # Compare entity id before and after
