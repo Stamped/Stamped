@@ -234,6 +234,7 @@ class Schema(object):
             raise Exception("Invalid data type: cannot import schema object")
         try:
             for k, v in properties.items():
+                logs.info('in dataImport loop.  k: %s   v: %s' % (k,v))
                 try:
                     if v is None:
                         self.__setattr__(k, None)
@@ -245,6 +246,7 @@ class Schema(object):
                             nested = self.__properties[k]
                         else:
                             nested = p[_kindKey]()
+                        logs.info('recursively calling dataImport')
                         nested.dataImport(v)
                         self.__setattr__(k, nested)
 
