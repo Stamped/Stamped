@@ -291,7 +291,9 @@ def buildEntity(data=None, kind=None, mini=False):
     else:
         new = getEntityObjectFromKind(kind)
     if data is not None:
+        logs.info('### calling dataimport for buildEntity')
         return new().dataImport(data, overflow=True)
+    logs.info('### creating skeletal object for buildEntity')
     return new()
 
 def upgradeEntityData(entityData):
