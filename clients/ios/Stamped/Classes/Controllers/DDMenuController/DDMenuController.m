@@ -579,7 +579,6 @@
         [UIView setAnimationsEnabled:NO];
     }
     
-    //_root.view.userInteractionEnabled = NO;
     [UIView animateWithDuration:.3 animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {
@@ -621,7 +620,6 @@
         [UIView setAnimationsEnabled:NO];
     }
     
-   // _root.view.userInteractionEnabled = NO;
     [UIView animateWithDuration:.3 animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {
@@ -631,6 +629,7 @@
     if (!animated) {
         [UIView setAnimationsEnabled:_enabled];
     }
+    
 }
 
 

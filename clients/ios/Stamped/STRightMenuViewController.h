@@ -10,8 +10,9 @@
 
 @interface STRightMenuViewController : UIViewController {
     NSMutableArray *_buttons;
-    BOOL _hasAnimated;
-    BOOL _animation1;
 }
+
+- (void)slideIn;
+- (void)popIn;
 
 @end

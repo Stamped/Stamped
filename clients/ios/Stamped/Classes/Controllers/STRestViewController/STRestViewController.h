@@ -10,11 +10,11 @@
 #import "EGORefreshTableHeaderView.h"
 #import "EGORefreshTableFooterView.h"
 #import "NoDataView.h"
+#import "STSearchView.h"
 
 @protocol STRestController;
 
-@class STSearchView;
-@interface STRestViewController : UIViewController <UITextFieldDelegate> {
+@interface STRestViewController : UIViewController <STSearchViewDelegate> {
     
     UITableViewStyle _tableStyle;
     UITableView *_tableView;

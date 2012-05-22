@@ -10,8 +10,8 @@
 #import "STStampedAPI.h"
 
 @interface Stamps : NSObject {
-  NSArray *_data;
-  STGenericCollectionSlice *_slice;
+    NSArray *_data;
+    STGenericCollectionSlice *_slice;
 }
 
 @property (nonatomic, readonly, getter = isReloading) BOOL reloading;
