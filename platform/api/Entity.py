@@ -527,7 +527,7 @@ def upgradeEntityData(entityData):
                 entityMini.sources.itunes_timestamp = item.pop('timestamp', seedTimestamp)
             newAlbums.append(entityMini)
         if len(newAlbums) > 0:
-            new.albums = albums
+            new.albums = newAlbums
             sourceName = 'itunes' if itunesSource else 'format'
             new.albums_source = artist.pop('albums_source', sourceName)
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
