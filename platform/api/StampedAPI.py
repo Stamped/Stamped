@@ -3020,22 +3020,17 @@ class StampedAPI(AStampedAPI):
             raise StampedPermissionsError("Must be logged in to inbox")
 
         if timeSlice.scope == 'me':
-            stampIds    = self._collectionDB.getUserStampIds(authUserId)
+            stampIds = self._collectionDB.getUserStampIds(authUserId)
         elif timeSlice.scope == 'friends':
-            stampIds    = self._collectionDB.getInboxStampIds(authUserId)
+            stampIds = self._collectionDB.getInboxStampIds(authUserId)
         elif timeSlice.scope == 'fof':
-            stampIds    = self._collectionDB.getFofStamps(authUserId)
+            stampIds = self._collectionDB.getFofStamps(authUserId)
         else:
-            stampIds    = None
+            stampIds = None
 
-        result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+        result = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
-        # Inbox
-
-        # User
-
-        # Credit?
-        pass
+        return result
     
     @API_CALL
     def getInboxStamps(self, authUserId, genericCollectionSlice):
