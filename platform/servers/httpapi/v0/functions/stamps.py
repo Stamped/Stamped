@@ -8,6 +8,19 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+def transformStamps(stamps):
+    """
+    Convert stamps to HTTPStamp and return as json-formatted HttpResponse
+    """
+    result = []
+    for stamp in stamps:
+        try:
+            result.append(HTTPStamp().importStamp(stamp).dataExport())
+        except:
+            logs.warn(utils.getFormattedException())
+    
+    return transformOutput(result)
+
 @handleHTTPRequest(http_schema=HTTPStampNew)
 @require_http_methods(["POST"])
 def create(request, authUserId, data, **kwargs):
@@ -20,6 +33,15 @@ def create(request, authUserId, data, **kwargs):
         data['credit'] = data['credit'].split(',')
     
     stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
+    stamp = HTTPStamp().importStamp(stamp)
+    
+    return transformOutput(stamp.dataExport())
+
+
+@handleHTTPRequest(http_schema=HTTPStampId)
+@require_http_methods(["POST"])
+def remove(request, authUserId, http_schema, **kwargs):
+    stamp = stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
     stamp = HTTPStamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
@@ -59,13 +81,19 @@ def show(request, authUserId, http_schema, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId)
-@require_http_methods(["POST"])
-def remove(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importStamp(stamp)
-    
-    return transformOutput(stamp.dataExport())
+# Collection
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPTimeSlice, conversion=HTTPTimeSlice.exportTimeSlice)
+@require_http_methods(["GET"])
+def collection(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.getStampCollection(schema, authUserId)
+    return transformStamps(stamps)
+
+# Search
+@handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
+@require_http_methods(["GET"])
+def collection(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.searchStampCollection(authUserId, schema)
+    return transformStamps(stamps)
 
 
 @handleHTTPRequest(http_schema=HTTPStampId)
