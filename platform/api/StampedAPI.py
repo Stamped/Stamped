@@ -3890,6 +3890,8 @@ class StampedAPI(AStampedAPI):
                 # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
                 if isinstance(artist, BasicEntity):
                     artist = artist.minimize()
+                else
+                    logs.info('failed to resolve stub: %s' % stub)
 
                 artistList.append(artist)
 
