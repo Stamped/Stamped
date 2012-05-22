@@ -44,9 +44,9 @@
         _controllerStore = [navigators retain];
         
         _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:
-                      @"Root.debug", @"Debug",
-                      @"Root.settings", @"Settings",
-                      nil] retain];
+                                   @"Root.debug", @"Debug",
+                                   @"Root.settings", @"Settings",
+                                   nil] retain];
         _anchorDataSource = [[NSArray arrayWithObjects:@"Debug", @"Settings", nil] retain];
         
     }
@@ -105,7 +105,7 @@
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
         [self.view addSubview:corner];
         [corner release];
-
+        
     }
     
     if (!_anchorTableView) {
@@ -126,18 +126,18 @@
         self.anchorTableView = tableView;
         
         /*
-        tableView.layer.shadowPath = [UIBezierPath bezierPathWithRect:tableView.bounds].CGPath;
-        tableView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
-        tableView.layer.shadowRadius = 16.0f;
-        tableView.layer.shadowOpacity = 0.4f;
-        */
+         tableView.layer.shadowPath = [UIBezierPath bezierPathWithRect:tableView.bounds].CGPath;
+         tableView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+         tableView.layer.shadowRadius = 16.0f;
+         tableView.layer.shadowOpacity = 0.4f;
+         */
         
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
         view.contentMode = UIViewContentModeRedraw;
         view.alpha = 0.1f;
         view.backgroundColor = [UIColor clearColor];
         [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
-
+            
             //CGContextSetAlpha(ctx, 0.1);
             drawGradient([UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, [UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, ctx);
             
@@ -145,10 +145,10 @@
         tableView.backgroundView = view;
         [view release];
         [tableView release];
-
+        
     }
-
-
+    
+    
 }
 
 - (void)viewDidUnload {
@@ -211,9 +211,9 @@
     
     cell.topBorder = YES;
     cell.titleLabel.text = [_anchorDataSource objectAtIndex:indexPath.row];
-
+    
     return cell;
-  
+    
 }
 
 
@@ -221,14 +221,22 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    NSString *key = (tableView == self.tableView) ? [_dataSource objectAtIndex:indexPath.row] : [_anchorDataSource objectAtIndex:indexPath.row];
-    UIViewController *controller = [[[STConfiguration value:[_controllerStore objectForKey:key]] alloc] init];
+    NSString* configKey = nil;
+    if (tableView == self.tableView) {
+        NSString* key = [_dataSource objectAtIndex:indexPath.row];
+        configKey = [_controllerStore objectForKey:key];
+    }
+    else {
+        NSString* key = [_anchorDataSource objectAtIndex:indexPath.row];
+        configKey = [_anchorControllerStore objectForKey:key];
+    }
+    UIViewController *controller = [[[STConfiguration value:configKey] alloc] init];
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     if (self.tableView == tableView) {
         [menuController setRootController:navController animated:YES];
     } else {
-        [menuController presentModalViewController:navController animated:YES];
+        [menuController setRootController:navController animated:YES];
     }
     [controller release];
     [navController release];
@@ -244,8 +252,6 @@
         _selectedIndexPath = [indexPath retain];
         
     }
- 
-
 }
 
 

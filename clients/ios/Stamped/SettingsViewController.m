@@ -15,6 +15,7 @@
 #import "WebViewController.h"
 #import "TOSViewController.h"
 #import "ECSlidingViewController.h"
+#import "Util.h"
 
 @implementation SettingsViewController
 
@@ -62,10 +63,7 @@
                                                                 action:nil];
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
-  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
-                                                                            style:UIBarButtonItemStyleDone
-                                                                           target:self
-                                                                           action:@selector(backButtonClicked:)] autorelease];
+    [Util addHomeButtonToController:self withBadge:YES];
 }
 
 - (void)viewDidUnload {
