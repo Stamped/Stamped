@@ -64,10 +64,10 @@
 	
 }
 
-- (id)initWithTitle:(NSString *)title style:(UIBarButtonItemStyle)style target:(id)target action:(SEL)action{
+- (id)initWithTitle:(NSString *)title style:(UIBarButtonItemStyle)style target:(id)target action:(SEL)action {
 	
 	STNavigationButton *button = [STNavigationButton buttonWithTitle:title buttonStyle:style];
-	[button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];	
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
 	if ((self = [super initWithCustomView:button])) {
 		
 		

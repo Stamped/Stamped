@@ -19,30 +19,22 @@
 
 @implementation SettingsViewController
 
-@synthesize scrollView = scrollView_;
-@synthesize contentView = contentView;
+@synthesize tableView = _tableView;
 @synthesize sharingView = sharingView_;
 
-- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-  if (self) {
-    // Custom initialization
-  }
-  return self;
-}
 
 - (id)init {
-  return [self initWithNibName:@"SettingsViewController" bundle:nil];
+    if (self = [super init]) {
+    }
+    return self;
 }
 
 - (void)didReceiveMemoryWarning {
-  // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
 }
 
 - (void)dealloc {
-  self.scrollView = nil;
-  self.contentView = nil;
+  self.tableView = nil;
   self.sharingView = nil;
   [super dealloc];
 }
@@ -55,28 +47,33 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [scrollView_ addSubview:self.contentView];
-  scrollView_.contentSize = self.contentView.bounds.size;
-  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
-                                                                 style:UIBarButtonItemStyleBordered
-                                                                target:nil
-                                                                action:nil];
-  [[self navigationItem] setBackBarButtonItem:backButton];
-  [backButton release];
-    [Util addHomeButtonToController:self withBadge:YES];
+
+    if (!_tableView) {
+        UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        tableView.delegate = (id<UITableViewDelegate>)self;
+        tableView.dataSource = (id<UITableViewDataSource>)self;
+        [self.view addSubview:tableView];
+        self.tableView = tableView;
+        [tableView release];
+    }
+    
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStyleBordered target:nil action:nil];
+    self.navigationItem.backBarButtonItem = backButton;
+    [backButton release];
+
 }
 
 - (void)viewDidUnload {
-  self.scrollView = nil;
-  self.contentView = nil;
+  self.tableView = nil;
   self.sharingView = nil;
   [super viewDidUnload];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  // Return YES for supported orientations
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
 }
+
 
 #pragma mark - Custom methods.
 

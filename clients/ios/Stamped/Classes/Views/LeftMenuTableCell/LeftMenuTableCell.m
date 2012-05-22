@@ -8,11 +8,13 @@
 
 #import "LeftMenuTableCell.h"
 #import "STBlockUIView.h"
+#import "QuartzUtils.h"
 
 @implementation LeftMenuTableCell
 
 @synthesize badgeCount=_badgeCount;
 @synthesize titleLabel=_titleLabel;
+@synthesize icon=_icon;
 @synthesize border=_border;
 @synthesize topBorder=_topBorder;
 @synthesize delegate;
@@ -21,24 +23,64 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
         
-        UIFont *font = [UIFont boldSystemFontOfSize:16];
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(18.0f, floorf((self.bounds.size.height - font.lineHeight)/2), 0.0f, font.lineHeight)];
+        UIFont *font = [UIFont boldSystemFontOfSize:15];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(48.0f, floorf((self.bounds.size.height - font.lineHeight)/2), 0.0f, font.lineHeight)];
         label.backgroundColor = [UIColor clearColor];
         label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         label.font = font;
-        label.textColor = [UIColor colorWithRed:0.765f green:0.765f blue:0.765f alpha:1.0f];
+        label.textColor = [UIColor colorWithRed:0.690f green:0.690f blue:0.690f alpha:1.0f];
         label.shadowOffset = CGSizeMake(0.0f, -1.0f);
         label.highlightedTextColor = [UIColor whiteColor];
-        label.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2];
+        label.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.3];
         [self addSubview:label];
         _titleLabel = [label retain];
         [label release];
+        
+        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(10.0f, floorf((self.bounds.size.height-30.0f)/2), 30.0f, 30.0f)];
+        view.backgroundColor = [UIColor clearColor];
+        view.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        [self addSubview:view];
+        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+           
+            if (_icon) {
+                
+                // flip context
+                CGContextTranslateCTM(ctx, 0, rect.size.height);
+                CGContextScaleCTM(ctx, 1.0, -1.0);
+                
+                CGRect fillRect = CGRectMake(rect.origin.x + ((rect.size.width-_icon.size.width)/2), rect.origin.y + ((rect.size.height-_icon.size.height)/2), _icon.size.width, _icon.size.height);
+
+                // draw shadow
+                CGContextSaveGState(ctx);
+                [[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.2f] setFill];
+                CGContextTranslateCTM(ctx, 0, 1.0f);
+                CGContextClipToMask(ctx, fillRect, _icon.CGImage);
+                CGContextFillRect(ctx, fillRect);
+                CGContextRestoreGState(ctx);
+                
+                
+                if (self.highlighted || self.selected) {
+                    [[UIColor whiteColor] setFill];
+                } else {
+                    [[self.titleLabel textColor] setFill];
+                }
+                
+                // draw icon
+                CGContextClipToMask(ctx, fillRect, _icon.CGImage);
+                CGContextFillRect(ctx, fillRect);
+                
+            }
+            
+        }];
+        _iconView = view;
+        [view release];
         
     }
     return self;
 }
 
 - (void)dealloc {
+    [_icon release], _icon=nil;
     [_titleLabel release], _titleLabel=nil;
     [super dealloc];
 }
@@ -51,7 +93,43 @@
 
 #pragma mark - Setters
 
-- (void)showHighligtedView:(BOOL)show {
+- (void)setIcon:(UIImage *)icon {
+    if (_icon) {
+        [_icon release], _icon=nil;
+    }
+    if (icon) {
+        _icon = [icon retain];
+    }
+    [_iconView setNeedsDisplay];
+}
+
+- (void)showHighlightedView:(BOOL)show {
+    if (self.selectionStyle != UITableViewCellSelectionStyleNone) return;
+
+    if (show) {
+        if (!_highlightedView) {
+            
+            STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:self.bounds];
+            view.alpha = 0.6f;
+            [self insertSubview:view belowSubview:self.titleLabel];
+            [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+                
+                drawGradient([UIColor colorWithRed:0.3f green:0.3f blue:0.3f alpha:1.0f].CGColor, [UIColor colorWithRed:0.1f green:0.1f blue:0.1f alpha:1.0f].CGColor, ctx);
+                
+            }];
+            [view release];
+            _highlightedView = view;
+            
+        } 
+    } else {
+        if (_highlightedView) {
+            [_highlightedView removeFromSuperview], _highlightedView=nil;
+        }
+    }
+}
+
+- (void)showSelectedView:(BOOL)show {
+    if (self.selectionStyle != UITableViewCellSelectionStyleNone) return;
     
     self.titleLabel.highlighted = show;
     self.layer.zPosition = show ? 10 : 0;
@@ -89,7 +167,8 @@
     if (_badgeView) {
         [_badgeView setNeedsDisplay];
     }
-    [self showHighligtedView:highlighted];
+    [_iconView setNeedsDisplay];
+    [self showHighlightedView:highlighted];
     self.titleLabel.highlighted = highlighted;
 }
 
@@ -98,7 +177,8 @@
     if (_badgeView) {
         [_badgeView setNeedsDisplay];
     }
-    [self showHighligtedView:selected];
+    [_iconView setNeedsDisplay];
+    [self showSelectedView:selected];
     
 }
 
@@ -175,7 +255,7 @@
         [view release];
         
         view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height - 1.0f, self.bounds.size.width, 1.0f)];
-        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.1f];
+        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.06f];
         view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
         [self insertSubview:view atIndex:0];
         [view release];
@@ -197,7 +277,7 @@
         [view release];
         
         view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 1.0f, self.bounds.size.width, 1.0f)];
-        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.1f];
+        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.06f];
         view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
         [self insertSubview:view atIndex:0];
         [view release];

@@ -919,6 +919,7 @@ static Rdio* _rdio;
                          @"book",
                          @"music",
                          @"film",
+                         @"download",
                          @"other",
                          nil];
   return categories;
