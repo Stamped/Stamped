@@ -3804,7 +3804,7 @@ class StampedAPI(AStampedAPI):
                 track, trackModified = _resolveStub(stub, musicSources)
             except KeyError as e:
                 logs.warning('Track resolution failed: %s' % e)
-                return stub
+                return None
 
             # Merge track if it wasn't resolved
             if track.entity_id is None:
@@ -3818,6 +3818,8 @@ class StampedAPI(AStampedAPI):
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
+                if track is None:
+                    continue
                 trackList.append(track.minimize())
 
                 # Compare entity id before and after
@@ -3834,7 +3836,7 @@ class StampedAPI(AStampedAPI):
                 album, albumModified = _resolveStub(stub, musicSources)
             except KeyError:
                 logs.warning('Album resolution failed')
-                return stub
+                return None
 
             # Merge album if it wasn't resolved
             if album.entity_id is None:
@@ -3848,6 +3850,8 @@ class StampedAPI(AStampedAPI):
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
+                if album is None:
+                    continue
                 albumList.append(album.minimize())
 
                 # Compare entity id before and after
@@ -3864,7 +3868,7 @@ class StampedAPI(AStampedAPI):
                 artist, artistModified = _resolveStub(stub, musicSources)
             except KeyError:
                 logs.warning('Artist resolution failed')
-                return stub
+                return None
 
             # Merge artist if it wasn't resolved
             # if artist.entity_id is None:
@@ -3878,8 +3882,8 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
-                import pprint
-                logs.info('stub: \n%s' % pprint.pformat(stub))
+                if artist is None:
+                    continue
                 artistList.append(artist.minimize())
 
                 # Compare entity id before and after
