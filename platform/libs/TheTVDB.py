@@ -10,13 +10,13 @@ __all__       = [ 'TheTVDB', 'globalTheTVDB' ]
 import Globals
 import string, sys, urllib, utils
 
-from Schemas    import *
-from optparse   import OptionParser
-from LibUtils   import parseDateString
-from lxml       import objectify, etree
-from pprint     import pprint
-from LRUCache   import lru_cache
-from Memcache   import memcached_function
+from api.Schemas    import *
+from optparse       import OptionParser
+from LibUtils       import parseDateString
+from lxml           import objectify, etree
+from pprint         import pprint
+from LRUCache       import lru_cache
+from Memcache       import memcached_function
 
 class TheTVDB(object):
     
@@ -114,7 +114,7 @@ class TheTVDB(object):
                     elem = elem.text.strip()
                     
                     if len(elem) > 0:
-                        entity[v] = elem
+                        setattr(entity, v, elem)
             
             for k, v in _map2.iteritems():
                 elem = item.find(k)
@@ -125,7 +125,7 @@ class TheTVDB(object):
                     if len(elem) > 0:
                         entity_key, func = v
                         
-                        entity[entity_key] = func(elem)
+                        setattr(entity, entity_key, func(elem))
             
             if entity.title is None:
                 return None
@@ -199,7 +199,7 @@ def main():
         print etree.tostring(results, pretty_print=True)
     else:
         for entity in results:
-            pprint(entity.value)
+            pprint(entity)
 
 if __name__ == '__main__':
     main()

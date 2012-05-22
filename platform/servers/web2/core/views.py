@@ -10,7 +10,7 @@ import api.HTTPSchemas
 import os, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
-from Schemas        import *
+from api.Schemas    import *
 from helpers        import *
 
 import travis_test
@@ -97,7 +97,7 @@ def profile(request, schema, **kwargs):
         user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+        stamps      = stampedAPIProxy.getUserStamps(**schema.dataExport())
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     
@@ -228,7 +228,7 @@ def map(request, schema, **kwargs):
         user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(**schema.exportSparse())
+        stamps      = stampedAPIProxy.getUserStamps(**schema.dataExport())
         friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
         followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
     
@@ -280,7 +280,7 @@ def sdetail(request, schema, **kwargs):
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")
     
-    stamp = HTTPStamp(stamp)
+    #stamp = Stamp().importData(stamp)
     '''
     encodedStampTitle = encodeStampTitle(stamp.entity.title)
     
@@ -296,7 +296,7 @@ def sdetail(request, schema, **kwargs):
     
     return stamped_render(request, 'sdetail.html', {
         'user'  : user, 
-        'stamp' : stamp.exportSparse()
+        'stamp' : stamp
     })
 
 

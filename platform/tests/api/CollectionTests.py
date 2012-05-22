@@ -168,7 +168,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         }
         result = self.handlePOST(path, data)
 
-        # User B should have "is_liked=True" 
+        # User B should have "is_liked=True"
         path = "collections/inbox.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
@@ -301,7 +301,6 @@ class StampedAPICollectionsConsumption(StampedAPICollectionTest):
             self.async(lambda: self.handleGET(path, data), [
                 lambda x: self.assertIsInstance(x, list),
                 ])
-
 
 
 if __name__ == '__main__':

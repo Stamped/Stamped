@@ -92,7 +92,7 @@ class Memcache(object):
         if isinstance(value, Schema):
             return {
                 "__schema__" : value.__class__, 
-                "__value__"  : value.value, 
+                "__value__"  : value.dataExport(), 
             }
         elif isinstance(value, (list, tuple)):
             value = map(self._import_value, value)
@@ -110,7 +110,7 @@ class Memcache(object):
         if isinstance(value, dict):
             if '__schema__' in value and '__value__' in value:
                 # reinstantiate the Schema subclass with its prior data
-                return value['__schema__'](value['__value__'])
+                return value['__schema__']().importData(value['__value__'])
             else:
                 return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
         elif isinstance(value, (list, tuple)):

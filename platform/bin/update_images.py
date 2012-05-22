@@ -36,7 +36,7 @@ def main():
     rs = accountDB._collection.find()
     for result in rs:
         account = accountDB._convertFromMongo(result)
-        pprint(account.value)
+        pprint(account)
         
         image = utils.getFile(account.profile_image)
         image = base64.encodestring(image)

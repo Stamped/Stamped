@@ -16,35 +16,36 @@ def create(request, authUserId, http_schema, **kwargs):
         'entity_id': http_schema.entity_id,
         'search_id': http_schema.search_id,
     }
-    
+
     favorite = stampedAPI.addFavorite(authUserId, entityRequest, stampId)
-    favorite = HTTPFavorite().importSchema(favorite)
-    
-    return transformOutput(favorite.exportSparse())
+    favorite = HTTPFavorite().importFavorite(favorite)
+
+    return transformOutput(favorite.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     favorite = stampedAPI.removeFavorite(authUserId, http_schema.entity_id)
-    favorite = HTTPFavorite().importSchema(favorite)
+    favorite = HTTPFavorite().importFavorite(favorite)
     
     # Hack to force 'entity' to null for Bons
     ### TODO: Come up with a long-term solution
-    result   = favorite.exportSparse()
+    result   = favorite.dataExport()
     result['entity'] = None
     
     return transformOutput(result)
 
 
-@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice, schema=GenericCollectionSlice)
+@handleHTTPRequest(http_schema=HTTPGenericCollectionSlice,
+                  conversion=HTTPGenericCollectionSlice.exportGenericCollectionSlice)
 @require_http_methods(["GET"])
 def show(request, authUserId, schema, **kwargs):
     favorites = stampedAPI.getFavorites(authUserId, schema)
     
     result = []
     for favorite in favorites:
-        result.append(HTTPFavorite().importSchema(favorite).exportSparse())
+        result.append(HTTPFavorite().importFavorite(favorite).dataExport())
     
     return transformOutput(result)
 

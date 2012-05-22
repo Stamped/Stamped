@@ -80,7 +80,7 @@ def _buildMap(template, stamps):
         for stamp in stamps:
             try:
                 if 'deleted' not in stamp:
-                    result.append(HTTPStamp().importSchema(stamp).exportSparse())
+                    result.append(HTTPStamp().importSchema(stamp).dataExport())
             except:
                 logs.warn(utils.getFormattedException())
 

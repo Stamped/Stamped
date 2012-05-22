@@ -15,26 +15,29 @@
 @implementation STSearchField
 
 - (void)initialize {
-  self.background = [[UIImage imageNamed:@"search_field_background"] stretchableImageWithLeftCapWidth:30
-                                                                                         topCapHeight:0];
-  self.font = [UIFont fontWithName:@"Helvetica" size:14];
-  self.autocorrectionType = UITextAutocorrectionTypeNo;
-  self.returnKeyType = UIReturnKeySearch;
-  self.enablesReturnKeyAutomatically = YES;
-  self.keyboardAppearance = UIKeyboardAppearanceAlert;
-  self.borderStyle = UITextBorderStyleNone;
-  self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-  self.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-  self.clearButtonMode = UITextFieldViewModeAlways;
-  self.leftViewMode = UITextFieldViewModeAlways;
-  UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, CGRectGetHeight(self.frame))];
-  UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];
-  searchIcon.frame = CGRectOffset(searchIcon.frame, 10, 7);
-  searchIcon.contentMode = UIViewContentModeCenter;
-  [leftView addSubview:searchIcon];
-  [searchIcon release];
-  self.leftView = leftView;
-  [leftView release];
+    
+    UIImage *image = [UIImage imageNamed:@"search_gutter_bg.png"];
+    self.background = [image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0];
+    
+    self.font = [UIFont fontWithName:@"Helvetica" size:14];
+    self.autocorrectionType = UITextAutocorrectionTypeNo;
+    self.returnKeyType = UIReturnKeySearch;
+    self.enablesReturnKeyAutomatically = YES;
+    self.keyboardAppearance = UIKeyboardAppearanceAlert;
+    self.borderStyle = UITextBorderStyleNone;
+    self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    self.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    self.clearButtonMode = UITextFieldViewModeAlways;
+    self.leftViewMode = UITextFieldViewModeAlways;
+    UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, CGRectGetHeight(self.frame))];
+    UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];
+    searchIcon.frame = CGRectOffset(searchIcon.frame, 10, 7);
+    searchIcon.contentMode = UIViewContentModeCenter;
+    [leftView addSubview:searchIcon];
+    [searchIcon release];
+    self.leftView = leftView;
+    [leftView release];
+
 }
 
 - (CGRect)placeholderRectForBounds:(CGRect)bounds {

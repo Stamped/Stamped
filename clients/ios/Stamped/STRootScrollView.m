@@ -8,7 +8,6 @@
 
 #import "STRootScrollView.h"
 #import "Util.h"
-#import "STRootMenuView.h"
 
 @interface STRootScrollView ()
 
@@ -32,6 +31,7 @@
   return self;
 }
 
+/*
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
   UITouch* touch = [touches anyObject];
   if (CGRectContainsPoint(self.controller.view.frame, [touch locationInView:self])) {
@@ -72,5 +72,6 @@
     [[STRootMenuView sharedInstance] touchesMoved:touches withEvent:event];
   }
 }
+*/
 
 @end

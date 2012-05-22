@@ -42,7 +42,7 @@
 - (id)initWithAction:(id<STActionItem>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate {
   self = [super initWithFrame:frame];
   if (self) {
-    NSLog(@"loading action: %@",action.name);
+    //NSLog(@"loading action: %@",action.name);
     self.delegate = delegate;
     [self.delegate registerDependent:self];
     self.action = action;

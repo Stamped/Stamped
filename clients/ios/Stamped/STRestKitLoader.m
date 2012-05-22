@@ -43,7 +43,7 @@
 }
 
 - (void)cancellationWasCancelled:(STCancellation *)cancellation {
-  NSLog(@"Cancelled operation");
+  //NSLog(@"Cancelled operation");
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [self autorelease];
 }
@@ -108,7 +108,7 @@
 }
 
 - (void)cancellationWasCancelled:(STCancellation *)cancellation {
-  NSLog(@"Cancelled operation");
+  //NSLog(@"Cancelled operation");
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [self autorelease];
 }

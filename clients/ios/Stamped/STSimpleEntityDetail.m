@@ -72,6 +72,7 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
+  [super encodeWithCoder:encoder];
   [encoder encodeObject:self.caption forKey:@"caption"];
   [encoder encodeObject:self.address forKey:@"address"];
   [encoder encodeObject:self.addressStreet forKey:@"addressStreet"];

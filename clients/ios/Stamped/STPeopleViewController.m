@@ -7,7 +7,6 @@
 //
 
 #import "STPeopleViewController.h"
-#import "STRootMenuView.h"
 
 @implementation STPeopleViewController
 
@@ -20,7 +19,7 @@
 }
 
 - (void)backButtonClicked:(id)button {
-  [[STRootMenuView sharedInstance] toggle];
+ // [[STRootMenuView sharedInstance] toggle];
 }
 
 - (void)viewDidLoad

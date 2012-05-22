@@ -307,7 +307,7 @@ def parse_request(request, schema, django_kwargs, **kwargs):
                 raise
             return
         
-        schema.importData(data)
+        schema.dataImport(data)
         return schema
     except Exception as e:
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
@@ -320,7 +320,7 @@ def format_url(url_format, schema, diff = None):
     import string
     formatter = string.Formatter()
     
-    data = schema.exportSparse()
+    data = schema.dataExport()
     url  = ""
     
     if diff is not None:

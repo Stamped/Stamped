@@ -90,7 +90,11 @@ typedef enum {
 - (STCancellation*)entityForEntityID:(NSString*)entityID 
                          andCallback:(void(^)(id<STEntity> entity, NSError* error, STCancellation* cancellation))block;
 
-- (STCancellation*)entityDetailForEntityID:(NSString*)entityID 
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID
+                               andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)entityDetailForEntityID:(NSString*)entityID
+                               forceUpdate:(BOOL)forceUpdate
                                andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 

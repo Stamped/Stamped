@@ -263,7 +263,7 @@ class RdioSource(GenericSource):
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.rdio_id = proxy.key
+        entity.sources.rdio_id = proxy.key
         return True
     
     def matchSource(self, query):

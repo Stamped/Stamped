@@ -68,7 +68,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 stamps        = self._stamp_collection.getStamps(stampIds, limit=1000, sort='modified')
                 
                 for stamp in stamps:
-                    seen['entity_id'].add(stamp.entity_id)
+                    seen['entity_id'].add(stamp.entity.entity_id)
             
             def _get_section_limit(i):
                 if limit:

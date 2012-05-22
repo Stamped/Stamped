@@ -120,7 +120,7 @@ def handle_entity(entity, entityDB, options):
         pass
     
     #entity.image = entity.image.replace('69/103', '375/375').replace('69x103', '375x375')
-    pprint(entity.value)
+    pprint(entity)
     
     if not options.noop:
         entityDB.updateEntity(entity)

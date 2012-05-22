@@ -12,22 +12,25 @@ from httpapi.v0.helpers import *
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(requires_auth=False, 
                    http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.getUsers(http_schema.user_ids.value, 
-                                http_schema.screen_names.value, 
-                                authUserId)
+    if http_schema.user_ids is not None:
+        users = stampedAPI.getUsers(http_schema.user_ids.split(','), None, authUserId)
+    elif http_schema.screen_names is not None:
+        users = stampedAPI.getUsers(None, http_schema.screen_names.split(','), authUserId)
+    else:
+        raise Exception("Field missing")
     
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -43,12 +46,13 @@ def search(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPSuggestedUsers, schema=SuggestedUserRequest)
+@handleHTTPRequest(http_schema=HTTPSuggestedUserRequest, 
+                   conversion=HTTPSuggestedUserRequest.convertToSuggestedUserRequest)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     results = stampedAPI.getSuggestedUsers(authUserId, schema)
@@ -56,12 +60,12 @@ def suggested(request, authUserId, schema, **kwargs):
     
     if schema.personalized:
         for user, explanations in results:
-            user2 = HTTPSuggestedUser().importSchema(user).exportSparse()
+            user2 = HTTPSuggestedUser().importUser(user).dataExport()
             user2.explanations = explanations
             output.append(user2)
     else:
         for user in results:
-            user2 = HTTPSuggestedUser().importSchema(user).exportSparse()
+            user2 = HTTPSuggestedUser().importUser(user).dataExport()
             output.append(user2)
     
     return transformOutput(output)
@@ -78,7 +82,7 @@ def privacy(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def findEmail(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     emails = []
     
     for email in q:
@@ -93,7 +97,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -101,7 +105,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def findPhone(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     phoneNumbers = []
     
     for item in q:
@@ -124,7 +128,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -140,7 +144,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
                                               twitterKey=http_schema.twitter_key, 
                                               twitterSecret=http_schema.twitter_secret)
     elif http_schema.q is not None:
-        q = http_schema.q.value
+        q = http_schema.q.split(',')
         twitterIds = []
         
         for item in q:
@@ -156,7 +160,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -170,7 +174,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
     if http_schema.facebook_token is not None:
         users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=http_schema.facebook_token)
     elif http_schema.q is not None:
-        q = http_schema.q.value
+        q = http_schema.q.split(',')
         facebookIds = []
         
         for item in q:
@@ -186,7 +190,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importSchema(user).exportSparse())
+            output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
 

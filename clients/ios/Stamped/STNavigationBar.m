@@ -114,16 +114,18 @@
 }
 
 - (void)initialize {
-  NSLog(@"initializing navbar");
-  self.layer.masksToBounds = NO;
 
-  CGFloat ripplesY = CGRectGetMaxY(self.bounds);
-  ripplesLayer_ = [[CALayer alloc] init];
-  ripplesLayer_.frame = CGRectMake(0, ripplesY, 320, 3);
-  ripplesLayer_.contentsGravity = kCAGravityResizeAspect;
-  ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
-  [self.layer addSublayer:ripplesLayer_];
-  [ripplesLayer_ release];
+    self.layer.masksToBounds = NO;
+
+    CGFloat ripplesY = CGRectGetMaxY(self.bounds);
+    ripplesLayer_ = [[CALayer alloc] init];
+    ripplesLayer_.contentsScale = [[UIScreen mainScreen] scale];
+    ripplesLayer_.frame = CGRectMake(0, ripplesY, 320, 3);
+    ripplesLayer_.contentsGravity = kCAGravityResizeAspect;
+    ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
+    [self.layer addSublayer:ripplesLayer_];
+    [ripplesLayer_ release];
+
 }
 
 - (void)setBlack:(BOOL)black {

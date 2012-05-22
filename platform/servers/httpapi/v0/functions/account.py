@@ -16,16 +16,18 @@ from Netflix            import *
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
                    http_schema=HTTPAccountNew, 
-                   schema=Account, 
-                   upload='porfile_image')
+                   conversion=HTTPAccountNew.convertToAccount,
+                   upload='profile_image')
 @require_http_methods(["POST"])
 def create(request, client_id, http_schema, schema, **kwargs):
+    logs.info('account schema passed in: %s' % schema)
     schema = stampedAPI.addAccount(schema, http_schema.profile_image)
-    user   = HTTPUser().importSchema(schema)
+
+    user   = HTTPUser().importUser(schema)
     logs.user(user.user_id)
     
     token  = stampedAuth.addRefreshToken(client_id, user.user_id)
-    output = { 'user': user.exportSparse(), 'token': token }
+    output = { 'user': user.dataExport(), 'token': token }
     
     return transformOutput(output)
 
@@ -34,9 +36,9 @@ def create(request, client_id, http_schema, schema, **kwargs):
 @require_http_methods(["POST"])
 def remove(request, authUserId, **kwargs):
     account = stampedAPI.removeAccount(authUserId)
-    account = HTTPAccount().importSchema(account)
+    account = HTTPAccount().dataImport(account.dataExport())
     
-    return transformOutput(account.exportSparse())
+    return transformOutput(account.dataExport())
 
 
 @handleHTTPRequest(parse_request=False)
@@ -47,7 +49,7 @@ def settings(request, authUserId, **kwargs):
         
         ### TEMP: Generate list of changes. Need to do something better eventually..
         schema = parseRequest(HTTPAccountSettings(), request)
-        data   = schema.exportSparse()
+        data   = schema.dataExport()
         
         for k, v in data.iteritems():
             if v == '':
@@ -59,9 +61,9 @@ def settings(request, authUserId, **kwargs):
         schema  = parseRequest(None, request)
         account = stampedAPI.getAccount(authUserId)
     
-    account     = HTTPAccount().importSchema(account)
+    account     = HTTPAccount().importAccount(account)
     
-    return transformOutput(account.exportSparse())
+    return transformOutput(account.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountProfile)
@@ -73,27 +75,27 @@ def update_profile(request, authUserId, data, **kwargs):
             data[k] = None
     
     account = stampedAPI.updateProfile(authUserId, data)
-    user    = HTTPUser().importSchema(account)
+    user    = HTTPUser().importUser(account)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountProfileImage, upload='profile_image')
 @require_http_methods(["POST"])
 def update_profile_image(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.updateProfileImage(authUserId, http_schema)
-    user = HTTPUser().importSchema(user)
+    user = HTTPUser().importUser(user)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp)
 @require_http_methods(["POST"])
 def customize_stamp(request, authUserId, data, **kwargs):
     account = stampedAPI.customizeStamp(authUserId, data)
-    user    = HTTPUser().importSchema(account)
+    user    = HTTPUser().importUser(account)
     
-    return transformOutput(user.exportSparse())
+    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(requires_auth=False, 
@@ -103,7 +105,7 @@ def customize_stamp(request, authUserId, data, **kwargs):
 def check(request, client_id, http_schema, **kwargs):
     try:
         user = stampedAPI.checkAccount(http_schema.login)
-        user = HTTPUser().importSchema(user)
+        user = HTTPUser().importUser(user)
         
         ### TODO: REMOVE THIS TEMPORARY CONVERSION!!!!
         try:
@@ -112,7 +114,7 @@ def check(request, client_id, http_schema, **kwargs):
         except:
             pass
         
-        return transformOutput(user.exportSparse())
+        return transformOutput(user.dataExport())
     except KeyError:
         response = HttpResponse("not_found")
         response.status_code = 404
@@ -126,10 +128,10 @@ def check(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPLinkedAccounts)
 @require_http_methods(["POST"])
 def linked_accounts(request, authUserId, http_schema, **kwargs):
-    linked       = http_schema.exportSchema(LinkedAccounts())
-    twitterAuth  = http_schema.exportSchema(TwitterAuthSchema())
-    facebookAuth = http_schema.exportSchema(FacebookAuthSchema())
-    netflixAuth = http_schema.exportSchema(NetflixAuthSchema())
+    linked          = http_schema.exportLinkedAccounts()
+    twitterAuth     = http_schema.exportTwitterAuthSchema()
+    facebookAuth    = http_schema.exportFacebookAuthSchema()
+    netflixAuth     = http_schema.exportNetflixAuthSchema()
     
     data = {
         'twitter'       : linked.twitter, 
@@ -163,7 +165,7 @@ def removeFacebook(request, authUserId, **kwargs):
                    parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def alertFollowersFromTwitter(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     twitterIds = []
 
     for item in q:
@@ -183,7 +185,7 @@ def alertFollowersFromTwitter(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['q']})
 @require_http_methods(["POST"])
 def alertFollowersFromFacebook(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.value
+    q = http_schema.q.split(',')
     facebookIds = []
 
     for item in q:
@@ -216,7 +218,7 @@ def createNetflixLoginResponse(authUserId):
     #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
-    return transformOutput(response.exportSparse())
+    return transformOutput(response.dataExport())
 
 @handleHTTPRequest()
 @require_http_methods(["GET"])
@@ -272,7 +274,7 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     response.setAction('netflix_login', 'Login to Netflix', [source])
     #TODO throw status codes on error
     #TODO return an HTTPAction
-    return transformOutput(response.exportSparse())
+    return transformOutput(response.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
@@ -318,18 +320,18 @@ def reset_password(request, client_id, http_schema, **kwargs):
 @require_http_methods(["GET"])
 def show_alerts(request, authUserId, **kwargs):
     account  = stampedAPI.getAccount(authUserId)
-    settings = HTTPAccountAlerts().importSchema(account)
+    settings = HTTPAccountAlerts().importAccount(account)
 
-    return transformOutput(settings.value)
+    return transformOutput(settings.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountAlerts)
 @require_http_methods(["POST"])
 def update_alerts(request, authUserId, http_schema, **kwargs):
     account  = stampedAPI.updateAlerts(authUserId, http_schema)
-    settings = HTTPAccountAlerts().importSchema(account)
+    settings = HTTPAccountAlerts().importAccount(account)
 
-    return transformOutput(settings.value)
+    return transformOutput(settings.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAPNSToken)

@@ -27,6 +27,7 @@
 @synthesize isTodod = _isTodod;
 @synthesize isLiked = _isLiked;
 @synthesize modified = _modified;
+@synthesize stamped = _stamped;
 @synthesize numComments = _numComments;
 @synthesize numLikes = _numLikes;
 @synthesize stampID = _stampID;
@@ -52,6 +53,7 @@
     _isTodod = [[decoder decodeObjectForKey:@"isTodod"] retain];
     _isLiked = [[decoder decodeObjectForKey:@"isLiked"] retain];
     _modified = [[decoder decodeObjectForKey:@"modified"] retain];
+    _stamped = [[decoder decodeObjectForKey:@"stamped"] retain];
     _numComments = [[decoder decodeObjectForKey:@"numComments"] retain];
     _numLikes = [[decoder decodeObjectForKey:@"numLikes"] retain];
     _stampID = [[decoder decodeObjectForKey:@"stampID"] retain];
@@ -79,6 +81,7 @@
   [_isTodod release];
   [_isLiked release];
   [_modified release];
+  [_stamped release];
   [_numComments release];
   [_numLikes release];
   [_stampID release];
@@ -104,6 +107,7 @@
   [encoder encodeObject:self.isTodod forKey:@"isTodod"];
   [encoder encodeObject:self.isLiked forKey:@"isLiked"];
   [encoder encodeObject:self.modified forKey:@"modified"];
+  [encoder encodeObject:self.stamped forKey:@"stamped"];
   [encoder encodeObject:self.numComments forKey:@"numComments"];
   [encoder encodeObject:self.numLikes forKey:@"numLikes"];
   [encoder encodeObject:self.stampID forKey:@"stampID"];
@@ -142,6 +146,7 @@
    @"created",
    @"deleted",
    @"modified",
+   @"stamped",
    @"via",
    nil];
   
@@ -164,6 +169,7 @@
   copy.isTodod = stamp.isTodod;
   copy.isLiked = stamp.isLiked;
   copy.modified = stamp.modified;
+  copy.stamped = stamp.stamped;
   copy.numComments = stamp.numComments;
   copy.numLikes = stamp.numLikes;
   copy.stampID = stamp.stampID;
