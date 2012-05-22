@@ -2906,7 +2906,7 @@ class StampedAPI(AStampedAPI):
         limit = timeSlice.limit
         timeSlice.limit = limit + 10
         
-        stampData = self._stampDB.getStampTimeSlice(stampIds, timeSlice)
+        stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
 
         stamps = self._enrichStampCollection(stampData, timeSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
