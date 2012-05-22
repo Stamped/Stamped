@@ -441,8 +441,8 @@ def upgradeEntityData(entityData):
     
     # Netflix
     if netflix:
-        setBasicGroup(netflix, new['sources'], 'nid', 'netflix', newSuffix='id')
-        setBasicGroup(netflix, new['sources'], 'nurl', 'netflix', newSuffix='url')
+        setBasicGroup(netflix, new.sources, 'nid', 'netflix', newSuffix='id')
+        setBasicGroup(netflix, new.sources, 'nurl', 'netflix', newSuffix='url')
 
     # OpenTable
     setBasicGroup(sources, new.sources, 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
