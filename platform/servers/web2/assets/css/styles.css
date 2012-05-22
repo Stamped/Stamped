@@ -716,7 +716,7 @@ header .header-body a.button {
   position: relative;
 }
 #stamp-category-nav-bar ol li a {
-  background: url(/assets/img/sidenav_sprite.png) no-repeat -192px 0;
+  background: url(/assets/img/sidenav_sprite2.png) no-repeat -192px 0;
   text-align: center;
   display: block;
   width: 60px;
@@ -733,15 +733,22 @@ header .header-body a.button {
   -webkit-transition: all 0.3s ease-out;
   -moz-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
+  /*@params: 0.3s ease-out;
+                @args: opacity @params, transform @params;
+                
+                -webkit-transition: @args;
+                -moz-transition: @args;
+                transition: @args;*/
+
 }
 #stamp-category-nav-bar ol li div {
-  background: url(/assets/img/sidenav_sprite.png) no-repeat;
+  background: url(/assets/img/sidenav_sprite2.png) no-repeat;
   position: absolute;
-  left: 14px;
-  top: 14px;
+  left: 15px;
+  top: 17px;
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   z-index: 999;
 }
 #stamp-category-nav-bar ol a:hover {
@@ -771,20 +778,62 @@ header .header-body a.button {
 #stamp-category-nav-bar ol li.default div {
   background-position: 0 0;
 }
+#stamp-category-nav-bar ol li.default a:hover + div,
+#stamp-category-nav-bar ol li.default a:active + div {
+  background-position: 0 -32px;
+}
 #stamp-category-nav-bar ol li.place div {
   background-position: -32px 0;
+}
+#stamp-category-nav-bar ol li.place a:hover + div,
+#stamp-category-nav-bar ol li.place a:active + div {
+  background-position: -32px -32px;
 }
 #stamp-category-nav-bar ol li.music div {
   background-position: -64px 0;
 }
+#stamp-category-nav-bar ol li.music a:hover + div,
+#stamp-category-nav-bar ol li.music a:active + div {
+  background-position: -64px -32px;
+}
 #stamp-category-nav-bar ol li.book div {
   background-position: -96px 0;
+}
+#stamp-category-nav-bar ol li.book a:hover + div,
+#stamp-category-nav-bar ol li.book a:active + div {
+  background-position: -96px -32px;
 }
 #stamp-category-nav-bar ol li.film div {
   background-position: -128px 0;
 }
-#stamp-category-nav-bar ol .other div {
+#stamp-category-nav-bar ol li.film a:hover + div,
+#stamp-category-nav-bar ol li.film a:active + div {
+  background-position: -128px -32px;
+}
+#stamp-category-nav-bar ol li.other div {
   background-position: -160px 0;
+}
+#stamp-category-nav-bar ol li.other a:hover + div,
+#stamp-category-nav-bar ol .other a:active + div {
+  background-position: -160px -32px;
+}
+body.default #stamp-category-nav-bar ol li.default div {
+  background-position: 0 -32px;
+}
+body.place #stamp-category-nav-bar ol li.place div {
+  background-position: -32px -32px;
+}
+body.music #stamp-category-nav-bar ol li.music div {
+  background-position: -64px -32px;
+}
+body.book #stamp-category-nav-bar ol li.book div {
+  background-position: -96px -32px;
+}
+body.film #stamp-category-nav-bar ol li.film div {
+  background-position: -128px -32px;
+}
+body.other #stamp-category-nav-bar ol li.other div {
+  background-position: -160px -32px;
 }
 body.default #stamp-category-nav-bar ol li.default a,
 body.place #stamp-category-nav-bar ol li.place a,

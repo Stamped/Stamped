@@ -53,6 +53,28 @@
     }
 }
 
+#stamp-category-nav-bar {
+    ol {
+        li.default a:hover + div, li.default a:active + div, 
+        li.place a:hover + div, li.place a:active + div, 
+        li.music a:hover + div, li.music a:active + div, 
+        li.book a:hover + div, li.book a:active + div, 
+        li.film a:hover + div, li.film a:active + div, 
+        .other a:hover + div, .other a:active + div {
+            background-color: fade(@secondary, 100%);
+        }
+    }
+}
+
+body.default    #stamp-category-nav-bar ol li.default div, 
+body.place      #stamp-category-nav-bar ol li.place div, 
+body.music      #stamp-category-nav-bar ol li.music div, 
+body.book       #stamp-category-nav-bar ol li.book div, 
+body.film       #stamp-category-nav-bar ol li.film div, 
+body.other      #stamp-category-nav-bar ol li.other div {
+    background-color: fade(@secondary, 100%);
+}
+
 .user-logo-large {
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png);
