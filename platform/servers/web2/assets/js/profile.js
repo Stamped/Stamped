@@ -100,8 +100,12 @@ var g_update_stamps = null;
         
         // use moment.js to make every stamps's timestamp human-readable and 
         // relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
-        var update_timestamps = function() {
-            $('.timestamp_raw').each(function(i, elem) {
+        var update_timestamps = function($scope) {
+            if (typeof($scope) === 'undefined') {
+                $scope = $(document);
+            }
+            
+            $scope.find('.timestamp_raw').each(function(i, elem) {
                 var expl  = "";
                 
                 try {
@@ -150,10 +154,14 @@ var g_update_stamps = null;
         //      relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
-        var update_stamps = function() {
-            update_timestamps();
+        var update_stamps = function($scope) {
+            if (typeof($scope) === 'undefined') {
+                $scope = $(document);
+            }
             
-            $('.stamp-preview').each(function(i, elem) {
+            update_timestamps($scope);
+            
+            $scope.find('.stamp-preview').each(function(i, elem) {
                 var $this = $(this);
                 
                 // enforce precedence of stamp preview images
@@ -210,18 +218,31 @@ var g_update_stamps = null;
                 update_images();
             });
             
-            $('a.sdetail').click(function(event) {
+            $scope.find('a.sdetail').click(function(event) {
                 event.preventDefault();
                 
                 var $this = $(this);
-                var $link  = $($this.find('.pronounced-title a').get(0));
-                var href  = $link.attr('href');
-                href      = href.replace('http://www.stamped.com', '');
+                var href  = $this.attr('href');
                 
-                console.debug(href);
-                //$.colorbox({
-                //    'href' : href
-                //});
+                href = href.replace('http://www.stamped.com', '');
+                href = '/travis/stamps/4/TEMPORARY';
+                
+                var $target = $("<div></div>");
+                
+                $target.load(href + " .sdetail_body", {}, function() {
+                    var $sdetail = $target.find('.sdetail_body').remove();
+                    update_stamps($sdetail);
+                    init_social_sharing();
+                    
+                    $.colorbox({
+                        inline      : true, 
+                        href        : $sdetail, 
+                        
+                        maxWidth    : (2 * window.innerWidth) / 3, 
+                        transition  : "elastic", 
+                        scrolling   : false
+                    });
+                });
                 
                 return false;
             });
@@ -244,7 +265,7 @@ var g_update_stamps = null;
                 });
             });*/
             
-			$("a.lightbox").fancybox({
+			$scope.find("a.lightbox").fancybox({
                 openEffect      : 'elastic', 
                 openEasing      : 'easeOutBack', 
                 openSpeed       : 300, 
