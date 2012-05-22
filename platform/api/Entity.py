@@ -378,7 +378,7 @@ def upgradeEntityData(entityData):
     
     sources                 = old.pop('sources', {})
     details                 = old.pop('details', {})
-    timestamp               = old.pop('timestamp', {})
+    timestamp               = old.pop('timestamp', {'created' : seedTimestamp})
     place                   = details.pop('place', {})
     contact                 = details.pop('contact', {})
     restaurant              = details.pop('restaurant', {})
@@ -615,6 +615,7 @@ def upgradeEntityData(entityData):
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
 
     logs.info('### returning from upgradeEntity and timestamp is: %s' % new.timestamp)
+    new['timestamp'] = timestamp
     return new 
 
 def fast_id_dedupe(entities, seen=None):
