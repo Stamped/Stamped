@@ -245,10 +245,6 @@ class MongoEntitySearcher(EntitySearcher):
                          prefix=False, 
                          local=False, 
                          user=None):
-        
-        # NOTE: remove -- strictly for testing!
-        #full = False
-        
         # -------------------------------- #
         # transform input query and coords #
         # -------------------------------- #
@@ -363,12 +359,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         # search built-in entities database
         def _find_entity():
-            if coords is not None:
-                lat, lng = coords[0], coords[1]
-            else:
-                lat, lng = None, None
-            
-            db_wrapper['db_results'] = self._find_entity(input_query, query, lat, lng, prefix)
+            db_wrapper['db_results'] = self._find_entity(input_query, query, coords, prefix)
         
         # search apple itunes API for multiple variants (artist, album, song, etc.)
         def _find_apple():
@@ -1019,12 +1010,7 @@ class MongoEntitySearcher(EntitySearcher):
         return {"titlel": {"$regex": query }, "sources.userGenerated": {'$exists': False}}
     
     @lru_cache(maxsize=64)
-    def _find_entity(self, input_query, query, lat, lng, prefix):
-        if lat is None or lng is None:
-            coords = None
-        else:
-            coords = (lat, lng)
-        
+    def _find_entity(self, input_query, query, coords, prefix):
         output = []
         
         """
