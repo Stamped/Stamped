@@ -17,6 +17,109 @@ from Entity             import *
 
 class AMongoCollectionView(AMongoCollection):
     
+    def _getTimeSlice(self, query, timeSlice):
+        # initialize params
+        # -----------------
+        sort        = [('timestamp.stamped', pymongo.DESCENDING), ('timestamp.created', pymongo.DESCENDING)] # Legacy support
+        viewport    = (timeSlice.viewport and timeSlice.viewport.lowerRight is not None)
+        
+        if timeSlice.limit is None:
+            timeSlice.limit = 0
+        if timeSlice.offset is None:
+            timeSlice.offset = 0
+        
+        def add_or_query(args):
+            if "$or" not in query:
+                query["$or"] = args
+            else:
+                result = []
+                for item in query.pop("$and", []) + [{"$or": query.pop("$or")}] + [{"$or": args}]:
+                    if item not in result:
+                        result.append(item)
+
+                query["$and"] = result
+                # query["$and"] = query["$and"] + [ { "$or" : existing }, { "$or" : args } ]
+        
+        
+        # handle before / since filters
+        # -----------------------------
+        if timeSlice.before is not None:
+            query['timestamp.stamped'] = { '$lte': timeSlice.before }
+            query['timestamp.created'] = { '$lte': timeSlice.before } # Legacy support
+        
+        # handle category / subcategory filters
+        # -------------------------------------
+        if timeSlice.category is not None:
+            raise NotImplementedError("NEED TO BUILD TIMESLICE CATEGORIES")
+            kinds           = deriveKindFromCategory(timeSlice.category) 
+            types           = deriveTypesFromCategory(timeSlice.category)
+            subcategories   = deriveSubcategoriesFromCategory(timeSlice.category)
+            
+            kinds_and_types = []
+            if len(kinds) > 0:
+                kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
+            if len(types) > 0:
+                kinds_and_types.append({'entity.types': {'$in': list(types)}})
+            
+            if len(kinds_and_types) > 0:
+                add_or_query([ { "entity.category" : str(timeSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} },
+                               { "$and" : kinds_and_types } ])
+            else:
+                add_or_query([ { "entity.category" : str(timeSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} } ])
+        
+        if timeSlice.subcategory is not None:
+            raise NotImplementedError("NEED TO BUILD TIMESLICE SUBCATEGORIES")
+            query['entity.subcategory'] = str(timeSlice.subcategory).lower()
+        
+        # handle viewport filter
+        # ----------------------
+        if viewport:
+            query["entity.coordinates.lat"] = {
+                "$gte" : timeSlice.viewport.lowerRight.lat, 
+                "$lte" : timeSlice.viewport.upperLeft.lat, 
+            }
+            
+            if timeSlice.viewport.upperLeft.lng <= timeSlice.viewport.lowerRight.lng:
+                query["entity.coordinates.lng"] = { 
+                    "$gte" : timeSlice.viewport.upperLeft.lng, 
+                    "$lte" : timeSlice.viewport.lowerRight.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                add_or_query([  {
+                        "entity.coordinates.lng" : {
+                            "$gte" : timeSlice.viewport.upperLeft.lng, 
+                        }, 
+                    }, 
+                    {
+                        "entity.coordinates.lng" : {
+                            "$lte" : timeSlice.viewport.lowerRight.lng, 
+                        }, 
+                    }, 
+                ])
+
+        #utils.log(pprint.pformat(query))
+        #utils.log(pprint.pformat(timeSlice))
+
+        logs.debug("QUERY: %s" % query)
+        logs.debug("SLICE: %s" % timeSlice.dataExport())
+        
+        # find, sort, and truncate results
+        results = self._collection.find(query) \
+                      .sort(sort) \
+                      .skip(timeSlice.offset) \
+                      .limit(timeSlice.limit)
+
+        return map(self._convertFromMongo, results)
+
+
+
+
+
+
+
     def _getSlice(self, query, genericCollectionSlice):
         # initialize params
         # -----------------

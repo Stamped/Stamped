@@ -488,7 +488,8 @@ class HTTPLinkedAccounts(Schema):
     def exportNetflixAuthSchema(self):
         schema = NetflixAuthSchema()
         schema.dataImport(self.dataExport(), overflow=True)
-        return schema 
+        return schema
+
 
 class HTTPAvailableLinkedAccounts(Schema):
     @classmethod
@@ -598,6 +599,18 @@ class HTTPFindFacebookUser(Schema):
     def setSchema(cls):
         cls.addProperty('q',                    basestring) # Comma delimited
         cls.addProperty('facebook_token',       basestring)
+
+class HTTPFacebookLoginResponse(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('state',                basestring) # passed back state value to prevent csrf attacks
+        cls.addProperty('code',                 basestring) # code we'll exchange for a user token
+
+class HTTPFacebookAuthResponse(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('access_token',         basestring)
+        cls.addProperty('expires',              int)        # seconds until token expires
 
 class HTTPNetflixId(Schema):
     @classmethod
@@ -973,7 +986,7 @@ class HTTPEntity(Schema):
                 action = HTTPAction()
                 action.type = 'link'
                 action.name = 'View link'
-                action.sources.append(actionSource)
+                action.sources = [actionSource]
 
                 item.action = action
 
@@ -1059,7 +1072,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Reserve on OpenTable'
                 source.source       = 'opentable'
                 source.source_id    = entity.sources.opentable_id
-                source.link         = _buildOpenTableURL(entity.sources.opentable_id, entity.opentable_nickname, client)
+                source.link         = _buildOpenTableURL(entity.sources.opentable_id, entity.sources.opentable_nickname, client)
                 source.icon         = _getIconURL('src_opentable', client=client)
                 source.setCompletion(
                     action      = actionType,
@@ -1070,28 +1083,28 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Reserve a table', sources, icon=actionIcon)
-
+            
             # Actions: Call
-
+            
             actionType  = 'phone'
             actionIcon  = _getIconURL('act_call', client=client)
             sources     = []
-
+            
             if entity.phone is not None:
                 source              = HTTPActionSource()
                 source.source       = 'phone'
                 source.source_id    = entity.phone
                 source.link         = 'tel:%s' % non_numeric_re.sub('', entity.phone)
                 sources.append(source)
-
+            
             self._addAction(actionType, entity.phone, sources, icon=actionIcon)
-
+            
             # Actions: View Menu
-
+            
             actionType  = 'menu'
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
-
+            
             if entity.sources.singleplatform_id is not None:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
@@ -1104,9 +1117,9 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-
+            
             self._addAction(actionType, 'View menu', sources, icon=actionIcon)
-
+        
         # Generic Place
         elif entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
@@ -1945,9 +1958,155 @@ class HTTPActionComplete(Schema):
         cls.addProperty('user_id',              basestring)
         cls.addProperty('stamp_id',             basestring)
 
-# ######## #
+
+# ###### #
 # Slices #
-# ######## #
+# ###### #
+
+class HTTPTimeSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('before',               int)
+        cls.addProperty('limit',                int)
+        cls.addProperty('offset',               int)
+
+        # Filtering
+        cls.addProperty('category',             basestring)
+        cls.addProperty('subcategory',          basestring)
+        cls.addProperty('properties',           basestring) # comma-separated list
+        cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
+
+        # Scope
+        cls.addProperty('user_id',              basestring)
+        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+
+    def exportTimeSlice(self):
+        data                = self.dataExport()
+        beforeData          = data.pop('before', None)
+        viewportData        = data.pop('viewport', None)
+        propertiesData      = data.pop('properties', None)
+
+        slc                 = TimeSlice()
+        slc.dataImport(data)
+
+        if self.before is not None:
+            slc.before          = datetime.utcfromtimestamp(int(before))
+
+        if self.viewport is not None:
+            viewportData        = self.viewport.split(',')
+            
+            coordinates0        = CoordinatesSchema()
+            coordinates0.lat    = viewportData[0]
+            coordinates0.lng    = viewportData[1]
+            
+            coordinates1        = CoordinatesSchema()
+            coordinates1.lat    = viewportData[2]
+            coordinates1.lng    = viewportData[3]
+
+            viewport            = ViewportSchema()
+            viewport.upperLeft  = coordinates0
+            viewport.lowerRight = coordinates1
+
+            slc.viewport        = viewport 
+
+        if self.properties is not None:
+            slc.properties      = self.properties.split(',')
+
+        return slc
+
+class HTTPSearchSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('limit',                int) # Max 50
+
+        # Filtering
+        cls.addProperty('category',             basestring)
+        cls.addProperty('subcategory',          basestring)
+        cls.addProperty('properties',           basestring) # comma-separated list
+        cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
+
+        # Scope
+        cls.addProperty('user_id',              basestring)
+        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+
+    def exportSearchSlice(self):
+        data                = self.dataExport()
+        beforeData          = data.pop('before', None)
+        viewportData        = data.pop('viewport', None)
+        propertiesData      = data.pop('properties', None)
+
+        slc                 = SearchSlice()
+        slc.dataImport(data)
+
+        if self.viewport is not None:
+            viewportData        = self.viewport.split(',')
+            
+            coordinates0        = CoordinatesSchema()
+            coordinates0.lat    = viewportData[0]
+            coordinates0.lng    = viewportData[1]
+            
+            coordinates1        = CoordinatesSchema()
+            coordinates1.lat    = viewportData[2]
+            coordinates1.lng    = viewportData[3]
+
+            viewport            = ViewportSchema()
+            viewport.upperLeft  = coordinates0
+            viewport.lowerRight = coordinates1
+
+            slc.viewport        = viewport 
+
+        if self.properties is not None:
+            slc.properties      = self.properties.split(',')
+
+        return slc
+
+class HTTPRelevanceSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Filtering
+        cls.addProperty('category',             basestring)
+        cls.addProperty('subcategory',          basestring)
+        cls.addProperty('properties',           basestring) # comma-separated list
+        cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
+
+        # Scope
+        cls.addProperty('user_id',              basestring)
+        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+
+    def exportRelevanceSlice(self):
+        data                = self.dataExport()
+        beforeData          = data.pop('before', None)
+        viewportData        = data.pop('viewport', None)
+        propertiesData      = data.pop('properties', None)
+
+        slc                 = RelevanceSlice()
+        slc.dataImport(data)
+
+        if self.viewport is not None:
+            viewportData        = self.viewport.split(',')
+            
+            coordinates0        = CoordinatesSchema()
+            coordinates0.lat    = viewportData[0]
+            coordinates0.lng    = viewportData[1]
+            
+            coordinates1        = CoordinatesSchema()
+            coordinates1.lat    = viewportData[2]
+            coordinates1.lng    = viewportData[3]
+
+            viewport            = ViewportSchema()
+            viewport.upperLeft  = coordinates0
+            viewport.lowerRight = coordinates1
+
+            slc.viewport        = viewport 
+
+        if self.properties is not None:
+            slc.properties      = self.properties.split(',')
+
+        return slc
+
+
 
 class HTTPGenericSlice(Schema):
     @classmethod
@@ -1981,7 +2140,7 @@ class HTTPGenericSlice(Schema):
         since = data.pop('since', None)
         if since is not None:
             try:
-                data['since'] = datetime.utcfromtimestamp(int() - 2)
+                data['since'] = datetime.utcfromtimestamp(int(since) - 2)
             except Exception:
                 raise StampedInputError("invalid since parameter; must be a valid UNIX timestamp")
 
@@ -2331,6 +2490,13 @@ class HTTPStamp(Schema):
 
     def minimize(self):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
+
+class HTTPStampDetail(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('screen_name',              basestring)
+        cls.addProperty('stamp_num',                int)
+        cls.addProperty('stamp_title',              basestring)
 
 class HTTPImageUpload(Schema):
     @classmethod
@@ -3006,3 +3172,4 @@ class HTTPMenu(Schema):
     def importMenuSchema(self, menu):
         self.dataImport(menu.dataExport(), overflow=True)
         return self
+

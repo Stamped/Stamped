@@ -275,8 +275,6 @@ class TMDBSource(GenericSource):
                         pass
         return result
 
-<<<<<<< HEAD
-=======
     def entityProxyFromKey(self, tmdb_id, **kwargs):
         # Todo: Make sure we fail gracefully if id is invalid
         try:
@@ -284,7 +282,6 @@ class TMDBSource(GenericSource):
         except Exception as e:
             logs.warning("Error: %s" % e)
             raise
->>>>>>> bd75fd4784c78165ac369065f217463ac776f5fa
 
     # def enrichEntity(self, entity, controller, decorations, timestamps):
     #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)

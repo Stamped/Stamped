@@ -164,13 +164,13 @@
             }*/
 
 }
-.stamp-gallery-item .content .previews .profile-image-small {
+.stamp-gallery-item .content .previews .profile-image-tiny {
   display: inline-block;
   float: none;
   position: relative;
   margin: 0 2px 4px 0;
 }
-.stamp-gallery-item .content .previews .profile-image-small .like {
+.stamp-gallery-item .content .previews .profile-image-tiny .like {
   background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
   background-position: 0, 0;
   position: absolute;
@@ -181,7 +181,7 @@
   height: 14px;
   z-index: 100;
 }
-.stamp-gallery-item .content .previews .profile-image-small .todo {
+.stamp-gallery-item .content .previews .profile-image-tiny .todo {
   background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
   background-position: -16px, 0;
   position: absolute;
@@ -192,7 +192,7 @@
   height: 14px;
   z-index: 100;
 }
-.stamp-gallery-item .content .previews .profile-image-small .comment {
+.stamp-gallery-item .content .previews .profile-image-tiny .comment {
   background: url(/assets/img/feedbackicons_sprite.png) no-repeat;
   background-position: -32px, 0;
   position: absolute;
@@ -203,7 +203,7 @@
   height: 14px;
   z-index: 100;
 }
-.stamp-gallery-item .content .previews .profile-image-small .credit {
+.stamp-gallery-item .content .previews .profile-image-tiny .credit {
   position: absolute;
   bottom: -4.666666666666667px;
   right: -4.666666666666667px;
@@ -214,7 +214,7 @@
   height: 18px;
   z-index: 101;
 }
-.stamp-gallery-item .content .previews .profile-image-small .credit img {
+.stamp-gallery-item .content .previews .profile-image-tiny .credit img {
   background: none;
   border: 0 none;
   -webkit-box-shadow: none;
@@ -226,9 +226,9 @@
   width: 18px;
   height: 18px;
 }
-.stamp-gallery-item .content .previews .profile-image-small .like img,
-.stamp-gallery-item .content .previews .profile-image-small .todo img,
-.stamp-gallery-item .content .previews .profile-image-small .comment img {
+.stamp-gallery-item .content .previews .profile-image-tiny .like img,
+.stamp-gallery-item .content .previews .profile-image-tiny .todo img,
+.stamp-gallery-item .content .previews .profile-image-tiny .comment img {
   -webkit-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);
   -ms-box-shadow: 0 6px 4px -4px rgba(0, 0, 0, 0.15);

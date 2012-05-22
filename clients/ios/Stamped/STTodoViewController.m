@@ -11,7 +11,7 @@
 #import "STStampedActions.h"
 #import "STActionManager.h"
 #import "STDebug.h"
-#import "ECSlidingViewController.h"
+#import "Util.h"
 
 @interface STTodoCell : UITableViewCell
 
@@ -60,20 +60,13 @@ static STTodoViewController* _sharedInstance;
   return self;
 }
 
-- (void)backButtonClicked:(id)button {
-  [self.slidingViewController anchorTopViewTo:ECRight];
-}
-
 - (void)viewDidLoad
 {
   [super viewDidLoad];
   self.tableView.delegate = self;
   self.tableView.dataSource = self;
   [self reloadStampedData];
-  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
-                                                                            style:UIBarButtonItemStyleDone
-                                                                           target:self 
-                                                                           action:@selector(backButtonClicked:)] autorelease];
+  [Util addHomeButtonToController:self withBadge:YES];
   [STDebug log:@"To-Do is still pre-alpha"];
 }
 

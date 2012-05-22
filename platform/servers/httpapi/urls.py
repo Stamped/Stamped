@@ -62,6 +62,7 @@ urlpatterns = patterns('',
     (r'v0/account/linked/twitter/update.json',      'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/twitter/followers.json',   'v0.functions.account.alertFollowersFromTwitter'),
     (r'v0/account/linked/twitter/remove.json',      'v0.functions.account.removeTwitter'),
+    (r'v0/account/linked/facebook/login_callback.json', 'v0.functions.account.facebookLoginCallback'),
     (r'v0/account/linked/facebook/update.json',     'v0.functions.account.linked_accounts'),
     (r'v0/account/linked/facebook/followers.json',  'v0.functions.account.alertFollowersFromFacebook'),
     (r'v0/account/linked/facebook/remove.json',     'v0.functions.account.removeFacebook'),
@@ -110,7 +111,7 @@ urlpatterns = patterns('',
     (r'v0/entities/menu.json',                      'v0.functions.entities.menu'),
     (r'v0/entities/stamped_by.json',                'v0.functions.entities.stampedBy'),
     (r'v0/entities/suggested.json',                 'v0.functions.entities.suggested'),
-
+    
     ### ACTIONS
     (r'v0/actions/complete.json',                   'v0.functions.entities.completeAction'),
 
@@ -120,6 +121,9 @@ urlpatterns = patterns('',
     (r'v0/stamps/update_image.json',                'v0.functions.stamps.update_image'),
     (r'v0/stamps/show.json',                        'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json',                      'v0.functions.stamps.remove'),
+    (r'v0/stamps/collection.json',                  'v0.functions.stamps.collection'),
+    (r'v0/stamps/search.json',                      'v0.functions.stamps.search'),
+    
     (r'v0/stamps/likes/create.json',                'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                'v0.functions.stamps.likesRemove'),
     (r'v0/stamps/likes/show.json',                  'v0.functions.stamps.likesShow'),

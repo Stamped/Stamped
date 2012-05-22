@@ -75,6 +75,27 @@ class StampedAPIProxy(object):
             else:
                 return []
     
+    def getStampFromUser(self, screen_name, stamp_num):
+        if self._prod:
+            raise NotImplementedError
+        else:
+            stamps = self._handle_get("collections/user.json", {
+                'screen_name' : screen_name, 
+                'limit'       : 1, 
+                'offset'      : stamp_num, 
+                'sort'        : 'created', 
+            })
+            
+            return stamps[0] if len(stamps) > 0 else None
+    
+    def getEntity(self, entity_id):
+        if self._prod:
+            raise NotImplementedError
+        else:
+            return self._handle_get("entities/show.json", {
+                'entity_id' : entity_id
+            })
+    
     def _handle_local_get(self, func, params):
         pass
     
@@ -294,7 +315,7 @@ def parse_request(request, schema, django_kwargs, **kwargs):
                 raise
             return
         
-        schema.importData(data)
+        schema.dataImport(data)
         return schema
     except Exception as e:
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
