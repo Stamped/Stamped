@@ -8,8 +8,8 @@
 
 #import "STNavigationButton.h"
 
-#define kButton @"nav_buttton.png"
-#define kButtonHi @"nav_buttton.png"
+#define kButton @"nav_button.png"
+#define kButtonHi @"nav_button.png"
 
 #define kBackButton @"nav_back_button.png"
 #define kBackButtonHi @"nav_back_button.png"

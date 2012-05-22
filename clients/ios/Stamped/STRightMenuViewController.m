@@ -57,7 +57,7 @@
         _scrollView = [scrollView retain];
         [scrollView release];
         
-        CGRect frame = CGRectMake(self.scrollView.frame.size.width - 76.0f, 30.0f, 50.0f, 50.0f);
+        CGRect frame = CGRectMake(self.scrollView.frame.size.width - 58.0f, 4.0f, 50.0f, 44.0f);
         
         // close
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -70,7 +70,7 @@
         
         for (NSInteger i = 0; i < self.categories.count; i++) {
             
-            frame.origin.y += 60.0f;
+            frame.origin.y += 48.0f;
             NSString *category = [self.categories objectAtIndex:i];
             UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"create_menu_%@.png", category]];
             UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -84,7 +84,7 @@
 
         }
         
-        frame.origin.y += 60.0f;
+        frame.origin.y += 48.0f;
 
         // more
         button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -125,31 +125,42 @@
 
 - (void)popInView:(UIView*)view withDelay:(CGFloat)delay {
     
-    
+    [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
+
     [CATransaction begin];
-    [CATransaction setAnimationDuration:0.2f];
+    [CATransaction setAnimationDuration:0.25f];
     [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
     [CATransaction setCompletionBlock:^{
-        //[view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"transform.scale"];
+        [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
+        [view.layer removeAllAnimations];
     }];
     
     CAAnimationGroup *groupAnimation = [CAAnimationGroup animation];
     groupAnimation.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
     groupAnimation.removedOnCompletion = NO;
     groupAnimation.fillMode = kCAFillModeForwards;
-
-    CAKeyframeAnimation *scale = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-    scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.1f], [NSNumber numberWithFloat:1.0f], nil];
     
-    //CABasicAnimation *scale = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-    //scale.fromValue = [NSNumber numberWithFloat:0.00000001f];
-    //scale.toValue = [NSNumber numberWithFloat:1.0f];
+    CGPoint fromPos = view.layer.position;
+    //fromPos.y -= 10.0f;
+    fromPos.x += 40.0f;
+    CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
+    position.fromValue = [NSValue valueWithCGPoint:fromPos];
+   // position.values = [NSArray arrayWithObjects:[NSValue valueWithCGPoint:fromPos], [[NSValue valueWithCGPoint:fromPos], [NSValue valueWithCGPoint:fromPos], nil];
 
-    CABasicAnimation *opacity = [CABasicAnimation animationWithKeyPath:@"opacity"];
-    opacity.fromValue = [NSNumber numberWithFloat:0.0f];
-    opacity.toValue = [NSNumber numberWithFloat:1.0f];
     
-    [groupAnimation setAnimations:[NSArray arrayWithObjects:scale, nil]];
+    CABasicAnimation *scale = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    scale.fromValue = [NSNumber numberWithFloat:0.7f];
+    scale.toValue = [NSNumber numberWithFloat:1.0f];
+
+    CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
+    opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
+    
+    CABasicAnimation *rotation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+    rotation.fromValue = [NSNumber numberWithFloat:0.0f];
+    rotation.toValue = [NSNumber numberWithFloat:M_PI*2];
+    
+    [groupAnimation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
     [view.layer addAnimation:groupAnimation forKey:nil];
 
     [CATransaction commit];
@@ -158,19 +169,22 @@
 
 - (void)animateIn {
     if (_hasAnimated) return;
-    _hasAnimated = NO;
+    _hasAnimated = YES;
     
-    float delay = 0.1f;
+    float delay = -.1f;
+    NSInteger index = 0;
     for (UIView *view in _buttons) {
 
-        CAKeyframeAnimation *scale = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-        scale.calculationMode = @"cubic";
-        scale.duration = 0.15f;
-        scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.1f], [NSNumber numberWithFloat:1.0f], nil];
-        scale.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
-        [view.layer addAnimation:scale forKey:nil];
-        
-        delay += 0.04f;
+        if (index > 0) {
+            [self popInView:view withDelay:delay];
+            //double val = floorf(((double)arc4random() / 0x100000000) * 2.0f);
+            // NSLog(@"%f", val);
+            delay += 0.06f;
+        } else {
+            delay = 0.1f;
+        }
+        index ++;
+
     }
     
 }
@@ -196,6 +210,11 @@
     STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [menuController pushViewController:controller animated:YES];
+    
+    if ([menuController.rootViewController isKindOfClass:[UINavigationController class]]) {
+        [(UINavigationController*)menuController.rootViewController setNavigationBarHidden:YES animated:NO];
+    }
+    
     [controller release];
     
 }

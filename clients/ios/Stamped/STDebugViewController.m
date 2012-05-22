@@ -45,8 +45,7 @@
 
 @implementation STDebugViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
     // Custom initialization
@@ -54,25 +53,15 @@
   return self;
 }
 
-- (void)backButtonClicked:(id)button {
-  [self.slidingViewController anchorTopViewTo:ECRight];
-}
-
-- (void)rightButtonClicked:(id)button {
-  [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
-}
-
-- (void)viewDidLoad
-{
-  [super viewDidLoad];
-  self.tableView.delegate = self;
-  self.tableView.dataSource = self;
-  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Home"
-                                                                            style:UIBarButtonItemStyleDone
-                                                                           target:self 
-                                                                           action:@selector(backButtonClicked:)] autorelease];
-  self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Configuration"
-                                                                             style:UIBarButtonItemStyleDone
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    
+    [Util addHomeButtonToController:self withBadge:NO];
+    self.navigationItem.rightBarButtonItem = [[[STNavigationItem alloc] initWithTitle:@"Configuration"
+                                                                             style:UIBarButtonItemStyleBordered
                                                                             target:self 
                                                                             action:@selector(rightButtonClicked:)] autorelease];
 }
@@ -81,11 +70,25 @@
   [self.tableView reloadData];
 }
 
-- (void)viewDidUnload
-{
+- (void)viewDidUnload {
   [super viewDidUnload];
   // Release any retained subviews of the main view.
 }
+
+
+#pragma mark - Actions
+
+- (void)backButtonClicked:(id)button {
+    [self.slidingViewController anchorTopViewTo:ECRight];
+}
+
+- (void)rightButtonClicked:(id)button {
+    [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
+}
+
+
+#pragma mark - UITableViewDataSource
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return [STDebug sharedInstance].logCount;
 }
@@ -98,6 +101,9 @@
   STDebugDatum* datum = [[STDebug sharedInstance] logItemAtIndex:([STDebug sharedInstance].logCount - (indexPath.row + 1))];
   return [[[STDebugCell alloc] initWithDatum:datum] autorelease];
 }
+
+
+#pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   STDebugDatum* datum = [[STDebug sharedInstance] logItemAtIndex:([STDebug sharedInstance].logCount - (indexPath.row + 1))];

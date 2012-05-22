@@ -401,6 +401,13 @@
     
 }
 
+- (void)stSearchViewShouldBeginSearching:(STSearchView*)view {
+    
+    [view.textField becomeFirstResponder];
+    [self setSearching:YES];
+    
+}
+
 
 #pragma mark - UIKeyboard Notfications
 

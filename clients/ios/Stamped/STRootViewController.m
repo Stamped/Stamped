@@ -32,26 +32,27 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
     self.delegate = (id<UINavigationControllerDelegate>)self;
     self.view.backgroundColor = [UIColor colorWithWhite:1 alpha:1];
-    STNavigationBar *bar = [[STNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 44)];
-    bar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    [self setValue:bar forKey:@"navigationBar"];
-    [bar release];
+    
+    if (![self.navigationBar isKindOfClass:[STNavigationBar class]]) {
+        
+        STNavigationBar *bar = [[STNavigationBar alloc] initWithFrame:self.navigationBar.bounds];
+        bar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self setValue:bar forKey:@"navigationBar"];
+        [bar release];
+        
+        UITapGestureRecognizer *gridRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleGrid:)];
+        gridRecognizer.numberOfTapsRequired = 3;
+        gridRecognizer.numberOfTouchesRequired = 2;
+        [bar addGestureRecognizer:gridRecognizer];
+        [gridRecognizer release];
+        
+    }
     
 }
 
 - (void)toggleGrid:(id)nothing {
     STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
     app.grid.hidden = !app.grid.hidden;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
-
-    UITapGestureRecognizer* gridRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleGrid:)] autorelease];
-    gridRecognizer.numberOfTapsRequired = 3;
-    gridRecognizer.numberOfTouchesRequired = 2;
-    [self.navigationBar addGestureRecognizer:gridRecognizer];
-  
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

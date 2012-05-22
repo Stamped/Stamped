@@ -10,8 +10,7 @@
 
 @interface SettingsViewController : UIViewController <UIActionSheetDelegate> 
 
-@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet UIView* contentView;
+@property (nonatomic, retain) UITableView *tableView;
 @property (nonatomic, retain) UIViewController* sharingView;
 
 - (IBAction)doneButtonPressed:(id)sender;

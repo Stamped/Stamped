@@ -38,16 +38,14 @@
                                     @"Root.inbox", @"Stamps",
                                     @"Root.iWantTo", @"I Want to...",
                                     @"Root.news", @"News",
-                                    @"Root.todo", @"To-Do",
+                                    @"Root.debug", @"Debug",
                                     nil];
-        _dataSource = [[NSArray arrayWithObjects:@"Stamps", @"I Want to...", @"News", @"To-Do", nil] retain];
+        _dataSource = [[NSArray arrayWithObjects:@"Stamps", @"I Want to...", @"News", @"Debug", nil] retain];
         _controllerStore = [navigators retain];
         
-        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:
-                      @"Root.debug", @"Debug",
-                      @"Root.settings", @"Settings",
+        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", @"To-Do", @"Root.settings", @"Settings",
                       nil] retain];
-        _anchorDataSource = [[NSArray arrayWithObjects:@"Debug", @"Settings", nil] retain];
+        _anchorDataSource = [[NSArray arrayWithObjects:@"To-Do", @"Settings", nil] retain];
         
     }
     return self;
@@ -68,7 +66,6 @@
     
     [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
         if (count && count.numberUnread.integerValue > 0) {
-            //count.numberUnread.integerValue
             _unreadCount = count.numberUnread.integerValue;
             [self.tableView reloadData];
         }
@@ -105,7 +102,17 @@
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
         [self.view addSubview:corner];
         [corner release];
+        
+        corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
+        corner.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
+        corner.layer.transform = CATransform3DMakeScale(1.0f, -1.0f, 0.0f);
+        [self.view addSubview:corner];
+        [corner release];
 
+        frame = corner.frame;
+        frame.origin.y = (self.view.bounds.size.height-corner.bounds.size.height);
+        corner.frame = frame;
+        
     }
     
     if (!_anchorTableView) {
@@ -122,24 +129,28 @@
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         tableView.delegate = (id<UITableViewDelegate>)self;
         tableView.dataSource = (id<UITableViewDataSource>)self;
-        [self.view addSubview:tableView];
+        [self.view insertSubview:tableView aboveSubview:self.tableView];
         self.anchorTableView = tableView;
         
-        /*
-        tableView.layer.shadowPath = [UIBezierPath bezierPathWithRect:tableView.bounds].CGPath;
-        tableView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
-        tableView.layer.shadowRadius = 16.0f;
-        tableView.layer.shadowOpacity = 0.4f;
-        */
+        UIImage *image = [UIImage imageNamed:@"left_menu_anchor_shadow.png"];
+        UIImageView *shadow = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
+        shadow.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:shadow];
+        [shadow release];
+
+        frame = shadow.bounds;
+        frame.size.width = self.view.bounds.size.width;
+        frame.origin.y = (tableView.frame.origin.y - frame.size.height);
+        shadow.frame = frame;
         
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         view.contentMode = UIViewContentModeRedraw;
         view.alpha = 0.1f;
         view.backgroundColor = [UIColor clearColor];
         [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
 
-            //CGContextSetAlpha(ctx, 0.1);
-            drawGradient([UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, [UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, ctx);
+            drawGradient([UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, [UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, ctx);
             
         }];
         tableView.backgroundView = view;
@@ -158,6 +169,12 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    [self.anchorTableView deselectRowAtIndexPath:self.anchorTableView.indexPathForSelectedRow animated:YES];
+    
+    if (_selectedIndexPath) {
+        [self.tableView selectRowAtIndexPath:_selectedIndexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+    }
+    
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -193,6 +210,8 @@
             [cell setBadgeCount:0];
         }
         
+        cell.icon = [UIImage imageNamed:[NSString stringWithFormat:@"left_menu_icon_%@.png", [cell.titleLabel.text lowercaseString]]];
+        
         if ([indexPath isEqual:_selectedIndexPath]) {
             cell.selected = YES;
         }
@@ -206,11 +225,13 @@
     LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     
-    cell.topBorder = YES;
+    //cell.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+    cell.titleLabel.textColor = [UIColor colorWithRed:0.4f green:0.4f blue:0.4f alpha:1.0f];
+    cell.topBorder = (indexPath.row==1);
     cell.titleLabel.text = [_anchorDataSource objectAtIndex:indexPath.row];
+    cell.icon = [UIImage imageNamed:[NSString stringWithFormat:@"left_menu_icon_%@.png", [cell.titleLabel.text lowercaseString]]];
 
     return cell;
   
@@ -222,13 +243,24 @@
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSString *key = (tableView == self.tableView) ? [_dataSource objectAtIndex:indexPath.row] : [_anchorDataSource objectAtIndex:indexPath.row];
-    UIViewController *controller = [[[STConfiguration value:[_controllerStore objectForKey:key]] alloc] init];
+    NSString *value = (tableView == self.tableView) ? [_controllerStore objectForKey:key] : [_anchorControllerStore objectForKey:key];
+    
+    UIViewController *controller = [[[STConfiguration value:value] alloc] init];
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+
     if (self.tableView == tableView) {
+        
         [menuController setRootController:navController animated:YES];
+        
     } else {
+        
+        STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleBordered target:self action:@selector(done:)];
+        controller.navigationItem.rightBarButtonItem = item;
+        [item release];
+
         [menuController presentModalViewController:navController animated:YES];
+
     }
     [controller release];
     [navController release];
@@ -261,6 +293,16 @@
             [selectedCell setSelected:!cell.highlighted];
         }
     }
+    
+}
+
+
+#pragma mark - Actions
+
+- (void)done:(id)sender {
+    
+    UIViewController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    [controller dismissModalViewControllerAnimated:YES];
     
 }
 

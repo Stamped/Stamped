@@ -12,6 +12,9 @@
 @protocol STSearchViewDelegate;
 @interface STSearchView : UIView {
     UIButton *_cancelButton;
+    UIImageView *_topLeftCorner;
+    UIImageView *_topRightCorner;
+    UITapGestureRecognizer *_tap;
 }
 
 @property(nonatomic,assign) id <STSearchViewDelegate> delegate;
@@ -21,4 +24,5 @@
 @end
 @protocol STSearchViewDelegate
 - (void)stSearchViewDidCancel:(STSearchView*)view;
+- (void)stSearchViewShouldBeginSearching:(STSearchView*)view;
 @end
