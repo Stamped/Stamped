@@ -52,18 +52,13 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             del(document['_id'])
 
         ### HACK: Verify that 'created' timestamp exists for entity
-        if 'timestamp' not in document:
+        if 'timestamp' not in document or 'created' not in document['timestamp']:
             try:
                 created = ObjectId(document[self._primary_key]).generation_time.replace(tzinfo=None)
             except:
-                created = datetime.utcnow()
+                report()
+                raise
             document['timestamp'] = { 'created' : created }
-        elif 'timestamp' in document and 'created' not in document['timestamp']:
-            try:
-                created = ObjectId(document[self._primary_key]).generation_time.replace(tzinfo=None)
-            except:
-                created = datetime.utcnow()
-            document['timestamp']['created'] = created 
 
         document.pop('titlel')
 
