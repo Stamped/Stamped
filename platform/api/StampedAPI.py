@@ -1266,7 +1266,8 @@ class StampedAPI(AStampedAPI):
             entityId = self._convertSearchId(entityId)
         else:
             self.mergeEntityId(entityId)
-        
+
+        logs.info('### about to call entityDB.getEntity')
         return self._entityDB.getEntity(entityId)
     
     @API_CALL
@@ -1279,6 +1280,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getEntity(self, entityRequest, authUserId=None):
+        logs.info('### calling stampedapi.getEntity')
         entity = self._getEntityFromRequest(entityRequest)
         
         if self.__version > 0 and entity.isType('artist'):
