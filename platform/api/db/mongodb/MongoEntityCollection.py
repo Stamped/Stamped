@@ -11,7 +11,7 @@ from logs       import report
 try:
     from datetime                       import datetime
     from utils                          import lazyProperty
-    from bson                           import ObjectId
+    from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
     from Entity                         import getSimplifiedTitle, buildEntity
