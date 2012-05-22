@@ -3692,7 +3692,8 @@ class StampedAPI(AStampedAPI):
     def _mergeEntity(self, entity, link=True):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         modified = self._resolveEntity(entity)
-
+        from pprint import pformat
+        logs.info('entity before resolveentityLinks:\n%s' % entity.dataExport())
         if link:
             modified = self._resolveEntityLinks(entity) | modified
 
