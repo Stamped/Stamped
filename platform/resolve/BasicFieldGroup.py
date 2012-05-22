@@ -96,15 +96,13 @@ class BasicFieldGroup(AFieldGroup):
     
     def getValue(self, entity, path):
         cur = entity
-        if isinstance(cur, Schema):
-            cur = cur.dataExport()
         for p in path[:-1]:
             if p in cur:
-                cur = cur[p]
+                cur = getattr(cur, p)
             else:
                 return None
         if path[-1] in cur:
-            return cur[path[-1]]
+            return getattr(cur, path[-1])
         else:
             return None
 
