@@ -111,7 +111,7 @@ urlpatterns = patterns('',
     (r'v0/entities/menu.json',                      'v0.functions.entities.menu'),
     (r'v0/entities/stamped_by.json',                'v0.functions.entities.stampedBy'),
     (r'v0/entities/suggested.json',                 'v0.functions.entities.suggested'),
-
+    
     ### ACTIONS
     (r'v0/actions/complete.json',                   'v0.functions.entities.completeAction'),
 
@@ -121,6 +121,9 @@ urlpatterns = patterns('',
     (r'v0/stamps/update_image.json',                'v0.functions.stamps.update_image'),
     (r'v0/stamps/show.json',                        'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json',                      'v0.functions.stamps.remove'),
+    (r'v0/stamps/collection.json',                  'v0.functions.stamps.collection'),
+    (r'v0/stamps/search.json',                      'v0.functions.stamps.search'),
+    
     (r'v0/stamps/likes/create.json',                'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                'v0.functions.stamps.likesRemove'),
     (r'v0/stamps/likes/show.json',                  'v0.functions.stamps.likesShow'),

@@ -1,4 +1,4 @@
-/* profile2.less
+/* profile.less
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -21,8 +21,8 @@
     clear: both;
     text-align: center;
     
-    margin: 0;
     padding: 1.5em 2em;
+    margin:  0;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -45,7 +45,7 @@
     
     /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
-    .transition(all, 0.8s, ease-in-out);
+    .transition(all, 0.8s, ease-out);
     
     /* TODO: keep this to enable GPU acceleration or not? Profile! */
     /*.transform(perspective(200px) translate(0,0));*/
@@ -67,32 +67,6 @@
             //border: 1px solid red;
             display: block;
             float: left;
-            
-            .entity-header {
-                margin-left: 24px;
-                display: block;
-                float: right;
-                text-align: left;
-                max-width: @stamp-gallery-item-min-width - 24px - 62px;
-                
-                .title {
-                    position: relative;
-                    display:  inline-block;
-                    max-width: 100%;
-                    
-                    .pronounced-title {
-                        display: inline-block;
-                        max-width: 100%;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                    }
-                    
-                    .pronounced-title:hover {
-                        text-overflow: clip;
-                    }
-                }
-            }
         }
         
         .content_1 {
@@ -114,7 +88,6 @@
             }
             
             .count_0_0_0 {
-                display: none;
             }
             
             .previews {
@@ -190,68 +163,57 @@
                 
                 .transition(opacity, 0.2s, ease-out);
             }
-            
-            @preview-width: 140px;
-            @preview-wrapper-width: @preview-width + 8px;
-            
-            .sized(@width) {
-                display: block;
-                max-width: @width;
-                width:  @width;
-                height: auto;
-                background-size: 100% 100%;
-            }
-            
-            .stamp-preview {
-                /*margin-left: 24px;*/
-                .sized(@preview-wrapper-width);
-                
-                .preview-image {
-                    display: none;
-                    .sized(@preview-wrapper-width);
-                }
-                
-                .stamp-map {
-                    z-index: 25;
-                }
-                .stamp-user-image {
-                    z-index: 24;
-                    
-                    img {
-                        .box-shadow(4px, 4px, 8px, 0, rgba(30,30,30,0.85));
-                    }
-                }
-                .stamp-entity-image {
-                    z-index: 23;
-                    
-                    img {
-                        .box-shadow(4px, 4px, 8px, 0, rgba(30,30,30,0.85));
-                    }
-                }
-                .stamp-icon {
-                    z-index: 22;
-                }
-                
-                img {
-                    .sized(@preview-width);
-                    .rounded(8px);
-                }
-                
-                .stamp-category-book  .icon, 
-                .stamp-category-film  .icon, 
-                .stamp-category-food  .icon, 
-                .stamp-category-music .icon, 
-                .stamp-category-other .icon {
-                    .sized(@preview-width);
-                    height: 140px;
-                    
-                    margin: 0 4px;
-                    /* TEMP */
-                    text-align: center;
-                    color: red;
-                    font-weight: bold;
-                }
-            }
+        }
+    }
+}
+
+.zoom {
+    background: url(/assets/img/zoom-icon.png) no-repeat;
+    pointer-events: none;
+    position: absolute;
+    
+    top:   8px;
+    right: 16px;
+    
+    display: block;
+    width:  25px;
+    height: 25px;
+    
+    z-index: 101;
+    opacity: 0;
+    .transition(opacity, 0.2s, ease-out);
+}
+
+.stamp-user-image:hover, .stamp-entity-image:hover {
+    cursor: pointer;
+    
+    .zoom {
+        opacity: 1;
+    }
+}
+
+.entity-header {
+    margin-left: 24px;
+    display: block;
+    float: right;
+    text-align: left;
+    max-width: @stamp-gallery-item-min-width - 24px - 62px;
+    
+    .title {
+        position: relative;
+        display:  inline-block;
+        max-width: 100%;
+        
+        .pronounced-title {
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .pronounced-title:hover {
+            text-overflow: clip;
         }
     }
 }
@@ -261,7 +223,8 @@
     
     .stamp-gallery-item {
         width: @stamp-gallery-item-min-width;
-        margin: 0 24px 24px 0;
+        margin:  0 12px 24px 0;
+        padding: 0 6px 0;
         
         .content {
             .content_1 {
@@ -271,26 +234,89 @@
             }
             
             .content_2 {
-                margin: 1em 0 0;
+                margin: 1.5em 0 0;
                 
                 .timestamp {
                     left: auto;
                     right: 8px;
-                    top: -1.3em;
+                    top: -1.5em;
                 }
             }
         }
     }
 }
 
-.blurb {
+@preview-width: 140px;
+@preview-wrapper-width: @preview-width + 8px;
+
+.sized(@width) {
+    display: block;
+    max-width: @width;
+    width:  @width;
+    height: auto;
+    background-size: 100% 100%;
+}
+
+.stamp-preview {
+    /*margin-left: 24px;*/
+    .sized(@preview-wrapper-width);
+    
+    .preview-image {
+        position: relative;
+        display: none;
+        .sized(@preview-wrapper-width);
+    }
+    
+    .stamp-map {
+        z-index: 25;
+    }
+    .stamp-user-image {
+        z-index: 24;
+        
+        img {
+            .box-shadow(0, 4px, 8px, -4px, rgba(30,30,30,0.85));
+        }
+    }
+    .stamp-entity-image {
+        z-index: 23;
+        
+        img {
+            .box-shadow(0, 4px, 8px, -2px, rgba(30,30,30,0.85));
+        }
+    }
+    .stamp-icon {
+        z-index: 22;
+    }
+    
+    img {
+        .sized(@preview-width);
+        /*.rounded(8px);*/
+    }
+    
+    .stamp-category-book  .icon, 
+    .stamp-category-film  .icon, 
+    .stamp-category-food  .icon, 
+    .stamp-category-music .icon, 
+    .stamp-category-other .icon {
+        .sized(@preview-width);
+        height: 140px;
+        
+        margin: 0 4px;
+        /* TEMP */
+        text-align: center;
+        color: red;
+        font-weight: bold;
+    }
+}
+
+
+.blurb, .normal_blurb {
     display: inline-block;
     text-align: justify;
     quotes: "\201C" "\201D";
-    
-    /*height: 4em;
-    overflow: hidden;*/
-    
+}
+
+.blurb {
     display: inline-block;
     max-width: 90%;
     white-space: nowrap;
@@ -309,13 +335,15 @@
     }
 }
 
+/*
 .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
 .blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
+*/
 
 .subtitle-line {
     position: relative;
     display: block;
-    margin: 0 0 -.5em;
+    margin: -0.3em 0 -.5em;
     
     p {
         margin: 0;

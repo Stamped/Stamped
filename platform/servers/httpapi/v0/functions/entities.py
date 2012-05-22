@@ -11,7 +11,7 @@ from httpapi.v0.helpers import *
 def _convertHTTPEntity(entity, authClientId=None):
     client = stampedAuth.getClientDetails(authClientId)
     
-    if client.api_version < 1:
+    if authClientId is not None and client.api_version < 1:
         raise NotImplementedError
     else:
         return HTTPEntity().importEntity(entity, client)

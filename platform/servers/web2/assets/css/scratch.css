@@ -1,3 +1,5 @@
+/*-webkit-font-smoothing: antialiased;*/
+
             /*.bqstart {
                  float: left;
                  height: 45px;
@@ -49,7 +51,7 @@
 }*/
 
 
-.profile-image-small {
+.profile-image-tiny {
     display: inline-block;
     float: none;
     

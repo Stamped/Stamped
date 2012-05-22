@@ -25,8 +25,8 @@
 @user_light: color(`(@{l0} >  @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
 @user_dark:  color(`(@{l0} <= @{l1} ? "@{user_primary}" : "@{user_secondary}")`);
 
-@primary:   lighten(@user_light, 25%);
-@secondary: darken( @user_dark,  10%);
+@primary:   fade(lighten(@user_light, 25%), 80%);
+@secondary: fade(darken( @user_dark,  10%), 80%);
 
 .user-gradient(@angle: 135deg) {
     background: -webkit-linear-gradient(@angle, @primary, @secondary);
@@ -35,14 +35,14 @@
     background: linear-gradient(@angle, @primary, @secondary);
 }
 
-.post-header {
+.post-header, .stamp-card-pre {
     .user-gradient(135deg);
     
     width:  100%;
     margin: 0;
 }
 
-.profile-header-post {
+.profile-header-post, .stamp-card-post {
     .user-gradient(135deg);
     
     width:  100%;
@@ -51,6 +51,28 @@
     .inset-stamp .number {
         color: @user_dark;
     }
+}
+
+#stamp-category-nav-bar {
+    ol {
+        li.default a:hover + div, li.default a:active + div, 
+        li.place a:hover + div, li.place a:active + div, 
+        li.music a:hover + div, li.music a:active + div, 
+        li.book a:hover + div, li.book a:active + div, 
+        li.film a:hover + div, li.film a:active + div, 
+        .other a:hover + div, .other a:active + div {
+            background-color: fade(@secondary, 100%);
+        }
+    }
+}
+
+body.default    #stamp-category-nav-bar ol li.default div, 
+body.place      #stamp-category-nav-bar ol li.place div, 
+body.music      #stamp-category-nav-bar ol li.music div, 
+body.book       #stamp-category-nav-bar ol li.book div, 
+body.film       #stamp-category-nav-bar ol li.film div, 
+body.other      #stamp-category-nav-bar ol li.other div {
+    background-color: fade(@secondary, 100%);
 }
 
 .user-logo-large {
@@ -69,11 +91,18 @@
 }
 
 .stamp-gallery-item:hover {
-    background-color: @primary;
+    background-color: fade(@primary, 50%);
 }
 
 .stamp-gallery-item:active {
-    background-color: @secondary;
+    background-color: fade(@primary, 80%);
+}
+
+.action:hover {
+    background-color: fade(@primary, 50%);
+}
+.action:active {
+    background-color: fade(@primary, 80%);
 }
 
 /* target webkit-browsers */

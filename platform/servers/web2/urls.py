@@ -12,6 +12,9 @@ urlpatterns = patterns('',
     url(r'^index\.html?$',                      'core.views.index'), 
     url(r'^/?$',                                'core.views.index'), 
     
+    url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
+                                                'core.views.sdetail'), 
+    
     # profile
     url(r'^(?P<screen_name>[\w-]{1,20})\/map$', 'core.views.map'), 
     url(r'^(?P<screen_name>[\w-]{1,20})\/?$',   'core.views.profile'), 
