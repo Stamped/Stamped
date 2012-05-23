@@ -14,7 +14,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STRippleViewContainer.h"
 #import "STRippleBar.h"
-#import "STLegacyInboxViewController.h"
 #import "STStampedByView.h"
 #import "STSimpleStampedBy.h"
 #import "STStampedActions.h"

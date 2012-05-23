@@ -91,6 +91,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
                    lambda x: self.assertTrue(x[0]['contents'][-1]['blurb'] == self.stampC['contents'][-1]['blurb']), 
         ])
 
+
 class StampedAPICollectionsSearch(StampedAPICollectionTest):
     def test_inbox(self):
         path = "stamps/search.json"

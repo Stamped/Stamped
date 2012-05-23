@@ -20,7 +20,6 @@
 #import "STFriendsStampsList.h"
 #import "STFriendsOfFriendsStampsList.h"
 #import "STButton.h"
-#import "ECSlidingViewController.h"
 #import "STTableDelegator.h"
 #import "STSingleViewSource.h"
 #import "STSearchField.h"
@@ -49,12 +48,18 @@
 
 - (id)init {
   if (self = [super init]) {
-    _stamps = [[Stamps alloc] init];
-    if ([AccountManager sharedManager].currentUser == nil) {
-      _stamps.scope = STStampedAPIScopeEveryone;
-    } else {
-      _stamps.scope = STStampedAPIScopeFriends;
-    }
+      
+      _stamps = [[Stamps alloc] init];
+      _stamps.identifier = [[self class] description];
+      
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stampsChanged:) name:[NSString stringWithFormat:@"stamps-%@", _stamps.identifier] object:nil];
+
+      if ([AccountManager sharedManager].currentUser == nil) {
+          _stamps.scope = STStampedAPIScopeEveryone;
+      } else {
+          _stamps.scope = STStampedAPIScopeFriends;
+      }
+      
   }
   return self;
 }
@@ -75,7 +80,7 @@
     [super viewDidLoad];
   
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-    
+
     [Util addHomeButtonToController:self withBadge:YES];
     [Util addCreateStampButtonToController:self];
     
@@ -86,7 +91,16 @@
         _slider.scope = _stamps.scope;
     }
     self.showsSearchBar = YES;
-  
+    [self.searchView setPlaceholderTitle:@"Search stamps"];
+    [self reloadDataSource];
+    
+    
+    UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0.0f, -300.0f, self.view.bounds.size.width, 241.0f)];
+    header.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    header.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
+    [self.tableView addSubview:header];
+    [header release];
+    
 }
 
 - (void)viewDidUnload {
@@ -94,32 +108,34 @@
     [_slider release];
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+}
+
+
+#pragma mark - Stamps Notifications 
+
 - (void)stampsChanged:(NSNotification *)notification {
     
     NSInteger sections = [self.tableView numberOfSections];
+    UITableView *tableView = self.searching ? _searchResultsTableView : self.tableView;
+    
     if (sections == 0 && ![_stamps isEmpty]) {
         
-        [self.tableView beginUpdates];
-        [self.tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-        [self.tableView endUpdates];
+        [tableView beginUpdates];
+        [tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+        [tableView endUpdates];
         
     } else {
         
-        [self.tableView reloadData];
-
+        CGPoint offset = tableView.contentOffset;
+        [tableView reloadData];
+        tableView.contentOffset = offset;
+        
     }
 
-}
+    [self dataSourceDidFinishLoading];
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stampsChanged:) name:StampsChangedNotification object:nil];
-    [self.stamps reloadData];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    //[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
@@ -127,13 +143,18 @@
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
     [_stamps setScope:scope];
+    [self.tableView reloadData];
+    [self dataSourceDidFinishLoading];
+    [self.tableView setContentOffset:CGPointMake(0.0f, 48.0f)];
+    [self reloadDataSource];
 }
 
 
 #pragma mark - UITableViewDataSouce
 
-- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {    
-    return 44.0f;
+- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps : _stamps stampAtIndex:indexPath.row];
+    return [STStampCell heightForStamp:stamp];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -147,7 +168,12 @@
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    return [(tableView == _searchResultsTableView) ? _stamps : _searchStamps  numberOfStamps];
+    
+    if (tableView == _searchResultsTableView) {
+        return [_searchStamps numberOfStamps];
+    }
+    
+    return [_stamps numberOfStamps];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -157,14 +183,10 @@
     STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.delegate = (id<STStampCellDelegate>)self;
     }
     
-    //TODO fix
-    //NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
-    //id<STStamp> stamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stampID];
-    //[cell setupWithStamp:stamp];
-    
-    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _stamps : _searchStamps stampAtIndex:indexPath.row];
+    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps : _stamps stampAtIndex:indexPath.row];
     [cell setupWithStamp:stamp];
     
     return cell;
@@ -176,11 +198,20 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    //NSString* stampID = [_stamps stampIDAtIndex:indexPath.row];
-    //[[STStampedActions sharedInstance] viewStampWithStampID:stampID];
-    
-    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _stamps : _searchStamps  stampAtIndex:indexPath.row];
+    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps :_stamps stampAtIndex:indexPath.row];
     [[STStampedActions sharedInstance] viewStampWithStampID:stamp.stampID];
+    
+}
+
+
+#pragma mark - STStampCellDelegate
+
+- (void)stStampCellAvatarTapped:(STStampCell*)cell {
+    
+    UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
+    NSIndexPath *indexPath = [tableview indexPathForCell:cell];
+    id<STStamp> stamp = [(tableview==_searchResultsTableView) ? _searchStamps :_stamps stampAtIndex:indexPath.row];
+    [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
 
@@ -208,6 +239,7 @@
     
     if (!_searchStamps) {
         _searchStamps = [[Stamps alloc] init];
+        _searchStamps.identifier = [[self class] description];
     }
     
 }
@@ -215,6 +247,12 @@
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
     [super stSearchView:view textDidChange:text];
     _stamps.searchQuery = text;
+}
+
+- (void)stSearchViewHitSearch:(STSearchView *)view withText:(NSString*)text {
+    
+    [_searchStamps searchWithQuery:text];
+    
 }
 
 
@@ -242,7 +280,165 @@
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-    [view setTitle:@"No Stamps" detailedTitle:@"No stamps found." imageName:nil];  
+
+    view.imageView.userInteractionEnabled = YES;
+    [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    
+    if (_stamps.scope == STStampedAPIScopeYou) {
+        
+        view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
+        view.imageView.backgroundColor = view.backgroundColor;
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+        label.lineBreakMode = UILineBreakModeWordWrap;
+        label.numberOfLines = 3;
+        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
+        label.font = [UIFont boldSystemFontOfSize:13];
+        label.backgroundColor = [UIColor clearColor];
+        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
+        label.textAlignment = UITextAlignmentCenter;
+        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+        [view.imageView addSubview:label];
+        [label release];
+        
+        label.text = @"That amazing burrito place.\nThe last great book you read.\nA movie your friends have to see.";
+        
+        CGSize size = [label.text sizeWithFont:label.font constrainedToSize:CGSizeMake(240.0f, CGFLOAT_MAX) lineBreakMode:UILineBreakModeWordWrap];
+        CGRect frame = label.frame;
+        frame.size = size;
+        frame.origin.x = floorf((view.imageView.bounds.size.width-size.width)/2);
+        frame.origin.y = 24.0f;
+        label.frame = frame;
+        
+        CGFloat maxY = CGRectGetMaxY(label.frame);
+        
+        label = [[UILabel alloc] initWithFrame:CGRectZero];
+        label.lineBreakMode	= UILineBreakModeTailTruncation;
+        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
+        label.font = [UIFont boldSystemFontOfSize:17];
+        label.backgroundColor = [UIColor clearColor];
+        label.textColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f];
+        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+        [view.imageView addSubview:label];
+        [label release];
+        
+        label.text = @"Stamp it.";
+        [label sizeToFit];
+        
+        frame = label.frame;
+        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
+        frame.origin.y = floorf(maxY + 4.0f);
+        label.frame = frame;
+        
+        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(noDataTapped:)];
+        [view addGestureRecognizer:gesture];
+        [gesture release];
+        
+    } else {
+        
+        UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setTitle:@"Find friends to follow" forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(findFriends:) forControlEvents:UIControlEventTouchUpInside];
+        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
+        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
+        [button sizeToFit];
+        [view.imageView addSubview:button];
+        CGRect frame = button.frame;
+        frame.origin.y = 34.0f;
+        frame.size.width += 48.0f;
+        frame.size.height = image.size.height;
+        frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
+        button.frame = frame;
+        CGFloat maxY = CGRectGetMaxY(button.frame);
+
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+        label.font = [UIFont systemFontOfSize:12];
+        label.backgroundColor = [UIColor clearColor];
+        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
+        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+        [view.imageView addSubview:label];
+        [label release];
+        
+        label.text = @"to view their stamps.";
+        [label sizeToFit];
+        
+        frame = label.frame;
+        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
+        frame.origin.y = floorf(maxY + 8.0f);
+        label.frame = frame;
+        
+    }
+    
+ 
+
 }
+
+
+#pragma mark - No Data Actions
+
+- (void)findFriends:(id)sender {
+    
+    
+}
+
+- (void)noDataTapped:(UITapGestureRecognizer*)gesture {
+    
+    UIImageView *magnifyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"no_data_magnify.png"]];
+    
+    UIGraphicsBeginImageContextWithOptions(magnifyView.bounds.size, YES, 0);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextScaleCTM(ctx, 1.2, 1.2);
+    CGContextTranslateCTM(ctx, -((self.view.bounds.size.width-magnifyView.bounds.size.width)+20.0f), 0.0f);
+    [self.navigationController.view.layer renderInContext:ctx];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    UIView *view = [[UIView alloc] initWithFrame:self.navigationController.view.bounds];
+    view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.3f];
+    [self.navigationController.view addSubview:view];
+    [view release];
+    
+    CGRect frame = magnifyView.frame;
+    frame.origin.x = (view.bounds.size.width - (frame.size.width-24.0f));
+    frame.origin.y = -30.0f;
+    magnifyView.frame = frame;
+    [view addSubview:magnifyView];
+    [magnifyView release];
+
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+    [view insertSubview:imageView atIndex:0];
+    [imageView release];
+    
+    frame = imageView.frame;
+    frame.origin.x = (view.bounds.size.width - imageView.frame.size.width);
+    imageView.frame = frame;
+    
+    CALayer *layer = [CALayer layer];
+    layer.frame = CGRectMake(32, -26.0f, imageView.bounds.size.width-18, imageView.bounds.size.height-18);
+    layer.cornerRadius = ((imageView.bounds.size.width-18)/2);
+    layer.backgroundColor = [UIColor blackColor].CGColor;
+    imageView.layer.mask = layer;
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
+    animation.fromValue = (id)[UIColor clearColor].CGColor;
+    animation.duration = 0.3f;
+    [view.layer addAnimation:animation forKey:nil];
+    
+    double delayInSeconds = 4.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [view removeFromSuperview];
+    });
+    
+}
+
 
 @end

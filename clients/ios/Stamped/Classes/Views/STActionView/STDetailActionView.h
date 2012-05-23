@@ -21,7 +21,8 @@
 @property(nonatomic,assign) NSInteger minItemsToShow; // default 4
 @property(nonatomic,assign) BOOL expanded;
 @property(nonatomic,assign) id <STActionViewDelegate> delegate;
-@property(nonatomic,retain) NSArray <STDetailActionItem> *items;
+@property(nonatomic,retain) NSDictionary<NSObject, STDetailActionItem> *items;
+@property(nonatomic,retain) NSArray *itemKeys;
 
 - (void)setExpanded:(BOOL)expanded animated:(BOOL)animated;
 

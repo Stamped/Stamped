@@ -13,27 +13,39 @@
 #define kActionItemGap 10
 
 @interface STDetailAction : NSObject <STDetailActionItem>
-- (id)initWithImageTitle:(NSString*)title imageTitleHi:(NSString*)titleHi target:(id)target action:(SEL)action;
+- (id)initWithImageTitle:(NSString*)title imageTitleHi:(NSString*)titleHi imageTitleSel:(NSString*)titleSel target:(id)target action:(SEL)action;
 @end
 @implementation STDetailAction
 @synthesize imageName;
 @synthesize imageNameHighlighted;
+@synthesize imageNameSelected;
 @synthesize target=_target;
 @synthesize selector;
-- (id)initWithImageTitle:(NSString*)title imageTitleHi:(NSString*)titleHi target:(id)target action:(SEL)action {
+- (id)initWithImageTitle:(NSString*)title imageTitleHi:(NSString*)titleHi imageTitleSel:(NSString*)titleSel target:(id)target action:(SEL)action {
     if ((self = [super init])) {
         self.imageName = title;
         self.imageNameHighlighted = titleHi;
+        self.imageNameSelected = titleSel;
         self.target = target;
         self.selector = action;
     }
     return self;
 }
+
+- (void)dealloc
+{
+    self.imageName = nil;
+    self.imageNameHighlighted = nil;
+    self.imageNameSelected = nil;
+    [super dealloc];
+}
+
 @end
 
 @implementation STDetailActionView
 
 @synthesize items=_items;
+@synthesize itemKeys=_itemKeys;
 @synthesize expanded=_expanded;
 @synthesize delegate=_delegate;
 @synthesize minItemsToShow=_minItemsToShow;
@@ -62,19 +74,27 @@
         
         [self commonInit];
         
-        NSMutableArray *items = [[NSMutableArray alloc] init];
+        NSMutableDictionary *items = [NSMutableDictionary dictionary];
+        NSMutableArray *itemKeys = [NSMutableArray array];
         
-        STDetailAction *button = [[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_like.png" imageTitleHi:@"sDetailBar_btn_like_selected.png" target:self action:@selector(buttonHit:)];
-        [items addObject:button];
-        [button release];
+        STDetailAction *button = [[[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_like.png" 
+                                                               imageTitleHi:@"sDetailBar_btn_like_active.png" 
+                                                              imageTitleSel:@"sDetailBar_btn_like_selected.png" 
+                                                                     target:self 
+                                                                     action:@selector(likeButtonHit:)] autorelease];
+        [items setObject:button forKey:@"todo"];
+        [itemKeys addObject:@"todo"];
         
-        button = [[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_todo.png" imageTitleHi:@"sDetailBar_btn_todo_selected.png" target:self action:@selector(buttonHit:)];
+        
+        button = [[[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_todo.png" 
+                                               imageTitleHi:@"sDetailBar_btn_todo_selected.png" 
+                                              imageTitleSel:@"sDetailBar_btn_todo_selected.png" 
+                                                     target:self action:@selector(todobuttonHit:)] autorelease];
         [items addObject:button];
-        [button release];
+        [itemKeys addObject:@"todo"];
         
         button = [[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_comment.png" imageTitleHi:@"sDetailBar_btn_comment_active.png" target:self action:@selector(buttonHit:)];
         [items addObject:button];
-        [button release];
         
         button = [[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_restamp.png" imageTitleHi:@"sDetailBar_btn_restamp_active.png" target:self action:@selector(buttonHit:)];
         [items addObject:button];
@@ -88,9 +108,7 @@
         [items addObject:button];
         [button release];
 
-        self.items = (id)items;
-        [items release];
-        
+        self.items = (id)items;        
     }
     return self;
 }

@@ -116,8 +116,6 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 @synthesize pending = _pending;
 @synthesize finished = _finished;
 
-static STTodoViewController* _sharedInstance;
-
 - (id)init
 {
     self = [super init];
@@ -132,8 +130,8 @@ static STTodoViewController* _sharedInstance;
     [super viewDidLoad];
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
     
-    //[Util addHomeButtonToController:self withBadge:YES];
-    //[Util addCreateStampButtonToController:self];
+    [Util addHomeButtonToController:self withBadge:YES];
+    [Util addCreateStampButtonToController:self];
     
     //self.showsSearchBar = NO;
 }
@@ -200,7 +198,7 @@ static STTodoViewController* _sharedInstance;
         }
         else {
             self.finished = YES;
-            [self.tableView reloadData];
+            [self dataSourceDidFinishLoading];
         }
     }];
 }

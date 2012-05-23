@@ -54,6 +54,7 @@ try:
     from StampedSource          import StampedSource
 
     from Netflix                import *
+    from Facebook               import *
 except Exception:
     report()
     raise
@@ -204,20 +205,22 @@ class StampedAPI(AStampedAPI):
         account.color_secondary = '0057D1'
         
         # Set default alerts
-        account.ios_alert_credit       = True
-        account.ios_alert_like         = True
-        account.ios_alert_fav          = True
-        account.ios_alert_mention      = True
-        account.ios_alert_comment      = True
-        account.ios_alert_reply        = True
-        account.ios_alert_follow       = True
-        account.email_alert_credit     = True
-        account.email_alert_like       = False
-        account.email_alert_fav        = False
-        account.email_alert_mention    = True
-        account.email_alert_comment    = True
-        account.email_alert_reply      = True
-        account.email_alert_follow     = True
+        alerts                          = AccountAlerts()
+        alerts.ios_alert_credit         = True
+        alerts.ios_alert_like           = True
+        alerts.ios_alert_fav            = True
+        alerts.ios_alert_mention        = True
+        alerts.ios_alert_comment        = True
+        alerts.ios_alert_reply          = True
+        alerts.ios_alert_follow         = True
+        alerts.email_alert_credit       = True
+        alerts.email_alert_like         = False
+        alerts.email_alert_fav          = False
+        alerts.email_alert_mention      = True
+        alerts.email_alert_comment      = True
+        alerts.email_alert_reply        = True
+        alerts.email_alert_follow       = True
+        account.alerts                  = alerts 
         
         # Validate screen name
         account.screen_name = account.screen_name.strip()
@@ -258,6 +261,41 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
         
         return account
+
+    @API_CALL
+    def addFacebookAccount(self, new_fb_account):
+        """
+        For adding a Facebook auth account, first pull the user info from Facebook, verify that the user_id is not already
+         linked to another user, populate the linked account information and then chain to the standard addAccount() method
+        """
+
+        # first, grab all the information from Facebook using the passed in token
+        fb = globalFacebook()
+        user = fb.getUserInfo(new_fb_account.facebook_token)
+
+        account = None
+        try:
+            account = self.getAccountByFacebookId(user['id'])
+        except StampedUnavailableError:
+            pass
+        # Check if the facebook account is already tied to a Stamped account
+        if account is not None:
+            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+
+        account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
+        logs.info(account)
+        account.linked_accounts             = LinkedAccounts()
+        fb_acct                             = FacebookAccountSchema()
+        fb_acct.facebook_id                 = user['id']
+        fb_acct.facebook_name               = user['name']
+        fb_acct.facebook_screen_name        = user.pop('username', None)
+        account.linked_accounts.facebook    = fb_acct
+        account.auth_service                = 'facebook'
+
+        # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
+        profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+
+        return self.addAccount(account, profile_image)
     
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -463,7 +501,16 @@ class StampedAPI(AStampedAPI):
     def getAccount(self, authUserId):
         account = self._accountDB.getAccount(authUserId)
         return account
-    
+
+    @API_CALL
+    def getAccountByFacebookId(self, facebookId):
+        accounts = self._accountDB.getAccountsByFacebookId(facebookId)
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
+        elif len(accounts) > 1:
+            raise StampedIllegalActionError("More than one account exists using facebook id: %s" % facebookId)
+        return accounts[0]
+
     @API_CALL
     def updateProfile(self, authUserId, data):
         ### TODO: Reexamine how updates are done
@@ -1990,7 +2037,9 @@ class StampedAPI(AStampedAPI):
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
-            content.timestamp.created = now
+            timestamp = TimestampSchema()
+            timestamp.created = now
+            content.timestamp = timestamp
 
         # Add image to stamp
         if imageData is not None:
@@ -2071,7 +2120,6 @@ class StampedAPI(AStampedAPI):
 
         # Build new stamp
         else:
-            stamp.user_id               = user.user_id
             stamp.entity                = entity
             stamp.contents              = [ content ]
 
@@ -2907,12 +2955,15 @@ class StampedAPI(AStampedAPI):
         limit = timeSlice.limit
         timeSlice.limit = limit + 10
         
+        t0 = time.time()
         stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
+        logs.debug('Time for _getStampCollectionSlice: %s' % (time.time() - t0))
+
         stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
-            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (len(stamps), limit))
         
         return stamps
     
@@ -2925,12 +2976,15 @@ class StampedAPI(AStampedAPI):
         limit = searchSlice.limit
         searchSlice.limit = limit + 10
         
+        t0 = time.time()
         stampData = self._stampDB.searchStampCollectionSlice(stampIds, searchSlice)
+        logs.debug('Time for _searchStampCollectionSlice: %s' % (time.time() - t0))
+
         stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
-            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (len(stamps), limit))
         
         return stamps
 
@@ -2939,6 +2993,20 @@ class StampedAPI(AStampedAPI):
         return self._collectionDB.getUserStampIds(user.user_id)
 
     def _getScopeStampIds(self, scope, authUserId=None):
+        """
+        If not logged in return "popular" results. Also, allow scope to be set to "popular" if 
+        not logged in; otherwise, raise exception.
+        """
+
+        if scope is None:
+            return None
+
+        if scope == 'popular':
+            return None
+
+        if authUserId is None and scope is not None:
+            raise StampedInputError("Must be logged in to use scope")
+
         if authUserId is None:
             return None
 
@@ -2961,35 +3029,34 @@ class StampedAPI(AStampedAPI):
 
         # User
         if timeSlice.user_id is not None:
+            t0 = time.time()
             stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-            return result
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
 
         # Inbox
         else:
+            t0 = time.time()
             stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-            return result
+        return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
     @API_CALL
     def searchStampCollection(self, searchSlice, authUserId=None):
-        print searchSlice
+
         # User
         if searchSlice.user_id is not None:
+            t0 = time.time()
             stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
-            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-
-            return result
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
 
         # Inbox
         else:
+            t0 = time.time()
             stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
-            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-            return result
-
+        return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
 
 
 

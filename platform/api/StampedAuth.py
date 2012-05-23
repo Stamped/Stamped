@@ -18,6 +18,8 @@ from AAuthAccessTokenDB     import AAuthAccessTokenDB
 from AAuthRefreshTokenDB    import AAuthRefreshTokenDB
 from AAuthEmailAlertsDB     import AAuthEmailAlertsDB
 
+from libs.Facebook          import *
+
 class StampedAuth(AStampedAuth):
     """
         Database-agnostic implementation of the internal API for authentication 
@@ -34,6 +36,10 @@ class StampedAuth(AStampedAuth):
     @property
     def isValid(self):
         return self._validated
+
+    @lazyProperty
+    def _facebook(self):
+        return globalFacebook()
     
     # ####### #
     # Clients #
@@ -88,18 +94,23 @@ class StampedAuth(AStampedAuth):
         try:
             # Login via email
             if utils.validate_email(userIdentifier):
-                user = self._accountDB.getAccountByEmail(userIdentifier)
+                account = self._accountDB.getAccountByEmail(userIdentifier)
             # Login via screen name
             elif utils.validate_screen_name(userIdentifier):
-                user = self._accountDB.getAccountByScreenName(userIdentifier)
+                account = self._accountDB.getAccountByScreenName(userIdentifier)
             else:
                 raise
 
-            if not auth.comparePasswordToStored(password, user.password):
+            if account.auth_service != 'stamped':
+                msg = "Attempting to do a stamped login for an account that doesn't use stamped for auth'"
+                logs.warning(msg)
+                raise StampedHTTPError("invalid_credentials", 401, msg)
+
+            if not auth.comparePasswordToStored(password, account.password):
                 raise
 
             logs.info("Login successful")
-            
+
             """
             IMPORTANT!!!!!
 
@@ -113,15 +124,66 @@ class StampedAuth(AStampedAuth):
             """
 
             ### Generate Refresh Token & Access Token
-            token = self.addRefreshToken(clientId, user.user_id)
+            token = self.addRefreshToken(clientId, account.user_id)
 
             logs.info("Token created")
 
-            return user, token
+            return account, token
         except:
             msg = "Invalid user credentials"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
+
+    def verifyFacebookUserCredentials(self, clientId, fb_token):
+        try:
+            fb_user = self._facebook.getUserInfo(fb_token)
+        except StampedInputError as e:
+            raise StampedHTTPError('facebook_login_failed', 400, e.message)
+
+        # TODO: remove repetitious code here (same as api.getAccountByFacebookId()
+        accounts = self._accountDB.getAccountsByFacebookId(fb_user['id'])
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % fb_user['id'])
+        elif len(accounts) > 1:
+            logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
+            raise StampedIllegalActionError("More than one account exists using facebook id: %s" % fb_user['id'])
+        account = accounts[0]
+
+        if account.auth_service != 'facebook':
+            msg = "Attempting to do a facebook login for an account that doesn't use facebook auth'"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        if account.linked_accounts.facebook is None or account.linked_accounts.facebook.facebook_id is None:
+            msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        if fb_user['id'] != account.linked_accounts.facebook.facebook_id:
+            msg = "Invalid credentials: Facebook id does not match Stamped user"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        logs.info("Login successful")
+
+        """
+        IMPORTANT!!!!!
+
+        Right now we're returning a refresh token upon login. This will
+        have to change ultimately, but it's an okay assumption for now
+        that every login will be from the iPhone. Once that changes we may
+        have to modify this.
+
+        Also, we'll ultimately need a way to deprecate unused refresh
+        tokens. Not sure how we'll implement that yet....
+        """
+
+        ### Generate Refresh Token & Access Token
+        token = self.addRefreshToken(clientId, account.user_id)
+
+        logs.info("Token created")
+
+        return account, token
     
     def verifyPassword(self, userId, password):
         try:

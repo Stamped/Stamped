@@ -38,6 +38,9 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 
 def _coordinatesDictToFlat(coordinates):
     try:
+        if isinstance(coordinates, Schema):
+            coordinates = coordinates.dataExport()
+
         if not isinstance(coordinates['lat'], float) or \
            not isinstance(coordinates['lng'], float):
             raise
@@ -297,6 +300,11 @@ class OAuthLogin(Schema):
         cls.addProperty('login',                        basestring, required=True)
         cls.addProperty('password',                     basestring, required=True)
 
+class OAuthFacebookLogin(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('fb_token',                     basestring, required=True)
+
 # ####### #
 # Actions #
 # ####### #
@@ -372,6 +380,7 @@ class HTTPAccount(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
         cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('auth_service',                 basestring, required=True)
         cls.addProperty('email',                        basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('privacy',                      bool, required=True)
@@ -391,7 +400,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
 
-        
+
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
         cls.addProperty('temp_image_width',             int)
@@ -417,10 +426,9 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         cls.addProperty('facebook_token',               basestring, required=True)
 
-        # for asynchronous image uploads
-        cls.addProperty('temp_image_url',               basestring)
-        cls.addProperty('temp_image_width',             int)
-        cls.addProperty('temp_image_height',            int)
+    def convertToFacebookAccountNew(self):
+        return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+
 
 class HTTPAccountSettings(Schema):
     @classmethod
@@ -574,105 +582,106 @@ class HTTPAPNSToken(Schema):
 class HTTPUserId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('screen_name',          basestring)
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('screen_name',                  basestring)
 
 class HTTPUserIds(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_ids',             basestring) # Comma delimited
-        cls.addProperty('screen_names',         basestring) # Comma delimited
+        cls.addProperty('user_ids',                     basestring) # Comma delimited
+        cls.addProperty('screen_names',                 basestring) # Comma delimited
 
 class HTTPUserSearch(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring)
-        cls.addProperty('limit',                int)
-        cls.addProperty('relationship',         basestring)
+        cls.addProperty('q',                            basestring)
+        cls.addProperty('limit',                        int)
+        cls.addProperty('relationship',                 basestring)
 
 class HTTPUserRelationship(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id_a',            basestring)
-        cls.addProperty('screen_name_a',        basestring)
-        cls.addProperty('user_id_b',            basestring)
-        cls.addProperty('screen_name_b',        basestring)
+        cls.addProperty('user_id_a',                    basestring)
+        cls.addProperty('screen_name_a',                basestring)
+        cls.addProperty('user_id_b',                    basestring)
+        cls.addProperty('screen_name_b',                basestring)
 
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) # Comma delimited
+        cls.addProperty('q',                            basestring) # Comma delimited
 
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) # Comma delimited
-        cls.addProperty('twitter_key',          basestring)
-        cls.addProperty('twitter_secret',       basestring)
+        cls.addProperty('q',                            basestring) # Comma delimited
+        cls.addProperty('twitter_key',                  basestring)
+        cls.addProperty('twitter_secret',               basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) # Comma delimited
-        cls.addProperty('facebook_token',       basestring)
+        cls.addProperty('q',                            basestring) # Comma delimited
+        cls.addProperty('facebook_token',               basestring)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('state',                basestring) # passed back state value to prevent csrf attacks
-        cls.addProperty('code',                 basestring) # code we'll exchange for a user token
+        cls.addProperty('state',                        basestring) # passed back state value to prevent csrf attacks
+        cls.addProperty('code',                         basestring) # code we'll exchange for a user token
 
 class HTTPFacebookAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('access_token',         basestring)
-        cls.addProperty('expires',              int)        # seconds until token expires
+        cls.addProperty('access_token',                 basestring)
+        cls.addProperty('expires',                      int)        # seconds until token expires
 
 class HTTPNetflixId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('netflix_id',           basestring)
+        cls.addProperty('netflix_id',                   basestring)
 
 class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamped_oauth_token',  basestring)
-        cls.addProperty('oauth_token',          basestring)
-        cls.addProperty('secret',               basestring)
-        cls.addProperty('oauth_verifier',       basestring)
+        cls.addProperty('stamped_oauth_token',          basestring)
+        cls.addProperty('oauth_token',                  basestring)
+        cls.addProperty('secret',                       basestring)
+        cls.addProperty('oauth_verifier',               basestring)
 
 class HTTPCategoryDistribution(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('category',           basestring, required=True)
-        cls.addProperty('name',               basestring)
-        cls.addProperty('icon',               basestring)
-        cls.addProperty('count',              int)
+        cls.addProperty('category',                     basestring, required=True)
+        cls.addProperty('name',                         basestring)
+        cls.addProperty('icon',                         basestring)
+        cls.addProperty('count',                        int)
 
 class HTTPUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',               basestring, required=True)
-        cls.addProperty('name',                  basestring, required=True)
-        cls.addProperty('screen_name',           basestring, required=True)
-        cls.addProperty('color_primary',         basestring)
-        cls.addProperty('color_secondary',       basestring)
-        cls.addProperty('bio',                   basestring)
-        cls.addProperty('website',               basestring)
-        cls.addProperty('location',              basestring)
-        cls.addProperty('privacy',               bool, required=True)
-        cls.addNestedProperty('image',           HTTPImageSchema)
+        cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('color_primary',                basestring)
+        cls.addProperty('color_secondary',              basestring)
+        cls.addProperty('bio',                          basestring)
+        cls.addProperty('website',                      basestring)
+        cls.addProperty('location',                     basestring)
+        cls.addProperty('privacy',                      bool, required=True)
+        cls.addNestedProperty('image',                  HTTPImageSchema)
+        cls.addProperty('image_url',                    basestring)
         
-        cls.addProperty('identifier',            basestring)
-        cls.addProperty('num_stamps',            int)
-        cls.addProperty('num_stamps_left',       int)
-        cls.addProperty('num_friends',           int)
-        cls.addProperty('num_followers',         int)
-        cls.addProperty('num_faves',             int)
-        cls.addProperty('num_credits',           int)
-        cls.addProperty('num_credits_given',     int)
-        cls.addProperty('num_likes',             int)
-        cls.addProperty('num_likes_given',       int)
+        cls.addProperty('identifier',                   basestring)
+        cls.addProperty('num_stamps',                   int)
+        cls.addProperty('num_stamps_left',              int)
+        cls.addProperty('num_friends',                  int)
+        cls.addProperty('num_followers',                int)
+        cls.addProperty('num_faves',                    int)
+        cls.addProperty('num_credits',                  int)
+        cls.addProperty('num_credits_given',            int)
+        cls.addProperty('num_likes',                    int)
+        cls.addProperty('num_likes_given',              int)
         cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
 
     def importAccount(self, account, client=None):
@@ -692,6 +701,7 @@ class HTTPUser(Schema):
         self.num_likes          = stats.pop('num_likes', 0)
         self.num_likes_given    = stats.pop('num_likes_given', 0)
         
+        self.image_url = _profileImageURL(user.screen_name, user.timestamp.image_cache)
         self.image = _buildProfileImage(self.screen_name, 
                                         cache=user.timestamp.image_cache, 
                                         sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
@@ -729,17 +739,17 @@ class HTTPSuggestedUser(HTTPUser):
 class HTTPUserMini(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring, required=True)
-        cls.addProperty('screen_name',          basestring, required=True)
-        cls.addProperty('color_primary',        basestring)
-        cls.addProperty('color_secondary',      basestring)
-        cls.addProperty('privacy',              bool, required=True)
-        cls.addNestedProperty('image',          HTTPImageSchema)
+        cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('color_primary',                basestring)
+        cls.addProperty('color_secondary',              basestring)
+        cls.addProperty('privacy',                      bool, required=True)
+        cls.addNestedProperty('image',                  HTTPImageSchema)
+        cls.addProperty('image_url',                    basestring)
 
     def importUserMini(self, mini):
         self.dataImport(mini.dataExport(), overflow=True)
         self.image_url = _profileImageURL(mini.screen_name, mini.timestamp.image_cache)
-
         self.image = _buildProfileImage(self.screen_name,
             cache=mini.timestamp.image_cache,
             sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
@@ -859,7 +869,7 @@ class HTTPEntityAction(Schema):
 class HTTPEntityMetadataItem(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name,',                basestring, required=True)
+        cls.addProperty('name',                basestring, required=True)
         cls.addProperty('value',                basestring, required=True)
         cls.addProperty('key',                  basestring)
         cls.addNestedProperty('action',         HTTPAction)
@@ -1381,7 +1391,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_buy', client=client)
             sources     = []
 
-            if getattr(entity.sources, 'amazon_underlying', None) is not None:
+            if entity.sources.amazon_underlying is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Buy from Amazon'
                 source.source       = 'amazon'
@@ -2037,8 +2047,8 @@ class HTTPTimeSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2085,8 +2095,8 @@ class HTTPSearchSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2129,8 +2139,8 @@ class HTTPRelevanceSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2402,29 +2412,25 @@ class HTTPStamp(Schema):
     def importStampMini(self, stamp):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
-        mentions                = getattr(stamp, 'mentions', [])
         credit                  = getattr(stamp, 'credit', [])
-        contents                = getattr(stamp, 'contents', [])
 
-        previews                = getattr(stamp, 'previews', {})
-        comments                = getattr(previews, 'comments', [])
-        likes                   = getattr(previews, 'likes', [])
-        todos                   = getattr(previews, 'todos', [])
-        credits                 = getattr(previews, 'credits', [])
+        data = stamp.dataExport()
+        data['contents'] = []
+        if 'previews' in data:
+            del(data['previews'])
+        self.dataImport(data, overflow=True)
 
-        if credit is not None and len(credit) > 0:
-            self.credit = credit
-
-        self.entity = HTTPEntityMini().importEntity(entity)
-
-        self.dataImport(stamp.dataExport(), overflow=True)
         self.user               = HTTPUserMini().importUserMini(stamp.user)
+        self.entity             = HTTPEntityMini().importEntity(entity)
         self.entity.coordinates = _coordinatesDictToFlat(coordinates)
         self.created            = stamp.timestamp.stamped
         self.modified           = stamp.timestamp.modified
         self.stamped            = stamp.timestamp.stamped
-        self.contents           = []
 
+        if credit is not None and len(credit) > 0:
+            self.credit = credit
+
+        contents = []
         for content in stamp.contents:
             item                    = HTTPStampContent()
             item.blurb              = content.blurb
@@ -2462,7 +2468,8 @@ class HTTPStamp(Schema):
                 item.images = newImages
 
             # Insert contents in descending chronological order
-            self.contents.insert(0, item)
+            contents.insert(0, item)
+        self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)

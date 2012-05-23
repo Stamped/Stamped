@@ -201,6 +201,15 @@ class AStampedAPITestCase(AStampedTestCase):
 
         return user, token
 
+    def loginWithFacebook(self, fb_user_token):
+        path = "oauth2/login_with_facebook.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "fb_token":     'BLAAAAARGH!!!',
+            }
+        return self.handlePOST(path, data)
+
     def deleteAccount(self, token):
         path = "account/remove.json"
         data = { "oauth_token": token['access_token'] }
@@ -228,6 +237,15 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
+
+    def addLinkedAccount(self, token, data=None):
+        """
+        params should include properties to fill HTTPLinkedAccounts object
+        """
+        path = "account/linked_accounts.json"
+        if "oauth_token" not in data:
+            data['oauth_token'] = token['access_token']
+        return self.handlePOST(path, data)
     
     def createEntity(self, token, data=None):
         path = "entities/create.json"
