@@ -79,7 +79,7 @@ def update_image(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPStampRef)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
-    if 'stamp_id' in http_schema:
+    if http_schema.stamp_id is not None:
         stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
     else:
         stamp = stampedAPI.getStampFromUser(userId=http_schema.user_id, 
