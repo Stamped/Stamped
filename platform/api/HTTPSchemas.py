@@ -1018,7 +1018,7 @@ class HTTPEntity(Schema):
                 metadata = []
             metadata.append(item)
 
-            logs.info('### adding metadata item: %s' % item)
+            logs.info('### adding metadata item.name: %s' % item.name)
 
             self.metadata = metadata
 
