@@ -981,7 +981,8 @@ class HTTPEntity(Schema):
         if value is not None and len(value) > 0:
             item        = HTTPEntityMetadataItem()
             logs.info('addMetaData name: %s' % name)
-            item.name   = name
+            #item.name   = name
+            item.name = 100
             logs.info('item.name: %s' % item.name)
             item.value  = value
 
