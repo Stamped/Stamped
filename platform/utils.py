@@ -56,7 +56,7 @@ def is_running(cmd):
     return 0 == shell("ps -ef | grep '%s' | grep -v grep" % cmd)[1]
 
 def lazyProperty(undecorated):
-    name = '_' + undecorated.__name__
+    name = '__' + undecorated.__name__
     @property
     @wraps(undecorated)
     def decorated(self):

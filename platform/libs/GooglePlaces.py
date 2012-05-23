@@ -266,8 +266,8 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             for result in results:
                 entity = PlaceEntity()
                 
-                entity.googleplaces_id        = result['id']
-                entity.googleplaces_reference = result['reference']
+                entity.sources.googleplaces_id        = result['id']
+                entity.sources.googleplaces_reference = result['reference']
                 
                 try:
                     terms = result['terms']

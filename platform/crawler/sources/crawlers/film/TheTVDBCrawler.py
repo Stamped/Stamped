@@ -104,7 +104,7 @@ class TheTVDBCrawler(AExternalEntitySource):
         if len(desc) > 5:
             entity.desc = desc
         
-        entity.thetvdb_id = self._id_re.match(url).groups()[0]
+        entity.sources.thetvdb_id = self._id_re.match(url).groups()[0]
         
         # parse images
         images = map(lambda img: img.get('src'), soup.findAll('img', {'class' : 'banner'}))
@@ -208,7 +208,7 @@ class TheTVDBCrawler(AExternalEntitySource):
         except:
             utils.printException()
         
-        entity2 = self._thetvdb.lookup(entity.thetvdb_id)
+        entity2 = self._thetvdb.lookup(entity.sources.thetvdb_id)
         
         if entity2 is not None:
             if entity2.mpaa_rating is not None:

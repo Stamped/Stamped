@@ -283,10 +283,10 @@ class GooglePlacesSource(GenericSource):
                     
                     for result in results:
                         data = {}
-                        data['reference']       = result.googleplaces_reference
+                        data['reference']       = result.sources.googleplaces_reference
                         data['name']            = result.title
-                        data['latitude']        = result.lat
-                        data['longitude']       = result.lng
+                        data['latitude']        = result.coordinates.lat
+                        data['longitude']       = result.coordinates.lng
                         data['address_string']  = result.neighborhood
                         data['type']            = result.subcategory
                         
@@ -298,7 +298,7 @@ class GooglePlacesSource(GenericSource):
                     for result in results:
                         # Hacky conversion
                         data = {}
-                        data['reference']       = result.googleplaces_reference
+                        data['reference']       = result.sources.googleplaces_reference
                         data['name']            = result.title
                         data['address_string']  = result.formatted_address
                         raw_results.append(data)

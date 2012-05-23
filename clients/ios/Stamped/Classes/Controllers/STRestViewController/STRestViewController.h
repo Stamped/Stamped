@@ -20,6 +20,7 @@
     UITableView *_tableView;
     UITableView *_searchResultsTableView;
     UILabel *_searchNoResultsLabel;
+    UIImageView *_stickyEnd;
     
     EGORefreshTableFooterView *_footerRefreshView;
     EGORefreshTableHeaderView *_headerRefreshView;

@@ -65,7 +65,7 @@
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         view.delegate = (id<EGORefreshTableHeaderDelegate>)self;
         [self.tableView addSubview:view];
-        _headerRefreshView = view; 
+        _headerRefreshView = view;
         [view release];
     }
     
@@ -77,6 +77,18 @@
         [view release];
     }
     
+    if (!_stickyEnd) {
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"refresh_sticky_end.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:imageView];
+        CGRect frame = imageView.frame;
+        frame.size.width = self.view.bounds.size.width;
+        imageView.frame = frame;
+        [imageView release];
+        _stickyEnd = imageView;
+        _stickyEnd.hidden = YES;
+    }
+    
     _explicitRefresh = NO;
     
 }
@@ -85,6 +97,7 @@
     [super viewDidUnload];
     _footerRefreshView=nil;
     _headerRefreshView=nil;
+    _stickyEnd=nil;
     _searchView=nil;
     self.tableView.tableHeaderView = nil;
     self.tableView=nil;
@@ -92,15 +105,36 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
+    
+    if (_searching) {
+        [self.navigationController setNavigationBarHidden:YES animated:NO];
+        [_searchResultsTableView deselectRowAtIndexPath:_searchResultsTableView.indexPathForSelectedRow animated:YES];
+    } else {
+        [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
+        if (_showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
+            [self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
+        }
+    }
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    if (_searching) {
+        [self.navigationController setNavigationBarHidden:NO animated:NO];
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification  object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    if (!_searching && _showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
+        [self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
+    }
 }
 
 
@@ -134,6 +168,12 @@
     self.tableView.contentInset = inset;
     self.tableView.scrollIndicatorInsets = inset;
     _headerRefreshView.tableInset = inset;
+
+    if (_searchResultsTableView) {
+        _searchResultsTableView.contentInset = inset;
+        _searchResultsTableView.scrollIndicatorInsets = inset;
+    }
+    
 }
 
 - (void)setHeaderView:(UIView *)headerView {
@@ -188,7 +228,6 @@
     if (!_searchView) {
         
         STSearchView *view = [[STSearchView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 52)];
-        view.backgroundColor = [UIColor colorWithPatternImage:[[UIImage imageNamed:@"search_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         view.delegate = (id<STSearchViewDelegate>)self;
         self.tableView.tableHeaderView = view;
@@ -223,16 +262,19 @@
 
 	if (!_empty || [(id<STRestController>)self dataSourceReloading]) {
 		
+        self.tableView.scrollEnabled = YES;
 		if (_noDataView!=nil) {
             [_noDataView removeFromSuperview], _noDataView=nil;
 		}
 		
 	} else {
 		
+        self.tableView.scrollEnabled = NO;
+
 		if (_noDataView==nil) {
             
             CGFloat yOffset = self.tableView.tableHeaderView ? self.tableView.tableHeaderView.bounds.size.height : 0.0f;
-			NoDataView *view = [[NoDataView alloc] initWithFrame:CGRectMake(0.0f, yOffset, self.tableView.frame.size.width, floorf(self.tableView.frame.size.height - yOffset))];
+			NoDataView *view = [[NoDataView alloc] initWithFrame:CGRectMake(0.0f, yOffset, self.tableView.frame.size.width, floorf(self.tableView.frame.size.height))];
             view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
             view.backgroundColor = self.tableView.backgroundColor;
 			[self.tableView addSubview:view];
@@ -267,6 +309,10 @@
     _explicitRefresh = NO;
 	[_headerRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:self.tableView];
 	[self setState];
+    
+    if (_searching) {
+        [self updateSearchState];
+    }
 
 }
 
@@ -276,6 +322,10 @@
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
     if (scrollView != self.tableView) return;
     
+    BOOL hidden = scrollView.contentOffset.y <= 49.0f;
+    if (_stickyEnd.hidden != hidden) {
+        _stickyEnd.hidden = hidden;
+    }
     [_headerRefreshView egoRefreshScrollViewDidScroll:scrollView];
     if (_restFlags.dataSourceLoadNextPage && _restFlags.dataSourceHasMoreData && _restFlags.dataSourceReloading) {
         if (![(id<STRestController>)self dataSourceReloading] && scrollView.contentOffset.y >= ((scrollView.contentSize.height - (scrollView.frame.size.height*2)) -10) && [(id<STRestController>)self dataSourceHasMoreData]) {
@@ -381,7 +431,7 @@
         
         if (!_searchResultsTableView) {
             
-            UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(0.0f, _searchView.bounds.size.height, self.view.bounds.size.height, self.view.bounds.size.height - _searchView.bounds.size.height) style:UITableViewStylePlain];
+            UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(0.0f, _searchView.bounds.size.height, self.view.bounds.size.width, self.view.bounds.size.height - _searchView.bounds.size.height) style:UITableViewStylePlain];
             tableView.delegate = (id<UITableViewDelegate>)self;
             tableView.dataSource = (id<UITableViewDataSource>)self;
             [self.view addSubview:tableView];
@@ -491,7 +541,7 @@
     
     CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-        [self setContentInset:UIEdgeInsetsMake(0, 0, keyboardFrame.size.height - 50.0f, 0)];
+        [self setContentInset:UIEdgeInsetsMake(0, 0, keyboardFrame.size.height, 0)];
     } completion:^(BOOL finished){}];
     
 }

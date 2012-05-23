@@ -136,9 +136,9 @@
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake((self.bounds.size.width/2), ((self.bounds.size.height-font.lineHeight)/2), 0.0f, 0.0f)];
         label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         label.backgroundColor = self.backgroundColor;
-        label.textColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.4f];
+        label.textColor = [UIColor colorWithRed:0.449f green:0.449f blue:0.449f alpha:1.0f];
         label.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        label.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.6f];
         label.font = font;
         [_patternView insertSubview:label atIndex:1];
         _titleLabel = label;

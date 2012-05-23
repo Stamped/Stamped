@@ -622,7 +622,7 @@ class AmazonSource(GenericSource):
         entity.sources.amazon_id = proxy.key
         try:
             if entity.isType('book'):
-                entity.amazon_underlying = proxy.underlying.key
+                entity.sources.amazon_underlying = proxy.underlying.key
         except Exception:
             pass
         return True
