@@ -28,11 +28,17 @@
 @primary:   fade(lighten(@user_light, 25%), 80%);
 @secondary: fade(darken( @user_dark,  10%), 80%);
 
-.user-gradient(@angle: 135deg) {
-    background: -webkit-linear-gradient(@angle, @primary, @secondary);
-    background: -moz-linear-gradient(@angle, @primary, @secondary);
-    background: -o-linear-gradient(@angle, @primary, @secondary);
-    background: linear-gradient(@angle, @primary, @secondary);
+/*@primary:   fade(@user_primary,   80%);
+@secondary: fade(@user_secondary, 80%);*/
+
+.user-gradient(@angle: 135deg, @a: 50%) {
+    @c0: fade(@primary,   @a);
+    @c1: fade(@secondary, @a);
+    
+    background: -webkit-linear-gradient(@angle, @c0, @c1);
+    background: -moz-linear-gradient(@angle, @c0, @c1);
+    background: -o-linear-gradient(@angle, @c0, @c1);
+    background: linear-gradient(@angle, @c0, @c1);
 }
 
 .post-header, .stamp-card-pre {
@@ -50,6 +56,12 @@
     
     .inset-stamp .number {
         color: @user_dark;
+    }
+}
+
+.profile-header-wrapper {
+    .profile-header {
+        .user-gradient(135deg);
     }
 }
 

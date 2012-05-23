@@ -227,6 +227,21 @@ var g_update_stamps = null;
                 href = href.replace('http://www.stamped.com', '');
                 //href = '/travis/stamps/4/TEMPORARY';
                 
+                $.colorbox({
+                    href        : href, 
+                    
+                    width       : "75%", 
+                    transition  : "elastic", 
+                    fixed       : true, 
+                    scrolling   : false, 
+                    
+                    onComplete  : function() {
+                        update_stamps();
+                        init_social_sharing();
+                    }
+                });
+                
+                /*
                 var $target = $("<div></div>");
                 
                 $target.load(href + " .sdetail_body", {}, function() {
@@ -238,12 +253,12 @@ var g_update_stamps = null;
                         inline      : true, 
                         href        : $sdetail, 
                         
-                        maxWidth    : (2 * window.innerWidth) / 3, 
+                        maxwidth    : (2 * window.innerwidth) / 3, 
                         transition  : "elastic", 
                         fixed       : true, 
                         scrolling   : false
                     });
-                });
+                });*/
                 
                 return false;
             });
@@ -857,7 +872,7 @@ var g_update_stamps = null;
                 }
             } else */
             if (right < fixed_padding / 2) {
-                console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
+                //console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
                 
                 if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery + " " + narrow_gallery);
@@ -866,7 +881,7 @@ var g_update_stamps = null;
                 
                 reset_stamp_gallery_items(min_blurb_width, true);
             } else {
-                console.debug("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
+                //console.debug("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
                 gallery = true;
                 
                 if (!$stamp_gallery.hasClass(wide_gallery)) {

@@ -661,7 +661,7 @@ class HTTPUser(Schema):
         cls.addProperty('website',               basestring)
         cls.addProperty('location',              basestring)
         cls.addProperty('privacy',               bool, required=True)
-        cls.addNestedProperty('image',                HTTPImageSchema)
+        cls.addNestedProperty('image',           HTTPImageSchema)
         
         cls.addProperty('identifier',            basestring)
         cls.addProperty('num_stamps',            int)

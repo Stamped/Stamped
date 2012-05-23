@@ -189,13 +189,13 @@
   left: -50%;
   top: 4px;
 }
-.stamp-gallery-item .content .content_2 .timestamp_raw {
-  display: none;
-}
 .stamp-gallery-item .content .content_2 .timestamp {
   opacity: 0;
   /*.transition(opacity, 0.2s, ease-out);*/
 
+}
+.timestamp_raw {
+  display: none;
 }
 a.lightbox {
   position: absolute;

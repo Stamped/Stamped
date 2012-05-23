@@ -132,7 +132,6 @@
 .sdetail_body .inner .stamp-card .stamp-contents .timestamp,
 .sdetail_body .inner .stamp-card .stamp-contents .timestamp_raw {
   text-align: right;
-  font-weight: bold;
   font-size: 80%;
 }
 .sdetail_body .inner .stamp-card .stamp-contents .stamp-inner-content {
