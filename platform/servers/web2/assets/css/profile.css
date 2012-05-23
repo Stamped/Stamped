@@ -292,11 +292,8 @@ a.lightbox .zoom {
   height: auto;
   background-size: 100% 100%;
 }
-.stamp-preview .stamp-map {
-  z-index: 25;
-}
 .stamp-preview .stamp-user-image {
-  z-index: 24;
+  z-index: 25;
 }
 .stamp-preview .stamp-user-image img {
   -webkit-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
@@ -304,6 +301,9 @@ a.lightbox .zoom {
   -ms-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   -o-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
+}
+.stamp-preview .stamp-map {
+  z-index: 24;
 }
 .stamp-preview .stamp-entity-image {
   z-index: 23;
@@ -401,8 +401,6 @@ a.lightbox .zoom {
   margin: 2em auto;
 }
 .profile-nav {
-  list-style: none;
-  text-decoration: none;
   position: absolute;
   top: 0;
   right: 0;
@@ -441,10 +439,6 @@ a.lightbox .zoom {
   background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
 }
 /* TODO: fix height issues */
-ul.user-category-distribution {
-  list-style: none;
-  text-decoration: none;
-}
 ul.user-category-distribution li {
   float: left;
   width: 10%;

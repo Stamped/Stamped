@@ -72,6 +72,14 @@ a:hover {
     text-decoration: underline;
 }
 
+ol, ul {
+    text-decoration: none;
+    list-style: none;
+    text-indent: 0;
+    padding: 0;
+    margin:  0;
+}
+
 .replaced {
     display: block;
     text-indent: -9999em;
@@ -309,7 +317,11 @@ header {
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .floatleft {
+                    .profile-image-large {
+                        .floatleft;
+                    }
+                    
+                    .floatleft, .profile-image-large {
                         margin: 0 24px 0 0;
                     }
                     
@@ -650,12 +662,6 @@ header {
     padding: 0;
     
     ol {
-        text-decoration: none;
-        list-style: none;
-        text-indent: 0;
-        padding: 0;
-        margin:  0;
-        
         li {
             position: relative;
             

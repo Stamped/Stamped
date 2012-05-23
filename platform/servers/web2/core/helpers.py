@@ -35,19 +35,19 @@ class StampedAPIProxy(object):
         self._prod = IS_PROD
         self.api = globalMongoStampedAPI()
     
-    def getUser(self, **params):
+    def getUser(self, params):
         if self._prod:
             raise NotImplementedError
         else:
             return self._handle_get("users/show.json", params)
     
-    def getUserStamps(self, **params):
+    def getUserStamps(self, params):
         if self._prod:
             raise NotImplementedError
         else:
             return self._handle_get("collections/user.json", params)
     
-    def getFriends(self, **params):
+    def getFriends(self, params):
         if self._prod:
             raise NotImplementedError
         else:
@@ -61,7 +61,7 @@ class StampedAPIProxy(object):
             else:
                 return []
     
-    def getFollowers(self, **params):
+    def getFollowers(self, params):
         if self._prod:
             raise NotImplementedError
         else:

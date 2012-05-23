@@ -99,12 +99,14 @@ def profile(request, schema, **kwargs):
         friends     = travis_test.friends
         followers   = travis_test.followers
     else:
-        user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(**schema.dataExport())
-        friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
-        followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
+        utils.log(pprint.pformat(schema.dataExport()))
+        
+        stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
+        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
+        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
     
     main_cluster    = { }
     
@@ -119,13 +121,14 @@ def profile(request, schema, **kwargs):
         # find stamp clusters
         for stamp in stamps:
             entity = stamp['entity']
-            if 'coordinates' not in entity:
+            if 'coordinates' not in entity or entity['coordinates'] is None:
                 continue
             
             # TODO: really should be retaining this for stamps overall instead of just subset here...
             
             coords = api.HTTPSchemas._coordinatesFlatToDict(entity['coordinates'])
             found_cluster = False
+            
             ll = [ coords['lat'], coords['lng'] ]
             #print "%s) %s" % (stamp.title, ll)
             
@@ -168,16 +171,17 @@ def profile(request, schema, **kwargs):
             if len(clusters_out) <= 0:
                 clusters_out.append(clusters[0])
         
-        clusters = sorted(clusters_out, key=lambda c: len(c['data']), reverse=True)
-        
-        for cluster in clusters:
-            utils.log(pprint.pformat(cluster))
-        
-        main_cluster = clusters[0]
-        main_cluster = {
-            'coordinates' : "%f,%f" % (main_cluster['avg'][0], main_cluster['avg'][1]), 
-            'markers'     : list("%f,%f" % (c[0], c[1]) for c in main_cluster['data']), 
-        }
+        if len(clusters) > 0:
+            clusters = sorted(clusters_out, key=lambda c: len(c['data']), reverse=True)
+            
+            for cluster in clusters:
+                utils.log(pprint.pformat(cluster))
+            
+            main_cluster = clusters[0]
+            main_cluster = {
+                'coordinates' : "%f,%f" % (main_cluster['avg'][0], main_cluster['avg'][1]), 
+                'markers'     : list("%f,%f" % (c[0], c[1]) for c in main_cluster['data']), 
+            }
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
@@ -230,12 +234,12 @@ def map(request, schema, **kwargs):
         friends     = travis_test.friends
         followers   = travis_test.followers
     else:
-        user        = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(**schema.dataExport())
-        friends     = stampedAPIProxy.getFriends(user_id=user_id, screen_name=schema.screen_name)
-        followers   = stampedAPIProxy.getFollowers(user_id=user_id, screen_name=schema.screen_name)
+        stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
+        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
+        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
     
     # TODO: bake this into stampedAPIProxy request
     stamps = filter(lambda s: 'coordinates' in s['entity'], stamps)
@@ -278,7 +282,7 @@ def sdetail(request, schema, **kwargs):
         user  = travis_test.user
         #stamp = travis_test.stamps[(-schema.stamp_num) - 1]
     else:
-        user  = stampedAPIProxy.getUser(screen_name=schema.screen_name)
+        user  = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
     
     stamp = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     

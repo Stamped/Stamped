@@ -1,54 +1,8 @@
 {% load stamped_tags %}
 
 <div class="sdetail_body clearfix">
-    <div class="lhs">
-        {% handlebars_template "stamp-image" stamp %}
-        
-        <div class="actions">
-            {% for a in entity.actions %}
-                {% with action=a.action %}
-                    <div class="action action-{{action.type}}">
-                        {% if action.sources.0 %}
-                            <div class="sources">
-                                {% for source in action.sources %}
-                                    {% if source.link %}
-                                        <div class="source source-{{source.source}}">
-                                            <!-- TODO: more clean & secure way of embedding JSON -->
-                                            <div class="metadata" style="display: none;">
-                                                {{source}}
-                                            </div>
-                                            
-                                            <a class='link' title="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}" href="{{source.link}}">
-                                                <!-- TODO: replace these icons with sprite assets from anthony -->
-                                                <div class='action-icon'>
-                                                    <img alt="{{a.name}}" src="{{a.icon}}" />
-                                                </div>
-                                                
-                                                <div class="name">
-                                                    {% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}
-                                                    
-                                                    {% if source.icon %}
-                                                        <img class='source-icon' src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
-/>
-                                                    {% endif %}
-                                                </div>
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endwith %}
-            {% endfor %}
-        </div>
-    </div>
     
-    <div class="rhs">
-        {% handlebars_template "social-sharing" %}
-    </div>
-    
-    <div class="inner">
+    <div class="section section-stamp">
         <div class="stamp-category-{{stamp.entity.category}}">
             <div class="entity-header">
                 <div class='title clearfix'>
@@ -83,9 +37,7 @@
                     </div>
                     
                     <div class='stamp-inner-content clearfix'>
-                        <div class="profile-image-medium">
-                            <img alt="{% if stamp.user.name %}{{stamp.user.name|title}} {% endif %}(@{{stamp.user.screen_name}})" src="{{stamp.user.image_url_72}}" />
-                        </div>
+                        {% handlebars_template "profile-image-medium" stamp.user %}
                         
                         {% for content in stamp.contents %}
                             {% if content.blurb and content.blurb|length > 0 %}
@@ -163,6 +115,53 @@
                 </div>
             </div>
         </div>
+    </div>
+    
+    <div class="section section-entity">
+        {% handlebars_template "stamp-image" stamp %}
+        
+        <div class="actions">
+            {% for a in entity.actions %}
+                {% with action=a.action %}
+                    <div class="action action-{{action.type}}">
+                        {% if action.sources.0 %}
+                            <div class="sources">
+                                {% for source in action.sources %}
+                                    {% if source.link %}
+                                        <div class="source source-{{source.source}}">
+                                            <!-- TODO: more clean & secure way of embedding JSON -->
+                                            <div class="metadata" style="display: none;">
+                                                {{source}}
+                                            </div>
+                                            
+                                            <a class='link' title="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}" href="{{source.link}}">
+                                                <!-- TODO: replace these icons with sprite assets from anthony -->
+                                                <div class='action-icon'>
+                                                    <img alt="{{a.name}}" src="{{a.icon}}" />
+                                                </div>
+                                                
+                                                <div class="name">
+                                                    {% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}
+                                                    
+                                                    {% if source.icon %}
+                                                        <img class='source-icon' src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
+/>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="section section-social">
+        {% handlebars_template "social-sharing" %}
     </div>
 </div>
 

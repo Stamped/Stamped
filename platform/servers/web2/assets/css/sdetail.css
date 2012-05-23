@@ -33,18 +33,19 @@
 .sdetail_body {
   background: #fff;
 }
-.sdetail_body .lhs {
-  float: left;
+.sdetail_body .section-entity {
+  float: right;
   width: 30%;
+  border: 2px solid red;
   padding: .25em;
 }
-.sdetail_body .lhs .stamp-preview {
+.sdetail_body .section-entity .stamp-preview {
   margin: 1em auto;
 }
-.sdetail_body .lhs .actions {
+.sdetail_body .section-entity .actions {
   margin: 2em auto;
 }
-.sdetail_body .lhs .actions .action {
+.sdetail_body .section-entity .actions .action {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -53,48 +54,45 @@
   background-clip: padding-box;
   padding: 2px;
 }
-.sdetail_body .lhs .actions .action .sources {
+.sdetail_body .section-entity .actions .action .sources {
   clear: both;
 }
-.sdetail_body .lhs .actions .action .sources .source {
+.sdetail_body .section-entity .actions .action .sources .source {
   margin: 0 1em 1em;
 }
-.sdetail_body .lhs .actions .action .sources .source .metadata {
+.sdetail_body .section-entity .actions .action .sources .source .metadata {
   display: none;
 }
-.sdetail_body .lhs .actions .action .sources .source a.link .action-icon {
+.sdetail_body .section-entity .actions .action .sources .source a.link .action-icon {
   display: inline-block;
   min-width: 48px;
   text-align: center;
 }
-.sdetail_body .lhs .actions .action .sources .source a.link .action-icon img {
+.sdetail_body .section-entity .actions .action .sources .source a.link .action-icon img {
   margin: 0 auto;
 }
-.sdetail_body .lhs .actions .action .sources .source a.link div.name {
+.sdetail_body .section-entity .actions .action .sources .source a.link div.name {
   display: inline-block;
   font-size: 80%;
 }
-.sdetail_body .lhs .actions .action .sources .source a.link div.name img.source-icon {
+.sdetail_body .section-entity .actions .action .sources .source a.link div.name img.source-icon {
   max-width: 32px;
 }
-.sdetail_body .lhs .actions .action .sources .source a.link:hover,
-.sdetail_body .lhs .actions .action .sources .source a.link:active,
-.sdetail_body .lhs .actions .action .sources .source a.link:visited {
+.sdetail_body .section-entity .actions .action .sources .source a.link:hover,
+.sdetail_body .section-entity .actions .action .sources .source a.link:active,
+.sdetail_body .section-entity .actions .action .sources .source a.link:visited {
   text-decoration: none;
 }
-.sdetail_body .inner {
-  position: relative;
-  top: 0;
-  left: 0;
-  float: right;
-  width: 45%;
-  min-width: 45%;
-  margin: 0 2em 1em;
+.sdetail_body .section-stamp {
+  float: left;
+  width: 50%;
+  border: 2px solid green;
+  margin: 0;
 }
-.sdetail_body .inner .entity-header {
+.sdetail_body .section-stamp .entity-header {
   float: none;
 }
-.sdetail_body .inner .stamp-card {
+.sdetail_body .section-stamp .stamp-card {
   -webkit-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
   -moz-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
   -ms-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
@@ -108,8 +106,8 @@
   background-clip: padding-box;
   margin: 1.5em 0 0;
 }
-.sdetail_body .inner .stamp-card .stamp-card-pre,
-.sdetail_body .inner .stamp-card .stamp-card-post {
+.sdetail_body .section-stamp .stamp-card .stamp-card-pre,
+.sdetail_body .section-stamp .stamp-card .stamp-card-post {
   display: block;
   width: 100%;
   height: 16px;
@@ -120,84 +118,89 @@
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .user-header .name {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .user-header .name {
   float: left;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .user-header .timestamp {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .user-header .timestamp {
   float: right;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .user-header-0 {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .user-header-0 {
   margin: 0.5em 1.5em 0.5em;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .timestamp,
-.sdetail_body .inner .stamp-card .stamp-contents .timestamp_raw {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .timestamp,
+.sdetail_body .section-stamp .stamp-card .stamp-contents .timestamp_raw {
   text-align: right;
   font-size: 80%;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .stamp-inner-content {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content {
   margin: 0 1.5em 1.5em;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .stamp-inner-content .profile-image-medium {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .profile-image-medium {
   margin: 0 24px 24px 0;
   float: left;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .stamp-inner-content .normal_blurb {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .normal_blurb {
   display: block;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .credits {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .credits {
   border-top: 1px solid #bbb;
   padding: 0.5em 1.5em;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .credits .stamp_0 {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .credits .stamp_0 {
   display: inline-block;
   width: 18px;
   height: 18px;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .credits .stamp_1 {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .credits .stamp_1 {
   display: inline-block;
   margin: 0 0 0 -9px;
   width: 18px;
   height: 18px;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .credits .credits-detail {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .credits .credits-detail {
   display: none;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments {
   /*.box-shadow(0, 3px, 8px, -4px, @shadow);*/
 
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments .comments-nav {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav {
   border-bottom: 1px dashed #bbb;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments ol.comment-list {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list {
   text-decoration: none;
   list-style: none;
   text-indent: 0;
   padding: 0.5em 1.5em;
   margin: 0;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments ol.comment-list li {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li {
   border-top: 1px solid #bbb;
   padding: .5em 0;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments ol.comment-list li .profile-image-small {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .profile-image-small {
   float: left;
   margin: 0 12px 0 0;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner {
   display: block;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner .user-header {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner .user-header {
   display: block;
 }
-.sdetail_body .inner .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.normal_blurb {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.normal_blurb {
   display: block;
 }
-.sdetail_body .rhs {
-  float: right;
-  width: 12%;
-  padding: .5em;
+.sdetail_body .section-social {
+  border: 2px solid blue;
+  float: left;
+  width: 50%;
+  margin: .5em .5em 0;
 }
-.sdetail_body .rhs p.share {
+.sdetail_body .section-social p.share {
   font-size: 80%;
+}
+.sdetail_body .section-social .share-button {
+  display: block;
+  float: left;
 }

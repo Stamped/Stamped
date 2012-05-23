@@ -30,10 +30,10 @@
 .sdetail_body {
     background: #fff;
     
-    .lhs {
-        float: left;
+    .section-entity {
+        float: right;
         width: 30%;
-        //border: 2px solid red;
+        border: 2px solid red;
         padding: .25em;
         
         .stamp-preview {
@@ -87,15 +87,11 @@
         }
     }
     
-    .inner {
-        position: relative;
-        top:  0;
-        left: 0;
-        float: right;
-        width: 45%;
-        min-width: 45%;
-        //border: 2px solid green;
-        margin: 0 2em 1em;
+    .section-stamp {
+        float: left;
+        width: 50%;
+        border: 2px solid green;
+        margin: 0;
         
         .entity-header {
             float: none;
@@ -213,17 +209,19 @@
         }
     }
     
-    .rhs {
-        //border: 2px solid blue;
-        float: right;
-        width: 12%;
-        padding: .5em;
+    .section-social {
+        border: 2px solid blue;
+        float: left;
+        width: 50%;
+        margin: .5em .5em 0;
         
         p.share {
             font-size: 80%;
         }
         
-        .share-buttton {
+        .share-button {
+            display: block;
+            float: left;
         }
     }
 }

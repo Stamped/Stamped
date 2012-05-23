@@ -275,15 +275,15 @@ a.lightbox {
         .sized(@preview-width);
     }
     
-    .stamp-map {
-        z-index: 25;
-    }
     .stamp-user-image {
-        z-index: 24;
+        z-index: 25;
         
         img {
             .box-shadow(0, 4px, 8px, -4px, rgba(30,30,30,0.85));
         }
+    }
+    .stamp-map {
+        z-index: 24;
     }
     .stamp-entity-image {
         z-index: 23;
@@ -386,11 +386,8 @@ a.lightbox {
 }
 
 .profile-nav {
-    list-style: none;
-    text-decoration: none;
-    
     position: absolute;
-    top: 0;
+    top:   0;
     right: 0;
     
     a {
@@ -437,9 +434,6 @@ a.lightbox {
 
 /* TODO: fix height issues */
 ul.user-category-distribution {
-    list-style: none;
-    text-decoration: none;
-    
     li {
         float: left;
         width: 10%;

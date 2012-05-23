@@ -19,7 +19,13 @@ var g_update_stamps = null;
         var screen_name = STAMPED_PRELOAD.user.screen_name;
         var update_navbar_layout = null;
         
+        var blacklisted_entity_images = {
+            'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' : true, 
+            'http://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png' : true, 
+            'http://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png' : true
+        };
         
+                    
         // ---------------------------------------------------------------------
         // initialize profile header navigation
         // ---------------------------------------------------------------------
@@ -171,7 +177,14 @@ var g_update_stamps = null;
                     var find = function(selector) {
                         var $elements = $this.find(selector);
                         $elements     = $elements.filter(function() {
-                            return !$(this).hasClass('hidden');
+                            var $this = $(this);
+                            
+                            if ($this.attr('src') in blacklisted_entity_images) {
+                                $this.addClass('hidden');
+                                return false;
+                            } else {
+                                return !$this.hasClass('hidden');
+                            }
                         });
                         
                         $elements.each(function(i, element) {
@@ -186,9 +199,10 @@ var g_update_stamps = null;
                         return $elements;
                     };
                     
-                    images.push.apply(images, $this.find('.stamp-map'));
-                    images.push.apply(images, find('.stamp-user-image img'));
+                    images.push.apply(images, find('.stamp-user-image   img'));
                     images.push.apply(images, find('.stamp-entity-image img'));
+                    
+                    images.push.apply(images, $this.find('.stamp-map'));
                     images.push.apply(images, $this.find('.stamp-icon'));
                     
                     if (images.length > 0) {
@@ -291,7 +305,7 @@ var g_update_stamps = null;
                 closeSpeed      : 300, 
                 
 				closeClick      : true, 
-                maxWidth        : (2 * window.innerWidth) / 3, 
+                //maxWidth        : (2 * window.innerWidth) / 3, 
                 
                 helpers         : {
                     overlay     : {

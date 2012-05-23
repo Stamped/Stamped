@@ -2,21 +2,13 @@
 <div class="stamp-preview">
     <div class='preview-image stamp-user-image'>
         {{#contents}}
-            {{#images}}
-                {{#sizes}}
-                    <img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" /><a class='lightbox' href="{{url}}"><div class='zoom'></div></a>
-                {{/sizes}}
-            {{/images}}
+            {{entity_image}}
         {{/contents}}
     </div>
     
     {{#entity}}
         <div class='preview-image stamp-entity-image'>
-            {{#images}}
-                {{#sizes}}
-                    <img src="{{url}}" onerror="this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }" /><a class='lightbox' href="{{url}}"><div class='zoom'></div></a>
-                {{/sizes}}
-            {{/images}}
+            {{entity_image}}
         </div>
         
         {{#if coordinates}}

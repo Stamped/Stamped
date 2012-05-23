@@ -61,6 +61,14 @@ a:visited {
 a:hover {
   text-decoration: underline;
 }
+ol,
+ul {
+  text-decoration: none;
+  list-style: none;
+  text-indent: 0;
+  padding: 0;
+  margin: 0;
+}
 .replaced {
   display: block;
   text-indent: -9999em;
@@ -285,7 +293,11 @@ header .header-body a.button {
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large {
+  margin: 0 24px 0 0;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large {
   margin: 0 24px 0 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth p {
@@ -689,13 +701,6 @@ header .header-body a.button {
   transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
   margin: -180px 0 0;
   padding: 0;
-}
-#stamp-category-nav-bar ol {
-  text-decoration: none;
-  list-style: none;
-  text-indent: 0;
-  padding: 0;
-  margin: 0;
 }
 #stamp-category-nav-bar ol li {
   position: relative;
