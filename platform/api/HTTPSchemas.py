@@ -2413,8 +2413,6 @@ class HTTPStamp(Schema):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
         credit                  = getattr(stamp, 'credit', [])
-        contents                = getattr(stamp, 'contents', [])
-        previews                = getattr(stamp, 'previews', {})
         comments                = getattr(previews, 'comments', [])
         likes                   = getattr(previews, 'likes', [])
         todos                   = getattr(previews, 'todos', [])
@@ -2422,10 +2420,8 @@ class HTTPStamp(Schema):
 
         data = stamp.dataExport()
         data['contents'] = []
+        data['previews'] = None
         self.dataImport(data, overflow=True)
-
-        if credit is not None and len(credit) > 0:
-            self.credit = credit
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
         self.entity             = HTTPEntityMini().importEntity(entity)
@@ -2433,8 +2429,11 @@ class HTTPStamp(Schema):
         self.created            = stamp.timestamp.stamped
         self.modified           = stamp.timestamp.modified
         self.stamped            = stamp.timestamp.stamped
-        self.contents           = []
 
+        if credit is not None and len(credit) > 0:
+            self.credit = credit
+
+        contents = []
         for content in stamp.contents:
             item                    = HTTPStampContent()
             item.blurb              = content.blurb
@@ -2472,7 +2471,8 @@ class HTTPStamp(Schema):
                 item.images = newImages
 
             # Insert contents in descending chronological order
-            self.contents.insert(0, item)
+            contents.insert(0, item)
+        self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)
