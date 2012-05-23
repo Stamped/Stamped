@@ -170,7 +170,37 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertValidKey(token['refresh_token'], 43)
         
         return user, token
-    
+
+    def createFacebookAccount(self, fb_user_token, name='TestUser', **kwargs):
+        global _test_case, _accounts
+        _test_case = self
+
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "account/create_using_facebook.json"
+        data = {
+            "client_id"         : c_id,
+            "client_secret"     : c_secret,
+            "name"              : name,
+            "screen_name"       : name,
+            "facebook_token"    : fb_user_token
+        }
+        response = self.handlePOST(path, data)
+        self.assertIn('user', response)
+        self.assertIn('token', response)
+
+        user  = response['user']
+        token = response['token']
+
+        _accounts.append((user, token))
+
+        self.assertValidKey(user['user_id'])
+        self.assertValidKey(token['access_token'], 22)
+        self.assertValidKey(token['refresh_token'], 43)
+
+        return user, token
+
     def deleteAccount(self, token):
         path = "account/remove.json"
         data = { "oauth_token": token['access_token'] }

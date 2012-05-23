@@ -9,7 +9,7 @@ import Globals, logs, re
 import unicodedata, utils
 
 try:
-    from api.Schemas        import *
+    from api.Schemas    import *
     from difflib        import SequenceMatcher
     from libs.LibUtils  import parseDateString
     from datetime       import datetime
@@ -282,16 +282,20 @@ def deriveCategoryFromTypes(types):
     return 'other'
 
 def buildEntity(data=None, kind=None, mini=False):
-    if data is not None:
-        if 'schema_version' not in data:
-            return upgradeEntityData(data)
-        kind = data.pop('kind', kind)
-    if mini:
-        new = getEntityMiniObjectFromKind(kind)
-    else:
-        new = getEntityObjectFromKind(kind)
-    if data is not None:
-        return new().dataImport(data, overflow=True)
+    try:
+        if data is not None:
+            if 'schema_version' not in data:
+                return upgradeEntityData(data)
+            kind = data.pop('kind', kind)
+        if mini:
+            new = getEntityMiniObjectFromKind(kind)
+        else:
+            new = getEntityObjectFromKind(kind)
+        if data is not None:
+            return new().dataImport(data, overflow=True)
+    except Exception as e:
+        logs.info(e.message)
+        raise
     return new()
 
 def upgradeEntityData(entityData):
@@ -372,7 +376,7 @@ def upgradeEntityData(entityData):
     
     sources                 = old.pop('sources', {})
     details                 = old.pop('details', {})
-    timestamp               = old.pop('timestamp', {})
+    timestamp               = old.pop('timestamp', {'created' : seedTimestamp})
     place                   = details.pop('place', {})
     contact                 = details.pop('contact', {})
     restaurant              = details.pop('restaurant', {})
@@ -388,7 +392,8 @@ def upgradeEntityData(entityData):
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
-    
+    new.timestamp           = TimestampSchema().dataImport(timestamp)
+
     # Images
     netflixImages = netflix.pop('images', {})
     oldImages = [
@@ -607,8 +612,8 @@ def upgradeEntityData(entityData):
             new.screenshots = newScreenshots
             new.screenshots_source = media.pop('screenshots_source', 'format')
             new.screenshots_timestamp = media.pop('screenshots_timestamp', seedTimestamp)
-    
-    return new 
+
+    return new
 
 def fast_id_dedupe(entities, seen=None):
     """

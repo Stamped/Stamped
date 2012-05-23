@@ -11,6 +11,7 @@ from logs       import report
 try:
     from datetime                       import datetime
     from utils                          import lazyProperty
+    from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
     from Entity                         import getSimplifiedTitle, buildEntity
@@ -63,7 +64,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document.pop('titlel')
 
         entity = buildEntity(document)
-        
+
         return entity
     
     def _convertToMongo(self, entity):
@@ -121,8 +122,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def removeCustomEntity(self, entityId, userId):
         try:
-            query = {'_id': self._getObjectIdFromString(entityId), \
-                        'sources.userGenerated.user_id': userId}
+            query = {'_id': self._getObjectIdFromString(entityId), 'sources.user_generated_id': userId}
+            self._collection.remove(query)
+            query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
             self._collection.remove(query)
             return True
         except:

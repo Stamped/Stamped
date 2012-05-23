@@ -192,7 +192,8 @@ class StampedAPI(AStampedAPI):
         timestamp = UserTimestampSchema()
         timestamp.created = now
         account.timestamp = timestamp
-        account.password = convertPasswordForStorage(account.password)
+        if account.password is not None:
+            account.password = convertPasswordForStorage(account.password)
 
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
@@ -228,9 +229,10 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
-        account.email = str(account.email).lower().strip()
-        if not utils.validate_email(account.email):
-            raise StampedInputError("Invalid format for email address")
+        if account.email is not None:
+            account.email = str(account.email).lower().strip()
+            if not utils.validate_email(account.email):
+                raise StampedInputError("Invalid format for email address")
         
         # Add image timestamp if exists
         if imageData:
@@ -246,7 +248,11 @@ class StampedAPI(AStampedAPI):
         
         # Add profile image
         if imageData:
-            self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
+            try:
+                self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
+            except IOError:
+                #if there was a problem with the image format, just ignore the image
+                account.image_cache = None
         
         # Asynchronously send welcome email and add activity items
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
@@ -258,48 +264,49 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(user_id)
         
         # Add activity if invitations were sent
-        invites = self._inviteDB.getInvitations(account.email)
-        invitedBy = {}
-        
-        for invite in invites:
-            invitedBy[invite['user_id']] = 1
-            
-        """
-        # Skip this activity item for now 
+        if account.email is not None:
+            invites = self._inviteDB.getInvitations(account.email)
+            invitedBy = {}
 
-            ### TODO: What genre are we picking for this activity item?
-            self._addActivity(genre='invite_sent', 
-                              user_id=invite['user_id'], 
-                              recipient_ids=[ account.user_id ])
+            for invite in invites:
+                invitedBy[invite['user_id']] = 1
+
+            """
+            # Skip this activity item for now
+
+                ### TODO: What genre are we picking for this activity item?
+                self._addActivity(genre='invite_sent',
+                                  user_id=invite['user_id'],
+                                  recipient_ids=[ account.user_id ])
+
+            if len(invitedBy) > 0:
+                ### TODO: What genre are we picking for this activity item?
+                self._addActivity(genre='invite_received',
+                                  user_id=account.user_id,
+                                  recipient_ids=invitedBy.keys())
+            """
+
+            self._inviteDB.join(account.email)
         
-        if len(invitedBy) > 0:
-            ### TODO: What genre are we picking for this activity item?
-            self._addActivity(genre='invite_received', 
-                              user_id=account.user_id, 
-                              recipient_ids=invitedBy.keys())
-        """
-        
-        self._inviteDB.join(account.email)
-        
-        domain = str(account.email).split('@')[1]
-        if domain != 'stamped.com':
-            msg = {}
-            msg['to'] = account.email
-            msg['from'] = 'Stamped <noreply@stamped.com>'
-            msg['subject'] = 'Welcome to Stamped!'
-            
-            try:
-                base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
-                template = open(path, 'r')
-            except Exception:
-                ### TODO: Add error logging?
-                raise
-            
-            params = {'screen_name': account.screen_name, 'email_address': account.email}
-            msg['body'] = utils.parseTemplate(template, params)
-            
-            utils.sendEmail(msg, format='html')
+            domain = str(account.email).split('@')[1]
+            if domain != 'stamped.com':
+                msg = {}
+                msg['to'] = account.email
+                msg['from'] = 'Stamped <noreply@stamped.com>'
+                msg['subject'] = 'Welcome to Stamped!'
+
+                try:
+                    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
+                    template = open(path, 'r')
+                except Exception:
+                    ### TODO: Add error logging?
+                    raise
+
+                params = {'screen_name': account.screen_name, 'email_address': account.email}
+                msg['body'] = utils.parseTemplate(template, params)
+
+                utils.sendEmail(msg, format='html')
     
     @API_CALL
     def removeAccount(self, authUserId):
@@ -401,7 +408,8 @@ class StampedAPI(AStampedAPI):
         self._accountDB.removeAccount(account.user_id)
         
         # Remove email address from invite list
-        self._inviteDB.remove(account.email)
+        if account.email is not None:
+            self._inviteDB.remove(account.email)
         
         return account
     
@@ -433,9 +441,10 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
-        account.email = str(account.email).lower().strip()
-        if not utils.validate_email(account.email):
-            raise StampedInputError("Invalid format for email address")
+        if account.email is not None:
+            account.email = str(account.email).lower().strip()
+            if not utils.validate_email(account.email):
+                raise StampedInputError("Invalid format for email address")
         
         self._accountDB.updateAccount(account)
         
@@ -529,7 +538,7 @@ class StampedAPI(AStampedAPI):
         
         image = self._imageDB.getImage(data)
         image_url = self._imageDB.addProfileImage(screen_name.lower(), image)
-        
+
         if user is not None:
             image_cache = datetime.utcnow()
             user.image_cache = image_cache
@@ -1266,7 +1275,7 @@ class StampedAPI(AStampedAPI):
             entityId = self._convertSearchId(entityId)
         else:
             self.mergeEntityId(entityId)
-        
+
         return self._entityDB.getEntity(entityId)
     
     @API_CALL
@@ -1640,6 +1649,8 @@ class StampedAPI(AStampedAPI):
         t0 = time.time()
         t1 = t0
 
+        previewLength = 10
+
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
@@ -1694,7 +1705,7 @@ class StampedAPI(AStampedAPI):
 
         for stat in stats:
             if stat.preview_credits is not None:
-                for credit in stat.preview_credits:
+                for credit in stat.preview_credits[:previewLength]:
                     allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
@@ -1706,6 +1717,27 @@ class StampedAPI(AStampedAPI):
         logs.debug('Time for getStamps: %s' % (time.time() - t1))
         t1 = time.time()
 
+        """
+        COMMENTS 
+
+        Pull in the comment objects for each stamp
+        """
+        allCommentIds   = set()
+        commentIds      = {}
+
+        for stat in stats:        
+            # Comments 
+            if stat.preview_comments is not None:
+                for commentId in stat.preview_comments[:previewLength]:
+                    allCommentIds.add(commentId)
+
+        comments = self._commentDB.getComments(list(allCommentIds))
+
+        for comment in comments:
+            commentIds[comment.comment_id] = comment
+
+        logs.debug('Time for getComments: %s' % (time.time() - t1))
+        t1 = time.time()
 
         """
         USERS 
@@ -1729,20 +1761,18 @@ class StampedAPI(AStampedAPI):
                 for credit in stamp.credit:
                     allUserIds.add(credit.user_id)
             
-            # Comments
-            if stamp.previews is not None and stamp.previews.comments is not None:
-                for comment in stamp.previews.comments:
-                    allUserIds.add(comment.user.user_id)
+        for k, v in commentIds.items():
+            allUserIds.add(v.user.user_id)
 
         for stat in stats:
             # Likes
             if stat.preview_likes is not None:
-                for like in stat.preview_likes:
+                for like in stat.preview_likes[:previewLength]:
                     allUserIds.add(like)
 
             # To-Dos
             if stat.preview_todos is not None:
-                for todo in stat.preview_todos:
+                for todo in stat.preview_todos[:previewLength]:
                     allUserIds.add(todo)
 
         for stampId, stamp in underlyingStampIds.iteritems():
@@ -1772,8 +1802,12 @@ class StampedAPI(AStampedAPI):
             logs.debug('Time for authUserId queries: %s' % (time.time() - t1))
             t1 = time.time()
 
+        """
+        APPLY DATA 
+        """
 
         stamps = []
+
         for stamp in stampData:
             try:
                 stamp.entity = entityIds[stamp.entity.entity_id]
@@ -1803,61 +1837,66 @@ class StampedAPI(AStampedAPI):
                     stat = None
 
                 if stat is not None:
-                    # Likes
-                    likeobjects = []
-                    if stat.preview_likes is not None:
-                        for like in stat.preview_likes:
+                    # Comments
+                    commentPreviews = []
+                    if stat.preview_comments is not None:
+                        for commentId in stat.preview_comments[:previewLength]:
                             try:
-                                likeobjects.append(userIds[str(like)])
+                                comment = commentIds[str(commentId)]
+                                try:
+                                    comment.user = userIds[str(comment.user.user_id)]
+                                except KeyError:
+                                    logs.warning("Key error for user (user_id = %s)" % userId)
+                                    raise
+                                commentPreviews.append(comment)
                             except KeyError:
-                                logs.warning("Key error for like (user_id = %s)" % like)
+                                logs.warning("Key error for comment (comment_id = %s)" % commentId)
                                 logs.debug("Stamp: %s" % stamp)
                                 continue
-                    previews.likes = likeobjects
+                    previews.comments = commentPreviews
+
+                    # Likes
+                    likePreviews = []
+                    if stat.preview_likes is not None:
+                        for userId in stat.preview_likes[:previewLength]:
+                            try:
+                                likePreviews.append(userIds[str(userId)])
+                            except KeyError:
+                                logs.warning("Key error for like (user_id = %s)" % userId)
+                                logs.debug("Stamp: %s" % stamp)
+                                continue
+                    previews.likes = likePreviews
                     
                     # Todos
-                    todos = []
+                    todoPreviews = []
                     if stat.preview_todos is not None:
-                        for todo in stat.preview_todos:
+                        for userId in stat.preview_todos[:previewLength]:
                             try:
-                                todos.append(userIds[str(todo)])
+                                todoPreviews.append(userIds[str(userId)])
                             except KeyError:
-                                logs.warning("Key error for todo (user_id = %s)" % todo)
+                                logs.warning("Key error for todo (user_id = %s)" % userId)
                                 logs.debug("Stamp: %s" % stamp)
                                 continue
-                    previews.todos = todos
+                    previews.todos = todoPreviews
 
                     # Credits
-                    credits = []
+                    creditPreviews = []
                     if stat.preview_credits is not None:
-                        for i in stat.preview_credits:
+                        for i in stat.preview_credits[:previewLength]:
                             try:
                                 credit = underlyingStampIds[str(i)]
                                 credit.user = userIds[str(credit.user.user_id)]
                                 credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                credits.append(credit.minimize())
+                                creditPreviews.append(credit.minimize())
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
                                 logs.debug("Stamp: %s" % stamp)
                                 continue
-                    previews.credits = credits
+                    previews.credits = creditPreviews
 
                 else:
                     tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
-
-                # Comments
-                comments = []
-                if stamp.previews is not None:
-                    for comment in stamp.previews.comments:
-                        try:
-                            comment.user = userIds[str(comment.user.user_id)]
-                            comments.append(comment)
-                        except KeyError, e:
-                            logs.warning("Key error for comment / user: %s" % comment)
-                            logs.debug("Stamp: %s" % stamp)
-                            continue
-                previews.comments = comments
 
                 stamp.previews = previews
 
@@ -2857,6 +2896,119 @@ class StampedAPI(AStampedAPI):
      #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
     """
     
+    def _getStampCollection(self, stampIds, timeSlice, authUserId=None):
+        
+        if timeSlice.limit is None or timeSlice.limit <= 0 or timeSlice.limit > 50:
+            timeSlice.limit = 50
+        
+        # Buffer of 10 additional stamps
+        limit = timeSlice.limit
+        timeSlice.limit = limit + 10
+        
+        stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = stamps[:limit]
+        
+        if len(stampData) >= limit and len(stamps) < limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+        
+        return stamps
+    
+    def _searchStampCollection(self, stampIds, searchSlice, authUserId=None):
+        
+        if searchSlice.limit is None or searchSlice.limit <= 0 or searchSlice.limit > 50:
+            searchSlice.limit = 50
+        
+        # Buffer of 10 additional stamps
+        limit = searchSlice.limit
+        searchSlice.limit = limit + 10
+        
+        stampData = self._stampDB.searchStampCollectionSlice(stampIds, searchSlice)
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = stamps[:limit]
+        
+        if len(stampData) >= limit and len(stamps) < limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+        
+        return stamps
+
+    def _getUserStampIds(self, userId, authUserId=None):
+        user = self._userDB.getUser(userId)
+        return self._collectionDB.getUserStampIds(user.user_id)
+
+    def _getScopeStampIds(self, scope, authUserId=None):
+        if authUserId is None:
+            return None
+
+        if scope == 'me':
+            return self._collectionDB.getUserStampIds(authUserId)
+
+        if scope == 'inbox':
+            return self._collectionDB.getInboxStampIds(authUserId)
+
+        if scope == 'friends':
+            raise NotImplementedError()
+
+        if scope == 'fof':
+            return self._collectionDB.getFofStampIds(authUserId)
+
+        return None
+
+    @API_CALL
+    def getStampCollection(self, timeSlice, authUserId=None):
+
+        # User
+        if timeSlice.user_id is not None:
+            stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
+            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+
+            return result
+
+        # Inbox
+        else:
+            stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
+            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+
+            return result
+
+    @API_CALL
+    def searchStampCollection(self, searchSlice, authUserId=None):
+        print searchSlice
+        # User
+        if searchSlice.user_id is not None:
+            stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
+            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+            return result
+
+        # Inbox
+        else:
+            stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
+            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+            return result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     def _setSliceParams(self, data, default_limit=20, default_sort=None):
         # Since
         try: 
@@ -2894,28 +3046,6 @@ class StampedAPI(AStampedAPI):
         except Exception:
             return cap
     
-    def _getStampCollection(self, stampIds, timeSlice, authUserId=None, enrich=True):
-        
-        stampCap    = 50
-        commentCap  = 10
-        
-        if timeSlice.limit is None or timeSlice.limit > stampCap:
-            timeSlice.limit = stampCap
-        
-        # Buffer of 10 additional stamps
-        limit = timeSlice.limit
-        timeSlice.limit = limit + 10
-        
-        stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
-
-        stamps = self._enrichStampCollection(stampData, timeSlice, authUserId, enrich, commentCap)
-        stamps = stamps[:limit]
-        
-        if len(stampData) >= limit and len(stamps) < limit:
-            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
-        
-        return stamps
-    
     def _getStampCollection_DEPRECATED(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
         if stampIds is not None and genericCollectionSlice.offset >= len(stampIds):
             return []
@@ -2946,7 +3076,7 @@ class StampedAPI(AStampedAPI):
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
 
-        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
@@ -2966,7 +3096,7 @@ class StampedAPI(AStampedAPI):
         
         return stamps
 
-    def _enrichStampCollection(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
+    def _enrichStampCollection_DEPRECATED(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
         commentPreviews = {}
         
         try:
@@ -3001,36 +3131,6 @@ class StampedAPI(AStampedAPI):
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId, nofilter=True)
 
         return stamps
-
-    @API_CALL
-    def getStampCollection(self, timeSlice, authUserId=None):
-
-        # User
-        if timeSlice.user_id is not None:
-            user        = self._userDB.getUser(timeSlice.user_id)
-            ### TODO: Check privacy
-
-            stampIds    = self._collectionDB.getUserStampIds(user.user_id)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-            return result
-
-        # Inbox
-        if authUserId is None:
-            raise StampedPermissionsError("Must be logged in to inbox")
-
-        if timeSlice.scope == 'me':
-            stampIds = self._collectionDB.getUserStampIds(authUserId)
-        elif timeSlice.scope == 'friends':
-            stampIds = self._collectionDB.getInboxStampIds(authUserId)
-        elif timeSlice.scope == 'fof':
-            stampIds = self._collectionDB.getFofStampIds(authUserId)
-        else:
-            stampIds = None
-
-        result = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-        return result
     
     @API_CALL
     def getInboxStamps(self, authUserId, genericCollectionSlice):
@@ -3153,7 +3253,7 @@ class StampedAPI(AStampedAPI):
                     return [], 0
             stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
             
-        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId=authUserId)
+        stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId=authUserId)
 
         return stamps, count
     
@@ -3692,7 +3792,6 @@ class StampedAPI(AStampedAPI):
     def _mergeEntity(self, entity, link=True):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         modified = self._resolveEntity(entity)
-
         if link:
             modified = self._resolveEntityLinks(entity) | modified
 
@@ -3770,9 +3869,9 @@ class StampedAPI(AStampedAPI):
             else:
                 for sourceName in sources:
                     try:
-                        if stub.sources['%s_id' % sourceName] is not None:
+                        if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
                             source = sources[sourceName]()
-                            source_id = stub.sources['%s_id' % sourceName]
+                            source_id = getattr(stub.sources, '%s_id' % sourceName)
                             # Attempt to resolve against the Stamped DB (quick)
                             entity_id = stampedSource.resolve_fast(source, source_id)
                             if entity_id is None:
@@ -3782,7 +3881,8 @@ class StampedAPI(AStampedAPI):
                                 if len(results) > 0 and results[0][0]['resolved']:
                                     entity_id = results[0][1].key
                             break
-                    except Exception:
+                    except Exception as e:
+                        logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
                         pass
             if entity_id is not None:
                 entity = self._entityDB.getEntity(entity_id)
@@ -3817,7 +3917,15 @@ class StampedAPI(AStampedAPI):
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
-                trackList.append(track.minimize())
+                if track is None:
+                    continue
+                # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(track, BasicEntity):
+                    track = track.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                trackList.append(track)
 
                 # Compare entity id before and after
                 if trackId != track.entity_id:
@@ -3847,7 +3955,15 @@ class StampedAPI(AStampedAPI):
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
-                albumList.append(album.minimize())
+                if album is None:
+                    continue
+                # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(album, BasicEntity):
+                    album = album.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                albumList.append(album)
 
                 # Compare entity id before and after
                 if albumId != album.entity_id:
@@ -3877,7 +3993,13 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
-                artistList.append(artist.minimize())
+                # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(artist, BasicEntity):
+                    artist = artist.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                artistList.append(artist)
 
                 # Compare entity id before and after
                 if artistId != artist.entity_id:

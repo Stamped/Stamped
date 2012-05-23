@@ -200,6 +200,22 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         
         return self._getTimeSlice(query, timeSlice)
     
+    def searchStampCollectionSlice(self, stampIds, searchSlice):
+        if stampIds is not None:
+            if len(stampIds) == 0:
+                return []
+            
+            ids = map(self._getObjectIdFromString, stampIds)
+            
+            if len(ids) == 1:
+                query   = { '_id' : ids[0] }
+            else:
+                query   = { '_id' : { '$in' : ids } }
+        else:
+            query   = { }
+        
+        return self._getSearchSlice(query, searchSlice)
+    
     ### DEPRECATED: 5/22/12
     def getStampsSlice(self, stampIds, genericCollectionSlice):
         if stampIds is not None:
