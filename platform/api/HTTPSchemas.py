@@ -2416,7 +2416,8 @@ class HTTPStamp(Schema):
 
         data = stamp.dataExport()
         data['contents'] = []
-        data['previews'] = None
+        if 'previews' in data:
+            del(data['previews'])
         self.dataImport(data, overflow=True)
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
