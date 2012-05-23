@@ -77,6 +77,18 @@
         [view release];
     }
     
+    if (!_stickyEnd) {
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"refresh_sticky_end.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:imageView];
+        CGRect frame = imageView.frame;
+        frame.size.width = self.view.bounds.size.width;
+        imageView.frame = frame;
+        [imageView release];
+        _stickyEnd = imageView;
+        _stickyEnd.hidden = YES;
+    }
+    
     _explicitRefresh = NO;
     
 }
@@ -85,6 +97,7 @@
     [super viewDidUnload];
     _footerRefreshView=nil;
     _headerRefreshView=nil;
+    _stickyEnd=nil;
     _searchView=nil;
     self.tableView.tableHeaderView = nil;
     self.tableView=nil;
@@ -99,7 +112,7 @@
     } else {
         [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
         if (_showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
-            [self.tableView setContentOffset:CGPointMake(0.0f, 48.0f)];
+            [self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
         }
     }
     
@@ -120,7 +133,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (!_searching && _showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
-        [self.tableView setContentOffset:CGPointMake(0.0f, 48.0f)];
+        [self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
     }
 }
 
@@ -215,7 +228,6 @@
     if (!_searchView) {
         
         STSearchView *view = [[STSearchView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 52)];
-        view.backgroundColor = [UIColor colorWithPatternImage:[[UIImage imageNamed:@"search_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         view.delegate = (id<STSearchViewDelegate>)self;
         self.tableView.tableHeaderView = view;
@@ -310,6 +322,10 @@
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
     if (scrollView != self.tableView) return;
     
+    BOOL hidden = scrollView.contentOffset.y <= 49.0f;
+    if (_stickyEnd.hidden != hidden) {
+        _stickyEnd.hidden = hidden;
+    }
     [_headerRefreshView egoRefreshScrollViewDidScroll:scrollView];
     if (_restFlags.dataSourceLoadNextPage && _restFlags.dataSourceHasMoreData && _restFlags.dataSourceReloading) {
         if (![(id<STRestController>)self dataSourceReloading] && scrollView.contentOffset.y >= ((scrollView.contentSize.height - (scrollView.frame.size.height*2)) -10) && [(id<STRestController>)self dataSourceHasMoreData]) {

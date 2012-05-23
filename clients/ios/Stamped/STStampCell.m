@@ -27,6 +27,7 @@
 @synthesize category=_category;
 @synthesize identifier=_identifier;
 @synthesize commentCount=_commentCount;
+@synthesize delegate;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
   if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
@@ -37,6 +38,7 @@
       
       // user image view
       UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
+      imageView.userInteractionEnabled = YES;
       imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
       imageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
       imageView.layer.shadowRadius = 1.0f;
@@ -46,6 +48,10 @@
       [self addSubview:imageView];
       _userImageView = imageView;
       [imageView release];
+      
+      UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
+      [imageView addGestureRecognizer:tap];
+      [tap release];
       
       STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.bounds];
       background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -265,6 +271,17 @@
     NSMutableArray* allImages = [NSMutableArray arrayWithObject:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize46]];
     [allImages addObjectsFromArray:images];
     return [STCancellation loadImages:allImages withCallback:block];
+}
+
+
+#pragma mark - Actions
+
+- (void)avatarTapped:(UITapGestureRecognizer*)gesture {
+    
+    if ([(id)delegate respondsToSelector:@selector(stStampCellAvatarTapped:)]) {
+        [self.delegate stStampCellAvatarTapped:self];
+    }
+    
 }
 
 @end

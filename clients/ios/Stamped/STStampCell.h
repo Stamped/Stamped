@@ -10,6 +10,7 @@
 #import "STStamp.h"
 #import "STCancellation.h"
 
+@protocol STStampCellDelegate;
 @class STBlockUIView, STPreviewsView;
 @interface STStampCell : UITableViewCell {
     STBlockUIView *_headerView;
@@ -30,6 +31,8 @@
 @property(nonatomic,readonly) NSString *identifier;
 @property(nonatomic,readonly) NSInteger commentCount;
 
+@property(nonatomic,assign) id <STStampCellDelegate> delegate;
+
 - (void)setupWithStamp:(id<STStamp>)stamp;
 
 + (CGFloat)heightForStamp:(id<STStamp>)stamp;
@@ -38,4 +41,8 @@
 
 + (NSString*)cellIdentifier;
 
+@end
+
+@protocol STStampCellDelegate
+- (void)stStampCellAvatarTapped:(STStampCell*)cell;
 @end

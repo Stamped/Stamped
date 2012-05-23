@@ -91,6 +91,7 @@
         _slider.scope = _stamps.scope;
     }
     self.showsSearchBar = YES;
+    [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self reloadDataSource];
     
     
@@ -182,6 +183,7 @@
     STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.delegate = (id<STStampCellDelegate>)self;
     }
     
     id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps : _stamps stampAtIndex:indexPath.row];
@@ -198,6 +200,18 @@
 
     id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps :_stamps stampAtIndex:indexPath.row];
     [[STStampedActions sharedInstance] viewStampWithStampID:stamp.stampID];
+    
+}
+
+
+#pragma mark - STStampCellDelegate
+
+- (void)stStampCellAvatarTapped:(STStampCell*)cell {
+    
+    UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
+    NSIndexPath *indexPath = [tableview indexPathForCell:cell];
+    id<STStamp> stamp = [(tableview==_searchResultsTableView) ? _searchStamps :_stamps stampAtIndex:indexPath.row];
+    [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
 

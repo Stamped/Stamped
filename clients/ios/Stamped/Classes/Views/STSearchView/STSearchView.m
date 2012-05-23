@@ -16,6 +16,8 @@
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         
+        self.backgroundColor = [UIColor colorWithPatternImage:[[UIImage imageNamed:@"search_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+
         UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
         gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         [self addGestureRecognizer:gesture];
