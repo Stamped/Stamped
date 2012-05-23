@@ -546,6 +546,19 @@ class StampedAPI(AStampedAPI):
         
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
         return user
+
+    def checkAccountWithFacebookId(self, facebookId):
+        """
+        Returns a bool indicating if an account with the facebook id exists
+        """
+        account = None
+        try:
+            account = self._accountDB.getAccountByFacebookId(facebookId)
+        except StampedUnavailableError:
+            pass
+        return account is not None
+
+
     
     def checkAccount(self, login):
         ### TODO: Clean this up (along with HTTP API function)

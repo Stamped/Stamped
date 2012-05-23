@@ -1016,6 +1016,8 @@ class HTTPEntity(Schema):
                 metadata = []
             metadata.append(item)
 
+            logs.info('### adding metadata item: %s' % item)
+
             self.metadata = metadata
 
     def _formatReleaseDate(self, date):

@@ -41,7 +41,15 @@ def createUsingFacebook(request, client_id, http_schema, **kwargs):
     # using hte HTTPFacebookAccountNew object, we'll manually create a new Account object
     # first, grab all the information from Facebook using the passed in token
     fb = globalFacebook()
-    user = fb.getUserInfo(http_schema.facebook_token)
+    try:
+        user = fb.getUserInfo(http_schema.facebook_token)
+        print user
+    except StampedInputError as e:
+        raise StampedHTTPError(e.message, 400)
+    except:
+        raise
+    # Check if the facebook account is already tied to a Stamped account
+    stampedAPI.checkAccountWithFacebookId(user['id'])
 
     account = Account().dataImport(http_schema.dataExport(), overflow=True)
     logs.info(account)
