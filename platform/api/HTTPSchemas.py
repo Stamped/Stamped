@@ -38,6 +38,9 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 
 def _coordinatesDictToFlat(coordinates):
     try:
+        if isinstance(coordinates, Schema):
+            coordinates = coordinates.dataExport()
+            
         if not isinstance(coordinates['lat'], float) or \
            not isinstance(coordinates['lng'], float):
             raise
