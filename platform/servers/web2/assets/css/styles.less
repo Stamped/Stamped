@@ -26,6 +26,11 @@
          url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
 }
 
+.stamped-font() {
+    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-style:  normal;
+    font-weight: normal;
+}
 
 /* **************************************************************************
                             BASIC HIGH-LEVEL SETUP
@@ -206,9 +211,7 @@ header {
         }
         
         a.button {
-            font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
-            font-style:  normal;
-            font-weight: normal;
+            .stamped-font();
             
             letter-spacing: .1em;
             text-align: center;
@@ -236,7 +239,7 @@ header {
 .user-logo-small {
     position: absolute;
     
-    top:   -10px;
+    top:   -0px;
     right: -22px;
     
     display: inline-block;
@@ -347,9 +350,7 @@ header {
                     padding: 18px 20px 0;
                     
                     .number {
-                        font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
-                        font-style:  normal;
-                        font-weight: normal;
+                        .stamped-font();
                         
                         font-size: 2em;
                         letter-spacing: .05em;
@@ -469,9 +470,8 @@ header {
     width: 18%;
     
     .number {
-        font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
-        font-style:  normal;
-        font-weight: normal;
+        .stamped-font();
+        
         font-size: 2em;
         letter-spacing: .05em;
         color: #000;
@@ -1024,18 +1024,15 @@ footer .copyright a, footer .copyright a {
 .pronounced-title {
     position: relative;
     
-    font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
-    font-style:  normal;
-    font-weight: normal;
+    .stamped-font();
     
-    /*font-smooth: always;
-    -webkit-font-smoothing: antialiased;*/
-    
-    font-size: 2em;
+    font-size: 3em;
     letter-spacing: .05em;
     color: #000;
     
-    /*text-shadow: 0.05em 0.05em 0.03em #aaa;*/
+    /*text-shadow: 0.05em 0.05em 0.03em #aaa;
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;*/
 }
 
 .large {

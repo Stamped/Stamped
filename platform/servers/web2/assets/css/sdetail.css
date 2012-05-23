@@ -15,25 +15,6 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
-.subtitle-line {
-  position: relative;
-  display: block;
-  margin: 0 0 -0.5em;
-}
-.subtitle-line p {
-  margin: 0;
-  padding: 0;
-}
-.subtitle-line .subtitle {
-  display: inline;
-  font-size: 80%;
-  position: relative;
-  top: -2px;
-}
-.subtitle-line .icon {
-  display: inline-block;
-  margin: 0 4px 0 0;
-}
 .normal_blurb {
   margin: 0;
 }

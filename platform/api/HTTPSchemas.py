@@ -2544,7 +2544,16 @@ class HTTPStampEdit(Schema):
 class HTTPStampId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('stamp_id',             basestring)
+
+class HTTPStampRef(Schema):
+    @classmethod
+    def setSchema(cls):
+        # stamp_id or (user and stamp_num)
+        cls.addProperty('stamp_id',             basestring)
+        cls.addNestedProperty('user',           HTTPUserMini, required=True)
+        cls.addProperty('stamp_num',            int)
+
 
 #TODO
         #cls.addProperty('limit',                int)

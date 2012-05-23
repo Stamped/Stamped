@@ -2431,9 +2431,11 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     @API_CALL
-    def getStampFromUser(self, screenName, stampNumber):
-        user = self._userDB.getUserByScreenName(screenName)
-        stamp = self._stampDB.getStampFromUserStampNum(user.user_id, stampNumber)
+    def getStampFromUser(self, screenName, stampNumber, userId=None):
+        if userId is None:
+            userId = self._userDB.getUserByScreenName(screenName).user_id
+        
+        stamp = self._stampDB.getStampFromUserStampNum(userId, stampNumber)
         stamp = self._enrichStampObjects(stamp)
         
         # TODO: if authUserId == stamp.user.user_id, then the privacy should be disregarded
