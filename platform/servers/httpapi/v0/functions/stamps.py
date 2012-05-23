@@ -13,12 +13,16 @@ def transformStamps(stamps):
     Convert stamps to HTTPStamp and return as json-formatted HttpResponse
     """
     result = []
+
+    if stamps is None:
+        stamps = []
+
     for stamp in stamps:
         try:
             result.append(HTTPStamp().importStamp(stamp).dataExport())
         except:
             logs.warn(utils.getFormattedException())
-    
+
     return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPStampNew)
@@ -91,8 +95,8 @@ def collection(request, authUserId, schema, **kwargs):
 # Search
 @handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
 @require_http_methods(["GET"])
-def collection(request, authUserId, schema, **kwargs):
-    stamps = stampedAPI.searchStampCollection(authUserId, schema)
+def search(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.searchStampCollection(schema, authUserId)
     return transformStamps(stamps)
 
 

@@ -1831,9 +1831,9 @@ class HTTPEntityNew(Schema):
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
             addField(entity, 'coordinates', coords, now)
 
-        entity.user_generated_id            = authUserId
-        entity.user_generated_subtitle      = self.subtitle
-        entity.user_generated_timestamp     = now
+        entity.sources.user_generated_id            = authUserId
+        entity.sources.user_generated_subtitle      = self.subtitle
+        entity.sources.user_generated_timestamp     = now
 
         addListField(entity, 'directors', self.director, PersonEntityMini, now)
         addListField(entity, 'cast', self.cast, PersonEntityMini, now)
@@ -2001,12 +2001,12 @@ class HTTPTimeSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
+        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportTimeSlice(self):
         data                = self.dataExport()
@@ -2051,12 +2051,13 @@ class HTTPSearchSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
+        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
+        cls.addProperty('query',                basestring, required=True)
 
     def exportSearchSlice(self):
         data                = self.dataExport()
@@ -2100,7 +2101,7 @@ class HTTPRelevanceSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportRelevanceSlice(self):
         data                = self.dataExport()

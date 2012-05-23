@@ -1603,8 +1603,8 @@ class TimeSlice(Schema):
         # Filtering
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
-        cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema)
+        # cls.addPropertyList('properties',           basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema) 
 
         # Scope
         cls.addProperty('user_id',                  basestring)
@@ -1619,12 +1619,13 @@ class SearchSlice(Schema):
         # Filtering
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
-        cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema)
+        # cls.addPropertyList('properties',           basestring)
+        cls.addNestedProperty('viewport',           ViewportSchema) 
 
         # Scope
         cls.addProperty('user_id',                  basestring)
         cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+        cls.addProperty('query',                    basestring, required=True) 
 
 class RelevanceSlice(Schema):
     @classmethod
@@ -1633,7 +1634,7 @@ class RelevanceSlice(Schema):
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
         cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema)
+        cls.addNestedProperty('viewport',           ViewportSchema) 
 
         # Scope
         cls.addProperty('user_id',                  basestring)
