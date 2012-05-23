@@ -982,6 +982,7 @@ class HTTPEntity(Schema):
             item        = HTTPEntityMetadataItem()
             logs.info('addMetaData name: %s' % name)
             item.name   = name
+            logs.info('item.name: %s' % item.name)
             item.value  = value
 
             if 'key' in kwargs:
