@@ -2975,34 +2975,43 @@ class StampedAPI(AStampedAPI):
 
         # User
         if timeSlice.user_id is not None:
+            t0 = time.time()
             stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-            return result
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
 
         # Inbox
         else:
+            t0 = time.time()
             stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-            return result
+
+        t0 = time.time()
+        result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+            logs.debug('Time for _getStampCollection: %s' % (time.time() - t0))
+
+        return result
 
     @API_CALL
     def searchStampCollection(self, searchSlice, authUserId=None):
-        print searchSlice
+
         # User
         if searchSlice.user_id is not None:
+            t0 = time.time()
             stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
-            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-
-            return result
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
 
         # Inbox
         else:
+            t0 = time.time()
             stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
-            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-            return result
+        t0 = time.time()
+        result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+        logs.debug('Time for _searchStampCollection: %s' % (time.time() - t0))
+
+        return result
 
 
 
