@@ -661,7 +661,7 @@ class HTTPUser(Schema):
         cls.addProperty('website',               basestring)
         cls.addProperty('location',              basestring)
         cls.addProperty('privacy',               bool, required=True)
-        cls.addNestedProperty('image',                HTTPImageSchema)
+        cls.addNestedProperty('image',           HTTPImageSchema)
         
         cls.addProperty('identifier',            basestring)
         cls.addProperty('num_stamps',            int)
@@ -2039,8 +2039,8 @@ class HTTPTimeSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2087,8 +2087,8 @@ class HTTPSearchSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2131,8 +2131,8 @@ class HTTPRelevanceSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2556,7 +2556,16 @@ class HTTPStampEdit(Schema):
 class HTTPStampId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('stamp_id',             basestring)
+
+class HTTPStampRef(Schema):
+    @classmethod
+    def setSchema(cls):
+        # stamp_id or (user_id and stamp_num)
+        cls.addProperty('stamp_id',             basestring)
+        cls.addProperty('user_id',              basestring)
+        cls.addProperty('stamp_num',            int)
+
 
 #TODO
         #cls.addProperty('limit',                int)

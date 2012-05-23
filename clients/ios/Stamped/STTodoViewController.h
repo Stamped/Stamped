@@ -7,9 +7,8 @@
 //
 
 #import "STTableViewController.h"
+#import "STRestViewController.h"
 
-@interface STTodoViewController : STTableViewController
-
-+ (STTodoViewController*)sharedInstance;
+@interface STTodoViewController : STRestViewController
 
 @end

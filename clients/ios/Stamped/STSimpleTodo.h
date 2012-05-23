@@ -14,10 +14,17 @@
 
 @property (nonatomic, readwrite, copy) NSString* todoID;
 @property (nonatomic, readwrite, copy) NSString* userID;
-@property (nonatomic, readwrite, retain) id<STEntity> entity;
-@property (nonatomic, readwrite, retain) id<STStamp> stamp;
 @property (nonatomic, readwrite, copy) NSString* created;
 @property (nonatomic, readwrite, copy) NSNumber* complete;
+
+
+@property (nonatomic, readwrite, retain) id<STTodoSource> source;
+@property (nonatomic, readwrite, copy) NSString* stampID;
+
+@property (nonatomic, readwrite, retain) id<STPreviews> previews;
+
+//TODO remove
+@property (nonatomic, readwrite, retain) id<STEntity> entity;
 
 + (RKObjectMapping*)mapping;
 
