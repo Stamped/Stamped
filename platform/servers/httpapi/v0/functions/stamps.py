@@ -13,12 +13,16 @@ def transformStamps(stamps):
     Convert stamps to HTTPStamp and return as json-formatted HttpResponse
     """
     result = []
+
+    if stamps is None:
+        stamps = []
+
     for stamp in stamps:
         try:
             result.append(HTTPStamp().importStamp(stamp).dataExport())
         except:
             logs.warn(utils.getFormattedException())
-    
+
     return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPStampNew)
@@ -72,10 +76,15 @@ def update_image(request, authUserId, http_schema, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampRef)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
+    if http_schema.stamp_id is not None:
+        stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
+    else:
+        stamp = stampedAPI.getStampFromUser(userId=http_schema.user_id, 
+                                            stampNumber=http_schema.stamp_num)
+    
     stamp = HTTPStamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
@@ -91,8 +100,8 @@ def collection(request, authUserId, schema, **kwargs):
 # Search
 @handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
 @require_http_methods(["GET"])
-def collection(request, authUserId, schema, **kwargs):
-    stamps = stampedAPI.searchStampCollection(authUserId, schema)
+def search(request, authUserId, schema, **kwargs):
+    stamps = stampedAPI.searchStampCollection(schema, authUserId)
     return transformStamps(stamps)
 
 

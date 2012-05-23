@@ -18,6 +18,8 @@ from AAuthAccessTokenDB     import AAuthAccessTokenDB
 from AAuthRefreshTokenDB    import AAuthRefreshTokenDB
 from AAuthEmailAlertsDB     import AAuthEmailAlertsDB
 
+from libs.Facebook          import *
+
 class StampedAuth(AStampedAuth):
     """
         Database-agnostic implementation of the internal API for authentication 
@@ -88,14 +90,14 @@ class StampedAuth(AStampedAuth):
         try:
             # Login via email
             if utils.validate_email(userIdentifier):
-                user = self._accountDB.getAccountByEmail(userIdentifier)
+                account = self._accountDB.getAccountByEmail(userIdentifier)
             # Login via screen name
             elif utils.validate_screen_name(userIdentifier):
-                user = self._accountDB.getAccountByScreenName(userIdentifier)
+                account = self._accountDB.getAccountByScreenName(userIdentifier)
             else:
                 raise
 
-            if not auth.comparePasswordToStored(password, user.password):
+            if not auth.comparePasswordToStored(password, account.password):
                 raise
 
             logs.info("Login successful")
@@ -113,15 +115,60 @@ class StampedAuth(AStampedAuth):
             """
 
             ### Generate Refresh Token & Access Token
-            token = self.addRefreshToken(clientId, user.user_id)
+            token = self.addRefreshToken(clientId, account.user_id)
 
             logs.info("Token created")
 
-            return user, token
+            return account, token
         except:
             msg = "Invalid user credentials"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
+
+    def verifyFacebookUserCredentials(self, clientId, userIdentifier, fb_token):
+        # Login via screen name
+        if utils.validate_screen_name(userIdentifier):
+            account = self._accountDB.getAccountByScreenName(userIdentifier)
+        else:
+            raise
+
+        if account.linked_accounts.facebook is None or account.linked_accounts.facebook.facebook_id is None:
+            msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        facebook = globalFacebook()
+
+        try:
+            fb_user = facebook.getUserInfo(fb_token)
+        except StampedInputError as e:
+            raise StampedHTTPError('facebook_login_failed', 400, e.message)
+
+        if fb_user['id'] != account.linked_accounts.facebook.facebook_id:
+            msg = "Invalid credentials: Facebook id does not match Stamped user"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        logs.info("Login successful")
+
+        """
+        IMPORTANT!!!!!
+
+        Right now we're returning a refresh token upon login. This will
+        have to change ultimately, but it's an okay assumption for now
+        that every login will be from the iPhone. Once that changes we may
+        have to modify this.
+
+        Also, we'll ultimately need a way to deprecate unused refresh
+        tokens. Not sure how we'll implement that yet....
+        """
+
+        ### Generate Refresh Token & Access Token
+        token = self.addRefreshToken(clientId, account.user_id)
+
+        logs.info("Token created")
+
+        return account, token
     
     def verifyPassword(self, userId, password):
         try:
@@ -227,6 +274,10 @@ class StampedAuth(AStampedAuth):
         # Remove refresh / access tokens
         self._refreshTokenDB.removeRefreshTokensForUser(authUserId)
         self._accessTokenDB.removeAccessTokensForUser(authUserId)
+
+        # If there is no email address associated with the account, we're done
+        if account.email is None:
+            return True
 
         # Send confirmation email
         msg = {}

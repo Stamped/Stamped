@@ -12,7 +12,6 @@
 #import "UIColor+Stamped.h"
 #import "STDebugDatumViewController.h"
 #import "Util.h"
-#import "ECSlidingViewController.h"
 #import "STConfiguration.h"
 
 @interface STDebugCell : UITableViewCell
@@ -71,10 +70,6 @@
 
 
 #pragma mark - Actions
-
-- (void)backButtonClicked:(id)button {
-    [self.slidingViewController anchorTopViewTo:ECRight];
-}
 
 - (void)rightButtonClicked:(id)button {
     [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];

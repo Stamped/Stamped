@@ -19,7 +19,6 @@
 #import "STButton.h"
 #import "STActionPair.h"
 #import "UIFont+Stamped.h"
-#import "ECSlidingViewController.h"
 #import "STStampedAPI.h"
 #import "STConfiguration.h"
 #import "DDMenuController.h"

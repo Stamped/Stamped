@@ -113,6 +113,105 @@ class AMongoCollectionView(AMongoCollection):
                       .limit(timeSlice.limit)
 
         return map(self._convertFromMongo, results)
+    
+    def _getSearchSlice(self, query, searchSlice):
+        # initialize params
+        # -----------------
+        viewport    = (searchSlice.viewport and searchSlice.viewport.lowerRight is not None)
+        
+        if searchSlice.limit is None:
+            searchSlice.limit = 0
+        
+        def add_or_query(args):
+            if "$or" not in query:
+                query["$or"] = args
+            else:
+                result = []
+                for item in query.pop("$and", []) + [{"$or": query.pop("$or")}] + [{"$or": args}]:
+                    if item not in result:
+                        result.append(item)
+
+                query["$and"] = result
+                # query["$and"] = query["$and"] + [ { "$or" : existing }, { "$or" : args } ]
+        
+        # handle category / subcategory filters
+        # -------------------------------------
+        if searchSlice.category is not None:
+            raise NotImplementedError("NEED TO BUILD searchSlice CATEGORIES")
+            kinds           = deriveKindFromCategory(searchSlice.category) 
+            types           = deriveTypesFromCategory(searchSlice.category)
+            subcategories   = deriveSubcategoriesFromCategory(searchSlice.category)
+            
+            kinds_and_types = []
+            if len(kinds) > 0:
+                kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
+            if len(types) > 0:
+                kinds_and_types.append({'entity.types': {'$in': list(types)}})
+            
+            if len(kinds_and_types) > 0:
+                add_or_query([ { "entity.category" : str(searchSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} },
+                               { "$and" : kinds_and_types } ])
+            else:
+                add_or_query([ { "entity.category" : str(searchSlice.category).lower() }, 
+                               { "entity.subcategory" : {"$in": list(subcategories)} } ])
+        
+        if searchSlice.subcategory is not None:
+            raise NotImplementedError("NEED TO BUILD searchSlice SUBCATEGORIES")
+            query['entity.subcategory'] = str(searchSlice.subcategory).lower()
+
+        # Query
+        if searchSlice.query is not None:
+            # TODO: make query regex better / safeguarded
+            user_query = searchSlice.query.lower().strip()
+            try:
+                user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
+            except:
+                pass
+            
+            ### TODO: check multiple blurbs
+            add_or_query([ { "blurb"            : { "$regex" : user_query, "$options" : 'i', } }, 
+                           { "contents.blurb"   : { "$regex" : user_query, "$options" : 'i', } },
+                           { "entity.title"     : { "$regex" : user_query, "$options" : 'i', } } ])
+        
+        # handle viewport filter
+        # ----------------------
+        if viewport:
+            query["entity.coordinates.lat"] = {
+                "$gte" : searchSlice.viewport.lowerRight.lat, 
+                "$lte" : searchSlice.viewport.upperLeft.lat, 
+            }
+            
+            if searchSlice.viewport.upperLeft.lng <= searchSlice.viewport.lowerRight.lng:
+                query["entity.coordinates.lng"] = { 
+                    "$gte" : searchSlice.viewport.upperLeft.lng, 
+                    "$lte" : searchSlice.viewport.lowerRight.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                add_or_query([  {
+                        "entity.coordinates.lng" : {
+                            "$gte" : searchSlice.viewport.upperLeft.lng, 
+                        }, 
+                    }, 
+                    {
+                        "entity.coordinates.lng" : {
+                            "$lte" : searchSlice.viewport.lowerRight.lng, 
+                        }, 
+                    }, 
+                ])
+
+        logs.info("QUERY: %s" % query)
+        logs.info("SLICE: %s" % searchSlice.dataExport())
+        
+        # find, sort, and truncate results
+        ### TODO: Change ranking
+        results = self._collection.find(query) \
+                      .sort([('timestamp.created', pymongo.DESCENDING)]) \
+                      .limit(searchSlice.limit)
+
+        return map(self._convertFromMongo, results)
+
 
 
 

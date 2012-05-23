@@ -64,7 +64,7 @@
   width: 75%;
   clear: both;
   text-align: center;
-  padding: 1.5em 2em;
+  padding: 1.5em;
   margin: 0;
 }
 .stamp-gallery .top-wave {
@@ -82,7 +82,7 @@
 
   display: block;
   width: 100%;
-  min-width: 305px;
+  min-width: 257px;
   /* note: to look correct, these transitions should match isotope's */
 
   -webkit-border-radius: 4px;
@@ -98,16 +98,19 @@
 
   /*.transform(perspective(200px) translate(0,0));*/
 
-  border-bottom: 1px solid #bbb;
-  background-color: #FEFEFE;
+  /*background-color: #FEFEFE;*/
+
 }
 .stamp-gallery-item:hover .content .content_2 .timestamp {
   opacity: 1;
 }
+.stamp-gallery-item .stamp-gallery-item-inner {
+  border-bottom: 1px solid #bbb;
+}
 .stamp-gallery-item .content {
   position: relative;
-  padding: 1em 0;
   width: 100%;
+  margin: 24px;
 }
 .stamp-gallery-item .content .content_0 {
   display: block;
@@ -118,7 +121,7 @@
   text-align: left;
   float: left;
   clear: left;
-  margin-left: 62px;
+  margin-left: 82px;
   width: 50%;
   max-width: 50%;
   text-align: justify;
@@ -132,7 +135,6 @@
 }
 .stamp-gallery-item .content .content_1 .previews .preview {
   display: inline;
-  margin: 0 .8em 0 0;
 }
 .stamp-gallery-item .content .content_1 .previews .count {
   position: relative;
@@ -175,61 +177,59 @@
   position: relative;
   display: block;
   float: right;
-  top: 0;
-  left: 0;
+  width: 156px;
+  left: -24px;
 }
 .stamp-gallery-item .content .content_2 .timestamp_raw,
 .stamp-gallery-item .content .content_2 .timestamp {
   display: block;
   text-align: right;
-  font-weight: bold;
   font-size: 80%;
   position: absolute;
-  left: -60%;
-}
-.stamp-gallery-item .content .content_2 .timestamp_raw {
-  display: none;
+  left: -50%;
+  top: 4px;
 }
 .stamp-gallery-item .content .content_2 .timestamp {
   opacity: 0;
-  -webkit-transition: opacity 0.2s ease-out;
-  -moz-transition: opacity 0.2s ease-out;
-  transition: opacity 0.2s ease-out;
+  /*.transition(opacity, 0.2s, ease-out);*/
+
 }
-.zoom {
-  background: url(/assets/img/zoom-icon.png) no-repeat;
-  pointer-events: none;
+.timestamp_raw {
+  display: none;
+}
+a.lightbox {
   position: absolute;
+  z-index: 101;
   top: 8px;
   right: 16px;
-  display: block;
-  width: 25px;
-  height: 25px;
-  z-index: 101;
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
 }
-.stamp-user-image:hover,
-.stamp-entity-image:hover {
+a.lightbox .zoom {
+  background: url(/assets/img/zoom-icon.png) no-repeat;
+  pointer-events: none;
   cursor: pointer;
+  display: block;
+  width: 25px;
+  height: 25px;
 }
-.stamp-user-image:hover .zoom,
-.stamp-entity-image:hover .zoom {
+.stamp-user-image:hover a.lightbox,
+.stamp-entity-image:hover a.lightbox {
   opacity: 1;
 }
 .entity-header {
-  margin-left: 24px;
   display: block;
   float: right;
   text-align: left;
-  max-width: 219px;
+  margin-left: 24px;
 }
 .entity-header .title {
   position: relative;
   display: inline-block;
   max-width: 100%;
+  margin: -0.5em 0 0;
 }
 .entity-header .title .pronounced-title {
   display: inline-block;
@@ -248,17 +248,20 @@
 .wide-gallery .stamp-gallery-item,
 .narrow-gallery .stamp-gallery-item {
   width: 305px;
-  margin: 0 12px 24px 0;
-  padding: 0 6px 0;
+  margin: 0 1em 24px 0;
+}
+.wide-gallery .stamp-gallery-item .content .entity-header,
+.narrow-gallery .stamp-gallery-item .content .entity-header {
+  max-width: 195px;
 }
 .wide-gallery .stamp-gallery-item .content .content_1,
 .narrow-gallery .stamp-gallery-item .content .content_1 {
   margin-left: 0;
-  max-width: 149px;
-  /* 305px - 144px - 12px; */
+  max-width: 113px;
+  /* 305px - 144px - 48px; */
 
-  width: 149px;
-  /* 305px - 144px - 12px; */
+  width: 113px;
+  /* 305px - 144px - 48px; */
 
 }
 .wide-gallery .stamp-gallery-item .content .content_2,
@@ -284,8 +287,8 @@
   position: relative;
   display: none;
   display: block;
-  max-width: 148px;
-  width: 148px;
+  max-width: 140px;
+  width: 140px;
   height: auto;
   background-size: 100% 100%;
 }
@@ -370,7 +373,7 @@
 .subtitle-line {
   position: relative;
   display: block;
-  margin: -0.3em 0 -0.5em;
+  margin: -0.5em 0 0;
 }
 .subtitle-line p {
   margin: 0;

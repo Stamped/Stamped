@@ -34,16 +34,17 @@
 #import "STLazyList.h"
 #import "STConsumptionSlice.h"
 #import "STActivityCount.h"
+#import "STLoginResponse.h"
 
 typedef enum {
-  STStampedAPIScopeYou = 0,
-  STStampedAPIScopeFriends,
-  STStampedAPIScopeFriendsOfFriends,
-  STStampedAPIScopeEveryone
+    STStampedAPIScopeYou = 0,
+    STStampedAPIScopeFriends,
+    STStampedAPIScopeFriendsOfFriends,
+    STStampedAPIScopeEveryone
 } STStampedAPIScope;
 
 typedef enum {
-  STStampedAPIErrorUnavailable,
+    STStampedAPIErrorUnavailable,
 } STStampedAPIError;
 
 @interface STStampedAPI : NSObject
@@ -141,10 +142,14 @@ typedef enum {
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block;
 
+- (STCancellation*)loginWithFacebookID:(NSString*)userID 
+                                 token:(NSString*)token
+                           andCallback:(void(^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
 - (void)isTododWithEntityID:(NSString*)entityID andCallback:(void(^)(BOOL,NSError*))block;
 
-- (void)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
-                            andCallback:(void(^)(NSArray<STTodo>*,NSError*))block;
+- (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
+                                       andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
 
 - (void)followerIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* followerIDs, NSError* error))block;
 

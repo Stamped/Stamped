@@ -1,4 +1,9 @@
 
+import time
+import urllib, urllib2, json
+import logs
+import re
+from errors import *
 
 APP_ID          = '297022226980395'
 APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
@@ -11,7 +16,7 @@ class Facebook(object):
         self.app_namespace  = app_namespace
         pass
 
-    def _get(accessToken, path, params=None):
+    def _get(self, accessToken, path, params=None, parse_json=True):
         if params is None:
             params = {}
 
@@ -25,7 +30,10 @@ class Facebook(object):
                 baseurl = 'https://graph.facebook.com/'
                 encoded_params  = urllib.urlencode(params)
                 url     = "%s%s?%s" % (baseurl, path, encoded_params)
-                result  = json.load(urllib2.urlopen(url))
+                if parse_json:
+                    result  = json.load(urllib2.urlopen(url))
+                else:
+                    result = urllib2.urlopen(url).read()
 
                 if 'error' in result:
                     if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
@@ -49,7 +57,7 @@ class Facebook(object):
             except Exception as e:
                 raise Exception('Error connecting to Facebook: %s' % e)
 
-    def authorize(code, state):
+    def authorize(self, code, state):
         path = 'oauth/access_token'
         self._get(None,
             params= {
@@ -57,6 +65,57 @@ class Facebook(object):
                 'client_secret'   : self.app_secret,
                 'code'            : code
         })
+
+    def getUserInfo(self, access_token):
+        path = 'me'
+        return self._get(
+            access_token,
+            path,
+            params= {
+                'access_token'            : access_token
+            })
+
+    # see: http://developers.facebook.com/docs/opengraph/using-app-tokens/
+    def getAppAccessToken(self, client_id=APP_ID, client_secret=APP_SECRET):
+        path = 'oauth/access_token'
+        result = self._get(
+            None,
+            path,
+            { 'client_id'       : client_id,
+              'client_secret'   : client_secret,
+              'grant_type'      : 'client_credentials'
+            },
+            parse_json=False,
+        )
+        r = re.search('access_token=([^&]*)', result)
+        return r.group(1)
+
+    def createTestUser(self, name, access_token, permissions=None, installed=True, method='post', locale='en_US', app_id=APP_ID):
+        path = '%s/accounts/test-users' % app_id
+        return self._get(
+            access_token,
+            path,
+            { 'installed'           : installed,
+              'name'                : name,
+              'locale'              : locale,
+              'permissions'         : permissions,
+              'method'              : method,
+              'access_token'        : access_token,
+            }
+        )
+
+    def deleteTestUser(self, access_token, test_user_id):
+        # will return bool result with True == success
+        path = test_user_id
+
+        return self._get(
+            access_token,
+            path,
+            { 'method'          : 'delete',
+              'access_token'    : access_token,
+            },
+            parse_json=False,
+        )
 
 __globalFacebook = None
 
@@ -68,27 +127,25 @@ def globalFacebook():
 
     return __globalFacebook
 
-def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
+
+USER_ID = '100003940534060'
+ACCESS_TOKEN = 'AAACEdEose0cBAFWCTyFkxAdiLCPBHMTmFZArw1sKUY3ji564jZB3aN46JQxtpiF80mUnwvrU4ZCZBOTPjcB2tgfRijBZBpgBc0t1OBi8tTqGOG58qzWba'
+
+def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
-    netflix = Netflix()
+    facebook = Facebook()
 
-    netflix_id = BIGLEB_ID
-    title = 'ghostbusters'
-    if 'netflix_id' in params:  netflix_id  = params['netflix_id']
-    if 'title' in params:       title       = params['title']
+#    if 'netflix_id' in params:  netflix_id  = params['netflix_id']
+#    if 'title' in params:       title       = params['title']
 
-    if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
-    if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
-    if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
-    if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
-    if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
-    if 'addToQueue' in methods:           pprint( netflix.addToQueue(user_id, user_token, user_secret, netflix_id) )
+    if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
+    if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getTitleDetails'
-    params['title'] = 'ghostbusters'
+    methods = 'getUserInfo'
+    params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

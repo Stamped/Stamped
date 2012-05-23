@@ -9,7 +9,7 @@
 @import "libs/elements.less";
 @import "libs/isotope.less";
 
-@stamp-gallery-item-min-width: 305px;
+@stamp-gallery-item-min-width: 305px - 24px - 24px;
 
 #main-content {
     position: relative;
@@ -21,7 +21,7 @@
     clear: both;
     text-align: center;
     
-    padding: 1.5em 2em;
+    padding: 1.5em;
     margin:  0;
     
     .top-wave {
@@ -50,18 +50,21 @@
     /* TODO: keep this to enable GPU acceleration or not? Profile! */
     /*.transform(perspective(200px) translate(0,0));*/
     
-    border-bottom: 1px solid #bbb;
-    background-color: #FEFEFE;
+    /*background-color: #FEFEFE;*/
     
     &:hover .content .content_2 .timestamp {
         opacity: 1;
     }
     
+    .stamp-gallery-item-inner {
+        border-bottom: 1px solid #bbb;
+    }
+    
     .content {
-        position: relative;
-        padding: 1em 0;
-        width: 100%;
         //border: 4px dotted black;
+        position: relative;
+        width:  100%;
+        margin: 24px;
         
         .content_0 {
             //border: 1px solid red;
@@ -75,7 +78,7 @@
             text-align: left;
             float: left;
             clear: left;
-            margin-left: 62px;
+            margin-left: 58px + 24px;
             width: 50%;
             max-width: 50%;
             text-align: justify;
@@ -95,7 +98,6 @@
                 
                 .preview {
                     display: inline;
-                    margin: 0 .8em 0 0;
                 }
                 
                 .preview-image(@l, @t) {
@@ -141,68 +143,71 @@
             position: relative;
             display: block;
             float: right;
-            top:  0;
-            left: 0;
+            width: 148px + 8px;
+            left: -24px;
             
             .timestamp_raw, .timestamp {
                 display: block;
                 
                 text-align: right;
-                font-weight: bold;
                 font-size: 80%;
                 
                 position: absolute;
-                left: -60%;
+                left: -50%;
+                top: 4px;
             }
             
-            .timestamp_raw {
-                display: none;
-            }
             .timestamp {
                 opacity: 0;
-                
-                .transition(opacity, 0.2s, ease-out);
+                /*.transition(opacity, 0.2s, ease-out);*/
             }
         }
     }
 }
 
-.zoom {
-    background: url(/assets/img/zoom-icon.png) no-repeat;
-    pointer-events: none;
+.timestamp_raw {
+    display: none;
+}
+
+a.lightbox {
     position: absolute;
+    z-index: 101;
     
     top:   8px;
     right: 16px;
     
-    display: block;
-    width:  25px;
-    height: 25px;
+    .zoom {
+        background: url(/assets/img/zoom-icon.png) no-repeat;
+        pointer-events: none;
+        cursor: pointer;
+        
+        display: block;
+        width:  25px;
+        height: 25px;
+    }
     
-    z-index: 101;
     opacity: 0;
     .transition(opacity, 0.2s, ease-out);
 }
 
 .stamp-user-image:hover, .stamp-entity-image:hover {
-    cursor: pointer;
-    
-    .zoom {
+    a.lightbox {
         opacity: 1;
     }
 }
 
 .entity-header {
-    margin-left: 24px;
     display: block;
     float: right;
     text-align: left;
-    max-width: @stamp-gallery-item-min-width - 24px - 62px;
+    margin-left: 24px;
+    
     
     .title {
         position: relative;
         display:  inline-block;
         max-width: 100%;
+        margin: -.5em 0 0;
         
         .pronounced-title {
             display: inline-block;
@@ -222,15 +227,18 @@
     width: 100%;
     
     .stamp-gallery-item {
-        width: @stamp-gallery-item-min-width;
-        margin:  0 12px 24px 0;
-        padding: 0 6px 0;
+        width: 305px;
+        margin:  0 1em 24px 0;
         
         .content {
+            .entity-header {
+                max-width: @stamp-gallery-item-min-width - 62px;
+            }
+            
             .content_1 {
                 margin-left: 0;
-                max-width: 149px; /* 305px - 144px - 12px; */
-                width: 149px; /* 305px - 144px - 12px; */
+                max-width: 113px; /* 305px - 144px - 48px; */
+                width: 113px; /* 305px - 144px - 48px; */
             }
             
             .content_2 {
@@ -264,7 +272,7 @@
     .preview-image {
         position: relative;
         display: none;
-        .sized(@preview-wrapper-width);
+        .sized(@preview-width);
     }
     
     .stamp-map {
@@ -343,7 +351,7 @@
 .subtitle-line {
     position: relative;
     display: block;
-    margin: -0.3em 0 -.5em;
+    margin: -0.5em 0 0;
     
     p {
         margin: 0;

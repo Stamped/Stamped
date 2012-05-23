@@ -44,21 +44,10 @@ class StampedAPICollectionTest(AStampedAPITestCase):
 
 class StampedAPICollectionsShow(StampedAPICollectionTest):
     def test_inbox(self):
-        path = "collections/inbox.json"
+        path = "stamps/collection.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 3), 
-                   lambda x: self.assertTrue(x[0]['contents'][-1]['blurb'] == self.stampA['contents'][-1]['blurb']), 
-        ])
-    
-    def test_user_screen_name(self):
-        path = "collections/user.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "screen_name": self.userA['screen_name']
+            "scope" : "inbox",
         }
         
         self.async(lambda: self.handleGET(path, data), [ 
@@ -67,7 +56,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         ])
     
     def test_user_user_id(self):
-        path = "collections/user.json"
+        path = "stamps/collection.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
             "user_id": self.userA['user_id']
@@ -103,63 +92,21 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         ])
 
 
-class StampedAPICollectionsQuality(StampedAPICollectionTest):
-    def test_show(self):
-        self.commentC = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentD = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentE = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentF = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentG = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentH = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentI = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentJ = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.commentK = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        
-        path = "collections/inbox.json"
+class StampedAPICollectionsSearch(StampedAPICollectionTest):
+    def test_inbox(self):
+        path = "stamps/search.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
-            "quality": 1
+            "scope" : "inbox",
+            "query" : "america",
         }
         
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertEqual(len(x), 3), 
-                   lambda x: self.assertEqual(len(x[0]['previews']['comments']), 11), 
         ])
-        
-        path = "collections/inbox.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "quality": 2
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 3), 
-                   lambda x: self.assertEqual(len(x[0]['previews']['comments']), 10), 
-        ])
-        
-        path = "collections/inbox.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "quality": 3
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 3), 
-                   lambda x: self.assertEqual(len(x[0]['previews']['comments']), 4), 
-        ])
-        
-        self.deleteComment(self.tokenA, self.commentC['comment_id'])
-        self.deleteComment(self.tokenA, self.commentD['comment_id'])
-        self.deleteComment(self.tokenA, self.commentE['comment_id'])
-        self.deleteComment(self.tokenA, self.commentF['comment_id'])
-        self.deleteComment(self.tokenA, self.commentG['comment_id'])
-        self.deleteComment(self.tokenA, self.commentH['comment_id'])
-        self.deleteComment(self.tokenA, self.commentI['comment_id'])
-        self.deleteComment(self.tokenA, self.commentJ['comment_id'])
-        self.deleteComment(self.tokenA, self.commentK['comment_id'])
 
 
-class StampedAPICollectionsActions(StampedAPICollectionTest):
+class StampedAPICollectionsLikes(StampedAPICollectionTest):
     def test_like(self):
         path = "stamps/likes/create.json"
         data = {
@@ -168,10 +115,10 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         }
         result = self.handlePOST(path, data)
 
-        # User B should have "is_liked=True"
-        path = "collections/inbox.json"
-        data = {
+        path = "stamps/collection.json"
+        data = { 
             "oauth_token": self.tokenB['access_token'],
+            "scope" : "inbox",
         }
         
         def _validate_result(result):
@@ -185,9 +132,10 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), _validate_result)
         
         # User A should not have "is_liked"
-        path = "collections/inbox.json"
-        data = {
+        path = "stamps/collection.json"
+        data = { 
             "oauth_token": self.tokenA['access_token'],
+            "scope" : "inbox",
         }
         
         def _validate_result2(result):
@@ -200,13 +148,15 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         
         self.async(lambda: self.handleGET(path, data), _validate_result2)
     
+class StampedAPICollectionsFavs(StampedAPICollectionTest):
     def test_fav(self):
         favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
         
         # User B should have "is_fav=True" 
-        path = "collections/inbox.json"
-        data = {
+        path = "stamps/collection.json"
+        data = { 
             "oauth_token": self.tokenB['access_token'],
+            "scope" : "inbox",
         }
         
         def _validate_result(result):
@@ -220,9 +170,10 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), _validate_result)
         
         # User A should not have "is_fav"
-        path = "collections/inbox.json"
-        data = {
+        path = "stamps/collection.json"
+        data = { 
             "oauth_token": self.tokenA['access_token'],
+            "scope" : "inbox",
         }
         
         def _validate_result2(result):
@@ -236,53 +187,34 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), _validate_result2)
         self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
 
-# class StampedAPICollectionsDeleted(StampedAPICollectionTest):
-#     def test_deleted(self):
-#         entityD = self.createEntity(self.tokenA)
-#         stampD  = self.createStamp(self.tokenA, entityD['entity_id'])
-        
-#         self.deleteStamp (self.tokenA, stampD['stamp_id'])
-#         self.deleteEntity(self.tokenA, entityD['entity_id'])
-        
-#         path = "collections/inbox.json"
-#         data = {
-#             "oauth_token": self.tokenB['access_token'],
-#         }
-        
-#         self.async(lambda: self.handleGET(path, data), [ 
-#                    lambda x: self.assertEqual(len(x), 4), 
-#                    lambda x: self.assertTrue(x[-1]['contents'][-1] == self.stampA['contents'][-1]['blurb']), 
-#                    lambda x: self.assertTrue(x[0]['stamp_id'] == stampD['stamp_id']), 
-#                    lambda x: self.assertTrue('deleted' in x[0]), 
-#         ])
-
 class StampedAPICollectionsFriends(StampedAPICollectionTest):
     def test_friends_of_friends(self):
-        path = "collections/friends.json"
-        data = {
+        path = "stamps/collection.json"
+        data = { 
             "oauth_token": self.tokenA['access_token'],
+            "scope" : "fof",
         }
         
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertIsInstance(x, list), 
         ])
-        
-        data["distance"]  = 1
-        data["inclusive"] = False
+
+class StampedAPICollectionsSuggested(StampedAPICollectionTest):
+    def test_suggested_stamps(self):
+        path = "stamps/collection.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "scope" : "popular",
+        }
         
         self.async(lambda: self.handleGET(path, data), [ 
                    lambda x: self.assertIsInstance(x, list), 
         ])
-        
-        data["distance"]  = -1
-        with expected_exception():
-            self.handleGET(path, data)
 
-class StampedAPICollectionsSuggested(StampedAPICollectionTest):
-    def test_suggested_stamps(self):
-        path = "collections/suggested.json"
-        data = {
-            "oauth_token": self.tokenA['access_token'],
+    def test_suggested_stamps_no_auth(self):
+        path = "stamps/collection.json"
+        data = { 
+            "scope" : "popular",
         }
         
         self.async(lambda: self.handleGET(path, data), [ 

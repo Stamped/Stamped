@@ -19,7 +19,6 @@
 #import "UIColor+Stamped.h"
 #import "STStampedAPI.h"
 #import "STPostStampViewController.h"
-#import "STLegacyInboxViewController.h"
 #import "STConfiguration.h"
 #import "UIButton+Stamped.h"
 #import <MobileCoreServices/UTCoreTypes.h>

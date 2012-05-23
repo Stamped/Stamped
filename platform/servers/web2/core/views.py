@@ -15,6 +15,8 @@ from helpers        import *
 
 import travis_test
 
+ENABLE_TRAVIS_TEST = (False and not IS_PROD)
+
 def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
 
@@ -38,11 +40,14 @@ def _get_body_classes(base, schema):
 # appear every page refresh, with preferential treatment always going to users 
 # who have customized their profile image away from the default.
 def _shuffle_split_users(users):
+    has_image        = (lambda a: a['image'] and a['image']['sizes'] and len(a['image']['sizes']) > 0)
+    has_custom_image = (lambda a: has_image(a) and not _is_static_profile_image(a['image']['sizes'][0]['url']))
+    
     # find all users who have a custom profile image
-    a0 = filter(lambda a: a['image_url'] and not _is_static_profile_image(a['image_url']), users)
+    a0 = filter(has_custom_image, users)
     
     # find all users who have the default profile image
-    a1 = filter(lambda a: not (a['image_url'] and _is_static_profile_image(a['image_url'])), users)
+    a1 = filter(lambda a: not has_custom_image(a), users)
     
     # shuffle them both independently
     a0 = utils.shuffle(a0)
@@ -77,7 +82,7 @@ def profile(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
-    if not IS_PROD and schema.screen_name == 'travis':
+    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
         user        = travis_test.user
         user_id     = user['user_id']
@@ -214,7 +219,7 @@ def map(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
-    if not IS_PROD and schema.screen_name == 'travis':
+    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
         user        = travis_test.user
         user_id     = user['user_id']
@@ -269,12 +274,13 @@ def sdetail(request, schema, **kwargs):
     
     logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
-    if not IS_PROD and schema.screen_name == 'travis':
+    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         user  = travis_test.user
-        stamp = travis_test.stamps[-schema.stamp_num]
+        #stamp = travis_test.stamps[(-schema.stamp_num) - 1]
     else:
         user  = stampedAPIProxy.getUser(screen_name=schema.screen_name)
-        stamp = stampedAPIProxy.getStampFromUser(schema.screen_name, schema.stamp_num)
+    
+    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")

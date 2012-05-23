@@ -13,7 +13,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STConsumptionViewController.h"
 #import "STButton.h"
-#import "ECSlidingViewController.h"
 #import "STLegacyMapViewController.h"
 #import "STConfiguration.h"
 #import "STConsumptionMapViewController.h"
@@ -45,9 +44,9 @@
     UIImage *imageHi = [UIImage imageNamed:@"want_btn_bg_hi.png"];
     CGRect buttonFrame = CGRectMake(5, 8, cellWidth, image.size.height);
 
-    for (NSInteger i = 1; i <= categories.count; i++) {
+    for (NSInteger i = 0; i < categories.count; i++) {
         
-        NSString *category = [categories objectAtIndex:i-1];
+        NSString *category = [categories objectAtIndex:i];
         NSString *imageName = [NSString stringWithFormat:@"consumption_%@", category];
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -58,9 +57,9 @@
         [button setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
         [button addTarget:self action:@selector(buttonHit:) forControlEvents:UIControlEventTouchUpInside];
         [self.scrollView addSubview:button];
-        button.tag = (i*100);
+        button.tag = i;
         
-        if (i%2 == 0) {
+        if (i % 2 != 0) {
             buttonFrame.origin.y += (image.size.height+4.0f);
             buttonFrame.origin.x = 4.0f;
         } else {
@@ -80,7 +79,7 @@
 
 - (void)buttonHit:(UIButton*)sender {
  
-    NSString *category = [[Util categories] objectAtIndex:([sender tag] / 100)];
+    NSString *category = [[Util categories] objectAtIndex:sender.tag];
     UIViewController *controller = nil;
   
     if (category) {
