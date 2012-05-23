@@ -2037,8 +2037,8 @@ class HTTPTimeSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2085,8 +2085,8 @@ class HTTPSearchSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2129,8 +2129,8 @@ class HTTPRelevanceSlice(Schema):
 
             slc.viewport        = viewport 
 
-        if self.properties is not None:
-            slc.properties      = self.properties.split(',')
+        # if self.properties is not None:
+        #     slc.properties      = self.properties.split(',')
 
         return slc
 
