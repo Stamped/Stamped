@@ -10,7 +10,6 @@
 #import "STStampedAPI.h"
 #import "STActivity.h"
 #import "STActionManager.h"
-#import "ECSlidingViewController.h"
 #import "STActivityCell.h"
 #import "Util.h"
 
@@ -54,10 +53,6 @@
     [self updateToggleButton];
   }
   return self;
-}
-
-- (void)backButtonClicked:(id)button {
-  [self.slidingViewController anchorTopViewTo:ECRight];
 }
 
 - (void)toggleButtonClicked:(id)button {

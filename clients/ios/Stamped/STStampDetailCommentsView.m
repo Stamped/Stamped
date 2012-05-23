@@ -218,14 +218,15 @@ andProfileImageSize:(STProfileImageSize)size {
     }
     CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
     if ( previewHeight > 0 && index == 0) {
+        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 8)];
         STPreviewsView *view = [[[STPreviewsView alloc] initWithFrame:CGRectZero] autorelease];
         [view setupWithStamp:stamp maxRows:2];
         CGRect frame = view.frame;
         frame.origin.x = 60.0f;
-        frame.origin.y = self.frame.size.height;
-        frame.size.height += previewHeight;
+        //frame.origin.y = self.frame.size.height;
+        //frame.size.height += previewHeight;
         view.frame = frame;
-        [self addSubview:view];
+        [Util appendView:view toParentView:self];
     }
     //TODO likes, credited, border
   }

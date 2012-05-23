@@ -14,7 +14,6 @@
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
 #import "TOSViewController.h"
-#import "ECSlidingViewController.h"
 #import "Util.h"
 
 @implementation SettingsViewController
@@ -40,10 +39,6 @@
 }
 
 #pragma mark - View lifecycle
-
-- (void)backButtonClicked:(id)button {
-  [self.slidingViewController anchorTopViewTo:ECRight];
-}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
