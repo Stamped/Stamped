@@ -92,11 +92,17 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def name(self):
-        return self.info['title']
+        try:
+            return self.info['title']
+        except Exception:
+            raise
     
     @lazyProperty
     def popularity(self):
-        return self.info['popularity']
+        try:
+            return self.info['popularity']
+        except Exception:
+            return None
     
     @lazyProperty
     def imdb(self):

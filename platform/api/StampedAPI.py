@@ -204,20 +204,22 @@ class StampedAPI(AStampedAPI):
         account.color_secondary = '0057D1'
         
         # Set default alerts
-        account.ios_alert_credit       = True
-        account.ios_alert_like         = True
-        account.ios_alert_fav          = True
-        account.ios_alert_mention      = True
-        account.ios_alert_comment      = True
-        account.ios_alert_reply        = True
-        account.ios_alert_follow       = True
-        account.email_alert_credit     = True
-        account.email_alert_like       = False
-        account.email_alert_fav        = False
-        account.email_alert_mention    = True
-        account.email_alert_comment    = True
-        account.email_alert_reply      = True
-        account.email_alert_follow     = True
+        alerts                          = AccountAlerts()
+        alerts.ios_alert_credit         = True
+        alerts.ios_alert_like           = True
+        alerts.ios_alert_fav            = True
+        alerts.ios_alert_mention        = True
+        alerts.ios_alert_comment        = True
+        alerts.ios_alert_reply          = True
+        alerts.ios_alert_follow         = True
+        alerts.email_alert_credit       = True
+        alerts.email_alert_like         = False
+        alerts.email_alert_fav          = False
+        alerts.email_alert_mention      = True
+        alerts.email_alert_comment      = True
+        alerts.email_alert_reply        = True
+        alerts.email_alert_follow       = True
+        account.alerts                  = alerts 
         
         # Validate screen name
         account.screen_name = account.screen_name.strip()
@@ -2003,7 +2005,9 @@ class StampedAPI(AStampedAPI):
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
-            content.timestamp.created = now
+            timestamp = TimestampSchema()
+            timestamp.created = now
+            content.timestamp = timestamp
 
         # Add image to stamp
         if imageData is not None:
@@ -2084,7 +2088,6 @@ class StampedAPI(AStampedAPI):
 
         # Build new stamp
         else:
-            stamp.user_id               = user.user_id
             stamp.entity                = entity
             stamp.contents              = [ content ]
 

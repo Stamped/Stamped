@@ -116,68 +116,98 @@ class AFilmGroup(AKindTypeGroup):
 class FactualGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'factual')
+        APlaceGroup.__init__(self, 'factual', 
+            source_path=['sources', 'factual_source'], 
+            timestamp_path=['sources', 'factual_timestamp']
+        )
         self.addField(['sources', 'factual_id'])
 
 class FoursquareGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'foursquare')
+        APlaceGroup.__init__(self, 'foursquare',
+            source_path=['sources', 'foursquare_source'], 
+            timestamp_path=['sources', 'foursquare_timestamp']
+        )
         self.addField(['sources', 'foursquare_id'])
         self.addField(['sources', 'foursquare_url'])
 
 class InstagramGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'instagram')
+        APlaceGroup.__init__(self, 'instagram',
+            source_path=['sources', 'instagram_source'], 
+            timestamp_path=['sources', 'instagram_timestamp']
+        )
         self.addField(['sources', 'instagram_id'])
 
 
 class OpenTableGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'opentable')
+        APlaceGroup.__init__(self, 'opentable',
+            source_path=['sources', 'opentable_source'], 
+            timestamp_path=['sources', 'opentable_timestamp']
+        )
         self.addField(['sources', 'opentable_id'])
         self.addField(['sources', 'opentable_url'])
 
 class OpenTableNicknameGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'opentable_nickname')
+        APlaceGroup.__init__(self, 'opentable_nickname',
+            source_path=['sources', 'opentable_nickname_source'], 
+            timestamp_path=['sources', 'opentable_nickname_timestamp']
+        )
         self.addField(['sources', 'opentable_nickname'])
 
 class SinglePlatformGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'singleplatform')
+        APlaceGroup.__init__(self, 'singleplatform',
+            source_path=['sources', 'singleplatform_source'], 
+            timestamp_path=['sources', 'singleplatform_timestamp']
+        )
         self.addField(['sources', 'singleplatform_id'])
         self.addField(['sources', 'singleplatform_url'])
 
 class GooglePlacesGroup(APlaceGroup):
 
     def __init__(self):
-        APlaceGroup.__init__(self, 'googleplaces')
+        APlaceGroup.__init__(self, 'googleplaces',
+            source_path=['sources', 'googleplaces_source'], 
+            timestamp_path=['sources', 'googleplaces_timestamp']
+        )
         self.addField(['sources', 'googleplaces_id'])
         self.addField(['sources', 'googleplaces_reference'])
 
 class TMDBGroup(AMovieGroup):
 
     def __init__(self):
-        AMovieGroup.__init__(self, 'tmdb')
+        AMovieGroup.__init__(self, 'tmdb',
+            source_path=['sources', 'tmdb_source'], 
+            timestamp_path=['sources', 'tmdb_timestamp']
+        )
         self.addField(['sources', 'tmdb_id'])
         self.addField(['sources', 'tmdb_url'])
 
 class FandangoGroup(AMovieGroup):
 
     def __init__(self):
-        AMovieGroup.__init__(self, 'fandango')
+        AMovieGroup.__init__(self, 'fandango',
+            source_path=['sources', 'fandango_source'], 
+            timestamp_path=['sources', 'fandango_timestamp']
+        )
         self.addField(['sources', 'fandango_id'])
         self.addField(['sources', 'fandango_url'])
 
 class NetflixGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'netflix')
+        AKindTypeGroup.__init__(self, 'netflix',
+            source_path=['sources', 'netflix_source'], 
+            timestamp_path=['sources', 'netflix_timestamp']
+        )
         self.addKind('media_item')
         self.addKind('media_collection')
         self.addType('movie')
@@ -191,7 +221,10 @@ class NetflixGroup(AKindTypeGroup):
 class RdioGroup(AKindTypeGroup):
     
     def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'rdio')
+        AKindTypeGroup.__init__(self, 'rdio',
+            source_path=['sources', 'rdio_source'], 
+            timestamp_path=['sources', 'rdio_timestamp']
+        )
         self.addKind('person')
         self.addType('artist')
         self.addKind('media_collection')
@@ -205,7 +238,10 @@ class RdioGroup(AKindTypeGroup):
 class TheTVDBGroup(AKindTypeGroup):
     
     def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'thetvdb')
+        AKindTypeGroup.__init__(self, 'thetvdb',
+            source_path=['sources', 'thetvdb_source'], 
+            timestamp_path=['sources', 'thetvdb_timestamp']
+        )
         self.addKind('media_item')
         self.addType('album')
         self.addKind('media_collection')
@@ -217,7 +253,10 @@ class TheTVDBGroup(AKindTypeGroup):
 class SpotifyGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'spotify')
+        AKindTypeGroup.__init__(self, 'spotify',
+            source_path=['sources', 'spotify_source'], 
+            timestamp_path=['sources', 'spotify_timestamp']
+        )
         self.addKind('person')
         self.addType('artist')
         self.addKind('media_collection')
@@ -231,7 +270,10 @@ class SpotifyGroup(AKindTypeGroup):
 class iTunesGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, 'itunes')
+        AKindTypeGroup.__init__(self, 'itunes',
+            source_path=['sources', 'itunes_source'], 
+            timestamp_path=['sources', 'itunes_timestamp']
+        )
         self.addKind('person')
         self.addType('artist')
         self.addKind('media_collection')
@@ -379,7 +421,10 @@ class TracksGroup(AKindTypeGroup):
 class IMDBGroup(AFilmGroup):
 
     def __init__(self, *args, **kwargs):
-        AFilmGroup.__init__(self, 'imdb')
+        AFilmGroup.__init__(self, 'imdb',
+            source_path=['sources', 'imdb_source'], 
+            timestamp_path=['sources', 'imdb_timestamp']
+        )
         self.addField(['sources', 'imdb_id'])
 
 class AAmazonGroup(AKindTypeGroup):
@@ -397,7 +442,10 @@ class AAmazonGroup(AKindTypeGroup):
 class AmazonGroup(AAmazonGroup):
 
     def __init__(self):
-        AAmazonGroup.__init__(self, 'amazon')
+        AAmazonGroup.__init__(self, 'amazon',
+            source_path=['sources', 'amazon_source'], 
+            timestamp_path=['sources', 'amazon_timestamp']
+        )
         self.addField(['sources', 'amazon_id'])
         self.addField(['sources', 'amazon_url'])
         self.addField(['sources', 'amazon_underlying'])
@@ -426,7 +474,10 @@ class DescGroup(BasicFieldGroup):
 class StampedTombstoneGroup(BasicFieldGroup):
 
     def __init__(self):
-        BasicFieldGroup.__init__(self, 'tombstone')
+        BasicFieldGroup.__init__(self, 'tombstone',
+            source_path=['sources', 'tombstone_source'], 
+            timestamp_path=['sources', 'tombstone_timestamp']
+        )
         self.addField(['sources', 'tombstone_id'])
 
     def eligible(self, entity):
