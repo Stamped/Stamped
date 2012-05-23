@@ -546,6 +546,19 @@ class StampedAPI(AStampedAPI):
         
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
         return user
+
+    def checkAccountWithFacebookId(self, facebookId):
+        """
+        Returns a bool indicating if an account with the facebook id exists
+        """
+        account = None
+        try:
+            account = self._accountDB.getAccountByFacebookId(facebookId)
+        except StampedUnavailableError:
+            pass
+        return account is not None
+
+
     
     def checkAccount(self, login):
         ### TODO: Clean this up (along with HTTP API function)
@@ -2907,7 +2920,10 @@ class StampedAPI(AStampedAPI):
         limit = timeSlice.limit
         timeSlice.limit = limit + 10
         
+        t0 = time.time()
         stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
+        logs.debug('Time for _getStampCollectionSlice: %s' % (time.time() - t0))
+
         stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
         stamps = stamps[:limit]
         
@@ -2925,7 +2941,10 @@ class StampedAPI(AStampedAPI):
         limit = searchSlice.limit
         searchSlice.limit = limit + 10
         
+        t0 = time.time()
         stampData = self._stampDB.searchStampCollectionSlice(stampIds, searchSlice)
+        logs.debug('Time for _searchStampCollectionSlice: %s' % (time.time() - t0))
+
         stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
         stamps = stamps[:limit]
         
@@ -2939,6 +2958,20 @@ class StampedAPI(AStampedAPI):
         return self._collectionDB.getUserStampIds(user.user_id)
 
     def _getScopeStampIds(self, scope, authUserId=None):
+        """
+        If not logged in return "popular" results. Also, allow scope to be set to "popular" if 
+        not logged in; otherwise, raise exception.
+        """
+
+        if scope is None:
+            return None
+
+        if scope == 'popular':
+            return None
+
+        if authUserId is None and scope is not None:
+            raise StampedInputError("Must be logged in to use scope")
+
         if authUserId is None:
             return None
 
@@ -2961,35 +2994,34 @@ class StampedAPI(AStampedAPI):
 
         # User
         if timeSlice.user_id is not None:
+            t0 = time.time()
             stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-            return result
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
 
         # Inbox
         else:
+            t0 = time.time()
             stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-            return result
+        return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
     @API_CALL
     def searchStampCollection(self, searchSlice, authUserId=None):
-        print searchSlice
+
         # User
         if searchSlice.user_id is not None:
+            t0 = time.time()
             stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
-            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-
-            return result
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
 
         # Inbox
         else:
+            t0 = time.time()
             stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
-            result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-            return result
-
+        return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
 
 
 

@@ -45,6 +45,8 @@ class Schema(object):
         for c in cls.__mro__:
             if hasattr(c, '_propertyInfo'):
                 for k,v in c._propertyInfo.items():
+                # TODO: do check for valid python identifier string
+                    #r'^[_a-zA-Z][_a-zA-Z0-9]*$'
                     if k in cls._propertyInfo:
                         cur = cls._propertyInfo[k]
                         if cur != v:

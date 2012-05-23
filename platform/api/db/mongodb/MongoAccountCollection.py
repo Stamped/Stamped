@@ -93,6 +93,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             raise StampedUnavailableError("Unable to find account (%s)" % screenName)
         return self._convertFromMongo(document)
 
+    def getAccountByFacebookId(self, facebookId):
+        document = self._collection.find_one({"linked_accounts.facebook.facebook_id" : facebookId})
+        if document is None:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
+        return self._convertFromMongo(document)
+
     def updateLinkedAccounts(self, userId, twitter=None, facebook=None, netflix=None):
 
         ### TODO: Derive valid_twitter/facebook from schema
