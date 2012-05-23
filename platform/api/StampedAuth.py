@@ -228,6 +228,10 @@ class StampedAuth(AStampedAuth):
         self._refreshTokenDB.removeRefreshTokensForUser(authUserId)
         self._accessTokenDB.removeAccessTokensForUser(authUserId)
 
+        # If there is no email address associated with the account, we're done
+        if account.email is None:
+            return True
+
         # Send confirmation email
         msg = {}
         msg['to'] = account.email

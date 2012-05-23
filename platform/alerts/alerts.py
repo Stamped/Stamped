@@ -213,8 +213,8 @@ def runAlerts(options):
                     # Send email
                     print 'EMAIL'
 
-                    if not recipient.email:
-                        raise
+                    if recipient.email is None:
+                        continue
 
                     # Add email address
                     if recipient.email not in userEmailQueue:

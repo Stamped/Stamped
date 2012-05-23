@@ -192,7 +192,8 @@ class StampedAPI(AStampedAPI):
         timestamp = UserTimestampSchema()
         timestamp.created = now
         account.timestamp = timestamp
-        account.password = convertPasswordForStorage(account.password)
+        if account.password is not None:
+            account.password = convertPasswordForStorage(account.password)
 
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
@@ -228,9 +229,10 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
-        account.email = str(account.email).lower().strip()
-        if not utils.validate_email(account.email):
-            raise StampedInputError("Invalid format for email address")
+        if account.email is not None:
+            account.email = str(account.email).lower().strip()
+            if not utils.validate_email(account.email):
+                raise StampedInputError("Invalid format for email address")
         
         # Add image timestamp if exists
         if imageData:
@@ -246,7 +248,11 @@ class StampedAPI(AStampedAPI):
         
         # Add profile image
         if imageData:
-            self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
+            try:
+                self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
+            except IOError:
+                #if there was a problem with the image format, just ignore the image
+                account.image_cache = None
         
         # Asynchronously send welcome email and add activity items
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
@@ -258,48 +264,49 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(user_id)
         
         # Add activity if invitations were sent
-        invites = self._inviteDB.getInvitations(account.email)
-        invitedBy = {}
-        
-        for invite in invites:
-            invitedBy[invite['user_id']] = 1
-            
-        """
-        # Skip this activity item for now 
+        if account.email is not None:
+            invites = self._inviteDB.getInvitations(account.email)
+            invitedBy = {}
 
-            ### TODO: What genre are we picking for this activity item?
-            self._addActivity(genre='invite_sent', 
-                              user_id=invite['user_id'], 
-                              recipient_ids=[ account.user_id ])
+            for invite in invites:
+                invitedBy[invite['user_id']] = 1
+
+            """
+            # Skip this activity item for now
+
+                ### TODO: What genre are we picking for this activity item?
+                self._addActivity(genre='invite_sent',
+                                  user_id=invite['user_id'],
+                                  recipient_ids=[ account.user_id ])
+
+            if len(invitedBy) > 0:
+                ### TODO: What genre are we picking for this activity item?
+                self._addActivity(genre='invite_received',
+                                  user_id=account.user_id,
+                                  recipient_ids=invitedBy.keys())
+            """
+
+            self._inviteDB.join(account.email)
         
-        if len(invitedBy) > 0:
-            ### TODO: What genre are we picking for this activity item?
-            self._addActivity(genre='invite_received', 
-                              user_id=account.user_id, 
-                              recipient_ids=invitedBy.keys())
-        """
-        
-        self._inviteDB.join(account.email)
-        
-        domain = str(account.email).split('@')[1]
-        if domain != 'stamped.com':
-            msg = {}
-            msg['to'] = account.email
-            msg['from'] = 'Stamped <noreply@stamped.com>'
-            msg['subject'] = 'Welcome to Stamped!'
-            
-            try:
-                base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
-                template = open(path, 'r')
-            except Exception:
-                ### TODO: Add error logging?
-                raise
-            
-            params = {'screen_name': account.screen_name, 'email_address': account.email}
-            msg['body'] = utils.parseTemplate(template, params)
-            
-            utils.sendEmail(msg, format='html')
+            domain = str(account.email).split('@')[1]
+            if domain != 'stamped.com':
+                msg = {}
+                msg['to'] = account.email
+                msg['from'] = 'Stamped <noreply@stamped.com>'
+                msg['subject'] = 'Welcome to Stamped!'
+
+                try:
+                    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
+                    template = open(path, 'r')
+                except Exception:
+                    ### TODO: Add error logging?
+                    raise
+
+                params = {'screen_name': account.screen_name, 'email_address': account.email}
+                msg['body'] = utils.parseTemplate(template, params)
+
+                utils.sendEmail(msg, format='html')
     
     @API_CALL
     def removeAccount(self, authUserId):
@@ -401,7 +408,8 @@ class StampedAPI(AStampedAPI):
         self._accountDB.removeAccount(account.user_id)
         
         # Remove email address from invite list
-        self._inviteDB.remove(account.email)
+        if account.email is not None:
+            self._inviteDB.remove(account.email)
         
         return account
     
@@ -433,9 +441,10 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
-        account.email = str(account.email).lower().strip()
-        if not utils.validate_email(account.email):
-            raise StampedInputError("Invalid format for email address")
+        if account.email is not None:
+            account.email = str(account.email).lower().strip()
+            if not utils.validate_email(account.email):
+                raise StampedInputError("Invalid format for email address")
         
         self._accountDB.updateAccount(account)
         
@@ -529,7 +538,7 @@ class StampedAPI(AStampedAPI):
         
         image = self._imageDB.getImage(data)
         image_url = self._imageDB.addProfileImage(screen_name.lower(), image)
-        
+
         if user is not None:
             image_cache = datetime.utcnow()
             user.image_cache = image_cache

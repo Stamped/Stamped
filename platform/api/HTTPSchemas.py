@@ -422,10 +422,6 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('temp_image_width',             int)
         cls.addProperty('temp_image_height',            int)
 
-    def convertToAccount(self):
-        return Account().dataImport(self.dataExport(), overflow=True)
-
-
 class HTTPAccountSettings(Schema):
     @classmethod
     def setSchema(cls):
@@ -679,8 +675,10 @@ class HTTPUser(Schema):
         cls.addProperty('num_likes_given',       int)
         cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
 
-    def importUser(self, user, client=None):
+    def importAccount(self, account, client=None):
+        return self.importUser(account, client)
 
+    def importUser(self, user, client=None):
         self.dataImport(user.dataExport(), overflow=True)
         
         stats = user.stats.dataExport()

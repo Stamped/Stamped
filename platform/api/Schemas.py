@@ -300,8 +300,8 @@ class Account(Schema):
         cls.addProperty('name',                     basestring, required=True)
         
         cls.addProperty('name_lower',               basestring)
-        cls.addProperty('email',                    basestring, required=True)
-        cls.addProperty('password',                 basestring, required=True)
+        cls.addProperty('email',                    basestring)
+        cls.addProperty('password',                 basestring)
         cls.addProperty('screen_name',              basestring, required=True)
         cls.addProperty('screen_name_lower',        basestring)
         cls.addProperty('color_primary',            basestring)
@@ -1604,7 +1604,7 @@ class TimeSlice(Schema):
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
         cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema) 
+        cls.addNestedProperty('viewport',           ViewportSchema)
 
         # Scope
         cls.addProperty('user_id',                  basestring)
@@ -1620,7 +1620,7 @@ class SearchSlice(Schema):
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
         cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema) 
+        cls.addNestedProperty('viewport',           ViewportSchema)
 
         # Scope
         cls.addProperty('user_id',                  basestring)
@@ -1633,7 +1633,7 @@ class RelevanceSlice(Schema):
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
         cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema) 
+        cls.addNestedProperty('viewport',           ViewportSchema)
 
         # Scope
         cls.addProperty('user_id',                  basestring)
