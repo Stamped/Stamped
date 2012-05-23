@@ -35,6 +35,7 @@
 #import "STPersistentCacheSource.h"
 #import "STSimpleMenu.h"
 #import "STHybridCacheSource.h"
+#import "STSimpleLoginResponse.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -450,15 +451,15 @@ static STStampedAPI* _sharedInstance;
 }
 
 
-- (void)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
-                            andCallback:(void(^)(NSArray<STTodo>*,NSError*))block {
+- (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
+                                       andCallback:(void(^)(NSArray<STTodo>*, NSError*, STCancellation*))block {
   NSString* path = @"/favorites/show.json";
-  [[STRestKitLoader sharedInstance] loadWithPath:path
+  return [[STRestKitLoader sharedInstance] loadWithPath:path
                                             post:NO
                                           params:slice.asDictionaryParams
                                          mapping:[STSimpleTodo mapping]
                                      andCallback:^(NSArray* results, NSError* error, STCancellation* cancellation) {
-                                       block((NSArray<STTodo>*)results,error);
+                                       block((NSArray<STTodo>*)results,error, cancellation);
                                      }];
 }
 
@@ -758,6 +759,21 @@ static STStampedAPI* _sharedInstance;
   else {
     return @"everyone";
   }
+}
+
+- (STCancellation*)loginWithFacebookID:(NSString*)userID 
+                                 token:(NSString*)token
+                           andCallback:(void(^)(id<STLoginResponse>, NSError*, STCancellation*))block {
+    //TODO
+    NSString* path = @"/account/create_using_facebook.json";
+    NSDictionary* params = nil;
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                        post:YES
+                                                      params:params
+                                                     mapping:[STSimpleLoginResponse mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation); 
+                                                 }];
 }
 
 - (void)fastPurge {

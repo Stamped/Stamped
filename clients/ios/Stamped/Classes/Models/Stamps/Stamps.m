@@ -19,23 +19,23 @@
 - (id)init {
   if ((self = [super init])) {
     
-    _data = [[NSArray alloc] init];
-    _moreData = NO;
+      _data = [[NSArray alloc] init];
+      _moreData = NO;
     
-    STGenericCollectionSlice *slice = [[STGenericCollectionSlice alloc] init];
-    slice.sort = [STConfiguration value:@"Root.inboxSort"];
-    _slice = [slice retain];
-    [slice release];
+      STGenericCollectionSlice *slice = [[STGenericCollectionSlice alloc] init];
+      slice.sort = [STConfiguration value:@"Root.inboxSort"];
+      _slice = [slice retain];
+      [slice release];
     
   }
   return self;
 }
 
 - (void)dealloc {
-  [self cancel];
-  [_data release], _data=nil;
-  [_slice release], _slice=nil;
-  [super dealloc];
+    [self cancel];
+    [_data release], _data=nil;
+    [_slice release], _slice=nil;
+    [super dealloc];
 }
 
 
@@ -57,10 +57,15 @@
 }
 
 - (void)loadNextPage {
+    
+    NSLog(@"next page");
+    
 }
 
 - (void)cancel {
   
+    
+    
 }
 
 
@@ -120,6 +125,9 @@
 - (BOOL)isEmpty {
   return ([_data count] == 0);
 }
+
+
+
 
 
 @end

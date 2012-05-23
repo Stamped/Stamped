@@ -390,6 +390,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+
         
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
@@ -414,15 +415,12 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('facebook_token',               basestring, required=True)
 
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
         cls.addProperty('temp_image_width',             int)
         cls.addProperty('temp_image_height',            int)
-
-    def convertToAccount(self):
-        return Account().dataImport(self.dataExport(), overflow=True)
-
 
 class HTTPAccountSettings(Schema):
     @classmethod
@@ -677,8 +675,10 @@ class HTTPUser(Schema):
         cls.addProperty('num_likes_given',       int)
         cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
 
-    def importUser(self, user, client=None):
+    def importAccount(self, account, client=None):
+        return self.importUser(account, client)
 
+    def importUser(self, user, client=None):
         self.dataImport(user.dataExport(), overflow=True)
         
         stats = user.stats.dataExport()
@@ -1074,10 +1074,12 @@ class HTTPEntity(Schema):
 
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
+                images = []
                 for image in entity.gallery:
                     item = HTTPImageSchema().dataImport(image)
-                    gallery.images.append(item)
-                self.galleries.append(gallery)
+                    images.append(item)
+                gallery.images = images
+                self.galleries += (gallery,)
 
             # Actions: Reservation
 
@@ -1157,6 +1159,7 @@ class HTTPEntity(Schema):
 
             if entity.gallery is not None and len(entity.gallery) > 0:
                 gallery = HTTPEntityGallery()
+                images = []
                 for image in entity.gallery:
                     item = HTTPImageSchema()
                     item.importSchema(image)
@@ -1168,8 +1171,9 @@ class HTTPEntity(Schema):
                     action.type         = 'stamped_view_image'
                     action.sources.append(source)
                     item.action     = action
-                    gallery.images.append(item)
-                self.galleries.append(gallery)
+                    images.append(item)
+                gallery.images = images
+                self.galleries += (gallery,)
 
             # Actions: Call
 
@@ -1657,6 +1661,7 @@ class HTTPEntity(Schema):
 
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
+                images = []
                 for album in entity.albums:
                     try:
                         item            = HTTPImageSchema()
@@ -1679,12 +1684,14 @@ class HTTPEntity(Schema):
 
                             item.action         = action
 
-                        gallery.images.append(item)
+                        images.append(item)
                     except Exception as e:
                         logs.info(e.message)
                         pass
+
+                gallery.images = images
                 if len(gallery.images) > 0:
-                    self.galleries.append(gallery)
+                    self.galleries += (gallery,)
 
         elif entity.kind == 'software' and entity.isType('app'):
 
@@ -1725,10 +1732,12 @@ class HTTPEntity(Schema):
 
             if entity.screenshots is not None and len(entity.screenshots) > 0:
                 gallery = HTTPEntityGallery()
+                images = []
                 for screenshot in entity.screenshots:
                     item = HTTPImageSchema().dataImport(screenshot)
-                    gallery.images.append(item)
-                self.galleries.append(gallery)
+                    images.append(item)
+                gallery.images = images
+                self.galleries += (gallery,)
 
 
         # Generic item
@@ -1822,9 +1831,9 @@ class HTTPEntityNew(Schema):
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
             addField(entity, 'coordinates', coords, now)
 
-        entity.user_generated_id            = authUserId
-        entity.user_generated_subtitle      = self.subtitle
-        entity.user_generated_timestamp     = now
+        entity.sources.user_generated_id            = authUserId
+        entity.sources.user_generated_subtitle      = self.subtitle
+        entity.sources.user_generated_timestamp     = now
 
         addListField(entity, 'directors', self.director, PersonEntityMini, now)
         addListField(entity, 'cast', self.cast, PersonEntityMini, now)
@@ -1992,12 +2001,12 @@ class HTTPTimeSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
+        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportTimeSlice(self):
         data                = self.dataExport()
@@ -2042,12 +2051,13 @@ class HTTPSearchSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
+        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
+        cls.addProperty('query',                basestring, required=True)
 
     def exportSearchSlice(self):
         data                = self.dataExport()
@@ -2091,7 +2101,7 @@ class HTTPRelevanceSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
 
     def exportRelevanceSlice(self):
         data                = self.dataExport()

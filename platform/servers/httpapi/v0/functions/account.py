@@ -12,6 +12,7 @@ from httpapi.v0.helpers import *
 from errors             import *
 from HTTPSchemas        import *
 from Netflix            import *
+from Facebook           import *
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
@@ -23,7 +24,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
     logs.info('account schema passed in: %s' % schema)
     schema = stampedAPI.addAccount(schema, http_schema.profile_image)
 
-    user   = HTTPUser().importUser(schema)
+    user   = HTTPUser().importAccount(schema)
     logs.user(user.user_id)
     
     token  = stampedAuth.addRefreshToken(client_id, user.user_id)
@@ -33,13 +34,40 @@ def create(request, client_id, http_schema, schema, **kwargs):
 
 @handleHTTPRequest(requires_auth=False,
                    #requires_client=True,
-                   http_schema=HTTPAccountNew,
-                   conversion=HTTPAccountNew.convertToAccount,
+                   http_schema=HTTPFacebookAccountNew,
                    upload='profile_image')
-def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
+@require_http_methods(["POST"])
+def createUsingFacebook(request, client_id, http_schema, **kwargs):
+    # using hte HTTPFacebookAccountNew object, we'll manually create a new Account object
+    # first, grab all the information from Facebook using the passed in token
+    fb = globalFacebook()
+    user = fb.getUserInfo(http_schema.facebook_token)
 
+    account = Account().dataImport(http_schema.dataExport(), overflow=True)
+    logs.info(account)
+    account.linked_accounts             = LinkedAccounts()
+    fb_acct                             = FacebookAccountSchema()
+    fb_acct.facebook_id                 = user['id']
+    fb_acct.facebook_name               = user['name']
+    fb_acct.facebook_screen_name        = user.pop('username', None)
+    account.linked_accounts.facebook    = fb_acct
+    account.email                       = user.pop('email', None)
+    account.bio                         = user.pop('bio', None)
+    account.website                     = user.pop('website', None)
 
-    return
+    if 'location' in user:
+        account.location                = user['location']['name']
+
+    profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+
+    account = stampedAPI.addAccount(account, profile_image)
+    user   = HTTPUser().importAccount(account)
+    logs.user(user.user_id)
+
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
+
+    return transformOutput(output)
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])

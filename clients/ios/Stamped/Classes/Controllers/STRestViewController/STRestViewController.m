@@ -6,7 +6,6 @@
 //
 
 #import "STRestViewController.h"
-#import "STSearchView.h"
 
 @implementation STRestViewController
 
@@ -15,6 +14,7 @@
 @synthesize headerView=_headerView;
 @synthesize showsSearchBar=_showsSearchBar;
 @synthesize searchView=_searchView;
+@synthesize searching=_searching;
 
 - (id)init {
     if ((self = [super init])) {
@@ -190,7 +190,6 @@
         STSearchView *view = [[STSearchView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 52)];
         view.backgroundColor = [UIColor colorWithPatternImage:[[UIImage imageNamed:@"search_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        view.textField.delegate = self;
         view.delegate = (id<STSearchViewDelegate>)self;
         self.tableView.tableHeaderView = view;
         _searchView = view;
@@ -264,7 +263,7 @@
 }
 
 - (void)dataSourceDidFinishLoading {
-
+    
     _explicitRefresh = NO;
 	[_headerRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:self.tableView];
 	[self setState];
@@ -275,6 +274,7 @@
 #pragma mark - UIScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+    if (scrollView != self.tableView) return;
     
     [_headerRefreshView egoRefreshScrollViewDidScroll:scrollView];
     if (_restFlags.dataSourceLoadNextPage && _restFlags.dataSourceHasMoreData && _restFlags.dataSourceReloading) {
@@ -287,7 +287,8 @@
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
-    
+    if (scrollView != self.tableView) return;
+
     if (scrollView.contentOffset.y < 0.0f) {
         [_headerRefreshView egoRefreshScrollViewDidEndDragging:scrollView];
     }
@@ -319,9 +320,52 @@
 
 #pragma mark - Search State Methods (internal)
 
+- (void)updateSearchState {
+    
+    if (_searchResultsTableView) {
+        
+        NSInteger count = [_searchResultsTableView numberOfRowsInSection:0];
+        
+        if (count == 0 && _searchOverlay!=nil && _searchOverlay.hidden) {
+            
+            // no results
+            if (!_searchNoResultsLabel) {
+                
+                UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+                label.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+                label.font = [UIFont boldSystemFontOfSize:15];
+                label.backgroundColor = [UIColor clearColor];
+                label.textColor = [UIColor grayColor];
+                label.text = NSLocalizedString(@"No results.", @"No results.");
+                [label sizeToFit];
+                [_searchResultsTableView addSubview:label];
+                _searchNoResultsLabel = label;
+                [label release];
+                
+                CGRect frame = label.frame;
+                frame.origin.x = floorf((self.view.bounds.size.width-label.bounds.size.width)/2);
+                frame.origin.y = 58.0f;
+                label.frame = frame;
+                
+            }
+            
+        } else {
+            
+            // has results
+            if (_searchNoResultsLabel) {
+                [_searchNoResultsLabel removeFromSuperview], _searchNoResultsLabel=nil;
+            }
+            
+            
+        }
+        
+    }
+    
+}
+
 - (void)overlayTapped:(UITapGestureRecognizer*)gesture {
     
-    [self setSearching:NO];
+    [_searchView cancelSearch];
     
 }
 
@@ -329,12 +373,28 @@
     _searching = searching;
     
     [self.navigationController setNavigationBarHidden:_searching animated:YES];
+    self.tableView.scrollEnabled = !_searching;
     
     if (_searching) {
         
         CGFloat barHeight = _searchView.bounds.size.height;
-
-        //self.tableView.contentOffset = CGPointMake(0.0f, -barHeight);
+        
+        if (!_searchResultsTableView) {
+            
+            UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(0.0f, _searchView.bounds.size.height, self.view.bounds.size.height, self.view.bounds.size.height - _searchView.bounds.size.height) style:UITableViewStylePlain];
+            tableView.delegate = (id<UITableViewDelegate>)self;
+            tableView.dataSource = (id<UITableViewDataSource>)self;
+            [self.view addSubview:tableView];
+            _searchResultsTableView = tableView;
+            [tableView release];
+            
+            CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+            animation.fromValue = [NSNumber numberWithFloat:0.0f];
+            animation.duration = 0.3f;
+            animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            [_searchResultsTableView.layer addAnimation:animation forKey:nil];
+            
+        }
         
         if (!_searchOverlay) {
             
@@ -360,8 +420,6 @@
         
     } else {
         
-        [_searchView.textField resignFirstResponder];
-        
         if (_searchOverlay) {
             
             __block UIView *view = _searchOverlay;
@@ -385,6 +443,11 @@
             [CATransaction commit];
             
         }
+        [self updateSearchState];
+        
+        if (_searchResultsTableView) {
+            [_searchResultsTableView removeFromSuperview], _searchResultsTableView=nil;
+        }
         
     }
     
@@ -396,15 +459,28 @@
 #pragma mark STSearchViewDelegate
 
 - (void)stSearchViewDidCancel:(STSearchView*)view {
- 
+     
     [self setSearching:NO];
+
+}
+
+- (void)stSearchViewDidBeginSearching:(STSearchView*)view {
+    
+    [self setSearching:YES];
     
 }
 
-- (void)stSearchViewShouldBeginSearching:(STSearchView*)view {
+- (void)stSearchViewDidEndSearching:(STSearchView*)view {
     
-    [view.textField becomeFirstResponder];
-    [self setSearching:YES];
+
+}
+
+- (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
+    
+    if (_searchOverlay) {
+        _searchOverlay.hidden = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0;
+    }
+    [self updateSearchState];
     
 }
 
@@ -427,40 +503,6 @@
     }];
     
 }
-
-
-#pragma mark - UITextFieldDelegate 
-
-- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
-    
-    return YES;
-}
-
-- (void)textFieldDidBeginEditing:(UITextField *)textField {
-    
-    [self setSearching:YES];
-    
-}
-
-- (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
-    
-    return YES;
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    
-}
-
-- (BOOL)textFieldShouldClear:(UITextField *)textField {
-    
-    return YES;
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    
-    return YES;
-}
-
 
 
 @end

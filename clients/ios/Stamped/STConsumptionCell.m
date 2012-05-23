@@ -58,8 +58,7 @@
 @synthesize block = block_;
 @synthesize stamp = stamp_;
 
-- (id)initWithStamp:(id<STStamp>)stamp andCallback:(void(^)(NSError*, STCancellation*))block
-{
+- (id)initWithStamp:(id<STStamp>)stamp andCallback:(void(^)(NSError*, STCancellation*))block {
   self = [super init];
   if (self) {
     [self retain];
@@ -74,8 +73,7 @@
   return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   cancellation_.delegate = nil;
   [cancellation_ release];
   [detailCancellation_ cancel];
@@ -242,8 +240,7 @@
   [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
   [stamp_ release];
   [activityView_ release];
   [entityDetail_ release];
@@ -319,6 +316,7 @@
     imageView.layer.shadowColor = [UIColor blackColor].CGColor;
     imageView.layer.shadowRadius = 7;
     imageView.layer.shadowOffset = CGSizeMake(0, imageView.layer.shadowRadius/2);
+    imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
     [self addSubview:imageView];
     UIImageView* stampImage = [[[UIImageView alloc] initWithImage:[Util stampImageForUser:self.stamp.user withSize:STStampImageSize46]] autorelease];
     [Util reframeView:stampImage withDeltas:CGRectMake(CGRectGetMaxX(imageView.frame) - 40,

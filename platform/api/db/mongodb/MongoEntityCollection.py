@@ -122,8 +122,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     
     def removeCustomEntity(self, entityId, userId):
         try:
-            query = {'_id': self._getObjectIdFromString(entityId), \
-                        'sources.userGenerated.user_id': userId}
+            query = {'_id': self._getObjectIdFromString(entityId), 'sources.user_generated_id': userId}
+            self._collection.remove(query)
+            query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
             self._collection.remove(query)
             return True
         except:
