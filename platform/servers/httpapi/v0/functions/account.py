@@ -49,7 +49,7 @@ def createUsingFacebook(request, client_id, http_schema, **kwargs):
     except:
         raise
     # Check if the facebook account is already tied to a Stamped account
-    if stampedAPI.checkAccountWithFacebookId(user['id']) is not None:
+    if stampedAPI.checkAccountWithFacebookId(user['id']):
         raise StampedHTTPError("The facebook user id is already linked to an existing account", 400)
 
     account = Account().dataImport(http_schema.dataExport(), overflow=True)

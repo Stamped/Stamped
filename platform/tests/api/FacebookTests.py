@@ -52,10 +52,32 @@ class StampedAPIFacebookTest(AStampedAPITestCase):
         self.assertTrue(self._deleteFacebookTestAccount(self.fb_user_token, self.fb_user_id))
 
 class StampedAPIFacebookCreate(StampedAPIFacebookTest):
-    def test_create(self):
-        print(self.user)
-#        self.assertEqual(self.user['linked_accounts']['facebook']['facebook_id'], self.fb_user_id)
-#        self.assertEqual(self.user['linked_accounts']['facebook']['facebook_token'], self.fb_user_token)
+
+    def test_invalid_login(self):
+        # login with invalid facebook user account
+        path = "oauth2/login_with_facebook.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login":        'usera',
+            "fb_token":     'BLAAAAARGH!!!',
+            }
+        with expected_exception():
+            self.handlePOST(path, data)
+
+    def test_valid_login(self):
+        # login with facebook user account
+        path = "oauth2/login_with_facebook.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login":        'usera',
+            "fb_token":     self.fb_user_token,
+        }
+        result = self.handlePOST(path, data)
+
+        # verify that the stamped user token and user_id are correct
+        self.assertEqual(result['user']['user_id'], self.user['user_id'])
 
 ### TESTS TO ADD:
 # Change bio from string to None

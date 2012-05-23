@@ -3,6 +3,7 @@ import time
 import urllib, urllib2, json
 import logs
 import re
+from errors import *
 
 APP_ID          = '297022226980395'
 APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'

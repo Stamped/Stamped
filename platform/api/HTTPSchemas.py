@@ -297,6 +297,12 @@ class OAuthLogin(Schema):
         cls.addProperty('login',                        basestring, required=True)
         cls.addProperty('password',                     basestring, required=True)
 
+class OAuthFacebookLogin(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('login',                        basestring, required=True)
+        cls.addProperty('fb_token',                     basestring, required=True)
+
 # ####### #
 # Actions #
 # ####### #

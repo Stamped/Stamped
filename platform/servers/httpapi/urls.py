@@ -36,6 +36,7 @@ urlpatterns = patterns('',
     ### OAUTH
     (r'v0/oauth2/token.json',                       'v0.functions.oauth2.token'),
     (r'v0/oauth2/login.json',                       'v0.functions.oauth2.login'),
+    (r'v0/oauth2/login_with_facebook.json',         'v0.functions.oauth2.loginWithFacebook'),
     
     ### ACCOUNT
     #
