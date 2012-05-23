@@ -2907,7 +2907,10 @@ class StampedAPI(AStampedAPI):
         limit = timeSlice.limit
         timeSlice.limit = limit + 10
         
+        t0 = time.time()
         stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
+        logs.debug('Time for _getStampCollectionSlice: %s' % (time.time() - t0))
+
         stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
         stamps = stamps[:limit]
         
@@ -2925,7 +2928,10 @@ class StampedAPI(AStampedAPI):
         limit = searchSlice.limit
         searchSlice.limit = limit + 10
         
+        t0 = time.time()
         stampData = self._stampDB.searchStampCollectionSlice(stampIds, searchSlice)
+        logs.debug('Time for _searchStampCollectionSlice: %s' % (time.time() - t0))
+
         stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
         stamps = stamps[:limit]
         
@@ -2985,12 +2991,7 @@ class StampedAPI(AStampedAPI):
             stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
             logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-
-        t0 = time.time()
-        result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-        logs.debug('Time for _getStampCollection: %s' % (time.time() - t0))
-
-        return result
+        return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
     @API_CALL
     def searchStampCollection(self, searchSlice, authUserId=None):
@@ -3007,12 +3008,7 @@ class StampedAPI(AStampedAPI):
             stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
             logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
-        t0 = time.time()
-        result      = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-        logs.debug('Time for _searchStampCollection: %s' % (time.time() - t0))
-
-        return result
-
+        return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
 
 
 
