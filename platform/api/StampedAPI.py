@@ -2939,6 +2939,20 @@ class StampedAPI(AStampedAPI):
         return self._collectionDB.getUserStampIds(user.user_id)
 
     def _getScopeStampIds(self, scope, authUserId=None):
+        """
+        If not logged in return "popular" results. Also, allow scope to be set to "popular" if 
+        not logged in; otherwise, raise exception.
+        """
+
+        if scope is None:
+            return None
+
+        if scope == 'popular':
+            return None
+
+        if authUserId is None and scope is not None:
+            raise StampedInputError("Must be logged in to use scope")
+
         if authUserId is None:
             return None
 
