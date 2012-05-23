@@ -39,8 +39,8 @@ class Netflix(object):
         self.__secret=secret
         self.__consumer = oauth.OAuthConsumer(self.__key, self.__secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-        self.__cpsLimiter = RateLimiter(cps=4, max_wait=15)          # 4 requests per second for all requests
-        self.__cpdLimiter = RateLimiter(cpd=5000)
+        self.__cpsLimiter = RateLimiter(cps=10, max_wait=15)          # 4 requests per second for all requests
+        self.__cpdLimiter = RateLimiter(cpd=25000)
 
         # the blacklist contains a dict of users and their 401/403 count. When a threshold is reached, all requests
         # from that user will be ignored until the blacklist is cleared

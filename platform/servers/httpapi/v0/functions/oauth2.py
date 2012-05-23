@@ -35,10 +35,7 @@ def login(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthFacebookLogin)
 @require_http_methods(["POST"])
 def loginWithFacebook(request, client_id, http_schema, **kwargs):
-    logs.info('### attempting to login with facebook')
-    account, token = stampedAuth.verifyFacebookUserCredentials(client_id,\
-        http_schema.login,\
-        http_schema.fb_token)
+    account, token = stampedAuth.verifyFacebookUserCredentials(client_id, http_schema.fb_token)
 
     user = HTTPUser().importAccount(account)
     logs.user(user.user_id)

@@ -300,7 +300,6 @@ class OAuthLogin(Schema):
 class OAuthFacebookLogin(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('login',                        basestring, required=True)
         cls.addProperty('fb_token',                     basestring, required=True)
 
 # ####### #
@@ -378,6 +377,7 @@ class HTTPAccount(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
         cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('auth_service',                 basestring, required=True)
         cls.addProperty('email',                        basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('privacy',                      bool, required=True)
@@ -397,7 +397,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
 
-        
+
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
         cls.addProperty('temp_image_width',             int)
@@ -423,10 +423,9 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         cls.addProperty('facebook_token',               basestring, required=True)
 
-        # for asynchronous image uploads
-        cls.addProperty('temp_image_url',               basestring)
-        cls.addProperty('temp_image_width',             int)
-        cls.addProperty('temp_image_height',            int)
+    def convertToFacebookAccountNew(self):
+        return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+
 
 class HTTPAccountSettings(Schema):
     @classmethod

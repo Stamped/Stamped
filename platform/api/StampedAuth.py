@@ -36,6 +36,10 @@ class StampedAuth(AStampedAuth):
     @property
     def isValid(self):
         return self._validated
+
+    @lazyProperty
+    def _facebook(self):
+        return globalFacebook()
     
     # ####### #
     # Clients #
@@ -97,11 +101,16 @@ class StampedAuth(AStampedAuth):
             else:
                 raise
 
+            if account.auth_service != 'stamped':
+                msg = "Attempting to do a stamped login for an account that doesn't use stamped for auth'"
+                logs.warning(msg)
+                raise StampedHTTPError("invalid_credentials", 401, msg)
+
             if not auth.comparePasswordToStored(password, account.password):
                 raise
 
             logs.info("Login successful")
-            
+
             """
             IMPORTANT!!!!!
 
@@ -125,24 +134,30 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
-    def verifyFacebookUserCredentials(self, clientId, userIdentifier, fb_token):
-        # Login via screen name
-        if utils.validate_screen_name(userIdentifier):
-            account = self._accountDB.getAccountByScreenName(userIdentifier)
-        else:
-            raise
+    def verifyFacebookUserCredentials(self, clientId, fb_token):
+        try:
+            fb_user = self._facebook.getUserInfo(fb_token)
+        except StampedInputError as e:
+            raise StampedHTTPError('facebook_login_failed', 400, e.message)
+
+        # TODO: remove repetitious code here (same as api.getAccountByFacebookId()
+        accounts = self._accountDB.getAccountsByFacebookId(fb_user['id'])
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % fb_user['id'])
+        elif len(accounts) > 1:
+            logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
+            raise StampedIllegalActionError("More than one account exists using facebook id: %s" % fb_user['id'])
+        account = accounts[0]
+
+        if account.auth_service != 'facebook':
+            msg = "Attempting to do a facebook login for an account that doesn't use facebook auth'"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
 
         if account.linked_accounts.facebook is None or account.linked_accounts.facebook.facebook_id is None:
             msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
-
-        facebook = globalFacebook()
-
-        try:
-            fb_user = facebook.getUserInfo(fb_token)
-        except StampedInputError as e:
-            raise StampedHTTPError('facebook_login_failed', 400, e.message)
 
         if fb_user['id'] != account.linked_accounts.facebook.facebook_id:
             msg = "Invalid credentials: Facebook id does not match Stamped user"

@@ -54,6 +54,7 @@ try:
     from StampedSource          import StampedSource
 
     from Netflix                import *
+    from Facebook               import *
 except Exception:
     report()
     raise
@@ -258,6 +259,41 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
         
         return account
+
+    @API_CALL
+    def addFacebookAccount(self, new_fb_account):
+        """
+        For adding a Facebook auth account, first pull the user info from Facebook, verify that the user_id is not already
+         linked to another user, populate the linked account information and then chain to the standard addAccount() method
+        """
+
+        # first, grab all the information from Facebook using the passed in token
+        fb = globalFacebook()
+        user = fb.getUserInfo(new_fb_account.facebook_token)
+
+        account = None
+        try:
+            account = self.getAccountByFacebookId(user['id'])
+        except StampedUnavailableError:
+            pass
+        # Check if the facebook account is already tied to a Stamped account
+        if account is not None:
+            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+
+        account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
+        logs.info(account)
+        account.linked_accounts             = LinkedAccounts()
+        fb_acct                             = FacebookAccountSchema()
+        fb_acct.facebook_id                 = user['id']
+        fb_acct.facebook_name               = user['name']
+        fb_acct.facebook_screen_name        = user.pop('username', None)
+        account.linked_accounts.facebook    = fb_acct
+        account.auth_service                = 'facebook'
+
+        # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
+        profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+
+        return self.addAccount(account, profile_image)
     
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -463,7 +499,16 @@ class StampedAPI(AStampedAPI):
     def getAccount(self, authUserId):
         account = self._accountDB.getAccount(authUserId)
         return account
-    
+
+    @API_CALL
+    def getAccountByFacebookId(self, facebookId):
+        accounts = self._accountDB.getAccountsByFacebookId(facebookId)
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
+        elif len(accounts) > 1:
+            raise StampedIllegalActionError("More than one account exists using facebook id: %s" % facebookId)
+        return accounts[0]
+
     @API_CALL
     def updateProfile(self, authUserId, data):
         ### TODO: Reexamine how updates are done
@@ -546,19 +591,6 @@ class StampedAPI(AStampedAPI):
         
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
         return user
-
-    def checkAccountWithFacebookId(self, facebookId):
-        """
-        Returns a bool indicating if an account with the facebook id exists
-        """
-        account = None
-        try:
-            account = self._accountDB.getAccountByFacebookId(facebookId)
-        except StampedUnavailableError:
-            pass
-        return account is not None
-
-
     
     def checkAccount(self, login):
         ### TODO: Clean this up (along with HTTP API function)

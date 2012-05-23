@@ -30,21 +30,22 @@ class Facebook(object):
                 baseurl = 'https://graph.facebook.com/'
                 encoded_params  = urllib.urlencode(params)
                 url     = "%s%s?%s" % (baseurl, path, encoded_params)
+                logs.info('url: %s' % url)
                 if parse_json:
                     result  = json.load(urllib2.urlopen(url))
                 else:
                     result = urllib2.urlopen(url).read()
-
+                return result
+            except urllib2.HTTPError as e:
+                msg = e.message
+                result = json.load(e)
                 if 'error' in result:
+                    logs.info('ERROR IN E')
                     if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                         # OAuth exception
-                        raise
-                    raise
+                        msg = result['error']['message']
 
-                return result
-
-            except urllib2.HTTPError as e:
-                logs.warning('Facebook API Error: %s' % e)
+                logs.info('Facebook API Error: %s' % msg)
                 num_retries += 1
                 if num_retries > max_retries:
                     if e.code == 400:
@@ -53,7 +54,6 @@ class Facebook(object):
 
                 logs.info("Retrying (%s)" % (num_retries))
                 time.sleep(0.5)
-
             except Exception as e:
                 raise Exception('Error connecting to Facebook: %s' % e)
 
@@ -71,9 +71,10 @@ class Facebook(object):
         return self._get(
             access_token,
             path,
-            params= {
-                'access_token'            : access_token
-            })
+#            params= {
+#                'access_token'            : access_token
+#            }
+        )
 
     # see: http://developers.facebook.com/docs/opengraph/using-app-tokens/
     def getAppAccessToken(self, client_id=APP_ID, client_secret=APP_SECRET):
@@ -100,7 +101,7 @@ class Facebook(object):
               'locale'              : locale,
               'permissions'         : permissions,
               'method'              : method,
-              'access_token'        : access_token,
+#              'access_token'        : access_token,
             }
         )
 
@@ -112,7 +113,7 @@ class Facebook(object):
             access_token,
             path,
             { 'method'          : 'delete',
-              'access_token'    : access_token,
+#              'access_token'    : access_token,
             },
             parse_json=False,
         )
@@ -134,9 +135,6 @@ ACCESS_TOKEN = 'AAACEdEose0cBAFWCTyFkxAdiLCPBHMTmFZArw1sKUY3ji564jZB3aN46JQxtpiF
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
     facebook = Facebook()
-
-#    if 'netflix_id' in params:  netflix_id  = params['netflix_id']
-#    if 'title' in params:       title       = params['title']
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
