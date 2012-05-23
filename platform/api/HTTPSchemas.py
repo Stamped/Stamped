@@ -859,7 +859,7 @@ class HTTPEntityAction(Schema):
 class HTTPEntityMetadataItem(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name,',                basestring, required=True)
+        cls.addProperty('name',                basestring, required=True)
         cls.addProperty('value',                basestring, required=True)
         cls.addProperty('key',                  basestring)
         cls.addNestedProperty('action',         HTTPAction)
@@ -980,10 +980,7 @@ class HTTPEntity(Schema):
     def _addMetadata(self, name, value, **kwargs):
         if value is not None and len(value) > 0:
             item        = HTTPEntityMetadataItem()
-            logs.info('addMetaData name: %s' % name)
-            #item.name   = name
-            item.name = 100
-            logs.info('item.name: %s' % item.name)
+            item.name   = name
             item.value  = value
 
             if 'key' in kwargs:
@@ -1018,8 +1015,6 @@ class HTTPEntity(Schema):
             if metadata is None:
                 metadata = []
             metadata.append(item)
-
-            logs.info('### adding metadata item.name: %s' % item.name)
 
             self.metadata = metadata
 
