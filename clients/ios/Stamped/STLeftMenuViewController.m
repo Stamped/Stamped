@@ -9,12 +9,10 @@
 #import "STLeftMenuViewController.h"
 #import "Util.h"
 #import "DDMenuController.h"
-#import "STLegacyInboxViewController.h"
 #import "SettingsViewController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
-#import "ECSlidingViewController.h"
 #import "STRootViewController.h"
 #import "STIWantToViewController.h"
 #import "STInboxViewController.h"
@@ -249,7 +247,7 @@
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
 
-    if (self.tableView == tableView) {
+    if (self.tableView == tableView || [key isEqualToString:@"To-Do"]) {
         
         [menuController setRootController:navController animated:YES];
         

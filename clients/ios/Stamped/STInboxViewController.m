@@ -20,7 +20,6 @@
 #import "STFriendsStampsList.h"
 #import "STFriendsOfFriendsStampsList.h"
 #import "STButton.h"
-#import "ECSlidingViewController.h"
 #import "STTableDelegator.h"
 #import "STSingleViewSource.h"
 #import "STSearchField.h"

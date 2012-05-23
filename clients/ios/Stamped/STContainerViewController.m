@@ -11,7 +11,6 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "Util.h"
-#import "ECSlidingViewController.h"
 
 static NSString* kPullDownText = @"Pull down to refresh...";
 static NSString* kReleaseText = @"Release to refresh...";

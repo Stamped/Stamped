@@ -38,7 +38,7 @@
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent];
-  [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
+  //[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
   [self.navigationController setNavigationBarHidden:YES animated:animated];
   self.navigationController.navigationBar.translucent = YES;
 }
@@ -55,7 +55,7 @@
   STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   navBar.black = NO;
   self.navigationController.navigationBar.translucent = NO;
-  [self.navigationController setNavigationBarHidden:NO animated:animated];
+  //[self.navigationController setNavigationBarHidden:NO animated:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
