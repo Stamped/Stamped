@@ -2413,10 +2413,6 @@ class HTTPStamp(Schema):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
         credit                  = getattr(stamp, 'credit', [])
-        comments                = getattr(previews, 'comments', [])
-        likes                   = getattr(previews, 'likes', [])
-        todos                   = getattr(previews, 'todos', [])
-        credits                 = getattr(previews, 'credits', [])
 
         data = stamp.dataExport()
         data['contents'] = []
