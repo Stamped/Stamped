@@ -20,6 +20,8 @@
     UIImage *_stampImage;
     UIImage *_categoryImage;
     
+    BOOL _hasMedia;
+    
 }
 @property(nonatomic,readonly) NSString *username;
 @property(nonatomic,readonly) NSString *subcategory;

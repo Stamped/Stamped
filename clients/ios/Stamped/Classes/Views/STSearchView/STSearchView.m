@@ -191,7 +191,10 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     
-    [textField resignFirstResponder];
+    if ([(id)delegate respondsToSelector:@selector(stSearchViewHitSearch:withText:)]) {
+        [self.delegate stSearchViewHitSearch:self withText:textField.text];
+    }
+
     return YES;
 }
 

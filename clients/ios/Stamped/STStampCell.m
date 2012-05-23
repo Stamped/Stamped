@@ -17,6 +17,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STImageCache.h"
 #import "QuartzUtils.h"
+#import "STSimpleStamp.h"
 
 @implementation STStampCell
 
@@ -64,23 +65,6 @@
       }];
       self.selectedBackgroundView = background;
       [background release];
-      
-      // comment count
-      STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectZero];
-      commentView.backgroundColor = [UIColor clearColor];
-      [self addSubview:commentView];
-      [commentView setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
-          
-          if (_commentCount > 0) {
-              
-              
-              
-          }
-          
-          
-      }];
-      [commentView release];
-      _commentView = commentView;
       
       // cell text
       STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, originY, 200, 70.0f)];
@@ -137,6 +121,34 @@
       _statsView = previewsView;
       [previewsView release];
       _statsView.hidden = YES;
+      
+      // comment count
+      STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200, 30.0f)];
+      commentView.backgroundColor = [UIColor whiteColor];
+      [self addSubview:commentView];
+      [commentView setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+          
+          CGFloat offset = 0.0f;
+          if (_commentCount > 0) {
+              [[UIImage imageNamed:@"stamp_cell_comment.png"] drawAtPoint:CGPointMake(0, 1.0f)];
+              offset += 12.0f;
+              if (!_hasMedia) {
+                  [[UIColor colorWithPatternImage:[UIImage imageNamed:@"stamp_cell_text_bg.png"]] setFill];
+                  NSString *comments = [NSString stringWithFormat:@"%i", _commentCount];
+                  CGFloat width = [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
+                  UIFont *font = [UIFont systemFontOfSize:9];
+                  [comments drawInRect:CGRectMake(offset, -1.0f, width, font.lineHeight) withFont:font];
+                  offset += (width+2.0f);
+              }
+          }
+          
+          if (_hasMedia) {
+              [[UIImage imageNamed:@"stamp_cell_media.png"] drawAtPoint:CGPointMake(offset, 0.0f)];
+          }
+          
+      }];
+      [commentView release];
+      _commentView = commentView;
 
   }
   return self;
@@ -159,10 +171,10 @@
 }
 
 - (void)setupWithStamp:(id<STStamp>)stamp {
-        
+
     [_category release], _category=nil;
     _category = [stamp.entity.subtitle copy];
-    
+        
     [_title release], _title = nil;
     _title = [stamp.entity.title copy];
     
@@ -179,17 +191,47 @@
     _stampImage = [[Util stampImageForUser:stamp.user withSize:STStampImageSize14] retain];
    
     _commentCount = [stamp.numComments integerValue];
+    for (id obj in stamp.contents) {
+        _hasMedia = [[obj images] count] > 0;
+        if (_hasMedia) {
+            break;
+        }
+    }
+    
+    // stats previews
+    _statsView.hidden = ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] <= 0.0f);
+    if (!_statsView.hidden) {
+        [_statsView setupWithStamp:stamp maxRows:1];
+    }
+    
+    CGRect frame = _commentView.frame;
+    frame.size.width = 0.0f;
+    frame.size.height = 10.0f;
+    if (_hasMedia) {
+        frame.size.width += 10.0f;
+    }
+    if (_commentCount > 0) {
+        frame.size.width += 12.0f;
+        if (!_hasMedia) {
+            frame.size.width += [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
+        }
+    }
+    frame.origin.x = ceilf(self.bounds.size.width-(frame.size.width+16.0f));
+    frame.origin.y = _statsView.hidden ? self.bounds.size.height - 20.0f : _statsView.frame.origin.y - 29.0f;
+    _commentView.frame = frame;
     
     [_headerView setNeedsDisplay];
-
+    [_commentView setNeedsDisplay];
+    
     // date
     _dateLabel.text = [Util userReadableTimeSinceDate:stamp.created];
     [_dateLabel sizeToFit];
-    CGRect frame = _dateLabel.frame;
-    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+10.0f)), 12);
+    frame = _dateLabel.frame;
+    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 12);
     _dateLabel.frame = frame;
     
     // user avatar
+    _userImageView.image = nil;
     UIImage *cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:stamp.user size:STProfileImageSize46];
     if (cachedImage) {
         _userImageView.image = cachedImage;
@@ -201,12 +243,6 @@
         }];
     }
     
-    // stats previews
-    _statsView.hidden = ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] <= 0.0f);
-    if (!_statsView.hidden) {
-        [_statsView setupWithStamp:stamp maxRows:1];
-    }
-    
 }
 
 + (NSString*)cellIdentifier {
@@ -216,7 +252,8 @@
 + (CGFloat)heightForStamp:(id<STStamp>)stamp {
     CGFloat defaultHeight = 90.0f;
     if (stamp) {
-        if ([STPreviewsView previewHeightForStamp:stamp andMaxRows:1] > 0) {
+         NSInteger count = stamp.previews.credits.count + stamp.previews.likes.count + stamp.previews.todos.count + stamp.previews.comments.count;
+        if (count > 0) {
             defaultHeight += 45.0f;
         }
     }

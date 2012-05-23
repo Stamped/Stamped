@@ -136,6 +136,7 @@
    @"image_dimensions", @"imageDimensions",
    @"image_url", @"imageURL",
    @"is_liked", @"isLiked",
+   @"num_comments", @"numComments",
    @"is_fav", @"isTodod",
    @"stamp_id", @"stampID",
    @"url", @"URL",
