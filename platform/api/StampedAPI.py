@@ -2928,7 +2928,7 @@ class StampedAPI(AStampedAPI):
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
-            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (len(stamps), limit))
         
         return stamps
     
@@ -2949,7 +2949,7 @@ class StampedAPI(AStampedAPI):
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
-            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (len(stamps), limit))
         
         return stamps
 

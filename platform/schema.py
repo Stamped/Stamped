@@ -176,6 +176,7 @@ class Schema(object):
         elif name in self.__class__._duplicates:
             raise SchemaException('Duplicate attribute used')
         else:
+            logs.warning('Setting non-schema field "%s" on %s' % (name, self))
             object.__setattr__(self, name, value)
 
     def __delattr__(self, name):

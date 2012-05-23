@@ -100,9 +100,6 @@ class AMongoCollectionView(AMongoCollection):
                     }, 
                 ])
 
-        #utils.log(pprint.pformat(query))
-        #utils.log(pprint.pformat(timeSlice))
-
         logs.debug("QUERY: %s" % query)
         logs.debug("SLICE: %s" % timeSlice.dataExport())
         
@@ -201,8 +198,8 @@ class AMongoCollectionView(AMongoCollection):
                     }, 
                 ])
 
-        logs.info("QUERY: %s" % query)
-        logs.info("SLICE: %s" % searchSlice.dataExport())
+        logs.debug("QUERY: %s" % query)
+        logs.debug("SLICE: %s" % searchSlice.dataExport())
         
         # find, sort, and truncate results
         ### TODO: Change ranking
