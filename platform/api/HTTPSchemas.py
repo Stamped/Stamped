@@ -2415,20 +2415,21 @@ class HTTPStamp(Schema):
         coordinates             = getattr(entity, 'coordinates', None)
         credit                  = getattr(stamp, 'credit', [])
         contents                = getattr(stamp, 'contents', [])
-
         previews                = getattr(stamp, 'previews', {})
         comments                = getattr(previews, 'comments', [])
         likes                   = getattr(previews, 'likes', [])
         todos                   = getattr(previews, 'todos', [])
         credits                 = getattr(previews, 'credits', [])
 
+        data = stamp.dataExport()
+        data['contents'] = []
+        self.dataImport(data, overflow=True)
+
         if credit is not None and len(credit) > 0:
             self.credit = credit
 
-        self.entity = HTTPEntityMini().importEntity(entity)
-
-        self.dataImport(stamp.dataExport(), overflow=True)
         self.user               = HTTPUserMini().importUserMini(stamp.user)
+        self.entity             = HTTPEntityMini().importEntity(entity)
         self.entity.coordinates = _coordinatesDictToFlat(coordinates)
         self.created            = stamp.timestamp.stamped
         self.modified           = stamp.timestamp.modified
