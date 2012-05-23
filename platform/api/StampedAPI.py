@@ -2988,7 +2988,7 @@ class StampedAPI(AStampedAPI):
 
         t0 = time.time()
         result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-            logs.debug('Time for _getStampCollection: %s' % (time.time() - t0))
+        logs.debug('Time for _getStampCollection: %s' % (time.time() - t0))
 
         return result
 
