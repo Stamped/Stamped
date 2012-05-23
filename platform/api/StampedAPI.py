@@ -2470,7 +2470,7 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     @API_CALL
-    def getStampFromUser(self, screenName, stampNumber, userId=None):
+    def getStampFromUser(self, screenName=None, stampNumber=None, userId=None):
         if userId is None:
             userId = self._userDB.getUserByScreenName(screenName).user_id
         
