@@ -82,7 +82,7 @@ def show(request, authUserId, http_schema, **kwargs):
     if 'stamp_id' in http_schema:
         stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
     else:
-        stamp = stampedAPI.getStampFromUser(userId=http_schema.user.user_id, 
+        stamp = stampedAPI.getStampFromUser(userId=http_schema.user_id, 
                                             stampNumber=http_schema.stamp_num)
     
     stamp = HTTPStamp().importStamp(stamp)

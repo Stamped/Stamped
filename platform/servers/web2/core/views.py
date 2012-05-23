@@ -271,10 +271,11 @@ def sdetail(request, schema, **kwargs):
     
     if not IS_PROD and schema.screen_name == 'travis':
         user  = travis_test.user
-        stamp = travis_test.stamps[-schema.stamp_num]
+        #stamp = travis_test.stamps[(-schema.stamp_num) - 1]
     else:
         user  = stampedAPIProxy.getUser(screen_name=schema.screen_name)
-        stamp = stampedAPIProxy.getStampFromUser(schema.screen_name, schema.stamp_num)
+    
+    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")

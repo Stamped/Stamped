@@ -2559,9 +2559,9 @@ class HTTPStampId(Schema):
 class HTTPStampRef(Schema):
     @classmethod
     def setSchema(cls):
-        # stamp_id or (user and stamp_num)
+        # stamp_id or (user_id and stamp_num)
         cls.addProperty('stamp_id',             basestring)
-        cls.addNestedProperty('user',           HTTPUserMini, required=True)
+        cls.addProperty('user_id',              basestring)
         cls.addProperty('stamp_num',            int)
 
 
