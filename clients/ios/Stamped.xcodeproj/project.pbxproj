@@ -1359,6 +1359,26 @@
 		6323F1181526262300BE408C /* STPlayerPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F1161526261A00BE408C /* STPlayerPopUp.m */; };
 		6323F11B1526360600BE408C /* STScrollViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11A152635FE00BE408C /* STScrollViewContainer.m */; };
 		6323F11C1526360600BE408C /* STScrollViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11A152635FE00BE408C /* STScrollViewContainer.m */; };
+		63313519156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
+		6331351A156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
+		6331351B156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
+		6331351C156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
+		6331351D156C067D00BF9B8D /* TEMP_todo_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313517156C067D00BF9B8D /* TEMP_todo_done.png */; };
+		6331351E156C067D00BF9B8D /* TEMP_todo_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313517156C067D00BF9B8D /* TEMP_todo_done.png */; };
+		6331351F156C067D00BF9B8D /* TEMP_todo_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313517156C067D00BF9B8D /* TEMP_todo_done.png */; };
+		63313520156C067D00BF9B8D /* TEMP_todo_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313517156C067D00BF9B8D /* TEMP_todo_done.png */; };
+		63313521156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */; };
+		63313522156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */; };
+		63313523156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */; };
+		63313524156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */; };
+		6331352D156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */; };
+		6331352E156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */; };
+		6331352F156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */; };
+		63313530156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */; };
+		63313534156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
+		63313535156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
+		63313536156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
+		63313537156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C691540CFE400C8F7D3 /* STPeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C681540CFE400C8F7D3 /* STPeopleViewController.m */; };
@@ -4377,6 +4397,15 @@
 		6323F1161526261A00BE408C /* STPlayerPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlayerPopUp.m; sourceTree = "<group>"; };
 		6323F119152635F900BE408C /* STScrollViewContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScrollViewContainer.h; sourceTree = "<group>"; };
 		6323F11A152635FE00BE408C /* STScrollViewContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollViewContainer.m; sourceTree = "<group>"; };
+		63313516156C067D00BF9B8D /* TEMP_todo_finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TEMP_todo_finished.png; sourceTree = "<group>"; };
+		63313517156C067D00BF9B8D /* TEMP_todo_done.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TEMP_todo_done.png; sourceTree = "<group>"; };
+		63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TEMP_todo_not_done.png; sourceTree = "<group>"; };
+		63313525156C1AEE00BF9B8D /* STTodoSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoSource.h; sourceTree = "<group>"; };
+		6331352B156C1DD300BF9B8D /* STSimpleTodoSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleTodoSource.h; sourceTree = "<group>"; };
+		6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleTodoSource.m; sourceTree = "<group>"; };
+		63313531156C268C00BF9B8D /* STLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoginResponse.h; sourceTree = "<group>"; };
+		63313532156C273300BF9B8D /* STSimpleLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleLoginResponse.h; sourceTree = "<group>"; };
+		63313533156C273300BF9B8D /* STSimpleLoginResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleLoginResponse.m; sourceTree = "<group>"; };
 		63323C621540C1A400C8F7D3 /* STTodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoViewController.h; sourceTree = "<group>"; };
 		63323C631540C1A400C8F7D3 /* STTodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTodoViewController.m; sourceTree = "<group>"; };
 		63323C671540CFE400C8F7D3 /* STPeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPeopleViewController.h; sourceTree = "<group>"; };
@@ -5924,6 +5953,7 @@
 		039B8CEA1562BFA600101BC9 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				63C9835A154A00A6000180DC /* Cache */,
 				0364C0F01564994600EE18C1 /* EGORefreshTableFooterView */,
 				0364C0F31564994600EE18C1 /* EGOTableViewPullRefresh */,
 				039B8CEB1562BFB600101BC9 /* QuartzHelper */,
@@ -6198,6 +6228,8 @@
 				635D1C59155315D600103D1A /* STEndpointResponse.h */,
 				637A182E15595F1000148C0B /* STActivityCount.h */,
 				636273E5155AB07D006AF7B8 /* STImageList.h */,
+				63313525156C1AEE00BF9B8D /* STTodoSource.h */,
+				63313531156C268C00BF9B8D /* STLoginResponse.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6220,6 +6252,8 @@
 		63865A82152A458600FE8A68 /* Simple Models */ = {
 			isa = PBXGroup;
 			children = (
+				63313532156C273300BF9B8D /* STSimpleLoginResponse.h */,
+				63313533156C273300BF9B8D /* STSimpleLoginResponse.m */,
 				6380A7AC1507BAC8003087EF /* STSimpleEntityDetail.h */,
 				6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */,
 				6386EE9815081EBD0019F1DC /* STSimpleAction.h */,
@@ -6298,6 +6332,8 @@
 				636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */,
 				63145D4A156AEACE0027EC92 /* STStampMini.h */,
 				63145D4B156AEACE0027EC92 /* STStampMini.m */,
+				6331352B156C1DD300BF9B8D /* STSimpleTodoSource.h */,
+				6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -6501,6 +6537,7 @@
 				63C983561549FA4D000180DC /* STImageCache.m */,
 			);
 			name = Cache;
+			path = ../..;
 			sourceTree = "<group>";
 		};
 		63C983DA154C7B5B000180DC /* I want to */ = {
@@ -7603,6 +7640,9 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				63313516156C067D00BF9B8D /* TEMP_todo_finished.png */,
+				63313517156C067D00BF9B8D /* TEMP_todo_done.png */,
+				63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */,
 				03E84F53156BEF75000D9A6B /* want_btn_bg_hi@2x.png */,
 				03E84F32156BDD41000D9A6B /* left_menu_icon_settings@2x.png */,
 				03E84F33156BDD41000D9A6B /* left_menu_icon_to-do@2x.png */,
@@ -7972,7 +8012,6 @@
 				63C98407154DD6C3000180DC /* Cell Factories */,
 				63C983F0154C8F16000180DC /* Lazy Lists */,
 				63C983DA154C7B5B000180DC /* I want to */,
-				63C9835A154A00A6000180DC /* Cache */,
 				636961B815436D3800993C4F /* ECSlider */,
 				638067B41541F39A00423E98 /* Users View */,
 				6380679F1541B58A00423E98 /* Debug */,
@@ -8956,6 +8995,9 @@
 				03E84F37156BDD41000D9A6B /* left_menu_icon_settings@2x.png in Resources */,
 				03E84F3B156BDD41000D9A6B /* left_menu_icon_to-do@2x.png in Resources */,
 				03E84F57156BEF75000D9A6B /* want_btn_bg_hi@2x.png in Resources */,
+				6331351C156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */,
+				63313520156C067D00BF9B8D /* TEMP_todo_done.png in Resources */,
+				63313524156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9660,6 +9702,9 @@
 				03E84F36156BDD41000D9A6B /* left_menu_icon_settings@2x.png in Resources */,
 				03E84F3A156BDD41000D9A6B /* left_menu_icon_to-do@2x.png in Resources */,
 				03E84F56156BEF75000D9A6B /* want_btn_bg_hi@2x.png in Resources */,
+				6331351B156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */,
+				6331351F156C067D00BF9B8D /* TEMP_todo_done.png in Resources */,
+				63313523156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10364,6 +10409,9 @@
 				03E84F35156BDD41000D9A6B /* left_menu_icon_settings@2x.png in Resources */,
 				03E84F39156BDD41000D9A6B /* left_menu_icon_to-do@2x.png in Resources */,
 				03E84F55156BEF75000D9A6B /* want_btn_bg_hi@2x.png in Resources */,
+				6331351A156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */,
+				6331351E156C067D00BF9B8D /* TEMP_todo_done.png in Resources */,
+				63313522156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11071,6 +11119,9 @@
 				03E84F34156BDD41000D9A6B /* left_menu_icon_settings@2x.png in Resources */,
 				03E84F38156BDD41000D9A6B /* left_menu_icon_to-do@2x.png in Resources */,
 				03E84F54156BEF75000D9A6B /* want_btn_bg_hi@2x.png in Resources */,
+				63313519156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */,
+				6331351D156C067D00BF9B8D /* TEMP_todo_done.png in Resources */,
+				63313521156C067D00BF9B8D /* TEMP_todo_not_done.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11390,6 +11441,8 @@
 				031527A6156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CE156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E4156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
+				63313530156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
+				63313537156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11677,6 +11730,8 @@
 				031527A5156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CD156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E3156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
+				6331352F156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
+				63313536156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11963,6 +12018,8 @@
 				031527A4156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CC156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E2156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
+				6331352E156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
+				63313535156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12261,6 +12318,8 @@
 				031527A3156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CB156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E1156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
+				6331352D156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
+				63313534156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
