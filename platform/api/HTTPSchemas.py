@@ -980,6 +980,7 @@ class HTTPEntity(Schema):
     def _addMetadata(self, name, value, **kwargs):
         if value is not None and len(value) > 0:
             item        = HTTPEntityMetadataItem()
+            logs.info('addMetaData name: %s' % name)
             item.name   = name
             item.value  = value
 
