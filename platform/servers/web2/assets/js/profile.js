@@ -19,6 +19,12 @@ var g_update_stamps = null;
         var screen_name = STAMPED_PRELOAD.user.screen_name;
         var update_navbar_layout = null;
         
+        var blacklisted_entity_images = {
+            'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' : true, 
+            'http://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png' : true, 
+            'http://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png' : true
+        };
+        
         
         // ---------------------------------------------------------------------
         // initialize profile header navigation
@@ -43,7 +49,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=10";
+            var limit = "limit=25";
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
@@ -155,8 +161,11 @@ var g_update_stamps = null;
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function($scope) {
+            var $items = $scope;
+            
             if (typeof($scope) === 'undefined') {
                 $scope = $(document);
+                $items = $scope.find('.stamp-gallery-item');
             }
             
             update_timestamps($scope);
@@ -171,13 +180,20 @@ var g_update_stamps = null;
                     var find = function(selector) {
                         var $elements = $this.find(selector);
                         $elements     = $elements.filter(function() {
-                            return !$(this).hasClass('hidden');
+                            var $this = $(this);
+                            
+                            if ($this.attr('src') in blacklisted_entity_images) {
+                                $this.addClass('hidden').parent().addClass('hidden');
+                                return false;
+                            } else {
+                                return !$this.hasClass('hidden');
+                            }
                         });
                         
                         $elements.each(function(i, element) {
                             element.onerror = function() {
                                 var $element = $(element);
-                                $element.addClass('hidden');
+                                $element.addClass('hidden').parent().addClass('hidden');
                                 
                                 update_images();
                             };
@@ -186,9 +202,10 @@ var g_update_stamps = null;
                         return $elements;
                     };
                     
-                    images.push.apply(images, $this.find('.stamp-map'));
-                    images.push.apply(images, find('.stamp-user-image img'));
+                    images.push.apply(images, find('.stamp-user-image   img'));
                     images.push.apply(images, find('.stamp-entity-image img'));
+                    
+                    images.push.apply(images, $this.find('.stamp-map'));
                     images.push.apply(images, $this.find('.stamp-icon'));
                     
                     if (images.length > 0) {
@@ -203,12 +220,13 @@ var g_update_stamps = null;
                             };
                         }
                         
+                        $preview.removeClass('hidden').parent().removeClass('hidden');
                         $preview.show();
                         
                         for (i = 1; i < images.length; i++) {
                             var $image = $(images[i]);
                             
-                            $image.hide();
+                            $image.hide().addClass('hidden').parent().addClass('hidden');
                         }
                     }
                     
@@ -218,15 +236,33 @@ var g_update_stamps = null;
                 update_images();
             });
             
-            $scope.find('a.sdetail').click(function(event) {
+            $items.click(function(event) {
                 event.preventDefault();
                 
                 var $this = $(this);
-                var href  = $this.attr('href');
+                var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+                var href  = $link.attr('href');
                 
                 href = href.replace('http://www.stamped.com', '');
-                href = '/travis/stamps/4/TEMPORARY';
+                href = href + "?" + new Date().getTime();
                 
+                //href = '/travis/stamps/4/TEMPORARY';
+                
+                $.colorbox({
+                    href        : href, 
+                    
+                    width       : "75%", 
+                    transition  : "elastic", 
+                    fixed       : true, 
+                    scrolling   : false, 
+                    
+                    onComplete  : function() {
+                        update_stamps();
+                        init_social_sharing();
+                    }
+                });
+                
+                /*
                 var $target = $("<div></div>");
                 
                 $target.load(href + " .sdetail_body", {}, function() {
@@ -238,12 +274,12 @@ var g_update_stamps = null;
                         inline      : true, 
                         href        : $sdetail, 
                         
-                        maxWidth    : (2 * window.innerWidth) / 3, 
+                        maxwidth    : (2 * window.innerwidth) / 3, 
                         transition  : "elastic", 
                         fixed       : true, 
                         scrolling   : false
                     });
-                });
+                });*/
                 
                 return false;
             });
@@ -276,7 +312,22 @@ var g_update_stamps = null;
                 closeSpeed      : 300, 
                 
 				closeClick      : true, 
-                maxWidth        : (2 * window.innerWidth) / 3
+                //maxWidth        : (2 * window.innerWidth) / 3, 
+                
+                helpers         : {
+                    overlay     : {
+                        speedIn  : 150, 
+                        speedOut : 300, 
+                        opacity  : 0.8, 
+                        
+                        css      : {
+                            cursor             : 'pointer', 
+                            'background-color' : '#fff'
+                        }, 
+                        
+                        closeClick  : true
+                    }
+                }
 			});
             
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
@@ -318,8 +369,13 @@ var g_update_stamps = null;
             $gallery = $(".stamp-gallery .stamps");
             
             $gallery.isotope({
-                itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "masonry"
+                itemSelector        : '.stamp-gallery-item', 
+                layoutMode          : "masonry"/*, 
+                animationOptions    : {
+                    duration        : 800,
+                    easing          : 'easeOut',
+                    queue           : true
+                }*/
             });
             
             init_infinite_scroll();
@@ -794,25 +850,39 @@ var g_update_stamps = null;
             var gallery_width   = $stamp_gallery.width();
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
-            var max_blurb_width = "149px";
-            var min_blurb_width = (gallery_width - (62 + 24 + 148 + 24)) + "px";
+            var max_blurb_width = 125;
+            var min_blurb_width = (gallery_width - (24 + 58 + 24 + 148));
             
-            var width = window.innerWidth;
-            var left  = gallery_x + gallery_width + fixed_padding;
-            var right = (width - (gallery_x + fixed_width + nav_bar_width + fixed_padding));
+            var width           = window.innerWidth;
+            var left            = gallery_x + gallery_width + fixed_padding;
+            var right           = (width - (gallery_x + fixed_width + nav_bar_width + 1.5 * fixed_padding));
+            var pos             = left;
             
-            var pos   = left;
-            var update= false;
-            var large = false;
             var force_no_update = false;
+            var update          = false;
+            var gallery         = false;
             
             var reset_stamp_gallery_items = function(desired_width) {
                 $stamp_gallery.find('.content').each(function(i, elem) {
                     var $elem = $(elem);
+                    var desired_width_px = desired_width + "px";
+                    var desired_width_header_px;
+                    
+                    if (gallery) {
+                        desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                    } else {
+                        //desired_width_header_px = (desired_width + 148) + "px";
+                        desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
+                    }
                     
                     $elem.find('.content_1').css({
-                        'width'     : desired_width, 
-                        'max-width' : desired_width
+                        'width'     : desired_width_px, 
+                        'max-width' : desired_width_px
+                    });
+                    
+                    $elem.find('.entity-header').css({
+                        'width'     : desired_width_header_px, 
+                        'max-width' : desired_width_header_px
                     });
                 });
             };
@@ -828,7 +898,7 @@ var g_update_stamps = null;
                 }
             } else */
             if (right < fixed_padding / 2) {
-                console.debug("SMALL GALLERY: width=" + width + ", pos=" + pos);
+                //console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
                 
                 if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery + " " + narrow_gallery);
@@ -837,8 +907,8 @@ var g_update_stamps = null;
                 
                 reset_stamp_gallery_items(min_blurb_width);
             } else {
-                console.debug("LARGE GALLERY: width=" + width + ", pos=" + pos);
-                large = true;
+                //console.debug("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
+                gallery = true;
                 
                 if (!$stamp_gallery.hasClass(wide_gallery)) {
                     $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
@@ -851,7 +921,7 @@ var g_update_stamps = null;
             if (!force_no_update) {
                 if (update || last_nav_pos !== pos) {
                     
-                    if (!large) {
+                    if (!gallery) {
                         var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
                         var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
                         

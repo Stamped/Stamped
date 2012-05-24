@@ -7,16 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STTodoSource.h"
+#import "STUser.h"
+#import "STPreviews.h"
 #import "STEntity.h"
-#import "STStamp.h"
 
 @protocol STTodo <NSObject>
 
 @property (nonatomic, readonly, copy) NSString* todoID;
 @property (nonatomic, readonly, copy) NSString* userID;
-@property (nonatomic, readonly, retain) id<STEntity> entity;
-@property (nonatomic, readonly, retain) id<STStamp> stamp;
+
+@property (nonatomic, readonly, retain) id<STTodoSource> source;
 @property (nonatomic, readonly, copy) NSString* created;
 @property (nonatomic, readonly, copy) NSNumber* complete;
+@property (nonatomic, readonly, copy) NSString* stampID;
+
+@property (nonatomic, readonly, retain) id<STPreviews> previews;
+
+//TODO remove
+@property (nonatomic, readonly, retain) id<STEntity> entity;
 
 @end

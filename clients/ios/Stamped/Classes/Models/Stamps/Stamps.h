@@ -10,10 +10,13 @@
 #import "STStampedAPI.h"
 
 @interface Stamps : NSObject {
-  NSArray *_data;
-  STGenericCollectionSlice *_slice;
+    NSArray *_data;
+    NSArray *_identifiers;
+    STCancellation *_cancellation;
+    NSInteger _page;
 }
 
+@property (nonatomic, copy) NSString *identifier;
 @property (nonatomic, readonly, getter = isReloading) BOOL reloading;
 @property (nonatomic, readonly, getter = hasMoreData) BOOL moreData;
 @property (nonatomic, assign) STStampedAPIScope scope;
@@ -33,5 +36,9 @@
 - (NSInteger)numberOfStamps;
 - (BOOL)isEmpty;
 
+/*
+ * Searching
+ */
+- (void)searchWithQuery:(NSString*)query;
 
 @end

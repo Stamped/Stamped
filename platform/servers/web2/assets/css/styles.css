@@ -61,6 +61,14 @@ a:visited {
 a:hover {
   text-decoration: underline;
 }
+ol,
+ul {
+  text-decoration: none;
+  list-style: none;
+  text-indent: 0;
+  padding: 0;
+  margin: 0;
+}
 .replaced {
   display: block;
   text-indent: -9999em;
@@ -200,7 +208,7 @@ header .header-body p.sign-in a.button:active {
   box-shadow: 0 0 4px 0 #0f4897;
 }
 header .header-body a.button {
-  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
   letter-spacing: .1em;
@@ -220,7 +228,7 @@ header .header-body a.button {
 }
 .user-logo-small {
   position: absolute;
-  top: -10px;
+  top: 0px;
   right: -22px;
   display: inline-block;
   width: 44px;
@@ -277,30 +285,19 @@ header .header-body a.button {
   left: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg {
-  /*background: url(/assets/img/collage.940x256.jpg) no-repeat fixed center center;
-                    background-size: 100%;
-                    
-                    position: absolute;
-                    width:   100%;
-                    height:  100%;
-                    opacity: 0.45;*/
-
-  /*$(document).ready(function() {
-                        $('.innerbg').css({
-                            position : 'absolute', 
-                            width    : '100%', 
-                            height   : '100%', 
-                            opacity  : '0.45', 
-                            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
-                            'background-size': '100%', 
-                        }).addClass('blur_8');
-                    });*/
-
+  background: url(/assets/img/profile_cover_default.png) repeat;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large {
+  margin: 0 24px 0 0;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large {
   margin: 0 24px 0 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth p {
@@ -326,7 +323,7 @@ header .header-body a.button {
   padding: 18px 20px 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp .number {
-  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
   font-size: 2em;
@@ -457,7 +454,7 @@ header .header-body a.button {
 }
 .profile-section1 .number,
 .profile-section2 .number {
-  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
   font-size: 2em;
@@ -699,18 +696,15 @@ header .header-body a.button {
   box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   top: 50%;
   right: 40px;
-  -webkit-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-  -moz-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-  transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  /*@params:  0.8s ease-in-out;
+    @targets: top @params, left @params;
+    
+    -webkit-transition: @targets;
+    -moz-transition: @targets;
+    transition: @targets;*/
+
   margin: -180px 0 0;
   padding: 0;
-}
-#stamp-category-nav-bar ol {
-  text-decoration: none;
-  list-style: none;
-  text-indent: 0;
-  padding: 0;
-  margin: 0;
 }
 #stamp-category-nav-bar ol li {
   position: relative;
@@ -1741,16 +1735,15 @@ a.pronounced-title {
 }
 .pronounced-title {
   position: relative;
-  font-family: TitlingGothicFB, StampedFallbackFont, helvetica, sans-serif;
+  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
-  /*font-smooth: always;
-    -webkit-font-smoothing: antialiased;*/
-
-  font-size: 2em;
+  font-size: 3em;
   letter-spacing: .05em;
   color: #000;
-  /*text-shadow: 0.05em 0.05em 0.03em #aaa;*/
+  /*text-shadow: 0.05em 0.05em 0.03em #aaa;
+    font-smooth: always;
+    -webkit-font-smoothing: antialiased;*/
 
 }
 .large {

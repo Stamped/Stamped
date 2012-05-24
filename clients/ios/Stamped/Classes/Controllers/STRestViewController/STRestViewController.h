@@ -10,14 +10,18 @@
 #import "EGORefreshTableHeaderView.h"
 #import "EGORefreshTableFooterView.h"
 #import "NoDataView.h"
+#import "STSearchView.h"
 
 @protocol STRestController;
 
-@class STSearchView;
-@interface STRestViewController : UIViewController <UITextFieldDelegate> {
+@interface STRestViewController : UIViewController <STSearchViewDelegate> {
     
     UITableViewStyle _tableStyle;
     UITableView *_tableView;
+    UITableView *_searchResultsTableView;
+    UILabel *_searchNoResultsLabel;
+    UIImageView *_stickyEnd;
+    
     EGORefreshTableFooterView *_footerRefreshView;
     EGORefreshTableHeaderView *_headerRefreshView;
     UIView *_searchOverlay;
@@ -42,6 +46,7 @@
 @property(strong, nonatomic) UIView *footerView;
 @property(readonly, nonatomic) STSearchView *searchView;
 @property(nonatomic, assign, getter = isShowingSearch) BOOL showsSearchBar;
+@property(nonatomic, readonly, getter = isSearching) BOOL searching;
 
 - (void)setContentInset:(UIEdgeInsets)inset;
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView;

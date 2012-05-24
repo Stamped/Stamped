@@ -9,7 +9,6 @@
 #import "STRootViewController.h"
 #import "Util.h"
 #import "STNavigationBar.h"
-#import "ECSlidingViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STAppDelegate.h"
 #import "STNavigationItem.h"

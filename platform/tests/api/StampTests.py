@@ -426,9 +426,6 @@ class StampedAPIEntitiesStampedBy(StampedAPIStampTest):
         }
         result = self.handleGET(path, data)
 
-        import pprint
-        print('entity_id: %s' % self.entity['entity_id'])
-        pprint.pprint(result)
         self.assertEqual(result['friends']['count'], 1)
         self.assertEqual(result['friends']['stamps'][0]['entity']['entity_id'], self.entity['entity_id'])
         self.assertEqual(result['friends']['stamps'][0]['stamp_id'], self.stamp['stamp_id'])

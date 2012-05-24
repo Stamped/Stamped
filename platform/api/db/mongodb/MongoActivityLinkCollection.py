@@ -33,8 +33,10 @@ class MongoActivityLinkCollection(AMongoCollection):
             item                = ActivityLink()
             item.activity_id    = activityId 
             item.user_id        = userId
-            item.created        = now
-            item.modified       = now
+            timestamp           = TimestampSchema()
+            timestamp.created   = now
+            timestamp.modified  = now
+            item.timestamp      = timestamp
             self._addObject(item)
 
     def removeActivityLink(self, activityId):

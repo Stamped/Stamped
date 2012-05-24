@@ -54,6 +54,7 @@ try:
     from StampedSource          import StampedSource
 
     from Netflix                import *
+    from Facebook               import *
 except Exception:
     report()
     raise
@@ -192,7 +193,8 @@ class StampedAPI(AStampedAPI):
         timestamp = UserTimestampSchema()
         timestamp.created = now
         account.timestamp = timestamp
-        account.password = convertPasswordForStorage(account.password)
+        if account.password is not None:
+            account.password = convertPasswordForStorage(account.password)
 
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
@@ -203,20 +205,22 @@ class StampedAPI(AStampedAPI):
         account.color_secondary = '0057D1'
         
         # Set default alerts
-        account.ios_alert_credit       = True
-        account.ios_alert_like         = True
-        account.ios_alert_fav          = True
-        account.ios_alert_mention      = True
-        account.ios_alert_comment      = True
-        account.ios_alert_reply        = True
-        account.ios_alert_follow       = True
-        account.email_alert_credit     = True
-        account.email_alert_like       = False
-        account.email_alert_fav        = False
-        account.email_alert_mention    = True
-        account.email_alert_comment    = True
-        account.email_alert_reply      = True
-        account.email_alert_follow     = True
+        alerts                          = AccountAlerts()
+        alerts.ios_alert_credit         = True
+        alerts.ios_alert_like           = True
+        alerts.ios_alert_fav            = True
+        alerts.ios_alert_mention        = True
+        alerts.ios_alert_comment        = True
+        alerts.ios_alert_reply          = True
+        alerts.ios_alert_follow         = True
+        alerts.email_alert_credit       = True
+        alerts.email_alert_like         = False
+        alerts.email_alert_fav          = False
+        alerts.email_alert_mention      = True
+        alerts.email_alert_comment      = True
+        alerts.email_alert_reply        = True
+        alerts.email_alert_follow       = True
+        account.alerts                  = alerts 
         
         # Validate screen name
         account.screen_name = account.screen_name.strip()
@@ -228,9 +232,10 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
-        account.email = str(account.email).lower().strip()
-        if not utils.validate_email(account.email):
-            raise StampedInputError("Invalid format for email address")
+        if account.email is not None:
+            account.email = str(account.email).lower().strip()
+            if not utils.validate_email(account.email):
+                raise StampedInputError("Invalid format for email address")
         
         # Add image timestamp if exists
         if imageData:
@@ -246,60 +251,100 @@ class StampedAPI(AStampedAPI):
         
         # Add profile image
         if imageData:
-            self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
+            try:
+                self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
+            except IOError:
+                #if there was a problem with the image format, just ignore the image
+                account.image_cache = None
         
         # Asynchronously send welcome email and add activity items
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
         
         return account
+
+    @API_CALL
+    def addFacebookAccount(self, new_fb_account):
+        """
+        For adding a Facebook auth account, first pull the user info from Facebook, verify that the user_id is not already
+         linked to another user, populate the linked account information and then chain to the standard addAccount() method
+        """
+
+        # first, grab all the information from Facebook using the passed in token
+        fb = globalFacebook()
+        user = fb.getUserInfo(new_fb_account.facebook_token)
+
+        account = None
+        try:
+            account = self.getAccountByFacebookId(user['id'])
+        except StampedUnavailableError:
+            pass
+        # Check if the facebook account is already tied to a Stamped account
+        if account is not None:
+            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+
+        account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
+        logs.info(account)
+        account.linked_accounts             = LinkedAccounts()
+        fb_acct                             = FacebookAccountSchema()
+        fb_acct.facebook_id                 = user['id']
+        fb_acct.facebook_name               = user['name']
+        fb_acct.facebook_screen_name        = user.pop('username', None)
+        account.linked_accounts.facebook    = fb_acct
+        account.auth_service                = 'facebook'
+
+        # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
+        #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+
+        return self.addAccount(account, new_fb_account.profile_image)
     
     @API_CALL
     def addAccountAsync(self, user_id):
         account = self._accountDB.getAccount(user_id)
         
         # Add activity if invitations were sent
-        invites = self._inviteDB.getInvitations(account.email)
-        invitedBy = {}
-        
-        for invite in invites:
-            invitedBy[invite['user_id']] = 1
-            
-        """
-        # Skip this activity item for now 
+        if account.email is not None:
+            invites = self._inviteDB.getInvitations(account.email)
+            invitedBy = {}
 
-            ### TODO: What genre are we picking for this activity item?
-            self._addActivity(genre='invite_sent', 
-                              user_id=invite['user_id'], 
-                              recipient_ids=[ account.user_id ])
+            for invite in invites:
+                invitedBy[invite['user_id']] = 1
+
+            """
+            # Skip this activity item for now
+
+                ### TODO: What genre are we picking for this activity item?
+                self._addActivity(genre='invite_sent',
+                                  user_id=invite['user_id'],
+                                  recipient_ids=[ account.user_id ])
+
+            if len(invitedBy) > 0:
+                ### TODO: What genre are we picking for this activity item?
+                self._addActivity(genre='invite_received',
+                                  user_id=account.user_id,
+                                  recipient_ids=invitedBy.keys())
+            """
+
+            self._inviteDB.join(account.email)
         
-        if len(invitedBy) > 0:
-            ### TODO: What genre are we picking for this activity item?
-            self._addActivity(genre='invite_received', 
-                              user_id=account.user_id, 
-                              recipient_ids=invitedBy.keys())
-        """
-        
-        self._inviteDB.join(account.email)
-        
-        domain = str(account.email).split('@')[1]
-        if domain != 'stamped.com':
-            msg = {}
-            msg['to'] = account.email
-            msg['from'] = 'Stamped <noreply@stamped.com>'
-            msg['subject'] = 'Welcome to Stamped!'
-            
-            try:
-                base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
-                template = open(path, 'r')
-            except Exception:
-                ### TODO: Add error logging?
-                raise
-            
-            params = {'screen_name': account.screen_name, 'email_address': account.email}
-            msg['body'] = utils.parseTemplate(template, params)
-            
-            utils.sendEmail(msg, format='html')
+            domain = str(account.email).split('@')[1]
+            if domain != 'stamped.com':
+                msg = {}
+                msg['to'] = account.email
+                msg['from'] = 'Stamped <noreply@stamped.com>'
+                msg['subject'] = 'Welcome to Stamped!'
+
+                try:
+                    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
+                    template = open(path, 'r')
+                except Exception:
+                    ### TODO: Add error logging?
+                    raise
+
+                params = {'screen_name': account.screen_name, 'email_address': account.email}
+                msg['body'] = utils.parseTemplate(template, params)
+
+                utils.sendEmail(msg, format='html')
     
     @API_CALL
     def removeAccount(self, authUserId):
@@ -401,7 +446,8 @@ class StampedAPI(AStampedAPI):
         self._accountDB.removeAccount(account.user_id)
         
         # Remove email address from invite list
-        self._inviteDB.remove(account.email)
+        if account.email is not None:
+            self._inviteDB.remove(account.email)
         
         return account
     
@@ -433,9 +479,10 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
         
         # Validate email address
-        account.email = str(account.email).lower().strip()
-        if not utils.validate_email(account.email):
-            raise StampedInputError("Invalid format for email address")
+        if account.email is not None:
+            account.email = str(account.email).lower().strip()
+            if not utils.validate_email(account.email):
+                raise StampedInputError("Invalid format for email address")
         
         self._accountDB.updateAccount(account)
         
@@ -454,7 +501,16 @@ class StampedAPI(AStampedAPI):
     def getAccount(self, authUserId):
         account = self._accountDB.getAccount(authUserId)
         return account
-    
+
+    @API_CALL
+    def getAccountByFacebookId(self, facebookId):
+        accounts = self._accountDB.getAccountsByFacebookId(facebookId)
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
+        elif len(accounts) > 1:
+            raise StampedIllegalActionError("More than one account exists using facebook id: %s" % facebookId)
+        return accounts[0]
+
     @API_CALL
     def updateProfile(self, authUserId, data):
         ### TODO: Reexamine how updates are done
@@ -529,7 +585,7 @@ class StampedAPI(AStampedAPI):
         
         image = self._imageDB.getImage(data)
         image_url = self._imageDB.addProfileImage(screen_name.lower(), image)
-        
+
         if user is not None:
             image_cache = datetime.utcnow()
             user.image_cache = image_cache
@@ -782,21 +838,16 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
-                    (account.netflix_user_id, account.netflix_token, account.netflix_secret))
+        nf_user_id  = account.linked_accounts.netflix.netflix_user_id
+        nf_token    = account.linked_accounts.netflix.netflix_token
+        nf_secret   = account.linked_accounts.netflix.netflix_secret
 
-        if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret == None:
+        if (nf_user_id == None or nf_token == None or nf_secret == None):
             logs.info('Returning because of missing account credentials')
             return None
 
         netflix = globalNetflix()
-        logs.info('About to add to Queue')
-        result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
-        logs.info('successfully added to queue')
-
-        # TODO check results
-
-        return True
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
 
     @API_CALL
     def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
@@ -1266,7 +1317,7 @@ class StampedAPI(AStampedAPI):
             entityId = self._convertSearchId(entityId)
         else:
             self.mergeEntityId(entityId)
-        
+
         return self._entityDB.getEntity(entityId)
     
     @API_CALL
@@ -1640,6 +1691,8 @@ class StampedAPI(AStampedAPI):
         t0 = time.time()
         t1 = t0
 
+        previewLength = 10
+
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
@@ -1694,7 +1747,7 @@ class StampedAPI(AStampedAPI):
 
         for stat in stats:
             if stat.preview_credits is not None:
-                for credit in stat.preview_credits:
+                for credit in stat.preview_credits[:previewLength]:
                     allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
@@ -1706,6 +1759,27 @@ class StampedAPI(AStampedAPI):
         logs.debug('Time for getStamps: %s' % (time.time() - t1))
         t1 = time.time()
 
+        """
+        COMMENTS 
+
+        Pull in the comment objects for each stamp
+        """
+        allCommentIds   = set()
+        commentIds      = {}
+
+        for stat in stats:        
+            # Comments 
+            if stat.preview_comments is not None:
+                for commentId in stat.preview_comments[:previewLength]:
+                    allCommentIds.add(commentId)
+
+        comments = self._commentDB.getComments(list(allCommentIds))
+
+        for comment in comments:
+            commentIds[comment.comment_id] = comment
+
+        logs.debug('Time for getComments: %s' % (time.time() - t1))
+        t1 = time.time()
 
         """
         USERS 
@@ -1729,20 +1803,18 @@ class StampedAPI(AStampedAPI):
                 for credit in stamp.credit:
                     allUserIds.add(credit.user_id)
             
-            # Comments
-            if stamp.previews is not None and stamp.previews.comments is not None:
-                for comment in stamp.previews.comments:
-                    allUserIds.add(comment.user.user_id)
+        for k, v in commentIds.items():
+            allUserIds.add(v.user.user_id)
 
         for stat in stats:
             # Likes
             if stat.preview_likes is not None:
-                for like in stat.preview_likes:
+                for like in stat.preview_likes[:previewLength]:
                     allUserIds.add(like)
 
             # To-Dos
             if stat.preview_todos is not None:
-                for todo in stat.preview_todos:
+                for todo in stat.preview_todos[:previewLength]:
                     allUserIds.add(todo)
 
         for stampId, stamp in underlyingStampIds.iteritems():
@@ -1772,8 +1844,12 @@ class StampedAPI(AStampedAPI):
             logs.debug('Time for authUserId queries: %s' % (time.time() - t1))
             t1 = time.time()
 
+        """
+        APPLY DATA 
+        """
 
         stamps = []
+
         for stamp in stampData:
             try:
                 stamp.entity = entityIds[stamp.entity.entity_id]
@@ -1803,61 +1879,66 @@ class StampedAPI(AStampedAPI):
                     stat = None
 
                 if stat is not None:
-                    # Likes
-                    likeobjects = []
-                    if stat.preview_likes is not None:
-                        for like in stat.preview_likes:
+                    # Comments
+                    commentPreviews = []
+                    if stat.preview_comments is not None:
+                        for commentId in stat.preview_comments[:previewLength]:
                             try:
-                                likeobjects.append(userIds[str(like)])
+                                comment = commentIds[str(commentId)]
+                                try:
+                                    comment.user = userIds[str(comment.user.user_id)]
+                                except KeyError:
+                                    logs.warning("Key error for user (user_id = %s)" % userId)
+                                    raise
+                                commentPreviews.append(comment)
                             except KeyError:
-                                logs.warning("Key error for like (user_id = %s)" % like)
+                                logs.warning("Key error for comment (comment_id = %s)" % commentId)
                                 logs.debug("Stamp: %s" % stamp)
                                 continue
-                    previews.likes = likeobjects
+                    previews.comments = commentPreviews
+
+                    # Likes
+                    likePreviews = []
+                    if stat.preview_likes is not None:
+                        for userId in stat.preview_likes[:previewLength]:
+                            try:
+                                likePreviews.append(userIds[str(userId)])
+                            except KeyError:
+                                logs.warning("Key error for like (user_id = %s)" % userId)
+                                logs.debug("Stamp: %s" % stamp)
+                                continue
+                    previews.likes = likePreviews
                     
                     # Todos
-                    todos = []
+                    todoPreviews = []
                     if stat.preview_todos is not None:
-                        for todo in stat.preview_todos:
+                        for userId in stat.preview_todos[:previewLength]:
                             try:
-                                todos.append(userIds[str(todo)])
+                                todoPreviews.append(userIds[str(userId)])
                             except KeyError:
-                                logs.warning("Key error for todo (user_id = %s)" % todo)
+                                logs.warning("Key error for todo (user_id = %s)" % userId)
                                 logs.debug("Stamp: %s" % stamp)
                                 continue
-                    previews.todos = todos
+                    previews.todos = todoPreviews
 
                     # Credits
-                    credits = []
+                    creditPreviews = []
                     if stat.preview_credits is not None:
-                        for i in stat.preview_credits:
+                        for i in stat.preview_credits[:previewLength]:
                             try:
                                 credit = underlyingStampIds[str(i)]
                                 credit.user = userIds[str(credit.user.user_id)]
                                 credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                credits.append(credit.minimize())
+                                creditPreviews.append(credit.minimize())
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
                                 logs.debug("Stamp: %s" % stamp)
                                 continue
-                    previews.credits = credits
+                    previews.credits = creditPreviews
 
                 else:
                     tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
-
-                # Comments
-                comments = []
-                if stamp.previews is not None:
-                    for comment in stamp.previews.comments:
-                        try:
-                            comment.user = userIds[str(comment.user.user_id)]
-                            comments.append(comment)
-                        except KeyError, e:
-                            logs.warning("Key error for comment / user: %s" % comment)
-                            logs.debug("Stamp: %s" % stamp)
-                            continue
-                previews.comments = comments
 
                 stamp.previews = previews
 
@@ -1951,7 +2032,9 @@ class StampedAPI(AStampedAPI):
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
-            content.timestamp.created = now
+            timestamp = TimestampSchema()
+            timestamp.created = now
+            content.timestamp = timestamp
 
         # Add image to stamp
         if imageData is not None:
@@ -1997,20 +2080,22 @@ class StampedAPI(AStampedAPI):
             imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            sizes   = {
+            supportedSizes   = {
                 ''        : (imageWidth, imageHeight),   #original size
                 '-ios1x'  : (200, 200),
                 '-ios2x'  : (400, 400),
                 '-web'    : (580, 580),
                 '-mobile' : (572, 572),
                 }
-            for k,v in sizes.iteritems():
+            sizes = []
+            for k,v in supportedSizes.iteritems():
                 logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
                 size            = ImageSizeSchema()
                 size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                 size.width      = v[0]
                 size.height     = v[1]
-                image.sizes.append(size)
+                sizes.append(size)
+            image.sizes = sizes
             content.images.append(image)
             imageExists = True
 
@@ -2032,7 +2117,6 @@ class StampedAPI(AStampedAPI):
 
         # Build new stamp
         else:
-            stamp.user_id               = user.user_id
             stamp.entity                = entity
             stamp.contents              = [ content ]
 
@@ -2431,9 +2515,11 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     @API_CALL
-    def getStampFromUser(self, screenName, stampNumber):
-        user = self._userDB.getUserByScreenName(screenName)
-        stamp = self._stampDB.getStampFromUserStampNum(user.user_id, stampNumber)
+    def getStampFromUser(self, screenName=None, stampNumber=None, userId=None):
+        if userId is None:
+            userId = self._userDB.getUserByScreenName(screenName).user_id
+        
+        stamp = self._stampDB.getStampFromUserStampNum(userId, stampNumber)
         stamp = self._enrichStampObjects(stamp)
         
         # TODO: if authUserId == stamp.user.user_id, then the privacy should be disregarded
@@ -2857,6 +2943,138 @@ class StampedAPI(AStampedAPI):
      #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
     """
     
+    def _getStampCollection(self, stampIds, timeSlice, authUserId=None):
+        
+        if timeSlice.limit is None or timeSlice.limit <= 0 or timeSlice.limit > 50:
+            timeSlice.limit = 50
+        
+        # Buffer of 10 additional stamps
+        limit = timeSlice.limit
+        timeSlice.limit = limit + 10
+        
+        t0 = time.time()
+        stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
+        logs.debug('Time for _getStampCollectionSlice: %s' % (time.time() - t0))
+
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = stamps[:limit]
+        
+        if len(stampData) >= limit and len(stamps) < limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (len(stamps), limit))
+        
+        return stamps
+    
+    def _searchStampCollection(self, stampIds, searchSlice, authUserId=None):
+        
+        if searchSlice.limit is None or searchSlice.limit <= 0 or searchSlice.limit > 50:
+            searchSlice.limit = 50
+        
+        # Buffer of 10 additional stamps
+        limit = searchSlice.limit
+        searchSlice.limit = limit + 10
+        
+        t0 = time.time()
+        stampData = self._stampDB.searchStampCollectionSlice(stampIds, searchSlice)
+        logs.debug('Time for _searchStampCollectionSlice: %s' % (time.time() - t0))
+
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = stamps[:limit]
+        
+        if len(stampData) >= limit and len(stamps) < limit:
+            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (len(stamps), limit))
+        
+        return stamps
+
+    def _getUserStampIds(self, userId, authUserId=None):
+        user = self._userDB.getUser(userId)
+        return self._collectionDB.getUserStampIds(user.user_id)
+
+    def _getScopeStampIds(self, scope, authUserId=None):
+        """
+        If not logged in return "popular" results. Also, allow scope to be set to "popular" if 
+        not logged in; otherwise, raise exception.
+        """
+
+        if scope is None:
+            return None
+
+        if scope == 'popular':
+            return None
+
+        if authUserId is None and scope is not None:
+            raise StampedInputError("Must be logged in to use scope")
+
+        if authUserId is None:
+            return None
+
+        if scope == 'me':
+            return self._collectionDB.getUserStampIds(authUserId)
+
+        if scope == 'inbox':
+            return self._collectionDB.getInboxStampIds(authUserId)
+
+        if scope == 'friends':
+            raise NotImplementedError()
+
+        if scope == 'fof':
+            return self._collectionDB.getFofStampIds(authUserId)
+
+        return None
+
+    @API_CALL
+    def getStampCollection(self, timeSlice, authUserId=None):
+
+        # User
+        if timeSlice.user_id is not None:
+            t0 = time.time()
+            stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
+
+        # Inbox
+        else:
+            t0 = time.time()
+            stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
+
+        return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
+
+    @API_CALL
+    def searchStampCollection(self, searchSlice, authUserId=None):
+
+        # User
+        if searchSlice.user_id is not None:
+            t0 = time.time()
+            stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
+            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
+
+        # Inbox
+        else:
+            t0 = time.time()
+            stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
+
+        return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     def _setSliceParams(self, data, default_limit=20, default_sort=None):
         # Since
         try: 
@@ -2894,28 +3112,6 @@ class StampedAPI(AStampedAPI):
         except Exception:
             return cap
     
-    def _getStampCollection(self, stampIds, timeSlice, authUserId=None, enrich=True):
-        
-        stampCap    = 50
-        commentCap  = 10
-        
-        if timeSlice.limit is None or timeSlice.limit > stampCap:
-            timeSlice.limit = stampCap
-        
-        # Buffer of 10 additional stamps
-        limit = timeSlice.limit
-        timeSlice.limit = limit + 10
-        
-        stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
-
-        stamps = self._enrichStampCollection(stampData, timeSlice, authUserId, enrich, commentCap)
-        stamps = stamps[:limit]
-        
-        if len(stampData) >= limit and len(stamps) < limit:
-            logs.warning("TOO MANY STAMPS FILTERED OUT! %s, %s" % (stampIds, limit))
-        
-        return stamps
-    
     def _getStampCollection_DEPRECATED(self, authUserId, stampIds, genericCollectionSlice, enrich=True):
         if stampIds is not None and genericCollectionSlice.offset >= len(stampIds):
             return []
@@ -2946,7 +3142,7 @@ class StampedAPI(AStampedAPI):
         
         stampData = self._stampDB.getStampsSlice(stampIds, genericCollectionSlice)
 
-        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
+        stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId, enrich, commentCap)
         stamps = stamps[:limit]
         
         if len(stampData) >= limit and len(stamps) < limit:
@@ -2966,7 +3162,7 @@ class StampedAPI(AStampedAPI):
         
         return stamps
 
-    def _enrichStampCollection(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
+    def _enrichStampCollection_DEPRECATED(self, stampData, genericCollectionSlice, authUserId=None, enrich=True, commentCap=4):
         commentPreviews = {}
         
         try:
@@ -3001,36 +3197,6 @@ class StampedAPI(AStampedAPI):
             stamps = self._enrichStampObjects(stamps, authUserId=authUserId, nofilter=True)
 
         return stamps
-
-    @API_CALL
-    def getStampCollection(self, timeSlice, authUserId=None):
-
-        # User
-        if timeSlice.user_id is not None:
-            user        = self._userDB.getUser(timeSlice.user_id)
-            ### TODO: Check privacy
-
-            stampIds    = self._collectionDB.getUserStampIds(user.user_id)
-            result      = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-            return result
-
-        # Inbox
-        if authUserId is None:
-            raise StampedPermissionsError("Must be logged in to inbox")
-
-        if timeSlice.scope == 'me':
-            stampIds = self._collectionDB.getUserStampIds(authUserId)
-        elif timeSlice.scope == 'friends':
-            stampIds = self._collectionDB.getInboxStampIds(authUserId)
-        elif timeSlice.scope == 'fof':
-            stampIds = self._collectionDB.getFofStampIds(authUserId)
-        else:
-            stampIds = None
-
-        result = self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
-
-        return result
     
     @API_CALL
     def getInboxStamps(self, authUserId, genericCollectionSlice):
@@ -3153,7 +3319,7 @@ class StampedAPI(AStampedAPI):
                     return [], 0
             stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
             
-        stamps = self._enrichStampCollection(stampData, genericCollectionSlice, authUserId=authUserId)
+        stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId=authUserId)
 
         return stamps, count
     
@@ -3692,7 +3858,6 @@ class StampedAPI(AStampedAPI):
     def _mergeEntity(self, entity, link=True):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         modified = self._resolveEntity(entity)
-
         if link:
             modified = self._resolveEntityLinks(entity) | modified
 
@@ -3818,7 +3983,15 @@ class StampedAPI(AStampedAPI):
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
-                trackList.append(track.minimize())
+                if track is None:
+                    continue
+                # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(track, BasicEntity):
+                    track = track.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                trackList.append(track)
 
                 # Compare entity id before and after
                 if trackId != track.entity_id:
@@ -3848,7 +4021,15 @@ class StampedAPI(AStampedAPI):
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
-                albumList.append(album.minimize())
+                if album is None:
+                    continue
+                # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(album, BasicEntity):
+                    album = album.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                albumList.append(album)
 
                 # Compare entity id before and after
                 if albumId != album.entity_id:
@@ -3878,9 +4059,13 @@ class StampedAPI(AStampedAPI):
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
-                import pprint
-                logs.info('stub: \n%s' % pprint.pformat(stub))
-                artistList.append(artist.minimize())
+                # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
+                if isinstance(artist, BasicEntity):
+                    artist = artist.minimize()
+                else:
+                    logs.info('failed to resolve stub: %s' % stub)
+
+                artistList.append(artist)
 
                 # Compare entity id before and after
                 if artistId != artist.entity_id:

@@ -10,10 +10,11 @@
 #import "STCacheModelSource.h"
 #import "Util.h"
 #import "STURLConnection.h"
+#import "STHybridCacheSource.h"
 
-@interface STImageCache () <STCacheModelSourceDelegate>
+@interface STImageCache () <STHybridCacheSourceDelegate>
 
-@property (nonatomic, readonly, retain) STCacheModelSource* cache;
+@property (nonatomic, readonly, retain) STHybridCacheSource* cache;
 
 @end
 
@@ -24,85 +25,86 @@
 static STImageCache* _sharedInstance;
 
 + (void)initialize {
-  _sharedInstance = [[STImageCache alloc] init];
+    _sharedInstance = [[STImageCache alloc] init];
 }
 
 + (STImageCache*)sharedInstance {
-  return _sharedInstance;
+    return _sharedInstance;
 }
 
 - (id)init
 {
-  self = [super init];
-  if (self) {
-    cache_ = [[STCacheModelSource alloc] initWithDelegate:self];
-    cache_.maximumCost = 10 * 1000 * 1000; // 10 megs
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        cache_ = [[STHybridCacheSource alloc] initWithCachePath:@"com.stamped.Images" relativeToCacheDir:YES];
+        cache_.maxMemoryCount = 400;
+        cache_.delegate = self;
+    }
+    return self;
 }
 
 - (void)dealloc
 {
-  [cache_ release];
-  [super dealloc];
+    [cache_ release];
+    [super dealloc];
 }
 
-- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
-                          withKey:(NSString*)key 
-                 andCurrentObject:(id)object 
-                     withCallback:(void(^)(id, NSInteger, NSError*, STCancellation*))block {
-  STCancellation* cancellation = [STURLConnection cancellationWithURL:[NSURL URLWithString:key] 
-                                                          andCallback:^(NSData *data, NSError *error, STCancellation *cancellation2) {
-                                                            if (data) {
-                                                              UIImage* image = [UIImage imageWithData:data];
-                                                              block(image, data.length, nil, cancellation2);
-                                                            }
-                                                            else {
-                                                              block(nil, -1, error, cancellation2);
-                                                            }
-                                                          }];
-  return cancellation;
+- (STCancellation *)objectForHybridCache:(STHybridCacheSource *)cache
+                                 withKey:(NSString *)key 
+                            withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
+    return [STURLConnection cancellationWithURL:[NSURL URLWithString:key]
+                                    andCallback:^(NSData *data, NSError *error, STCancellation *cancellation) {
+                                        if (data) {
+                                            UIImage* image = [UIImage imageWithData:data];
+                                            block(image, nil, cancellation);
+                                        }
+                                        else {
+                                            block(nil, error, cancellation);
+                                        }
+                                    }];
 }
 
 - (STCancellation*)userImageForUser:(id<STUser>)user 
                                size:(STProfileImageSize)size
                         andCallback:(void(^)(UIImage*, NSError*, STCancellation*))block {
-  NSString* url = [Util profileImageURLForUser:user withSize:size];
-  return [self imageForImageURL:url andCallback:block];
+    NSString* url = [Util profileImageURLForUser:user withSize:size];
+    return [self imageForImageURL:url andCallback:block];
 }
 
 - (STCancellation*)entityImageForEntityDetail:(id<STEntityDetail>)entityDetail
                                   andCallback:(void(^)(UIImage* image, NSError* error, STCancellation* cancellation))block {
-  NSString* url = [Util entityImageURLForEntityDetail:entityDetail];
-  return [self imageForImageURL:url andCallback:block];
+    NSString* url = [Util entityImageURLForEntityDetail:entityDetail];
+    return [self imageForImageURL:url andCallback:block];
 }
 
 - (STCancellation*)imageForImageURL:(NSString*)URL
                         andCallback:(void(^)(UIImage* image, NSError* error, STCancellation* cancellation))block {
-  STCancellation* cancellation = [STCancellation cancellation];
-  [self.cache fetchWithKey:URL callback:^(id model, NSError *error, STCancellation* cancellation2) {
-    if (!cancellation.cancelled) {
-      block(model, error, cancellation);
-    }
-  }];
-  return cancellation;
+    NSAssert(URL != nil, @"Requested nil URL");
+    STCancellation* cancellation = [STCancellation cancellation];
+    [self.cache objectForKey:URL forceUpdate:YES withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+        if (!cancellation.cancelled) {
+            block((UIImage*)model, error, cancellation);
+        }
+    }];;
+    return cancellation;
 }
 
 - (UIImage*)cachedUserImageForUser:(id<STUser>)user 
                               size:(STProfileImageSize)size {
-  return [self cachedImageForImageURL:[Util profileImageURLForUser:user withSize:size]];
+    return [self cachedImageForImageURL:[Util profileImageURLForUser:user withSize:size]];
 }
 
 - (UIImage*)cachedEntityImageForEntityDetail:(id<STEntityDetail>)entityDetail {
-  return [self cachedImageForImageURL:[Util entityImageURLForEntityDetail:entityDetail]];
+    return [self cachedImageForImageURL:[Util entityImageURLForEntityDetail:entityDetail]];
 }
 
 - (UIImage*)cachedImageForImageURL:(NSString*)URL {
-  return [self.cache cachedValueForKey:URL];
+    NSAssert(URL != nil, @"Requested nil URL");
+    return (UIImage*)[self.cache cachedObjectForKey:URL];
 }
 
 - (void)fastPurge {
-  [self.cache fastPurge];
+    [self.cache fastMemoryPurge];
 }
 
 @end

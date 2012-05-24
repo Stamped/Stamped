@@ -44,7 +44,7 @@ class SinglePlatformSource(BasicSource):
                     menu = self.__singleplatform.get_menu_schema(singleplatform_id)
                     entity.menu = menu != None
                     if menu is not None:
-                        menu['entity_id'] = entity.entity_id
+                        menu.entity_id = entity.entity_id
                         decorations['menu'] = menu
                         logs.debug('Regenerated menu for %s' % singleplatform_id)
         except HTTPError as e:

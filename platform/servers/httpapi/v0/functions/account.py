@@ -12,6 +12,7 @@ from httpapi.v0.helpers import *
 from errors             import *
 from HTTPSchemas        import *
 from Netflix            import *
+from Facebook           import *
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
@@ -23,7 +24,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
     logs.info('account schema passed in: %s' % schema)
     schema = stampedAPI.addAccount(schema, http_schema.profile_image)
 
-    user   = HTTPUser().importUser(schema)
+    user   = HTTPUser().importAccount(schema)
     logs.user(user.user_id)
     
     token  = stampedAuth.addRefreshToken(client_id, user.user_id)
@@ -32,14 +33,21 @@ def create(request, client_id, http_schema, schema, **kwargs):
     return transformOutput(output)
 
 @handleHTTPRequest(requires_auth=False,
-                   #requires_client=True,
-                   http_schema=HTTPAccountNew,
-                   conversion=HTTPAccountNew.convertToAccount,
+                   requires_client=True,
+                   http_schema=HTTPFacebookAccountNew,
+                   conversion=HTTPFacebookAccountNew.convertToFacebookAccountNew,
                    upload='profile_image')
+@require_http_methods(["POST"])
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
+    account = stampedAPI.addFacebookAccount(schema)
 
+    user   = HTTPUser().importAccount(account)
+    logs.user(user.user_id)
 
-    return
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
+
+    return transformOutput(output)
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])
@@ -162,30 +170,6 @@ def removeTwitter(request, authUserId, **kwargs):
     return transformOutput(True)
 
 
-
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPFacebookAuthResponse)
-    #parse_request_kwargs={'allow_oauth_token': True})
-@require_http_methods(["GET"])
-def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
-    logs.info('\n### HIT facebookLoginCallback  request: %s  oauth_token: %s   secret: %s' % (request, http_schema.oauth_token, http_schema.secret))
-    fb = globalFacebook()
-
-    result = facebook.authorize(http_schema.oauth_token, http_schema.secret)
-
-    logs.info('\n### request auth result: %s' % result)
-
-    netflixAuth = NetflixAuthSchema()
-    netflixAuth.netflix_token       = result['oauth_token']
-    netflixAuth.netflix_secret      = result['oauth_token_secret']
-    netflixAuth.netflix_user_id     = result['user_id']
-
-    logs.info('\nnetflixAuth %s' % netflixAuth)
-
-    stampedAPI.updateLinkedAccounts(http_schema.stamped_oauth_token, netflixAuth=netflixAuth)
-
-    return createNetflixLoginResponse(authUserId)
-
-
 @handleHTTPRequest()
 @require_http_methods(["POST"])
 def removeFacebook(request, authUserId, **kwargs):
@@ -262,18 +246,14 @@ def netflixLogin(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'allow_oauth_token': True})
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
-    logs.info('\n### HIT netflixLoginCallback  request: %s  oauth_token: %s   secret: %s' % (request, http_schema.oauth_token, http_schema.secret))
     netflix = globalNetflix()
 
     result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
-    logs.info('\n### request auth result: %s' % result)
 
     netflixAuth = NetflixAuthSchema()
     netflixAuth.netflix_token       = result['oauth_token']
     netflixAuth.netflix_secret      = result['oauth_token_secret']
     netflixAuth.netflix_user_id     = result['user_id']
-
-    logs.info('\nnetflixAuth %s' % netflixAuth)
 
     stampedAPI.updateLinkedAccounts(http_schema.stamped_oauth_token, netflixAuth=netflixAuth)
 
@@ -285,7 +265,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
-    logs.info('\n### ATTEMPTING TO ADD TO NETFLIX with netflix_id: %s' % http_schema.netflix_id)
+    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
@@ -297,13 +277,11 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     if result == None:
         return createNetflixLoginResponse(authUserId)
 
-    logs.info('\n### SUCCESSFULLY ADDED TO NETFLIX INSTANT QUEUE')
-
     response = HTTPEndpointResponse()
 
     source                  = HTTPActionSource()
     source.source           = 'stamped_confirm'
-    source.source_data      = 'We have added this item to your Netflix Queue.'
+    source.source_data      = 'The item is now added to your Netflix Queue.'
     #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
     #TODO throw status codes on error

@@ -19,7 +19,6 @@
 #import "STButton.h"
 #import "STActionPair.h"
 #import "UIFont+Stamped.h"
-#import "ECSlidingViewController.h"
 #import "STStampedAPI.h"
 #import "STConfiguration.h"
 #import "DDMenuController.h"
@@ -975,12 +974,10 @@ static Rdio* _rdio;
 + (void)addHomeButtonToController:(UIViewController*)controller withBadge:(BOOL)flag {
   
     UIImage* normalImage = [UIImage imageNamed:@"nav_btn_menu"];
-    UIImage* activeImage = [Util gradientImage:[UIImage imageNamed:@"nav_btn_menu"] withPrimaryColor:@"99AACC" secondary:@"CCDDFF"];
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(0.0f, 0.0f, 44.0f, 44.0f);
     [button setImage:normalImage forState:UIControlStateNormal];
-    [button setImage:activeImage forState:UIControlStateHighlighted];
     [button addTarget:self action:@selector(_homeButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
     
     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:button];

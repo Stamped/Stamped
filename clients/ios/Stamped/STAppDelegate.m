@@ -10,7 +10,6 @@
 #import "STRootViewController.h"
 #import "BWQuincyManager.h"
 #import <RestKit/RestKit.h>
-#import "STLegacyInboxViewController.h"
 #import "OAuthToken.h"
 #import "DetailedEntity.h"
 #import "User.h"
@@ -24,19 +23,17 @@
 #import "STDebug.h"
 #import "Util.h"
 #import "STRootScrollView.h"
-#import "ECSlidingViewController.h"
 #import "STLeftMenuViewController.h"
 #import "STRightMenuViewController.h"
 #import "STConfiguration.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
-#import "STLegacyInboxViewController.h"
 #import "STInboxViewController.h"
 #import "STIWantToViewController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
-#import "SettingsViewController.h"
+#import "STSettingsViewController.h"
 #import "STStampCell.h"
 #import "STImageCache.h"
 #import "STStampedAPI.h"
@@ -128,12 +125,12 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [self.window makeKeyAndVisible];
     
     // 1st run debugging code..
-    
+    /*
     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
     [menuController.view addSubview:welcomeController.view];
     welcomeController.view.frame = menuController.view.bounds;
     [welcomeController animateIn];
-    
+    */
   //[[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
     
      
@@ -393,14 +390,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   //Root Menu
   NSDictionary* inboxChoices = [NSDictionary dictionaryWithObjectsAndKeys:
                                 [STInboxViewController class], @"New Inbox",
-                                [STLegacyInboxViewController class], @"Old Inbox",
                                 nil];
   [STConfiguration addChoices:inboxChoices originalKey:@"New Inbox" forKey:@"Root.inbox"];
   [STConfiguration addValue:[STIWantToViewController class] forKey:@"Root.iWantTo"];
   [STConfiguration addValue:[STUniversalNewsController class] forKey:@"Root.news"];
   [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];
   [STConfiguration addValue:[STDebugViewController class] forKey:@"Root.debug"];
-  [STConfiguration addValue:[SettingsViewController class] forKey:@"Root.settings"];
+  [STConfiguration addValue:[STSettingsViewController class] forKey:@"Root.settings"];
   NSDictionary* choices = [NSDictionary dictionaryWithObjectsAndKeys:
                            @"created", @"Created",
                            @"modified", @"Modified",

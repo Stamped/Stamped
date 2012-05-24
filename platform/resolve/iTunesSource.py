@@ -47,7 +47,29 @@ class _iTunesObject(object):
         self.__itunes       = itunes
         self.__data         = data
         self.__itunes_id    = itunes_id
-    
+
+    def _findBestImage(self, url):
+        """
+        Takes a artworkUrl100 url and returns the highest res url
+        """
+        size400url = url.replace('100x100', '400x400')
+        size200url = url.replace('100x100', '200x200')
+
+        try:
+            urllib2.urlopen(size400url)
+            return size400url
+        except urllib2.HTTPError:
+            pass
+
+        try:
+            urllib2.urlopen(size200url)
+            return size200url
+        except urllib2.HTTPError:
+            pass
+
+        return url
+
+
     @lazyProperty
     def data(self):
         if self.__data == None:

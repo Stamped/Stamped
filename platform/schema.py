@@ -45,6 +45,8 @@ class Schema(object):
         for c in cls.__mro__:
             if hasattr(c, '_propertyInfo'):
                 for k,v in c._propertyInfo.items():
+                # TODO: do check for valid python identifier string
+                    #r'^[_a-zA-Z][_a-zA-Z0-9]*$'
                     if k in cls._propertyInfo:
                         cur = cls._propertyInfo[k]
                         if cur != v:
@@ -174,6 +176,9 @@ class Schema(object):
         elif name in self.__class__._duplicates:
             raise SchemaException('Duplicate attribute used')
         else:
+            if not name.startswith('_Schema__') and not name.startswith('__'):
+                logs.warning('Setting non-schema field "%s"' % (name))
+                raise AttributeError('SETTING NON-SCHEMA FIELD "%s"' % name)
             object.__setattr__(self, name, value)
 
     def __delattr__(self, name):
@@ -255,8 +260,8 @@ class Schema(object):
                         self.__setattr__(k, nestedPropList)
                     else:
                         self.__setattr__(k, v)
-                except KeyError:
-                    if kwargs.pop('overflow', False):
+                except (AttributeError, KeyError):
+                    if kwargs.pop('overflow', False) == True:
                         continue
         except Exception as e:
             logs.warning(e)

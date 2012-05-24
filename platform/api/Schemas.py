@@ -298,10 +298,11 @@ class Account(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                  basestring)
         cls.addProperty('name',                     basestring, required=True)
-        
+        cls.addProperty('auth_service',             basestring, required=True)
+
         cls.addProperty('name_lower',               basestring)
-        cls.addProperty('email',                    basestring, required=True)
-        cls.addProperty('password',                 basestring, required=True)
+        cls.addProperty('email',                    basestring)
+        cls.addProperty('password',                 basestring)
         cls.addProperty('screen_name',              basestring, required=True)
         cls.addProperty('screen_name_lower',        basestring)
         cls.addProperty('color_primary',            basestring)
@@ -319,11 +320,20 @@ class Account(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.privacy    = False
-        self.timestamp  = UserTimestampSchema()
-        self.stats      = UserStatsSchema()
+        self.privacy        = False
+        self.timestamp      = UserTimestampSchema()
+        self.stats          = UserStatsSchema()
+        self.auth_service   = 'stamped'
 
-
+class FacebookAccountNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring)#, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('facebook_token',               basestring, required=True)
 
 # ##### #
 # Users #
@@ -1609,7 +1619,7 @@ class TimeSlice(Schema):
         # Filtering
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
-        cls.addPropertyList('properties',           basestring)
+        # cls.addPropertyList('properties',           basestring)
         cls.addNestedProperty('viewport',           ViewportSchema) 
 
         # Scope
@@ -1625,12 +1635,13 @@ class SearchSlice(Schema):
         # Filtering
         cls.addProperty('category',                 basestring)
         cls.addProperty('subcategory',              basestring)
-        cls.addPropertyList('properties',           basestring)
+        # cls.addPropertyList('properties',           basestring)
         cls.addNestedProperty('viewport',           ViewportSchema) 
 
         # Scope
         cls.addProperty('user_id',                  basestring)
         cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+        cls.addProperty('query',                    basestring, required=True) 
 
 class RelevanceSlice(Schema):
     @classmethod

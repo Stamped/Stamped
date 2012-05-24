@@ -119,12 +119,16 @@ class MongoFriendshipCollection(AFriendshipDB):
 
         visitUser(userId, 1)
 
-        result = friends[distance]
+        result = set([])
+
+        if distance in friends:
+            result = friends[distance]
 
         if not inclusive:
             prevDistance = distance - 1
             while prevDistance >= 0:
-                result = result.difference(friends[prevDistance])
+                if prevDistance in friends:
+                    result = result.difference(friends[prevDistance])
                 prevDistance = prevDistance - 1
 
         return list(result)

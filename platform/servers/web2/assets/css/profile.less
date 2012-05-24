@@ -9,7 +9,7 @@
 @import "libs/elements.less";
 @import "libs/isotope.less";
 
-@stamp-gallery-item-min-width: 305px;
+@stamp-gallery-item-min-width: 305px - 24px - 24px;
 
 #main-content {
     position: relative;
@@ -21,7 +21,7 @@
     clear: both;
     text-align: center;
     
-    padding: 1.5em 2em;
+    padding: 1.5em;
     margin:  0;
     
     .top-wave {
@@ -45,23 +45,37 @@
     
     /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
-    .transition(all, 0.8s, ease-out);
+    
+    /*@args: 0.8s ease-out;
+    
+    -webkit-transition: top @args, left @args, width @args, height @args;
+    -moz-transition: top @args, left @args, width @args, height @args;
+    transition: top @args, left @args, width @args, height @args;*/
+
+    /*.transition(all, 0.8s, ease-out);*/
     
     /* TODO: keep this to enable GPU acceleration or not? Profile! */
     /*.transform(perspective(200px) translate(0,0));*/
     
-    border-bottom: 1px solid #bbb;
-    background-color: #FEFEFE;
+    /*background-color: #FEFEFE;*/
     
-    &:hover .content .content_2 .timestamp {
-        opacity: 1;
+    &:hover {
+        cursor: pointer;
+        
+        .content .content_2 .timestamp {
+            opacity: 1;
+        }
+    }
+    
+    .stamp-gallery-item-inner {
+        border-bottom: 1px solid #bbb;
     }
     
     .content {
-        position: relative;
-        padding: 1em 0;
-        width: 100%;
         //border: 4px dotted black;
+        position: relative;
+        width:  100%;
+        margin: 24px;
         
         .content_0 {
             //border: 1px solid red;
@@ -74,16 +88,11 @@
             display: block;
             text-align: left;
             float: left;
-            clear: left;
-            margin-left: 62px;
-            width: 50%;
-            max-width: 50%;
+            margin-left: 58px + 24px;
             text-align: justify;
+            padding-right: 32px;
             
             .stamp-contents {
-                font-size: 80%;
-                margin: .2em 0 0;
-                
                 .stamped-content { }
             }
             
@@ -95,7 +104,6 @@
                 
                 .preview {
                     display: inline;
-                    margin: 0 .8em 0 0;
                 }
                 
                 .preview-image(@l, @t) {
@@ -138,66 +146,74 @@
         
         .content_2 {
             //border: 1px solid green;
-            position: relative;
-            display: block;
             float: right;
-            top:  0;
-            left: 0;
+            display: block;
+            width: 148px + 8px;
+            
+            position: relative;
+            top: 0;
+            left: -24px;
             
             .timestamp_raw, .timestamp {
                 display: block;
                 
+                white-space: nowrap;
                 text-align: right;
-                font-weight: bold;
                 font-size: 80%;
+                color: #777;
                 
                 position: absolute;
-                left: -60%;
+                right: 105%;
+                top:   4px;
             }
             
-            .timestamp_raw {
-                display: none;
-            }
             .timestamp {
                 opacity: 0;
-                
-                .transition(opacity, 0.2s, ease-out);
+                /*.transition(opacity, 0.2s, ease-out);*/
             }
         }
     }
 }
 
-.zoom {
-    background: url(/assets/img/zoom-icon.png) no-repeat;
-    pointer-events: none;
+.timestamp_raw {
+    display: none;
+}
+
+a.lightbox {
     position: absolute;
+    z-index: 101;
     
     top:   8px;
     right: 16px;
     
-    display: block;
-    width:  25px;
-    height: 25px;
+    .zoom {
+        background: url(/assets/img/zoom-icon.png) no-repeat;
+        pointer-events: none;
+        cursor: pointer;
+        
+        display: block;
+        width:  25px;
+        height: 25px;
+    }
     
-    z-index: 101;
     opacity: 0;
     .transition(opacity, 0.2s, ease-out);
 }
 
 .stamp-user-image:hover, .stamp-entity-image:hover {
-    cursor: pointer;
-    
-    .zoom {
+    a.lightbox {
         opacity: 1;
     }
 }
 
 .entity-header {
-    margin-left: 24px;
     display: block;
-    float: right;
+    float: left;
     text-align: left;
-    max-width: @stamp-gallery-item-min-width - 24px - 62px;
+    margin-left: 24px;
+    position: relative;
+    padding: 2px;
+    top: -7px;
     
     .title {
         position: relative;
@@ -222,23 +238,38 @@
     width: 100%;
     
     .stamp-gallery-item {
-        width: @stamp-gallery-item-min-width;
-        margin:  0 12px 24px 0;
-        padding: 0 6px 0;
+        width: 305px;
+        margin:  0 1em 24px 0;
         
         .content {
+            .entity-header {
+                max-width: @stamp-gallery-item-min-width - 62px;
+                margin-bottom: .5em;
+            }
+            
+            .content_0 {
+                float: none;
+                display: block;
+                width: 100%;
+            }
+            .content_0:after {
+                clear: both;
+            }
+            
             .content_1 {
                 margin-left: 0;
-                max-width: 149px; /* 305px - 144px - 12px; */
-                width: 149px; /* 305px - 144px - 12px; */
+                float: none;
+                //max-width: 125px; /* 305px - 144px - 36px; */
+                //width: 125px; /* 305px - 144px - 36px; */
             }
             
             .content_2 {
-                margin: 1.5em 0 0;
+                margin: 0 0 4px 40px;
                 
                 .timestamp {
+                    position: absolute;
                     left: auto;
-                    right: 8px;
+                    right: 18px;
                     top: -1.5em;
                 }
             }
@@ -264,18 +295,18 @@
     .preview-image {
         position: relative;
         display: none;
-        .sized(@preview-wrapper-width);
+        .sized(@preview-width);
     }
     
-    .stamp-map {
-        z-index: 25;
-    }
     .stamp-user-image {
-        z-index: 24;
+        z-index: 25;
         
         img {
             .box-shadow(0, 4px, 8px, -4px, rgba(30,30,30,0.85));
         }
+    }
+    .stamp-map {
+        z-index: 24;
     }
     .stamp-entity-image {
         z-index: 23;
@@ -290,7 +321,7 @@
     
     img {
         .sized(@preview-width);
-        /*.rounded(8px);*/
+        .rounded(8px);
     }
     
     .stamp-category-book  .icon, 
@@ -311,14 +342,19 @@
 
 
 .blurb, .normal_blurb {
-    display: inline-block;
+    display: block;
     text-align: justify;
     quotes: "\201C" "\201D";
+    line-height: 135%;
+    font-family: 'arial', sans-serif;
+    color: #666;
+    
+    line-height: 125%;
+    margin: 1em 0;
 }
 
 .blurb {
-    display: inline-block;
-    max-width: 90%;
+    display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -326,12 +362,13 @@
 
 .wide-gallery {
     .blurb {
-        display: inline-block;
-        max-width: auto;
+        display: block;
         width: auto;
         white-space: inherit;
         overflow: inherit;
         text-overflow: clip;
+        margin: 0 0 1em 0;
+        font-size: 80%;
     }
 }
 
@@ -343,7 +380,7 @@
 .subtitle-line {
     position: relative;
     display: block;
-    margin: -0.3em 0 -.5em;
+    margin: -0.5em 0 0;
     
     p {
         margin: 0;
@@ -355,6 +392,9 @@
         font-size: 80%;
         position: relative;
         top: -2px;
+        
+        font-family: 'arial', sans-serif;
+        color: #666;
     }
     
     .icon {
@@ -378,11 +418,8 @@
 }
 
 .profile-nav {
-    list-style: none;
-    text-decoration: none;
-    
     position: absolute;
-    top: 0;
+    top:   0;
     right: 0;
     
     a {
@@ -429,9 +466,6 @@
 
 /* TODO: fix height issues */
 ul.user-category-distribution {
-    list-style: none;
-    text-decoration: none;
-    
     li {
         float: left;
         width: 10%;

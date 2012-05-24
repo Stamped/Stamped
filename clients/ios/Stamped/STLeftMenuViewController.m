@@ -9,12 +9,10 @@
 #import "STLeftMenuViewController.h"
 #import "Util.h"
 #import "DDMenuController.h"
-#import "STLegacyInboxViewController.h"
 #import "SettingsViewController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
-#import "ECSlidingViewController.h"
 #import "STRootViewController.h"
 #import "STIWantToViewController.h"
 #import "STInboxViewController.h"
@@ -228,7 +226,6 @@
         cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
     
-    //cell.titleLabel.font = [UIFont boldSystemFontOfSize:15];
     cell.titleLabel.textColor = [UIColor colorWithRed:0.4f green:0.4f blue:0.4f alpha:1.0f];
     cell.topBorder = (indexPath.row==1);
     cell.titleLabel.text = [_anchorDataSource objectAtIndex:indexPath.row];
@@ -250,7 +247,7 @@
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
 
-    if (self.tableView == tableView) {
+    if (self.tableView == tableView || [key isEqualToString:@"To-Do"]) {
         
         [menuController setRootController:navController animated:YES];
         
