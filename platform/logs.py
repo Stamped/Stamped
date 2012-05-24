@@ -49,6 +49,8 @@ def _log(level, msg, *args, **kwargs):
 
     try:
         filename    = inspect.stack()[2][1]
+        if filename.rfind('/') != -1:
+            filename = filename[filename.rfind('/') + 1:]
         lineno      = inspect.stack()[2][2]
         fnc         = inspect.stack()[2][3]
     except:
