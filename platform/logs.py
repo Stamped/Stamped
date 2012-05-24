@@ -211,7 +211,7 @@ def save():
     except Exception as e:
 
         log.info('### log exception:\n%s ####### END OF EXCEPTION PRINTOUT' % e)
-        log.info('### localData.log: %s  #### END OF localData.log' % localData.log)
+        log.info('### localData.log: \n%s\n  #### END OF localData.log' % pprint.pformat(localData.log))
         pprint.pprint(localData.log)
         pass
     
