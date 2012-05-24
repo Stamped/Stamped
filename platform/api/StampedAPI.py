@@ -838,21 +838,16 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
-                    (account.netflix_user_id, account.netflix_token, account.netflix_secret))
+        nf_user_id  = account.linked_accounts.netflix.netflix_user_id
+        nf_token    = account.linked_accounts.netflix.netflix_token
+        nf_secret   = account.linked_accounts.netflix.netflix_secret
 
-        if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret == None:
+        if (nf_user_id == None or nf_token == None or nf_secret == None):
             logs.info('Returning because of missing account credentials')
             return None
 
         netflix = globalNetflix()
-        logs.info('About to add to Queue')
-        result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
-        logs.info('successfully added to queue')
-
-        # TODO check results
-
-        return True
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
 
     @API_CALL
     def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
@@ -2085,20 +2080,22 @@ class StampedAPI(AStampedAPI):
             imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            sizes   = {
+            supportedSizes   = {
                 ''        : (imageWidth, imageHeight),   #original size
                 '-ios1x'  : (200, 200),
                 '-ios2x'  : (400, 400),
                 '-web'    : (580, 580),
                 '-mobile' : (572, 572),
                 }
-            for k,v in sizes.iteritems():
+            sizes = []
+            for k,v in supportedSizes.iteritems():
                 logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
                 size            = ImageSizeSchema()
                 size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                 size.width      = v[0]
                 size.height     = v[1]
-                image.sizes.append(size)
+                sizes.append(size)
+            image.sizes = sizes
             content.images.append(image)
             imageExists = True
 

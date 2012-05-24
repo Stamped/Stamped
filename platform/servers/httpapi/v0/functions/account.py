@@ -265,6 +265,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
+    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
