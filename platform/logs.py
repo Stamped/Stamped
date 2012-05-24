@@ -53,7 +53,7 @@ def _log(level, msg, *args, **kwargs):
         fnc = "UNKNOWN FUNCTION"
     
     if localData.format == 'object':
-        item = (datetime.datetime.utcnow(), level, fnc, msg)
+        item = (datetime.datetime.utcnow(), level, fnc, str(msg))
         localData.log['log'].append(item)
         localData.log[level] = True
 
