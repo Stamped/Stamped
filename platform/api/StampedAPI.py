@@ -293,9 +293,9 @@ class StampedAPI(AStampedAPI):
         account.auth_service                = 'facebook'
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
-        profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+        #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
-        return self.addAccount(account, profile_image)
+        return self.addAccount(account, new_fb_account.profile_image)
     
     @API_CALL
     def addAccountAsync(self, user_id):
