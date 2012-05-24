@@ -178,7 +178,7 @@ class Schema(object):
         else:
             if not name.startswith('_Schema__') and not name.startswith('__'):
                 logs.warning('Setting non-schema field "%s"' % (name))
-                raise AttributeError('SETTING NON-SCHEMA FIELD "%s"' % name)
+                raise Exception('SETTING NON-SCHEMA FIELD "%s"' % name)
             object.__setattr__(self, name, value)
 
     def __delattr__(self, name):
