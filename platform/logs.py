@@ -49,6 +49,7 @@ def _log(level, msg, *args, **kwargs):
 
     try:
         fnc = inspect.stack()[2][3]
+        lineno = inspect.stack()[2][2]
     except:
         fnc = "UNKNOWN FUNCTION"
     
@@ -57,12 +58,12 @@ def _log(level, msg, *args, **kwargs):
             msg = str(msg)
         except Exception:
             msg = "LOGGER ERROR: failed to convert msg (type: %s) to string" % type(msg)
-        item = (datetime.datetime.utcnow(), level, fnc, msg)
+        item = (datetime.datetime.utcnow(), level, fnc, lineno, msg)
         localData.log['log'].append(item)
         localData.log[level] = True
 
     # else:
-    msg = "%s | %s | %-25s | %s" % (os.getpid(), localData.logId[:6], fnc, msg)
+    msg = "%s | %s | %-25s | %-5s | %s" % (os.getpid(), localData.logId[:6], fnc, lineno, msg)
     if level == 'warning':
         log.warning(msg, *args, **kwargs)
     elif level == 'info':
