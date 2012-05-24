@@ -126,9 +126,18 @@ class Netflix(object):
         if response.status < 300:
             return json.loads(response.read())
         else:
-            failData = json.loads(response.read())['status']
+            responseData = response.read()
+            failData = json.loads(responseData)['status']
             logs.info('Failed with status code %d' % response.status)
-            raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
+            try:
+                msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
+                     (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code']
+                status_code = failData['status_code']
+            except:
+                msg = 'Netflix returned a failture response: %s' % responseData
+                status_code = response.status
+            finally:
+                raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
                            (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
 
     def __get(self, service, user_id=None, token=None, **parameters):
