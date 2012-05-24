@@ -25,7 +25,7 @@ var g_update_stamps = null;
             'http://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png' : true
         };
         
-                    
+        
         // ---------------------------------------------------------------------
         // initialize profile header navigation
         // ---------------------------------------------------------------------
@@ -49,7 +49,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=10";
+            var limit = "limit=25";
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
@@ -367,8 +367,13 @@ var g_update_stamps = null;
             $gallery = $(".stamp-gallery .stamps");
             
             $gallery.isotope({
-                itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "masonry"
+                itemSelector        : '.stamp-gallery-item', 
+                layoutMode          : "masonry"/*, 
+                animationOptions    : {
+                    duration        : 800,
+                    easing          : 'easeOut',
+                    queue           : true
+                }*/
             });
             
             init_infinite_scroll();
@@ -855,23 +860,23 @@ var g_update_stamps = null;
             var update          = false;
             var gallery         = false;
             
-            var reset_stamp_gallery_items = function(desired_width, is_gallery) {
+            var reset_stamp_gallery_items = function(desired_width) {
                 $stamp_gallery.find('.content').each(function(i, elem) {
                     var $elem = $(elem);
                     var desired_width_px = desired_width + "px";
                     var desired_width_header_px;
                     
-                    if (is_gallery) {
-                        desired_width_header_px = "auto";
-                        //Math.max(305 - 24 - 62, 200) + "px";
+                    if (gallery) {
+                        desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
                     } else {
-                        desired_width_header_px = (desired_width - 24) + "px";
+                        //desired_width_header_px = (desired_width + 148) + "px";
+                        desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
                     }
                     
-                    $elem.find('.content_1').css({
+                    /*$elem.find('.content_1').css({
                         'width'     : desired_width_px, 
                         'max-width' : desired_width_px
-                    });
+                    });*/
                     
                     $elem.find('.entity-header').css({
                         'width'     : desired_width_header_px, 
@@ -898,7 +903,7 @@ var g_update_stamps = null;
                     update = true;
                 }
                 
-                reset_stamp_gallery_items(min_blurb_width, true);
+                reset_stamp_gallery_items(min_blurb_width);
             } else {
                 //console.debug("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
                 gallery = true;
@@ -907,7 +912,7 @@ var g_update_stamps = null;
                     $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
                     update = true;
                     
-                    reset_stamp_gallery_items(max_blurb_width, false);
+                    reset_stamp_gallery_items(max_blurb_width);
                 }
             }
             

@@ -91,9 +91,14 @@
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: all 0.8s ease-out;
-  -moz-transition: all 0.8s ease-out;
-  transition: all 0.8s ease-out;
+  /*@args: 0.8s ease-out;
+    
+    -webkit-transition: top @args, left @args, width @args, height @args;
+    -moz-transition: top @args, left @args, width @args, height @args;
+    transition: top @args, left @args, width @args, height @args;*/
+
+  /*.transition(all, 0.8s, ease-out);*/
+
   /* TODO: keep this to enable GPU acceleration or not? Profile! */
 
   /*.transform(perspective(200px) translate(0,0));*/
@@ -123,11 +128,9 @@
   display: block;
   text-align: left;
   float: left;
-  clear: left;
   margin-left: 82px;
-  width: 50%;
-  max-width: 50%;
   text-align: justify;
+  padding-right: 32px;
 }
 .stamp-gallery-item .content .content_1 .previews {
   font-size: 80%;
@@ -176,6 +179,7 @@
   float: right;
   display: block;
   width: 156px;
+  margin-left: 40px;
   position: relative;
   top: 0;
   left: -24px;
@@ -225,12 +229,14 @@ a.lightbox .zoom {
   float: left;
   text-align: left;
   margin-left: 24px;
+  position: relative;
+  padding: 2px;
+  top: -7px;
 }
 .entity-header .title {
   position: relative;
   display: inline-block;
   max-width: 100%;
-  margin: -0.5em 0 0;
 }
 .entity-header .title .pronounced-title {
   display: inline-block;
@@ -269,12 +275,7 @@ a.lightbox .zoom {
 .wide-gallery .stamp-gallery-item .content .content_1,
 .narrow-gallery .stamp-gallery-item .content .content_1 {
   margin-left: 0;
-  max-width: 125px;
-  /* 305px - 144px - 36px; */
-
-  width: 125px;
-  /* 305px - 144px - 36px; */
-
+  float: none;
 }
 .wide-gallery .stamp-gallery-item .content .content_2 .timestamp,
 .narrow-gallery .stamp-gallery-item .content .content_2 .timestamp {
@@ -333,8 +334,12 @@ a.lightbox .zoom {
   width: 140px;
   height: auto;
   background-size: 100% 100%;
-  /*.rounded(8px);*/
-
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
 }
 .stamp-preview .stamp-category-book .icon,
 .stamp-preview .stamp-category-film .icon,
@@ -356,24 +361,23 @@ a.lightbox .zoom {
 }
 .blurb,
 .normal_blurb {
-  display: inline-block;
+  display: block;
   text-align: justify;
   quotes: "\201C" "\201D";
   line-height: 135%;
   font-family: 'arial', sans-serif;
   color: #999;
+  line-height: 125%;
   margin: 1em 0;
 }
 .blurb {
-  display: inline-block;
-  max-width: 90%;
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .wide-gallery .blurb {
-  display: inline-block;
-  max-width: auto;
+  display: block;
   width: auto;
   white-space: inherit;
   overflow: inherit;

@@ -45,7 +45,14 @@
     
     /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
-    .transition(all, 0.8s, ease-out);
+    
+    /*@args: 0.8s ease-out;
+    
+    -webkit-transition: top @args, left @args, width @args, height @args;
+    -moz-transition: top @args, left @args, width @args, height @args;
+    transition: top @args, left @args, width @args, height @args;*/
+
+    /*.transition(all, 0.8s, ease-out);*/
     
     /* TODO: keep this to enable GPU acceleration or not? Profile! */
     /*.transform(perspective(200px) translate(0,0));*/
@@ -81,11 +88,9 @@
             display: block;
             text-align: left;
             float: left;
-            clear: left;
             margin-left: 58px + 24px;
-            width: 50%;
-            max-width: 50%;
             text-align: justify;
+            padding-right: 32px;
             
             .stamp-contents {
                 .stamped-content { }
@@ -144,6 +149,7 @@
             float: right;
             display: block;
             width: 148px + 8px;
+            margin-left: 40px;
             
             position: relative;
             top: 0;
@@ -205,12 +211,14 @@ a.lightbox {
     float: left;
     text-align: left;
     margin-left: 24px;
+    position: relative;
+    padding: 2px;
+    top: -7px;
     
     .title {
         position: relative;
         display:  inline-block;
         max-width: 100%;
-        margin: -.5em 0 0;
         
         .pronounced-title {
             display: inline-block;
@@ -250,8 +258,9 @@ a.lightbox {
             
             .content_1 {
                 margin-left: 0;
-                max-width: 125px; /* 305px - 144px - 36px; */
-                width: 125px; /* 305px - 144px - 36px; */
+                float: none;
+                //max-width: 125px; /* 305px - 144px - 36px; */
+                //width: 125px; /* 305px - 144px - 36px; */
             }
             
             .content_2 {
@@ -310,7 +319,7 @@ a.lightbox {
     
     img {
         .sized(@preview-width);
-        /*.rounded(8px);*/
+        .rounded(8px);
     }
     
     .stamp-category-book  .icon, 
@@ -331,18 +340,19 @@ a.lightbox {
 
 
 .blurb, .normal_blurb {
-    display: inline-block;
+    display: block;
     text-align: justify;
     quotes: "\201C" "\201D";
     line-height: 135%;
     font-family: 'arial', sans-serif;
     color: #999;
+    
+    line-height: 125%;
     margin: 1em 0;
 }
 
 .blurb {
-    display: inline-block;
-    max-width: 90%;
+    display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -350,8 +360,7 @@ a.lightbox {
 
 .wide-gallery {
     .blurb {
-        display: inline-block;
-        max-width: auto;
+        display: block;
         width: auto;
         white-space: inherit;
         overflow: inherit;

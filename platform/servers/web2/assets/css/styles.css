@@ -696,9 +696,13 @@ header .header-body a.button {
   box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   top: 50%;
   right: 40px;
-  -webkit-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-  -moz-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-  transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  /*@params:  0.8s ease-in-out;
+    @targets: top @params, left @params;
+    
+    -webkit-transition: @targets;
+    -moz-transition: @targets;
+    transition: @targets;*/
+
   margin: -180px 0 0;
   padding: 0;
 }
