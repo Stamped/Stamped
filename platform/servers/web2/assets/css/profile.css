@@ -179,7 +179,6 @@
   float: right;
   display: block;
   width: 156px;
-  margin: 0 0 8px 40px;
   position: relative;
   top: 0;
   left: -24px;
@@ -280,7 +279,7 @@ a.lightbox .zoom {
 }
 .wide-gallery .stamp-gallery-item .content .content_2,
 .narrow-gallery .stamp-gallery-item .content .content_2 {
-  margin: 0 0 0 40px;
+  margin: 0 0 4px 40px;
 }
 .wide-gallery .stamp-gallery-item .content .content_2 .timestamp,
 .narrow-gallery .stamp-gallery-item .content .content_2 .timestamp {
