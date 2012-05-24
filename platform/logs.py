@@ -56,7 +56,7 @@ def _log(level, msg, *args, **kwargs):
         try:
             msg = str(msg)
         except Exception:
-            msg = "LOGGER ERROR: failed to convert msg to string"
+            msg = "LOGGER ERROR: failed to convert msg (type: %s) to string" % type(msg)
         item = (datetime.datetime.utcnow(), level, fnc, msg)
         localData.log['log'].append(item)
         localData.log[level] = True
