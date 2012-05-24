@@ -137,8 +137,7 @@ class Netflix(object):
                 msg = 'Netflix returned a failture response: %s' % responseData
                 status_code = response.status
             finally:
-                raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
-                           (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
+                raise StampedHTTPError(msg, status_code)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
