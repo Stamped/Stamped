@@ -209,7 +209,7 @@ def save():
         localData.saveLog(localData.log)
         log.info('### successfully saved log, it would seem')
     except Exception as e:
-        log.info('### log exception:\n%s' % e)
+        log.info('### log exception:\n%s ####### END OF EXCEPTION PRINTOUT' % e)
         #pprint.pprint(localData.log)
         pass
     
