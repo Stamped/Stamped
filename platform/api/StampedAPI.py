@@ -838,24 +838,16 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
-                    (account.linked_accounts.netflix.netflix_user_id, account.linked_accounts.netflix.netflix_token,
-                     account.linked_accounts.netflix.netflix_secret))
+        nf_user_id  = account.linked_accounts.netflix.netflix_user_id
+        nf_token    = account.linked_accounts.netflix.netflix_token
+        nf_secret   = account.linked_accounts.netflix.netflix_secret
 
-        if (account.linked_accounts.netflix.netflix_user_id == None
-           or account.linked_accounts.netflix.netflix_token == None
-           or account.linked_accounts.netflix.netflix_secret == None):
+        if (nf_user_id == None or nf_token == None or nf_secret == None):
             logs.info('Returning because of missing account credentials')
             return None
 
         netflix = globalNetflix()
-        logs.info('About to add to Queue')
-        result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
-        logs.info('successfully added to queue')
-
-        # TODO check results
-
-        return True
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
 
     @API_CALL
     def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
