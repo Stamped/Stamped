@@ -12,9 +12,8 @@
 
 @end
 
-@implementation <#class#>
+@implementation STSettingsViewControllerCell
 
-<#methods#>
 
 @end
 

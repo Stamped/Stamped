@@ -70,7 +70,7 @@
             return @"me";
             break;
         case STStampedAPIScopeFriends:
-            return @"friends";
+            return @"inbox";
             break;
         case STStampedAPIScopeFriendsOfFriends:
             return @"fof";
