@@ -2369,8 +2369,19 @@ class HTTPStampMini(Schema):
         cls.addProperty('created',              basestring)
         cls.addProperty('modified',             basestring)
         cls.addProperty('stamped',              basestring)
+        
         cls.addProperty('num_comments',         int)
         cls.addProperty('num_likes',            int)
+        cls.addProperty('num_todos',            int)
+        cls.addProperty('num_credits',          int)
+
+        cls.addProperty('is_liked',             bool)
+        cls.addProperty('is_fav',               bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.is_liked           = False
+        self.is_fav             = False
 
 class HTTPStampPreviews(Schema):
     @classmethod
@@ -2413,19 +2424,12 @@ class HTTPStamp(Schema):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
         credit                  = getattr(stamp, 'credit', [])
-        contents                = getattr(stamp, 'contents', [])
-        previews                = getattr(stamp, 'previews', {})
-        comments                = getattr(previews, 'comments', [])
-        likes                   = getattr(previews, 'likes', [])
-        todos                   = getattr(previews, 'todos', [])
-        credits                 = getattr(previews, 'credits', [])
 
         data = stamp.dataExport()
         data['contents'] = []
+        if 'previews' in data:
+            del(data['previews'])
         self.dataImport(data, overflow=True)
-
-        if credit is not None and len(credit) > 0:
-            self.credit = credit
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
         self.entity             = HTTPEntityMini().importEntity(entity)
@@ -2433,8 +2437,11 @@ class HTTPStamp(Schema):
         self.created            = stamp.timestamp.stamped
         self.modified           = stamp.timestamp.modified
         self.stamped            = stamp.timestamp.stamped
-        self.contents           = []
 
+        if credit is not None and len(credit) > 0:
+            self.credit = credit
+
+        contents = []
         for content in stamp.contents:
             item                    = HTTPStampContent()
             item.blurb              = content.blurb
@@ -2472,7 +2479,8 @@ class HTTPStamp(Schema):
                 item.images = newImages
 
             # Insert contents in descending chronological order
-            self.contents.insert(0, item)
+            contents.insert(0, item)
+        self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)

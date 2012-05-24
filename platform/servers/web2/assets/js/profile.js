@@ -19,6 +19,12 @@ var g_update_stamps = null;
         var screen_name = STAMPED_PRELOAD.user.screen_name;
         var update_navbar_layout = null;
         
+        var blacklisted_entity_images = {
+            'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' : true, 
+            'http://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png' : true, 
+            'http://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png' : true
+        };
+        
         
         // ---------------------------------------------------------------------
         // initialize profile header navigation
@@ -43,7 +49,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=10";
+            var limit = "limit=25";
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
@@ -155,8 +161,11 @@ var g_update_stamps = null;
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function($scope) {
+            var $items = $scope;
+            
             if (typeof($scope) === 'undefined') {
                 $scope = $(document);
+                $items = $scope.find('.stamp-gallery-item');
             }
             
             update_timestamps($scope);
@@ -171,13 +180,20 @@ var g_update_stamps = null;
                     var find = function(selector) {
                         var $elements = $this.find(selector);
                         $elements     = $elements.filter(function() {
-                            return !$(this).hasClass('hidden');
+                            var $this = $(this);
+                            
+                            if ($this.attr('src') in blacklisted_entity_images) {
+                                $this.addClass('hidden').parent().addClass('hidden');
+                                return false;
+                            } else {
+                                return !$this.hasClass('hidden');
+                            }
                         });
                         
                         $elements.each(function(i, element) {
                             element.onerror = function() {
                                 var $element = $(element);
-                                $element.addClass('hidden');
+                                $element.addClass('hidden').parent().addClass('hidden');
                                 
                                 update_images();
                             };
@@ -186,9 +202,10 @@ var g_update_stamps = null;
                         return $elements;
                     };
                     
-                    images.push.apply(images, $this.find('.stamp-map'));
-                    images.push.apply(images, find('.stamp-user-image img'));
+                    images.push.apply(images, find('.stamp-user-image   img'));
                     images.push.apply(images, find('.stamp-entity-image img'));
+                    
+                    images.push.apply(images, $this.find('.stamp-map'));
                     images.push.apply(images, $this.find('.stamp-icon'));
                     
                     if (images.length > 0) {
@@ -203,12 +220,13 @@ var g_update_stamps = null;
                             };
                         }
                         
+                        $preview.removeClass('hidden').parent().removeClass('hidden');
                         $preview.show();
                         
                         for (i = 1; i < images.length; i++) {
                             var $image = $(images[i]);
                             
-                            $image.hide();
+                            $image.hide().addClass('hidden').parent().addClass('hidden');
                         }
                     }
                     
@@ -218,13 +236,16 @@ var g_update_stamps = null;
                 update_images();
             });
             
-            $scope.find('a.sdetail').click(function(event) {
+            $items.click(function(event) {
                 event.preventDefault();
                 
                 var $this = $(this);
-                var href  = $this.attr('href');
+                var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+                var href  = $link.attr('href');
                 
                 href = href.replace('http://www.stamped.com', '');
+                href = href + "?" + new Date().getTime();
+                
                 //href = '/travis/stamps/4/TEMPORARY';
                 
                 $.colorbox({
@@ -291,7 +312,7 @@ var g_update_stamps = null;
                 closeSpeed      : 300, 
                 
 				closeClick      : true, 
-                maxWidth        : (2 * window.innerWidth) / 3, 
+                //maxWidth        : (2 * window.innerWidth) / 3, 
                 
                 helpers         : {
                     overlay     : {
@@ -348,8 +369,13 @@ var g_update_stamps = null;
             $gallery = $(".stamp-gallery .stamps");
             
             $gallery.isotope({
-                itemSelector    : '.stamp-gallery-item', 
-                layoutMode      : "masonry"
+                itemSelector        : '.stamp-gallery-item', 
+                layoutMode          : "masonry"/*, 
+                animationOptions    : {
+                    duration        : 800,
+                    easing          : 'easeOut',
+                    queue           : true
+                }*/
             });
             
             init_infinite_scroll();
@@ -824,29 +850,29 @@ var g_update_stamps = null;
             var gallery_width   = $stamp_gallery.width();
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
-            var max_blurb_width = 113;
+            var max_blurb_width = 125;
             var min_blurb_width = (gallery_width - (24 + 58 + 24 + 148));
             
             var width           = window.innerWidth;
             var left            = gallery_x + gallery_width + fixed_padding;
-            var right           = (width - (gallery_x + fixed_width + nav_bar_width + fixed_padding));
+            var right           = (width - (gallery_x + fixed_width + nav_bar_width + 1.5 * fixed_padding));
             var pos             = left;
             
             var force_no_update = false;
             var update          = false;
             var gallery         = false;
             
-            var reset_stamp_gallery_items = function(desired_width, is_gallery) {
+            var reset_stamp_gallery_items = function(desired_width) {
                 $stamp_gallery.find('.content').each(function(i, elem) {
                     var $elem = $(elem);
                     var desired_width_px = desired_width + "px";
                     var desired_width_header_px;
                     
-                    if (is_gallery) {
-                        // TODO: handle gallery header width properly
-                        desired_width_header_px = (305 - 48 - 62) + "px";
+                    if (gallery) {
+                        desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
                     } else {
-                        desired_width_header_px = (desired_width - 24) + "px";
+                        //desired_width_header_px = (desired_width + 148) + "px";
+                        desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
                     }
                     
                     $elem.find('.content_1').css({
@@ -879,7 +905,7 @@ var g_update_stamps = null;
                     update = true;
                 }
                 
-                reset_stamp_gallery_items(min_blurb_width, true);
+                reset_stamp_gallery_items(min_blurb_width);
             } else {
                 //console.debug("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
                 gallery = true;
@@ -888,7 +914,7 @@ var g_update_stamps = null;
                     $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
                     update = true;
                     
-                    reset_stamp_gallery_items(max_blurb_width, false);
+                    reset_stamp_gallery_items(max_blurb_width);
                 }
             }
             

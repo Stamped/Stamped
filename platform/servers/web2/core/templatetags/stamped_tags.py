@@ -8,6 +8,8 @@ __license__   = "TODO"
 import Globals
 import logs, os, pystache, utils, pybars
 
+from handlebars_template_helpers import *
+
 from subprocess import Popen, PIPE
 from pprint     import pformat
 from django     import template
@@ -144,16 +146,17 @@ class HandlebarsTemplateLibrary(object):
         pad = "-" * 20
         pad = "%s %s(%s) %s" % (pad, self, template_name, pad)
         
-        def debug(scope, *args, **kwargs):
-            logs.info("\n%s\n%s\n%s" % (pad, pformat(scope.context), pad))
-        
-        def missing(scope, name):
-            logs.warn("[%s] '%s' missing key '%s'" % (self, template_name, name))
-            return ""
+        def helper_wrapper(helper):
+            def _(*args, **kwargs):
+                return helper(template_name, pad, *args, **kwargs)
+            
+            return _
         
         helpers = dict(
-            helperMissing=missing, 
-            debug=debug
+            helperMissing=helper_wrapper(missing), 
+            user_profile_image=helper_wrapper(user_profile_image), 
+            entity_image=helper_wrapper(entity_image), 
+            debug=helper_wrapper(debug)
         )
         
         return self._compiled[template_name](context, helpers=helpers, partials=self._partials)

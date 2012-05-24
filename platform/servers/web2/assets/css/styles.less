@@ -72,6 +72,14 @@ a:hover {
     text-decoration: underline;
 }
 
+ol, ul {
+    text-decoration: none;
+    list-style: none;
+    text-indent: 0;
+    padding: 0;
+    margin:  0;
+}
+
 .replaced {
     display: block;
     text-indent: -9999em;
@@ -309,7 +317,11 @@ header {
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .floatleft {
+                    .profile-image-large {
+                        .floatleft;
+                    }
+                    
+                    .floatleft, .profile-image-large {
                         margin: 0 24px 0 0;
                     }
                     
@@ -642,20 +654,17 @@ header {
     top:   50%;
     right: 40px;
     
-    -webkit-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-    -moz-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-    transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+    /*@params:  0.8s ease-in-out;
+    @targets: top @params, left @params;
+    
+    -webkit-transition: @targets;
+    -moz-transition: @targets;
+    transition: @targets;*/
     
     margin: -180px 0 0;
     padding: 0;
     
     ol {
-        text-decoration: none;
-        list-style: none;
-        text-indent: 0;
-        padding: 0;
-        margin:  0;
-        
         li {
             position: relative;
             

@@ -91,15 +91,23 @@
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-transition: all 0.8s ease-out;
-  -moz-transition: all 0.8s ease-out;
-  transition: all 0.8s ease-out;
+  /*@args: 0.8s ease-out;
+    
+    -webkit-transition: top @args, left @args, width @args, height @args;
+    -moz-transition: top @args, left @args, width @args, height @args;
+    transition: top @args, left @args, width @args, height @args;*/
+
+  /*.transition(all, 0.8s, ease-out);*/
+
   /* TODO: keep this to enable GPU acceleration or not? Profile! */
 
   /*.transform(perspective(200px) translate(0,0));*/
 
   /*background-color: #FEFEFE;*/
 
+}
+.stamp-gallery-item:hover {
+  cursor: pointer;
 }
 .stamp-gallery-item:hover .content .content_2 .timestamp {
   opacity: 1;
@@ -120,15 +128,9 @@
   display: block;
   text-align: left;
   float: left;
-  clear: left;
   margin-left: 82px;
-  width: 50%;
-  max-width: 50%;
   text-align: justify;
-}
-.stamp-gallery-item .content .content_1 .stamp-contents {
-  font-size: 80%;
-  margin: .2em 0 0;
+  padding-right: 32px;
 }
 .stamp-gallery-item .content .content_1 .previews {
   font-size: 80%;
@@ -174,19 +176,22 @@
   background-position: -38px -20px;
 }
 .stamp-gallery-item .content .content_2 {
-  position: relative;
-  display: block;
   float: right;
+  display: block;
   width: 156px;
+  position: relative;
+  top: 0;
   left: -24px;
 }
 .stamp-gallery-item .content .content_2 .timestamp_raw,
 .stamp-gallery-item .content .content_2 .timestamp {
   display: block;
+  white-space: nowrap;
   text-align: right;
   font-size: 80%;
+  color: #777;
   position: absolute;
-  left: -50%;
+  right: 105%;
   top: 4px;
 }
 .stamp-gallery-item .content .content_2 .timestamp {
@@ -221,15 +226,17 @@ a.lightbox .zoom {
 }
 .entity-header {
   display: block;
-  float: right;
+  float: left;
   text-align: left;
   margin-left: 24px;
+  position: relative;
+  padding: 2px;
+  top: -7px;
 }
 .entity-header .title {
   position: relative;
   display: inline-block;
   max-width: 100%;
-  margin: -0.5em 0 0;
 }
 .entity-header .title .pronounced-title {
   display: inline-block;
@@ -253,25 +260,32 @@ a.lightbox .zoom {
 .wide-gallery .stamp-gallery-item .content .entity-header,
 .narrow-gallery .stamp-gallery-item .content .entity-header {
   max-width: 195px;
+  margin-bottom: .5em;
+}
+.wide-gallery .stamp-gallery-item .content .content_0,
+.narrow-gallery .stamp-gallery-item .content .content_0 {
+  float: none;
+  display: block;
+  width: 100%;
+}
+.wide-gallery .stamp-gallery-item .content .content_0:after,
+.narrow-gallery .stamp-gallery-item .content .content_0:after {
+  clear: both;
 }
 .wide-gallery .stamp-gallery-item .content .content_1,
 .narrow-gallery .stamp-gallery-item .content .content_1 {
   margin-left: 0;
-  max-width: 113px;
-  /* 305px - 144px - 48px; */
-
-  width: 113px;
-  /* 305px - 144px - 48px; */
-
+  float: none;
 }
 .wide-gallery .stamp-gallery-item .content .content_2,
 .narrow-gallery .stamp-gallery-item .content .content_2 {
-  margin: 1.5em 0 0;
+  margin: 0 0 4px 40px;
 }
 .wide-gallery .stamp-gallery-item .content .content_2 .timestamp,
 .narrow-gallery .stamp-gallery-item .content .content_2 .timestamp {
+  position: absolute;
   left: auto;
-  right: 8px;
+  right: 18px;
   top: -1.5em;
 }
 .stamp-preview {
@@ -292,11 +306,8 @@ a.lightbox .zoom {
   height: auto;
   background-size: 100% 100%;
 }
-.stamp-preview .stamp-map {
-  z-index: 25;
-}
 .stamp-preview .stamp-user-image {
-  z-index: 24;
+  z-index: 25;
 }
 .stamp-preview .stamp-user-image img {
   -webkit-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
@@ -304,6 +315,9 @@ a.lightbox .zoom {
   -ms-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   -o-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
+}
+.stamp-preview .stamp-map {
+  z-index: 24;
 }
 .stamp-preview .stamp-entity-image {
   z-index: 23;
@@ -324,8 +338,12 @@ a.lightbox .zoom {
   width: 140px;
   height: auto;
   background-size: 100% 100%;
-  /*.rounded(8px);*/
-
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
 }
 .stamp-preview .stamp-category-book .icon,
 .stamp-preview .stamp-category-film .icon,
@@ -347,24 +365,29 @@ a.lightbox .zoom {
 }
 .blurb,
 .normal_blurb {
-  display: inline-block;
+  display: block;
   text-align: justify;
   quotes: "\201C" "\201D";
+  line-height: 135%;
+  font-family: 'arial', sans-serif;
+  color: #666;
+  line-height: 125%;
+  margin: 1em 0;
 }
 .blurb {
-  display: inline-block;
-  max-width: 90%;
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .wide-gallery .blurb {
-  display: inline-block;
-  max-width: auto;
+  display: block;
   width: auto;
   white-space: inherit;
   overflow: inherit;
   text-overflow: clip;
+  margin: 0 0 1em 0;
+  font-size: 80%;
 }
 /*
 .blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
@@ -384,6 +407,8 @@ a.lightbox .zoom {
   font-size: 80%;
   position: relative;
   top: -2px;
+  font-family: 'arial', sans-serif;
+  color: #666;
 }
 .subtitle-line .icon {
   display: inline-block;
@@ -401,8 +426,6 @@ a.lightbox .zoom {
   margin: 2em auto;
 }
 .profile-nav {
-  list-style: none;
-  text-decoration: none;
   position: absolute;
   top: 0;
   right: 0;
@@ -441,10 +464,6 @@ a.lightbox .zoom {
   background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
 }
 /* TODO: fix height issues */
-ul.user-category-distribution {
-  list-style: none;
-  text-decoration: none;
-}
 ul.user-category-distribution li {
   float: left;
   width: 10%;
