@@ -149,7 +149,8 @@ def main():
                         # TODO: eventually get rid of the if condition and always assume len() == 6.  Must wait for
                         # old logs to flush out
                         if len(log) == 6:
-                            print '%-10s %s | %-30s | %-25s | %s' % (prefix, log[0].strftime('%H:%M:%S'), "%s:%s" % (log[2],log[3]), log[4], log[5])
+                            print "{0:10} {1} | {2:25}:{3:>5} | {4:25} | {5} | {6}".format(prefix, log[0].strftime('%H:%M:%S'), log[2], log[3], log[4], log[5])
+#                            print '%-10s %s | %-30s | %-25s | %s' % (prefix, log[0].strftime('%H:%M:%S'), "%s:%s" % (log[2],log[3]), log[4], log[5])
                         elif len(log) == 5:
                             print '%-10s %s | %-30s | %-5s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3], log[4])
                         else:
