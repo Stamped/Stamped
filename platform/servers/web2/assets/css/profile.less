@@ -52,8 +52,12 @@
     
     /*background-color: #FEFEFE;*/
     
-    &:hover .content .content_2 .timestamp {
-        opacity: 1;
+    &:hover {
+        cursor: pointer;
+        
+        .content .content_2 .timestamp {
+            opacity: 1;
+        }
     }
     
     .stamp-gallery-item-inner {
@@ -84,9 +88,6 @@
             text-align: justify;
             
             .stamp-contents {
-                font-size: 80%;
-                margin: .2em 0 0;
-                
                 .stamped-content { }
             }
             
@@ -140,10 +141,12 @@
         
         .content_2 {
             //border: 1px solid green;
-            position: relative;
-            display: block;
             float: right;
+            display: block;
             width: 148px + 8px;
+            
+            position: relative;
+            top: 0;
             left: -24px;
             
             .timestamp_raw, .timestamp {
@@ -153,8 +156,9 @@
                 font-size: 80%;
                 
                 position: absolute;
-                left: -50%;
+                right: 105%;
                 top: 4px;
+                white-space: nowrap;
             }
             
             .timestamp {
@@ -198,10 +202,9 @@ a.lightbox {
 
 .entity-header {
     display: block;
-    float: right;
+    float: left;
     text-align: left;
     margin-left: 24px;
-    
     
     .title {
         position: relative;
@@ -233,18 +236,27 @@ a.lightbox {
         .content {
             .entity-header {
                 max-width: @stamp-gallery-item-min-width - 62px;
+                margin-bottom: .5em;
+            }
+            
+            .content_0 {
+                float: none;
+                display: block;
+                width: 100%;
+            }
+            .content_0:after {
+                clear: both;
             }
             
             .content_1 {
                 margin-left: 0;
-                max-width: 113px; /* 305px - 144px - 48px; */
-                width: 113px; /* 305px - 144px - 48px; */
+                max-width: 125px; /* 305px - 144px - 36px; */
+                width: 125px; /* 305px - 144px - 36px; */
             }
             
             .content_2 {
-                margin: 1.5em 0 0;
-                
                 .timestamp {
+                    position: absolute;
                     left: auto;
                     right: 8px;
                     top: -1.5em;
@@ -322,6 +334,10 @@ a.lightbox {
     display: inline-block;
     text-align: justify;
     quotes: "\201C" "\201D";
+    line-height: 135%;
+    font-family: 'arial', sans-serif;
+    color: #999;
+    margin: 1em 0;
 }
 
 .blurb {
@@ -340,6 +356,8 @@ a.lightbox {
         white-space: inherit;
         overflow: inherit;
         text-overflow: clip;
+        margin: 0 0 1em 0;
+        font-size: 80%;
     }
 }
 
@@ -363,6 +381,9 @@ a.lightbox {
         font-size: 80%;
         position: relative;
         top: -2px;
+        
+        font-family: 'arial', sans-serif;
+        color: #999;
     }
     
     .icon {

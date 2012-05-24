@@ -12,14 +12,18 @@
         </div>
         
         {{#if coordinates}}
-            <div class='preview-image stamp-map'>
-                {{> static-map-small}}
+            <div>
+                <div class='preview-image stamp-map'>
+                    {{> static-map-small}}
+                </div>
             </div>
         {{/if}}
         
-        <div class="preview-image stamp-icon">
-            <div class="stamp-category-{{category}}">
-                <span class="icon">STANDIN</span>
+        <div>
+            <div class="preview-image stamp-icon">
+                <div class="stamp-category-{{category}}">
+                    <span class="icon">STANDIN</span>
+                </div>
             </div>
         </div>
     {{/entity}}

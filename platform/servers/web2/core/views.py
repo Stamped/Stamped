@@ -15,7 +15,7 @@ from helpers        import *
 
 import travis_test
 
-ENABLE_TRAVIS_TEST = (False and not IS_PROD)
+ENABLE_TRAVIS_TEST = (True and not IS_PROD)
 
 def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
@@ -112,6 +112,12 @@ def profile(request, schema, **kwargs):
     
     #utils.log("STAMPS:")
     #utils.log(pprint.pformat(stamps))
+    
+    #utils.log("FRIENDS:")
+    #utils.log(pprint.pformat(friends))
+    
+    #utils.log("FOLLOWERS:")
+    #utils.log(pprint.pformat(followers))
     
     if schema.category == 'place':
         earthRadius = 3959.0 # miles

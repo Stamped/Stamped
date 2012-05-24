@@ -57,7 +57,7 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
                 break
     
     if not okay:
-        logs.warn("[%s] no image of size '%s' for user '%s'" % (self, size, screen_name))
+        logs.warn("no image of size '%s' for user '%s'" % (size, screen_name))
     
     return pybars.strlist('<img alt="%s" src="%s" />' % (alt, url))
 
@@ -105,8 +105,8 @@ def entity_image(template_name, pad, scope, *args, **kwargs):
         return ""
     
     onerror = "this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }"
-    pre     = '<img alt="%s" src="%s" onerror="%s" />' % (alt, url, onerror)
-    body    = '<a class="lightbox" href="%s"><div class="zoom"></div></a>' % large
+    pre     = '<div><img alt="%s" src="%s" onerror="%s" />' % (alt, url, onerror)
+    body    = '<a class="lightbox" href="%s"><div class="zoom"></div></a></div>' % large
     
     return pybars.strlist(pre + "\n" + body)
 

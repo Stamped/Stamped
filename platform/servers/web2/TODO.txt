@@ -42,6 +42,22 @@
 
 
 TODO:
+    * SDETAIL
+        * layout and initialize social buttons correctly
+        * slide-in animation vs lightbox
+            * remove header user-gradient
+        
+        * section-stamp
+            * test different #credits
+            * test different #comments
+            * comment collapsing
+        
+        * section-entity
+            * perspective entity image transform
+                * how to achieve fake depth of field effect?
+            * add address and/or desc
+            * use entity action sprite sheet
+    
     * fix entity title cutoff
     * fix infinite scroll after returning to default category
     * hide stamp blurb quotes if blurb is empty

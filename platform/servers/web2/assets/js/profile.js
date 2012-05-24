@@ -161,8 +161,11 @@ var g_update_stamps = null;
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function($scope) {
+            var $items = $scope;
+            
             if (typeof($scope) === 'undefined') {
                 $scope = $(document);
+                $items = $scope.find('.stamp-gallery-item');
             }
             
             update_timestamps($scope);
@@ -180,7 +183,7 @@ var g_update_stamps = null;
                             var $this = $(this);
                             
                             if ($this.attr('src') in blacklisted_entity_images) {
-                                $this.addClass('hidden');
+                                $this.addClass('hidden').parent().addClass('hidden');
                                 return false;
                             } else {
                                 return !$this.hasClass('hidden');
@@ -190,7 +193,7 @@ var g_update_stamps = null;
                         $elements.each(function(i, element) {
                             element.onerror = function() {
                                 var $element = $(element);
-                                $element.addClass('hidden');
+                                $element.addClass('hidden').parent().addClass('hidden');
                                 
                                 update_images();
                             };
@@ -217,12 +220,13 @@ var g_update_stamps = null;
                             };
                         }
                         
+                        $preview.removeClass('hidden').parent().removeClass('hidden');
                         $preview.show();
                         
                         for (i = 1; i < images.length; i++) {
                             var $image = $(images[i]);
                             
-                            $image.hide();
+                            $image.hide().addClass('hidden').parent().addClass('hidden');
                         }
                     }
                     
@@ -232,11 +236,12 @@ var g_update_stamps = null;
                 update_images();
             });
             
-            $scope.find('a.sdetail').click(function(event) {
+            $items.click(function(event) {
                 event.preventDefault();
                 
                 var $this = $(this);
-                var href  = $this.attr('href');
+                var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+                var href  = $link.attr('href');
                 
                 href = href.replace('http://www.stamped.com', '');
                 //href = '/travis/stamps/4/TEMPORARY';
@@ -838,12 +843,12 @@ var g_update_stamps = null;
             var gallery_width   = $stamp_gallery.width();
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
-            var max_blurb_width = 113;
+            var max_blurb_width = 125;
             var min_blurb_width = (gallery_width - (24 + 58 + 24 + 148));
             
             var width           = window.innerWidth;
             var left            = gallery_x + gallery_width + fixed_padding;
-            var right           = (width - (gallery_x + fixed_width + nav_bar_width + fixed_padding));
+            var right           = (width - (gallery_x + fixed_width + nav_bar_width + 1.5 * fixed_padding));
             var pos             = left;
             
             var force_no_update = false;
@@ -857,8 +862,8 @@ var g_update_stamps = null;
                     var desired_width_header_px;
                     
                     if (is_gallery) {
-                        // TODO: handle gallery header width properly
-                        desired_width_header_px = (305 - 48 - 62) + "px";
+                        desired_width_header_px = "auto";
+                        //Math.max(305 - 24 - 62, 200) + "px";
                     } else {
                         desired_width_header_px = (desired_width - 24) + "px";
                     }
