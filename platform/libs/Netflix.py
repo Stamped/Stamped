@@ -93,7 +93,7 @@ class Netflix(object):
             else:
                 url = "http://%s/users/%s/%s" % (HOST, user_id, service)
         parameters['output'] = 'json'
-        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so nevermind it
+        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so never mind it
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
             parameters=parameters,

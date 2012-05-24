@@ -207,7 +207,8 @@ def save():
         if localData.saveLog == None:
             raise
         localData.saveLog(localData.log)
-    except:
+    except Exception as e:
+        pprint.pprint('### log exception:\n%s' % e)
         #pprint.pprint(localData.log)
         pass
     
