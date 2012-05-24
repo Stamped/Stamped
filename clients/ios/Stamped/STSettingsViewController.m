@@ -8,7 +8,20 @@
 
 #import "STSettingsViewController.h"
 
+@interface STSettingsViewControllerCell : NSObject
+
+@end
+
+@implementation <#class#>
+
+<#methods#>
+
+@end
+
 @interface STSettingsViewController ()
+
+- (void)addHeader:(NSString*)header;
+- (void)addSectionWithCells:(NSArray*)cells;
 
 @end
 
