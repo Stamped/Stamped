@@ -151,8 +151,13 @@ def stamped_view(schema=None,
                 response = fn(request, *args, **subkwargs)
                 logs.info("End request: Success")
                 
-                response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=10)).ctime()
-                response['Cache-Control'] = 'max-age=600'
+                if utils.is_ec2():
+                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=10)).ctime()
+                    response['Cache-Control'] = 'max-age=600'
+                else:
+                    # disable caching for local development / debugging
+                    response['Expires'] = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    response['Cache-Control'] = 'max-age=0'
                 
                 return response
             

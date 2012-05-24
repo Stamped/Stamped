@@ -110,6 +110,9 @@ def profile(request, schema, **kwargs):
     
     main_cluster    = { }
     
+    #utils.log("USER:")
+    #utils.log(pprint.pformat(user))
+    
     #utils.log("STAMPS:")
     #utils.log(pprint.pformat(stamps))
     

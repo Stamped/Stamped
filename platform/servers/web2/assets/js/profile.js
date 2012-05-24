@@ -244,6 +244,8 @@ var g_update_stamps = null;
                 var href  = $link.attr('href');
                 
                 href = href.replace('http://www.stamped.com', '');
+                href = href + "?" + new Date().getTime();
+                
                 //href = '/travis/stamps/4/TEMPORARY';
                 
                 $.colorbox({
@@ -873,10 +875,10 @@ var g_update_stamps = null;
                         desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
                     }
                     
-                    /*$elem.find('.content_1').css({
+                    $elem.find('.content_1').css({
                         'width'     : desired_width_px, 
                         'max-width' : desired_width_px
-                    });*/
+                    });
                     
                     $elem.find('.entity-header').css({
                         'width'     : desired_width_header_px, 

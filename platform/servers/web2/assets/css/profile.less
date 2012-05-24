@@ -149,7 +149,7 @@
             float: right;
             display: block;
             width: 148px + 8px;
-            margin-left: 40px;
+            margin: 0 0 8px 40px;
             
             position: relative;
             top: 0;
@@ -158,13 +158,14 @@
             .timestamp_raw, .timestamp {
                 display: block;
                 
+                white-space: nowrap;
                 text-align: right;
                 font-size: 80%;
+                color: #777;
                 
                 position: absolute;
                 right: 105%;
-                top: 4px;
-                white-space: nowrap;
+                top:   4px;
             }
             
             .timestamp {
@@ -264,10 +265,12 @@ a.lightbox {
             }
             
             .content_2 {
+                margin: 0 0 0 40px;
+                
                 .timestamp {
                     position: absolute;
                     left: auto;
-                    right: 8px;
+                    right: 18px;
                     top: -1.5em;
                 }
             }
@@ -345,7 +348,7 @@ a.lightbox {
     quotes: "\201C" "\201D";
     line-height: 135%;
     font-family: 'arial', sans-serif;
-    color: #999;
+    color: #666;
     
     line-height: 125%;
     margin: 1em 0;
@@ -392,7 +395,7 @@ a.lightbox {
         top: -2px;
         
         font-family: 'arial', sans-serif;
-        color: #999;
+        color: #666;
     }
     
     .icon {

@@ -179,7 +179,7 @@
   float: right;
   display: block;
   width: 156px;
-  margin-left: 40px;
+  margin: 0 0 8px 40px;
   position: relative;
   top: 0;
   left: -24px;
@@ -187,12 +187,13 @@
 .stamp-gallery-item .content .content_2 .timestamp_raw,
 .stamp-gallery-item .content .content_2 .timestamp {
   display: block;
+  white-space: nowrap;
   text-align: right;
   font-size: 80%;
+  color: #777;
   position: absolute;
   right: 105%;
   top: 4px;
-  white-space: nowrap;
 }
 .stamp-gallery-item .content .content_2 .timestamp {
   opacity: 0;
@@ -277,11 +278,15 @@ a.lightbox .zoom {
   margin-left: 0;
   float: none;
 }
+.wide-gallery .stamp-gallery-item .content .content_2,
+.narrow-gallery .stamp-gallery-item .content .content_2 {
+  margin: 0 0 0 40px;
+}
 .wide-gallery .stamp-gallery-item .content .content_2 .timestamp,
 .narrow-gallery .stamp-gallery-item .content .content_2 .timestamp {
   position: absolute;
   left: auto;
-  right: 8px;
+  right: 18px;
   top: -1.5em;
 }
 .stamp-preview {
@@ -366,7 +371,7 @@ a.lightbox .zoom {
   quotes: "\201C" "\201D";
   line-height: 135%;
   font-family: 'arial', sans-serif;
-  color: #999;
+  color: #666;
   line-height: 125%;
   margin: 1em 0;
 }
@@ -404,7 +409,7 @@ a.lightbox .zoom {
   position: relative;
   top: -2px;
   font-family: 'arial', sans-serif;
-  color: #999;
+  color: #666;
 }
 .subtitle-line .icon {
   display: inline-block;

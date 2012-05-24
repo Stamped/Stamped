@@ -36,7 +36,6 @@
 .sdetail_body .section-entity {
   float: right;
   width: 30%;
-  border: 2px solid red;
   padding: .25em;
 }
 .sdetail_body .section-entity .stamp-preview {
@@ -89,9 +88,6 @@
   border: 2px solid green;
   margin: 0;
 }
-.sdetail_body .section-stamp .entity-header {
-  float: none;
-}
 .sdetail_body .section-stamp .stamp-card {
   -webkit-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
   -moz-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
@@ -135,7 +131,10 @@
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content {
   margin: 0 1.5em 1.5em;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .profile-image-medium {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .entity-header {
+  float: none;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .profile-image-large {
   margin: 0 24px 24px 0;
   float: left;
 }
@@ -171,25 +170,37 @@
   text-decoration: none;
   list-style: none;
   text-indent: 0;
-  padding: 0.5em 1.5em;
+  padding: 0;
   margin: 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li {
   border-top: 1px solid #bbb;
-  padding: .5em 0;
+  padding: 0.5em 1.5em;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .profile-image-small {
   float: left;
-  margin: 0 12px 0 0;
+  margin: 0 12px 12px 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner {
-  display: block;
+  position: relative;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner .user-header {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.test0 {
   display: block;
+  margin: 0 0 .75em;
+  padding: 0;
+  line-height: 100%;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.test0 .name {
+  text-align: left;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.test0 .timestamp {
+  text-align: right;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.normal_blurb {
-  display: block;
+  font-size: 80%;
 }
 .sdetail_body .section-social {
   border: 2px solid blue;

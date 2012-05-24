@@ -33,7 +33,7 @@
     .section-entity {
         float: right;
         width: 30%;
-        border: 2px solid red;
+        //border: 2px solid red;
         padding: .25em;
         
         .stamp-preview {
@@ -93,10 +93,6 @@
         border: 2px solid green;
         margin: 0;
         
-        .entity-header {
-            float: none;
-        }
-        
         .stamp-card {
             @round: 8px;
             .box-shadow(0, 0, 16px, 0, @shadow);
@@ -136,7 +132,11 @@
                 .stamp-inner-content {
                     margin: 0 @space @space;
                     
-                    .profile-image-medium {
+                    .entity-header {
+                        float: none;
+                    }
+                    
+                    .profile-image-large {
                         margin: 0 24px 24px 0;
                         float: left;
                     }
@@ -169,7 +169,6 @@
                 
                 .comments {
                     /*.box-shadow(0, 3px, 8px, -4px, @shadow);*/
-                    //border: 1px solid red;
                     
                     .comments-nav {
                         border-bottom: 1px dashed #bbb;
@@ -179,27 +178,42 @@
                         text-decoration: none;
                         list-style: none;
                         text-indent: 0;
-                        padding: .5em @space;
+                        padding: 0;
                         margin:  0;
                         
                         li {
                             border-top: 1px solid #bbb;
-                            padding: .5em 0;
+                            padding: .5em @space;
+                            //border: 1px solid red;
                             
                             .profile-image-small {
                                 float: left;
-                                margin: 0 12px 0 0;
+                                margin: 0 12px 12px 0;
                             }
                             
                             .comment-inner {
-                                display: block;
+                                //border: 1px solid purple;
+                                position: relative;
                                 
-                                .user-header {
+                                p.test0 {
                                     display: block;
+                                    margin:  0 0 .75em;
+                                    padding: 0;
+                                    line-height: 100%;
+                                    
+                                    .name {
+                                        text-align: left;
+                                    }
+                                    .timestamp {
+                                        text-align: right;
+                                        position: absolute;
+                                        top: 0;
+                                        right: 0;
+                                    }
                                 }
                                 
                                 p.normal_blurb {
-                                    display: block;
+                                    font-size: 80%;
                                 }
                             }
                         }
