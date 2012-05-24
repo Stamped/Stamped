@@ -178,7 +178,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/create_using_facebook.json"
+        path = "account/create_with_facebook.json"
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,

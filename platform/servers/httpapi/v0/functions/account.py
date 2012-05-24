@@ -38,7 +38,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
                    conversion=HTTPFacebookAccountNew.convertToFacebookAccountNew,
                    upload='profile_image')
 @require_http_methods(["POST"])
-def createUsingFacebook(request, client_id, http_schema, schema, **kwargs):
+def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     account = stampedAPI.addFacebookAccount(schema)
 
     user   = HTTPUser().importAccount(account)
