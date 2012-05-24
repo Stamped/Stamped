@@ -2085,20 +2085,22 @@ class StampedAPI(AStampedAPI):
             imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            sizes   = {
+            supportedSizes   = {
                 ''        : (imageWidth, imageHeight),   #original size
                 '-ios1x'  : (200, 200),
                 '-ios2x'  : (400, 400),
                 '-web'    : (580, 580),
                 '-mobile' : (572, 572),
                 }
-            for k,v in sizes.iteritems():
+            sizes = []
+            for k,v in supportedSizes.iteritems():
                 logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
                 size            = ImageSizeSchema()
                 size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                 size.width      = v[0]
                 size.height     = v[1]
-                image.sizes.append(size)
+                sizes.append(size)
+            image.sizes = sizes
             content.images.append(image)
             imageExists = True
 
