@@ -134,7 +134,7 @@ class Netflix(object):
                      (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code']
                 status_code = failData['status_code']
             except:
-                msg = 'Netflix returned a failture response: %s' % responseData
+                msg = 'Netflix returned a failure response: %s' % responseData
                 status_code = response.status
             finally:
                 raise StampedHTTPError(msg, status_code)
