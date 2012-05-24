@@ -146,9 +146,11 @@ def main():
             for log in logs[i]['log']:
                 if log[1] in levels:
                     try:
-                        # TODO: eventually get rid of the if condition and always assume len() == 5.  Must wait for
+                        # TODO: eventually get rid of the if condition and always assume len() == 6.  Must wait for
                         # old logs to flush out
-                        if len(log) == 5:
+                        if len(log) == 6:
+                            print '%-10s %s | %-30s | %-25s | %s' % (prefix, log[0].strftime('%H:%M:%S'), "%s:%s" % (log[2],log[3]), log[4], log[5])
+                        elif len(log) == 5:
                             print '%-10s %s | %-30s | %-5s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3], log[4])
                         else:
                             print '%-10s %s | %-30s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3])
