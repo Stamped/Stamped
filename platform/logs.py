@@ -53,7 +53,11 @@ def _log(level, msg, *args, **kwargs):
         fnc = "UNKNOWN FUNCTION"
     
     if localData.format == 'object':
-        item = (datetime.datetime.utcnow(), level, fnc, str(msg))
+        try:
+            msg = str(msg)
+        except Exception:
+            msg = "LOGGER ERROR: failed to convert msg to string"
+        item = (datetime.datetime.utcnow(), level, fnc, msg)
         localData.log['log'].append(item)
         localData.log[level] = True
 
@@ -207,11 +211,7 @@ def save():
         if localData.saveLog == None:
             raise
         localData.saveLog(localData.log)
-        log.info('### successfully saved log, it would seem')
     except Exception as e:
-
-        log.info('### log exception:\n%s ####### END OF EXCEPTION PRINTOUT' % e)
-        log.info('### localData.log: \n%s\n  #### END OF localData.log' % pprint.pformat(localData.log))
         pprint.pprint(localData.log)
         pass
     
