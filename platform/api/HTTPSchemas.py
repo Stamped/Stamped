@@ -2369,8 +2369,19 @@ class HTTPStampMini(Schema):
         cls.addProperty('created',              basestring)
         cls.addProperty('modified',             basestring)
         cls.addProperty('stamped',              basestring)
+        
         cls.addProperty('num_comments',         int)
         cls.addProperty('num_likes',            int)
+        cls.addProperty('num_todos',            int)
+        cls.addProperty('num_credits',          int)
+
+        cls.addProperty('is_liked',             bool)
+        cls.addProperty('is_fav',               bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.is_liked           = False
+        self.is_fav             = False
 
 class HTTPStampPreviews(Schema):
     @classmethod
