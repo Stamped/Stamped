@@ -100,8 +100,6 @@
             
             @space: 1.5em;
             
-            margin: @space 0 0;
-            
             .stamp-card-pre, .stamp-card-post {
                 display: block;
                 width:  100%;
@@ -136,9 +134,14 @@
                         float: none;
                     }
                     
-                    .profile-image-large {
-                        margin: 0 24px 24px 0;
+                    .profile-image-large-ish {
+                        margin: 0 24px 12px 0;
                         float: left;
+                    }
+                    
+                    .stamp-preview {
+                        float: right;
+                        margin: 0 0 24px 12px;
                     }
                     
                     .normal_blurb {
@@ -167,11 +170,26 @@
                     }
                 }
                 
+                .no-credits {
+                }
+                
+                
                 .comments {
-                    /*.box-shadow(0, 3px, 8px, -4px, @shadow);*/
+                    .box-shadow(0, 3px, 8px, -4px, @shadow);
                     
                     .comments-nav {
                         border-bottom: 1px dashed #bbb;
+                        text-align: center;
+                        display: none;
+                        padding: .5em;
+                        
+                        .show {
+                            display: none;
+                        }
+                        
+                        .hide {
+                            display: block;
+                        }
                     }
                     
                     ol.comment-list {
@@ -181,10 +199,12 @@
                         padding: 0;
                         margin:  0;
                         
-                        li {
+                        li.comment {
                             border-top: 1px solid #bbb;
-                            padding: .5em @space;
+                            padding: 1em @space;
                             //border: 1px solid red;
+                            
+                            .transition(all, 0.5s, ease-out);
                             
                             .profile-image-small {
                                 float: left;
@@ -216,6 +236,25 @@
                                     font-size: 80%;
                                 }
                             }
+                        }
+                    }
+                }
+                
+                .collapsed {
+                    .comments-nav {
+                        .show {
+                            display: block !important;
+                        }
+                        
+                        .hide {
+                            display: none !important;
+                        }
+                    }
+                    
+                    ol.comment-list {
+                        li.comment:nth-child(n+4) {
+
+                            opacity: 0 !important;
                         }
                     }
                 }

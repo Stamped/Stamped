@@ -100,7 +100,6 @@
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  margin: 1.5em 0 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-card-pre,
 .sdetail_body .section-stamp .stamp-card .stamp-card-post {
@@ -134,9 +133,13 @@
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .entity-header {
   float: none;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .profile-image-large {
-  margin: 0 24px 24px 0;
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .profile-image-large-ish {
+  margin: 0 24px 12px 0;
   float: left;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .stamp-preview {
+  float: right;
+  margin: 0 0 24px 12px;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .normal_blurb {
   display: block;
@@ -160,11 +163,23 @@
   display: none;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments {
-  /*.box-shadow(0, 3px, 8px, -4px, @shadow);*/
-
+  -webkit-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  -ms-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  -o-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav {
   border-bottom: 1px dashed #bbb;
+  text-align: center;
+  display: none;
+  padding: .5em;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav .show {
+  display: none;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav .hide {
+  display: block;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list {
   text-decoration: none;
@@ -173,34 +188,46 @@
   padding: 0;
   margin: 0;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment {
   border-top: 1px solid #bbb;
-  padding: 0.5em 1.5em;
+  padding: 1em 1.5em;
+  -webkit-transition: all 0.5s ease-out;
+  -moz-transition: all 0.5s ease-out;
+  transition: all 0.5s ease-out;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .profile-image-small {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .profile-image-small {
   float: left;
   margin: 0 12px 12px 0;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner {
   position: relative;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.test0 {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner p.test0 {
   display: block;
   margin: 0 0 .75em;
   padding: 0;
   line-height: 100%;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.test0 .name {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner p.test0 .name {
   text-align: left;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.test0 .timestamp {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner p.test0 .timestamp {
   text-align: right;
   position: absolute;
   top: 0;
   right: 0;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li .comment-inner p.normal_blurb {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner p.normal_blurb {
   font-size: 80%;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .collapsed .comments-nav .show {
+  display: block !important;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .collapsed .comments-nav .hide {
+  display: none !important;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .collapsed ol.comment-list li.comment:nth-child(n+4) {
+  opacity: 0 !important;
 }
 .sdetail_body .section-social {
   border: 2px solid blue;

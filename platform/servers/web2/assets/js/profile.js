@@ -10,6 +10,7 @@ var g_update_stamps = null;
 
 (function() {
     $(document).ready(function() {
+        
         // ---------------------------------------------------------------------
         // initialize StampedClient
         // ---------------------------------------------------------------------
@@ -149,7 +150,7 @@ var g_update_stamps = null;
                 last_layout = now;
                 
                 update_gallery(function() {
-                    update_navbar_layout(true);
+                    update_navbar_layout(false);
                     last_layout = new Date().getTime();
                 });
             }
@@ -256,10 +257,7 @@ var g_update_stamps = null;
                     fixed       : true, 
                     scrolling   : false, 
                     
-                    onComplete  : function() {
-                        update_stamps();
-                        init_social_sharing();
-                    }
+                    onComplete  : init_sdetail
                 });
                 
                 /*
@@ -302,7 +300,7 @@ var g_update_stamps = null;
                 });
             });*/
             
-			$scope.find("a.lightbox").fancybox({
+            $scope.find("a.lightbox").fancybox({
                 openEffect      : 'elastic', 
                 openEasing      : 'easeOutBack', 
                 openSpeed       : 300, 
@@ -311,7 +309,7 @@ var g_update_stamps = null;
                 closeEasing     : 'easeInBack', 
                 closeSpeed      : 300, 
                 
-				closeClick      : true, 
+                closeClick      : true, 
                 //maxWidth        : (2 * window.innerWidth) / 3, 
                 
                 helpers         : {
@@ -328,7 +326,7 @@ var g_update_stamps = null;
                         closeClick  : true
                     }
                 }
-			});
+            });
             
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
@@ -851,7 +849,7 @@ var g_update_stamps = null;
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
             var max_blurb_width = 125;
-            var min_blurb_width = (gallery_width - (24 + 58 + 24 + 148));
+            var min_blurb_width = (gallery_width - (24 + 58 + 48 + 148));
             
             var width           = window.innerWidth;
             var left            = gallery_x + gallery_width + fixed_padding;
@@ -870,6 +868,7 @@ var g_update_stamps = null;
                     
                     if (gallery) {
                         desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        desired_width_px = "auto";
                     } else {
                         //desired_width_header_px = (desired_width + 148) + "px";
                         desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
@@ -951,11 +950,37 @@ var g_update_stamps = null;
             }
         };
         
+        var init_sdetail = function() {
+            var $sdetail        = $('.sdetail_body');
+            var $comments_nav   = $sdetail.find('.comments-nav');
+            var $comments_div   = $sdetail.find('.comments');
+            var $comments       = $sdetail.find('.comment');
+            var collapsed       = 'collapsed';
+            var i;
+            
+            update_stamps($sdetail);
+            init_social_sharing();
+            
+            if ($comments.length >= 3 && !!$comments_nav.get(0)) {
+                $comments_nav.css({
+                    display : 'block'
+                });
+                
+                $comments_nav.find('a').click(function(event) {
+                    event.preventDefault();
+                    
+                    $comments_div.toggleClass(collapsed);
+                    $.colorbox.resize();
+                    return false;
+                });
+            }
+        };
+        
         $(window).resize(update_navbar_layout);
         
         // TODO: initial gallery opening animation by adding items one at a time
         update_stamps();
-        init_gallery ();
+        init_gallery();
         update_navbar_layout();
         
         return;
