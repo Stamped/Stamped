@@ -324,7 +324,7 @@ def sdetail(request, schema, **kwargs):
     return stamped_render(request, 'sdetail.html', {
         'user'   : user, 
         'stamp'  : stamp, 
-        'entity' : entity
+        'entity' : entity, 
     })
 
 
@@ -334,9 +334,13 @@ def test_view(request, **kwargs):
 
 @stamped_view(schema=HTTPEntityId)
 def menu(request, schema, **kwargs):
-    menu = stampedAPIProxy.getEntityMenu(schema.entity_id)
+    entity  = stampedAPIProxy.getEntity(schema.entity_id)
+    menu    = stampedAPIProxy.getEntityMenu(schema.entity_id)
+    
+    #utils.getFile(menu['attribution_image_link'])
     
     return stamped_render(request, 'menu.html', {
-        'menu' : menu
+        'menu'   : menu, 
+        'entity' : entity, 
     })
 

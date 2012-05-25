@@ -29,6 +29,26 @@ var g_update_stamps = null;
             return (url.indexOf(static_prefix) != -1);
         };
         
+        var extract_data = function($target, prefix, default_value) {
+            var classes = $target.get(0).className.split(/\s+/);
+            var value   = default_value;
+            
+            for (i = 0; i < classes.length; ++i) {
+                var c = classes[i];
+                
+                if (c.indexOf(prefix) === 0) {
+                    c = c.substring(prefix.length);
+                    
+                    if (c.length > 1) {
+                        value = c;
+                        break;
+                    }
+                }
+            }
+            
+            return value;
+        };
+        
         
         // ---------------------------------------------------------------------
         // initialize profile header navigation
@@ -177,26 +197,10 @@ var g_update_stamps = null;
             update_timestamps($scope);
             
             $scope.find('.stamp-preview').each(function(i, elem) {
-                var $this           = $(this);
-                var classes         = this.className.split(/\s+/);
-                var is_sdetail      = ($this.parents('.sdetail_body').length >= 1);
-                var category_prefix = 'stamp-category-';
-                var category        = 'other';
-                var i;
+                var $this       = $(this);
+                var is_sdetail  = ($this.parents('.sdetail_body').length >= 1);
                 
-                for (i = 0; i < classes.length; ++i) {
-                    var c = classes[i];
-                    
-                    if (c.indexOf(category_prefix) === 0) {
-                        c = c.substring(category_prefix.length);
-                        
-                        if (c.length > 1) {
-                            category = c;
-                            break;
-                        }
-                    }
-                }
-                
+                //var category    = extract_data($this, 'stamp-category-', 'other');
                 //console.debug("CATEGORY: " + category + "; is_sdetail: " + is_sdetail);
                 
                 // enforce precedence of stamp preview images
@@ -1113,28 +1117,29 @@ var g_update_stamps = null;
                 var $temp = $link.parents('.entity-id');
                 
                 if ($temp.length >= 1) {
-                    var classes          = $temp.get(0).className.split(/\s+/);
-                    var entity_id_prefix = 'entity-id-';
-                    var entity_id        = null;
-                    var i;
-                    
-                    for (i = 0; i < classes.length; ++i) {
-                        var c = classes[i];
-                        
-                        if (c.indexOf(entity_id_prefix) === 0) {
-                            c = c.substring(entity_id_prefix.length);
-                            
-                            if (c.length > 1) {
-                                entity_id = c;
-                                break;
-                            }
-                        }
-                    }
+                    var entity_id    = extract_data($temp, 'entity-id-',    null);
+                    var entity_title = $.trim($link.prev('.entity-title').text());
                     
                     if (entity_id !== null) {
+                        if (entity_title === null) {
+                            entity_title = "Menu";
+                        } else {
+                            entity_title = "Menu for " + entity_title;
+                        }
+                        
+                        var link_type = 'ajax';
                         $link.attr('href', '/entities/menu?entity_id=' + entity_id);
                         
-                        /*$link.fancybox({
+                        // TODO: embed singleplatform page directly if one exists!
+                        //link_type = 'iframe';
+                        //$link.attr('href', 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped');
+                        
+                        $link.fancybox({
+                            type            : link_type, 
+                            title           : entity_title, 
+                            
+                            maxWidth        : Math.max((2 * window.innerWidth) / 3, 640), 
+                            
                             openEffect      : 'elastic', 
                             openEasing      : 'easeOutBack', 
                             openSpeed       : 300, 
@@ -1159,7 +1164,7 @@ var g_update_stamps = null;
                                     closeClick  : true
                                 }
                             }
-                        });*/
+                        });
                     }
                 }
                 

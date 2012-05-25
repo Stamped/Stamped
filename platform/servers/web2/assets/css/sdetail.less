@@ -8,6 +8,12 @@
 
 @import "libs/elements.less";
 
+
+/* **************************************************************************
+                                SDETAIL CORE
+   ************************************************************************** */
+
+
 @shadow: rgba(50, 50, 50, 0.75);
 @shadow-light: fade(@shadow, 15%);
 
@@ -32,6 +38,13 @@
 }
 
 .sdetail_body {
+    
+    
+/* **************************************************************************
+                            SDETAIL ENTITY SECTION
+   ************************************************************************** */
+    
+    
     .section-entity {
         float: right;
         width: 30%;
@@ -92,6 +105,12 @@
             }
         }
     }
+    
+    
+/* **************************************************************************
+                            SDETAIL STAMP SECTION
+   ************************************************************************** */
+    
     
     .section-stamp {
         float: left;
@@ -304,6 +323,12 @@
         }
     }
     
+    
+/* **************************************************************************
+                            SDETAIL SOCIAL SECTION
+   ************************************************************************** */
+    
+    
     .section-social {
         //border: 2px solid blue;
         float: left;
@@ -318,6 +343,72 @@
             display: block;
             float: left;
         }
+    }
+}
+
+
+/* **************************************************************************
+                                SDETAIL MENU
+   ************************************************************************** */
+
+
+.entity-menu {
+    max-height: 500px;
+    overflow-y: scroll;
+    text-align: center;
+    
+    .entity-title {
+        font-size: 250%;
+        font-weight: bold;
+    }
+    
+    .menus {
+        .submenu {
+            .submenu-title {
+                font-size: 200%;
+                font-weight: bold;
+            }
+            
+            .submenu-desc {
+                font-style: italic;
+                font-size: 90%;
+            }
+            
+            .submenu-footnote {
+                font-style: italic;
+                font-size: 80%;
+            }
+            
+            .section {
+                .section-title {
+                    font-size: 150%;
+                }
+                
+                .section-desc {
+                    font-style: italic;
+                    font-size: 90%;
+                }
+                
+                .items {
+                    .item {
+                        .item-title {
+                            font-weight: bold;
+                        }
+                        .item-prices {
+                            font-size: 80%;
+                        }
+                        /*.item-title, .item-desc, .item-spicy, .item-prices {
+                            display: inline-block;
+                        }*/
+                    }
+                }
+            }
+        }
+    }
+    
+    .attribution {
+        font-style: italic;
+        font-size: 70%;
     }
 }
 

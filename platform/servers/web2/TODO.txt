@@ -63,6 +63,7 @@ TODO:
                 * how to achieve fake depth of field effect?
             * add address and/or desc
             * use entity action sprite sheet
+            * TODO: style menu and/or embed external SinglePlatform menu page
     
     * fix entity title cutoff
     * fix infinite scroll after returning to default category

@@ -1,6 +1,96 @@
 {% load stamped_tags %}
 
-<p>
-    {{menu}}
-</p>
+<div class='entity-menu'>
+    <div class='entity-title'>
+        {% if menu.attribution_image_link %}
+            <a href='{{menu.attribution_image_link}}' target='_blank' title='View Menu for {{entity.title}}'>
+                {{entity.title}}
+            </a>
+        {% else %}
+            {{entity.title}}
+        {% endif %}
+    </div>
+    
+    <div class='menus'>
+        {% for submenu in menu.menus %}
+            <div class='submenu'>
+                {% if submenu.title %}
+                    <p class='submenu-title'>{{submenu.title}}</p>
+                {% endif %}
+                
+                {% if submenu.desc %}
+                    <p class='submenu-desc'>{{submenu.desc}}</p>
+                {% endif %}
+                
+                {% if submenu.footnote %}
+                    <p class='submenu-footnote'>{{submenu.footnote}}</p>
+                {% endif %}
+                
+                {% if submenu.sections|length > 0 %}
+                    <div class='sections'>
+                        {% for section in submenu.sections %}
+                            <div class='section'>
+                                {% if section.title %}
+                                    <p class='section-title'>{{section.title}}</p>
+                                {% endif %}
+                                
+                                {% if section.desc %}
+                                    <p class='section-desc'>{{section.desc}}</p>
+                                {% endif %}
+                                
+                                {% if section.items|length > 0 %}
+                                    <div class='items'>
+                                        {% for item in section.items %}
+                                            <div class='item'>
+                                                {% if item.title %}
+                                                    <p class='item-title'>
+                                                        {{item.title}}
+                                                    </p>
+                                                {% endif %}
+                                                
+                                                {% if item.desc %}
+                                                    <p class='item-desc'>
+                                                        {{item.desc}}
+                                                    </p>
+                                                {% endif %}
+                                                
+                                                {% if item.prices and item.prices|length > 0 %}
+                                                    <div class='item-prices'>
+                                                        {% for price in item.prices %}
+                                                            <div class='price'>
+                                                                {{price.price}}
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                {% if item.spicy %}
+                                                    <p class='item-spicy'>
+                                                        {{item.spicy}}
+                                                    </p>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    
+    {% if menu.attribution_image %}
+        <div class='attribution'>
+            <a href='{{menu.attribution_image_link}}' target='_blank' title='View Menu for {{entity.title}}'>
+                <img class='attribution-image' src='{{menu.attribution_image}}' />
+            </a>
+            
+            {% if menu.disclaimer %}
+                <p class='disclaimer'>{{menu.disclaimer}}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
 
