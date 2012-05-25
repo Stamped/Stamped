@@ -256,9 +256,11 @@
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [menuController pushViewController:controller animated:YES];
     
+    /*
     if ([menuController.rootViewController isKindOfClass:[UINavigationController class]]) {
         [(UINavigationController*)menuController.rootViewController setNavigationBarHidden:YES animated:NO];
     }
+     */
     
     [controller release];
     
