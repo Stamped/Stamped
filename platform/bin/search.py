@@ -193,8 +193,8 @@ def main():
             #data['titles'] = utils.normalize(entity.simplified_title)
 
             data['subcategory'] = utils.normalize(entity.subcategory)
-            if 'address' in entity:
-                data['addr'] = utils.normalize(entity.address)
+            if hasattr(entity, 'address_locality') and entity.address_locality is not None:
+                data['addr'] = entity.formatAddress()
             #data['subtitle'] = utils.normalize(entity.subtitle)
 
             if options.Stats:
