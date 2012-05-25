@@ -123,7 +123,6 @@ class TheTVDB(object):
             TheTVDB.SingleFieldTranslator('id',             ['sources', 'thetvdb_id']),
             TheTVDB.SingleFieldTranslator('ContentRating',  'mpaa_rating'),
             TheTVDB.SingleFieldTranslator('Network',        'networks',     lambda n: [ makeBasicEntityMini(n) ]),
-            TheTVDB.SingleFieldTranslator('Network',        'networks',     lambda n: [ makeBasicEntityMini(n) ]),
             TheTVDB.SingleFieldTranslator('Actors',         'cast',
                                           lambda n: map(lambda _: makeBasicEntityMini(_, mini_type=PersonEntityMini), filter(lambda _: len(_) > 0, n.split('|')))),
             TheTVDB.SingleFieldTranslator('Genre',          'genres',       lambda n: filter(lambda _: len(_) > 0, n.split('|'))),
