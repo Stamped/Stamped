@@ -57,17 +57,26 @@ def is_running(cmd):
     return 0 == shell("ps -ef | grep '%s' | grep -v grep" % cmd)[1]
 
 def lazyProperty(undecorated):
-    closure = []
-    lock = Lock() # from threading?
+    name = '__lazyProperty_' + undecorated.__name__
+    propertyLock = Lock()
     @property
     @wraps(undecorated)
     def decorated(self):
-        result = None
-        with lock:
-            if len(closure) == 0:
-                closure.append(undecorated(self))
-            result = closure[0]
-        return result
+        try:
+            pair = getattr(self, name)
+        except AttributeError:
+            with propertyLock:
+                if hasattr(self, name):
+                    pair = getattr(self, name)
+                else:
+                    pair = ([], Lock())
+                    setattr(self, name, pair)
+        closure, lock = pair
+        if len(closure) == 0:
+            with lock:
+                if len(closure) == 0:
+                    closure.append(undecorated(self))
+        return closure[0]
 
     return decorated
 

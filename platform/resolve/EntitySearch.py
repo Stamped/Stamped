@@ -48,6 +48,7 @@ try:
     from AmazonSource               import AmazonSource
     from time                       import time
     from Entity                     import subcategories, deriveTypesFromSubcategories, deriveKindFromSubcategory
+    # from Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
 except:
     report()
     raise
@@ -324,6 +325,8 @@ def _convertCategorySubcategory(category, subcategory):
     if subcategory is not None:
         kinds = set([deriveKindFromSubcategory(subcategory)])
         types = set(deriveTypesFromSubcategories([subcategory]))
+        # kinds = mapSubcategoryToKinds(subcategory)
+        # types = mapSubcategoryToTypes(subcategory)
 
     elif category is not None:
         kinds = set()
@@ -334,6 +337,8 @@ def _convertCategorySubcategory(category, subcategory):
                 t = set(deriveTypesFromSubcategories([s]))
                 for i in t:
                     types.add(i)
+        # kinds = mapCategoryToKinds(category)
+        # types = mapCategoryToTypes(category)
 
     logs.debug('KINDS: %s' % kinds)
     logs.debug('TYPES: %s' % types)
