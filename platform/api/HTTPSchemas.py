@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
+import Entity
 
 from errors             import *
 from schema             import *
@@ -1824,11 +1825,11 @@ class HTTPEntityNew(Schema):
 
     def exportEntity(self, authUserId):
 
-        kind    = deriveKindFromSubcategory(self.subcategory)
+        kind    = list(mapSubcategoryToKinds(self.subcategory))[0]
         entity  = buildEntity(kind=kind)
 
         entity.schema_version   = 0
-        entity.types            = list(deriveTypesFromSubcategories([self.subcategory]))
+        entity.types            = list(mapSubcategoryToTypes(self.subcategory))
         entity.title            = self.title
 
         def addField(entity, field, value, timestamp):
@@ -1904,7 +1905,17 @@ class HTTPEntityNew(Schema):
 #                raise NotImplementedError(type(schema))
 #            return schema
 
-class HTTPEntityAutosuggest(Schema):
+class HTTPEntityAutoSuggestForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                basestring, required=True)
+        cls.addProperty('category',             basestring)
+        cls.addProperty('coordinates',          basestring)
+
+    def exportEntityAutoSuggestForm(self):
+        return EntityAutoSuggestForm().dataImport(self.dataExport(), overflow=True)
+
+class HTTPEntityAutoSuggest(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('search_id',            basestring, required=True)
@@ -1943,16 +1954,20 @@ class HTTPEntitySearch(Schema):
         cls.addProperty('q',                basestring, required=True)
         cls.addProperty('coordinates',      basestring)
         cls.addProperty('category',         basestring)
-        cls.addProperty('subcategory',      basestring)
         cls.addProperty('local',            bool)
-        cls.addProperty('page',             int)
 
     def __init__(self):
         Schema.__init__(self)
-        self.page = 0
 
     def exportEntitySearch(self):
-        entSearch = EntitySearch().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        if 'coordinates' in data:
+            del(data['coordinates'])
+        if 'category' in data and data['category'] is not None:
+            if data['category'] not in Entity.categories:
+                raise StampedInputError("Invalid category: %s" % data['category'])
+
+        entSearch = EntitySearch().dataImport(data, overflow=True)
         if self.coordinates is not None:
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
             entSearch.coordinates = coordinates 
@@ -2709,7 +2724,7 @@ class HTTPFavorite(Schema):
         self.complete                = fav.complete
 
         if fav.stamp is not None:
-            self.stamp              = HTTPStamp().dataImport(fav.stamp.dataExport())
+            self.stamp              = HTTPStamp().importStampMini(fav.stamp)
 
         return self
 

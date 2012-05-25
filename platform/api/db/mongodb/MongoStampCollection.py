@@ -146,6 +146,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self.user_stamps_collection.removeAllUserStamps(userId)
     
     def addInboxStampReference(self, userIds, stampId):
+        if not isinstance(userIds, list):
+            userIds = [ userIds ]
         # Add a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.addInboxStamps(userIds, stampId)
     

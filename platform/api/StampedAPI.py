@@ -17,6 +17,7 @@ try:
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
+    import Entity
     
     from datetime               import datetime, timedelta
     from auth                   import convertPasswordForStorage
@@ -38,7 +39,6 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
-    from Entity                 import buildEntity, deriveCategoryFromTypes
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -71,6 +71,18 @@ class StampedAPI(AStampedAPI):
         Database-agnostic implementation of the internal API for accessing 
         and manipulating all Stamped backend databases.
     """
+
+    @lazyProperty
+    def _netflix(self):
+        return globalNetflix()
+
+    @lazyProperty
+    def _facebook(self):
+        return globalFacebook()
+
+    @lazyProperty
+    def _twitter(self):
+        return globalTwitter()
     
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
@@ -273,8 +285,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        fb = globalFacebook()
-        user = fb.getUserInfo(new_fb_account.facebook_token)
+        user = self._facebook.getUserInfo(new_fb_account.facebook_token)
 
         account = None
         try:
@@ -308,8 +319,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # First, get user information from Twitter using the passed in token
-        twitter = globalTwitter()
-        user = twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
+        user = self._twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
 
         account = None
         try:
@@ -426,7 +436,7 @@ class StampedAPI(AStampedAPI):
         # Remove favorites
         favEntityIds = self._favoriteDB.getFavoriteEntityIds(account.user_id)
         for entityId in favEntityIds:
-            self._favoriteDB.removeFavorite(account.user_id, entityId)
+            self._favoriteDB.removeTodo(account.user_id, entityId)
         
         # Remove stamps / collections
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
@@ -934,12 +944,13 @@ class StampedAPI(AStampedAPI):
 
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps      = self._enrichStampObjects(stamps)
         
         categories  = {}
         num_stamps  = len(stamps)
         
         for stamp in stamps:
-            category = deriveCategoryFromTypes(stamp.entity.types)
+            category = stamp.entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
 
@@ -1464,13 +1475,12 @@ class StampedAPI(AStampedAPI):
                        query, 
                        coords=None, 
                        authUserId=None, 
-                       category=None, 
-                       subcategory=None):
+                       category=None):
+
         entities = self._entitySearch.searchEntities(query, 
                                                      limit=10, 
                                                      coords=coords, 
-                                                     category=category, 
-                                                     subcategory=subcategory)
+                                                     category=category)
         
         results = []
         process = 5
@@ -1543,13 +1553,20 @@ class StampedAPI(AStampedAPI):
         results = results[offset : offset + limit]
         
         return results
+
+
+    @API_CALL
+    def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
+        if autosuggestForm.category == 'film':
+            return self._netflix.autocomplete(autosuggestForm.query)
+        return []
     
     @API_CALL
     def getSuggestedEntities(self, authUserId, suggested):
         coords = (suggested.coordinates.lat, suggested.coordinates.lng)
         
         return self._suggestedEntities.getSuggestedEntities(authUserId, 
-                                                            coords=coords, 
+                                                            coords=coords,
                                                             category=suggested.category, 
                                                             subcategory=suggested.subcategory, 
                                                             limit=suggested.limit)
@@ -1720,7 +1737,7 @@ class StampedAPI(AStampedAPI):
                 result.screen_name  = creditedUser.screen_name
                 
                 # Add to user ids
-                userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
+                userIds[userId] = creditedUser.minimize()
                 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, entity_id)
@@ -1875,7 +1892,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = UserMini().dataImport(user.dataExport())
+            userIds[user.user_id] = user.minimize()
 
         logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
         t1 = time.time()
@@ -2055,7 +2072,7 @@ class StampedAPI(AStampedAPI):
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
-        userIds     = { user.user_id : UserMini().dataImport(user.dataExport()) }
+        userIds     = { user.user_id : user.minimize() }
         entityIds   = { entity.entity_id : entity }
         
         blurbData   = data.pop('blurb',  None)
@@ -2210,6 +2227,7 @@ class StampedAPI(AStampedAPI):
             self._rollback.append((self._stampDB.removeUserStampReference, \
                 {'stampId': stamp.stamp_id, 'userId': user.user_id}))
             self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
+            self._stampDB.addInboxStampReference([ user.user_id ], stamp.stamp_id)
             
             # Update user stats 
             self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
@@ -2231,14 +2249,13 @@ class StampedAPI(AStampedAPI):
         
         # Add references to the stamp in all relevant inboxes
         followers = self._friendshipDB.getFollowers(authUserId)
-        followers.append(authUserId)
         self._stampDB.addInboxStampReference(followers, stampId)
         
         # If stamped entity is on the to do list, mark as complete
         try:
-            self._favoriteDB.completeFavorite(entity.entity_id, authUserId)
+            self._favoriteDB.completeTodo(entity.entity_id, authUserId)
             if entity.entity_id != stamp.entity.entity_id:
-                self._favoriteDB.completeFavorite(stamp.entity.entity_id, authUserId)
+                self._favoriteDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
 
@@ -2326,7 +2343,7 @@ class StampedAPI(AStampedAPI):
         
         # Collect user ids
         userIds = {}
-        userIds[user.user_id] = UserMini().dataImport(user.dataExport())
+        userIds[user.user_id] = user.minimize()
         
         # Blurb & Mentions
         mentionedUsers = []
@@ -2378,7 +2395,7 @@ class StampedAPI(AStampedAPI):
                 result.screen_name  = creditedUser['screen_name']
 
                 # Add to user ids
-                userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
+                userIds[userId] = creditedUser.minimize()
 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, stamp.entity.entity_id)
@@ -2513,7 +2530,7 @@ class StampedAPI(AStampedAPI):
         
         # Remove as favorite if necessary
         try:
-            self._favoriteDB.completeFavorite(stamp.entity_id, authUserId, complete=False)
+            self._favoriteDB.completeTodo(stamp.entity_id, authUserId, complete=False)
         except Exception:
             pass
         
@@ -2684,7 +2701,7 @@ class StampedAPI(AStampedAPI):
         self._rollback.append((self._commentDB.removeComment, {'commentId': comment.comment_id}))
         
         # Add full user object back
-        comment.user = UserMini().dataImport(user.dataExport())
+        comment.user = user.minimize()
         
         tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
         
@@ -2785,7 +2802,7 @@ class StampedAPI(AStampedAPI):
 
         # Add user object
         user = self._userDB.getUser(comment.user.user_id)
-        comment.user = UserMini().dataImport(user.dataExport())
+        comment.user = user.minimize()
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[comment.stamp_id])
@@ -2817,7 +2834,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(userIds.keys(), None)
         
         for user in users:
-            userIds[user.user_id] = UserMini().dataImport(user.dataExport())
+            userIds[user.user_id] = user.minimize()
         
         comments = []
         for comment in commentData:
@@ -3385,7 +3402,7 @@ class StampedAPI(AStampedAPI):
 
     def _enrichFavorite(self, rawFavorite, user=None, entity=None, stamp=None, authUserId=None):
         if user is None or user.user_id != rawFavorite.user_id:
-            user = UserMini().dataImport(self._userDB.getUser(rawFavorite.user_id).dataExport())
+            user = self._userDB.getUser(rawFavorite.user_id).minimize()
 
         if entity is None or entity.entity_id != rawFavorite.entity.entity_id:
             entity = self._entityDB.getEntity(rawFavorite.entity.entity_id)
@@ -3397,7 +3414,7 @@ class StampedAPI(AStampedAPI):
         return rawFavorite.enrich(user, entity, stamp)
     
     @API_CALL
-    def addFavorite(self, authUserId, entityRequest, stampId=None):
+    def addTodo(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
         favorite                    = RawFavorite()
@@ -3411,7 +3428,7 @@ class StampedAPI(AStampedAPI):
         
         # Check to verify that user hasn't already favorited entity
         try:
-            fav = self._favoriteDB.getFavorite(authUserId, entity.entity_id)
+            fav = self._favoriteDB.getTodo(authUserId, entity.entity_id)
             if fav.favorite_id is None:
                 raise
             exists = True
@@ -3425,7 +3442,7 @@ class StampedAPI(AStampedAPI):
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
             favorite.complete = True
         
-        favorite = self._favoriteDB.addFavorite(favorite)
+        favorite = self._favoriteDB.addTodo(favorite)
         
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.favorites')
@@ -3453,14 +3470,14 @@ class StampedAPI(AStampedAPI):
         return favorite
     
     @API_CALL
-    def removeFavorite(self, authUserId, entityId):
+    def removeTodo(self, authUserId, entityId):
         ### TODO: Fail gracefully if favorite doesn't exist
-        rawFavorite = self._favoriteDB.getFavorite(authUserId, entityId)
+        rawFavorite = self._favoriteDB.getTodo(authUserId, entityId)
         
         if not rawFavorite or not rawFavorite.favorite_id:
             raise StampedUnavailableError('Invalid favorite: %s' % rawFavorite)
         
-        self._favoriteDB.removeFavorite(authUserId, entityId)
+        self._favoriteDB.removeTodo(authUserId, entityId)
         
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', increment=-1)
@@ -3478,7 +3495,7 @@ class StampedAPI(AStampedAPI):
         return favorite
     
     @API_CALL
-    def getFavorites(self, authUserId, genericCollectionSlice):
+    def getTodos(self, authUserId, genericCollectionSlice):
         quality = genericCollectionSlice.quality
         
         # Set quality
@@ -3497,7 +3514,7 @@ class StampedAPI(AStampedAPI):
         if genericCollectionSlice.sort == 'modified':
             genericCollectionSlice.sort = 'created'
         
-        favoriteData = self._favoriteDB.getFavorites(authUserId, genericCollectionSlice)
+        favoriteData = self._favoriteDB.getTodos(authUserId, genericCollectionSlice)
         
         # Extract entities & stamps
         entityIds   = {}
@@ -3510,7 +3527,7 @@ class StampedAPI(AStampedAPI):
                 stampIds[str(rawFavorite.stamp_id)] = None
 
         # User
-        user = UserMini().dataImport(self._userDB.getUser(authUserId).dataExport())
+        user = self._userDB.getUser(authUserId).minimize()
         
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3726,7 +3743,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(userIds.keys(), None)
         
         for user in users:
-            userIds[str(user.user_id)] = UserMini().dataImport(user.dataExport())
+            userIds[str(user.user_id)] = user.minimize()
         
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
@@ -3748,7 +3765,7 @@ class StampedAPI(AStampedAPI):
                 commentUserIds[comment.user.user_id] = None
         users = self._userDB.lookupUsers(commentUserIds.keys(), None)
         for user in users:
-            userIds[str(user.user_id)] = UserMini().dataImport(user.dataExport())
+            userIds[str(user.user_id)] = user.minimize()
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
@@ -3895,7 +3912,7 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport(), link])
     
     def mergeEntityAsync(self, entityDict, link=True):
-        self._mergeEntity(buildEntity(entityDict), link)
+        self._mergeEntity(Entity.buildEntity(entityDict), link)
 
     def mergeEntityId(self, entityId, link=True):
         logs.info('Merge EntityId: %s' % entityId)
