@@ -92,24 +92,35 @@ def search(request, authUserId, schema, **kwargs):
     return transformOutput(group.dataExport())
 
 
+@handleHTTPRequest(http_schema=HTTPEntitySuggested, conversion=HTTPEntitySuggested.exportEntitySuggested)
+@require_http_methods(["GET"])
+def suggested(request, authUserId, schema, **kwargs):
+    sections    = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
+    convert     = lambda e: HTTPEntitySearchResultsItem().importEntity(e)
+    
+    result      = []
+
+    for section in sections:
+        try:
+            group = HTTPEntitySearchResultsGroup()
+            group.title = 'Suggested'
+            if 'name' in section and name['section'] is not None:
+                group.title = section['name']
+            group.entities = map(convert, section['entities'])
+
+            result.append(group)
+        except Exception as e:
+            logs.warning("Autosuggest error: %s (%s)" % (e, section))
+    
+    return transformOutput(result)
+
+
 
 @handleHTTPRequest(http_schema=HTTPEntityAutoSuggestForm, conversion=HTTPEntityAutoSuggestForm.exportEntityAutoSuggestForm)
 @require_http_methods(["GET"])
 def autosuggest(request, authUserId, http_schema, schema, **kwargs):
     results     = stampedAPI.getEntityAutoSuggestions(authUserId=authUserId, autosuggestForm=schema)
 
-    return transformOutput(results)
-
-
-@handleHTTPRequest(http_schema=HTTPEntitySuggested, conversion=HTTPEntitySuggested.exportEntitySuggested)
-@require_http_methods(["GET"])
-def suggested(request, authUserId, schema, **kwargs):
-    results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
-    convert     = lambda e: HTTPEntitySearchResultsItem().importEntity(e).dataExport()
-    
-    for section in results:
-        section['entities'] = map(convert, section['entities'])
-    
     return transformOutput(results)
 
 
