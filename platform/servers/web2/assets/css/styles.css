@@ -698,10 +698,14 @@ header .header-body a.button {
 /* **************************************************************************
                             STAMP CATEGORY NAV BAR
    ************************************************************************** */
+#main-content {
+  visibility: hidden;
+}
 #stamp-category-nav-bar {
   position: fixed;
   display: block;
   z-index: 1000;
+  visibility: hidden;
   background: #262626;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;

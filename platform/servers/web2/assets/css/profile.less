@@ -504,6 +504,7 @@ ul.user-category-distribution {
     
     position: fixed;
     top: 15%;
+    z-index: 100;
 }
 
 body.sdetail_popup {
@@ -511,8 +512,16 @@ body.sdetail_popup {
         background: #fff;
     }
     
-    .main-page-content-body {
+    #main-page-content-body {
         visibility: hidden !important;
+        
+        #stamp-category-nav-bar {
+            visibility: hidden !important;
+        }
+        
+        #main-content {
+            visibility: hidden !important;
+        }
     }
 }
 

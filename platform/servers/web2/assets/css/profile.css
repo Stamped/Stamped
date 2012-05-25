@@ -498,10 +498,17 @@ ul.user-category-distribution li .bargraph .value {
   width: 100%;
   position: fixed;
   top: 15%;
+  z-index: 100;
 }
 body.sdetail_popup .post-header {
   background: #fff;
 }
-body.sdetail_popup .main-page-content-body {
+body.sdetail_popup #main-page-content-body {
+  visibility: hidden !important;
+}
+body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
+  visibility: hidden !important;
+}
+body.sdetail_popup #main-page-content-body #main-content {
   visibility: hidden !important;
 }

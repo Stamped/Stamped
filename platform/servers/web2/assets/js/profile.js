@@ -22,6 +22,7 @@ var g_update_stamps = null;
         
         var sdetail_popup           = 'sdetail_popup';
         var sdetail_wrapper         = 'sdetail_wrapper';
+        var sdetail_wrapper_sel     = '.' + sdetail_wrapper;
         var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
         var update_navbar_layout    = null;
         
@@ -166,6 +167,19 @@ var g_update_stamps = null;
         // to avoid doing extra, unnecessary work / rendering that could result 
         // in a choppier end-user experience.
         var update_gallery_layout = function(force) {
+            update_gallery(function() {
+                update_navbar_layout(false);
+                last_layout = new Date().getTime();
+                
+                var style = {
+                    visibility : 'visible'
+                };
+                
+                $('#main-content').css(style);
+                $('#stamp-category-nav-bar').css(style);
+            });
+            return;
+
             force   = (typeof(force) === 'undefined' ? false : force);
             var now = new Date().getTime();
             
@@ -175,6 +189,13 @@ var g_update_stamps = null;
                 update_gallery(function() {
                     update_navbar_layout(false);
                     last_layout = new Date().getTime();
+                    
+                    var style = {
+                        visibility : 'visible'
+                    };
+                    
+                    $('#main-content').css(style);
+                    $('#stamp-category-nav-bar').css(style);
                 });
             }
         };
@@ -259,7 +280,8 @@ var g_update_stamps = null;
                         if ($preview.is("img")) {
                             // ensure gallery's layout is updated whenever this 
                             preview.onload = function() {
-                                setTimeout(update_gallery_layout, 100);
+                                update_gallery_layout();
+                                //setTimeout(update_gallery_layout, 100);
                             };
                         }
                         
@@ -273,7 +295,7 @@ var g_update_stamps = null;
                         }
                     }
                     
-                    update_gallery_layout(true);
+                    update_gallery_layout();
                 };
                 
                 update_images();
@@ -308,6 +330,7 @@ var g_update_stamps = null;
                         onComplete  : init_sdetail
                     });*/
                     
+                    $(sdetail_wrapper_sel).remove();
                     var $target = $("<div class='" + sdetail_wrapper + "'></div>");
                     
                     // initialize sDetail popup after AJAX load
@@ -320,7 +343,7 @@ var g_update_stamps = null;
                             alert("TODO: handle AJAX and backend errors gracefuly");
                             return;
                         }
-
+                        
                         init_sdetail($target);
                         
                         update_stamps($target);
@@ -329,9 +352,11 @@ var g_update_stamps = null;
                         // TODO: disable infinite scroll for sdetail popup
                         //destroy_infinite_scroll();
                         
-                        $target.insertAfter('.main-page-content-body');
+                        $target.insertAfter('#main-page-content-body');
                         $body.addClass(sdetail_popup);
                         update_dynamic_header();
+                        
+                        $target = $(sdetail_wrapper_sel);
                         resize_sdetail_wrapper($target);
                         
                         /*var $comments_div = $target.find('.comments');
@@ -344,8 +369,9 @@ var g_update_stamps = null;
                         $target.find('.close-button a').click(function(event) {
                             event.preventDefault();
                             
-                            $target.hide().remove();
+                            $(sdetail_wrapper_sel).hide().remove();
                             $body.removeClass(sdetail_popup);
+                            
                             update_dynamic_header();
                             //update_gallery_layout(true);
                             //init_infinite_scroll();
@@ -422,7 +448,7 @@ var g_update_stamps = null;
         
         var resize_sdetail_wrapper = function($sdetail_wrapper) {
             if (!$sdetail_wrapper) {
-                $sdetail_wrapper = $(sdetail_wrapper);
+                $sdetail_wrapper = $(sdetail_wrapper_sel);
             }
             
             if ($sdetail_wrapper.length === 1) {
