@@ -92,6 +92,14 @@ class StampedAPIProxy(object):
                 'entity_id' : entity_id
             })
     
+    def getEntityMenu(self, entity_id):
+        if self._prod:
+            raise NotImplementedError
+        else:
+            return self._handle_get("entities/menu.json", {
+                'entity_id' : entity_id
+            })
+    
     def _handle_local_get(self, func, params):
         pass
     

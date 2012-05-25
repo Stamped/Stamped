@@ -300,10 +300,18 @@ class OAuthLogin(Schema):
         cls.addProperty('login',                        basestring, required=True)
         cls.addProperty('password',                     basestring, required=True)
 
+# TODO: Consolidate OAuthFacebookLogin and OAuthTwitterLogin after linked account generification?
+
 class OAuthFacebookLogin(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('fb_token',                     basestring, required=True)
+
+class OAuthTwitterLogin(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('user_secret',                  basestring, required=True)
 
 # ####### #
 # Actions #
@@ -428,6 +436,21 @@ class HTTPFacebookAccountNew(Schema):
 
     def convertToFacebookAccountNew(self):
         return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+
+class HTTPTwitterAccountNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring)#, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('user_secret',                  basestring, required=True)
+
+    def convertToTwitterAccountNew(self):
+        return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
+
 
 
 class HTTPAccountSettings(Schema):

@@ -171,6 +171,8 @@ class AStampedAPITestCase(AStampedTestCase):
         
         return user, token
 
+    #TODO: Consoldiate the facebook and twitter account creation methods? Consolidate all creation methods?
+
     def createFacebookAccount(self, fb_user_token, name='TestUser', **kwargs):
         global _test_case, _accounts
         _test_case = self
@@ -184,7 +186,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "client_secret"     : c_secret,
             "name"              : name,
             "screen_name"       : name,
-            "facebook_token"    : fb_user_token
+            "facebook_token"    : fb_user_token,
         }
         response = self.handlePOST(path, data)
         self.assertIn('user', response)
@@ -201,12 +203,59 @@ class AStampedAPITestCase(AStampedTestCase):
 
         return user, token
 
-    def loginWithFacebook(self, fb_user_token):
+    def createTwitterAccount(self, tw_user_token, tw_user_secret, name='TestUser', **kwargs):
+        global _test_case, _accounts
+        _test_case = self
+
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "account/create_with_twitter.json"
+        data = {
+            "client_id"         : c_id,
+            "client_secret"     : c_secret,
+            "name"              : name,
+            "screen_name"       : name,
+            "user_token"        : tw_user_token,
+            "user_secret"       : tw_user_secret,
+        }
+        response = self.handlePOST(path, data)
+        self.assertIn('user', response)
+        self.assertIn('token', response)
+
+        user  = response['user']
+        token = response['token']
+
+        _accounts.append((user, token))
+
+        self.assertValidKey(user['user_id'])
+        self.assertValidKey(token['access_token'], 22)
+        self.assertValidKey(token['refresh_token'], 43)
+
+        return user, token
+
+    def loginWithFacebook(self, fb_user_token, **kwargs):
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
         path = "oauth2/login_with_facebook.json"
         data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "fb_token":     'BLAAAAARGH!!!',
+            "client_id":        c_id,
+            "client_secret":    c_secret,
+            "fb_token":         fb_user_token,
+            }
+        return self.handlePOST(path, data)
+
+    def loginWithTwitter(self, tw_user_token, tw_user_secret, **kwargs):
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "oauth2/login_with_twitter.json"
+        data = {
+            "client_id":      c_id,
+            "client_secret":  c_secret,
+            "user_token":     tw_user_token,
+            "user_secret":    tw_user_secret,
             }
         return self.handlePOST(path, data)
 

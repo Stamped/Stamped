@@ -43,3 +43,15 @@ def loginWithFacebook(request, client_id, http_schema, **kwargs):
     output = { 'user' : user.dataExport(), 'token' : token }
 
     return transformOutput(output)
+
+@handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthTwitterLogin)
+@require_http_methods(["POST"])
+def loginWithTwitter(request, client_id, http_schema, **kwargs):
+    account, token = stampedAuth.verifyTwitterUserCredentials(client_id, http_schema.user_token, http_schema.user_secret)
+
+    user = HTTPUser().importAccount(account)
+    logs.user(user.user_id)
+
+    output = { 'user' : user.dataExport(), 'token' : token }
+
+    return transformOutput(output)

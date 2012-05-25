@@ -37,13 +37,15 @@ urlpatterns = patterns('',
     (r'v0/oauth2/token.json',                       'v0.functions.oauth2.token'),
     (r'v0/oauth2/login.json',                       'v0.functions.oauth2.login'),
     (r'v0/oauth2/login_with_facebook.json',         'v0.functions.oauth2.loginWithFacebook'),
-    
+    (r'v0/oauth2/login_with_twitter.json',          'v0.functions.oauth2.loginWithTwitter'),
+
     ### ACCOUNT
     #
     # DOCUMENTED SAMPLE PATH DATA
     # establishes mapping of the REST command account/create to the implementing function, platform.servers.httpapi.v0.functions.account.create
     (r'v0/account/create.json',                     'v0.functions.account.create'),
     (r'v0/account/create_with_facebook.json',       'v0.functions.account.createWithFacebook'),
+    (r'v0/account/create_with_twitter.json',        'v0.functions.account.createWithTwitter'),
     (r'v0/account/remove.json',                     'v0.functions.account.remove'),
     (r'v0/account/settings.json',                   'v0.functions.account.settings'),
     (r'v0/account/update_profile.json',             'v0.functions.account.update_profile'),

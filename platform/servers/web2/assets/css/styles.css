@@ -220,7 +220,7 @@ header .header-body a.button {
 .user-logo-large {
   position: absolute;
   display: block;
-  top: -75px;
+  top: -78px;
   left: -125px;
   width: 195px;
   height: 195px;
@@ -250,10 +250,14 @@ header .header-body a.button {
   display: block;
   height: 16px;
 }
+#main-page-content {
+  position: relative;
+  top: 86px;
+  left: 0;
+}
 .profile-header-wrapper {
   position: relative;
   width: 100%;
-  padding: 5em 0 0;
   position: relative;
   top: 0;
   left: 0;
@@ -285,7 +289,7 @@ header .header-body a.button {
   left: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg {
-  background: url(/assets/img/profile_cover_default.png) repeat;
+  background: url(/assets/img/profile_cover_default.1.png) repeat;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -360,6 +364,22 @@ header .header-body a.button {
   -ms-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-large-ish {
+  float: left;
+  display: block;
+  width: 102px;
+  height: 102px;
+}
+.profile-image-large-ish img {
+  width: 96px;
+  height: 96px;
+  border: 3px solid #ffffff;
+  -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
 }
 .profile-image-medium {
   float: left;
@@ -678,10 +698,14 @@ header .header-body a.button {
 /* **************************************************************************
                             STAMP CATEGORY NAV BAR
    ************************************************************************** */
+#main-content {
+  visibility: hidden;
+}
 #stamp-category-nav-bar {
   position: fixed;
   display: block;
   z-index: 1000;
+  visibility: hidden;
   background: #262626;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
