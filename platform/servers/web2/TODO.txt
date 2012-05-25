@@ -42,6 +42,11 @@
 
 
 TODO:
+    * ask anthony what 'screen' blending mode means for header cover images
+    * test entity headers on profile page
+        * need to transform both gradient and header image layer together w/ perspective
+        * transform parent
+    
     * SDETAIL
         * layout and initialize social buttons correctly
         * slide-in animation vs lightbox
@@ -51,12 +56,14 @@ TODO:
             * test different #credits
             * test different #comments
             * comment collapsing
+                * TODO: how to scroll comments?
         
         * section-entity
             * perspective entity image transform
                 * how to achieve fake depth of field effect?
             * add address and/or desc
             * use entity action sprite sheet
+            * TODO: style menu and/or embed external SinglePlatform menu page
     
     * fix entity title cutoff
     * fix infinite scroll after returning to default category

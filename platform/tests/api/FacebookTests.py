@@ -68,7 +68,7 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
     def test_create_duplicate_facebook_auth_account(self):
         with expected_exception():
-            self.createFacebookAccount(self.fb_user_token, name='fUser')
+            self.createFacebookAccount(self.fb_user_token, name='fUser2')
 
     def test_linked_account_with_used_facebook_id(self):
 #        self.addLinkedAccount(
@@ -87,13 +87,7 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
     def test_valid_login(self):
         # login with facebook user account
-        path = "oauth2/login_with_facebook.json"
-        data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "fb_token":     self.fb_user_token,
-        }
-        result = self.handlePOST(path, data)
+        result = self.loginWithFacebook(self.fb_user_token)
 
         # verify that the stamped user token and user_id are correct
         self.assertEqual(result['user']['user_id'], self.fUser['user_id'])

@@ -55,6 +55,7 @@ try:
 
     from Netflix                import *
     from Facebook               import *
+    from Twitter                import *
 except Exception:
     report()
     raise
@@ -262,6 +263,8 @@ class StampedAPI(AStampedAPI):
         
         return account
 
+    #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
+
     @API_CALL
     def addFacebookAccount(self, new_fb_account):
         """
@@ -293,9 +296,44 @@ class StampedAPI(AStampedAPI):
         account.auth_service                = 'facebook'
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
-        profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+        #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
-        return self.addAccount(account, profile_image)
+        return self.addAccount(account, new_fb_account.profile_image)
+
+    @API_CALL
+    def addTwitterAccount(self, new_tw_account):
+        """
+        For adding a Twitter auth account, first pull the user info from Twitter, verify that the user_id is not already
+         linked to another user, populate the linked account information and then chain to the standard addAccount() method
+        """
+
+        # First, get user information from Twitter using the passed in token
+        twitter = globalTwitter()
+        user = twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
+
+        account = None
+        try:
+            account = self.getAccountByTwitterId(user['id'])
+        except StampedUnavailableError:
+            pass
+            # Check if the twitter account is already tied to a Stamped account
+        if account is not None:
+            raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
+
+        account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
+
+        account.linked_accounts             = LinkedAccounts()
+        tw_acct                             = TwitterAccountSchema()
+        tw_acct.twitter_id                  = user['id']
+        tw_acct.twitter_screen_name         = user['screen_name']
+        tw_acct.twitter_name                = user.pop('name', None)
+        account.linked_accounts.twitter     = tw_acct
+        account.auth_service                = 'twitter'
+
+        # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
+        #profile_image = user['profile_background_image_url']
+
+        return self.addAccount(account, new_tw_account.profile_image)
     
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -502,13 +540,24 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         return account
 
+    #TODO: Consolidate getAccountByFacebookId and getAccountByTwitterId?  After linked account generification is complete
+
     @API_CALL
     def getAccountByFacebookId(self, facebookId):
         accounts = self._accountDB.getAccountsByFacebookId(facebookId)
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using facebook id: %s" % facebookId)
+            raise StampedIllegalActionError("More than one account exists using facebook_id: %s" % facebookId)
+        return accounts[0]
+
+    @API_CALL
+    def getAccountByTwitterId(self, twitterId):
+        accounts = self._accountDB.getAccountsByTwitterId(twitterId)
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
+        elif len(accounts) > 1:
+            raise StampedIllegalActionError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
 
     @API_CALL
@@ -838,21 +887,16 @@ class StampedAPI(AStampedAPI):
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
 
-        logs.info('netflix_user_id: %s    netflix_token: %s   netflix_secret: %s' %
-                    (account.netflix_user_id, account.netflix_token, account.netflix_secret))
+        nf_user_id  = account.linked_accounts.netflix.netflix_user_id
+        nf_token    = account.linked_accounts.netflix.netflix_token
+        nf_secret   = account.linked_accounts.netflix.netflix_secret
 
-        if account.netflix_user_id == None or account.netflix_token == None or account.netflix_secret == None:
+        if (nf_user_id == None or nf_token == None or nf_secret == None):
             logs.info('Returning because of missing account credentials')
             return None
 
         netflix = globalNetflix()
-        logs.info('About to add to Queue')
-        result = netflix.addToQueue(account.netflix_user_id, account.netflix_token, account.netflix_secret, netflixId)
-        logs.info('successfully added to queue')
-
-        # TODO check results
-
-        return True
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
 
     @API_CALL
     def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
@@ -2085,20 +2129,22 @@ class StampedAPI(AStampedAPI):
             imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
             # Add image dimensions to stamp object
             image           = ImageSchema()
-            sizes   = {
+            supportedSizes   = {
                 ''        : (imageWidth, imageHeight),   #original size
                 '-ios1x'  : (200, 200),
                 '-ios2x'  : (400, 400),
                 '-web'    : (580, 580),
                 '-mobile' : (572, 572),
                 }
-            for k,v in sizes.iteritems():
+            sizes = []
+            for k,v in supportedSizes.iteritems():
                 logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
                 size            = ImageSizeSchema()
                 size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                 size.width      = v[0]
                 size.height     = v[1]
-                image.sizes.append(size)
+                sizes.append(size)
+            image.sizes = sizes
             content.images.append(image)
             imageExists = True
 

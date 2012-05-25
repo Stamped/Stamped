@@ -82,6 +82,13 @@ def profile(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
+    if ENABLE_TRAVIS_TEST:
+        friends     = travis_test.friends
+        followers   = travis_test.followers
+    else:
+        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
+        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
+    
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
         user        = travis_test.user
@@ -96,17 +103,12 @@ def profile(request, schema, **kwargs):
             stamps  = filter(lambda s: s['entity']['subcategory'] == schema.subcategory, stamps)
         
         stamps      = stamps[schema.offset : schema.offset + schema.limit]
-        friends     = travis_test.friends
-        followers   = travis_test.followers
     else:
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
         
-        utils.log(pprint.pformat(schema.dataExport()))
-        
+        #utils.log(pprint.pformat(schema.dataExport()))
         stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
-        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
-        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
     
     main_cluster    = { }
     
@@ -232,6 +234,13 @@ def map(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
+    if ENABLE_TRAVIS_TEST:
+        friends     = travis_test.friends
+        followers   = travis_test.followers
+    else:
+        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
+        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
+
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
         user        = travis_test.user
@@ -239,19 +248,14 @@ def map(request, schema, **kwargs):
         
         stamps      = filter(lambda s: 'coordinates' in s['entity'], travis_test.stamps)
         stamps      = stamps[schema.offset : schema.offset + schema.limit]
-        
-        friends     = travis_test.friends
-        followers   = travis_test.followers
     else:
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
         
         stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
-        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
-        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
     
     # TODO: bake this into stampedAPIProxy request
-    stamps = filter(lambda s: 'coordinates' in s['entity'], stamps)
+    stamps    = filter(lambda s: 'coordinates' in s['entity'], stamps)
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
@@ -320,11 +324,23 @@ def sdetail(request, schema, **kwargs):
     return stamped_render(request, 'sdetail.html', {
         'user'   : user, 
         'stamp'  : stamp, 
-        'entity' : entity
+        'entity' : entity, 
     })
 
 
-@stamped_view(schema=HTTPUserCollectionSlice)
-def test_view(request, schema, **kwargs):
+@stamped_view()
+def test_view(request, **kwargs):
     return stamped_render(request, 'test.html', { })
+
+@stamped_view(schema=HTTPEntityId)
+def menu(request, schema, **kwargs):
+    entity  = stampedAPIProxy.getEntity(schema.entity_id)
+    menu    = stampedAPIProxy.getEntityMenu(schema.entity_id)
+    
+    #utils.getFile(menu['attribution_image_link'])
+    
+    return stamped_render(request, 'menu.html', {
+        'menu'   : menu, 
+        'entity' : entity, 
+    })
 

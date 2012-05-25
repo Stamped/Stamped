@@ -178,7 +178,7 @@ class Schema(object):
         else:
             if not name.startswith('_Schema__') and not name.startswith('__'):
                 logs.warning('Setting non-schema field "%s"' % (name))
-                raise Exception("SETTING NON-SCHEMA FIELD %s" % name)
+                raise AttributeError('SETTING NON-SCHEMA FIELD "%s"' % name)
             object.__setattr__(self, name, value)
 
     def __delattr__(self, name):
@@ -260,8 +260,8 @@ class Schema(object):
                         self.__setattr__(k, nestedPropList)
                     else:
                         self.__setattr__(k, v)
-                except KeyError:
-                    if kwargs.pop('overflow', False):
+                except (AttributeError, KeyError):
+                    if kwargs.pop('overflow', False) == True:
                         continue
         except Exception as e:
             logs.warning(e)

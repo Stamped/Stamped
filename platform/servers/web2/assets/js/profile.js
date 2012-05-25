@@ -10,6 +10,7 @@ var g_update_stamps = null;
 
 (function() {
     $(document).ready(function() {
+        
         // ---------------------------------------------------------------------
         // initialize StampedClient
         // ---------------------------------------------------------------------
@@ -17,12 +18,36 @@ var g_update_stamps = null;
         
         var client      = new StampedClient();
         var screen_name = STAMPED_PRELOAD.user.screen_name;
-        var update_navbar_layout = null;
+        var $body       = $('body');
         
-        var blacklisted_entity_images = {
-            'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' : true, 
-            'http://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png' : true, 
-            'http://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png' : true
+        var sdetail_popup           = 'sdetail_popup';
+        var sdetail_wrapper         = 'sdetail_wrapper';
+        var sdetail_wrapper_sel     = '.' + sdetail_wrapper;
+        var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
+        var update_navbar_layout    = null;
+        
+        var is_blacklisted_image    = function(url) {
+            return (url.indexOf(static_prefix) != -1);
+        };
+        
+        var extract_data = function($target, prefix, default_value) {
+            var classes = $target.get(0).className.split(/\s+/);
+            var value   = default_value;
+            
+            for (i = 0; i < classes.length; ++i) {
+                var c = classes[i];
+                
+                if (c.indexOf(prefix) === 0) {
+                    c = c.substring(prefix.length);
+                    
+                    if (c.length > 1) {
+                        value = c;
+                        break;
+                    }
+                }
+            }
+            
+            return value;
         };
         
         
@@ -49,7 +74,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=25";
+            var limit = "limit=10";
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
@@ -142,6 +167,19 @@ var g_update_stamps = null;
         // to avoid doing extra, unnecessary work / rendering that could result 
         // in a choppier end-user experience.
         var update_gallery_layout = function(force) {
+            update_gallery(function() {
+                update_navbar_layout(false);
+                last_layout = new Date().getTime();
+                
+                var style = {
+                    visibility : 'visible'
+                };
+                
+                $('#main-content').css(style);
+                $('#stamp-category-nav-bar').css(style);
+            });
+            return;
+
             force   = (typeof(force) === 'undefined' ? false : force);
             var now = new Date().getTime();
             
@@ -149,8 +187,15 @@ var g_update_stamps = null;
                 last_layout = now;
                 
                 update_gallery(function() {
-                    update_navbar_layout(true);
+                    update_navbar_layout(false);
                     last_layout = new Date().getTime();
+                    
+                    var style = {
+                        visibility : 'visible'
+                    };
+                    
+                    $('#main-content').css(style);
+                    $('#stamp-category-nav-bar').css(style);
                 });
             }
         };
@@ -166,12 +211,18 @@ var g_update_stamps = null;
             if (typeof($scope) === 'undefined') {
                 $scope = $(document);
                 $items = $scope.find('.stamp-gallery-item');
+            } else if ($scope.hasClass(sdetail_wrapper)) {
+                $items = null;
             }
             
             update_timestamps($scope);
             
             $scope.find('.stamp-preview').each(function(i, elem) {
-                var $this = $(this);
+                var $this       = $(this);
+                var is_sdetail  = ($this.parents('.sdetail_body').length >= 1);
+                
+                //var category    = extract_data($this, 'stamp-category-', 'other');
+                //console.debug("CATEGORY: " + category + "; is_sdetail: " + is_sdetail);
                 
                 // enforce precedence of stamp preview images
                 var update_images = function() {
@@ -182,7 +233,7 @@ var g_update_stamps = null;
                         $elements     = $elements.filter(function() {
                             var $this = $(this);
                             
-                            if ($this.attr('src') in blacklisted_entity_images) {
+                            if (is_blacklisted_image($this.attr('src'))) {
                                 $this.addClass('hidden').parent().addClass('hidden');
                                 return false;
                             } else {
@@ -202,11 +253,24 @@ var g_update_stamps = null;
                         return $elements;
                     };
                     
-                    images.push.apply(images, find('.stamp-user-image   img'));
-                    images.push.apply(images, find('.stamp-entity-image img'));
+                    var $stamp_user_images   = find('.stamp-user-image   img');
+                    var $stamp_entity_images = find('.stamp-entity-image img');
+                    var $map  = $this.find('.stamp-map');
+                    var $icon = $this.find('.stamp-icon');
                     
-                    images.push.apply(images, $this.find('.stamp-map'));
-                    images.push.apply(images, $this.find('.stamp-icon'));
+                    if (is_sdetail) {
+                        images.push.apply(images, $map);
+                        images.push.apply(images, $stamp_entity_images);
+                        images.push.apply(images, $icon);
+                        
+                        // note: user image is included in stamp-card
+                        images.push.apply(images, $stamp_user_images);
+                    } else {
+                        images.push.apply(images, $stamp_user_images);
+                        images.push.apply(images, $stamp_entity_images);
+                        images.push.apply(images, $map);
+                        images.push.apply(images, $icon);
+                    }
                     
                     if (images.length > 0) {
                         var preview  = images[0];
@@ -216,7 +280,8 @@ var g_update_stamps = null;
                         if ($preview.is("img")) {
                             // ensure gallery's layout is updated whenever this 
                             preview.onload = function() {
-                                setTimeout(update_gallery_layout, 100);
+                                update_gallery_layout();
+                                //setTimeout(update_gallery_layout, 100);
                             };
                         }
                         
@@ -230,59 +295,104 @@ var g_update_stamps = null;
                         }
                     }
                     
-                    update_gallery_layout(true);
+                    update_gallery_layout();
                 };
                 
                 update_images();
             });
             
-            $items.click(function(event) {
-                event.preventDefault();
-                
-                var $this = $(this);
-                var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
-                var href  = $link.attr('href');
-                
-                href = href.replace('http://www.stamped.com', '');
-                href = href + "?" + new Date().getTime();
-                
-                //href = '/travis/stamps/4/TEMPORARY';
-                
-                $.colorbox({
-                    href        : href, 
-                    
-                    width       : "75%", 
-                    transition  : "elastic", 
-                    fixed       : true, 
-                    scrolling   : false, 
-                    
-                    onComplete  : function() {
-                        update_stamps();
-                        init_social_sharing();
+            if (!!$items) {
+                $items.click(function(event) {
+                    var $target = $(event.target);
+                    if ($target.is('a') && $target.hasClass('lightbox')) {
+                        return true;
                     }
-                });
-                
-                /*
-                var $target = $("<div></div>");
-                
-                $target.load(href + " .sdetail_body", {}, function() {
-                    var $sdetail = $target.find('.sdetail_body').remove();
-                    update_stamps($sdetail);
-                    init_social_sharing();
                     
-                    $.colorbox({
-                        inline      : true, 
-                        href        : $sdetail, 
+                    event.preventDefault();
+                    
+                    var $this = $(this);
+                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+                    var href  = $link.attr('href');
+                    
+                    href = href.replace('http://www.stamped.com', '');
+                    href = href + "?" + new Date().getTime();
+                    
+                    //href = '/travis/stamps/4/TEMPORARY';
+                    
+                    /*$.colorbox({
+                        href        : href, 
                         
-                        maxwidth    : (2 * window.innerwidth) / 3, 
+                        width       : "75%", 
                         transition  : "elastic", 
                         fixed       : true, 
-                        scrolling   : false
+                        scrolling   : false, 
+                        
+                        onComplete  : init_sdetail
+                    });*/
+                    
+                    $(sdetail_wrapper_sel).remove();
+                    var $target = $("<div class='" + sdetail_wrapper + "'></div>");
+                    
+                    // initialize sDetail popup after AJAX load
+                    $target.load(href, {}, function(response, status, xhr) {
+                        if (status == "error") {
+                            console.debug("AJAX ERROR (sdetail): " + url);
+                            console.debug(response);
+                            console.debug(xhr);
+                            
+                            alert("TODO: handle AJAX and backend errors gracefuly");
+                            return;
+                        }
+                        
+                        init_sdetail($target);
+                        
+                        update_stamps($target);
+                        init_social_sharing();
+                        
+                        // TODO: disable infinite scroll for sdetail popup
+                        //destroy_infinite_scroll();
+                        
+                        $target.insertAfter('#main-page-content-body');
+                        $body.addClass(sdetail_popup);
+                        update_dynamic_header();
+                        
+                        $target = $(sdetail_wrapper_sel);
+                        resize_sdetail_wrapper($target);
+                        
+                        /*var $comments_div = $target.find('.comments');
+                        $comments_div.css({
+                            'height' : $comments_div.height(), 
+                            'overflow-y' : 'scroll'
+                        });*/
+                        
+                        // initialize sDetail close button logic
+                        $target.find('.close-button a').click(function(event) {
+                            event.preventDefault();
+                            
+                            $(sdetail_wrapper_sel).hide().remove();
+                            $body.removeClass(sdetail_popup);
+                            
+                            update_dynamic_header();
+                            //update_gallery_layout(true);
+                            //init_infinite_scroll();
+                            
+                            return false;
+                        });
+                        
+                        /*$.colorbox({
+                            inline      : true, 
+                            href        : $sdetail, 
+                            
+                            maxwidth    : (2 * window.innerWidth) / 3, 
+                            transition  : "elastic", 
+                            fixed       : true, 
+                            scrolling   : false
+                        });*/
                     });
-                });*/
-                
-                return false;
-            });
+                    
+                    return false;
+                });
+            }
             
             /*$('.stamp-gallery-item').click(function(event) {
                 //event.preventDefault();
@@ -302,7 +412,7 @@ var g_update_stamps = null;
                 });
             });*/
             
-			$scope.find("a.lightbox").fancybox({
+            $scope.find("a.lightbox").fancybox({
                 openEffect      : 'elastic', 
                 openEasing      : 'easeOutBack', 
                 openSpeed       : 300, 
@@ -311,7 +421,7 @@ var g_update_stamps = null;
                 closeEasing     : 'easeInBack', 
                 closeSpeed      : 300, 
                 
-				closeClick      : true, 
+                closeClick      : true, 
                 //maxWidth        : (2 * window.innerWidth) / 3, 
                 
                 helpers         : {
@@ -328,12 +438,36 @@ var g_update_stamps = null;
                         closeClick  : true
                     }
                 }
-			});
+            });
             
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
                 $this.fitText();
             });*/
+        };
+        
+        var resize_sdetail_wrapper = function($sdetail_wrapper) {
+            if (!$sdetail_wrapper) {
+                $sdetail_wrapper = $(sdetail_wrapper_sel);
+            }
+            
+            if ($sdetail_wrapper.length === 1) {
+                var offset = cur_header_height + 16 + 24;
+                
+                $sdetail_wrapper.css({
+                    'top' : offset + "px", 
+                });
+                
+                // constrain entity header's width to fit on one line
+                var $stamp_card_header  = $sdetail_wrapper.find('.stamp-card-header');
+                var $entity_header      = $stamp_card_header.find('.entity-header');
+                var width               = $stamp_card_header.width() - (96 + 48);
+                
+                $entity_header.css({
+                    'width'     : width, 
+                    'max-width' : width
+                });
+            }
         };
         
         g_update_stamps = update_stamps;
@@ -526,14 +660,18 @@ var g_update_stamps = null;
         // collect the default, static positions and sizes of all header 
         // elements that we'll be animating
         var $user_logo          = $('header .user-logo-large');
+        var user_logo_top       = parseFloat($user_logo.css('top'));
+        var user_logo_left      = parseFloat($user_logo.css('left'));
         var user_logo_width     = parseFloat($user_logo.css('width'));
         var user_logo_height    = parseFloat($user_logo.css('height'));
         
         var $window             = $(window);
         var $header             = $('header .header-body');
+        var $content            = $('#main-page-content');
         var header_height       = $header.height();
         var cur_header_height   = header_height;
         var min_height_ratio    = 0.5;
+        var min_header_height   = header_height * min_height_ratio;
         
         var $join               = $('.join');
         var $join_button        = $join.find('a.button');
@@ -579,11 +717,20 @@ var g_update_stamps = null;
         
         var last_ratio = null;
         
-        // whenever the window scrolls, check if the header's layout needs to be updated
-        $window.bind("scroll", function(n) {
-            var cur_ratio = (header_height - $window.scrollTop()) / header_height;
-            cur_ratio     = Math.min(Math.max(cur_ratio, 0.0), 1.0);
+        var update_dynamic_header = function() {
+            // note: if sdetail's up, we round the dynamic header's size ratio to the 
+            // nearest value s.t. it's either at maximum size or minimum size
+            var cur_ratio = Math.round(last_ratio);
             
+            if (!$body.hasClass(sdetail_popup)) {
+                // if we're not in sdetail, set the dynamic header's size ratio to be 
+                // proportional to the window's current vertical scroll offset
+                cur_ratio = (header_height - $window.scrollTop()) / header_height;
+                cur_ratio = Math.min(Math.max(cur_ratio, 0.0), 1.0);
+            }
+            
+            // only update the dynamic header's properties if the dynamic header's 
+            // size ratio has changed since the last time we updated the header
             if (cur_ratio !== last_ratio) {
                 last_ratio = cur_ratio;
                 var inv_cur_ratio = 1.0 - cur_ratio;
@@ -596,18 +743,25 @@ var g_update_stamps = null;
                     $header.height(cur_header_height);
                 }
                 
+                // ensure main body content's vertical offset respects the dynamic 
+                // header's height
+                $content.css({
+                    top : cur_header_height + 16
+                });
+                
+                // layout and style the header's sign-in / sign-up content
                 var cur_opacity = cur_ratio * cur_ratio;
-                var style = {
+                var already_stamping_style = {
                     opacity : cur_opacity
                 };
                 
                 if (cur_opacity <= 0.2) {
-                    style['visibility'] = 'hidden';
+                    already_stamping_style['visibility'] = 'hidden';
                 } else {
-                    style['visibility'] = 'visible';
+                    already_stamping_style['visibility'] = 'visible';
                 }
                 
-                $already_stamping.css(style);
+                $already_stamping.css(already_stamping_style);
                 
                 var cur_left = join_pos.left - inv_cur_ratio * (sign_in_button_width + 16);
                 $join.css({
@@ -619,21 +773,25 @@ var g_update_stamps = null;
                     top : cur_top
                 });
                 
-                
+                // resize user's stamp logo
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width  / 4.0);
                 var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_height / 4.0);
                 var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_height + 'px';
+                var cur_logo_top    = user_logo_top  + (user_logo_width  - cur_logo_height) / 2.0;
+                var cur_logo_left   = user_logo_left + (user_logo_height - cur_logo_width)  / 2.0;
                 
                 $user_logo.css({
-                    width  : cur_logo_width, 
-                    height : cur_logo_height, 
+                    width               : cur_logo_width, 
+                    height              : cur_logo_height, 
                     'background-size'   : cur_logo_size, 
-                    '-webkit-mask-size' : cur_logo_size
+                    '-webkit-mask-size' : cur_logo_size, 
+                    top                 : cur_logo_top, 
+                    left                : cur_logo_left
                 });
                 
                 //console.debug("DYNAMIC HEADER: ratio=" + cur_ratio);
             }
-        });
+        };
         
         
         // ---------------------------------------------------------------------
@@ -645,8 +803,6 @@ var g_update_stamps = null;
         var categories = 'default place music book film other';
         
         var set_body_class = function(category) {
-            var $body  = $('body');
-            
             $body.removeClass(categories).addClass(category);
         };
         
@@ -696,7 +852,16 @@ var g_update_stamps = null;
                 
                 var $target = $("<div></div>");
                 
-                $target.load(url + " .stamp-gallery", params, function() {
+                $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                    if (status == "error") {
+                        console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
+                        console.debug(response);
+                        console.debug(xhr);
+                        
+                        alert("TODO: handle AJAX and backend errors gracefuly");
+                        return;
+                    }
+                    
                     var $elements = $target.find('.stamp-gallery-item').remove();
                     
                     //$('.stamp-gallery-nav').show();
@@ -851,7 +1016,7 @@ var g_update_stamps = null;
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
             var max_blurb_width = 125;
-            var min_blurb_width = (gallery_width - (24 + 58 + 24 + 148));
+            var min_blurb_width = (gallery_width - (24 + 58 + 48 + 148));
             
             var width           = window.innerWidth;
             var left            = gallery_x + gallery_width + fixed_padding;
@@ -870,6 +1035,7 @@ var g_update_stamps = null;
                     
                     if (gallery) {
                         desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        desired_width_px = "auto";
                     } else {
                         //desired_width_header_px = (desired_width + 148) + "px";
                         desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
@@ -928,7 +1094,10 @@ var g_update_stamps = null;
                         $('.fixedwidth').width(new_fixed_width);
                         update = true;
                     } else {
-                        $('.fixedwidth').width("1000px");
+                        //var cur_fixed_width_px = Math.Max(1000, 1 * width) + "px";
+                        var cur_fixed_width_px = fixed_width + "px";
+                        
+                        $('.fixedwidth').width(cur_fixed_width_px);
                     }
                 }
                 
@@ -951,11 +1120,117 @@ var g_update_stamps = null;
             }
         };
         
-        $(window).resize(update_navbar_layout);
+        var init_sdetail = function($sdetail) {
+            if (!$sdetail) {
+                $sdetail        = $('.sdetail_body');
+            }
+            
+            var $comments_div   = $sdetail.find('.comments');
+            var $comments_nav   = $comments_div.find('.comments-nav');
+            var $comments       = $comments_div.find('.comment');
+            var collapsed       = 'collapsed';
+            
+            // initialize comment collapsing
+            if ($comments.length >= 3) {
+                $comments_nav.find('a').click(function(event) {
+                    event.preventDefault();
+                    
+                    $comments_div.toggleClass(collapsed);
+                    resize_sdetail_wrapper();
+                    
+                    return false;
+                });
+            }
+            
+            // initialize menu action
+            var $link = $sdetail.find('.action-menu a.link');
+            
+            if ($link.length >= 1) {
+                var $temp = $link.parents('.entity-id');
+                
+                if ($temp.length >= 1) {
+                    var entity_id    = extract_data($temp, 'entity-id-',    null);
+                    var entity_title = $.trim($link.prev('.entity-title').text());
+                    
+                    if (entity_id !== null) {
+                        if (entity_title === null) {
+                            entity_title = "Menu";
+                        } else {
+                            entity_title = "Menu for " + entity_title;
+                        }
+                        
+                        var link_type = 'ajax';
+                        $link.attr('href', '/entities/menu?entity_id=' + entity_id);
+                        
+                        // TODO: embed singleplatform page directly if one exists!
+                        //link_type = 'iframe';
+                        //$link.attr('href', 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped');
+                        
+                        $link.fancybox({
+                            type            : link_type, 
+                            title           : entity_title, 
+                            
+                            maxWidth        : Math.max((2 * window.innerWidth) / 3, 640), 
+                            
+                            openEffect      : 'elastic', 
+                            openEasing      : 'easeOutBack', 
+                            openSpeed       : 300, 
+                            
+                            closeEffect     : 'elastic', 
+                            closeEasing     : 'easeInBack', 
+                            closeSpeed      : 300, 
+                            
+                            closeClick      : true, 
+                            
+                            helpers         : {
+                                overlay     : {
+                                    speedIn  : 150, 
+                                    speedOut : 300, 
+                                    opacity  : 0.8, 
+                                    
+                                    css      : {
+                                        cursor             : 'pointer', 
+                                        'background-color' : '#fff'
+                                    }, 
+                                    
+                                    closeClick  : true
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // NOTE: metadata embedding approach doesn't work because it 
+                // includes unicode u'' prefix on strings
+                
+                /*var $metadata = $this.prev('.source-metadata');
+                console.debug("METADATA: " + );
+                var metadata  = $.parseJSON($metadata.text());
+                console.debug("METADATA: " + metadata);*/
+            }
+            
+            /*// initialize actions
+            $sdetail.find('.action').each(function(i, elem) {
+                var $elem = $(elem);
+                
+                if ($elem.hasClass('action-menu')) {
+                    $elem.find('a.link').click(
+                }
+            });*/
+        };
+        
+        var handle_window_resize = function() {
+            update_navbar_layout();
+        };
+        
+        // whenever the window scrolls, check if the header's layout needs to be updated
+        $window.bind("scroll", update_dynamic_header);
+        $window.resize(handle_window_resize);
         
         // TODO: initial gallery opening animation by adding items one at a time
+        update_dynamic_header();
         update_stamps();
-        init_gallery ();
+        init_gallery();
         update_navbar_layout();
         
         return;

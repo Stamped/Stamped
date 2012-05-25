@@ -93,7 +93,7 @@ class Netflix(object):
             else:
                 url = "http://%s/users/%s/%s" % (HOST, user_id, service)
         parameters['output'] = 'json'
-        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so nevermind it
+        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so never mind it
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
             parameters=parameters,
@@ -126,10 +126,18 @@ class Netflix(object):
         if response.status < 300:
             return json.loads(response.read())
         else:
-            failData = json.loads(response.read())['status']
+            responseData = response.read()
+            failData = json.loads(responseData)['status']
             logs.info('Failed with status code %d' % response.status)
-            raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
-                           (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
+            try:
+                msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
+                     (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code']
+                status_code = failData['status_code']
+            except:
+                msg = 'Netflix returned a failure response: %s' % responseData
+                status_code = response.status
+            finally:
+                raise StampedHTTPError(msg, status_code)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)

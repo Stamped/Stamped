@@ -49,6 +49,23 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
 
     return transformOutput(output)
 
+@handleHTTPRequest(requires_auth=False,
+    requires_client=True,
+    http_schema=HTTPTwitterAccountNew,
+    conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
+    upload='profile_image')
+@require_http_methods(["POST"])
+def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
+    account = stampedAPI.addTwitterAccount(schema)
+
+    user   = HTTPUser().importAccount(account)
+    logs.user(user.user_id)
+
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
+
+    return transformOutput(output)
+
 @handleHTTPRequest()
 @require_http_methods(["POST"])
 def remove(request, authUserId, **kwargs):
@@ -265,6 +282,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
+    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:

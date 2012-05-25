@@ -118,3 +118,17 @@
     }
 }
 
+
+<script>
+    $(document).ready(function() {
+        $('.innerbg').css({
+            position : 'absolute', 
+            width    : '100%', 
+            height   : '100%', 
+            opacity  : '0.45', 
+            background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
+            'background-size': '100%', 
+        }).addClass('blur_8');
+    });
+</script>
+
