@@ -104,7 +104,7 @@ def suggested(request, authUserId, schema, **kwargs):
         try:
             group = HTTPEntitySearchResultsGroup()
             group.title = 'Suggested'
-            if 'name' in section and name['section'] is not None:
+            if 'name' in section and section['name'] is not None:
                 group.title = section['name']
             group.entities = map(convert, section['entities'])
 
