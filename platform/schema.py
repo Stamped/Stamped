@@ -235,6 +235,7 @@ class Schema(object):
         return properties
 
     def dataImport(self, properties, **kwargs):
+        overflow = kwargs.pop('overflow', False)
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
         try:
@@ -261,8 +262,8 @@ class Schema(object):
                     else:
                         self.__setattr__(k, v)
                 except (AttributeError, KeyError):
-                    if kwargs.pop('overflow', False) == True:
-                        continue
+                    if not overflow:
+                        raise
         except Exception as e:
             logs.warning(e)
             raise

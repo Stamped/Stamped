@@ -1824,13 +1824,11 @@ class HTTPEntityNew(Schema):
 
     def exportEntity(self, authUserId):
 
-        kind    = deriveKindFromSubcategory(self.subcategory)
-        # kind    = list(mapSubcategoryToKinds(self.subcategory))[0]
+        kind    = list(mapSubcategoryToKinds(self.subcategory))[0]
         entity  = buildEntity(kind=kind)
 
         entity.schema_version   = 0
-        entity.types            = list(deriveTypesFromSubcategories([self.subcategory]))
-        # entity.types            = list(mapSubcategoryToTypes(self.subcategory))
+        entity.types            = list(mapSubcategoryToTypes(self.subcategory))
         entity.title            = self.title
 
         def addField(entity, field, value, timestamp):
@@ -2721,7 +2719,7 @@ class HTTPFavorite(Schema):
         self.complete                = fav.complete
 
         if fav.stamp is not None:
-            self.stamp              = HTTPStamp().dataImport(fav.stamp.dataExport())
+            self.stamp              = HTTPStamp().importStampMini(fav.stamp)
 
         return self
 

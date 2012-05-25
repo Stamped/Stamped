@@ -1736,7 +1736,7 @@ class StampedAPI(AStampedAPI):
                 result.screen_name  = creditedUser.screen_name
                 
                 # Add to user ids
-                userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
+                userIds[userId] = creditedUser.minimize()
                 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, entity_id)
@@ -1891,7 +1891,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = UserMini().dataImport(user.dataExport())
+            userIds[user.user_id] = user.minimize()
 
         logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
         t1 = time.time()
@@ -2071,7 +2071,7 @@ class StampedAPI(AStampedAPI):
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
-        userIds     = { user.user_id : UserMini().dataImport(user.dataExport()) }
+        userIds     = { user.user_id : user.minimize() }
         entityIds   = { entity.entity_id : entity }
         
         blurbData   = data.pop('blurb',  None)
@@ -2226,7 +2226,7 @@ class StampedAPI(AStampedAPI):
             self._rollback.append((self._stampDB.removeUserStampReference, \
                 {'stampId': stamp.stamp_id, 'userId': user.user_id}))
             self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
-            self._stampDB.addInboxStampReference(user.user_id, stamp.stamp_id)
+            self._stampDB.addInboxStampReference([ user.user_id ], stamp.stamp_id)
             
             # Update user stats 
             self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
@@ -2342,7 +2342,7 @@ class StampedAPI(AStampedAPI):
         
         # Collect user ids
         userIds = {}
-        userIds[user.user_id] = UserMini().dataImport(user.dataExport())
+        userIds[user.user_id] = user.minimize()
         
         # Blurb & Mentions
         mentionedUsers = []
@@ -2394,7 +2394,7 @@ class StampedAPI(AStampedAPI):
                 result.screen_name  = creditedUser['screen_name']
 
                 # Add to user ids
-                userIds[userId] = UserMini().dataImport(creditedUser.dataExport())
+                userIds[userId] = creditedUser.minimize()
 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, stamp.entity.entity_id)
@@ -2700,7 +2700,7 @@ class StampedAPI(AStampedAPI):
         self._rollback.append((self._commentDB.removeComment, {'commentId': comment.comment_id}))
         
         # Add full user object back
-        comment.user = UserMini().dataImport(user.dataExport())
+        comment.user = user.minimize()
         
         tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
         
@@ -2801,7 +2801,7 @@ class StampedAPI(AStampedAPI):
 
         # Add user object
         user = self._userDB.getUser(comment.user.user_id)
-        comment.user = UserMini().dataImport(user.dataExport())
+        comment.user = user.minimize()
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[comment.stamp_id])
@@ -2833,7 +2833,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(userIds.keys(), None)
         
         for user in users:
-            userIds[user.user_id] = UserMini().dataImport(user.dataExport())
+            userIds[user.user_id] = user.minimize()
         
         comments = []
         for comment in commentData:
@@ -3401,7 +3401,7 @@ class StampedAPI(AStampedAPI):
 
     def _enrichFavorite(self, rawFavorite, user=None, entity=None, stamp=None, authUserId=None):
         if user is None or user.user_id != rawFavorite.user_id:
-            user = UserMini().dataImport(self._userDB.getUser(rawFavorite.user_id).dataExport())
+            user = self._userDB.getUser(rawFavorite.user_id).minimize()
 
         if entity is None or entity.entity_id != rawFavorite.entity.entity_id:
             entity = self._entityDB.getEntity(rawFavorite.entity.entity_id)
@@ -3526,7 +3526,7 @@ class StampedAPI(AStampedAPI):
                 stampIds[str(rawFavorite.stamp_id)] = None
 
         # User
-        user = UserMini().dataImport(self._userDB.getUser(authUserId).dataExport())
+        user = self._userDB.getUser(authUserId).minimize()
         
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3742,7 +3742,7 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.lookupUsers(userIds.keys(), None)
         
         for user in users:
-            userIds[str(user.user_id)] = UserMini().dataImport(user.dataExport())
+            userIds[str(user.user_id)] = user.minimize()
         
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
@@ -3764,7 +3764,7 @@ class StampedAPI(AStampedAPI):
                 commentUserIds[comment.user.user_id] = None
         users = self._userDB.lookupUsers(commentUserIds.keys(), None)
         for user in users:
-            userIds[str(user.user_id)] = UserMini().dataImport(user.dataExport())
+            userIds[str(user.user_id)] = user.minimize()
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment

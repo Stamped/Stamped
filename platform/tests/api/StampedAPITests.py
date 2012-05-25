@@ -130,19 +130,6 @@ class StampedAPIStampTests(StampedAPITest):
         self.assertEqual(s0.entity.title,         s1.entity.title)
         self.assertEqual(s0.entity.entity_id,     s1.entity.entity_id)
     
-    def _test_reverse(self, genericCollectionSlice, results0):
-        genericCollectionSlice.reverse    = True
-        
-        results1 = self._getStamps(genericCollectionSlice)
-        self.assertEqual(len(results0), len(results1))
-        
-        # test reverse to ensure stamps are exactly mirrored
-        for i in xrange(len(results0)):
-            s0 = results0[i]
-            s1 = results1[len(results1) - (i + 1)]
-            
-            self._assertStampsEqual(s0, s1)
-    
     def test_slicing_coverage(self):
         # test strictly for coverage with a bunch of different parameter 
         # permutations to try and hit as many code paths as possible, 
@@ -225,12 +212,6 @@ class StampedAPIStampTests(StampedAPITest):
             s1 = ret1[i - genericCollectionSlice.offset]
             
             self._assertStampsEqual(s0, s1)
-        
-        # test reverse
-        genericCollectionSlice.offset     = 0
-        genericCollectionSlice.limit      = 10
-        
-        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_popularity_sort(self):
         genericCollectionSlice            = HTTPGenericCollectionSlice()
@@ -245,8 +226,6 @@ class StampedAPIStampTests(StampedAPITest):
         self.assertTrue(ret0[0].stats.num_credit   >= ret0[-1].stats.num_credit)
         self.assertTrue(ret0[0].stats.num_likes    >= ret0[-1].stats.num_likes)
         self.assertTrue(ret0[0].stats.num_comments >= ret0[-1].stats.num_comments)
-        
-        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_proximity_sort(self):
         genericCollectionSlice                = HTTPGenericCollectionSlice()
@@ -272,9 +251,6 @@ class StampedAPIStampTests(StampedAPITest):
             # results is less precise but faster to calculate (L2 norm)
             self.assertTrue(dist >= prev_dist - 1)
             prev_dist = dist
-        
-        # test reverse
-        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_alphabetical_sort(self):
         genericCollectionSlice            = HTTPGenericCollectionSlice()
@@ -296,8 +272,6 @@ class StampedAPIStampTests(StampedAPITest):
                 self.assertTrue(title >= prev_title)
             
             prev_title = title
-        
-        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_viewport_filter(self):
         genericCollectionSlice            = HTTPGenericCollectionSlice()
@@ -317,9 +291,6 @@ class StampedAPIStampTests(StampedAPITest):
         for s in ret0:
             self.assertTrue(s.entity.coordinates.lat <= viewport[0] and s.entity.coordinates.lat >= viewport[2])
             self.assertTrue(s.entity.coordinates.lng >= viewport[1] and s.entity.coordinates.lng <= viewport[3])
-        
-        # test reverse
-        self._test_reverse(genericCollectionSlice, ret0)
     
     def test_invalid_params(self):
         genericCollectionSlice            = HTTPGenericCollectionSlice()
