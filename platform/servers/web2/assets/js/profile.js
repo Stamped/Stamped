@@ -340,7 +340,7 @@ var g_update_stamps = null;
                             console.debug(response);
                             console.debug(xhr);
                             
-                            alert("TODO: handle AJAX and backend errors gracefuly");
+                            //alert("TODO: handle AJAX and backend errors gracefuly");
                             return;
                         }
                         
@@ -858,7 +858,7 @@ var g_update_stamps = null;
                         console.debug(response);
                         console.debug(xhr);
                         
-                        alert("TODO: handle AJAX and backend errors gracefuly");
+                        //alert("TODO: handle AJAX and backend errors gracefuly");
                         return;
                     }
                     

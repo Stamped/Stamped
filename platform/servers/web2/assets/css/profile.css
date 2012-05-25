@@ -129,7 +129,7 @@
   text-align: left;
   float: left;
   margin-left: 82px;
-  text-align: justify;
+  text-align: left;
   padding-right: 32px;
 }
 .stamp-gallery-item .content .content_2 {
@@ -367,7 +367,7 @@ a.lightbox .zoom {
 .blurb,
 .normal_blurb {
   display: block;
-  text-align: justify;
+  text-align: left;
   quotes: "\201C" "\201D";
   line-height: 135%;
   font-family: 'arial', sans-serif;
