@@ -220,7 +220,7 @@ header .header-body a.button {
 .user-logo-large {
   position: absolute;
   display: block;
-  top: -75px;
+  top: -78px;
   left: -125px;
   width: 195px;
   height: 195px;
@@ -250,10 +250,14 @@ header .header-body a.button {
   display: block;
   height: 16px;
 }
+#main-page-content {
+  position: relative;
+  top: 86px;
+  left: 0;
+}
 .profile-header-wrapper {
   position: relative;
   width: 100%;
-  padding: 5em 0 0;
   position: relative;
   top: 0;
   left: 0;

@@ -1,7 +1,6 @@
 {% load stamped_tags %}
 
-<div class="sdetail_body clearfix">
-    
+<div class="sdetail_body fixedwidth clearfix">
     <div class="section section-stamp">
         <div class="stamp-category-{{stamp.entity.category}}">
             <div class="stamp-card">
@@ -9,83 +8,87 @@
                     <div class="ribbon-bottom"></div>
                 </div>
                 
-                <div class='stamp-contents'>
-                    <div class='user-header user-header-0 clearfix'>
-                        <div class='name'>
-                            {% handlebars_template "screen-name" stamp.user %}
-                        </div>
-                        
-                        {% if stamp.modified %}
-                            <div class="timestamp_raw">{{stamp.modified}}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class='stamp-inner-content clearfix'>
-                        {% handlebars_template "profile-image-large-ish" stamp.user %}
-                        
-                        <div class="entity-header">
-                            <div class='title clearfix'>
-                                <div class="pronounced-title">
-                                    <a href="{{stamp.url}}" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
-                                </div>
-                                <span class='user-logo-small'></span>
+                <div class="stamp-contents">
+                    <div class="stamp-contents-upper{% if stamp.previews.comments|length > 0 %} shadowed{% endif %}">
+                        <div class="user-header user-header-0 clearfix">
+                            <div class="name">
+                                {% handlebars_template "screen-name" stamp.user %}
                             </div>
                             
-                            <div class="subtitle-line">
-                                <p>
-                                    <span class="icon"></span>
-                                    <span class="subtitle">{{stamp.entity.subtitle}}</span>
-                                </p>
-                            </div>
+                            {% if stamp.modified %}
+                                <div class="timestamp_raw">{{stamp.modified}}</div>
+                            {% endif %}
                         </div>
                         
-                        {% if stamp.contents.0.images.0.sizes.0.url %}
-                            {% handlebars_template "stamp-card-image" stamp %}
-                        {% endif %}
-                        
-                        {% for content in stamp.contents %}
-                            {% if content.blurb and content.blurb|length > 0 %}
-                                <p class="normal_blurb">{{content.blurb}}</p>
+                        <div class="stamp-inner-content clearfix">
+                            <div class="stamp-card-header clearfix">
+                                {% handlebars_template "profile-image-large-ish" stamp.user %}
+                                
+                                <div class="entity-header">
+                                    <div class="title clearfix">
+                                        <div class="pronounced-title">
+                                            <a href="{{stamp.url}}" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
+                                        </div>
+                                        <span class="user-logo-small"></span>
+                                    </div>
+                                    
+                                    <div class="subtitle-line">
+                                        <p>
+                                            <span class="icon"></span>
+                                            <span class="subtitle">{{stamp.entity.subtitle}}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if stamp.contents.0.images.0.sizes.0.url %}
+                                {% handlebars_template "stamp-card-image" stamp %}
                             {% endif %}
-                        {% endfor %}
-                    </div>
-                    
-                    {% with credits=stamp.previews.credits %}
-                        {% if credits and credits|length > 0 %}
-                            <p class="credits">
-                                <img class="stamp_0" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" />
-                                
-                                Credit to 
-                                {% handlebars_template "screen-name" credits.0.user %}
-                                
-                                {% if credits|length > 1 %}
-                                    and 
-                                    {% if credits|length == 2 %}
-                                        {% handlebars_template "screen-name" credits.1.user %}
-                                    {% else %}
-                                        {{ credits|length }} others
-                                        
-                                        <span class="credits-detail">
-                                            {% for credit in credits %}
-                                                {% handlebars_template "screen-name" credit.user %}
-                                            {% endfor %}
-                                        </span>
-                                    {% endif %}
+                            
+                            {% for content in stamp.contents %}
+                                {% if content.blurb and content.blurb|length > 0 %}
+                                    <p class="normal_blurb">{{content.blurb}}</p>
                                 {% endif %}
-                            </p>
-                        {% endif %}
-                    {% endwith %}
+                            {% endfor %}
+                            
+                            {% handlebars_template "social-feedback" stamp %}
+                        </div>
+                        
+                        {% with credits=stamp.previews.credits %}
+                            {% if credits and credits|length > 0 %}
+                                <p class="credits">
+                                    <img class="stamp_0" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" />
+                                    
+                                    Credit to 
+                                    {% handlebars_template "screen-name" credits.0.user %}
+                                    
+                                    {% if credits|length > 1 %}
+                                        and 
+                                        {% if credits|length == 2 %}
+                                            {% handlebars_template "screen-name" credits.1.user %}
+                                        {% else %}
+                                            {{ credits|length }} others
+                                            
+                                            <span class="credits-detail">
+                                                {% for credit in credits %}
+                                                    {% handlebars_template "screen-name" credit.user %}
+                                                {% endfor %}
+                                            </span>
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
                     
                     {% with comments=stamp.previews.comments %}
                         {% if comments and comments|length > 0 %}
                             <div class="comments collapsed">
                                 {% if comments|length > 3 %}
-                                    <div class='comments-nav'>
-                                        <a class='show' href="#">View all {{comments|length}} comments.</a>
-                                        <a class='hide' href="#">Collapse comments.</a>
+                                    <div class="comments-nav">
+                                        <a class="show" href="#">View all {{comments|length}} comments.</a>
+                                        <a class="hide" href="#">Collapse comments.</a>
                                     </div>
-                                {% else %}
-                                
                                 {% endif %}
                                 
                                 <ol class="comment-list">
@@ -94,8 +97,8 @@
                                             {% handlebars_template "profile-image-small" comment.user %}
                                             
                                             <div class="comment-inner">
-                                                <p class='test0'>
-                                                    <span class='name'>
+                                                <p class="test0">
+                                                    <span class="name">
                                                         {% handlebars_template "screen-name" comment.user %}
                                                     </span>
                                                     
@@ -123,40 +126,48 @@
         </div>
     </div>
     
-    <div class="section section-entity">
+    <div class="section section-entity entity-id entity-id-{{stamp.entity.entity_id}}">
+        <div class="close-button">
+            <a href="#">Close</a>
+        </div>
+        
         {% handlebars_template "stamp-image" stamp %}
         
         <div class="actions">
             {% for a in entity.actions %}
                 {% with action=a.action %}
                     <div class="action action-{{action.type}}">
+                        
+                        <!-- TODO: more clean & secure way of embedding JSON -->
+                        <!--<div class="metadata action-metadata" style="display: none;">
+                            {{action}}
+                        </div>-->
+                        
                         {% if action.sources.0 %}
                             <div class="sources">
                                 {% for source in action.sources %}
-                                    {% if source.link %}
-                                        <div class="source source-{{source.source}}">
-                                            <!-- TODO: more clean & secure way of embedding JSON -->
-                                            <div class="metadata" style="display: none;">
-                                                {{source}}
+                                    <div class="source source-{{source.source}}">
+                                        <!-- TODO: more clean & secure way of embedding JSON -->
+                                        <!--<div class="metadata source-metadata" style="display: none;">
+                                            {{source}}
+                                        </div>-->
+                                        
+                                        <a class="link" title="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}" href="{{source.link}}">
+                                            <!-- TODO: replace these icons with sprite assets from anthony -->
+                                            <div class="action-icon">
+                                                <img alt="{{a.name}}" src="{{a.icon}}" />
                                             </div>
                                             
-                                            <a class='link' title="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}" href="{{source.link}}">
-                                                <!-- TODO: replace these icons with sprite assets from anthony -->
-                                                <div class='action-icon'>
-                                                    <img alt="{{a.name}}" src="{{a.icon}}" />
-                                                </div>
+                                            <div class="name">
+                                                {% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}
                                                 
-                                                <div class="name">
-                                                    {% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}
-                                                    
-                                                    {% if source.icon %}
-                                                        <img class='source-icon' src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
+                                                {% if source.icon %}
+                                                    <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
 />
-                                                    {% endif %}
-                                                </div>
-                                            </a>
-                                        </div>
-                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    </div>
                                 {% endfor %}
                             </div>
                         {% endif %}

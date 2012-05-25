@@ -77,13 +77,15 @@
         {% endblock post_header %}
         
         {% block pre_main %}
-        <div role="main" class="main">
-            {% endblock pre_main %}
-            
-            {% block main %}
-            {% endblock main %}
-            
-            {% block post_main %}
+        <div id="main-page-content" role="main" class="main">
+            <div class='main-page-content-body'>
+                {% endblock pre_main %}
+                
+                {% block main %}
+                {% endblock main %}
+                
+                {% block post_main %}
+            </div>
         </div>
         {% endblock post_main %}
         

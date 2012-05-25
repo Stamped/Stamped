@@ -328,7 +328,15 @@ def sdetail(request, schema, **kwargs):
     })
 
 
-@stamped_view(schema=HTTPUserCollectionSlice)
-def test_view(request, schema, **kwargs):
+@stamped_view()
+def test_view(request, **kwargs):
     return stamped_render(request, 'test.html', { })
+
+@stamped_view(schema=HTTPEntityId)
+def menu(request, schema, **kwargs):
+    menu = stampedAPIProxy.getEntityMenu(schema.entity_id)
+    
+    return stamped_render(request, 'menu.html', {
+        'menu' : menu
+    })
 

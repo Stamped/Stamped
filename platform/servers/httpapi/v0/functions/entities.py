@@ -118,7 +118,7 @@ def suggested(request, authUserId, schema, **kwargs):
     return transformOutput(results)
 
 
-@handleHTTPRequest(http_schema=HTTPEntityId)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityId)
 @require_http_methods(["GET"])
 def menu(request, authUserId, http_schema, **kwargs):
     menu        = stampedAPI.getMenu(http_schema.entity_id)
