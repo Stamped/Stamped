@@ -1459,6 +1459,14 @@
 		633FB55A156D478100D7D776 /* STSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB558156D478100D7D776 /* STSettingsViewController.m */; };
 		633FB55B156D478100D7D776 /* STSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB558156D478100D7D776 /* STSettingsViewController.m */; };
 		633FB55C156D478100D7D776 /* STSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB558156D478100D7D776 /* STSettingsViewController.m */; };
+		633FB58C156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */; };
+		633FB58D156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */; };
+		633FB58E156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */; };
+		633FB58F156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */; };
+		633FB5A7156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB5A6156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m */; };
+		633FB5A8156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB5A6156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m */; };
+		633FB5A9156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB5A6156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m */; };
+		633FB5AA156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB5A6156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m */; };
 		634BA4B9153CA8BE003F96AB /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
 		634BA4BA153CA8BE003F96AB /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
 		634CC952154F42AF000CA620 /* TEMP_noImage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 634CC951154F42AF000CA620 /* TEMP_noImage@2x.png */; };
@@ -4485,6 +4493,11 @@
 		633F26E3153928BC00391F15 /* STFriendsSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STFriendsSource.m; sourceTree = "<group>"; };
 		633FB557156D478100D7D776 /* STSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSettingsViewController.h; sourceTree = "<group>"; };
 		633FB558156D478100D7D776 /* STSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSettingsViewController.m; sourceTree = "<group>"; };
+		633FB589156FEEA700D7D776 /* STEntityAutoCompleteResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityAutoCompleteResult.h; sourceTree = "<group>"; };
+		633FB58A156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntityAutoCompleteResult.h; sourceTree = "<group>"; };
+		633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntityAutoCompleteResult.m; sourceTree = "<group>"; };
+		633FB5A5156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesAutoSuggestCell.h; sourceTree = "<group>"; };
+		633FB5A6156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesAutoSuggestCell.m; sourceTree = "<group>"; };
 		634BA4B7153CA8BD003F96AB /* STStampedByView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedByView.h; sourceTree = "<group>"; };
 		634BA4B8153CA8BD003F96AB /* STStampedByView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedByView.m; sourceTree = "<group>"; };
 		634CC951154F42AF000CA620 /* TEMP_noImage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_noImage@2x.png"; sourceTree = "<group>"; };
@@ -6260,6 +6273,7 @@
 				636273E5155AB07D006AF7B8 /* STImageList.h */,
 				63313525156C1AEE00BF9B8D /* STTodoSource.h */,
 				63313531156C268C00BF9B8D /* STLoginResponse.h */,
+				633FB589156FEEA700D7D776 /* STEntityAutoCompleteResult.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6364,6 +6378,8 @@
 				63145D4B156AEACE0027EC92 /* STStampMini.m */,
 				6331352B156C1DD300BF9B8D /* STSimpleTodoSource.h */,
 				6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */,
+				633FB58A156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.h */,
+				633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -6523,6 +6539,8 @@
 		63A6E288153DDFD900D84915 /* Entities Search */ = {
 			isa = PBXGroup;
 			children = (
+				633FB5A5156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.h */,
+				633FB5A6156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m */,
 				63A6E289153DE32B00D84915 /* STEntitySearchController.h */,
 				63A6E28A153DE32B00D84915 /* STEntitySearchController.m */,
 			);
@@ -11495,6 +11513,8 @@
 				63313530156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
 				63313537156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 				633FB55C156D478100D7D776 /* STSettingsViewController.m in Sources */,
+				633FB58F156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */,
+				633FB5AA156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11782,6 +11802,8 @@
 				6331352F156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
 				63313536156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 				633FB55B156D478100D7D776 /* STSettingsViewController.m in Sources */,
+				633FB58E156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */,
+				633FB5A9156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12068,6 +12090,8 @@
 				6331352E156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
 				63313535156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 				633FB55A156D478100D7D776 /* STSettingsViewController.m in Sources */,
+				633FB58D156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */,
+				633FB5A8156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12366,6 +12390,8 @@
 				6331352D156C1DD300BF9B8D /* STSimpleTodoSource.m in Sources */,
 				63313534156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */,
 				633FB559156D478100D7D776 /* STSettingsViewController.m in Sources */,
+				633FB58C156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m in Sources */,
+				633FB5A7156FF1CE00D7D776 /* SearchEntitiesAutoSuggestCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12668,8 +12694,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedDev copy";
-				PROVISIONING_PROFILE = "2BC06E82-35DF-4467-9C8B-810A4AB2642C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "2BC06E82-35DF-4467-9C8B-810A4AB2642C";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -12714,8 +12740,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedDev copy";
-				PROVISIONING_PROFILE = "2BC06E82-35DF-4467-9C8B-810A4AB2642C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "2BC06E82-35DF-4467-9C8B-810A4AB2642C";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -12761,8 +12787,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedDev copy";
-				PROVISIONING_PROFILE = "2BC06E82-35DF-4467-9C8B-810A4AB2642C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "2BC06E82-35DF-4467-9C8B-810A4AB2642C";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

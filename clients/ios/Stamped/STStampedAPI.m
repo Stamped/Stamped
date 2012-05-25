@@ -36,6 +36,7 @@
 #import "STSimpleMenu.h"
 #import "STHybridCacheSource.h"
 #import "STSimpleLoginResponse.h"
+#import "STSimpleEntityAutoCompleteResult.h"
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -774,6 +775,27 @@ static STStampedAPI* _sharedInstance;
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
                                                      block(result, error, cancellation); 
                                                  }];
+}
+
+- (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
+                                         coordinates:(NSString*)coordinates
+                                            category:(NSString*)category
+                                         andCallback:(void(^)(NSArray<STEntityAutoCompleteResult>* results, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/entities/autosuggest.json";
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   query, @"query",
+                                   category, @"category",
+                                   nil];
+    if (coordinates) {
+        [params setObject:coordinates forKey:@"coordinates"];
+    }
+    return [[STRestKitLoader sharedInstance] loadWithPath:path
+                                                     post:NO
+                                                   params:params
+                                                  mapping:[STSimpleEntityAutoCompleteResult mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation); 
+                                              }];
 }
 
 - (void)fastPurge {

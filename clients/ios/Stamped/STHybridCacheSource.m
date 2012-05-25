@@ -157,14 +157,14 @@
                 [self threadSafeRemoveWithKey:key];
             }
             else {
-                @synchronized (self) {
+                [Util executeOnMainThread:^{
                     if (![self.cache objectForKey:key]) {
                         //NSLog(@"Upgrading %@ in %@", [result title], self.path);
                         [self.cache setObject:result forKey:key];
                         [self.cacheKeys setObject:key forKey:[NSValue valueWithPointer:result]];
                         [self.cacheDates setObject:date forKey:key];
                     }
-                }
+                }];
             }
         }];
     }

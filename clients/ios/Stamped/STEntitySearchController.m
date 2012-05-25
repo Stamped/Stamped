@@ -17,7 +17,9 @@
 #import "STStampedAPI.h"
 #import "EntityDetailViewController.h"
 #import "STEntitySearchSection.h"
+#import "STEntityAutoCompleteResult.h"
 #import <CoreLocation/CoreLocation.h>
+#import "SearchEntitiesAutoSuggestCell.h"
 
 @interface STEntitySearchTableViewCell : UITableViewCell
 
@@ -56,11 +58,15 @@
 @property (nonatomic, readwrite, retain) STSearchField* searchField;
 @property (nonatomic, readwrite, retain) NSArray<STEntitySearchSection>* suggestedSections;
 @property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* searchResults;
+@property (nonatomic, readonly, retain) NSMutableArray<STEntityAutoCompleteResult>* autoCompleteResults;
 @property (nonatomic, readwrite, retain) UITableView* tableView;
 @property (nonatomic, readwrite, assign) CGRect searchFieldFrameNormal;
 @property (nonatomic, readwrite, assign) CGRect searchFieldFrameActive;
 @property (nonatomic, readwrite, assign) CGRect cancelFrameNormal;
 @property (nonatomic, readwrite, assign) CGRect cancelFrameActive;
+@property (nonatomic, readwrite, assign) CGRect tableFrameNormal;
+@property (nonatomic, readwrite, retain) NSString* coordinates;
+@property (nonatomic, readwrite, retain) STCancellation* autoCompleteCancellation;
 
 @end
 
@@ -70,12 +76,16 @@
 @synthesize initialQuery = initialQuery_;
 @synthesize suggestedSections = suggestedSections_;
 @synthesize searchResults = searchResults_;
+@synthesize autoCompleteResults = autoCompleteResults_;
 @synthesize tableView = tableView_;
 @synthesize searchField = searchField_;
 @synthesize searchFieldFrameNormal = _searchFieldFrameNormal;
 @synthesize searchFieldFrameActive = _searchFieldFrameActive;
 @synthesize cancelFrameNormal = _cancelFrameNormal;
 @synthesize cancelFrameActive = _cancelFrameActive;
+@synthesize tableFrameNormal = _tableFrameNormal;
+@synthesize coordinates = _coordinates;
+@synthesize autoCompleteCancellation = _autoCompleteCancellation;
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
     self = [super init];
@@ -85,6 +95,7 @@
         }
         category_ = [category retain];
         initialQuery_ = [query retain];
+        autoCompleteResults_ = (id)[[NSMutableArray alloc] init];
         STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
         suggested.category = category;
         CLLocationManager* locationManager = [[CLLocationManager alloc] init];
@@ -98,6 +109,7 @@
             float longitude=location.coordinate.longitude;
             float latitude=location.coordinate.latitude;
             suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+            self.coordinates = suggested.coordinates;
         }
         [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested 
                                                            andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
@@ -117,6 +129,12 @@
 {
     [category_ release];
     [initialQuery_ release];
+    [searchResults_ release];
+    [suggestedSections_ release];
+    [autoCompleteResults_ release];
+    [_coordinates release];
+    [self.autoCompleteCancellation cancel];
+    [_autoCompleteCancellation release];
     [super dealloc];
 }
 
@@ -185,89 +203,152 @@
                                                                self.view.frame.size.height + [Util sharedNavigationController].navigationBar.frame.size.height - CGRectGetMaxY(header.frame))];
     tableView_.delegate = self;
     tableView_.dataSource = self;
-    tableView_.rowHeight = 68;
+    tableView_.rowHeight = 64;
+    self.tableFrameNormal = tableView_.frame;
     //tableView.backgroundColor = [UIColor grayColor];
     [self.view addSubview:tableView_];
     [self.view addSubview:header];
 }
+
 
 - (void)viewDidUnload {
     [searchField_ release];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldDidChange:) name:UITextFieldTextDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     //[[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     //[[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
 }
 
+- (void)keyboardDidShow:(NSNotification *)notification
+{
+    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    
+    [UIView animateWithDuration:.25 animations:^{
+        [Util reframeView:self.tableView withDeltas:CGRectMake(0, 0, 0, -keyboardSize.height)];
+    }];
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSLog(@"numberOfRows");
-    if (self.searchResults) {
-        return self.searchResults.count;
+    if (self.autoCompleteResults.count) {
+        return self.autoCompleteResults.count;
     }
-    else if (self.suggestedSections) {
-        id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
-        return sectionObject.entities.count;
+    else {
+        if (self.searchResults) {
+            return self.searchResults.count;
+        }
+        else if (self.suggestedSections) {
+            id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+            return sectionObject.entities.count;
+        }
+        return 0;
     }
-    return 0;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    if (self.searchResults) {
+    if (self.autoCompleteResults.count) {
         return 1;
-    }
-    else if (self.suggestedSections) {
-        return self.suggestedSections.count;
     }
     else {
-        return 1;
+        if (self.searchResults) {
+            return 1;
+        }
+        else if (self.suggestedSections) {
+            return self.suggestedSections.count;
+        }
+        else {
+            return 1;
+        }
     }
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    id<STEntitySearchResult> result = nil;
-    if (self.searchResults) {
-        result = [self.searchResults objectAtIndex:indexPath.row];
-    }
-    else if (self.suggestedSections) {
-        id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
-        result = [section.entities objectAtIndex:indexPath.row];
-    }
-    if (result) {
-        return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
+    if (self.autoCompleteResults.count) {
+        id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
+        NSString* reuseIdentifier = @"autoComplete";
+        SearchEntitiesAutoSuggestCell* cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+        if (!cell) {
+            cell = [[[SearchEntitiesAutoSuggestCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+        }
+        cell.customTextLabel.text = autoCompleteResult.completion;
+        return cell;
     }
     else {
-        return nil;
+        id<STEntitySearchResult> result = nil;
+        if (self.searchResults) {
+            result = [self.searchResults objectAtIndex:indexPath.row];
+        }
+        else if (self.suggestedSections) {
+            id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
+            result = [section.entities objectAtIndex:indexPath.row];
+        }
+        if (result) {
+            return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
+        }
+        else {
+            return nil;
+        }
     }
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-    id<STEntitySearchResult> result = nil;
-    if (self.searchResults) {
-        result = [self.searchResults objectAtIndex:indexPath.row];
+    if (self.autoCompleteResults.count) {
+        id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
+        self.searchField.text = autoCompleteResult.completion;
+        [self.searchField resignFirstResponder];
     }
-    else if (self.suggestedSections) {
-        id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
-        result = [section.entities objectAtIndex:indexPath.row];
-    }
-    if (result) {
-        EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
-        [[Util sharedNavigationController] pushViewController:controller animated:YES];
-        NSLog(@"Chose %@, %@", result.title, result.searchID);
+    else {
+        id<STEntitySearchResult> result = nil;
+        if (self.searchResults) {
+            result = [self.searchResults objectAtIndex:indexPath.row];
+        }
+        else if (self.suggestedSections) {
+            id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
+            result = [section.entities objectAtIndex:indexPath.row];
+        }
+        if (result) {
+            EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
+            [[Util sharedNavigationController] pushViewController:controller animated:YES];
+            NSLog(@"Chose %@, %@", result.title, result.searchID);
+        }
     }
 }
 
+- (void)textFieldDidChange:(NSNotification*)notification {
+    [self.autoCompleteCancellation cancel];
+    self.autoCompleteCancellation = [[STStampedAPI sharedInstance] entityAutocompleteResultsForQuery:self.searchField.text
+                                                                                         coordinates:self.coordinates
+                                                                                            category:self.category
+                                                                                         andCallback:^(NSArray<STEntityAutoCompleteResult> *results, NSError *error, STCancellation *cancellation) {
+                                                                                             self.autoCompleteCancellation = nil;
+                                                                                             if (results) {
+                                                                                                 [self.autoCompleteResults removeAllObjects];
+                                                                                                 [self.autoCompleteResults addObjectsFromArray:results];
+                                                                                                 [self.tableView reloadData];
+                                                                                             }
+                                                                                         }];
+}
+
 - (void)textFieldDidEndEditing:(UITextField *)textField {
+    [self.autoCompleteCancellation cancel];
+    self.autoCompleteCancellation = nil;
+    [self.autoCompleteResults removeAllObjects];
+    [self.tableView reloadData];
     [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
+    [UIView animateWithDuration:.25 animations:^{
+        self.tableView.frame = self.tableFrameNormal;  
+    }];
     if (textField.text && ![textField.text isEqualToString:@""]) {
         STEntitySearch* search = [[[STEntitySearch alloc] init] autorelease];
         search.category = self.category;
         search.query = textField.text;
         [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
-            NSLog(@"searchResult:%@",error);
             if (results) {
                 for (id<STEntitySearchResult> result in results) {
                     NSLog(@"%@", result.title);
@@ -279,14 +360,28 @@
     }
 }
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (self.searchResults) {
+    if (self.autoCompleteResults.count) {
         return nil;
     }
-    else if (self.suggestedSections) {
-        id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
-        return sectionObject.name;
+    else {
+        if (self.searchResults) {
+            return nil;
+        }
+        else if (self.suggestedSections) {
+            id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+            return sectionObject.name;
+        }
+        return nil;
     }
-    return nil;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (self.autoCompleteResults.count) {
+        return 47;
+    }
+    else {
+        return 64;
+    } 
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {

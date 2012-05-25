@@ -10,6 +10,8 @@
 #import "STConfiguration.h"
 #import "STRestKitLoader.h"
 #import "STSimpleStamp.h"
+#import "STDebug.h"
+#import "Util.h"
 
 #define kStampLimit 20
 
@@ -27,8 +29,6 @@
       _data = [[NSArray alloc] init];
       _identifiers = [[NSArray alloc] init];
       _moreData = NO;
-
-      
   }
   return self;
 }
@@ -79,6 +79,8 @@
             return @"popular";
             break;
         default:
+            [STDebug log:[NSString stringWithFormat:@"bad scope in Stamps,%d", _scope]];
+            [Util warnWithMessage:@"Bad scope in Stamps; please report last log" andBlock:nil];
             break;
     }
     
