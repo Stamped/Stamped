@@ -73,7 +73,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=25";
+            var limit = "limit=10";
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
