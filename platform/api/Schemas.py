@@ -654,9 +654,15 @@ class BasicEntity(BasicEntityMini):
         cls.addProperty('phone_source',                    basestring)
         cls.addProperty('phone_timestamp',                 datetime)
 
-        cls.addNestedProperty('stats',                      EntityStatsSchema)
+        cls.addNestedProperty('stats',                     EntityStatsSchema)
         # cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
-        cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
+        cls.addNestedProperty('timestamp',                 TimestampSchema, required=True)
+
+        # The last date/time we got some input indicating that this is currently popular.
+        cls.addProperty('last_popular',                    datetime)
+        # Not to be exposed to users -- just some internal data letting us know what sort
+        # of input we got indicating that this is currently popular.
+        cls.addProperty('last_popular_info',               basestring)
 
     def __init__(self):
         BasicEntityMini.__init__(self)
