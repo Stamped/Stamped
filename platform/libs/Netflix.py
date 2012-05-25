@@ -172,9 +172,10 @@ class Netflix(object):
         )
         print (results)
         autocomplete = results.pop('autocomplete', None)
-        if autocomplete is None:
+        if autocomplete is None or 'autocomplete_item' not in self.__asList(autocomplete)[0]:
             return []
 
+        print autocomplete
         completions = []
         for title in self.__asList(self.__asList(autocomplete)[0]['autocomplete_item']):
             completions.append( { 'completion' : title['title']['short'] } )
@@ -377,7 +378,7 @@ if __name__ == '__main__':
     import sys
     params = {}
     methods = 'autocomplete'
-    params['title'] = 'ghostbusters'
+    params['title'] = 'ghostbuts'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:
