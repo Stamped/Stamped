@@ -7,6 +7,9 @@ urlpatterns = patterns('',
     url(r'^blog$',                              'core.views.blog'), 
     url(r'^test$',                              'core.views.test_view'), 
     
+    # menu
+    url(r'^entities/menu$',                     'core.views.menu'), 
+    
     # index
     url(r'^index$',                             'core.views.index'), 
     url(r'^index\.html?$',                      'core.views.index'), 

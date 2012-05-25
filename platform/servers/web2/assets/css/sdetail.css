@@ -15,6 +15,16 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+/* **************************************************************************
+                                SDETAIL CORE
+   ************************************************************************** */
+.shadowed {
+  -webkit-box-shadow: 0 3px 4px 0 rgba(50, 50, 50, 0.15);
+  -moz-box-shadow: 0 3px 4px 0 rgba(50, 50, 50, 0.15);
+  -ms-box-shadow: 0 3px 4px 0 rgba(50, 50, 50, 0.15);
+  -o-box-shadow: 0 3px 4px 0 rgba(50, 50, 50, 0.15);
+  box-shadow: 0 3px 4px 0 rgba(50, 50, 50, 0.15);
+}
 .normal_blurb {
   margin: 0;
 }
@@ -23,20 +33,29 @@
 }
 .profile .sdetail_body {
   padding: 2em;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
 }
 .sdetail_body {
-  background: #fff;
+  /* **************************************************************************
+                            SDETAIL ENTITY SECTION
+   ************************************************************************** */
+
+  /* **************************************************************************
+                            SDETAIL STAMP SECTION
+   ************************************************************************** */
+
+  /* **************************************************************************
+                            SDETAIL SOCIAL SECTION
+   ************************************************************************** */
+
 }
 .sdetail_body .section-entity {
   float: right;
   width: 30%;
   padding: .25em;
+}
+.sdetail_body .section-entity .close-button {
+  text-align: right;
+  width: 100%;
 }
 .sdetail_body .section-entity .stamp-preview {
   margin: 1em auto;
@@ -85,7 +104,6 @@
 .sdetail_body .section-stamp {
   float: left;
   width: 50%;
-  border: 2px solid green;
   margin: 0;
 }
 .sdetail_body .section-stamp .stamp-card {
@@ -94,9 +112,9 @@
   -ms-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
   -o-box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
   box-shadow: 0 0 16px 0 rgba(50, 50, 50, 0.75);
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
@@ -106,74 +124,77 @@
   display: block;
   width: 100%;
   height: 16px;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .user-header .name {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .user-header .name {
   float: left;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .user-header .timestamp {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .user-header .timestamp {
   float: right;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .user-header-0 {
-  margin: 0.5em 1.5em 0.5em;
-}
-.sdetail_body .section-stamp .stamp-card .stamp-contents .timestamp,
-.sdetail_body .section-stamp .stamp-card .stamp-contents .timestamp_raw {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .timestamp,
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .timestamp_raw {
   text-align: right;
   font-size: 80%;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content {
-  margin: 0 1.5em 1.5em;
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .user-header-0 {
+  margin: 0.5em 1.5em 0.5em;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .entity-header {
-  float: none;
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content {
+  margin: 0 1.5em 0;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .profile-image-large-ish {
-  margin: 0 24px 12px 0;
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .entity-header {
+  max-width: 50%;
+  padding: 2px;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .profile-image-large-ish {
+  margin: 0 0 12px 0;
   float: left;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .stamp-preview {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .stamp-preview {
   float: right;
-  margin: 0 0 24px 12px;
+  margin: 0 0 24px 24px;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-inner-content .normal_blurb {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .normal_blurb {
   display: block;
+  margin-bottom: 1em;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .credits {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback {
+  margin-bottom: 12px;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits {
   border-top: 1px solid #bbb;
   padding: 0.5em 1.5em;
+  margin: 0;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .credits .stamp_0 {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits .stamp_0 {
   display: inline-block;
   width: 18px;
   height: 18px;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .credits .stamp_1 {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits .stamp_1 {
   display: inline-block;
   margin: 0 0 0 -9px;
   width: 18px;
   height: 18px;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .credits .credits-detail {
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits .credits-detail {
   display: none;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments {
-  -webkit-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
-  -moz-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
-  -ms-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
-  -o-box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
-  box-shadow: 0 3px 8px -4px rgba(50, 50, 50, 0.75);
+  display: block;
+  height: auto;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav {
   border-bottom: 1px dashed #bbb;
   text-align: center;
-  display: none;
-  padding: .5em;
+  margin: 0 24px;
+  padding: .5em 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav .show {
   display: none;
@@ -191,7 +212,7 @@
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment {
   display: block;
   border-bottom: 1px solid #bbb;
-  padding: 1em 1.5em;
+  padding: 1em 1.5em 0;
   -webkit-transition-property: -webkit-transform, opacity;
   -moz-transition-property: -moz-transform, opacity;
   -ms-transition-property: -ms-transform, opacity;
@@ -215,6 +236,7 @@
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner {
   position: relative;
+  margin-bottom: 1em;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner p.test0 {
   display: block;
@@ -228,6 +250,7 @@
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comment-list li.comment .comment-inner p.test0 .timestamp {
   text-align: right;
   position: absolute;
+  font-size: 80%;
   top: 0;
   right: 0;
 }
@@ -238,10 +261,10 @@
   border-bottom: 0 none;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .collapsed .comments-nav .show {
-  display: block !important;
+  display: block;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .collapsed .comments-nav .hide {
-  display: none  !important;
+  display: none;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .collapsed ol.comment-list li.comment:nth-child(n+4) {
   -webkit-transform: scale(0.001);
@@ -259,7 +282,6 @@
   border-bottom: 0 none;
 }
 .sdetail_body .section-social {
-  border: 2px solid blue;
   float: left;
   width: 50%;
   margin: .5em .5em 0;
@@ -270,4 +292,51 @@
 .sdetail_body .section-social .share-button {
   display: block;
   float: left;
+}
+/* **************************************************************************
+                                SDETAIL MENU
+   ************************************************************************** */
+.entity-menu {
+  max-height: 500px;
+  overflow-y: scroll;
+  text-align: center;
+}
+.entity-menu .entity-title {
+  font-size: 250%;
+  font-weight: bold;
+}
+.entity-menu .menus .submenu .submenu-title {
+  font-size: 200%;
+  font-weight: bold;
+}
+.entity-menu .menus .submenu .submenu-desc {
+  font-style: italic;
+  font-size: 90%;
+}
+.entity-menu .menus .submenu .submenu-footnote {
+  font-style: italic;
+  font-size: 80%;
+}
+.entity-menu .menus .submenu .section .section-title {
+  font-size: 150%;
+}
+.entity-menu .menus .submenu .section .section-desc {
+  font-style: italic;
+  font-size: 90%;
+}
+.entity-menu .menus .submenu .section .items .item {
+  /*.item-title, .item-desc, .item-spicy, .item-prices {
+                            display: inline-block;
+                        }*/
+
+}
+.entity-menu .menus .submenu .section .items .item .item-title {
+  font-weight: bold;
+}
+.entity-menu .menus .submenu .section .items .item .item-prices {
+  font-size: 80%;
+}
+.entity-menu .attribution {
+  font-style: italic;
+  font-size: 70%;
 }

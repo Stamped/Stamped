@@ -235,7 +235,7 @@ header {
     position: absolute;
     
     display: block;
-    top:  -75px;
+    top:  -78px;
     left: -125px;
     
     width:  195px;
@@ -277,10 +277,14 @@ header {
     height: 16px;
 }
 
+#main-page-content {
+    position: relative;
+    top:  86px;
+    left: 0;
+}
+
 .profile-header-wrapper {
     .fullwidth;
-    
-    padding: 5em 0 0;
     
     position: relative;
     top:  0;
@@ -646,10 +650,16 @@ header {
     .transform(scale(1, 1));
 }
 
+#main-content {
+    visibility: hidden;
+}
+
 #stamp-category-nav-bar {
     position: fixed;
     display:  block;
     z-index: 1000;
+    
+    visibility: hidden;
     
     background: #262626;
     .rounded(8px);

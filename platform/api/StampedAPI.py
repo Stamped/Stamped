@@ -38,7 +38,7 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
-    from Entity                 import buildEntity, deriveCategoryFromTypes
+    from Entity                 import buildEntity
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -944,12 +944,13 @@ class StampedAPI(AStampedAPI):
 
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps      = self._enrichStampObjects(stamps)
         
         categories  = {}
         num_stamps  = len(stamps)
         
         for stamp in stamps:
-            category = deriveCategoryFromTypes(stamp.entity.types)
+            category = stamp.entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
 
@@ -1474,13 +1475,11 @@ class StampedAPI(AStampedAPI):
                        query, 
                        coords=None, 
                        authUserId=None, 
-                       category=None, 
-                       subcategory=None):
+                       category=None):
         entities = self._entitySearch.searchEntities(query, 
                                                      limit=10, 
                                                      coords=coords, 
-                                                     category=category, 
-                                                     subcategory=subcategory)
+                                                     category=category)
         
         results = []
         process = 5
@@ -2227,6 +2226,7 @@ class StampedAPI(AStampedAPI):
             self._rollback.append((self._stampDB.removeUserStampReference, \
                 {'stampId': stamp.stamp_id, 'userId': user.user_id}))
             self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
+            self._stampDB.addInboxStampReference(user.user_id, stamp.stamp_id)
             
             # Update user stats 
             self._userDB.updateUserStats(authUserId, 'num_stamps',       increment=1)
@@ -2248,7 +2248,6 @@ class StampedAPI(AStampedAPI):
         
         # Add references to the stamp in all relevant inboxes
         followers = self._friendshipDB.getFollowers(authUserId)
-        followers.append(authUserId)
         self._stampDB.addInboxStampReference(followers, stampId)
         
         # If stamped entity is on the to do list, mark as complete

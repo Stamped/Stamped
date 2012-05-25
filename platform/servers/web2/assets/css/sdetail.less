@@ -8,7 +8,18 @@
 
 @import "libs/elements.less";
 
-@shadow: rgba(50,50,50,0.75);
+
+/* **************************************************************************
+                                SDETAIL CORE
+   ************************************************************************** */
+
+
+@shadow: rgba(50, 50, 50, 0.75);
+@shadow-light: fade(@shadow, 15%);
+
+.shadowed {
+    .box-shadow(0, 3px, 4px, 0, @shadow-light);
+}
 
 .normal_blurb {
     margin: 0;
@@ -23,18 +34,27 @@
 .profile {
     .sdetail_body {
         padding: 2em;
-        .rounded(8px);
     }
 }
 
 .sdetail_body {
-    background: #fff;
+    
+    
+/* **************************************************************************
+                            SDETAIL ENTITY SECTION
+   ************************************************************************** */
+    
     
     .section-entity {
         float: right;
         width: 30%;
         //border: 2px solid red;
         padding: .25em;
+        
+        .close-button {
+            text-align: right;
+            width: 100%;
+        }
         
         .stamp-preview {
             margin: 1em auto;
@@ -44,7 +64,6 @@
             margin: 2em auto;
             
             .action {
-                
                 .rounded(4px);
                 padding: 2px;
                 
@@ -87,14 +106,20 @@
         }
     }
     
+    
+/* **************************************************************************
+                            SDETAIL STAMP SECTION
+   ************************************************************************** */
+    
+    
     .section-stamp {
         float: left;
         width: 50%;
-        border: 2px solid green;
+        //border: 2px solid green;
         margin: 0;
         
         .stamp-card {
-            @round: 8px;
+            @round: 4px;
             .box-shadow(0, 0, 16px, 0, @shadow);
             .rounded(@round);
             
@@ -108,80 +133,86 @@
             }
             
             .stamp-contents {
-                .user-header {
-                    .name {
-                        float: left;
+                .stamp-contents-upper {
+                    .user-header {
+                        .name {
+                            float: left;
+                        }
+                        
+                        .timestamp {
+                            float: right;
+                        }
                     }
                     
-                    .timestamp {
-                        float: right;
+                    .timestamp, .timestamp_raw {
+                        text-align: right;
+                        font-size: 80%;
+                    }
+                    
+                    .user-header-0 {
+                        margin: .5em @space .5em;
+                    }
+                    
+                    .stamp-inner-content {
+                        margin: 0 @space 0;
+                        
+                        .entity-header {
+                            max-width: 50%;
+                            padding: 2px;
+                        }
+                        
+                        .profile-image-large-ish {
+                            margin: 0 0 12px 0;
+                            float: left;
+                        }
+                        
+                        .stamp-preview {
+                            float: right;
+                            margin: 0 0 24px 24px;
+                        }
+                        
+                        .normal_blurb {
+                            display: block;
+                            margin-bottom: 1em;
+                        }
+                        
+                        .social-feedback {
+                            margin-bottom: 12px;
+                        }
+                    }
+                    
+                    .credits {
+                        border-top: 1px solid #bbb;
+                        padding: .5em @space;
+                        margin: 0;
+                        
+                        .stamp_0 {
+                            display: inline-block;
+                            width:  18px;
+                            height: 18px;
+                        }
+                        .stamp_1 {
+                            display: inline-block;
+                            margin: 0 0 0 -9px;
+                            width:  18px;
+                            height: 18px;
+                        }
+                        
+                        .credits-detail {
+                            display: none;
+                        }
                     }
                 }
-                
-                .user-header-0 {
-                    margin: .5em @space .5em;
-                }
-                
-                .timestamp, .timestamp_raw {
-                    text-align: right;
-                    font-size: 80%;
-                }
-                
-                .stamp-inner-content {
-                    margin: 0 @space @space;
-                    
-                    .entity-header {
-                        float: none;
-                    }
-                    
-                    .profile-image-large-ish {
-                        margin: 0 24px 12px 0;
-                        float: left;
-                    }
-                    
-                    .stamp-preview {
-                        float: right;
-                        margin: 0 0 24px 12px;
-                    }
-                    
-                    .normal_blurb {
-                        display: block;
-                    }
-                }
-                
-                .credits {
-                    border-top: 1px solid #bbb;
-                    padding: .5em @space;
-                    
-                    .stamp_0 {
-                        display: inline-block;
-                        width:  18px;
-                        height: 18px;
-                    }
-                    .stamp_1 {
-                        display: inline-block;
-                        margin: 0 0 0 -9px;
-                        width:  18px;
-                        height: 18px;
-                    }
-                    
-                    .credits-detail {
-                        display: none;
-                    }
-                }
-                
-                .no-credits {
-                }
-                
                 
                 .comments {
-                    .box-shadow(0, 3px, 8px, -4px, @shadow);
+                    //border: 1px solid green;
                     
                     .comments-nav {
                         border-bottom: 1px dashed #bbb;
                         text-align: center;
-                        display: none;
-                        padding: .5em;
+                        
+                        margin:  0 24px;
+                        padding: .5em 0;
                         
                         .show {
                             display: none;
@@ -191,6 +222,9 @@
                             display: block;
                         }
                     }
+                    
+                    display: block;
+                    height: auto;
                     
                     ol.comment-list {
                         text-decoration: none;
@@ -202,7 +236,7 @@
                         li.comment {
                             display: block;
                             border-bottom: 1px solid #bbb;
-                            padding: 1em @space;
+                            padding: 1em @space 0;
                             //border: 1px solid red;
                             
                             -webkit-transition-property: -webkit-transform, opacity;
@@ -210,7 +244,7 @@
                                 -ms-transition-property:     -ms-transform, opacity;
                                  -o-transition-property:         top, left, opacity;
                                     transition-property:         transform, opacity;
-                              
+                            
                             -webkit-transition-duration: 0.5s;
                                -moz-transition-duration: 0.5s;
                                 -ms-transition-duration: 0.5s;
@@ -219,7 +253,6 @@
                             
                             opacity: 1;
                             .transform(scale(1.0));
-                            //.transition(all, 0.5s, ease-out);
                             
                             .profile-image-small {
                                 float: left;
@@ -229,6 +262,7 @@
                             .comment-inner {
                                 //border: 1px solid purple;
                                 position: relative;
+                                margin-bottom: 1em;
                                 
                                 p.test0 {
                                     display: block;
@@ -242,6 +276,7 @@
                                     .timestamp {
                                         text-align: right;
                                         position: absolute;
+                                        font-size: 80%;
                                         top: 0;
                                         right: 0;
                                     }
@@ -262,11 +297,11 @@
                 .collapsed {
                     .comments-nav {
                         .show {
-                            display: block !important;
+                            display: block;
                         }
                         
                         .hide {
-                            display: none  !important;
+                            display: none;
                         }
                     }
                     
@@ -291,8 +326,14 @@
         }
     }
     
+    
+/* **************************************************************************
+                            SDETAIL SOCIAL SECTION
+   ************************************************************************** */
+    
+    
     .section-social {
-        border: 2px solid blue;
+        //border: 2px solid blue;
         float: left;
         width: 50%;
         margin: .5em .5em 0;
@@ -305,6 +346,72 @@
             display: block;
             float: left;
         }
+    }
+}
+
+
+/* **************************************************************************
+                                SDETAIL MENU
+   ************************************************************************** */
+
+
+.entity-menu {
+    max-height: 500px;
+    overflow-y: scroll;
+    text-align: center;
+    
+    .entity-title {
+        font-size: 250%;
+        font-weight: bold;
+    }
+    
+    .menus {
+        .submenu {
+            .submenu-title {
+                font-size: 200%;
+                font-weight: bold;
+            }
+            
+            .submenu-desc {
+                font-style: italic;
+                font-size: 90%;
+            }
+            
+            .submenu-footnote {
+                font-style: italic;
+                font-size: 80%;
+            }
+            
+            .section {
+                .section-title {
+                    font-size: 150%;
+                }
+                
+                .section-desc {
+                    font-style: italic;
+                    font-size: 90%;
+                }
+                
+                .items {
+                    .item {
+                        .item-title {
+                            font-weight: bold;
+                        }
+                        .item-prices {
+                            font-size: 80%;
+                        }
+                        /*.item-title, .item-desc, .item-spicy, .item-prices {
+                            display: inline-block;
+                        }*/
+                    }
+                }
+            }
+        }
+    }
+    
+    .attribution {
+        font-style: italic;
+        font-size: 70%;
     }
 }
 

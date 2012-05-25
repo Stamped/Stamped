@@ -1825,10 +1825,12 @@ class HTTPEntityNew(Schema):
     def exportEntity(self, authUserId):
 
         kind    = deriveKindFromSubcategory(self.subcategory)
+        # kind    = list(mapSubcategoryToKinds(self.subcategory))[0]
         entity  = buildEntity(kind=kind)
 
         entity.schema_version   = 0
         entity.types            = list(deriveTypesFromSubcategories([self.subcategory]))
+        # entity.types            = list(mapSubcategoryToTypes(self.subcategory))
         entity.title            = self.title
 
         def addField(entity, field, value, timestamp):
@@ -1953,16 +1955,16 @@ class HTTPEntitySearch(Schema):
         cls.addProperty('q',                basestring, required=True)
         cls.addProperty('coordinates',      basestring)
         cls.addProperty('category',         basestring)
-        cls.addProperty('subcategory',      basestring)
         cls.addProperty('local',            bool)
-        cls.addProperty('page',             int)
 
     def __init__(self):
         Schema.__init__(self)
-        self.page = 0
 
     def exportEntitySearch(self):
-        entSearch = EntitySearch().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        if 'coordinates' in data:
+            del(data['coordinates'])
+        entSearch = EntitySearch().dataImport(data, overflow=True)
         if self.coordinates is not None:
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
             entSearch.coordinates = coordinates 
