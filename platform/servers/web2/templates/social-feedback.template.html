@@ -1,21 +1,21 @@
 
 <div class="social-feedback count_{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}_{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}_{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}">
     <div class='social-feedback-item count_{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}'>
-        <div class='like'></div>
+        <div class='social-feedback-like'></div>
         <span class='count'>
             {{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}
         </span>
     </div>
     
     <div class='social-feedback-item count_{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}'>
-        <div class='todo'></div>
+        <div class='social-feedback-todo'></div>
         <span class='count'>
             {{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}
         </span>
     </div>
     
     <div class='social-feedback-item count_{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}'>
-        <div class='comments'></div>
+        <div class='social-feedback-comments'></div>
         <span class='count'>
             {{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}
         </span>

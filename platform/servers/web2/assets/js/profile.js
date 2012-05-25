@@ -328,11 +328,17 @@ var g_update_stamps = null;
                         
                         // TODO: disable infinite scroll for sdetail popup
                         //destroy_infinite_scroll();
-                        $body.addClass(sdetail_popup);
-                        update_dynamic_header();
                         
                         $target.insertAfter('.main-page-content-body');
+                        $body.addClass(sdetail_popup);
+                        update_dynamic_header();
                         resize_sdetail_wrapper($target);
+                        
+                        /*var $comments_div = $target.find('.comments');
+                        $comments_div.css({
+                            'height' : $comments_div.height(), 
+                            'overflow-y' : 'scroll'
+                        });*/
                         
                         // initialize sDetail close button logic
                         $target.find('.close-button a').click(function(event) {
@@ -1093,9 +1099,9 @@ var g_update_stamps = null;
                 $sdetail        = $('.sdetail_body');
             }
             
-            var $comments_nav   = $sdetail.find('.comments-nav');
             var $comments_div   = $sdetail.find('.comments');
-            var $comments       = $sdetail.find('.comment');
+            var $comments_nav   = $comments_div.find('.comments-nav');
+            var $comments       = $comments_div.find('.comment');
             var collapsed       = 'collapsed';
             
             // initialize comment collapsing

@@ -186,6 +186,10 @@
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits .credits-detail {
   display: none;
 }
+.sdetail_body .section-stamp .stamp-card .stamp-contents .comments {
+  display: block;
+  height: auto;
+}
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments .comments-nav {
   border-bottom: 1px dashed #bbb;
   text-align: center;
