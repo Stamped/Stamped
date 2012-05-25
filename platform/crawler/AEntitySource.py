@@ -37,6 +37,7 @@ class AEntitySource(Greenlet, IASyncProducer):
                 raise AttributeError("Source subcategory '%s' not supported" % t)
             
             self.categories.add(Entity.subcategories[t])
+            # self.categories.add(Entity.mapSubcategoryToCategory(t))
     
     def get(self, block=True, timeout=None):
         return self._output.get(block, timeout)

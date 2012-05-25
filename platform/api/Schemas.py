@@ -906,16 +906,13 @@ class PlaceEntity(BasicEntity):
 
     @property
     def category(self):
-        food = set(['restaurant', 'bar', 'bakery', 'cafe', 'market', 'food', 'night_club'])
-        if len(food.intersection(self.types)) > 0:
-            return 'food'
-        return 'other'
+        return 'place'
 
     @property
     def subcategory(self):
         for t in self.types:
             return t
-        return 'other'
+        return 'place'
 
 
 class PersonEntity(BasicEntity):
@@ -1193,22 +1190,22 @@ class SoftwareEntity(BasicEntity):
     @property
     def subtitle(self):
         if self.isType('app'):
-            suffix = ''
             if len(self.authors) > 0:
-                suffix = ' (%s)' % ', '.join(unicode(i.title) for i in self.authors)
+                return 'App (%s)' % ', '.join(unicode(i.title) for i in self.authors)
+            return 'App'
 
-            return 'App%s' % suffix
         elif 'video_game' in self.types:
-            suffix = ''
             if self.platform:
-                suffix = ' (%s)' % self.platform
+                return 'Video Game (%s)' % self.platform
 
-            return 'Video Game%s' % suffix
+            return 'Video Game'
 
         return self._genericSubtitle()
 
     @property
     def category(self):
+        if self.isType('app'):
+            return 'app'
         return 'other'
 
     @property
@@ -1747,10 +1744,7 @@ class EntitySearch(Schema):
         cls.addProperty('q',                        basestring, required=True)
         cls.addNestedProperty('coordinates',        CoordinatesSchema)
         cls.addProperty('category',                 basestring)
-        cls.addProperty('subcategory',              basestring)
         cls.addProperty('local',                    bool)
-        cls.addProperty('page',                     int)
 
     def __init__(self):
         Schema.__init__(self)
-        self.page = 0

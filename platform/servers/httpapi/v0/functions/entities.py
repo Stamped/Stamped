@@ -75,8 +75,7 @@ def search(request, authUserId, schema, **kwargs):
     result = stampedAPI.searchEntities(authUserId=authUserId, 
                                        query=schema.q, 
                                        coords=schema.coordinates, 
-                                       category=schema.category, 
-                                       subcategory=schema.subcategory)
+                                       category=schema.category)
     
     autosuggest = []
     for item in result:
