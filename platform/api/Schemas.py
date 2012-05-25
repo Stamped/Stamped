@@ -1227,6 +1227,17 @@ class EntitySuggested(Schema):
         self.limit = 10
 
 
+class EntityAutoSuggestForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                basestring, required=True)
+        cls.addProperty('category',             basestring)
+        cls.addProperty('coordinates',          basestring)
+
+class EntityAutoSuggest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('completion',           basestring, required=True)
 
 
 # ##### #

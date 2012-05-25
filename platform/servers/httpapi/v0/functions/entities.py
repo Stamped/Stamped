@@ -106,6 +106,14 @@ def nearby(request, authUserId, schema, **kwargs):
     return transformOutput(autosuggest)
 
 
+@handleHTTPRequest(http_schema=HTTPEntityAutoSuggestForm, conversion=HTTPEntityAutoSuggestForm.exportEntityAutoSuggestForm)
+@require_http_methods(["GET"])
+def autosuggest(request, authUserId, http_schema, schema, **kwargs):
+    results     = stampedAPI.getEntityAutoSuggestions(authUserId=authUserId, autosuggestForm=schema)
+
+    return transformOutput(results)
+
+
 @handleHTTPRequest(http_schema=HTTPEntitySuggested, conversion=HTTPEntitySuggested.exportEntitySuggested)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):

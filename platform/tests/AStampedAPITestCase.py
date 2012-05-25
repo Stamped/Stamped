@@ -180,7 +180,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/create_with_facebook.json"
+        path = "account/create/facebook.json"
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
@@ -210,7 +210,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/create_with_twitter.json"
+        path = "account/create/twitter.json"
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
@@ -238,7 +238,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "oauth2/login_with_facebook.json"
+        path = "oauth2/login/facebook.json"
         data = {
             "client_id":        c_id,
             "client_secret":    c_secret,
@@ -250,7 +250,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "oauth2/login_with_twitter.json"
+        path = "oauth2/login/twitter.json"
         data = {
             "client_id":      c_id,
             "client_secret":  c_secret,

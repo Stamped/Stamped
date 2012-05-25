@@ -75,6 +75,19 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
         
         self.assertEqual(result[0]['title'].lower(), self.entity['title'].lower())
 
+
+class StampedAPIEntitiesAutoSuggest(StampedAPIEntityTest):
+    def test_autosuggest(self):
+        path = "entities/autosuggest.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            'query'     : 'ghostbusters',
+            'category'  : 'film',
+        }
+        result = self.handleGET(path, data)
+        self.assertGreater(len(result), 0)
+
+
 # ########### #
 # OLD VERSION #
 # ########### #

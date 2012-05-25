@@ -1904,7 +1904,17 @@ class HTTPEntityNew(Schema):
 #                raise NotImplementedError(type(schema))
 #            return schema
 
-class HTTPEntityAutosuggest(Schema):
+class HTTPEntityAutoSuggestForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                basestring, required=True)
+        cls.addProperty('category',             basestring)
+        cls.addProperty('coordinates',          basestring)
+
+    def exportEntityAutoSuggestForm(self):
+        return EntityAutoSuggestForm().dataImport(self.dataExport(), overflow=True)
+
+class HTTPEntityAutoSuggest(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('search_id',            basestring, required=True)

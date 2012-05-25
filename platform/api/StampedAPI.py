@@ -71,6 +71,18 @@ class StampedAPI(AStampedAPI):
         Database-agnostic implementation of the internal API for accessing 
         and manipulating all Stamped backend databases.
     """
+
+    @lazyProperty
+    def _netflix(self):
+        return globalNetflix()
+
+    @lazyProperty
+    def _facebook(self):
+        return globalFacebook()
+
+    @lazyProperty
+    def _twitter(self):
+        return globalTwitter()
     
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
@@ -273,8 +285,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        fb = globalFacebook()
-        user = fb.getUserInfo(new_fb_account.facebook_token)
+        user = self._facebook.getUserInfo(new_fb_account.facebook_token)
 
         account = None
         try:
@@ -308,8 +319,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # First, get user information from Twitter using the passed in token
-        twitter = globalTwitter()
-        user = twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
+        user = self._twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
 
         account = None
         try:
@@ -426,7 +436,7 @@ class StampedAPI(AStampedAPI):
         # Remove favorites
         favEntityIds = self._favoriteDB.getFavoriteEntityIds(account.user_id)
         for entityId in favEntityIds:
-            self._favoriteDB.removeFavorite(account.user_id, entityId)
+            self._favoriteDB.removeTodo(account.user_id, entityId)
         
         # Remove stamps / collections
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
@@ -1543,13 +1553,20 @@ class StampedAPI(AStampedAPI):
         results = results[offset : offset + limit]
         
         return results
+
+
+    @API_CALL
+    def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
+        if autosuggestForm.category == 'film':
+            return self._netflix.autocomplete(autosuggestForm.query)
+        return []
     
     @API_CALL
     def getSuggestedEntities(self, authUserId, suggested):
         coords = (suggested.coordinates.lat, suggested.coordinates.lng)
         
         return self._suggestedEntities.getSuggestedEntities(authUserId, 
-                                                            coords=coords, 
+                                                            coords=coords,
                                                             category=suggested.category, 
                                                             subcategory=suggested.subcategory, 
                                                             limit=suggested.limit)
@@ -2236,9 +2253,9 @@ class StampedAPI(AStampedAPI):
         
         # If stamped entity is on the to do list, mark as complete
         try:
-            self._favoriteDB.completeFavorite(entity.entity_id, authUserId)
+            self._favoriteDB.completeTodo(entity.entity_id, authUserId)
             if entity.entity_id != stamp.entity.entity_id:
-                self._favoriteDB.completeFavorite(stamp.entity.entity_id, authUserId)
+                self._favoriteDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
 
@@ -2513,7 +2530,7 @@ class StampedAPI(AStampedAPI):
         
         # Remove as favorite if necessary
         try:
-            self._favoriteDB.completeFavorite(stamp.entity_id, authUserId, complete=False)
+            self._favoriteDB.completeTodo(stamp.entity_id, authUserId, complete=False)
         except Exception:
             pass
         
@@ -3397,7 +3414,7 @@ class StampedAPI(AStampedAPI):
         return rawFavorite.enrich(user, entity, stamp)
     
     @API_CALL
-    def addFavorite(self, authUserId, entityRequest, stampId=None):
+    def addTodo(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
         favorite                    = RawFavorite()
@@ -3411,7 +3428,7 @@ class StampedAPI(AStampedAPI):
         
         # Check to verify that user hasn't already favorited entity
         try:
-            fav = self._favoriteDB.getFavorite(authUserId, entity.entity_id)
+            fav = self._favoriteDB.getTodo(authUserId, entity.entity_id)
             if fav.favorite_id is None:
                 raise
             exists = True
@@ -3425,7 +3442,7 @@ class StampedAPI(AStampedAPI):
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
             favorite.complete = True
         
-        favorite = self._favoriteDB.addFavorite(favorite)
+        favorite = self._favoriteDB.addTodo(favorite)
         
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.favorites')
@@ -3453,14 +3470,14 @@ class StampedAPI(AStampedAPI):
         return favorite
     
     @API_CALL
-    def removeFavorite(self, authUserId, entityId):
+    def removeTodo(self, authUserId, entityId):
         ### TODO: Fail gracefully if favorite doesn't exist
-        rawFavorite = self._favoriteDB.getFavorite(authUserId, entityId)
+        rawFavorite = self._favoriteDB.getTodo(authUserId, entityId)
         
         if not rawFavorite or not rawFavorite.favorite_id:
             raise StampedUnavailableError('Invalid favorite: %s' % rawFavorite)
         
-        self._favoriteDB.removeFavorite(authUserId, entityId)
+        self._favoriteDB.removeTodo(authUserId, entityId)
         
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', increment=-1)
@@ -3478,7 +3495,7 @@ class StampedAPI(AStampedAPI):
         return favorite
     
     @API_CALL
-    def getFavorites(self, authUserId, genericCollectionSlice):
+    def getTodos(self, authUserId, genericCollectionSlice):
         quality = genericCollectionSlice.quality
         
         # Set quality
@@ -3497,7 +3514,7 @@ class StampedAPI(AStampedAPI):
         if genericCollectionSlice.sort == 'modified':
             genericCollectionSlice.sort = 'created'
         
-        favoriteData = self._favoriteDB.getFavorites(authUserId, genericCollectionSlice)
+        favoriteData = self._favoriteDB.getTodos(authUserId, genericCollectionSlice)
         
         # Extract entities & stamps
         entityIds   = {}
