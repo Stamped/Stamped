@@ -100,8 +100,6 @@
             
             @space: 1.5em;
             
-            margin: @space 0 0;
-            
             .stamp-card-pre, .stamp-card-post {
                 display: block;
                 width:  100%;
@@ -136,9 +134,14 @@
                         float: none;
                     }
                     
-                    .profile-image-large {
-                        margin: 0 24px 24px 0;
+                    .profile-image-large-ish {
+                        margin: 0 24px 12px 0;
                         float: left;
+                    }
+                    
+                    .stamp-preview {
+                        float: right;
+                        margin: 0 0 24px 12px;
                     }
                     
                     .normal_blurb {
@@ -167,11 +170,26 @@
                     }
                 }
                 
+                .no-credits {
+                }
+                
+                
                 .comments {
-                    /*.box-shadow(0, 3px, 8px, -4px, @shadow);*/
+                    .box-shadow(0, 3px, 8px, -4px, @shadow);
                     
                     .comments-nav {
                         border-bottom: 1px dashed #bbb;
+                        text-align: center;
+                        display: none;
+                        padding: .5em;
+                        
+                        .show {
+                            display: none;
+                        }
+                        
+                        .hide {
+                            display: block;
+                        }
                     }
                     
                     ol.comment-list {
@@ -181,10 +199,27 @@
                         padding: 0;
                         margin:  0;
                         
-                        li {
-                            border-top: 1px solid #bbb;
-                            padding: .5em @space;
+                        li.comment {
+                            display: block;
+                            border-bottom: 1px solid #bbb;
+                            padding: 1em @space;
                             //border: 1px solid red;
+                            
+                            -webkit-transition-property: -webkit-transform, opacity;
+                               -moz-transition-property:    -moz-transform, opacity;
+                                -ms-transition-property:     -ms-transform, opacity;
+                                 -o-transition-property:         top, left, opacity;
+                                    transition-property:         transform, opacity;
+                              
+                            -webkit-transition-duration: 0.5s;
+                               -moz-transition-duration: 0.5s;
+                                -ms-transition-duration: 0.5s;
+                                 -o-transition-duration: 0.5s;
+                                    transition-duration: 0.5s;
+                            
+                            opacity: 1;
+                            .transform(scale(1.0));
+                            //.transition(all, 0.5s, ease-out);
                             
                             .profile-image-small {
                                 float: left;
@@ -216,6 +251,39 @@
                                     font-size: 80%;
                                 }
                             }
+                        }
+                        
+                        li.comment:last-child {
+                            border-bottom: 0 none;
+                        }
+                    }
+                }
+                
+                .collapsed {
+                    .comments-nav {
+                        .show {
+                            display: block !important;
+                        }
+                        
+                        .hide {
+                            display: none  !important;
+                        }
+                    }
+                    
+                    ol.comment-list {
+                        li.comment:nth-child(n+4) {
+                            .transform(scale(0.001));
+                            
+                            line-height: 0;
+                            opacity: 0;
+                            height:  0;
+                            
+                            margin:  0;
+                            padding: 0;
+                        }
+                        
+                        li.comment:nth-child(3) {
+                            border-bottom: 0 none;
                         }
                     }
                 }

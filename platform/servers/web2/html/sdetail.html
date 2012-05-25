@@ -21,7 +21,7 @@
                     </div>
                     
                     <div class='stamp-inner-content clearfix'>
-                        {% handlebars_template "profile-image-large" stamp.user %}
+                        {% handlebars_template "profile-image-large-ish" stamp.user %}
                         
                         <div class="entity-header">
                             <div class='title clearfix'>
@@ -38,6 +38,10 @@
                                 </p>
                             </div>
                         </div>
+                        
+                        {% if stamp.contents.0.images.0.sizes.0.url %}
+                            {% handlebars_template "stamp-card-image" stamp %}
+                        {% endif %}
                         
                         {% for content in stamp.contents %}
                             {% if content.blurb and content.blurb|length > 0 %}
@@ -74,18 +78,19 @@
                     
                     {% with comments=stamp.previews.comments %}
                         {% if comments and comments|length > 0 %}
-                            <div class="comments">
+                            <div class="comments collapsed">
                                 {% if comments|length > 3 %}
                                     <div class='comments-nav'>
-                                        <a href="#">View all {{comments|length}} comments.</a>
+                                        <a class='show' href="#">View all {{comments|length}} comments.</a>
+                                        <a class='hide' href="#">Collapse comments.</a>
                                     </div>
                                 {% else %}
                                 
                                 {% endif %}
                                 
                                 <ol class="comment-list">
-                                    {% for comment in comments %}
-                                        <li class="clearfix">
+                                    {% for comment in comments reversed %}
+                                        <li class="comment clearfix">
                                             {% handlebars_template "profile-image-small" comment.user %}
                                             
                                             <div class="comment-inner">

@@ -42,6 +42,11 @@
 
 
 TODO:
+    * ask anthony what 'screen' blending mode means for header cover images
+    * test entity headers on profile page
+        * need to transform both gradient and header image layer together w/ perspective
+        * transform parent
+    
     * SDETAIL
         * layout and initialize social buttons correctly
         * slide-in animation vs lightbox

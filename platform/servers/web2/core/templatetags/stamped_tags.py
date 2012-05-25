@@ -139,8 +139,6 @@ class HandlebarsTemplateLibrary(object):
             self.templates[name] = (path, text)
         
         logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
-        for t in self.templates:
-            logs.info("[%s] loaded '%s'" % (self, t))
     
     def render(self, template_name, context):
         pad = "-" * 20
