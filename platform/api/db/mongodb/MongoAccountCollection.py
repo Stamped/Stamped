@@ -97,6 +97,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
         return [self._convertFromMongo(doc) for doc in documents]
 
+    def getAccountsByTwitterId(self, twitterId):
+        documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
+        return [self._convertFromMongo(doc) for doc in documents]
+
     def updateLinkedAccounts(self, userId, twitter=None, facebook=None, netflix=None):
 
         ### TODO: Derive valid_twitter/facebook from schema

@@ -49,6 +49,23 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
 
     return transformOutput(output)
 
+@handleHTTPRequest(requires_auth=False,
+    requires_client=True,
+    http_schema=HTTPTwitterAccountNew,
+    conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
+    upload='profile_image')
+@require_http_methods(["POST"])
+def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
+    account = stampedAPI.addTwitterAccount(schema)
+
+    user   = HTTPUser().importAccount(account)
+    logs.user(user.user_id)
+
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
+
+    return transformOutput(output)
+
 @handleHTTPRequest()
 @require_http_methods(["POST"])
 def remove(request, authUserId, **kwargs):

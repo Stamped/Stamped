@@ -233,6 +233,7 @@ class TwitterAccountSchema(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('twitter_id',               basestring)
+        cls.addProperty('twitter_name',             basestring)
         cls.addProperty('twitter_screen_name',      basestring)
         cls.addProperty('twitter_alerts_sent',      bool)
 
@@ -334,6 +335,18 @@ class FacebookAccountNew(Schema):
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         cls.addProperty('facebook_token',               basestring, required=True)
+
+class TwitterAccountNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring)#, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('user_secret',                  basestring, required=True)
+
 
 # ##### #
 # Users #
