@@ -137,6 +137,9 @@ class AStampedAPITestCase(AStampedTestCase):
     def assertValidKey(self, key, length=24):
         self.assertIsInstance(key, basestring)
         self.assertLength(key, length)
+
+    def assertGreater(self, first, second, msg=None):
+        self.assertTrue(first > second)
     
     ### HELPER FUNCTIONS
     def createAccount(self, name='TestUser', password="12345", **kwargs):

@@ -17,6 +17,7 @@ try:
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
+    import Entity
     
     from datetime               import datetime, timedelta
     from auth                   import convertPasswordForStorage
@@ -38,7 +39,6 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
-    from Entity                 import buildEntity
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -1476,6 +1476,7 @@ class StampedAPI(AStampedAPI):
                        coords=None, 
                        authUserId=None, 
                        category=None):
+
         entities = self._entitySearch.searchEntities(query, 
                                                      limit=10, 
                                                      coords=coords, 
@@ -3911,7 +3912,7 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport(), link])
     
     def mergeEntityAsync(self, entityDict, link=True):
-        self._mergeEntity(buildEntity(entityDict), link)
+        self._mergeEntity(Entity.buildEntity(entityDict), link)
 
     def mergeEntityId(self, entityId, link=True):
         logs.info('Merge EntityId: %s' % entityId)

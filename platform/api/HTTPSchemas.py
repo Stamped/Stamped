@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
+import Entity
 
 from errors             import *
 from schema             import *
@@ -1962,6 +1963,10 @@ class HTTPEntitySearch(Schema):
         data = self.dataExport()
         if 'coordinates' in data:
             del(data['coordinates'])
+        if 'category' in data and data['category'] is not None:
+            if data['category'] not in Entity.categories:
+                raise StampedInputError("Invalid category: %s" % data['category'])
+
         entSearch = EntitySearch().dataImport(data, overflow=True)
         if self.coordinates is not None:
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
