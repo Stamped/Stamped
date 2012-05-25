@@ -1415,8 +1415,8 @@ class Stamp(Schema):
         cls.addNestedProperty('stats',              StampStatsSchema, required=True)
         cls.addNestedProperty('attributes',         StampAttributesSchema)
         cls.addNestedPropertyList('badges',         Badge)
-        cls.addNestedProperty('previews',           StampPreviews)
         cls.addProperty('via',                      basestring)
+        cls.addNestedProperty('previews',           StampPreviews)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1424,7 +1424,13 @@ class Stamp(Schema):
         self.stats      = StampStatsSchema()
 
     def minimize(self):
-        return StampMini().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        if 'previews' in data:
+            del(data['previews'])
+        entity = data.pop('entity', None)
+        mini = StampMini().dataImport(data, overflow=True)
+        mini.entity = entity 
+        return mini
 
 class StampedByGroup(Schema):
     @classmethod

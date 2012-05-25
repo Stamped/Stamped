@@ -12,7 +12,7 @@ from optparse       import OptionParser
 from Geocoder       import Geocoder
 from AKeyBasedAPI   import AKeyBasedAPI
 from AEntitySource  import AExternalServiceEntitySource
-from api.Schemas    import PlaceEntity
+from api.Schemas    import PlaceEntity, CoordinatesSchema
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
 
@@ -163,8 +163,10 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         entity = PlaceEntity()
         entity.title = result['name']
-        entity.lat   = result['geometry']['location']['lat']
-        entity.lng   = result['geometry']['location']['lng']
+        coordinates = CoordinatesSchema()
+        coordinates.lat = result['geometry']['location']['lat']
+        coordinates.lng   = result['geometry']['location']['lng']
+        entity.coordinates = coordinates
         entity.googleplaces_id          = result['id']
         entity.googleplaces_reference   = result['reference']
         

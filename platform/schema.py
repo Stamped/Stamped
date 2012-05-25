@@ -254,6 +254,7 @@ class Schema(object):
                         self.__setattr__(k, v)
                 except (AttributeError, KeyError):
                     if not overflow:
+                        logs.warning("AttributeError: %s (%s)" % (k, self.__class__.__name__))
                         raise
         except Exception as e:
             logs.warning(e)

@@ -1563,7 +1563,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getSuggestedEntities(self, authUserId, suggested):
-        coords = (suggested.coordinates.lat, suggested.coordinates.lng)
+        coords = None
+        if suggested.coordinates is not None:
+            coords = (suggested.coordinates.lat, suggested.coordinates.lng)
         
         return self._suggestedEntities.getSuggestedEntities(authUserId, 
                                                             coords=coords,
