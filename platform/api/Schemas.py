@@ -1427,9 +1427,10 @@ class Stamp(Schema):
         data = self.dataExport()
         if 'previews' in data:
             del(data['previews'])
-        entity = data.pop('entity', None)
+        if 'entity' in data:
+            del(data['entity'])
         mini = StampMini().dataImport(data, overflow=True)
-        mini.entity = entity 
+        mini.entity = self.entity 
         return mini
 
 class StampedByGroup(Schema):
