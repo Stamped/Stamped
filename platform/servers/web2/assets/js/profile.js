@@ -971,6 +971,7 @@ var g_update_stamps = null;
                     
                     $comments_div.toggleClass(collapsed);
                     $.colorbox.resize();
+                    
                     return false;
                 });
             }

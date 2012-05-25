@@ -200,11 +200,26 @@
                         margin:  0;
                         
                         li.comment {
-                            border-top: 1px solid #bbb;
+                            display: block;
+                            border-bottom: 1px solid #bbb;
                             padding: 1em @space;
                             //border: 1px solid red;
                             
-                            .transition(all, 0.5s, ease-out);
+                            -webkit-transition-property: -webkit-transform, opacity;
+                               -moz-transition-property:    -moz-transform, opacity;
+                                -ms-transition-property:     -ms-transform, opacity;
+                                 -o-transition-property:         top, left, opacity;
+                                    transition-property:         transform, opacity;
+                              
+                            -webkit-transition-duration: 0.5s;
+                               -moz-transition-duration: 0.5s;
+                                -ms-transition-duration: 0.5s;
+                                 -o-transition-duration: 0.5s;
+                                    transition-duration: 0.5s;
+                            
+                            opacity: 1;
+                            .transform(scale(1.0));
+                            //.transition(all, 0.5s, ease-out);
                             
                             .profile-image-small {
                                 float: left;
@@ -237,6 +252,10 @@
                                 }
                             }
                         }
+                        
+                        li.comment:last-child {
+                            border-bottom: 0 none;
+                        }
                     }
                 }
                 
@@ -247,14 +266,24 @@
                         }
                         
                         .hide {
-                            display: none !important;
+                            display: none  !important;
                         }
                     }
                     
                     ol.comment-list {
                         li.comment:nth-child(n+4) {
-
-                            opacity: 0 !important;
+                            .transform(scale(0.001));
+                            
+                            line-height: 0;
+                            opacity: 0;
+                            height:  0;
+                            
+                            margin:  0;
+                            padding: 0;
+                        }
+                        
+                        li.comment:nth-child(3) {
+                            border-bottom: 0 none;
                         }
                     }
                 }
