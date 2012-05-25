@@ -198,7 +198,7 @@ def main():
             #data['subtitle'] = utils.normalize(entity.subtitle)
 
             if options.Stats:
-                data['stats'] = entity.getDataAsDict()['stats']
+                data['stats'] = entity.dataExport()['stats']
         pprint(data)
 
     print
