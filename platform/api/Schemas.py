@@ -373,6 +373,9 @@ class User(Schema):
         self.stats = UserStatsSchema()
         self.timestamp = UserTimestampSchema()
 
+    def minimize(self):
+        return UserMini().dataImport(self.dataExport(), overflow=True)
+
 class UserMini(Schema):
     @classmethod
     def setSchema(cls):
