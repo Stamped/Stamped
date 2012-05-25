@@ -1905,56 +1905,34 @@ class HTTPEntityNew(Schema):
 #                raise NotImplementedError(type(schema))
 #            return schema
 
-class HTTPEntityAutoSuggestForm(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('query',                basestring, required=True)
-        cls.addProperty('category',             basestring)
-        cls.addProperty('coordinates',          basestring)
-
-    def exportEntityAutoSuggestForm(self):
-        return EntityAutoSuggestForm().dataImport(self.dataExport(), overflow=True)
-
-class HTTPEntityAutoSuggest(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('search_id',            basestring, required=True)
-        cls.addProperty('title',                basestring, required=True)
-        cls.addProperty('subtitle',             basestring)
-        cls.addProperty('category',             basestring, required=True)
-        cls.addProperty('distance',             float)
-
-    def importEntity(self, entity, distance=None):
-        self.search_id          = entity.search_id
-        self.title              = entity.title
-        self.subtitle           = entity.subtitle
-        self.category           = entity.category
-
-        if isinstance(distance, float) and distance >= 0:
-            self.distance       = distance
-            
-        assert self.search_id is not None
-
-        return self
-
 class HTTPEntityId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',        basestring, required=True)
+        cls.addProperty('entity_id',                    basestring, required=True)
 
 class HTTPEntityIdSearchId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',        basestring)
-        cls.addProperty('search_id',        basestring)
+        cls.addProperty('entity_id',                    basestring)
+        cls.addProperty('search_id',                    basestring)
+
+class HTTPEntityAutoSuggestForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                        basestring, required=True)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('coordinates',                  basestring)
+
+    def exportEntityAutoSuggestForm(self):
+        return EntityAutoSuggestForm().dataImport(self.dataExport(), overflow=True)
 
 class HTTPEntitySearch(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                basestring, required=True)
-        cls.addProperty('coordinates',      basestring)
-        cls.addProperty('category',         basestring)
-        cls.addProperty('local',            bool)
+        cls.addProperty('q',                            basestring, required=True)
+        cls.addProperty('coordinates',                  basestring)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('local',                        bool)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1976,10 +1954,10 @@ class HTTPEntitySearch(Schema):
 class HTTPEntityNearby(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('coordinates',          basestring, required=True)
-        cls.addProperty('category',             basestring)
-        cls.addProperty('subcategory',          basestring)
-        cls.addProperty('page',                 int)
+        cls.addProperty('coordinates',                  basestring, required=True)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        cls.addProperty('page',                         int)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1998,10 +1976,10 @@ class HTTPEntityNearby(Schema):
 class HTTPEntitySuggested(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('coordinates',          basestring)
-        cls.addProperty('category',             basestring)
-        cls.addProperty('subcategory',          basestring)
-        cls.addProperty('limit',                int)
+        cls.addProperty('coordinates',                  basestring)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        cls.addProperty('limit',                        int)
 
     def exportEntitySuggested(self):
         data = self.dataExport()
@@ -2016,22 +1994,53 @@ class HTTPEntitySuggested(Schema):
         return entitySuggested
 
 
+
+class HTTPEntitySearchResultsItem(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('search_id',                    basestring, required=True)
+        cls.addProperty('title',                        basestring, required=True)
+        cls.addProperty('subtitle',                     basestring)
+        cls.addProperty('category',                     basestring, required=True)
+        cls.addProperty('distance',                     float)
+
+    def importEntity(self, entity, distance=None):
+        self.search_id          = entity.search_id
+        self.title              = entity.title
+        self.subtitle           = entity.subtitle
+        self.category           = entity.category
+
+        if isinstance(distance, float) and distance >= 0:
+            self.distance       = distance
+            
+        assert self.search_id is not None
+
+        return self
+
+class HTTPEntitySearchResultsGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('entities',           HTTPEntitySearchResultsItem)
+        cls.addProperty('title',                        basestring)
+        cls.addProperty('subtitle',                     basestring)
+        cls.addProperty('image_url',                    basestring)
+
 class HTTPEntityActionEndpoint(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('status',               basestring)
-        cls.addProperty('message',              basestring)
-        cls.addProperty('redirect',             basestring)
+        cls.addProperty('status',                       basestring)
+        cls.addProperty('message',                      basestring)
+        cls.addProperty('redirect',                     basestring)
 
 class HTTPActionComplete(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('action',               basestring)
-        cls.addProperty('source',               basestring)
-        cls.addProperty('source_id',            basestring)
-        cls.addProperty('entity_id',            basestring)
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('stamp_id',             basestring)
+        cls.addProperty('action',                       basestring)
+        cls.addProperty('source',                       basestring)
+        cls.addProperty('source_id',                    basestring)
+        cls.addProperty('entity_id',                    basestring)
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('stamp_id',                     basestring)
 
 
 # ###### #

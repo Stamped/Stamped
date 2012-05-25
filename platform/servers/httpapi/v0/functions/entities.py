@@ -77,32 +77,20 @@ def search(request, authUserId, schema, **kwargs):
                                        coords=schema.coordinates, 
                                        category=schema.category)
     
-    autosuggest = []
-    for item in result:
+    group = HTTPEntitySearchResultsGroup()
+    group.title = 'Search results'
+
+    entities = []
+    for entity, distance in result:
         try:
-            item = HTTPEntityAutoSuggest().importEntity(item[0], item[1]).dataExport()
-            autosuggest.append(item)
+            entities.append(HTTPEntitySearchResultsItem().importEntity(entity, distance))
         except Exception as e:
-            logs.warning('HTTPEntityAutoSuggest Import Error: %s (entity = %s)' % (e, item[0]))
-    
-    return transformOutput(autosuggest)
+            logs.warning('HTTPEntitySearchResultsItem Import Error: %s (entity = %s)' % (e, entity))
 
+    group.entities = entities 
+    
+    return transformOutput(group.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPEntityNearby, conversion=HTTPEntityNearby.exportEntityNearby)
-@require_http_methods(["GET"])
-def nearby(request, authUserId, schema, **kwargs):
-    result      = stampedAPI.searchNearby(authUserId=authUserId, 
-                                          coords=schema.coordinates, 
-                                          category=schema.category, 
-                                          subcategory=schema.subcategory, 
-                                          page=schema.page)
-    
-    autosuggest = []
-    for item in result:
-        item = HTTPEntityAutoSuggest().importEntity(item[0], item[1]).dataExport()
-        autosuggest.append(item)
-    
-    return transformOutput(autosuggest)
 
 
 @handleHTTPRequest(http_schema=HTTPEntityAutoSuggestForm, conversion=HTTPEntityAutoSuggestForm.exportEntityAutoSuggestForm)
@@ -117,7 +105,7 @@ def autosuggest(request, authUserId, http_schema, schema, **kwargs):
 @require_http_methods(["GET"])
 def suggested(request, authUserId, schema, **kwargs):
     results     = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
-    convert     = lambda e: HTTPEntityAutoSuggest().importEntity(e).dataExport()
+    convert     = lambda e: HTTPEntitySearchResultsItem().importEntity(e).dataExport()
     
     for section in results:
         section['entities'] = map(convert, section['entities'])
