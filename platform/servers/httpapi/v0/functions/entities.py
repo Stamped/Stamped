@@ -108,7 +108,7 @@ def suggested(request, authUserId, schema, **kwargs):
                 group.title = section['name']
             group.entities = map(convert, section['entities'])
 
-            result.append(group)
+            result.append(group.dataExport())
         except Exception as e:
             logs.warning("Autosuggest error: %s (%s)" % (e, section))
     
