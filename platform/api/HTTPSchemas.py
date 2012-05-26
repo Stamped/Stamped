@@ -1088,8 +1088,8 @@ class HTTPEntity(Schema):
 
         subcategory             = self._formatSubcategory(self.subcategory)
 
-        # Restaurant / Bar
-        if entity.kind == 'place' and entity.category == 'food':
+        # Place
+        if entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
 
@@ -1098,7 +1098,7 @@ class HTTPEntity(Schema):
                 self.caption = address
 
             # Metadata
-            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_food', client=client))
+            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
             self._addMetadata('Cuisine', ', '.join(unicode(i) for i in entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
@@ -1110,7 +1110,15 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema().dataImport(image)
+                    item                = HTTPImageSchema().dataImport(image)
+                    source              = HTTPActionSource()
+                    source.source_id    = item.sizes[0].url
+                    source.source       = 'stamped'
+                    source.link         = item.sizes[0].url
+                    action              = HTTPAction()
+                    action.type         = 'stamped_view_image'
+                    action.sources      = [ source ]
+                    item.action         = action
                     images.append(item)
                 gallery.images = images
                 self.galleries += (gallery,)
@@ -1173,21 +1181,6 @@ class HTTPEntity(Schema):
                 sources.append(source)
             
             self._addAction(actionType, 'View menu', sources, icon=actionIcon)
-        
-        # Generic Place
-        elif entity.kind == 'place':
-            self.address        = entity.formatAddress(extendStreet=True)
-            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
-
-            address = entity.formatAddress(extendStreet=True, breakLines=True)
-            if address is not None:
-                self.caption = address
-
-            # Metadata
-
-            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
-            self._addMetadata('Description', entity.desc, key='desc')
-            self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
 
             # Image gallery
 
@@ -1208,21 +1201,6 @@ class HTTPEntity(Schema):
                     images.append(item)
                 gallery.images = images
                 self.galleries += (gallery,)
-
-            # Actions: Call
-
-            actionType  = 'phone'
-            actionIcon  = _getIconURL('act_call', client=client)
-            sources     = []
-
-            if entity.phone is not None:
-                source              = HTTPActionSource()
-                source.source       = 'phone'
-                source.source_id    = entity.phone
-                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.phone)
-                sources.append(source)
-
-            self._addAction(actionType, entity.phone, sources, icon=actionIcon)
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
@@ -1263,63 +1241,15 @@ class HTTPEntity(Schema):
         # TV
         elif entity.kind == 'media_collection' and entity.isType('tv'):
 
-            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
-            self._addMetadata('Overview', entity.desc, key='desc', extended=True)
-            self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
-            if entity.subcategory == 'movie':
-                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
-
-
-
-            actionType  = 'add_to_instant_queue'
-            actionIcon  = _getIconURL('act_play_primary', client=client)
-            sources     = []
-
-            if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
-                source                  = HTTPActionSource()
-                source.name             = 'Add to Netflix Instant Queue'
-                source.source           = 'netflix'
-                source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
-                source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
-                source.icon             = _getIconURL('src_itunes', client=client)
-                source.setCompletion(
-                    action      = actionType,
-                    entity_id   = entity.entity_id,
-                    source      = source.source,
-                    source_id   = source.source_id,
-                )
-                sources.append(source)
-
-            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
-
-        # Movie
-        elif entity.kind == 'media_item' and entity.isType('movie'):
-
-            if entity.subcategory == 'movie' and entity.length is not None:
-                length = self._formatFilmLength(entity.length)
-                if length is not None:
-                    self.caption = length
-
-            if entity.subcategory == 'tv' and len(entity.networks) > 0:
+            if len(entity.networks) > 0:
                 self.caption = ', '.join(unicode(i.title) for i in entity.networks)
 
-            # Metadata
-
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
             self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
-            if entity.subcategory == 'movie':
-                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
             # Actions: Watch Now
 
@@ -1361,7 +1291,7 @@ class HTTPEntity(Schema):
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
                 source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
-                source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
+                source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
                     action      = actionType,
@@ -1372,6 +1302,65 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
+
+            # Actions: Download
+
+            actionType  = 'buy'
+            actionIcon  = _getIconURL('act_buy', client=client)
+            sources     = []
+
+            if entity.sources.amazon_underlying is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Buy from Amazon'
+                source.source       = 'amazon'
+                source.source_id    = entity.sources.amazon_underlying
+                source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
+                sources.append(source)
+
+            self._addAction(actionType, 'Buy', sources, icon=actionIcon)
+
+        # Movie
+        elif entity.kind == 'media_item' and entity.isType('movie'):
+
+            if entity.length is not None:
+                length = self._formatFilmLength(entity.length)
+                if length is not None:
+                    self.caption = length
+
+            # Metadata
+
+            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
+            self._addMetadata('Overview', entity.desc, key='desc', extended=True)
+            self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
+            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
+            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
+            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+
+            # Actions: Watch Now
+
+            actionType  = 'watch'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Watch on iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.itunes_id
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
+                source.icon         = _getIconURL('src_itunes', client=client)
+                if getattr(entity.sources, 'itunes_url', None) is not None:
+                    source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
 
             # Actions: Find Tickets
 
@@ -1401,9 +1390,32 @@ class HTTPEntity(Schema):
 
             self._addAction(actionType, 'Find tickets', sources, icon=actionIcon)
 
-            # Actions: Add to Queue
+            # Actions: Add to Netflix Instant Queue
 
-            ### TODO: Add Netflix
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
             # Actions: Watch Trailer
 
@@ -1440,11 +1452,11 @@ class HTTPEntity(Schema):
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_music', client=client))
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 self._addMetadata('Biography', entity.desc, key='desc')
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
 
-            elif entity.subcategory == 'album':
+            elif entity.isType('album'):
                 if len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
@@ -1461,7 +1473,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
-            elif entity.subcategory == 'song':
+            elif entity.isType('track'):
                 if len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
@@ -1482,11 +1494,11 @@ class HTTPEntity(Schema):
 
             actionType  = 'listen'
             actionTitle = 'Listen'
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 actionTitle = 'Listen to top songs'
-            elif entity.subcategory == 'album':
+            elif entity.isType('album'):
                 actionTitle = 'Listen to album'
-            elif entity.subcategory == 'song':
+            elif entity.isType('track'):
                 actionTitle = 'Listen to song'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
@@ -1546,7 +1558,7 @@ class HTTPEntity(Schema):
 
             actionType  = 'playlist'
             actionTitle = 'Add to playlist'
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 actionTitle = 'Add artist to playlist'
             actionIcon  = _getIconURL('act_playlist_music', client=client)
             sources     = []
@@ -1605,11 +1617,11 @@ class HTTPEntity(Schema):
 
             # Playlist
 
-            if entity.subcategory in ["album", "artist"] and entity.tracks is not None:
+            if (entity.isType('album') or entity.isType('artist')) and entity.tracks is not None:
                 playlist = HTTPEntityPlaylist()
                 data = []
 
-                if entity.subcategory == 'album':
+                if entity.isType('album'):
                     playlist.name = 'Tracks'
                 else:
                     playlist.name = 'Top songs'
