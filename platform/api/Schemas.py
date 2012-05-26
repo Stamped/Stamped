@@ -654,9 +654,15 @@ class BasicEntity(BasicEntityMini):
         cls.addProperty('phone_source',                    basestring)
         cls.addProperty('phone_timestamp',                 datetime)
 
-        cls.addNestedProperty('stats',                      EntityStatsSchema)
+        cls.addNestedProperty('stats',                     EntityStatsSchema)
         # cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
-        cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
+        cls.addNestedProperty('timestamp',                 TimestampSchema, required=True)
+
+        # The last date/time we got some input indicating that this is currently popular.
+        cls.addProperty('last_popular',                    datetime)
+        # Not to be exposed to users -- just some internal data letting us know what sort
+        # of input we got indicating that this is currently popular.
+        cls.addProperty('last_popular_info',               basestring)
 
     def __init__(self):
         BasicEntityMini.__init__(self)
@@ -1409,8 +1415,8 @@ class Stamp(Schema):
         cls.addNestedProperty('stats',              StampStatsSchema, required=True)
         cls.addNestedProperty('attributes',         StampAttributesSchema)
         cls.addNestedPropertyList('badges',         Badge)
-        cls.addNestedProperty('previews',           StampPreviews)
         cls.addProperty('via',                      basestring)
+        cls.addNestedProperty('previews',           StampPreviews)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1418,7 +1424,14 @@ class Stamp(Schema):
         self.stats      = StampStatsSchema()
 
     def minimize(self):
-        return StampMini().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        if 'previews' in data:
+            del(data['previews'])
+        if 'entity' in data:
+            del(data['entity'])
+        mini = StampMini().dataImport(data, overflow=True)
+        mini.entity = self.entity 
+        return mini
 
 class StampedByGroup(Schema):
     @classmethod

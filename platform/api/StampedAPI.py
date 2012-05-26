@@ -1563,7 +1563,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getSuggestedEntities(self, authUserId, suggested):
-        coords = (suggested.coordinates.lat, suggested.coordinates.lng)
+        coords = None
+        if suggested.coordinates is not None:
+            coords = (suggested.coordinates.lat, suggested.coordinates.lng)
         
         return self._suggestedEntities.getSuggestedEntities(authUserId, 
                                                             coords=coords,
@@ -1641,7 +1643,7 @@ class StampedAPI(AStampedAPI):
 
         fofUserIds          = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
         fofOverlap          = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
-        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
+        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap[:limit], entityId)
 
         fofUsers            = StampedByGroup()
         fofUsers.stamps     = self._enrichStampObjects(fofStamps[:limit])
@@ -1925,7 +1927,7 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credit is not None:
                     for credit in stamp.credit:
-                        user = userIds[credit.user_id]
+                        user                    = userIds[credit.user_id]
                         item                    = CreditSchema()
                         item.user_id            = credit.user_id
                         item.stamp_id           = credit.stamp_id

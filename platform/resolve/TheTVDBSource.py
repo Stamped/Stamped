@@ -53,7 +53,7 @@ class _TheTVDBObject(object):
             except KeyError:
                 raise ValueError('bad thetvdb_id')
         elif thetvdb_id is not None:
-            if thetvdb_id != data.thetvdb_id:
+            if thetvdb_id != data.sources.thetvdb_id:
                 raise ValueError('thetvdb_id does not match data["key"]')
         
         self.__thetvdb = thetvdb
@@ -89,12 +89,12 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     
     @lazyProperty
     def key(self):
-        return self.data.thetvdb_id
+        return self.data.sources.thetvdb_id
     
     @lazyProperty
     def cast(self):
         if self.data.cast is not None:
-            return map(lambda x: { 'name' : x['title'] }, self.data.cast)
+            return map(lambda x: { 'name' : x.title }, self.data.cast)
         return []
     
     @lazyProperty
@@ -111,7 +111,7 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     
     @lazyProperty
     def networks(self):
-        return map(lambda x: { 'name' : x['title'] }, self.data.networks)
+        return map(lambda x: { 'name' : x.title }, self.data.networks)
     
     @lazyProperty 
     def genres(self):
