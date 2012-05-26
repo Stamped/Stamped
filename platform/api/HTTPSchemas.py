@@ -2476,7 +2476,9 @@ class HTTPStamp(Schema):
         data['contents'] = []
         if 'previews' in data:
             del(data['previews'])
+        logs.info('BEGIN DATA IMPORT')
         self.dataImport(data, overflow=True)
+        logs.info('END DATA IMPORT')
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
         self.entity             = HTTPEntityMini().importEntity(entity)
@@ -2547,7 +2549,7 @@ class HTTPStamp(Schema):
     def importStamp(self, stamp):
         logs.info('BEGIN IMPORT STAMP')
         self.importStampMini(stamp)
-        logs.info('IMPORTED STAMP MINI')
+        logs.info('IMPORTED STAMP MINI: %s' % self)
         previews = HTTPStampPreviews()
 
         if stamp.previews.comments is not None:
