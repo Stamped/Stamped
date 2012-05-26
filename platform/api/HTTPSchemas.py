@@ -2648,8 +2648,10 @@ class HTTPStampedByGroup(Schema):
             self.count = group.count 
 
         if group.stamps is not None:
+            # self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
             httpStamps = []
             for stamp in group.stamps:
+                logs.info("STAMP: %s" % stamp)
                 httpStamps.append(HTTPStamp().importStamp(stamp))
 
         return self

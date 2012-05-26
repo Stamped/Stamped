@@ -256,7 +256,6 @@ class Schema(object):
                 except (AttributeError, KeyError):
                     if not overflow:
                         logs.warning("AttributeError: %s (%s)" % (k, self.__class__.__name__))
-                        logs.warning(utils.getFormattedException())
                         raise
         except Exception as e:
             logs.warning(e)
