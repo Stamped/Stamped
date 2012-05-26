@@ -2654,11 +2654,6 @@ class HTTPStampedByGroup(Schema):
 
         return self
 
-    def importStampedByGroup(self, stampedbygroup):
-        self.count = stampedbygroup.count
-        self.stamps = [HTTPStamp().importStamp(s) for s in stampedbygroup.stamps]
-        return self
-
 class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
@@ -2676,15 +2671,6 @@ class HTTPStampedBy(Schema):
         if stampedBy.all is not None:
             self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
 
-        return self
-
-    def importStampedBy(self, stampedby):
-        self.friends = HTTPStampedByGroup()
-        self.fof     = HTTPStampedByGroup()
-        self.all     = HTTPStampedByGroup()
-        self.friends.importStampedByGroup(stampedby.friends)
-        self.fof.importStampedByGroup(stampedby.fof)
-        self.all.importStampedByGroup(stampedby.all)
         return self
 
 class HTTPStampImage(Schema):
