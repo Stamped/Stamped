@@ -227,7 +227,10 @@ class Schema(object):
         return properties
 
     def dataImport(self, properties, **kwargs):
-        overflow = kwargs.pop('overflow', False)
+        overflow = False
+        if 'overflow' in kwargs and kwargs['overflow'] == True:
+            overflow = True
+            
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
         try:
@@ -243,7 +246,7 @@ class Schema(object):
                             nested = self.__properties[k]
                         else:
                             nested = p[_kindKey]()
-                        nested.dataImport(v)
+                        nested.dataImport(v, **kwargs)
                         self.__setattr__(k, nested)
 
                     elif p[_typeKey] == _nestedPropertyListKey and v is not None:
