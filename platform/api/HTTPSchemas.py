@@ -2545,7 +2545,9 @@ class HTTPStamp(Schema):
         return self
 
     def importStamp(self, stamp):
+        logs.info('BEGIN IMPORT STAMP')
         self.importStampMini(stamp)
+        logs.info('IMPORTED STAMP MINI')
         previews = HTTPStampPreviews()
 
         if stamp.previews.comments is not None:
@@ -2651,8 +2653,10 @@ class HTTPStampedByGroup(Schema):
             # self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
             httpStamps = []
             for stamp in group.stamps:
+                logs.info()
                 logs.info("STAMP: %s" % stamp)
                 httpStamps.append(HTTPStamp().importStamp(stamp))
+                logs.info()
 
         return self
 
