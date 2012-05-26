@@ -15,12 +15,25 @@
 
 #define kStampLimit 20
 
+@interface Stamps ()
+
+@property (nonatomic, readwrite, retain) NSArray* data;
+@property (nonatomic, readwrite, retain) NSArray* identifiers;
+@property (nonatomic, readwrite, retain) STCancellation* cancellation;
+@property (nonatomic, readwrite, assign) NSInteger page;
+
+@end
+
 @implementation Stamps
 
 @synthesize reloading=_reloading;
 @synthesize moreData=_moreData;
 @synthesize scope=_scope;
 @synthesize searchQuery=_searchQuery;
+@synthesize data = _data;
+@synthesize identifiers = _identifiers;
+@synthesize cancellation = _cancellation;
+@synthesize page = _page;
 @synthesize identifier;
 
 - (id)init {

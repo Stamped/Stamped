@@ -68,7 +68,7 @@ static const NSInteger _cellsPerRow = 7;
 
 + (NSInteger)totalItemsForPreviews:(id<STPreviews>)previews {
   if (previews) {
-    return previews.credits.count + previews.likes.count + previews.todos.count + previews.comments.count;
+      return previews.credits.count + previews.likes.count + previews.todos.count; //+ previews.comments.count;
   }
   return 0;
 }
@@ -149,6 +149,7 @@ static const NSInteger _cellsPerRow = 7;
                 break;
             }
         }
+        /*
         UIImage* commentIcon = [UIImage imageNamed:@"comment_mini"];
         for (id<STComment> comment in previews.comments) {
             if (items_.count < limit) {
@@ -162,6 +163,7 @@ static const NSInteger _cellsPerRow = 7;
                 break;
             }
         }
+         */
         for (NSInteger i = limit - 1; i >= 0; i--) {
             NSInteger col = i % _cellsPerRow;
             NSInteger row = i / _cellsPerRow;
@@ -280,6 +282,7 @@ static const NSInteger _cellsPerRow = 7;
         break;
       }
     }
+      /*
     for (id<STComment> comment in previews.comments) {
       if (images.count < limit) {
         [images addObject:[Util profileImageURLForUser:comment.user withSize:STProfileImageSize31]];
@@ -288,6 +291,7 @@ static const NSInteger _cellsPerRow = 7;
         break;
       }
     }
+       */
   }
   return images;
 }

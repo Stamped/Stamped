@@ -102,8 +102,8 @@ typedef enum {
 - (STCancellation*)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
                                        andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
-- (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
-                         andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
+- (STCancellation*)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
+                                    andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 
