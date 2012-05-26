@@ -2653,10 +2653,10 @@ class HTTPStampedByGroup(Schema):
             # self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
             httpStamps = []
             for stamp in group.stamps:
-                logs.info()
+                logs.info('')
                 logs.info("STAMP: %s" % stamp)
                 httpStamps.append(HTTPStamp().importStamp(stamp))
-                logs.info()
+                logs.info('')
 
         return self
 
