@@ -1720,7 +1720,7 @@ class HTTPEntity(Schema):
 
                         images.append(item)
                     except Exception as e:
-                        logs.info(e.message)
+                        logs.warning(e)
                         pass
 
                 gallery.images = images
@@ -2476,9 +2476,7 @@ class HTTPStamp(Schema):
         data['contents'] = []
         if 'previews' in data:
             del(data['previews'])
-        logs.info('BEGIN DATA IMPORT')
         self.dataImport(data, overflow=True)
-        logs.info('END DATA IMPORT')
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
         self.entity             = HTTPEntityMini().importEntity(entity)
@@ -2547,9 +2545,7 @@ class HTTPStamp(Schema):
         return self
 
     def importStamp(self, stamp):
-        logs.info('BEGIN IMPORT STAMP')
         self.importStampMini(stamp)
-        logs.info('IMPORTED STAMP MINI: %s' % self)
         previews = HTTPStampPreviews()
 
         if stamp.previews.comments is not None:
@@ -2652,13 +2648,7 @@ class HTTPStampedByGroup(Schema):
             self.count = group.count 
 
         if group.stamps is not None:
-            # self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
-            httpStamps = []
-            for stamp in group.stamps:
-                logs.info('')
-                logs.info("STAMP: %s" % stamp)
-                httpStamps.append(HTTPStamp().importStamp(stamp))
-                logs.info('')
+            self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
 
         return self
 
