@@ -108,7 +108,7 @@ def search(request, authUserId, schema, **kwargs):
 # Guide
 @handleHTTPRequest(http_schema=HTTPGuideRequest, conversion=HTTPGuideRequest.exportGuideRequest)
 @require_http_methods(["GET"])
-def search(request, authUserId, schema, **kwargs):
+def guide(request, authUserId, schema, **kwargs):
     entities = stampedAPI.getGuide(schema, authUserId)
     result = []
 
