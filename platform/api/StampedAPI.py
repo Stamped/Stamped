@@ -3127,17 +3127,83 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
 
-        # try:
-        #     return self._guideDB.getGuide(guideRequest, authUserId)
-        # except KeyError:
-        #     pass
+        try:
+            guide = self._guideDB.getGuide(guideRequest, authUserId)
+        except (StampedUnavailableError, KeyError):
+            # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
+            guide = self._buildGuide(authUserId)
+
+        allItems = getattr(guide, guideRequest.section)
+
+        limit = 20
+        if guideRequest.limit is not None:
+            limit = guideRequest.limit 
+        offset = 0
+        if guideRequest.offset is not None:
+            offset = guideRequest.offset
+
+        entityIds = {}
+        stampIds = {}
+        userIds = {}
+        items = []
+
+        i = 0
+        for item in allItems[offset:]:
+            if guideRequest.subsection is None or guideRequest.subsection in item.tags:
+
+                items.append(item)
+                entityIds[item.entity_id] = None
+                for userId in item.stamp_user_ids:
+                    userIds[userId] = None 
+                for userId in item.todo_user_ids:
+                    userIds[userId] = None
+                i += 1
+
+            if i >= limit:
+                break
+
+        # Entities 
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            if entity.sources.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                ### TODO: Async process to replace reference
+            else:
+                entityIds[entity.entity_id] = entity
+
+        # Users
+        users = self._userDB.lookupUsers(list(userIds.keys()))
+
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Build guide
+        result = []
+        for item in items:
+            entity = entities[item.entity_id]
+            result.append(entity)
+
+        return result
 
         # Build guide
         return None
-        guide = self.buildGuide(authUserId, fast=True)
+
 
     @API_CALL
-    def buildGuide(self, authUserId):
+    def buildGuideAsync(self, authUserId):
+        try:
+            guide = self._guideDB.getGuide(guideRequest, authUserId)
+            if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
+                return
+        except (StampedUnavailableError, KeyError):
+            pass
+
+        self._buildGuide(authUserId)
+
+    def _buildGuide(self, authUserId):
         user = self.getUser({'user_id': authUserId})
         now = datetime.utcnow()
 
@@ -3209,6 +3275,7 @@ class StampedAPI(AStampedAPI):
 
         guide = GuideCache()
         guide.user_id = user.user_id
+        guide.updated = now
 
         for category, entities in categories.items():
             r = []
@@ -3230,12 +3297,13 @@ class StampedAPI(AStampedAPI):
             r.sort(key=itemgetter(1))
             r.reverse()
             cache = []
-            for result in r[:1000]:
-                item = GuideCacheGroup()
+            for result in r[:500]:
+                item = GuideCacheItem()
                 item.entity_id = result[0]
                 item.tags = result[2]
                 if len(stampMap[result[0]]) > 0:
                     item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
+                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
                 cache.append(item)
             setattr(guide, category, cache)
 

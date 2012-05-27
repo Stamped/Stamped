@@ -1703,12 +1703,18 @@ class GuideRequest(Schema):
         # Scope
         cls.addProperty('scope',                        basestring)
 
+    def __init__(self):
+        Schema.__init__(self)
+        self.limit = 20
+        self.offset = 0
 
-class GuideCacheGroup(Schema):
+
+class GuideCacheItem(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('entity_id',                    basestring, required=True)
         cls.addPropertyList('stamp_ids',                basestring)
+        cls.addPropertyList('stamp_user_ids',           basestring)
         cls.addPropertyList('todo_user_ids',            basestring)
         cls.addPropertyList('tags',                     basestring)
 
@@ -1716,12 +1722,13 @@ class GuideCache(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
-        cls.addNestedPropertyList('music',              GuideCacheGroup)
-        cls.addNestedPropertyList('film',               GuideCacheGroup)
-        cls.addNestedPropertyList('book',               GuideCacheGroup)
-        cls.addNestedPropertyList('food',               GuideCacheGroup)
-        cls.addNestedPropertyList('app',                GuideCacheGroup)
-        cls.addNestedPropertyList('other',              GuideCacheGroup)
+        cls.addNestedPropertyList('music',              GuideCacheItem)
+        cls.addNestedPropertyList('film',               GuideCacheItem)
+        cls.addNestedPropertyList('book',               GuideCacheItem)
+        cls.addNestedPropertyList('food',               GuideCacheItem)
+        cls.addNestedPropertyList('app',                GuideCacheItem)
+        cls.addNestedPropertyList('other',              GuideCacheItem)
+        cls.addProperty('updated',                      datetime)
 
 
 

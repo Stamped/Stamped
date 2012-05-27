@@ -109,8 +109,16 @@ def search(request, authUserId, schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPGuideRequest, conversion=HTTPGuideRequest.exportGuideRequest)
 @require_http_methods(["GET"])
 def search(request, authUserId, schema, **kwargs):
-    results = stampedAPI.getGuide(schema, authUserId)
-    return transformStamps(results)
+    entities = stampedAPI.getGuide(schema, authUserId)
+    result = []
+
+    for entity in entities:
+        try:
+            result.append(HTTPEntity().importEntity(entity).dataExport())
+        except:
+            logs.warning(utils.getFormattedException())
+
+    return transformOutput(result)
 
 
 
