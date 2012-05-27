@@ -3239,7 +3239,7 @@ class StampedAPI(AStampedAPI):
                 cache.append(item)
             setattr(guide, category, cache)
 
-        logs.info("Time to build guide: %s seconds" % time.time() - t0)
+        logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 
         self._guideDB.saveGuide(guide)
 
