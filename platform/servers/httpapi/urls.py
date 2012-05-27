@@ -127,6 +127,7 @@ urlpatterns = patterns('',
     (r'v0/stamps/remove.json',                      'v0.functions.stamps.remove'),
     (r'v0/stamps/collection.json',                  'v0.functions.stamps.collection'),
     (r'v0/stamps/search.json',                      'v0.functions.stamps.search'),
+    (r'v0/stamps/guide.json',                       'v0.functions.stamps.guide'),
     
     (r'v0/stamps/likes/create.json',                'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                'v0.functions.stamps.likesRemove'),
