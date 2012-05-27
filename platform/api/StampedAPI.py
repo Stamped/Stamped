@@ -3153,10 +3153,12 @@ class StampedAPI(AStampedAPI):
 
                 items.append(item)
                 entityIds[item.entity_id] = None
-                for userId in item.stamp_user_ids:
-                    userIds[userId] = None 
-                for userId in item.todo_user_ids:
-                    userIds[userId] = None
+                if item.stamp_user_ids is not None:
+                    for userId in item.stamp_user_ids:
+                        userIds[userId] = None 
+                if item.todo_user_ids is not None:
+                    for userId in item.todo_user_ids:
+                        userIds[userId] = None
                 i += 1
 
             if i >= limit:
