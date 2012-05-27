@@ -98,6 +98,14 @@
   [super dealloc];
 }
 
+- (NSString *)key {
+    return self.stampID;
+}
+
+- (NSDate*)timestamp {
+    return self.stamped;
+}
+
 - (void)encodeWithCoder:(NSCoder *)encoder {
   [encoder encodeObject:self.blurb forKey:@"blurb"];
   [encoder encodeObject:self.created forKey:@"created"];

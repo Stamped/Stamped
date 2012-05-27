@@ -50,6 +50,14 @@
     [super dealloc];
 }
 
+- (NSString*)key {
+    return self.todoID;
+}
+
+- (NSDate*)timestamp {
+    return self.created;
+}
+
 - (void)encodeWithCoder:(NSCoder *)encoder {
     [encoder encodeObject:self.todoID forKey:@"todoID"];
     [encoder encodeObject:self.userID forKey:@"userID"];
