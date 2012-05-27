@@ -3138,16 +3138,16 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def buildGuide(self, authUserId):
-        user = api.getUser({'user_id': authUserId})
+        user = self.getUser({'user_id': authUserId})
         now = datetime.utcnow()
 
         t0 = time.time()
 
-        stampIds = api._collectionDB.getInboxStampIds(user.user_id)
-        stamps = api._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stampIds = self._collectionDB.getInboxStampIds(user.user_id)
+        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
-        entities = api._entityDB.getEntities(entityIds)
-        todos = set(api._favoriteDB.getFavoriteEntityIds(user.user_id))
+        entities = self._entityDB.getEntities(entityIds)
+        todos = set(self._favoriteDB.getFavoriteEntityIds(user.user_id))
 
         t1 = time.time()
 
