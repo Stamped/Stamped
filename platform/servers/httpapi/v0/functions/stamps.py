@@ -105,6 +105,18 @@ def search(request, authUserId, schema, **kwargs):
     return transformStamps(stamps)
 
 
+# Guide
+@handleHTTPRequest(http_schema=HTTPGuideRequest, conversion=HTTPGuideRequest.exportGuideRequest)
+@require_http_methods(["GET"])
+def search(request, authUserId, schema, **kwargs):
+    results = stampedAPI.getGuide(schema, authUserId)
+    return transformStamps(results)
+
+
+
+
+
+
 @handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["POST"])
 def likesCreate(request, authUserId, http_schema, **kwargs):

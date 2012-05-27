@@ -36,6 +36,7 @@ from db.mongodb.MongoMenuCollection             import MongoMenuCollection
 from db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
 from db.mongodb.MongoLogsCollection             import MongoLogsCollection
 from db.mongodb.MongoStatsCollection            import MongoStatsCollection
+from db.mongodb.MongoGuideCollection            import MongoGuideCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
@@ -158,6 +159,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _stampStatsDB(self):
         return MongoStampStatsCollection()
+    
+    @lazyProperty
+    def _guideDB(self):
+        return MongoGuideCollection()
     
     @lazyProperty
     def _clientLogsDB(self):

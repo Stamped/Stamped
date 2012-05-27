@@ -2361,6 +2361,47 @@ class HTTPStampedBySlice(HTTPGenericCollectionSlice):
         return GenericCollectionSlice().dataImport(data, overflow=True)
 
 
+
+class HTTPGuideRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
+        cls.addProperty('section',                      basestring, required=True)
+        cls.addProperty('subsection',                   basestring)
+        cls.addProperty('viewport',                     basestring) # lat0,lng0,lat1,lng1
+        cls.addProperty('scope',                        basestring)
+
+    def exportGuideRequest(self):
+        return GuideRequest().dataImport(self.dataExport(), overflow=True)
+
+        data = self.dataExport()
+        if 'viewport' in data:
+            del(data['viewport'])
+        guideRequest = GuideRequest()
+        guideRequest.dataImport(data)
+
+        if self.viewport is not None:
+            viewportData            = self.viewport.split(',')
+            
+            coordinates0            = CoordinatesSchema()
+            coordinates0.lat        = viewportData[0]
+            coordinates0.lng        = viewportData[1]
+            
+            coordinates1            = CoordinatesSchema()
+            coordinates1.lat        = viewportData[2]
+            coordinates1.lng        = viewportData[3]
+
+            viewport                = ViewportSchema()
+            viewport.upperLeft      = coordinates0
+            viewport.lowerRight     = coordinates1
+
+            guideRequest.viewport   = viewport 
+
+        return guideRequest
+
+
+
 # ######## #
 # Comments #
 # ######## #

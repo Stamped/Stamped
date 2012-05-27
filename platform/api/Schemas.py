@@ -1636,56 +1636,94 @@ class EnrichedActivity(Schema):
 class ViewportSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('upperLeft',          CoordinatesSchema)
-        cls.addNestedProperty('lowerRight',         CoordinatesSchema)
+        cls.addNestedProperty('upperLeft',              CoordinatesSchema)
+        cls.addNestedProperty('lowerRight',             CoordinatesSchema)
 
 class TimeSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('before',                   datetime)
-        cls.addProperty('limit',                    int)
-        cls.addProperty('offset',                   int)
+        cls.addProperty('before',                       datetime)
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
 
         # Filtering
-        cls.addProperty('category',                 basestring)
-        cls.addProperty('subcategory',              basestring)
-        # cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema) 
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        # cls.addPropertyList('properties',               basestring)
+        cls.addNestedProperty('viewport',               ViewportSchema) 
 
         # Scope
-        cls.addProperty('user_id',                  basestring)
-        cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('scope',                        basestring) # me, friends, fof, popular
 
 class SearchSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('limit',                    int) # Max 50
+        cls.addProperty('limit',                        int) # Max 50
 
         # Filtering
-        cls.addProperty('category',                 basestring)
-        cls.addProperty('subcategory',              basestring)
-        # cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema) 
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        # cls.addPropertyList('properties',               basestring)
+        cls.addNestedProperty('viewport',               ViewportSchema) 
 
         # Scope
-        cls.addProperty('user_id',                  basestring)
-        cls.addProperty('scope',                    basestring) # me, friends, fof, popular
-        cls.addProperty('query',                    basestring, required=True) 
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('scope',                        basestring) # me, friends, fof, popular
+        cls.addProperty('query',                        basestring, required=True) 
 
 class RelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Filtering
-        cls.addProperty('category',                 basestring)
-        cls.addProperty('subcategory',              basestring)
-        cls.addPropertyList('properties',           basestring)
-        cls.addNestedProperty('viewport',           ViewportSchema) 
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        cls.addPropertyList('properties',               basestring)
+        cls.addNestedProperty('viewport',               ViewportSchema) 
 
         # Scope
-        cls.addProperty('user_id',                  basestring)
-        cls.addProperty('scope',                    basestring) # me, friends, fof, popular
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('scope',                        basestring) # me, friends, fof, popular
+
+
+class GuideRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
+        
+        # Filtering
+        cls.addProperty('section',                      basestring, required=True)
+        cls.addProperty('subsection',                   basestring)
+        cls.addNestedProperty('viewport',               ViewportSchema) 
+
+        # Scope
+        cls.addProperty('scope',                        basestring)
+
+
+class GuideCacheGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',                    basestring, required=True)
+        cls.addPropertyList('stamp_ids',                basestring)
+        cls.addPropertyList('todo_user_ids',            basestring)
+        cls.addPropertyList('tags',                     basestring)
+
+class GuideCache(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',                      basestring, required=True)
+        cls.addNestedPropertyList('music',              GuideCacheGroup)
+        cls.addNestedPropertyList('film',               GuideCacheGroup)
+        cls.addNestedPropertyList('book',               GuideCacheGroup)
+        cls.addNestedPropertyList('food',               GuideCacheGroup)
+        cls.addNestedPropertyList('app',                GuideCacheGroup)
+        cls.addNestedPropertyList('other',              GuideCacheGroup)
+
+
 
 
 

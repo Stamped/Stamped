@@ -26,6 +26,7 @@ try:
     from errors                 import *
     from libs.ec2_utils         import is_prod_stack
     from pprint                 import pprint, pformat
+    from operator               import itemgetter, attrgetter
     
     from AStampedAPI            import AStampedAPI
     from AAccountDB             import AAccountDB
@@ -3122,6 +3123,130 @@ class StampedAPI(AStampedAPI):
             logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+    @API_CALL
+    def getGuide(self, guideRequest, authUserId):
+
+        # try:
+        #     return self._guideDB.getGuide(guideRequest, authUserId)
+        # except KeyError:
+        #     pass
+
+        # Build guide
+        return None
+        guide = self.buildGuide(authUserId, fast=True)
+
+    @API_CALL
+    def buildGuide(self, authUserId):
+        user = api.getUser({'user_id': authUserId})
+        now = datetime.utcnow()
+
+        t0 = time.time()
+
+        stampIds = api._collectionDB.getInboxStampIds(user.user_id)
+        stamps = api._stampDB.getStamps(stampIds, limit=len(stampIds))
+        entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
+        entities = api._entityDB.getEntities(entityIds)
+        todos = set(api._favoriteDB.getFavoriteEntityIds(user.user_id))
+
+        t1 = time.time()
+
+        categories = {}
+        for entity in entities:
+            category = entity.category 
+            if category == 'place':
+                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
+                    category = 'food'
+                else:
+                    category = 'other'
+            if category not in categories:
+                categories[category] = set()
+            categories[category].add(entity)
+
+        def entityScore(**kwargs):
+            numStamps = kwargs.pop('numStamps', 0)
+            numLikes = kwargs.pop('numLikes', 0)
+            numTodos = kwargs.pop('numTodos', 0)
+            created = kwargs.pop('created', 0)
+            result = 0
+            ### TIME
+            t = (time.mktime(now.timetuple()) - created) / 60 / 60 / 24
+            time_score = 0
+            if t < 90:
+                time_score = -0.1 / 90 * t + 1
+            elif t < 280:
+                time_score = -0.9 / 180 * t + 1.4
+            ### STAMPS
+            stamp_score = 0
+            if numStamps < 5:
+                stamp_score = numStamps / 5.0
+            elif numStamps >= 5:
+                stamp_score = 1
+            ### LIKES
+            like_score = 0
+            if numLikes < 20:
+                like_score = numLikes / 20.0
+            elif numLikes >= 20:
+                like_score = 1
+            ### TODOS
+            todo_score = 0
+            if numTodos < 10:
+                todo_score = numTodos / 10.0
+            elif numTodos >= 10:
+                todo_score = 1
+            ### PERSONAL TODO LIST
+            personal_todo_score = 0
+            if entity.entity_id in todos:
+                personal_todo_score = 1
+            result = (3 * time_score) + (5 * stamp_score) + (1 * todo_score) + (1 * like_score) + (3 * personal_todo_score)
+            return result
+
+        stampMap = {}
+        for stamp in stamps:
+            if stamp.entity.entity_id not in stampMap:
+                stampMap[stamp.entity.entity_id] = set()
+            stampMap[stamp.entity.entity_id].add(stamp)
+
+        guide = GuideCache()
+        guide.user_id = user.user_id
+
+        for category, entities in categories.items():
+            r = []
+            for entity in entities:
+                numLikes = 0
+                numTodos = 0
+                created = 0
+                for stamp in stampMap[entity.entity_id]:
+                    if stamp.stats.num_likes is not None:
+                        numLikes += stamp.stats.num_likes
+                    if stamp.stats.num_todos is not None:
+                        numTodos += stamp.stats.num_todos
+                    if stamp.timestamp.stamped is not None:
+                        created = max(created, time.mktime(stamp.timestamp.stamped.timetuple()))
+                    elif stamp.timestamp.created is not None:
+                        created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
+                score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
+                r.append((entity.entity_id, score, entity.types))
+            r.sort(key=itemgetter(1))
+            r.reverse()
+            cache = []
+            for result in r[:1000]:
+                item = GuideCacheGroup()
+                item.entity_id = result[0]
+                item.tags = result[2]
+                if len(stampMap[result[0]]) > 0:
+                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
+                cache.append(item)
+            setattr(guide, category, cache)
+
+        logs.info("Time to build guide: %s seconds" % time.time() - t0)
+
+        self._guideDB.saveGuide(guide)
+
+        return guide
+
+
+
 
 
 
