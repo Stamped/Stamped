@@ -3185,7 +3185,7 @@ class StampedAPI(AStampedAPI):
         # Build guide
         result = []
         for item in items:
-            entity = entities[item.entity_id]
+            entity = entityIds[item.entity_id]
             result.append(entity)
 
         return result
