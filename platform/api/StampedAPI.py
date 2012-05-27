@@ -3241,7 +3241,7 @@ class StampedAPI(AStampedAPI):
 
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 
-        self._guideDB.saveGuide(guide)
+        self._guideDB.updateGuide(guide)
 
         return guide
 
