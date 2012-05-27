@@ -3128,7 +3128,7 @@ class StampedAPI(AStampedAPI):
     def getGuide(self, guideRequest, authUserId):
 
         try:
-            guide = self._guideDB.getGuide(guideRequest, authUserId)
+            guide = self._guideDB.getGuide(authUserId)
         except (StampedUnavailableError, KeyError):
             # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
             guide = self._buildGuide(authUserId)
