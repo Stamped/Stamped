@@ -981,6 +981,7 @@ class HTTPEntity(Schema):
         cls.addProperty('caption',              basestring)
         cls.addNestedPropertyList('images',     HTTPImageSchema)
         cls.addProperty('last_modified',        basestring)
+        cls.addProperty('previews',             HTTPEntityPreviewsSchema)
 
         # Location
         cls.addProperty('address',              basestring)
