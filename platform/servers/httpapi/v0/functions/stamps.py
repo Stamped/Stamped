@@ -115,8 +115,9 @@ def guide(request, authUserId, schema, **kwargs):
     for entity in entities:
         try:
             result.append(HTTPEntity().importEntity(entity).dataExport())
-        except:
-            logs.warning(utils.getFormattedException())
+        except Exception:
+            raise
+            # logs.warning(utils.getFormattedException())
 
     return transformOutput(result)
 
