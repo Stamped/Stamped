@@ -3226,7 +3226,7 @@ class StampedAPI(AStampedAPI):
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
         entities = self._entityDB.getEntities(entityIds)
-        todos = set(self._favoriteDB.getFavoriteEntityIds(user.user_id))
+        todos = set(self._todoDB.getTodoEntityIds(user.user_id))
 
         t1 = time.time()
 
@@ -3692,6 +3692,31 @@ class StampedAPI(AStampedAPI):
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
         
+        return todo
+
+    @API_CALL
+    def completeTodo(self, authUserId, entityId, complete):
+        ### TODO: Fail gracefully if todo doesn't exist
+        RawTodo = self._todoDB.getTodo(authUserId, entityId)
+
+        if not RawTodo or not RawTodo.todo_id:
+            raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
+
+        self._todoDB.completeTodo(authUserId, entityId)
+
+        # Decrement user stats by one
+        self._userDB.updateUserStats(authUserId, 'num_todos', increment=-1)
+
+        # Enrich todo
+        todo = self._enrichTodo(RawTodo, authUserId=authUserId)
+
+        if todo.stamp is not None and todo.stamp.stamp_id is not None:
+            # Remove activity
+            self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
+
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[todo.stamp.stamp_id])
+
         return todo
     
     @API_CALL

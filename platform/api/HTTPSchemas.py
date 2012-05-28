@@ -835,7 +835,7 @@ class HTTPClientLogsEntry(Schema):
         # optional ids
         cls.addProperty('stamp_id',     basestring)
         cls.addProperty('entity_id',    basestring)
-        cls.addProperty('favorite_id',  basestring)
+        cls.addProperty('todo_id',      basestring)
         cls.addProperty('comment_id',   basestring)
         cls.addProperty('activity_id',  basestring)
 
@@ -2793,38 +2793,55 @@ class HTTPCommentSlice(HTTPGenericSlice):
         cls.addProperty('stamp_id',             basestring, required=True)
 
 
-# ######## #
-# Favorite #
-# ######## #
+# #### #
+# Todo #
+# #### #
 
-class HTTPFavorite(Schema):
+class HTTPTodoSource(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('favorite_id',          basestring, required=True)
-        cls.addProperty('user_id',              basestring, required=True)
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        cls.addNestedProperty('stamp',          HTTPStamp)
+        cls.addPropertyList('stamp_ids',        basestring)
+
+class HTTPTodo(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('todo_id',              basestring, required=True)
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addNestedProperty('source',         HTTPTodoSource, required=True)
+        #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
+        #cls.addNestedProperty('stamp',          HTTPStamp)
+        cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
+        cls.addNestedProperty('previews',       HTTPStampPreviews)
         cls.addProperty('created',              basestring)
         cls.addProperty('complete',             bool)
 
-    def importFavorite(self, fav):
-        self.favorite_id             = fav.favorite_id
-        self.user_id                 = fav.user.user_id
-        self.entity                  = HTTPEntityMini().importEntity(fav.entity)
-        self.created                 = fav.timestamp.created
-        self.complete                = fav.complete
+    def importTodo(self, todo):
+        self.todo_id                = todo.todo_id
+        self.user_id                = todo.user.user_id
+        self.source                 = HTTPTodoSource()
+        self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
+        if todo.stamp is not None:
+            self.source.stamp_ids   = [ todo.stamp.stamp_id ]
+        if todo.previews is not None and todo.previews.todos is not None:
+            self.previews           = HTTPStampPreviews()
+            self.previews.todos     = [HTTPUser().importUser(u) for u in todo.previews.todos]
+        self.created                = todo.timestamp.created
+        self.complete               = todo.complete
 
-        if fav.stamp is not None:
-            self.stamp              = HTTPStamp().importStampMini(fav.stamp)
+        if todo.stamp is not None:
+            self.stamp_id              = todo.stamp.stamp_id#= HTTPStamp().importStampMini(todo.stamp)
 
         return self
 
-class HTTPFavoriteNew(Schema):
+class HTTPTodoNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('entity_id',            basestring)
         cls.addProperty('search_id',            basestring)
         cls.addProperty('stamp_id',             basestring)
+
+
 
 
 # ######## #
