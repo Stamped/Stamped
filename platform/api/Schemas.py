@@ -570,7 +570,6 @@ class EntityPreviewsSchema(Schema):
     def setSchema(cls):
         cls.addNestedPropertyList('stamp_users',            UserMini)
         cls.addNestedPropertyList('todos',                  UserMini)
-        cls.addNestedPropertyList('stamps',                 StampMini)
 
 class BasicEntityMini(Schema):
     @classmethod

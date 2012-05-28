@@ -928,7 +928,6 @@ class HTTPEntityPreviewsSchema(Schema):
     def setSchema(cls):
         cls.addNestedPropertyList('stamp_users',            HTTPUserMini)
         cls.addNestedPropertyList('todos',                  HTTPUserMini)
-        cls.addNestedPropertyList('stamps',                 HTTPStampMini)
 
 class HTTPEntityStampedBy(Schema):
     @classmethod
@@ -1825,12 +1824,6 @@ class HTTPEntity(Schema):
                 for user in entity.previews.stamp_users:
                     users.append(HTTPUserMini.importUserMini(user))
                 previews.stamp_users = users 
-
-            if entity.previews.stamps is not None:
-                stamps = []
-                for stamp in entity.previews.stamps:
-                    stamps.append(HTTPStampMini.importStampMini(stamp))
-                previews.stamps = stamps
 
             self.previews = previews 
 
