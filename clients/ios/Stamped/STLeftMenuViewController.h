@@ -19,6 +19,8 @@
     NSIndexPath *_selectedIndexPath;
 }
 
++ (void)setupConfigurations;
+
 @property(nonatomic,retain) UITableView *tableView;
 @property(nonatomic,retain) UITableView *anchorTableView;
 

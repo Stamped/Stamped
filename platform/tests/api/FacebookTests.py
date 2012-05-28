@@ -25,7 +25,7 @@ class StampedAPIFacebookTest(AStampedAPITestCase):
         access_token    = self.fb.getAppAccessToken()
 
         # Next generate the test user for our app on Facebook
-        fb_test_user    = self.fb.createTestUser(name, access_token, permissions='email')
+        fb_test_user            = self.fb.createTestUser(name, access_token, permissions='email')
 
         fb_user_id              = fb_test_user['id']
         fb_user_token           = fb_test_user['access_token']
@@ -41,43 +41,56 @@ class StampedAPIFacebookTest(AStampedAPITestCase):
 
     def setUp(self):
         # Create a Facebook test user registered with our app, then use that test user to create a new Stamped account
+        # Also create a user with standard stamped auth
         self.fb = globalFacebook()
-        (self.fb_user_token, self.fb_user_id)   = self._createFacebookTestAccount(name='UserA')
-        (self.user, self.token)                 = self.createFacebookAccount(self.fb_user_token, name='UserA')
+        (self.fb_user_token, self.fb_user_id)   = self._createFacebookTestAccount(name='fbusera')
+        (self.fUser, self.fUserToken)           = self.createFacebookAccount(self.fb_user_token, name='fUser')
+        (self.sUser, self.sUserToken)           = self.createAccount(name='sUser')
+
         self.privacy = False
 
 
     def tearDown(self):
-        self.deleteAccount(self.token)
+        self.deleteAccount(self.sUserToken)
+        self.deleteAccount(self.fUserToken)
         self.assertTrue(self._deleteFacebookTestAccount(self.fb_user_token, self.fb_user_id))
+
+## create two stamped accounts, give them both linked facebook id, and try to create a facebook account
+## create one stamped account, link it to facebook account, try to create new stamped facebook account
+#
 
 class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
-    def test_invalid_login(self):
-        # login with invalid facebook user account
-        path = "oauth2/login_with_facebook.json"
-        data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "login":        'usera',
-            "fb_token":     'BLAAAAARGH!!!',
-            }
+    def test_invalid_facebook_token_login(self):
+        # attempt login with invalid facebook token
         with expected_exception():
-            self.handlePOST(path, data)
+            self.loginWithFacebook("BLAAARRGH!!")
+
+    def test_create_duplicate_facebook_auth_account(self):
+        with expected_exception():
+            self.createFacebookAccount(self.fb_user_token, name='fUser2')
+
+    def test_linked_account_with_used_facebook_id(self):
+#        self.addLinkedAccount(
+#            self.sUserToken,
+#                { 'facebook_id'         : self.fb_user_id,
+#                  'facebook_name'       : 'facebook_user',
+#                  'facebook_token'      : self.fb_user_token,
+#                  }
+#        )
+        pass
+
+    def test_attempt_linked_account_change_for_facebook_auth_user(self):
+        pass
+
+
 
     def test_valid_login(self):
         # login with facebook user account
-        path = "oauth2/login_with_facebook.json"
-        data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "login":        'usera',
-            "fb_token":     self.fb_user_token,
-        }
-        result = self.handlePOST(path, data)
+        result = self.loginWithFacebook(self.fb_user_token)
 
         # verify that the stamped user token and user_id are correct
-        self.assertEqual(result['user']['user_id'], self.user['user_id'])
+        self.assertEqual(result['user']['user_id'], self.fUser['user_id'])
 
 ### TESTS TO ADD:
 # Change bio from string to None

@@ -19,6 +19,7 @@ from subprocess          import Popen, PIPE
 from functools           import wraps
 from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
+from threading           import Lock
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -56,16 +57,27 @@ def is_running(cmd):
     return 0 == shell("ps -ef | grep '%s' | grep -v grep" % cmd)[1]
 
 def lazyProperty(undecorated):
-    name = '_' + undecorated.__name__
+    name = '__lazyProperty_' + undecorated.__name__
+    propertyLock = Lock()
     @property
     @wraps(undecorated)
     def decorated(self):
         try:
-            return getattr(self, name)
+            pair = getattr(self, name)
         except AttributeError:
-            v = undecorated(self)
-            setattr(self, name, v)
-            return v
+            with propertyLock:
+                if hasattr(self, name):
+                    pair = getattr(self, name)
+                else:
+                    pair = ([], Lock())
+                    setattr(self, name, pair)
+        closure, lock = pair
+        if len(closure) == 0:
+            with lock:
+                if len(closure) == 0:
+                    closure.append(undecorated(self))
+        return closure[0]
+
     return decorated
 
 def log(s=""):

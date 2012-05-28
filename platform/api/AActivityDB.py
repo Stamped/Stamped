@@ -15,7 +15,7 @@ class AActivityDB(object):
     
     * User is given credit (restamp)
     * Someone comments on a stamp User is mentioned in
-    * Someone "favorites" User's stamp
+    * Someone "todos" User's stamp
     * Someone directs a stamp to User (with optional comment)
     * User achieves milestone
     

@@ -103,11 +103,11 @@ body.other      #stamp-category-nav-bar ol li.other div {
 }
 
 .stamp-gallery-item:hover {
-    background-color: fade(@primary, 50%);
+    background-color: fade(@primary, 15%);
 }
 
 .stamp-gallery-item:active {
-    background-color: fade(@primary, 80%);
+    background-color: fade(@primary, 25%);
 }
 
 .action:hover {

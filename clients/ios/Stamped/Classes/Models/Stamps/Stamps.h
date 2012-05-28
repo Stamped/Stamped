@@ -9,12 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "STStampedAPI.h"
 
-@interface Stamps : NSObject {
-    NSArray *_data;
-    NSArray *_identifiers;
-    STCancellation *_cancellation;
-    NSInteger _page;
-}
+@interface Stamps : NSObject
 
 @property (nonatomic, copy) NSString *identifier;
 @property (nonatomic, readonly, getter = isReloading) BOOL reloading;

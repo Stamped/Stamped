@@ -48,17 +48,25 @@ def _log(level, msg, *args, **kwargs):
     _begin()
 
     try:
-        fnc = inspect.stack()[2][3]
+        filename    = inspect.stack()[2][1]
+        if filename.rfind('/') != -1:
+            filename = filename[filename.rfind('/') + 1:]
+        lineno      = inspect.stack()[2][2]
+        fnc         = inspect.stack()[2][3]
     except:
         fnc = "UNKNOWN FUNCTION"
     
     if localData.format == 'object':
-        item = (datetime.datetime.utcnow(), level, fnc, msg)
+        try:
+            msg = str(msg)
+        except Exception:
+            msg = "LOGGER ERROR: failed to convert msg (type: %s) to string" % type(msg)
+        item = (datetime.datetime.utcnow(), level, filename, lineno, fnc, msg)
         localData.log['log'].append(item)
         localData.log[level] = True
 
     # else:
-    msg = "%s | %s | %-25s | %s" % (os.getpid(), localData.logId[:6], fnc, msg)
+    msg = "{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, msg)
     if level == 'warning':
         log.warning(msg, *args, **kwargs)
     elif level == 'info':
@@ -207,8 +215,8 @@ def save():
         if localData.saveLog == None:
             raise
         localData.saveLog(localData.log)
-    except:
-        #pprint.pprint(localData.log)
+    except Exception as e:
+        pprint.pprint(localData.log)
         pass
     
     try:

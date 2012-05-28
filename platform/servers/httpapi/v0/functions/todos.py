@@ -8,44 +8,45 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 
-@handleHTTPRequest(http_schema=HTTPFavoriteNew)
+@handleHTTPRequest(http_schema=HTTPTodoNew)
 @require_http_methods(["POST"])
 def create(request, authUserId, http_schema, **kwargs):
     stampId  = http_schema.stamp_id
     entityRequest = {
         'entity_id': http_schema.entity_id,
         'search_id': http_schema.search_id,
-    }
+        }
 
-    favorite = stampedAPI.addFavorite(authUserId, entityRequest, stampId)
-    favorite = HTTPFavorite().importFavorite(favorite)
+    todo = stampedAPI.addTodo(authUserId, entityRequest, stampId)
+    todo = HTTPTodo().importTodo(todo)
 
-    return transformOutput(favorite.dataExport())
+    logs.info(todo.dataExport())
+    return transformOutput(todo.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
-    favorite = stampedAPI.removeFavorite(authUserId, http_schema.entity_id)
-    favorite = HTTPFavorite().importFavorite(favorite)
-    
+    todo = stampedAPI.removeTodo(authUserId, http_schema.entity_id)
+    todo = HTTPTodo().importTodo(todo)
+
     # Hack to force 'entity' to null for Bons
     ### TODO: Come up with a long-term solution
-    result   = favorite.dataExport()
+    result   = todo.dataExport()
     result['entity'] = None
-    
+
     return transformOutput(result)
 
 
 @handleHTTPRequest(http_schema=HTTPGenericCollectionSlice,
-                  conversion=HTTPGenericCollectionSlice.exportGenericCollectionSlice)
+    conversion=HTTPGenericCollectionSlice.exportGenericCollectionSlice)
 @require_http_methods(["GET"])
 def show(request, authUserId, schema, **kwargs):
-    favorites = stampedAPI.getFavorites(authUserId, schema)
-    
+    todos = stampedAPI.getTodos(authUserId, schema)
+
     result = []
-    for favorite in favorites:
-        result.append(HTTPFavorite().importFavorite(favorite).dataExport())
-    
+    for todo in todos:
+        result.append(HTTPTodo().importTodo(todo).dataExport())
+
     return transformOutput(result)
 

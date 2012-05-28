@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
+import Entity
 
 from errors             import *
 from schema             import *
@@ -38,6 +39,9 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 
 def _coordinatesDictToFlat(coordinates):
     try:
+        if isinstance(coordinates, Schema):
+            coordinates = coordinates.dataExport()
+
         if not isinstance(coordinates['lat'], float) or \
            not isinstance(coordinates['lng'], float):
             raise
@@ -297,11 +301,18 @@ class OAuthLogin(Schema):
         cls.addProperty('login',                        basestring, required=True)
         cls.addProperty('password',                     basestring, required=True)
 
+# TODO: Consolidate OAuthFacebookLogin and OAuthTwitterLogin after linked account generification?
+
 class OAuthFacebookLogin(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('login',                        basestring, required=True)
         cls.addProperty('fb_token',                     basestring, required=True)
+
+class OAuthTwitterLogin(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('user_secret',                  basestring, required=True)
 
 # ####### #
 # Actions #
@@ -378,6 +389,7 @@ class HTTPAccount(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
         cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('auth_service',                 basestring, required=True)
         cls.addProperty('email',                        basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('privacy',                      bool, required=True)
@@ -397,7 +409,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
 
-        
+
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',               basestring)
         cls.addProperty('temp_image_width',             int)
@@ -423,10 +435,24 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         cls.addProperty('facebook_token',               basestring, required=True)
 
-        # for asynchronous image uploads
-        cls.addProperty('temp_image_url',               basestring)
-        cls.addProperty('temp_image_width',             int)
-        cls.addProperty('temp_image_height',            int)
+    def convertToFacebookAccountNew(self):
+        return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+
+class HTTPTwitterAccountNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('email',                        basestring)#, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('user_secret',                  basestring, required=True)
+
+    def convertToTwitterAccountNew(self):
+        return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
+
+
 
 class HTTPAccountSettings(Schema):
     @classmethod
@@ -580,105 +606,106 @@ class HTTPAPNSToken(Schema):
 class HTTPUserId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('screen_name',          basestring)
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('screen_name',                  basestring)
 
 class HTTPUserIds(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_ids',             basestring) # Comma delimited
-        cls.addProperty('screen_names',         basestring) # Comma delimited
+        cls.addProperty('user_ids',                     basestring) # Comma delimited
+        cls.addProperty('screen_names',                 basestring) # Comma delimited
 
 class HTTPUserSearch(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring)
-        cls.addProperty('limit',                int)
-        cls.addProperty('relationship',         basestring)
+        cls.addProperty('q',                            basestring)
+        cls.addProperty('limit',                        int)
+        cls.addProperty('relationship',                 basestring)
 
 class HTTPUserRelationship(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id_a',            basestring)
-        cls.addProperty('screen_name_a',        basestring)
-        cls.addProperty('user_id_b',            basestring)
-        cls.addProperty('screen_name_b',        basestring)
+        cls.addProperty('user_id_a',                    basestring)
+        cls.addProperty('screen_name_a',                basestring)
+        cls.addProperty('user_id_b',                    basestring)
+        cls.addProperty('screen_name_b',                basestring)
 
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) # Comma delimited
+        cls.addProperty('q',                            basestring) # Comma delimited
 
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) # Comma delimited
-        cls.addProperty('twitter_key',          basestring)
-        cls.addProperty('twitter_secret',       basestring)
+        cls.addProperty('q',                            basestring) # Comma delimited
+        cls.addProperty('twitter_key',                  basestring)
+        cls.addProperty('twitter_secret',               basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                    basestring) # Comma delimited
-        cls.addProperty('facebook_token',       basestring)
+        cls.addProperty('q',                            basestring) # Comma delimited
+        cls.addProperty('facebook_token',               basestring)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('state',                basestring) # passed back state value to prevent csrf attacks
-        cls.addProperty('code',                 basestring) # code we'll exchange for a user token
+        cls.addProperty('state',                        basestring) # passed back state value to prevent csrf attacks
+        cls.addProperty('code',                         basestring) # code we'll exchange for a user token
 
 class HTTPFacebookAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('access_token',         basestring)
-        cls.addProperty('expires',              int)        # seconds until token expires
+        cls.addProperty('access_token',                 basestring)
+        cls.addProperty('expires',                      int)        # seconds until token expires
 
 class HTTPNetflixId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('netflix_id',           basestring)
+        cls.addProperty('netflix_id',                   basestring)
 
 class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamped_oauth_token',  basestring)
-        cls.addProperty('oauth_token',          basestring)
-        cls.addProperty('secret',               basestring)
-        cls.addProperty('oauth_verifier',       basestring)
+        cls.addProperty('stamped_oauth_token',          basestring)
+        cls.addProperty('oauth_token',                  basestring)
+        cls.addProperty('secret',                       basestring)
+        cls.addProperty('oauth_verifier',               basestring)
 
 class HTTPCategoryDistribution(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('category',           basestring, required=True)
-        cls.addProperty('name',               basestring)
-        cls.addProperty('icon',               basestring)
-        cls.addProperty('count',              int)
+        cls.addProperty('category',                     basestring, required=True)
+        cls.addProperty('name',                         basestring)
+        cls.addProperty('icon',                         basestring)
+        cls.addProperty('count',                        int)
 
 class HTTPUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',               basestring, required=True)
-        cls.addProperty('name',                  basestring, required=True)
-        cls.addProperty('screen_name',           basestring, required=True)
-        cls.addProperty('color_primary',         basestring)
-        cls.addProperty('color_secondary',       basestring)
-        cls.addProperty('bio',                   basestring)
-        cls.addProperty('website',               basestring)
-        cls.addProperty('location',              basestring)
-        cls.addProperty('privacy',               bool, required=True)
-        cls.addNestedProperty('image',           HTTPImageSchema)
+        cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('color_primary',                basestring)
+        cls.addProperty('color_secondary',              basestring)
+        cls.addProperty('bio',                          basestring)
+        cls.addProperty('website',                      basestring)
+        cls.addProperty('location',                     basestring)
+        cls.addProperty('privacy',                      bool, required=True)
+        cls.addNestedProperty('image',                  HTTPImageSchema)
+        cls.addProperty('image_url',                    basestring)
         
-        cls.addProperty('identifier',            basestring)
-        cls.addProperty('num_stamps',            int)
-        cls.addProperty('num_stamps_left',       int)
-        cls.addProperty('num_friends',           int)
-        cls.addProperty('num_followers',         int)
-        cls.addProperty('num_faves',             int)
-        cls.addProperty('num_credits',           int)
-        cls.addProperty('num_credits_given',     int)
-        cls.addProperty('num_likes',             int)
-        cls.addProperty('num_likes_given',       int)
+        cls.addProperty('identifier',                   basestring)
+        cls.addProperty('num_stamps',                   int)
+        cls.addProperty('num_stamps_left',              int)
+        cls.addProperty('num_friends',                  int)
+        cls.addProperty('num_followers',                int)
+        cls.addProperty('num_faves',                    int)
+        cls.addProperty('num_credits',                  int)
+        cls.addProperty('num_credits_given',            int)
+        cls.addProperty('num_likes',                    int)
+        cls.addProperty('num_likes_given',              int)
         cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
 
     def importAccount(self, account, client=None):
@@ -698,6 +725,7 @@ class HTTPUser(Schema):
         self.num_likes          = stats.pop('num_likes', 0)
         self.num_likes_given    = stats.pop('num_likes_given', 0)
         
+        self.image_url = _profileImageURL(user.screen_name, user.timestamp.image_cache)
         self.image = _buildProfileImage(self.screen_name, 
                                         cache=user.timestamp.image_cache, 
                                         sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
@@ -735,17 +763,17 @@ class HTTPSuggestedUser(HTTPUser):
 class HTTPUserMini(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring, required=True)
-        cls.addProperty('screen_name',          basestring, required=True)
-        cls.addProperty('color_primary',        basestring)
-        cls.addProperty('color_secondary',      basestring)
-        cls.addProperty('privacy',              bool, required=True)
-        cls.addNestedProperty('image',          HTTPImageSchema)
+        cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('color_primary',                basestring)
+        cls.addProperty('color_secondary',              basestring)
+        cls.addProperty('privacy',                      bool, required=True)
+        cls.addNestedProperty('image',                  HTTPImageSchema)
+        cls.addProperty('image_url',                    basestring)
 
     def importUserMini(self, mini):
         self.dataImport(mini.dataExport(), overflow=True)
         self.image_url = _profileImageURL(mini.screen_name, mini.timestamp.image_cache)
-
         self.image = _buildProfileImage(self.screen_name,
             cache=mini.timestamp.image_cache,
             sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
@@ -807,7 +835,7 @@ class HTTPClientLogsEntry(Schema):
         # optional ids
         cls.addProperty('stamp_id',     basestring)
         cls.addProperty('entity_id',    basestring)
-        cls.addProperty('favorite_id',  basestring)
+        cls.addProperty('todo_id',      basestring)
         cls.addProperty('comment_id',   basestring)
         cls.addProperty('activity_id',  basestring)
 
@@ -895,14 +923,18 @@ class HTTPEntityPlaylist(Schema):
         cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
         cls.addProperty('name',                 basestring)
 
+class HTTPEntityPreviewsSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('stamp_users',            HTTPUserMini)
+        cls.addNestedPropertyList('todos',                  HTTPUserMini)
+
 class HTTPEntityStampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('friends',              int, required=True)
         cls.addProperty('friends_of_friends',   int)
         cls.addProperty('everyone',             int)
-
-# Related
 
 class HTTPEntityMini(Schema):
     @classmethod
@@ -933,35 +965,36 @@ class HTTPEntityMini(Schema):
 class HTTPEntityRelated(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('data',       HTTPEntityMini, required=True)
-        cls.addProperty('title',                basestring)
+        cls.addNestedPropertyList('data',               HTTPEntityMini, required=True)
+        cls.addProperty('title',                        basestring)
 
 
 class HTTPEntity(Schema):
     @classmethod
     def setSchema(cls):
         # Core
-        cls.addProperty('entity_id',            basestring, required=True)
-        cls.addProperty('title',                basestring, required=True)
-        cls.addProperty('subtitle',             basestring, required=True)
-        cls.addProperty('category',             basestring, required=True)
-        cls.addProperty('subcategory',          basestring, required=True)
-        cls.addProperty('caption',              basestring)
-        cls.addNestedPropertyList('images',     HTTPImageSchema)
-        cls.addProperty('last_modified',        basestring)
+        cls.addProperty('entity_id',                    basestring, required=True)
+        cls.addProperty('title',                        basestring, required=True)
+        cls.addProperty('subtitle',                     basestring, required=True)
+        cls.addProperty('category',                     basestring, required=True)
+        cls.addProperty('subcategory',                  basestring, required=True)
+        cls.addProperty('caption',                      basestring)
+        cls.addNestedPropertyList('images',             HTTPImageSchema)
+        cls.addProperty('last_modified',                basestring)
+        cls.addNestedProperty('previews',               HTTPEntityPreviewsSchema)
 
         # Location
-        cls.addProperty('address',              basestring)
-        cls.addProperty('neighborhood',         basestring)
-        cls.addProperty('coordinates',          basestring)
+        cls.addProperty('address',                      basestring)
+        cls.addProperty('neighborhood',                 basestring)
+        cls.addProperty('coordinates',                  basestring)
 
         # Components
-        cls.addNestedProperty('playlist',       HTTPEntityPlaylist)
-        cls.addNestedPropertyList('actions',    HTTPEntityAction)
-        cls.addNestedPropertyList('galleries',  HTTPEntityGallery)
-        cls.addNestedPropertyList('metadata',   HTTPEntityMetadataItem)
-        cls.addNestedProperty('stamped_by',     HTTPEntityStampedBy)
-        cls.addNestedProperty('related',        HTTPEntityRelated)
+        cls.addNestedProperty('playlist',               HTTPEntityPlaylist)
+        cls.addNestedPropertyList('actions',            HTTPEntityAction)
+        cls.addNestedPropertyList('galleries',          HTTPEntityGallery)
+        cls.addNestedPropertyList('metadata',           HTTPEntityMetadataItem)
+        cls.addNestedProperty('stamped_by',             HTTPEntityStampedBy)
+        cls.addNestedProperty('related',                HTTPEntityRelated)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1060,8 +1093,8 @@ class HTTPEntity(Schema):
 
         subcategory             = self._formatSubcategory(self.subcategory)
 
-        # Restaurant / Bar
-        if entity.kind == 'place' and entity.category == 'food':
+        # Place
+        if entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
 
@@ -1070,7 +1103,7 @@ class HTTPEntity(Schema):
                 self.caption = address
 
             # Metadata
-            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_food', client=client))
+            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
             self._addMetadata('Cuisine', ', '.join(unicode(i) for i in entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
@@ -1082,7 +1115,15 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema().dataImport(image)
+                    item                = HTTPImageSchema().dataImport(image)
+                    source              = HTTPActionSource()
+                    source.source_id    = item.sizes[0].url
+                    source.source       = 'stamped'
+                    source.link         = item.sizes[0].url
+                    action              = HTTPAction()
+                    action.type         = 'stamped_view_image'
+                    action.sources      = [ source ]
+                    item.action         = action
                     images.append(item)
                 gallery.images = images
                 self.galleries += (gallery,)
@@ -1145,21 +1186,6 @@ class HTTPEntity(Schema):
                 sources.append(source)
             
             self._addAction(actionType, 'View menu', sources, icon=actionIcon)
-        
-        # Generic Place
-        elif entity.kind == 'place':
-            self.address        = entity.formatAddress(extendStreet=True)
-            self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
-
-            address = entity.formatAddress(extendStreet=True, breakLines=True)
-            if address is not None:
-                self.caption = address
-
-            # Metadata
-
-            self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
-            self._addMetadata('Description', entity.desc, key='desc')
-            self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
 
             # Image gallery
 
@@ -1167,8 +1193,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema()
-                    item.importSchema(image)
+                    item = HTTPImageSchema().dataImport(image, overflow = True)
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
@@ -1180,21 +1205,6 @@ class HTTPEntity(Schema):
                     images.append(item)
                 gallery.images = images
                 self.galleries += (gallery,)
-
-            # Actions: Call
-
-            actionType  = 'phone'
-            actionIcon  = _getIconURL('act_call', client=client)
-            sources     = []
-
-            if entity.phone is not None:
-                source              = HTTPActionSource()
-                source.source       = 'phone'
-                source.source_id    = entity.phone
-                source.link         = 'tel:%s' % non_numeric_re.sub('', entity.phone)
-                sources.append(source)
-
-            self._addAction(actionType, entity.phone, sources, icon=actionIcon)
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
@@ -1235,16 +1245,42 @@ class HTTPEntity(Schema):
         # TV
         elif entity.kind == 'media_collection' and entity.isType('tv'):
 
+            if len(entity.networks) > 0:
+                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
+
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
             self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
-            if entity.subcategory == 'movie':
-                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
+            # Actions: Watch Now
 
+            actionType  = 'watch'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Watch on iTunes'
+                source.source       = 'itunes'
+                source.source_id    = entity.sources.itunes_id
+                source.source_data  = { 'preview_url': entity.sources.itunes_preview }
+                source.icon         = _getIconURL('src_itunes', client=client)
+                if getattr(entity.sources, 'itunes_url', None) is not None:
+                    source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+
+            # Actions: Add to Netflix Instant Queue
 
             actionType  = 'add_to_instant_queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
@@ -1271,16 +1307,29 @@ class HTTPEntity(Schema):
 
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
+            # Actions: Download
+
+            actionType  = 'buy'
+            actionIcon  = _getIconURL('act_buy', client=client)
+            sources     = []
+
+            if entity.sources.amazon_underlying is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Buy from Amazon'
+                source.source       = 'amazon'
+                source.source_id    = entity.sources.amazon_underlying
+                source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
+                sources.append(source)
+
+            self._addAction(actionType, 'Buy', sources, icon=actionIcon)
+
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
 
-            if entity.subcategory == 'movie' and entity.length is not None:
+            if entity.length is not None:
                 length = self._formatFilmLength(entity.length)
                 if length is not None:
                     self.caption = length
-
-            if entity.subcategory == 'tv' and len(entity.networks) > 0:
-                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
 
             # Metadata
 
@@ -1290,8 +1339,7 @@ class HTTPEntity(Schema):
             self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
             self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
-            if entity.subcategory == 'movie':
-                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+            self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
             # Actions: Watch Now
 
@@ -1373,9 +1421,32 @@ class HTTPEntity(Schema):
 
             self._addAction(actionType, 'Find tickets', sources, icon=actionIcon)
 
-            # Actions: Add to Queue
+            # Actions: Add to Netflix Instant Queue
 
-            ### TODO: Add Netflix
+            actionType  = 'add_to_instant_queue'
+            actionIcon  = _getIconURL('act_play_primary', client=client)
+            sources     = []
+
+            if (entity.sources.netflix_id is not None and
+                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_instant_available_until is not None and
+                entity.sources.netflix_instant_available_until > datetime.now()):
+                source                  = HTTPActionSource()
+                source.name             = 'Add to Netflix Instant Queue'
+                source.source           = 'netflix'
+                source.source_id        = entity.sources.netflix_id
+                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
+                source.icon             = _getIconURL('src_itunes', client=client)
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
+
+            self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
             # Actions: Watch Trailer
 
@@ -1387,7 +1458,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_buy', client=client)
             sources     = []
 
-            if getattr(entity.sources, 'amazon_underlying', None) is not None:
+            if entity.sources.amazon_underlying is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Buy from Amazon'
                 source.source       = 'amazon'
@@ -1412,11 +1483,11 @@ class HTTPEntity(Schema):
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_music', client=client))
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 self._addMetadata('Biography', entity.desc, key='desc')
                 self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
 
-            elif entity.subcategory == 'album':
+            elif entity.isType('album'):
                 if len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
@@ -1433,7 +1504,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
-            elif entity.subcategory == 'song':
+            elif entity.isType('track'):
                 if len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
@@ -1454,11 +1525,11 @@ class HTTPEntity(Schema):
 
             actionType  = 'listen'
             actionTitle = 'Listen'
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 actionTitle = 'Listen to top songs'
-            elif entity.subcategory == 'album':
+            elif entity.isType('album'):
                 actionTitle = 'Listen to album'
-            elif entity.subcategory == 'song':
+            elif entity.isType('track'):
                 actionTitle = 'Listen to song'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
@@ -1518,7 +1589,7 @@ class HTTPEntity(Schema):
 
             actionType  = 'playlist'
             actionTitle = 'Add to playlist'
-            if entity.subcategory == 'artist':
+            if entity.isType('artist'):
                 actionTitle = 'Add artist to playlist'
             actionIcon  = _getIconURL('act_playlist_music', client=client)
             sources     = []
@@ -1577,11 +1648,11 @@ class HTTPEntity(Schema):
 
             # Playlist
 
-            if entity.subcategory in ["album", "artist"] and entity.tracks is not None:
+            if (entity.isType('album') or entity.isType('artist')) and entity.tracks is not None:
                 playlist = HTTPEntityPlaylist()
                 data = []
 
-                if entity.subcategory == 'album':
+                if entity.isType('album'):
                     playlist.name = 'Tracks'
                 else:
                     playlist.name = 'Top songs'
@@ -1662,9 +1733,7 @@ class HTTPEntity(Schema):
 
             # Albums
 
-            if entity.isType('artist') and len(entity.albums) > 0:
-                from pprint import pformat
-
+            if entity.isType('artist') and entity.albums is not None and len(entity.albums) > 0:
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 images = []
@@ -1675,7 +1744,7 @@ class HTTPEntity(Schema):
                         ### TODO: Add placeholder if image doesn't exist
                         size.url        = _cleanImageURL(album.images[0].sizes[0].url)
                         item.caption    = album.title
-                        item.sizes.append(size)
+                        item.sizes      = [size]
 
                         if album.entity_id is not None:
                             source              = HTTPActionSource()
@@ -1692,12 +1761,15 @@ class HTTPEntity(Schema):
 
                         images.append(item)
                     except Exception as e:
-                        logs.info(e.message)
+                        logs.warning("Artist album-gallery item failed: %s (%s)" % (e, album))
                         pass
 
                 gallery.images = images
                 if len(gallery.images) > 0:
-                    self.galleries += (gallery,)
+                    if self.galleries is None:
+                        self.galleries = [gallery]
+                    else:
+                        self.galleries += (gallery,)
 
         elif entity.kind == 'software' and entity.isType('app'):
 
@@ -1764,6 +1836,25 @@ class HTTPEntity(Schema):
         elif entity.images is not None and len(entity.images) > 0:
             _addImages(self, entity.images)
 
+        # Previews
+
+        if entity.previews is not None:
+            previews = HTTPEntityPreviewsSchema()
+
+            if entity.previews.todos is not None:
+                users = []
+                for user in entity.previews.todos:
+                    users.append(HTTPUserMini().importUserMini(user))
+                previews.todos = users
+            
+            if entity.previews.stamp_users is not None:
+                users = []
+                for user in entity.previews.stamp_users:
+                    users.append(HTTPUserMini().importUserMini(user))
+                previews.stamp_users = users 
+
+            self.previews = previews 
+
         return self
 
     def importEntityMini(self, mini, client=None):
@@ -1797,11 +1888,11 @@ class HTTPEntityNew(Schema):
 
     def exportEntity(self, authUserId):
 
-        kind    = deriveKindFromSubcategory(self.subcategory)
+        kind    = list(mapSubcategoryToKinds(self.subcategory))[0]
         entity  = buildEntity(kind=kind)
 
         entity.schema_version   = 0
-        entity.types            = list(deriveTypesFromSubcategories([self.subcategory]))
+        entity.types            = list(mapSubcategoryToTypes(self.subcategory))
         entity.title            = self.title
 
         def addField(entity, field, value, timestamp):
@@ -1877,55 +1968,47 @@ class HTTPEntityNew(Schema):
 #                raise NotImplementedError(type(schema))
 #            return schema
 
-class HTTPEntityAutosuggest(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('search_id',            basestring, required=True)
-        cls.addProperty('title',                basestring, required=True)
-        cls.addProperty('subtitle',             basestring)
-        cls.addProperty('category',             basestring, required=True)
-        cls.addProperty('distance',             float)
-
-    def importEntity(self, entity, distance=None):
-        self.search_id          = entity.search_id
-        self.title              = entity.title
-        self.subtitle           = entity.subtitle
-        self.category           = entity.category
-
-        if isinstance(distance, float) and distance >= 0:
-            self.distance       = distance
-            
-        assert self.search_id is not None
-
-        return self
-
 class HTTPEntityId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',        basestring, required=True)
+        cls.addProperty('entity_id',                    basestring, required=True)
 
 class HTTPEntityIdSearchId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',        basestring)
-        cls.addProperty('search_id',        basestring)
+        cls.addProperty('entity_id',                    basestring)
+        cls.addProperty('search_id',                    basestring)
+
+class HTTPEntityAutoSuggestForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                        basestring, required=True)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('coordinates',                  basestring)
+
+    def exportEntityAutoSuggestForm(self):
+        return EntityAutoSuggestForm().dataImport(self.dataExport(), overflow=True)
 
 class HTTPEntitySearch(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                basestring, required=True)
-        cls.addProperty('coordinates',      basestring)
-        cls.addProperty('category',         basestring)
-        cls.addProperty('subcategory',      basestring)
-        cls.addProperty('local',            bool)
-        cls.addProperty('page',             int)
+        cls.addProperty('q',                            basestring, required=True)
+        cls.addProperty('coordinates',                  basestring)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('local',                        bool)
 
     def __init__(self):
         Schema.__init__(self)
-        self.page = 0
 
     def exportEntitySearch(self):
-        entSearch = EntitySearch().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        if 'coordinates' in data:
+            del(data['coordinates'])
+        if 'category' in data and data['category'] is not None:
+            if data['category'] not in Entity.categories:
+                raise StampedInputError("Invalid category: %s" % data['category'])
+
+        entSearch = EntitySearch().dataImport(data, overflow=True)
         if self.coordinates is not None:
             coords = CoordinatesSchema().dataImport(_coordinatesFlatToDict(self.coordinates))
             entSearch.coordinates = coordinates 
@@ -1934,10 +2017,10 @@ class HTTPEntitySearch(Schema):
 class HTTPEntityNearby(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('coordinates',          basestring, required=True)
-        cls.addProperty('category',             basestring)
-        cls.addProperty('subcategory',          basestring)
-        cls.addProperty('page',                 int)
+        cls.addProperty('coordinates',                  basestring, required=True)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        cls.addProperty('page',                         int)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1956,10 +2039,10 @@ class HTTPEntityNearby(Schema):
 class HTTPEntitySuggested(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('coordinates',          basestring)
-        cls.addProperty('category',             basestring)
-        cls.addProperty('subcategory',          basestring)
-        cls.addProperty('limit',                int)
+        cls.addProperty('coordinates',                  basestring)
+        cls.addProperty('category',                     basestring)
+        cls.addProperty('subcategory',                  basestring)
+        cls.addProperty('limit',                        int)
 
     def exportEntitySuggested(self):
         data = self.dataExport()
@@ -1974,22 +2057,53 @@ class HTTPEntitySuggested(Schema):
         return entitySuggested
 
 
+
+class HTTPEntitySearchResultsItem(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('search_id',                    basestring, required=True)
+        cls.addProperty('title',                        basestring, required=True)
+        cls.addProperty('subtitle',                     basestring)
+        cls.addProperty('category',                     basestring, required=True)
+        cls.addProperty('distance',                     float)
+
+    def importEntity(self, entity, distance=None):
+        self.search_id          = entity.search_id
+        self.title              = entity.title
+        self.subtitle           = entity.subtitle
+        self.category           = entity.category
+
+        if isinstance(distance, float) and distance >= 0:
+            self.distance       = distance
+            
+        assert self.search_id is not None
+
+        return self
+
+class HTTPEntitySearchResultsGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('entities',           HTTPEntitySearchResultsItem)
+        cls.addProperty('title',                        basestring)
+        cls.addProperty('subtitle',                     basestring)
+        cls.addProperty('image_url',                    basestring)
+
 class HTTPEntityActionEndpoint(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('status',               basestring)
-        cls.addProperty('message',              basestring)
-        cls.addProperty('redirect',             basestring)
+        cls.addProperty('status',                       basestring)
+        cls.addProperty('message',                      basestring)
+        cls.addProperty('redirect',                     basestring)
 
 class HTTPActionComplete(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('action',               basestring)
-        cls.addProperty('source',               basestring)
-        cls.addProperty('source_id',            basestring)
-        cls.addProperty('entity_id',            basestring)
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('stamp_id',             basestring)
+        cls.addProperty('action',                       basestring)
+        cls.addProperty('source',                       basestring)
+        cls.addProperty('source_id',                    basestring)
+        cls.addProperty('entity_id',                    basestring)
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('stamp_id',                     basestring)
 
 
 # ###### #
@@ -2024,7 +2138,7 @@ class HTTPTimeSlice(Schema):
         slc.dataImport(data)
 
         if self.before is not None:
-            slc.before          = datetime.utcfromtimestamp(int(before))
+            slc.before          = datetime.utcfromtimestamp(int(self.before))
 
         if self.viewport is not None:
             viewportData        = self.viewport.split(',')
@@ -2242,12 +2356,6 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
             except Exception:
                 raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
 
-#        coordinates = getattr(data, 'coordinates', None)
-#        if coordinates is not None:
-#            data['coordinates'] = _coordinatesFlatToDict(coordinates)
-#            if data['coordinates'] is None:
-#                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
-
         return data
 
     def exportGenericCollectionSlice(self):
@@ -2296,6 +2404,47 @@ class HTTPStampedBySlice(HTTPGenericCollectionSlice):
     def exportGenericCollectionSlice(self):
         data = self._convertData(self.dataExport())
         return GenericCollectionSlice().dataImport(data, overflow=True)
+
+
+
+class HTTPGuideRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
+        cls.addProperty('section',                      basestring, required=True)
+        cls.addProperty('subsection',                   basestring)
+        cls.addProperty('viewport',                     basestring) # lat0,lng0,lat1,lng1
+        cls.addProperty('scope',                        basestring)
+
+    def exportGuideRequest(self):
+        return GuideRequest().dataImport(self.dataExport(), overflow=True)
+
+        data = self.dataExport()
+        if 'viewport' in data:
+            del(data['viewport'])
+        guideRequest = GuideRequest()
+        guideRequest.dataImport(data)
+
+        if self.viewport is not None:
+            viewportData            = self.viewport.split(',')
+            
+            coordinates0            = CoordinatesSchema()
+            coordinates0.lat        = viewportData[0]
+            coordinates0.lng        = viewportData[1]
+            
+            coordinates1            = CoordinatesSchema()
+            coordinates1.lat        = viewportData[2]
+            coordinates1.lng        = viewportData[3]
+
+            viewport                = ViewportSchema()
+            viewport.upperLeft      = coordinates0
+            viewport.lowerRight     = coordinates1
+
+            guideRequest.viewport   = viewport 
+
+        return guideRequest
+
 
 
 # ######## #
@@ -2365,8 +2514,19 @@ class HTTPStampMini(Schema):
         cls.addProperty('created',              basestring)
         cls.addProperty('modified',             basestring)
         cls.addProperty('stamped',              basestring)
+        
         cls.addProperty('num_comments',         int)
         cls.addProperty('num_likes',            int)
+        cls.addProperty('num_todos',            int)
+        cls.addProperty('num_credits',          int)
+
+        cls.addProperty('is_liked',             bool)
+        cls.addProperty('is_fav',               bool)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.is_liked           = False
+        self.is_fav             = False
 
 class HTTPStampPreviews(Schema):
     @classmethod
@@ -2408,29 +2568,25 @@ class HTTPStamp(Schema):
     def importStampMini(self, stamp):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
-        mentions                = getattr(stamp, 'mentions', [])
         credit                  = getattr(stamp, 'credit', [])
-        contents                = getattr(stamp, 'contents', [])
 
-        previews                = getattr(stamp, 'previews', {})
-        comments                = getattr(previews, 'comments', [])
-        likes                   = getattr(previews, 'likes', [])
-        todos                   = getattr(previews, 'todos', [])
-        credits                 = getattr(previews, 'credits', [])
+        data = stamp.dataExport()
+        data['contents'] = []
+        if 'previews' in data:
+            del(data['previews'])
+        self.dataImport(data, overflow=True)
 
-        if credit is not None and len(credit) > 0:
-            self.credit = credit
-
-        self.entity = HTTPEntityMini().importEntity(entity)
-
-        self.dataImport(stamp.dataExport(), overflow=True)
         self.user               = HTTPUserMini().importUserMini(stamp.user)
+        self.entity             = HTTPEntityMini().importEntity(entity)
         self.entity.coordinates = _coordinatesDictToFlat(coordinates)
         self.created            = stamp.timestamp.stamped
         self.modified           = stamp.timestamp.modified
         self.stamped            = stamp.timestamp.stamped
-        self.contents           = []
 
+        if credit is not None and len(credit) > 0:
+            self.credit = credit
+
+        contents = []
         for content in stamp.contents:
             item                    = HTTPStampContent()
             item.blurb              = content.blurb
@@ -2468,7 +2624,8 @@ class HTTPStamp(Schema):
                 item.images = newImages
 
             # Insert contents in descending chronological order
-            self.contents.insert(0, item)
+            contents.insert(0, item)
+        self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)
@@ -2589,15 +2746,8 @@ class HTTPStampedByGroup(Schema):
             self.count = group.count 
 
         if group.stamps is not None:
-            httpStamps = []
-            for stamp in group.stamps:
-                httpStamps.append(HTTPStamp().importStamp(stamp))
+            self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
 
-        return self
-
-    def importStampedByGroup(self, stampedbygroup):
-        self.count = stampedbygroup.count
-        self.stamps = [HTTPStamp().importStamp(s) for s in stampedbygroup.stamps]
         return self
 
 class HTTPStampedBy(Schema):
@@ -2617,15 +2767,6 @@ class HTTPStampedBy(Schema):
         if stampedBy.all is not None:
             self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
 
-        return self
-
-    def importStampedBy(self, stampedby):
-        self.friends = HTTPStampedByGroup()
-        self.fof     = HTTPStampedByGroup()
-        self.all     = HTTPStampedByGroup()
-        self.friends.importStampedByGroup(stampedby.friends)
-        self.fof.importStampedByGroup(stampedby.fof)
-        self.all.importStampedByGroup(stampedby.all)
         return self
 
 class HTTPStampImage(Schema):
@@ -2652,38 +2793,55 @@ class HTTPCommentSlice(HTTPGenericSlice):
         cls.addProperty('stamp_id',             basestring, required=True)
 
 
-# ######## #
-# Favorite #
-# ######## #
+# #### #
+# Todo #
+# #### #
 
-class HTTPFavorite(Schema):
+class HTTPTodoSource(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('favorite_id',          basestring, required=True)
-        cls.addProperty('user_id',              basestring, required=True)
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        cls.addNestedProperty('stamp',          HTTPStamp)
+        cls.addPropertyList('stamp_ids',        basestring)
+
+class HTTPTodo(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('todo_id',              basestring, required=True)
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addNestedProperty('source',         HTTPTodoSource, required=True)
+        #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
+        #cls.addNestedProperty('stamp',          HTTPStamp)
+        cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
+        cls.addNestedProperty('previews',       HTTPStampPreviews)
         cls.addProperty('created',              basestring)
         cls.addProperty('complete',             bool)
 
-    def importFavorite(self, fav):
-        self.favorite_id             = fav.favorite_id
-        self.user_id                 = fav.user.user_id
-        self.entity                  = HTTPEntityMini().importEntity(fav.entity)
-        self.created                 = fav.timestamp.created
-        self.complete                = fav.complete
+    def importTodo(self, todo):
+        self.todo_id                = todo.todo_id
+        self.user_id                = todo.user.user_id
+        self.source                 = HTTPTodoSource()
+        self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
+        if todo.stamp is not None:
+            self.source.stamp_ids   = [ todo.stamp.stamp_id ]
+        if todo.previews is not None and todo.previews.todos is not None:
+            self.previews           = HTTPStampPreviews()
+            self.previews.todos     = [HTTPUser().importUser(u) for u in todo.previews.todos]
+        self.created                = todo.timestamp.created
+        self.complete               = todo.complete
 
-        if fav.stamp is not None:
-            self.stamp              = HTTPStamp().dataImport(fav.stamp.dataExport())
+        if todo.stamp is not None:
+            self.stamp_id              = todo.stamp.stamp_id#= HTTPStamp().importStampMini(todo.stamp)
 
         return self
 
-class HTTPFavoriteNew(Schema):
+class HTTPTodoNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('entity_id',            basestring)
         cls.addProperty('search_id',            basestring)
         cls.addProperty('stamp_id',             basestring)
+
+
 
 
 # ######## #

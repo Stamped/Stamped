@@ -35,6 +35,7 @@
 #import "STConsumptionSlice.h"
 #import "STActivityCount.h"
 #import "STLoginResponse.h"
+#import "STEntityAutoCompleteResult.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -101,8 +102,8 @@ typedef enum {
 - (STCancellation*)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
                                        andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
-- (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
-                         andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
+- (STCancellation*)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
+                                    andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 
@@ -145,6 +146,11 @@ typedef enum {
 - (STCancellation*)loginWithFacebookID:(NSString*)userID 
                                  token:(NSString*)token
                            andCallback:(void(^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
+                                         coordinates:(NSString*)coordinates
+                                            category:(NSString*)category
+                                         andCallback:(void(^)(NSArray<STEntityAutoCompleteResult>* results, NSError* error, STCancellation* cancellation))block;
 
 - (void)isTododWithEntityID:(NSString*)entityID andCallback:(void(^)(BOOL,NSError*))block;
 

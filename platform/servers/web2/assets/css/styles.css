@@ -61,6 +61,14 @@ a:visited {
 a:hover {
   text-decoration: underline;
 }
+ol,
+ul {
+  text-decoration: none;
+  list-style: none;
+  text-indent: 0;
+  padding: 0;
+  margin: 0;
+}
 .replaced {
   display: block;
   text-indent: -9999em;
@@ -212,7 +220,7 @@ header .header-body a.button {
 .user-logo-large {
   position: absolute;
   display: block;
-  top: -75px;
+  top: -78px;
   left: -125px;
   width: 195px;
   height: 195px;
@@ -242,10 +250,14 @@ header .header-body a.button {
   display: block;
   height: 16px;
 }
+#main-page-content {
+  position: relative;
+  top: 86px;
+  left: 0;
+}
 .profile-header-wrapper {
   position: relative;
   width: 100%;
-  padding: 5em 0 0;
   position: relative;
   top: 0;
   left: 0;
@@ -277,7 +289,7 @@ header .header-body a.button {
   left: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg {
-  background: url(/assets/img/profile_cover_default.png) repeat;
+  background: url(/assets/img/profile_cover_default.1.png) repeat;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -285,7 +297,11 @@ header .header-body a.button {
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large {
+  margin: 0 24px 0 0;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large {
   margin: 0 24px 0 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth p {
@@ -348,6 +364,22 @@ header .header-body a.button {
   -ms-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-large-ish {
+  float: left;
+  display: block;
+  width: 102px;
+  height: 102px;
+}
+.profile-image-large-ish img {
+  width: 96px;
+  height: 96px;
+  border: 3px solid #ffffff;
+  -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
 }
 .profile-image-medium {
   float: left;
@@ -666,10 +698,14 @@ header .header-body a.button {
 /* **************************************************************************
                             STAMP CATEGORY NAV BAR
    ************************************************************************** */
+#main-content {
+  visibility: hidden;
+}
 #stamp-category-nav-bar {
   position: fixed;
   display: block;
   z-index: 1000;
+  visibility: hidden;
   background: #262626;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
@@ -684,18 +720,15 @@ header .header-body a.button {
   box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   top: 50%;
   right: 40px;
-  -webkit-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-  -moz-transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
-  transition: top 0.8s ease-in-out, left 0.8s ease-in-out;
+  /*@params:  0.8s ease-in-out;
+    @targets: top @params, left @params;
+    
+    -webkit-transition: @targets;
+    -moz-transition: @targets;
+    transition: @targets;*/
+
   margin: -180px 0 0;
   padding: 0;
-}
-#stamp-category-nav-bar ol {
-  text-decoration: none;
-  list-style: none;
-  text-indent: 0;
-  padding: 0;
-  margin: 0;
 }
 #stamp-category-nav-bar ol li {
   position: relative;

@@ -9,6 +9,7 @@ import Globals
 import copy
 import pprint
 import logs
+import utils
 
 class SchemaException(Exception):
     pass
@@ -56,7 +57,6 @@ class Schema(object):
 
     @classmethod
     def _postSetSchema(cls):
-        cls._duplicates        = set()
         cls._required_fields   = set()
 
         properties = cls._propertyInfo
@@ -65,8 +65,6 @@ class Schema(object):
             t = info[_typeKey]
             if info['required']:
                 cls._required_fields.add(name)
-        for dup in cls._duplicates:
-            del cls._duplicates[dup]
 
     @classmethod
     def setSchema(cls):
@@ -123,8 +121,6 @@ class Schema(object):
                     return self.__properties[name]
                 else:
                     return None
-        elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate attribute used')
         else:
             return object.__getattribute__(self, name)
 
@@ -173,9 +169,10 @@ class Schema(object):
                         if name not in self.__properties or self.__properties[name] is None:
                             self.__required_count += 1
                     self.__properties[name] = value
-        elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate attribute used')
         else:
+            if not name.startswith('_Schema__') and not name.startswith('__'):
+                logs.warning('Setting non-schema field "%s"' % (name))
+                raise AttributeError('SETTING NON-SCHEMA FIELD "%s"' % name)
             object.__setattr__(self, name, value)
 
     def __delattr__(self, name):
@@ -186,8 +183,6 @@ class Schema(object):
                     if name in self.__properties and self.__properties[name] is not None:
                         self.__required_count -= 1
                 del self.__properties[name]
-        elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate attribute used')
         else:
             object.__delattr__(self, name)
 
@@ -232,6 +227,10 @@ class Schema(object):
         return properties
 
     def dataImport(self, properties, **kwargs):
+        overflow = False
+        if 'overflow' in kwargs and kwargs['overflow'] == True:
+            overflow = True
+            
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
         try:
@@ -247,7 +246,7 @@ class Schema(object):
                             nested = self.__properties[k]
                         else:
                             nested = p[_kindKey]()
-                        nested.dataImport(v)
+                        nested.dataImport(v, **kwargs)
                         self.__setattr__(k, nested)
 
                     elif p[_typeKey] == _nestedPropertyListKey and v is not None:
@@ -257,9 +256,10 @@ class Schema(object):
                         self.__setattr__(k, nestedPropList)
                     else:
                         self.__setattr__(k, v)
-                except KeyError:
-                    if kwargs.pop('overflow', False):
-                        continue
+                except (AttributeError, KeyError):
+                    if not overflow:
+                        logs.warning("AttributeError: %s (%s)" % (k, self.__class__.__name__))
+                        raise
         except Exception as e:
             logs.warning(e)
             raise

@@ -15,7 +15,7 @@
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/colorbox.css">
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/libs/colorbox.css">-->
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.fancybox.css?v=2.0.6">
     
     <style>
@@ -32,16 +32,14 @@
                 <div class="profile-header-body">
                     <div class="innerbg"></div>
                     <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        <div class="profile-image-large floatleft">
-                            <!-- TODO: link to lighthouse with full-resolution profile image -->
-                            <img src="{{user.image_url_144}}" />
-                        </div>
+                        {% handlebars_template "profile-image-large" user %}
                         
                         <div class="floatleft profile-section0">
                             <p>
                                 <a class='pronounced-title large' href="/{{user.screen_name}}">{{user.name}}</a>
                                 <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
+                            
                             <p>
                                 {{user.bio}}
                             </p>
@@ -62,7 +60,7 @@
                                     <p>following</p>
                                     
                                     {% with users=friends %}
-                                        {% mustache_template "user-gallery" %}
+                                        {% handlebars_template "user-gallery" %}
                                     {% endwith %}
                                 </div>
                                 
@@ -71,7 +69,7 @@
                                     <p>followers</p>
                                     
                                     {% with users=followers %}
-                                        {% mustache_template "user-gallery" %}
+                                        {% handlebars_template "user-gallery" %}
                                     {% endwith %}
                                 </div>
                             </div>
@@ -160,7 +158,7 @@
     <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
     <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>
+    <!--<script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>-->
     <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.pack.js?v=2.0.6"></script>
     <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
     
@@ -168,19 +166,6 @@
     <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
     <script src="{{ STATIC_URL }}js/client.js"></script>
     <script src="{{ STATIC_URL }}js/profile.js"></script>
-    
-    <script>
-        /*$(document).ready(function() {
-            $('.innerbg').css({
-                position : 'absolute', 
-                width    : '100%', 
-                height   : '100%', 
-                opacity  : '0.45', 
-                background  : 'url("https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=png&maptype=roadmap&size=400x200{% if main_stamp_cluster.markers %}{% for marker in main_stamp_cluster.markers %}&markers=%7C{{marker}}{% endfor %}{% endif %}") no-repeat fixed left -75px', 
-                'background-size': '100%', 
-            }).addClass('blur_8');
-        });*/
-    </script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

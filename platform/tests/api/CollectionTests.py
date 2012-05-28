@@ -148,11 +148,11 @@ class StampedAPICollectionsLikes(StampedAPICollectionTest):
         
         self.async(lambda: self.handleGET(path, data), _validate_result2)
     
-class StampedAPICollectionsFavs(StampedAPICollectionTest):
-    def test_fav(self):
-        favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
+class StampedAPICollectionsTodos(StampedAPICollectionTest):
+    def test_todo(self):
+        todo = self.createTodo(self.tokenB, self.entityA['entity_id'])
         
-        # User B should have "is_fav=True" 
+        # User B should have "is_todo=True"
         path = "stamps/collection.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
@@ -165,11 +165,11 @@ class StampedAPICollectionsFavs(StampedAPICollectionTest):
             for stamp in result:
                 if stamp['stamp_id'] == self.stampA['stamp_id']:
                     self.assertTrue(stamp['contents'][-1]['blurb'] == self.stampA['contents'][-1]['blurb'])
-                    self.assertTrue(stamp['is_fav'])
+                    self.assertTrue(stamp['is_todo'])
         
         self.async(lambda: self.handleGET(path, data), _validate_result)
         
-        # User A should not have "is_fav"
+        # User A should not have "is_todo"
         path = "stamps/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
@@ -182,10 +182,10 @@ class StampedAPICollectionsFavs(StampedAPICollectionTest):
             for stamp in result:
                 if stamp['stamp_id'] == self.stampA['stamp_id']:
                     self.assertTrue(stamp['contents'][-1]['blurb'] == self.stampA['contents'][-1]['blurb'])
-                    self.assertTrue(stamp['is_fav'] == False)
+                    self.assertTrue(stamp['is_todo'] == False)
         
         self.async(lambda: self.handleGET(path, data), _validate_result2)
-        self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
+        self.deleteTodo(self.tokenB, self.entityA['entity_id'])
 
 class StampedAPICollectionsFriends(StampedAPICollectionTest):
     def test_friends_of_friends(self):

@@ -14,7 +14,7 @@
 
 @property (nonatomic, readwrite, copy) NSString* todoID;
 @property (nonatomic, readwrite, copy) NSString* userID;
-@property (nonatomic, readwrite, copy) NSString* created;
+@property (nonatomic, readwrite, copy) NSDate* created;
 @property (nonatomic, readwrite, copy) NSNumber* complete;
 
 

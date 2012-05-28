@@ -124,6 +124,7 @@
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
+    [self.stamps cancel];
     [super viewDidDisappear:animated];
 }
 

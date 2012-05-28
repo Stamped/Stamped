@@ -279,6 +279,7 @@ def checkClient(request):
         
         return client_id
     except Exception, e:
+        logs.info(e)
         raise StampedAuthError("access_denied", "Invalid client credentials")
 
 def optionalOAuth(request):

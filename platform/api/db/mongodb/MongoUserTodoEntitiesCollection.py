@@ -9,21 +9,21 @@ import Globals
 
 from AMongoCollection import AMongoCollection
 
-class MongoUserFavEntitiesCollection(AMongoCollection):
-    
+class MongoUserTodoEntitiesCollection(AMongoCollection):
+
     def __init__(self):
         AMongoCollection.__init__(self, collection='userfaventities')
-    
+
     ### PUBLIC
-    
-    def addUserFavoriteEntity(self, userId, entityId):
+
+    def addUserTodoEntity(self, userId, entityId):
         self._createRelationship(keyId=userId, refId=entityId)
         return True
-    
-    def removeUserFavoriteEntity(self, userId, entityId):
+
+    def removeUserTodoEntity(self, userId, entityId):
         return self._removeRelationship(keyId=userId, refId=entityId)
-    
-    def getUserFavoriteEntities(self, userId):
+
+    def getUserTodoEntities(self, userId):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId)
 

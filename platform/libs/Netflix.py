@@ -39,8 +39,8 @@ class Netflix(object):
         self.__secret=secret
         self.__consumer = oauth.OAuthConsumer(self.__key, self.__secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-        self.__cpsLimiter = RateLimiter(cps=4, max_wait=15)          # 4 requests per second for all requests
-        self.__cpdLimiter = RateLimiter(cpd=5000)
+        self.__cpsLimiter = RateLimiter(cps=10, max_wait=15)          # 4 requests per second for all requests
+        self.__cpdLimiter = RateLimiter(cpd=25000)
 
         # the blacklist contains a dict of users and their 401/403 count. When a threshold is reached, all requests
         # from that user will be ignored until the blacklist is cleared
@@ -93,7 +93,7 @@ class Netflix(object):
             else:
                 url = "http://%s/users/%s/%s" % (HOST, user_id, service)
         parameters['output'] = 'json'
-        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so nevermind it
+        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so never mind it
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
             parameters=parameters,
@@ -126,10 +126,18 @@ class Netflix(object):
         if response.status < 300:
             return json.loads(response.read())
         else:
-            failData = json.loads(response.read())['status']
+            responseData = response.read()
+            failData = json.loads(responseData)['status']
             logs.info('Failed with status code %d' % response.status)
-            raise StampedHTTPError('Netflix returned a failure response.  status: %d  sub_code %d.  %s' %
-                           (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code'])
+            try:
+                msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
+                     (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code']
+                status_code = failData['status_code']
+            except:
+                msg = 'Netflix returned a failure response: %s' % responseData
+                status_code = response.status
+            finally:
+                raise StampedHTTPError(msg, status_code)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
@@ -156,6 +164,23 @@ class Netflix(object):
             if item[key].find(search) != -1:
                 return item[returnKey]
         return None
+
+    def autocomplete(self, term):
+        results = self.__get(
+            service         = 'catalog/titles/autocomplete',
+            term            = term,
+        )
+        print (results)
+        autocomplete = results.pop('autocomplete', None)
+        if autocomplete is None or 'autocomplete_item' not in self.__asList(autocomplete)[0]:
+            return []
+
+        print autocomplete
+        completions = []
+        for title in self.__asList(self.__asList(autocomplete)[0]['autocomplete_item']):
+            completions.append( { 'completion' : title['title']['short'] } )
+        return completions
+
 
     def searchTitles(self, title, start=0, count=100):
         """
@@ -341,6 +366,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
 
+    if 'autocomplete' in methods:         pprint( netflix.autocomplete(title) )
     if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
     if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
@@ -351,8 +377,8 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getTitleDetails'
-    params['title'] = 'ghostbusters'
+    methods = 'autocomplete'
+    params['title'] = 'ghostbuts'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

@@ -137,7 +137,7 @@ class AStampedAPITestCase(AStampedTestCase):
     def assertValidKey(self, key, length=24):
         self.assertIsInstance(key, basestring)
         self.assertLength(key, length)
-    
+
     ### HELPER FUNCTIONS
     def createAccount(self, name='TestUser', password="12345", **kwargs):
         global _test_case, _accounts
@@ -171,6 +171,8 @@ class AStampedAPITestCase(AStampedTestCase):
         
         return user, token
 
+    #TODO: Consoldiate the facebook and twitter account creation methods? Consolidate all creation methods?
+
     def createFacebookAccount(self, fb_user_token, name='TestUser', **kwargs):
         global _test_case, _accounts
         _test_case = self
@@ -178,13 +180,13 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/create_using_facebook.json"
+        path = "account/create/facebook.json"
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
             "name"              : name,
             "screen_name"       : name,
-            "facebook_token"    : fb_user_token
+            "facebook_token"    : fb_user_token,
         }
         response = self.handlePOST(path, data)
         self.assertIn('user', response)
@@ -200,6 +202,62 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertValidKey(token['refresh_token'], 43)
 
         return user, token
+
+    def createTwitterAccount(self, tw_user_token, tw_user_secret, name='TestUser', **kwargs):
+        global _test_case, _accounts
+        _test_case = self
+
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "account/create/twitter.json"
+        data = {
+            "client_id"         : c_id,
+            "client_secret"     : c_secret,
+            "name"              : name,
+            "screen_name"       : name,
+            "user_token"        : tw_user_token,
+            "user_secret"       : tw_user_secret,
+        }
+        response = self.handlePOST(path, data)
+        self.assertIn('user', response)
+        self.assertIn('token', response)
+
+        user  = response['user']
+        token = response['token']
+
+        _accounts.append((user, token))
+
+        self.assertValidKey(user['user_id'])
+        self.assertValidKey(token['access_token'], 22)
+        self.assertValidKey(token['refresh_token'], 43)
+
+        return user, token
+
+    def loginWithFacebook(self, fb_user_token, **kwargs):
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "oauth2/login/facebook.json"
+        data = {
+            "client_id":        c_id,
+            "client_secret":    c_secret,
+            "fb_token":         fb_user_token,
+            }
+        return self.handlePOST(path, data)
+
+    def loginWithTwitter(self, tw_user_token, tw_user_secret, **kwargs):
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "oauth2/login/twitter.json"
+        data = {
+            "client_id":      c_id,
+            "client_secret":  c_secret,
+            "user_token":     tw_user_token,
+            "user_secret":    tw_user_secret,
+            }
+        return self.handlePOST(path, data)
 
     def deleteAccount(self, token):
         path = "account/remove.json"
@@ -228,6 +286,15 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
+
+    def addLinkedAccount(self, token, data=None):
+        """
+        params should include properties to fill HTTPLinkedAccounts object
+        """
+        path = "account/linked_accounts.json"
+        if "oauth_token" not in data:
+            data['oauth_token'] = token['access_token']
+        return self.handlePOST(path, data)
     
     def createEntity(self, token, data=None):
         path = "entities/create.json"
@@ -328,8 +395,8 @@ class AStampedAPITestCase(AStampedTestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
     
-    def createFavorite(self, token, entityId, stampId=None):
-        path = "favorites/create.json"
+    def createTodo(self, token, entityId, stampId=None):
+        path = "todos/create.json"
         data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId,
@@ -338,13 +405,13 @@ class AStampedAPITestCase(AStampedTestCase):
         if stampId != None:
             data['stamp_id'] = stampId
         
-        favorite = self.handlePOST(path, data)
-        self.assertValidKey(favorite['favorite_id'])
+        todo = self.handlePOST(path, data)
+        self.assertValidKey(todo['todo_id'])
         
-        return favorite
+        return todo
     
-    def deleteFavorite(self, token, entityId):
-        path = "favorites/remove.json"
+    def deleteTodo(self, token, entityId):
+        path = "todos/remove.json"
         data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId

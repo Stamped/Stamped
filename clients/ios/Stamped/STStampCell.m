@@ -269,7 +269,7 @@
 + (CGFloat)heightForStamp:(id<STStamp>)stamp {
     CGFloat defaultHeight = 90.0f;
     if (stamp) {
-         NSInteger count = stamp.previews.credits.count + stamp.previews.likes.count + stamp.previews.todos.count + stamp.previews.comments.count;
+        NSInteger count = stamp.previews.credits.count + stamp.previews.likes.count + stamp.previews.todos.count; //stamp.previews.comments.count;
         if (count > 0) {
             defaultHeight += 45.0f;
         }

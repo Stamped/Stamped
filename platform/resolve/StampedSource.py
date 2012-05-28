@@ -908,7 +908,7 @@ class StampedSource(GenericSource):
             'googleplaces'      : 'sources.googleplaces_id', 
             'itunes'            : 'sources.itunes_id', 
             'netflix'           : 'sources.netflix_id',
-            'thetvdb'           : 'sources.thetvdb.thetvdb_id', 
+            'thetvdb'           : 'sources.thetvdb_id', 
         }
         
         try:

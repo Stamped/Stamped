@@ -119,7 +119,7 @@ class MongoFriendshipCollection(AFriendshipDB):
 
         visitUser(userId, 1)
 
-        result = []
+        result = set([])
 
         if distance in friends:
             result = friends[distance]

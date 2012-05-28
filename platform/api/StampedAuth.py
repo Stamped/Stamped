@@ -19,6 +19,7 @@ from AAuthRefreshTokenDB    import AAuthRefreshTokenDB
 from AAuthEmailAlertsDB     import AAuthEmailAlertsDB
 
 from libs.Facebook          import *
+from libs.Twitter           import *
 
 class StampedAuth(AStampedAuth):
     """
@@ -36,6 +37,14 @@ class StampedAuth(AStampedAuth):
     @property
     def isValid(self):
         return self._validated
+
+    @lazyProperty
+    def _facebook(self):
+        return globalFacebook()
+
+    @lazyProperty
+    def _twitter(self):
+        return globalTwitter()
     
     # ####### #
     # Clients #
@@ -97,11 +106,16 @@ class StampedAuth(AStampedAuth):
             else:
                 raise
 
+            if account.auth_service != 'stamped':
+                msg = "Attempting to do a stamped login for an account that doesn't use stamped for auth'"
+                logs.warning(msg)
+                raise StampedHTTPError("invalid_credentials", 401, msg)
+
             if not auth.comparePasswordToStored(password, account.password):
                 raise
 
             logs.info("Login successful")
-            
+
             """
             IMPORTANT!!!!!
 
@@ -125,24 +139,32 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
-    def verifyFacebookUserCredentials(self, clientId, userIdentifier, fb_token):
-        # Login via screen name
-        if utils.validate_screen_name(userIdentifier):
-            account = self._accountDB.getAccountByScreenName(userIdentifier)
-        else:
-            raise
+# TODO: Consolidate facebook credentials verifications with twitter?
+
+    def verifyFacebookUserCredentials(self, clientId, fb_token):
+        try:
+            fb_user = self._facebook.getUserInfo(fb_token)
+        except StampedInputError as e:
+            raise StampedHTTPError('facebook_login_failed', 400, e.message)
+
+        # TODO: remove repetitious code here (same as api.getAccountByFacebookId()
+        accounts = self._accountDB.getAccountsByFacebookId(fb_user['id'])
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % fb_user['id'])
+        elif len(accounts) > 1:
+            logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
+            raise StampedIllegalActionError("More than one account exists using facebook_id: %s" % fb_user['id'])
+        account = accounts[0]
+
+        if account.auth_service != 'facebook':
+            msg = "Attempting to do a facebook login for an account that doesn't use facebook auth'"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
 
         if account.linked_accounts.facebook is None or account.linked_accounts.facebook.facebook_id is None:
             msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
-
-        facebook = globalFacebook()
-
-        try:
-            fb_user = facebook.getUserInfo(fb_token)
-        except StampedInputError as e:
-            raise StampedHTTPError('facebook_login_failed', 400, e.message)
 
         if fb_user['id'] != account.linked_accounts.facebook.facebook_id:
             msg = "Invalid credentials: Facebook id does not match Stamped user"
@@ -169,6 +191,59 @@ class StampedAuth(AStampedAuth):
         logs.info("Token created")
 
         return account, token
+
+    def verifyTwitterUserCredentials(self, clientId, user_token, user_secret):
+        try:
+            tw_user = self._twitter.verifyCredentials(user_token, user_secret)
+        except StampedInputError as e:
+            raise StampedHTTPError('twitter_login_failed', 400, e.message)
+
+        # TODO: remove repetitious code here (same as api.getAccountByTwitterId()
+        accounts = self._accountDB.getAccountsByTwitterId(tw_user['id'])
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with twitter_id: %s" % tw_user['id'])
+        elif len(accounts) > 1:
+            logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
+            raise StampedIllegalActionError("More than one account exists using twitter_id: %s" % tw_user['id'])
+        account = accounts[0]
+
+        if account.auth_service != 'twitter':
+            msg = "Attempting to do a twitter login for an account that doesn't use twitter auth'"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        if account.linked_accounts.twitter is None or account.linked_accounts.twitter.twitter_id is None:
+            msg = "Invalid credentials: Attempting to login via twitter with an account that has no twitter linked account"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        if tw_user['id'] != account.linked_accounts.twitter.twitter_id:
+            msg = "Invalid credentials: twitter id does not match Stamped user"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        logs.info("Login successful")
+
+        """
+        IMPORTANT!!!!!
+
+        Right now we're returning a refresh token upon login. This will
+        have to change ultimately, but it's an okay assumption for now
+        that every login will be from the iPhone. Once that changes we may
+        have to modify this.
+
+        Also, we'll ultimately need a way to deprecate unused refresh
+        tokens. Not sure how we'll implement that yet....
+        """
+
+        ### Generate Refresh Token & Access Token
+        token = self.addRefreshToken(clientId, account.user_id)
+
+        logs.info("Token created")
+
+        return account, token
+
+
     
     def verifyPassword(self, userId, password):
         try:

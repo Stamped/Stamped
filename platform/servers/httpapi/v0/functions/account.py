@@ -33,43 +33,31 @@ def create(request, client_id, http_schema, schema, **kwargs):
     return transformOutput(output)
 
 @handleHTTPRequest(requires_auth=False,
-                   #requires_client=True,
+                   requires_client=True,
                    http_schema=HTTPFacebookAccountNew,
+                   conversion=HTTPFacebookAccountNew.convertToFacebookAccountNew,
                    upload='profile_image')
 @require_http_methods(["POST"])
-def createUsingFacebook(request, client_id, http_schema, **kwargs):
-    # using hte HTTPFacebookAccountNew object, we'll manually create a new Account object
-    # first, grab all the information from Facebook using the passed in token
-    fb = globalFacebook()
-    try:
-        user = fb.getUserInfo(http_schema.facebook_token)
-        print user
-    except StampedInputError as e:
-        raise StampedHTTPError(e.message, 400)
-    except:
-        raise
-    # Check if the facebook account is already tied to a Stamped account
-    if stampedAPI.checkAccountWithFacebookId(user['id']):
-        raise StampedHTTPError("The facebook user id is already linked to an existing account", 400)
+def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
+    account = stampedAPI.addFacebookAccount(schema)
 
-    account = Account().dataImport(http_schema.dataExport(), overflow=True)
-    logs.info(account)
-    account.linked_accounts             = LinkedAccounts()
-    fb_acct                             = FacebookAccountSchema()
-    fb_acct.facebook_id                 = user['id']
-    fb_acct.facebook_name               = user['name']
-    fb_acct.facebook_screen_name        = user.pop('username', None)
-    account.linked_accounts.facebook    = fb_acct
-    account.email                       = user.pop('email', None)
-    account.bio                         = user.pop('bio', None)
-    account.website                     = user.pop('website', None)
+    user   = HTTPUser().importAccount(account)
+    logs.user(user.user_id)
 
-    if 'location' in user:
-        account.location                = user['location']['name']
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
 
-    profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+    return transformOutput(output)
 
-    account = stampedAPI.addAccount(account, profile_image)
+@handleHTTPRequest(requires_auth=False,
+    requires_client=True,
+    http_schema=HTTPTwitterAccountNew,
+    conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
+    upload='profile_image')
+@require_http_methods(["POST"])
+def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
+    account = stampedAPI.addTwitterAccount(schema)
+
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
 
@@ -82,7 +70,7 @@ def createUsingFacebook(request, client_id, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def remove(request, authUserId, **kwargs):
     account = stampedAPI.removeAccount(authUserId)
-    account = HTTPAccount().dataImport(account.dataExport())
+    account = HTTPAccount().importAccount(account)
     
     return transformOutput(account.dataExport())
 
@@ -294,6 +282,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
+    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:

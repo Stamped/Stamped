@@ -18,7 +18,7 @@
 @property (nonatomic, readonly, copy) NSString* userID;
 
 @property (nonatomic, readonly, retain) id<STTodoSource> source;
-@property (nonatomic, readonly, copy) NSString* created;
+@property (nonatomic, readonly, copy) NSDate* created;
 @property (nonatomic, readonly, copy) NSNumber* complete;
 @property (nonatomic, readonly, copy) NSString* stampID;
 
