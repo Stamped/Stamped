@@ -1818,13 +1818,13 @@ class HTTPEntity(Schema):
             if entity.previews.todos is not None:
                 users = []
                 for user in entity.previews.todos:
-                    users.append(HTTPUserMini.importUserMini(user))
+                    users.append(HTTPUserMini().importUserMini(user))
                 previews.todos = users
             
             if entity.previews.stamp_users is not None:
                 users = []
                 for user in entity.previews.stamp_users:
-                    users.append(HTTPUserMini.importUserMini(user))
+                    users.append(HTTPUserMini().importUserMini(user))
                 previews.stamp_users = users 
 
             self.previews = previews 
