@@ -2087,7 +2087,7 @@ class HTTPTimeSlice(Schema):
         slc.dataImport(data)
 
         if self.before is not None:
-            slc.before          = datetime.utcfromtimestamp(int(before))
+            slc.before          = datetime.utcfromtimestamp(int(self.before))
 
         if self.viewport is not None:
             viewportData        = self.viewport.split(',')
