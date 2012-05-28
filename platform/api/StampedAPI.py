@@ -3190,6 +3190,12 @@ class StampedAPI(AStampedAPI):
         result = []
         for item in items:
             entity = entityIds[item.entity_id]
+            previews = EntityPreviewsSchema()
+            if item.stamp_user_ids is not None:
+                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
+            if item.todo_user_ids is not None:
+                previews.todos = [ userIds[x] for x in item.todo_user_ids ]
+            entity.previews = previews 
             result.append(entity)
 
         return result

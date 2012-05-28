@@ -923,14 +923,19 @@ class HTTPEntityPlaylist(Schema):
         cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
         cls.addProperty('name',                 basestring)
 
+class HTTPEntityPreviewsSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('stamp_users',            HTTPUserMini)
+        cls.addNestedPropertyList('todos',                  HTTPUserMini)
+        cls.addNestedPropertyList('stamps',                 HTTPStampMini)
+
 class HTTPEntityStampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('friends',              int, required=True)
         cls.addProperty('friends_of_friends',   int)
         cls.addProperty('everyone',             int)
-
-# Related
 
 class HTTPEntityMini(Schema):
     @classmethod
@@ -1804,6 +1809,31 @@ class HTTPEntity(Schema):
         elif entity.images is not None and len(entity.images) > 0:
             _addImages(self, entity.images)
 
+        # Previews
+
+        if entity.previews is not None:
+            previews = HTTPEntityPreviewsSchema()
+
+            if entity.previews.todos is not None:
+                users = []
+                for user in entity.previews.todos:
+                    users.append(HTTPUserMini.importUserMini(user))
+                previews.todos = users
+            
+            if entity.previews.stamp_users is not None:
+                users = []
+                for user in entity.previews.stamp_users:
+                    users.append(HTTPUserMini.importUserMini(user))
+                previews.stamp_users = users 
+
+            if entity.previews.stamps is not None:
+                stamps = []
+                for stamp in entity.previews.stamps:
+                    stamps.append(HTTPStampMini.importStampMini(stamp))
+                previews.stamps = stamps
+
+            self.previews = previews 
+
         return self
 
     def importEntityMini(self, mini, client=None):
@@ -2304,12 +2334,6 @@ class HTTPGenericCollectionSlice(HTTPGenericSlice):
                 # TODO: validate viewport
             except Exception:
                 raise StampedInputError("invalid viewport parameter; format \"lat0,lng0,lat1,lng1\"")
-
-#        coordinates = getattr(data, 'coordinates', None)
-#        if coordinates is not None:
-#            data['coordinates'] = _coordinatesFlatToDict(coordinates)
-#            if data['coordinates'] is None:
-#                raise StampedInputError("invalid coordinates parameter; format \"lat,lng\"")
 
         return data
 

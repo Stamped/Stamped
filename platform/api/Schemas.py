@@ -565,6 +565,13 @@ class EntitySourcesSchema(Schema):
         cls.addProperty('googleplaces_source',             basestring)
         cls.addProperty('googleplaces_timestamp',          datetime)
 
+class EntityPreviewsSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('stamp_users',            UserMini)
+        cls.addNestedPropertyList('todos',                  UserMini)
+        cls.addNestedPropertyList('stamps',                 StampMini)
+
 class BasicEntityMini(Schema):
     @classmethod
     def setSchema(cls):
@@ -619,50 +626,44 @@ class BasicEntity(BasicEntityMini):
 
     @classmethod
     def setSchema(cls):
-        # cls.addProperty('schema_version',                   int, required=True)
-
-        # cls.addProperty('entity_id',                        basestring)
-        # cls.addProperty('title',                            basestring)
-        # cls.addProperty('kind',                             basestring, required=True)
         cls.addProperty('locale',                           basestring)
 
         cls.addProperty('desc',                             basestring)
         cls.addProperty('desc_source',                      basestring)
         cls.addProperty('desc_timestamp',                   datetime)
 
-        # cls.addPropertyList('types',                        basestring)
         cls.addProperty('types_source',                     basestring)
         cls.addProperty('types_timestamp',                  datetime)
 
-        # cls.addNestedPropertyList('images',                 ImageSchema)
         cls.addProperty('images_source',                    basestring)
         cls.addProperty('images_timestamp',                 datetime)
 
-        cls.addProperty('site',                            basestring)
-        cls.addProperty('site_source',                     basestring)
-        cls.addProperty('site_timestamp',                  datetime)
+        cls.addProperty('site',                             basestring)
+        cls.addProperty('site_source',                      basestring)
+        cls.addProperty('site_timestamp',                   datetime)
 
-        cls.addProperty('email',                           basestring)
-        cls.addProperty('email_source',                    basestring)
-        cls.addProperty('email_timestamp',                 datetime)
+        cls.addProperty('email',                            basestring)
+        cls.addProperty('email_source',                     basestring)
+        cls.addProperty('email_timestamp',                  datetime)
 
-        cls.addProperty('fax',                             basestring)
-        cls.addProperty('fax_source',                      basestring)
-        cls.addProperty('fax_timestamp',                   datetime)
+        cls.addProperty('fax',                              basestring)
+        cls.addProperty('fax_source',                       basestring)
+        cls.addProperty('fax_timestamp',                    datetime)
 
-        cls.addProperty('phone',                           basestring)
-        cls.addProperty('phone_source',                    basestring)
-        cls.addProperty('phone_timestamp',                 datetime)
+        cls.addProperty('phone',                            basestring)
+        cls.addProperty('phone_source',                     basestring)
+        cls.addProperty('phone_timestamp',                  datetime)
 
-        cls.addNestedProperty('stats',                     EntityStatsSchema)
-        # cls.addNestedProperty('sources',                    EntitySourcesSchema, required=True)
-        cls.addNestedProperty('timestamp',                 TimestampSchema, required=True)
+        cls.addNestedProperty('stats',                      EntityStatsSchema)
+        cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
+
+        cls.addNestedProperty('previews',                   EntityPreviewsSchema)
 
         # The last date/time we got some input indicating that this is currently popular.
-        cls.addProperty('last_popular',                    datetime)
+        cls.addProperty('last_popular',                     datetime)
         # Not to be exposed to users -- just some internal data letting us know what sort
         # of input we got indicating that this is currently popular.
-        cls.addProperty('last_popular_info',               basestring)
+        cls.addProperty('last_popular_info',                basestring)
 
     def __init__(self):
         BasicEntityMini.__init__(self)
