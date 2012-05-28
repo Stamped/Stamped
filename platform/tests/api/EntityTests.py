@@ -73,19 +73,29 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
         }
         result = self.handleGET(path, data)
         
-        self.assertEqual(result[0]['title'].lower(), self.entity['title'].lower())
+        self.assertEqual(result['entities'][0]['title'].lower(), self.entity['title'].lower())
 
 
 class StampedAPIEntitiesAutoSuggest(StampedAPIEntityTest):
-    def test_autosuggest(self):
+    def test_autosuggest_results(self):
         path = "entities/autosuggest.json"
         data = {
             "oauth_token": self.token['access_token'],
             'query'     : 'ghostbusters',
             'category'  : 'film',
-        }
+            }
         result = self.handleGET(path, data)
         self.assertGreater(len(result), 0)
+
+    def test_autosuggest_noresults(self):
+        path = "entities/autosuggest.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            'query'     : 'asdfoimwerplkj',
+            'category'  : 'film',
+            }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 0)
 
 
 # ########### #

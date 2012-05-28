@@ -328,12 +328,12 @@ class StampedAPIAccountAlertSettings(StampedAPIAccountTest):
         path = "account/alerts/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "email_alert_fav": True,
+            "email_alert_todo": True,
             "email_alert_reply": False
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) == 14)
-        self.assertTrue(result['email_alert_fav'])
+        self.assertTrue(result['email_alert_todo'])
 
     def test_set_token(self):
         path = "account/alerts/ios/update.json"

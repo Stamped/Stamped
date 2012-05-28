@@ -9,12 +9,12 @@ from threading import Lock
 from datetime import datetime
 
 from QL import MySQL
-from AFavoriteDB import AFavoriteDB
+from ATodoDB import ATodoDB
 from Favorite import Favorite
 from QLUserDB import MySQLUserDB
 from QLStampDB import MySQLStampDB
 
-class MySQLFavoriteDB(AFavoriteDB, MySQL):
+class MySQLTodoDB(ATodoDB, MySQL):
 
     # Denotes relationship between object and SQL table structure -- primary
     # use is to map fields between both structures.
@@ -26,7 +26,7 @@ class MySQLFavoriteDB(AFavoriteDB, MySQL):
         ]
     
     def __init__(self, setup=False):
-        AFavoriteDB.__init__(self, self.DESC)
+        ATodoDB.__init__(self, self.DESC)
         MySQL.__init__(self, mapping=self.MAPPING)
         
         self.db = self._getConnection()
@@ -36,7 +36,7 @@ class MySQLFavoriteDB(AFavoriteDB, MySQL):
         
     ### PUBLIC
     
-    def addFavorite(self, favorite):
+    def addTodo(self, favorite):
         favorite = self._mapObjToSQL(favorite)
         favorite['timestamp'] = datetime.now().isoformat()
         
@@ -49,7 +49,7 @@ class MySQLFavoriteDB(AFavoriteDB, MySQL):
 
         return self._transact(_addFavorite)
     
-    def getFavorite(self, stampID, userID):
+    def getTodo(self, stampID, userID):
         def _getFavorite(cursor):
             query = ("""SELECT * FROM favorites 
                 WHERE stamp_id = %s AND user_id = %s""" % 
@@ -69,8 +69,8 @@ class MySQLFavoriteDB(AFavoriteDB, MySQL):
         
         return favorite
     
-    def removeFavorite(self, stampID, userID):
-        def _removeFavorite(cursor):
+    def removeTodo(self, stampID, userID):
+        def _removeTodo(cursor):
             query = ("""DELETE FROM favorites 
                 WHERE stamp_id = %s AND user_id = %s""" % 
                 (stampID, userID))
@@ -78,11 +78,11 @@ class MySQLFavoriteDB(AFavoriteDB, MySQL):
             
             return (cursor.rowcount > 0)
         
-        return self._transact(_removeFavorite)
+        return self._transact(_removeTodo)
     
     ### PRIVATE
     
-    def _createFavoriteTable(self):
+    def _createTodoTable(self):
         def _createTable(cursor):
             query = """CREATE TABLE favorites ( 
                     stamp_id INT NOT NULL, 

@@ -8,25 +8,25 @@ __license__   = "TODO"
 import Globals
 from utils import abstract
 
-class AFavoriteDB(object):
+class ATodoDB(object):
     
     @abstract    
-    def addFavorite(self, favorite):
+    def addTodo(self, todo):
         pass
     
     @abstract
-    def getFavorite(self, userId, entityId):
+    def getTodo(self, userId, entityId):
         pass
     
     @abstract
-    def removeFavorite(self, userId, entityId):
+    def removeTodos(self, userId, entityId):
         pass
     
     @abstract
-    def completeFavorite(self, entityId, userId, complete=True):
+    def completeTodo(self, entityId, userId, complete=True):
         pass
     
     @abstract
-    def getFavorites(self, userId, **kwargs):
+    def getTodos(self, userId, **kwargs):
         pass
 

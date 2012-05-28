@@ -25,7 +25,7 @@ class MongoActivityCollection(AActivityDB):
     * comment
     * reply
     * like
-    * favorite
+    * todo
     * invite_sent
     * invite_received
     * follower

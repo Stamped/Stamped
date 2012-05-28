@@ -11,7 +11,9 @@
 
 @protocol STEntitySearchSection <NSObject>
 
-@property (nonatomic, readonly, copy) NSString* name;
+@property (nonatomic, readonly, copy) NSString* title;
+@property (nonatomic, readonly, copy) NSString* subtitle;
+@property (nonatomic, readonly, copy) NSString* imageURL;
 @property (nonatomic, readonly, copy) NSArray<STEntitySearchResult>* entities;
 
 @end

@@ -6,7 +6,7 @@ import ClientLogsTests
 import CollectionTests
 import CommentTests
 import EntityTests
-import FavoriteTests
+import TodoTests
 import FriendshipTests
 import OAuthTests
 import PlaceEntityTests

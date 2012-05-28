@@ -12,7 +12,9 @@
 
 @interface STSimpleEntitySearchSection : NSObject <STEntitySearchSection, NSCoding>
 
-@property (nonatomic, readwrite, copy) NSString* name;
+@property (nonatomic, readwrite, copy) NSString* title;
+@property (nonatomic, readwrite, copy) NSString* subtitle;
+@property (nonatomic, readwrite, copy) NSString* imageURL;
 @property (nonatomic, readwrite, copy) NSArray<STEntitySearchResult>* entities;
 
 + (RKObjectMapping*)mapping;

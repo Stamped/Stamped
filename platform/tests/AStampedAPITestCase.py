@@ -138,9 +138,6 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertIsInstance(key, basestring)
         self.assertLength(key, length)
 
-    def assertGreater(self, first, second, msg=None):
-        self.assertTrue(first > second)
-    
     ### HELPER FUNCTIONS
     def createAccount(self, name='TestUser', password="12345", **kwargs):
         global _test_case, _accounts
@@ -398,8 +395,8 @@ class AStampedAPITestCase(AStampedTestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
     
-    def createFavorite(self, token, entityId, stampId=None):
-        path = "favorites/create.json"
+    def createTodo(self, token, entityId, stampId=None):
+        path = "todos/create.json"
         data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId,
@@ -408,13 +405,13 @@ class AStampedAPITestCase(AStampedTestCase):
         if stampId != None:
             data['stamp_id'] = stampId
         
-        favorite = self.handlePOST(path, data)
-        self.assertValidKey(favorite['favorite_id'])
+        todo = self.handlePOST(path, data)
+        self.assertValidKey(todo['todo_id'])
         
-        return favorite
+        return todo
     
-    def deleteFavorite(self, token, entityId):
-        path = "favorites/remove.json"
+    def deleteTodo(self, token, entityId):
+        path = "todos/remove.json"
         data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId

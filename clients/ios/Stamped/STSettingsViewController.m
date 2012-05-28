@@ -7,6 +7,7 @@
 //
 
 #import "STSettingsViewController.h"
+#import "Util.h"
 
 @interface STSettingsViewControllerCell : NSObject
 
@@ -39,6 +40,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    [Util addHomeButtonToController:self withBadge:YES];
 }
 
 - (void)viewDidUnload

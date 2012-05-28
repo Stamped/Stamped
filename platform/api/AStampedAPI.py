@@ -203,20 +203,20 @@ class AStampedAPI(AEntitySink):
     def getUserMentions(self, params):
         raise NotImplementedError
     
-    # ######### #
-    # Favorites #
-    # ######### #
+    # ##### #
+    # Todos #
+    # ##### #
     
     @abstract
-    def addFavorite(self, authUserId, entityId, stampId=None):
+    def addTodo(self, authUserId, entityId, stampId=None):
         raise NotImplementedError
     
     @abstract
-    def removeFavorite(self, authUserId, entityId):
+    def removeTodo(self, authUserId, entityId):
         raise NotImplementedError
     
     @abstract
-    def getFavorites(self, authUserId, **kwargs):   
+    def getTodos(self, authUserId, **kwargs):
         raise NotImplementedError
     
     # ######## #

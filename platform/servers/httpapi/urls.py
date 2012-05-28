@@ -112,7 +112,6 @@ urlpatterns = patterns('',
     (r'v0/entities/remove.json',                    'v0.functions.entities.remove'),
     (r'v0/entities/autosuggest.json',               'v0.functions.entities.autosuggest'),
     (r'v0/entities/search.json',                    'v0.functions.entities.search'),
-    (r'v0/entities/nearby.json',                    'v0.functions.entities.nearby'),
     (r'v0/entities/menu.json',                      'v0.functions.entities.menu'),
     (r'v0/entities/stamped_by.json',                'v0.functions.entities.stampedBy'),
     (r'v0/entities/suggested.json',                 'v0.functions.entities.suggested'),
@@ -128,6 +127,7 @@ urlpatterns = patterns('',
     (r'v0/stamps/remove.json',                      'v0.functions.stamps.remove'),
     (r'v0/stamps/collection.json',                  'v0.functions.stamps.collection'),
     (r'v0/stamps/search.json',                      'v0.functions.stamps.search'),
+    (r'v0/stamps/guide.json',                       'v0.functions.stamps.guide'),
     
     (r'v0/stamps/likes/create.json',                'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                'v0.functions.stamps.likesRemove'),
@@ -146,10 +146,10 @@ urlpatterns = patterns('',
     (r'v0/collections/suggested.json',              'v0.functions.collections.suggested'),
     (r'v0/collections/consumption.json',            'v0.functions.collections.consumption'),
     
-    ### FAVORITES
-    (r'v0/favorites/create.json',                   'v0.functions.favorites.create'),
-    (r'v0/favorites/remove.json',                   'v0.functions.favorites.remove'),
-    (r'v0/favorites/show.json',                     'v0.functions.favorites.show'),
+    ### TODOS
+    (r'v0/todos/create.json',                       'v0.functions.todos.create'),
+    (r'v0/todos/remove.json',                       'v0.functions.todos.remove'),
+    (r'v0/todos/show.json',                         'v0.functions.todos.show'),
     
     ### ACTIVITY
     (r'v0/activity/show.json',                      'v0.functions.activity.show'),

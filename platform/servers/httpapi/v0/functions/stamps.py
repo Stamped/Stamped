@@ -105,6 +105,27 @@ def search(request, authUserId, schema, **kwargs):
     return transformStamps(stamps)
 
 
+# Guide
+@handleHTTPRequest(http_schema=HTTPGuideRequest, conversion=HTTPGuideRequest.exportGuideRequest)
+@require_http_methods(["GET"])
+def guide(request, authUserId, schema, **kwargs):
+    entities = stampedAPI.getGuide(schema, authUserId)
+    result = []
+
+    for entity in entities:
+        try:
+            result.append(HTTPEntity().importEntity(entity).dataExport())
+        except Exception:
+            raise
+            # logs.warning(utils.getFormattedException())
+
+    return transformOutput(result)
+
+
+
+
+
+
 @handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["POST"])
 def likesCreate(request, authUserId, http_schema, **kwargs):

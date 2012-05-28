@@ -21,6 +21,9 @@
 #import <CoreLocation/CoreLocation.h>
 #import "SearchEntitiesAutoSuggestCell.h"
 
+static const CGFloat _innerBorderHeight = 40;
+static const CGFloat _offscreenCancelPadding = 5;
+
 @interface STEntitySearchTableViewCell : UITableViewCell
 
 + (NSString*)reuseIdentifier;
@@ -57,16 +60,15 @@
 @property (nonatomic, readonly, retain) NSString* initialQuery;
 @property (nonatomic, readwrite, retain) STSearchField* searchField;
 @property (nonatomic, readwrite, retain) NSArray<STEntitySearchSection>* suggestedSections;
-@property (nonatomic, readwrite, retain) NSArray<STEntitySearchResult>* searchResults;
+@property (nonatomic, readwrite, retain) NSArray<STEntitySearchSection>* searchSections;
 @property (nonatomic, readonly, retain) NSMutableArray<STEntityAutoCompleteResult>* autoCompleteResults;
 @property (nonatomic, readwrite, retain) UITableView* tableView;
 @property (nonatomic, readwrite, assign) CGRect searchFieldFrameNormal;
-@property (nonatomic, readwrite, assign) CGRect searchFieldFrameActive;
 @property (nonatomic, readwrite, assign) CGRect cancelFrameNormal;
-@property (nonatomic, readwrite, assign) CGRect cancelFrameActive;
 @property (nonatomic, readwrite, assign) CGRect tableFrameNormal;
 @property (nonatomic, readwrite, retain) NSString* coordinates;
 @property (nonatomic, readwrite, retain) STCancellation* autoCompleteCancellation;
+@property (nonatomic, readwrite, retain) UIView* cancelButton;
 
 @end
 
@@ -75,17 +77,16 @@
 @synthesize category = category_;
 @synthesize initialQuery = initialQuery_;
 @synthesize suggestedSections = suggestedSections_;
-@synthesize searchResults = searchResults_;
+@synthesize searchSections = searchSections_;
 @synthesize autoCompleteResults = autoCompleteResults_;
 @synthesize tableView = tableView_;
 @synthesize searchField = searchField_;
 @synthesize searchFieldFrameNormal = _searchFieldFrameNormal;
-@synthesize searchFieldFrameActive = _searchFieldFrameActive;
 @synthesize cancelFrameNormal = _cancelFrameNormal;
-@synthesize cancelFrameActive = _cancelFrameActive;
 @synthesize tableFrameNormal = _tableFrameNormal;
 @synthesize coordinates = _coordinates;
 @synthesize autoCompleteCancellation = _autoCompleteCancellation;
+@synthesize cancelButton = _cancelButton;
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
     self = [super init];
@@ -129,7 +130,7 @@
 {
     [category_ release];
     [initialQuery_ release];
-    [searchResults_ release];
+    [searchSections_ release];
     [suggestedSections_ release];
     [autoCompleteResults_ release];
     [_coordinates release];
@@ -145,7 +146,7 @@
 - (void)loadView {
     CGFloat borderSize = 1;
     self.view = [[[UIView alloc] initWithFrame:[Util standardFrameWithNavigationBar:YES]] autorelease];
-    UIView* header = [[[UIView alloc] initWithFrame:CGRectMake(-borderSize, -borderSize, self.view.frame.size.width + 2*borderSize, 40+borderSize)] autorelease];
+    UIView* header = [[[UIView alloc] initWithFrame:CGRectMake(-borderSize, -borderSize, self.view.frame.size.width + 2*borderSize, _innerBorderHeight + borderSize)] autorelease];
     header.layer.borderWidth = borderSize;
     header.layer.borderColor = [UIColor whiteColor].CGColor;
     header.layer.shadowRadius = 2;
@@ -162,18 +163,18 @@
     }
     searchField.enablesReturnKeyAutomatically = NO;
     searchField.frame = [Util centeredAndBounded:searchField.frame.size inFrame:header.frame];
-    [Util reframeView:searchField withDeltas:CGRectMake(0, 2, 0, 0)];
+    [Util reframeView:searchField withDeltas:CGRectMake(5, 2, -10 + 1, 0)]; //compensate for asymetry 
+    self.searchFieldFrameNormal = searchField.frame;
     searchField.delegate = self;
     CGFloat xPadding = 5;
     CGFloat buttonWidth = 60;
-    [Util reframeView:searchField withDeltas:CGRectMake(xPadding, 0, -(xPadding * 3 + buttonWidth), 0)];
+    //[Util reframeView:searchField withDeltas:CGRectMake(xPadding, 0, -(xPadding * 3 + buttonWidth), 0)];
     [header addSubview:searchField];
     
-    CGRect cancelFrame = [Util centeredAndBounded:CGSizeMake(buttonWidth, searchField.frame.size.height) 
-                                          inFrame:CGRectMake(CGRectGetMaxX(searchField.frame) + xPadding, 0, buttonWidth, header.frame.size.height)];
+    CGRect cancelFrame = CGRectMake(0, 0, buttonWidth, searchField.frame.size.height);
     UIView* cancelViews[2];
     for (NSInteger i = 0; i < 2; i++) {
-        UIView* cancelView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, cancelFrame.size.width, cancelFrame.size.height)] autorelease];
+        UIView* cancelView = [[[UIView alloc] initWithFrame:cancelFrame] autorelease];
         UILabel* label = [Util viewWithText:@"Cancel"
                                        font:[UIFont stampedFontWithSize:14]
                                       color:i == 0 ? [UIColor stampedGrayColor] : [UIColor whiteColor]
@@ -194,8 +195,10 @@
                                                    activeView:cancelViews[1] 
                                                        target:self 
                                                     andAction:@selector(cancelClicked)] autorelease];
+    [Util reframeView:cancelButton withDeltas:CGRectMake(self.view.frame.size.width + _offscreenCancelPadding, searchField.frame.origin.y, 0, 0)];
+    self.cancelFrameNormal = cancelButton.frame;
     [header addSubview:cancelButton];
-    
+    self.cancelButton = cancelButton;
     
     tableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 
                                                                CGRectGetMaxY(header.frame), 
@@ -213,6 +216,7 @@
 
 - (void)viewDidUnload {
     [searchField_ release];
+    self.cancelButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -223,7 +227,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    //[[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
+    [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
 }
 
 - (void)keyboardDidShow:(NSNotification *)notification
@@ -240,8 +244,9 @@
         return self.autoCompleteResults.count;
     }
     else {
-        if (self.searchResults) {
-            return self.searchResults.count;
+        if (self.searchSections) {
+            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
+            return sectionObject.entities.count;
         }
         else if (self.suggestedSections) {
             id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
@@ -256,8 +261,8 @@
         return 1;
     }
     else {
-        if (self.searchResults) {
-            return 1;
+        if (self.searchSections) {
+            return self.searchSections.count;
         }
         else if (self.suggestedSections) {
             return self.suggestedSections.count;
@@ -281,8 +286,9 @@
     }
     else {
         id<STEntitySearchResult> result = nil;
-        if (self.searchResults) {
-            result = [self.searchResults objectAtIndex:indexPath.row];
+        if (self.searchSections) {
+            id<STEntitySearchSection> section = [self.searchSections objectAtIndex:indexPath.section];
+            result = [section.entities objectAtIndex:indexPath.row];
         }
         else if (self.suggestedSections) {
             id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
@@ -305,8 +311,9 @@
     }
     else {
         id<STEntitySearchResult> result = nil;
-        if (self.searchResults) {
-            result = [self.searchResults objectAtIndex:indexPath.row];
+        if (self.searchSections) {
+            id<STEntitySearchSection> section = [self.searchSections objectAtIndex:indexPath.section];
+            result = [section.entities objectAtIndex:indexPath.row];
         }
         else if (self.suggestedSections) {
             id<STEntitySearchSection> section = [self.suggestedSections objectAtIndex:indexPath.section];
@@ -342,19 +349,21 @@
     [self.tableView reloadData];
     [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
     [UIView animateWithDuration:.25 animations:^{
-        self.tableView.frame = self.tableFrameNormal;  
+        self.tableView.frame = self.tableFrameNormal;
+        self.cancelButton.frame = self.cancelFrameNormal;
+        self.searchField.frame = self.searchFieldFrameNormal;
     }];
     if (textField.text && ![textField.text isEqualToString:@""]) {
         STEntitySearch* search = [[[STEntitySearch alloc] init] autorelease];
         search.category = self.category;
         search.query = textField.text;
-        [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchResult> *results, NSError *error) {
-            if (results) {
-                for (id<STEntitySearchResult> result in results) {
-                    NSLog(@"%@", result.title);
-                }
-                self.searchResults = results;
+        [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchSection> *sections, NSError *error, STCancellation* cancellation) {
+            if (sections) {
+                self.searchSections = sections;
                 [self.tableView reloadData];
+            }
+            else {
+                [Util warnWithMessage:[NSString stringWithFormat:@"entity/search error:%@", error] andBlock:nil];
             }
         }];
     }
@@ -364,12 +373,13 @@
         return nil;
     }
     else {
-        if (self.searchResults) {
-            return nil;
+        if (self.searchSections) {
+            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
+            return sectionObject.title;
         }
         else if (self.suggestedSections) {
             id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
-            return sectionObject.name;
+            return sectionObject.title;
         }
         return nil;
     }
@@ -387,6 +397,11 @@
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
     //Override collapsing behavior
     [[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
+    [UIView animateWithDuration:.25 animations:^{
+        CGFloat delta = 256 - self.cancelFrameNormal.origin.x;
+        [Util reframeView:self.searchField withDeltas:CGRectMake(0, 0, delta + _offscreenCancelPadding, 0)];
+        [Util reframeView:self.cancelButton withDeltas:CGRectMake(delta, 0, 0, 0)];
+    }];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
