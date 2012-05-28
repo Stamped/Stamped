@@ -1742,7 +1742,10 @@ class HTTPEntity(Schema):
 
                 gallery.images = images
                 if len(gallery.images) > 0:
-                    self.galleries += (gallery,)
+                    if self.galleries is None:
+                        self.galleries = [gallery]
+                    else:
+                        self.galleries += (gallery,)
 
         elif entity.kind == 'software' and entity.isType('app'):
 
