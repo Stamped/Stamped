@@ -1707,9 +1707,7 @@ class HTTPEntity(Schema):
 
             # Albums
 
-            if entity.isType('artist') and len(entity.albums) > 0:
-                from pprint import pformat
-
+            if entity.isType('artist') and entity.albums is not None and len(entity.albums) > 0:
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 images = []
@@ -1737,7 +1735,7 @@ class HTTPEntity(Schema):
 
                         images.append(item)
                     except Exception as e:
-                        logs.warning("Artist album-gallery item failed: %s" % e)
+                        logs.warning("Artist album-gallery item failed: %s (%s)" % (e, album))
                         pass
 
                 gallery.images = images
