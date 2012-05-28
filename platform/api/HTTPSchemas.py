@@ -965,36 +965,36 @@ class HTTPEntityMini(Schema):
 class HTTPEntityRelated(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('data',       HTTPEntityMini, required=True)
-        cls.addProperty('title',                basestring)
+        cls.addNestedPropertyList('data',               HTTPEntityMini, required=True)
+        cls.addProperty('title',                        basestring)
 
 
 class HTTPEntity(Schema):
     @classmethod
     def setSchema(cls):
         # Core
-        cls.addProperty('entity_id',            basestring, required=True)
-        cls.addProperty('title',                basestring, required=True)
-        cls.addProperty('subtitle',             basestring, required=True)
-        cls.addProperty('category',             basestring, required=True)
-        cls.addProperty('subcategory',          basestring, required=True)
-        cls.addProperty('caption',              basestring)
-        cls.addNestedPropertyList('images',     HTTPImageSchema)
-        cls.addProperty('last_modified',        basestring)
-        cls.addProperty('previews',             HTTPEntityPreviewsSchema)
+        cls.addProperty('entity_id',                    basestring, required=True)
+        cls.addProperty('title',                        basestring, required=True)
+        cls.addProperty('subtitle',                     basestring, required=True)
+        cls.addProperty('category',                     basestring, required=True)
+        cls.addProperty('subcategory',                  basestring, required=True)
+        cls.addProperty('caption',                      basestring)
+        cls.addNestedPropertyList('images',             HTTPImageSchema)
+        cls.addProperty('last_modified',                basestring)
+        cls.addNestedProperty('previews',               HTTPEntityPreviewsSchema)
 
         # Location
-        cls.addProperty('address',              basestring)
-        cls.addProperty('neighborhood',         basestring)
-        cls.addProperty('coordinates',          basestring)
+        cls.addProperty('address',                      basestring)
+        cls.addProperty('neighborhood',                 basestring)
+        cls.addProperty('coordinates',                  basestring)
 
         # Components
-        cls.addNestedProperty('playlist',       HTTPEntityPlaylist)
-        cls.addNestedPropertyList('actions',    HTTPEntityAction)
-        cls.addNestedPropertyList('galleries',  HTTPEntityGallery)
-        cls.addNestedPropertyList('metadata',   HTTPEntityMetadataItem)
-        cls.addNestedProperty('stamped_by',     HTTPEntityStampedBy)
-        cls.addNestedProperty('related',        HTTPEntityRelated)
+        cls.addNestedProperty('playlist',               HTTPEntityPlaylist)
+        cls.addNestedPropertyList('actions',            HTTPEntityAction)
+        cls.addNestedPropertyList('galleries',          HTTPEntityGallery)
+        cls.addNestedPropertyList('metadata',           HTTPEntityMetadataItem)
+        cls.addNestedProperty('stamped_by',             HTTPEntityStampedBy)
+        cls.addNestedProperty('related',                HTTPEntityRelated)
 
     def __init__(self):
         Schema.__init__(self)
