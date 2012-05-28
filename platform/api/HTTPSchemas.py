@@ -1720,7 +1720,7 @@ class HTTPEntity(Schema):
                         ### TODO: Add placeholder if image doesn't exist
                         size.url        = _cleanImageURL(album.images[0].sizes[0].url)
                         item.caption    = album.title
-                        item.sizes.append(size)
+                        item.sizes      = [size]
 
                         if album.entity_id is not None:
                             source              = HTTPActionSource()
