@@ -23,6 +23,11 @@ def create(request, authUserId, http_schema, **kwargs):
     logs.info(todo.dataExport())
     return transformOutput(todo.dataExport())
 
+@handleHTTPRequest(http_schema=HTTPTodoComplete)
+@require_http_methods(["POST"])
+def complete(request, authUserId, http_schema, **kwargs):
+    todo = stampedAPI.completeTodo(authUserId, http_schema.entity_id, http_schema.complete)
+    return transformOutput(todo)
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["POST"])

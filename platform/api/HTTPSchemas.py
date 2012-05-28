@@ -2841,7 +2841,11 @@ class HTTPTodoNew(Schema):
         cls.addProperty('search_id',            basestring)
         cls.addProperty('stamp_id',             basestring)
 
-
+class HTTPTodoComplete(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',            basestring)
+        cls.addProperty('complete',             bool)
 
 
 # ######## #

@@ -252,18 +252,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         return self._collection.find(query).count()
     
-    def checkStamp(self, userId, entityId):
-        try:
-            document = self._collection.find_one({
-                'user.user_id': userId, 
-                'entity.entity_id': entityId,
-            })
-            if document['_id'] != None:
-                return True
-            raise
-        except Exception:
-            return False
-    
     def updateStampStats(self, stampId, stat, value=None, increment=1):
         key = 'stats.%s' % (stat)
         if value is not None:
@@ -277,7 +265,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 {'$inc': {key: increment}, 
                  '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
-    
+
+
     def getStampFromUserEntity(self, userId, entityId):
         try:
             document = self._collection.find_one({
@@ -287,6 +276,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return self._convertFromMongo(document)
         except Exception:
             return None
+
+    def checkStamp(self, userId, entityId):
+        return self.getStampFromUserEntity(userId, entityId) is not None
     
     def getStampsFromUsersForEntity(self, userIds, entityId):
         try:
