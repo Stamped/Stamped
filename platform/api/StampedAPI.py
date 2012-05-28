@@ -3412,6 +3412,11 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
 
+        # Hack to return kevin's guide for popular 
+        if guideRequest != 'inbox':
+            user = self._userDB.getUserByScreenName('kevin')
+            authUserId = user.user_id 
+
         try:
             guide = self._guideDB.getGuide(authUserId)
         except (StampedUnavailableError, KeyError):
