@@ -736,7 +736,7 @@ class HTTPUser(Schema):
                 data[item['category']] = item['count']
                 
             order = [
-                'food',
+                'place',
                 'book',
                 'film', 
                 'music',
@@ -2406,14 +2406,29 @@ class HTTPStampedBySlice(HTTPGenericCollectionSlice):
         return GenericCollectionSlice().dataImport(data, overflow=True)
 
 
-
 class HTTPGuideRequest(Schema):
     @classmethod
     def setSchema(cls):
+        def checkSection(section):
+            if section is None:
+                return None
+            section = section.lower()
+            if section in set(['food', 'music', 'film', 'book', 'app']):
+                return section 
+            raise StampedInputError("Invalid section: %s" % section)
+
+        def checkSubsection(subsection):
+            if subsection is None:
+                return None
+            subsection = subsection.lower()
+            if subsection in set(['restaurant', 'bar', 'cafe', 'artist', 'album', 'track', 'movie', 'tv']):
+                return subsection
+            raise StampedInputError("Invalid subsection: %s" % subsection)
+
         cls.addProperty('limit',                        int)
         cls.addProperty('offset',                       int)
-        cls.addProperty('section',                      basestring, required=True)
-        cls.addProperty('subsection',                   basestring)
+        cls.addProperty('section',                      basestring, required=True, cast=checkSection)
+        cls.addProperty('subsection',                   basestring, cast=checkSubsection)
         cls.addProperty('viewport',                     basestring) # lat0,lng0,lat1,lng1
         cls.addProperty('scope',                        basestring)
 

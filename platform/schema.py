@@ -266,17 +266,17 @@ class Schema(object):
         return self
 
     @classmethod
-    def addProperty(cls, name, kind, required=False):
-        cls.__addProperty(_propertyKey, name, kind, required=required)
+    def addProperty(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_propertyKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addPropertyList(cls, name, kind, required=False):
-        cls.__addProperty(_propertyListKey, name, kind, required=required)
+    def addPropertyList(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_propertyListKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addNestedProperty(cls, name, kind, required=False):
-        cls.__addProperty(_nestedPropertyKey, name, kind, required=required)
+    def addNestedProperty(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_nestedPropertyKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addNestedPropertyList(cls, name, kind, required=False):
-        cls.__addProperty(_nestedPropertyListKey, name, kind, required=required)
+    def addNestedPropertyList(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_nestedPropertyListKey, name, kind, required=required, **kwargs)
