@@ -8,7 +8,6 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
-import Entity
 
 from errors             import *
 from schema             import *
@@ -557,14 +556,14 @@ class HTTPAccountAlerts(Schema):
     def setSchema(cls):
         cls.addProperty('ios_alert_credit',       bool)
         cls.addProperty('ios_alert_like',         bool)
-        cls.addProperty('ios_alert_fav',          bool)
+        cls.addProperty('ios_alert_todo',          bool)
         cls.addProperty('ios_alert_mention',      bool)
         cls.addProperty('ios_alert_comment',      bool)
         cls.addProperty('ios_alert_reply',        bool)
         cls.addProperty('ios_alert_follow',       bool)
         cls.addProperty('email_alert_credit',     bool)
         cls.addProperty('email_alert_like',       bool)
-        cls.addProperty('email_alert_fav',        bool)
+        cls.addProperty('email_alert_todo',        bool)
         cls.addProperty('email_alert_mention',    bool)
         cls.addProperty('email_alert_comment',    bool)
         cls.addProperty('email_alert_reply',      bool)
@@ -574,14 +573,14 @@ class HTTPAccountAlerts(Schema):
         Schema.__init__(self)
         self.ios_alert_credit           = False
         self.ios_alert_like             = False
-        self.ios_alert_fav              = False
+        self.ios_alert_todo              = False
         self.ios_alert_mention          = False
         self.ios_alert_comment          = False
         self.ios_alert_reply            = False
         self.ios_alert_follow           = False
         self.email_alert_credit         = False
         self.email_alert_like           = False
-        self.email_alert_fav            = False
+        self.email_alert_todo            = False
         self.email_alert_mention        = False
         self.email_alert_comment        = False
         self.email_alert_reply          = False
@@ -701,7 +700,7 @@ class HTTPUser(Schema):
         cls.addProperty('num_stamps_left',              int)
         cls.addProperty('num_friends',                  int)
         cls.addProperty('num_followers',                int)
-        cls.addProperty('num_faves',                    int)
+        cls.addProperty('num_todos',                    int)
         cls.addProperty('num_credits',                  int)
         cls.addProperty('num_credits_given',            int)
         cls.addProperty('num_likes',                    int)
@@ -719,7 +718,7 @@ class HTTPUser(Schema):
         self.num_stamps_left    = stats.pop('num_stamps_left', 0)
         self.num_friends        = stats.pop('num_friends', 0)
         self.num_followers      = stats.pop('num_followers', 0)
-        self.num_faves          = stats.pop('num_faves', 0)
+        self.num_todos          = stats.pop('num_todos', 0)
         self.num_credits        = stats.pop('num_credits', 0)
         self.num_credits_given  = stats.pop('num_credits_given', 0)
         self.num_likes          = stats.pop('num_likes', 0)
@@ -835,7 +834,7 @@ class HTTPClientLogsEntry(Schema):
         # optional ids
         cls.addProperty('stamp_id',     basestring)
         cls.addProperty('entity_id',    basestring)
-        cls.addProperty('favorite_id',  basestring)
+        cls.addProperty('todo_id',  basestring)
         cls.addProperty('comment_id',   basestring)
         cls.addProperty('activity_id',  basestring)
 
@@ -1110,7 +1109,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema().dataImport(image)
+                    item = HTTPImageSchema().dataImport(image, overflow=True)
                     images.append(item)
                 gallery.images = images
                 self.galleries += (gallery,)
@@ -1195,8 +1194,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema()
-                    item.importSchema(image)
+                    item = HTTPImageSchema().dataImport(image, overflow = True)
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
@@ -2414,12 +2412,12 @@ class HTTPStampMini(Schema):
         cls.addProperty('num_credits',          int)
 
         cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_fav',               bool)
+        cls.addProperty('is_todo',               bool)
 
     def __init__(self):
         Schema.__init__(self)
-        self.is_liked           = False
-        self.is_fav             = False
+        self.is_liked            = False
+        self.is_todo             = False
 
 class HTTPStampPreviews(Schema):
     @classmethod
@@ -2451,12 +2449,12 @@ class HTTPStamp(Schema):
         cls.addProperty('num_credits',          int)
 
         cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_fav',               bool)
+        cls.addProperty('is_todo',               bool)
 
     def __init__(self):
         Schema.__init__(self)
         self.is_liked           = False
-        self.is_fav             = False
+        self.is_todo            = False
 
     def importStampMini(self, stamp):
         entity                  = stamp.entity
@@ -2531,7 +2529,7 @@ class HTTPStamp(Schema):
 
         if stamp.attributes is not None:
             self.is_liked   = getattr(stamp.attributes, 'is_liked', False)
-            self.is_fav     = getattr(stamp.attributes, 'is_fav', False)
+            self.is_todo    = getattr(stamp.attributes, 'is_todo', False)
 
         return self
 
@@ -2702,33 +2700,48 @@ class HTTPCommentSlice(HTTPGenericSlice):
         cls.addProperty('stamp_id',             basestring, required=True)
 
 
-# ######## #
-# Favorite #
-# ######## #
+# #### #
+# Todo #
+# #### #
 
-class HTTPFavorite(Schema):
+class HTTPTodoSource(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('favorite_id',          basestring, required=True)
-        cls.addProperty('user_id',              basestring, required=True)
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        cls.addNestedProperty('stamp',          HTTPStamp)
+        cls.addPropertyList('stamp_ids',        basestring)
+
+class HTTPTodo(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('todo_id',              basestring, required=True)
+        cls.addProperty('user_id',              basestring, required=True)
+        cls.addNestedProperty('source',         HTTPTodoSource, required=True)
+        #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
+        #cls.addNestedProperty('stamp',          HTTPStamp)
+        cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
+        cls.addNestedProperty('previews',       HTTPStampPreviews)
         cls.addProperty('created',              basestring)
         cls.addProperty('complete',             bool)
 
-    def importFavorite(self, fav):
-        self.favorite_id             = fav.favorite_id
-        self.user_id                 = fav.user.user_id
-        self.entity                  = HTTPEntityMini().importEntity(fav.entity)
-        self.created                 = fav.timestamp.created
-        self.complete                = fav.complete
+    def importTodo(self, todo):
+        self.todo_id                = todo.todo_id
+        self.user_id                = todo.user.user_id
+        self.source                 = HTTPTodoSource()
+        self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
+        if todo.stamp is not None:
+            self.source.stamp_ids   = [ todo.stamp.stamp_id ]
+        if todo.previews is not None and todo.previews.todos is not None:
+            self.previews           = HTTPStampPreviews()
+            self.previews.todos     = [HTTPUser().importUser(u) for u in todo.previews.todos]
+        self.created                = todo.timestamp.created
+        self.complete               = todo.complete
 
-        if fav.stamp is not None:
-            self.stamp              = HTTPStamp().importStampMini(fav.stamp)
+        if todo.stamp is not None:
+            self.stamp_id           = todo.stamp.stamp_id#= HTTPStamp().importStampMini(todo.stamp)
 
         return self
 
-class HTTPFavoriteNew(Schema):
+class HTTPTodoNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('entity_id',            basestring)

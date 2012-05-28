@@ -285,6 +285,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def updateUserStats(self, userIdOrIds, stat, value=None, increment=1):
         if userIdOrIds is None or len(userIdOrIds) == 0:
             raise Exception("Invalid ids")
+
+        # TODO: Note that the following check and conversion is necessary for backward compatability
+        if stat == 'num_todos':
+            stat = 'num_faves'
             
         key = 'stats.%s' % stat
         

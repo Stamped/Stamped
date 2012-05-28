@@ -133,9 +133,6 @@ def runAlerts(options):
     
     for alert in alerts:
         try:
-            print 
-            print
-
             print alert
             if userIds[str(alert['recipient_id'])] == 1 \
                 or userIds[str(alert['user_id'])] == 1:
@@ -150,9 +147,9 @@ def runAlerts(options):
             elif alert.genre == 'like':
                 send_push   = recipient.alerts.ios_alert_like
                 send_email  = recipient.alerts.email_alert_like
-            elif alert.genre == 'favorite':
-                send_push   = recipient.alerts.ios_alert_fav
-                send_email  = recipient.alerts.email_alert_fav
+            elif alert.genre == 'todo':
+                send_push   = recipient.alerts.ios_alert_todo
+                send_email  = recipient.alerts.email_alert_todo
             elif alert.genre == 'mention':
                 send_push   = recipient.alerts.ios_alert_mention
                 send_email  = recipient.alerts.email_alert_mention
@@ -385,7 +382,7 @@ def _setSubject(user, genre):
     elif genre == 'like':
         msg = u'%s (@%s) liked your stamp' % (user['name'], user.screen_name)
 
-    elif genre == 'favorite':
+    elif genre == 'todo':
         msg = u'%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
 
     elif genre == 'mention':
@@ -475,7 +472,7 @@ def buildPushNotification(user, activityItem, deviceId):
         #msg = u'%s \ue057 your stamp' % (user.screen_name)
         msg = '%s liked your stamp' % (user.screen_name)
     
-    elif genre == 'favorite':
+    elif genre == 'todo':
         msg = '%s added your stamp as a to-do' % (user.screen_name)
 
     elif genre == 'mention':

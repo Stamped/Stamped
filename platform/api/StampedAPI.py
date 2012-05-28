@@ -34,7 +34,7 @@ try:
     from AUserDB                import AUserDB
     from AStampDB               import AStampDB
     from ACommentDB             import ACommentDB
-    from AFavoriteDB            import AFavoriteDB
+    from ATodoDB            import ATodoDB
     from ACollectionDB          import ACollectionDB
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
@@ -221,14 +221,14 @@ class StampedAPI(AStampedAPI):
         alerts                          = AccountAlerts()
         alerts.ios_alert_credit         = True
         alerts.ios_alert_like           = True
-        alerts.ios_alert_fav            = True
+        alerts.ios_alert_todo           = True
         alerts.ios_alert_mention        = True
         alerts.ios_alert_comment        = True
         alerts.ios_alert_reply          = True
         alerts.ios_alert_follow         = True
         alerts.email_alert_credit       = True
         alerts.email_alert_like         = False
-        alerts.email_alert_fav          = False
+        alerts.email_alert_todo         = False
         alerts.email_alert_mention      = True
         alerts.email_alert_comment      = True
         alerts.email_alert_reply        = True
@@ -433,10 +433,10 @@ class StampedAPI(AStampedAPI):
             # Decrement number of followers 
             self._userDB.updateUserStats(friendId, 'num_followers', increment=-1)
         
-        # Remove favorites
-        favEntityIds = self._favoriteDB.getFavoriteEntityIds(account.user_id)
-        for entityId in favEntityIds:
-            self._favoriteDB.removeTodo(account.user_id, entityId)
+        # Remove todos
+        todoEntityIds = self._todoDB.getTodoEntityIds(account.user_id)
+        for entityId in todoEntityIds:
+            self._todoDB.removeTodo(account.user_id, entityId)
         
         # Remove stamps / collections
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
@@ -1900,8 +1900,8 @@ class StampedAPI(AStampedAPI):
         
         if authUserId:
             ### TODO: Intelligent matching with stampId
-            # Favorites
-            favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
+            # Todos
+            todos = self._todoDB.getTodoEntityIds(authUserId)
             
             ### TODO: Intelligent matching with stampId
             # Likes
@@ -2013,8 +2013,8 @@ class StampedAPI(AStampedAPI):
                     if stamp.attributes is None:
                         stamp.attributes = StampAttributesSchema()
 
-                    # Mark as favorited
-                    stamp.attributes.is_fav = stamp.entity.entity_id in favorites
+                    # Mark as todo
+                    stamp.attributes.is_todo = stamp.entity.entity_id in todos
 
                     # Mark as liked
                     stamp.attributes.is_liked =  stamp.stamp_id in likes
@@ -2218,7 +2218,7 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
         self._statsSink.increment('stamped.api.stamps.subcategory.%s' % entity.subcategory)
 
-        # Enrich linked user, entity, favorites, etc. within the stamp
+        # Enrich linked user, entity, todos, etc. within the stamp
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
 
@@ -2253,9 +2253,9 @@ class StampedAPI(AStampedAPI):
         
         # If stamped entity is on the to do list, mark as complete
         try:
-            self._favoriteDB.completeTodo(entity.entity_id, authUserId)
+            self._todoDB.completeTodo(entity.entity_id, authUserId)
             if entity.entity_id != stamp.entity.entity_id:
-                self._favoriteDB.completeTodo(stamp.entity.entity_id, authUserId)
+                self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
 
@@ -2528,13 +2528,13 @@ class StampedAPI(AStampedAPI):
         # Remove activity
         self._activityDB.removeActivityForStamp(stamp.stamp_id)
         
-        # Remove as favorite if necessary
+        # Remove as todo if necessary
         try:
-            self._favoriteDB.completeTodo(stamp.entity_id, authUserId, complete=False)
+            self._todoDB.completeTodo(stamp.entity_id, authUserId, complete=False)
         except Exception:
             pass
         
-        ### TODO: Remove reference in other people's favorites
+        ### TODO: Remove reference in other people's todos
 
         # Update user stats 
         ### TODO: Do an actual count / update?
@@ -2627,7 +2627,7 @@ class StampedAPI(AStampedAPI):
         stats.preview_likes     = likes
 
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
-        todos                   = self._favoriteDB.getFavoritesFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        todos                   = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
@@ -3391,108 +3391,125 @@ class StampedAPI(AStampedAPI):
     
     
     """
-    #######                             
-    #         ##   #    # ######  ####  
-    #        #  #  #    # #      #      
-    #####   #    # #    # #####   ####  
-    #       ###### #    # #           # 
-    #       #    #  #  #  #      #    # 
-    #       #    #   ##   ######  ####  
+     #######
+        #     ####  #####   ####   ####
+        #    #    # #    # #    # #
+        #    #    # #    # #    #  ####
+        #    #    # #    # #    #      #
+        #    #    # #    # #    # #    #
+        #     ####  #####   ####   ####
     """
 
-    def _enrichFavorite(self, rawFavorite, user=None, entity=None, stamp=None, authUserId=None):
-        if user is None or user.user_id != rawFavorite.user_id:
-            user = self._userDB.getUser(rawFavorite.user_id).minimize()
 
-        if entity is None or entity.entity_id != rawFavorite.entity.entity_id:
-            entity = self._entityDB.getEntity(rawFavorite.entity.entity_id)
+    def _enrichTodo(self, rawTodo, user=None, entity=None, stamp=None, followerIds=None, authUserId=None):
+        if user is None or user.user_id != rawTodo.user_id:
+            user = self._userDB.getUser(rawTodo.user_id).minimize()
 
-        if rawFavorite.stamp_id is not None:
-            stamp = self._stampDB.getStamp(rawFavorite.stamp_id)
+        if entity is None or entity.entity_id != rawTodo.entity.entity_id:
+            entity = self._entityDB.getEntity(rawTodo.entity.entity_id)
+
+        if rawTodo.stamp_id is not None:
+            stamp = self._stampDB.getStamp(rawTodo.stamp_id)
             stamp = self._enrichStampObjects(stamp, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
 
-        return rawFavorite.enrich(user, entity, stamp)
+        previews = None
+        if followerIds is not None:
+            previews = StampPreviews()
+
+            # TODO: We definitely want to reassess how we obtain the preview todos list.  For now, we'll pull all friends
+            #  and check every friend's todo list.  This may be suboptimal.  An alernative would be to add
+            #  the preview_todos to the entityStats collection, though this could grow large for popular items
+            friendTodos = self._todoDB.getTodosFromUsersForEntity(followerIds, entity.entity_id)
+            previews.todos = [todo.user for todo in friendTodos]
+
+
+        return rawTodo.enrich(user, entity, previews, stamp)
     
     @API_CALL
     def addTodo(self, authUserId, entityRequest, stampId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        favorite                    = RawFavorite()
-        favorite.entity             = entity
-        favorite.user_id            = authUserId
-        favorite.timestamp          = TimestampSchema()
-        favorite.timestamp.created  = datetime.utcnow()
+        todo                    = RawTodo()
+        todo.entity             = entity
+        todo.user_id            = authUserId
+        todo.timestamp          = TimestampSchema()
+        todo.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
-            favorite.stamp_id = stampId
-        
-        # Check to verify that user hasn't already favorited entity
+            todo.stamp_id = stampId
+
+        # Check to verify that user hasn't already todoed entity
         try:
-            fav = self._favoriteDB.getTodo(authUserId, entity.entity_id)
-            if fav.favorite_id is None:
+            testTodo = self._todoDB.getTodo(authUserId, entity.entity_id)
+            if testTodo.todo_id is None:
                 raise
             exists = True
         except Exception:
             exists = False
         
         if exists:
-            raise StampedDuplicationError("Favorite already exists")
-        
+            raise StampedDuplicationError("Todo already exists")
+
         # Check if user has already stamped entity, mark as complete if so
         if self._stampDB.checkStamp(authUserId, entity.entity_id):
-            favorite.complete = True
+            todo.complete = True
         
-        favorite = self._favoriteDB.addTodo(favorite)
+        todo = self._todoDB.addTodo(todo)
         
         # Increment stats
-        self._statsSink.increment('stamped.api.stamps.favorites')
-        
-        # Enrich favorite
-        favorite = self._enrichFavorite(favorite, entity=entity, authUserId=authUserId)
+        self._statsSink.increment('stamped.api.stamps.todos')
+
+        # User
+        user = self._userDB.getUser(authUserId).minimize()
+
+        followerIds = self._friendshipDB.getFollowers(user.user_id)
+
+        # Enrich todo
+        todo = self._enrichTodo(todo, user=user, entity=entity, followerIds=followerIds, authUserId=authUserId)
         
         # Increment user stats by one
-        self._userDB.updateUserStats(authUserId, 'num_faves', increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
         
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
         ### TODO: Make async
-        if stampId is not None and favorite.stamp.user.user_id != authUserId:
+        if stampId is not None and todo.stamp.user.user_id != authUserId:
 
-            self._addActivity(verb          = 'todo', 
+            self._addActivity(verb          = 'todo',
                               userId        = authUserId, 
                               entityId      = entity.entity_id,
-                              friendId      = favorite.stamp.user.user_id,
+                              friendId      = todo.stamp.user.user_id,
                               stampId       = stampId)
 
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
         
-        return favorite
+        return todo
     
     @API_CALL
     def removeTodo(self, authUserId, entityId):
-        ### TODO: Fail gracefully if favorite doesn't exist
-        rawFavorite = self._favoriteDB.getTodo(authUserId, entityId)
+        ### TODO: Fail gracefully if todo doesn't exist
+        RawTodo = self._todoDB.getTodo(authUserId, entityId)
         
-        if not rawFavorite or not rawFavorite.favorite_id:
-            raise StampedUnavailableError('Invalid favorite: %s' % rawFavorite)
+        if not RawTodo or not RawTodo.todo_id:
+            raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
         
-        self._favoriteDB.removeTodo(authUserId, entityId)
+        self._todoDB.removeTodo(authUserId, entityId)
         
         # Decrement user stats by one
-        self._userDB.updateUserStats(authUserId, 'num_faves', increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_todos', increment=-1)
         
-        # Enrich favorite
-        favorite = self._enrichFavorite(rawFavorite, authUserId=authUserId)
+        # Enrich todo
+        todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
-        if favorite.stamp is not None and favorite.stamp.stamp_id is not None:
+        if todo.stamp is not None and todo.stamp.stamp_id is not None:
             # Remove activity
-            self._activityDB.removeActivity('todo', authUserId, stampId=favorite.stamp.stamp_id)
+            self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
 
             # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[favorite.stamp.stamp_id])
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[todo.stamp.stamp_id])
         
-        return favorite
+        return todo
     
     @API_CALL
     def getTodos(self, authUserId, genericCollectionSlice):
@@ -3500,31 +3517,31 @@ class StampedAPI(AStampedAPI):
         
         # Set quality
         if quality == 1:
-            favCap  = 50
+            todoCap  = 50
         elif quality == 2:
-            favCap  = 30
+            todoCap  = 30
         else:
-            favCap  = 20
+            todoCap  = 20
         
         if genericCollectionSlice.limit is None:
-            genericCollectionSlice.limit = favCap
+            genericCollectionSlice.limit = todoCap
         
         # TODO: remove this temporary restriction since all client builds before 
         # v1.1 assume an implicit sort on created date
         if genericCollectionSlice.sort == 'modified':
             genericCollectionSlice.sort = 'created'
         
-        favoriteData = self._favoriteDB.getTodos(authUserId, genericCollectionSlice)
+        todoData = self._todoDB.getTodos(authUserId, genericCollectionSlice)
         
         # Extract entities & stamps
         entityIds   = {}
         stampIds    = {}
         
-        for rawFavorite in favoriteData:
-            entityIds[str(rawFavorite.entity.entity_id)] = None
+        for rawTodo in todoData:
+            entityIds[str(rawTodo.entity.entity_id)] = None
             
-            if rawFavorite.stamp_id is not None:
-                stampIds[str(rawFavorite.stamp_id)] = None
+            if rawTodo.stamp_id is not None:
+                stampIds[str(rawTodo.stamp_id)] = None
 
         # User
         user = self._userDB.getUser(authUserId).minimize()
@@ -3541,19 +3558,21 @@ class StampedAPI(AStampedAPI):
         
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
-        
+
+        followerIds = self._friendshipDB.getFollowers(user.user_id)
+
         result = []
-        for rawFavorite in favoriteData:
+        for rawTodo in todoData:
             try:
-                entity      = entityIds[rawFavorite.entity.entity_id]
+                entity      = entityIds[rawTodo.entity.entity_id]
                 stamp       = None
-                if rawFavorite.stamp_id is not None:
-                    stamp = stampIds[rawFavorite.stamp_id] 
-                favorite    = self._enrichFavorite(rawFavorite, user, entity, stamp, authUserId=authUserId)
-                result.append(favorite)
+                if rawTodo.stamp_id is not None:
+                    stamp = stampIds[rawTodo.stamp_id]
+                todo    = self._enrichTodo(rawTodo, user, entity, stamp, followerIds=followerIds, authUserId=authUserId)
+                result.append(todo)
             except Exception as e:
-                logs.debug("RAW FAVORITE: %s" % rawFavorite)
-                logs.warning("Enrich favorite failed: %s" % e)
+                logs.debug("RAW TODO: %s" % rawTodo)
+                logs.warning("Enrich todo failed: %s" % e)
                 continue
         
         return result

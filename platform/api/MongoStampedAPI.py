@@ -26,9 +26,10 @@ from db.mongodb.MongoUserCollection             import MongoUserCollection
 from db.mongodb.MongoStampCollection            import MongoStampCollection
 from db.mongodb.MongoStampStatsCollection       import MongoStampStatsCollection
 from db.mongodb.MongoCommentCollection          import MongoCommentCollection
-from db.mongodb.MongoFavoriteCollection         import MongoFavoriteCollection
+from db.mongodb.MongoTodoCollection             import MongoTodoCollection
 from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
+from db.mongodb.MongoUserTodoEntitiesCollection import MongoUserTodoEntitiesCollection
 from db.mongodb.MongoActivityCollection         import MongoActivityCollection
 from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
 from db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
@@ -88,8 +89,8 @@ class MongoStampedAPI(StampedAPI):
         return MongoCommentCollection()
     
     @lazyProperty
-    def _favoriteDB(self):
-        return MongoFavoriteCollection()
+    def _todoDB(self):
+        return MongoTodoCollection()
     
     @lazyProperty
     def _collectionDB(self):
@@ -98,6 +99,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _friendshipDB(self):
         return MongoFriendshipCollection(self)
+
+    @lazyProperty
+    def _userTodoDB(self):
+        return MongoUserTodoEntitiesCollection(self)
     
     @lazyProperty
     def _activityDB(self):

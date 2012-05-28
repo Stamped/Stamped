@@ -116,7 +116,7 @@ class ClientLogsEntry(Schema):
         # optional ids
         cls.addProperty('stamp_id',            basestring)
         cls.addProperty('entity_id',           basestring)
-        cls.addProperty('favorite_id',         basestring)
+        cls.addProperty('todo_id',         basestring)
         cls.addProperty('comment_id',          basestring)
         cls.addProperty('activity_id',         basestring)
 
@@ -139,7 +139,7 @@ class UserStatsSchema(Schema):
         cls.addProperty('num_stamps_total',         int)
         cls.addProperty('num_friends',              int)
         cls.addProperty('num_followers',            int)
-        cls.addProperty('num_faves',                int)
+        cls.addProperty('num_todos',                int)
         cls.addProperty('num_credits',              int)
         cls.addProperty('num_credits_given',        int)
         cls.addProperty('num_likes',                int)
@@ -273,14 +273,14 @@ class AccountAlerts(Schema):
     def setSchema(cls):
         cls.addProperty('ios_alert_credit',         bool)
         cls.addProperty('ios_alert_like',           bool)
-        cls.addProperty('ios_alert_fav',            bool)
+        cls.addProperty('ios_alert_todo',            bool)
         cls.addProperty('ios_alert_mention',        bool)
         cls.addProperty('ios_alert_comment',        bool)
         cls.addProperty('ios_alert_reply',          bool)
         cls.addProperty('ios_alert_follow',         bool)
         cls.addProperty('email_alert_credit',       bool)
         cls.addProperty('email_alert_like',         bool)
-        cls.addProperty('email_alert_fav',          bool)
+        cls.addProperty('email_alert_todo',          bool)
         cls.addProperty('email_alert_mention',      bool)
         cls.addProperty('email_alert_comment',      bool)
         cls.addProperty('email_alert_reply',        bool)
@@ -1349,12 +1349,12 @@ class StampAttributesSchema(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('is_liked',                     bool)
-        cls.addProperty('is_fav',                       bool)
+        cls.addProperty('is_todo',                      bool)
 
     def init(self):
         Schema.__init__(self)
         self.is_liked       = False
-        self.is_fav         = False
+        self.is_todo        = False
 
 class StampContent(Schema):
     @classmethod
@@ -1434,39 +1434,42 @@ class StampedBy(Schema):
         cls.addNestedProperty('all',                StampedByGroup)
 
 
-# ######## #
-# Favorite #
-# ######## #
+# #### #
+# Todo #
+# #### #
 
-class RawFavorite(Schema):
+class RawTodo(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('favorite_id',              basestring)
+        cls.addProperty('todo_id',                  basestring)
         cls.addProperty('user_id',                  basestring, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
         cls.addProperty('stamp_id',                 basestring)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
 
-    def enrich(self, user, entity, stamp=None):
-        favorite = Favorite()
-        favorite.dataImport(self.dataExport(), overflow=True)
-        favorite.user   = user
-        favorite.entity = entity
+    def enrich(self, user, entity, previews=None, stamp=None):
+        todo = Todo()
+        todo.dataImport(self.dataExport(), overflow=True)
+        todo.user   = user
+        todo.entity = entity
         if stamp is not None:
-            favorite.stamp  = stamp
+            todo.stamp  = stamp
+        if previews is not None:
+            todo.previews = previews
 
-        return favorite
+        return todo
 
-class Favorite(Schema):
+class Todo(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('favorite_id',              basestring)
+        cls.addProperty('todo_id',                  basestring)
         cls.addProperty('user',                     UserMini, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
         cls.addNestedProperty('stamp',              Stamp)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
+        cls.addProperty('previews',                 StampPreviews)
 
     def __init__(self):
         Schema.__init__(self)
