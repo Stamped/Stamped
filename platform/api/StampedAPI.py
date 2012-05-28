@@ -61,7 +61,7 @@ except Exception:
     report()
     raise
 
-CREDIT_BENEFIT  = 2 # Per credit
+CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
 
 # TODO (travis): refactor API function calling conventions to place optional last 
@@ -2898,6 +2898,12 @@ class StampedAPI(AStampedAPI):
         if self._stampDB.checkLike(authUserId, stampId):
             raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
 
+        # Check if user has liked the stamp previously; if so, don't give credit
+        previouslyLiked = False
+        history = self._stampDB.getUserLikesHistory(authUserId)
+        if stampId in history:
+            previouslyLiked = True 
+
         # Add like
         self._stampDB.addLike(authUserId, stampId)
         
@@ -2920,25 +2926,17 @@ class StampedAPI(AStampedAPI):
             stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True
         
-        # Give credit once a given threshold is hit
-        benefit = None
-        if stamp.stats.num_likes >= 3 and not stamp.stats.like_threshold_hit:
-            benefit = LIKE_BENEFIT
-            
-            # Update stamp stats
-            self._stampDB.giveLikeCredit(stamp.stamp_id)
-            stamp.stats.like_threshold_hit = True
-            
+        # Give credit if not previously liked
+        if not previouslyLiked and stamp.user.user_id != authUserId:
             # Update user stats with new credit
             self._userDB.updateUserStats(stamp.user.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
         
-        # Add activity for stamp owner (if not self)
-        if stamp.user.user_id != authUserId:
+            # Add activity for stamp owner
             self._addActivity(verb          = 'like', 
                               userId        = authUserId, 
                               stampId       = stamp.stamp_id,
                               friendId      = stamp.user.user_id,
-                              benefit       = benefit)
+                              benefit       = LIKE_BENEFIT)
 
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
@@ -2973,8 +2971,9 @@ class StampedAPI(AStampedAPI):
         else:
             stamp.stats.num_likes  = 0
         
+        ### NOTE (5/28/12): Removing deletion for now, and only adding new activity items if first time liked
         # Remove activity
-        self._activityDB.removeActivity('like', authUserId, stampId=stampId)
+        # self._activityDB.removeActivity('like', authUserId, stampId=stampId)
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
@@ -3867,6 +3866,7 @@ class StampedAPI(AStampedAPI):
         elif verb == 'like':
             objects.stamp_ids       = [ kwargs['stampId'] ] 
             group                   = True
+            groupRange              = timedelta(days=1)
 
         elif verb == 'todo':
             objects.user_ids        = [ kwargs['friendId'] ]

@@ -8,22 +8,23 @@ __license__   = "TODO"
 import Globals, utils
 import bson, logs, pprint, pymongo, re
 
-from datetime                       import datetime
-from utils                          import lazyProperty
-from api.Schemas                    import *
-from Entity                         import buildEntity
+from datetime                           import datetime
+from utils                              import lazyProperty
+from api.Schemas                        import *
+from Entity                             import buildEntity
 
-from api.AStampDB                   import AStampDB
-from AMongoCollection               import AMongoCollection
-from AMongoCollectionView           import AMongoCollectionView
-from MongoUserLikesCollection       import MongoUserLikesCollection
-from MongoStampLikesCollection      import MongoStampLikesCollection
-from MongoStampViewsCollection      import MongoStampViewsCollection
-from MongoUserStampsCollection      import MongoUserStampsCollection
-from MongoInboxStampsCollection     import MongoInboxStampsCollection
-from MongoDeletedStampCollection    import MongoDeletedStampCollection
-from MongoCreditGiversCollection    import MongoCreditGiversCollection
-from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
+from api.AStampDB                       import AStampDB
+from AMongoCollection                   import AMongoCollection
+from AMongoCollectionView               import AMongoCollectionView
+from MongoUserLikesCollection           import MongoUserLikesCollection
+from MongoUserLikesHistoryCollection    import MongoUserLikesHistoryCollection
+from MongoStampLikesCollection          import MongoStampLikesCollection
+from MongoStampViewsCollection          import MongoStampViewsCollection
+from MongoUserStampsCollection          import MongoUserStampsCollection
+from MongoInboxStampsCollection         import MongoInboxStampsCollection
+from MongoDeletedStampCollection        import MongoDeletedStampCollection
+from MongoCreditGiversCollection        import MongoCreditGiversCollection
+from MongoCreditReceivedCollection      import MongoCreditReceivedCollection
 
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     
@@ -116,6 +117,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     @lazyProperty
     def user_likes_collection(self):
         return MongoUserLikesCollection()
+    
+    @lazyProperty
+    def user_likes_history_collection(self):
+        return MongoUserLikesHistoryCollection()
     
     def addStamp(self, stamp):
         return self._addObject(stamp)
@@ -382,18 +387,15 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return map(self._convertFromMongo, documents)
         except Exception:
             return []
-    
-    def giveLikeCredit(self, stampId):
-        self._collection.update(
-            {'_id': self._getObjectIdFromString(stampId)}, 
-            {'$set': {'stats.like_threshold_hit': True}}
-        )
+
         
     def addLike(self, userId, stampId):
         # Add a reference to the user in the stamp's 'like' collection
         self.stamp_likes_collection.addStampLike(stampId, userId) 
         # Add a reference to the stamp in the user's 'like' collection
         self.user_likes_collection.addUserLike(userId, stampId) 
+        # Add a reference to the stamp in the user's 'like' history collection
+        self.user_likes_history_collection.addUserLike(userId, stampId)
         # Update the modified timestamp
         self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
             {'$set': {'timestamp.modified': datetime.utcnow()}})
@@ -420,6 +422,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def getUserLikes(self, userId):
         # Return stamp ids that a user has "liked"
         return self.user_likes_collection.getUserLikes(userId) 
+
+    def getUserLikesHistory(self, userId):
+        return self.user_likes_history_collection.getUserLikes(userId)
     
     def countStampLikes(self, stampId):
         return len(self.getStampLikes(stampId))
