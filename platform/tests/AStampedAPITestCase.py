@@ -322,7 +322,7 @@ class AStampedAPITestCase(AStampedTestCase):
                 "title": "Good Food",
                 "subtitle": "Peoria, IL",
                 "desc": "American food in America", 
-                "category": "food",
+                "category": "place",
                 "subcategory": "restaurant",
                 "address": "123 Main Street, Peoria, IL",
                 "coordinates": "40.714623,-74.006605"
