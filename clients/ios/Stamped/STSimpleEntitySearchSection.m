@@ -11,40 +11,50 @@
 
 @implementation STSimpleEntitySearchSection
 
-@synthesize name = name_;
-@synthesize entities = entities_;
+@synthesize title = _title;
+@synthesize subtitle = _subtitle;
+@synthesize imageURL = _imageURL;
+@synthesize entities = _entities;
 
 - (id)initWithCoder:(NSCoder *)decoder {
-  self = [super init];
-  if (self) {
-    name_ = [[decoder decodeObjectForKey:@"name"] retain];
-    entities_ = [[decoder decodeObjectForKey:@"entities"] retain];
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        _title = [[decoder decodeObjectForKey:@"title"] retain];
+        _subtitle = [[decoder decodeObjectForKey:@"subtitle"] retain];
+        _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+        _entities = [[decoder decodeObjectForKey:@"entities"] retain];
+    }
+    return self;
 }
 
 - (void)dealloc
 {
-  [name_ release];
-  [entities_ release];
-  [super dealloc];
+    [_title release];
+    [_subtitle release];
+    [_imageURL release];
+    [_entities release];
+    [super dealloc];
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-  [encoder encodeObject:self.name forKey:@"name"];
-  [encoder encodeObject:self.entities forKey:@"entities"];
+    [encoder encodeObject:self.title forKey:@"title"];
+    [encoder encodeObject:self.subtitle forKey:@"subtitle"];
+    [encoder encodeObject:self.imageURL forKey:@"imageURL"];
+    [encoder encodeObject:self.entities forKey:@"entities"];
 }
 
 + (RKObjectMapping *)mapping {
-  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleEntitySearchSection class]];
-  
-  [mapping mapAttributes:
-   @"name",
-   nil];
-  
-  [mapping mapRelationship:@"entities" withMapping:[STSimpleEntitySearchResult mapping]];
-  
-  return mapping;
+    RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleEntitySearchSection class]];
+    
+    [mapping mapAttributes:
+     @"title",
+     @"subtitle",
+     @"imageURL",
+     nil];
+    
+    [mapping mapRelationship:@"entities" withMapping:[STSimpleEntitySearchResult mapping]];
+    
+    return mapping;
 }
 
 @end

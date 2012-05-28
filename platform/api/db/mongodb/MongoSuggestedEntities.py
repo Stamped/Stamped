@@ -113,7 +113,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
         def _add_suggested_section(title, entities):
             suggested.append({ 'name' : title, 'entities' : entities })
         
-        if category == 'place' or category == 'food':
+        if category == 'place':
             if coords is not None:
                 params  = { 'radius' : 100 }
                 results = self._google_places.getEntityResultsByLatLng(coords, params)
@@ -150,7 +150,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 _add_suggested_section('Box Office', movies)
         elif category == 'book':
             subcategory = 'book'
-        elif subcategory == 'app':
+        elif category == 'app':
             top_free_apps       = self._appleRSS.get_top_free_apps(limit=5)
             top_paid_apps       = self._appleRSS.get_top_paid_apps(limit=5)
             top_grossing_apps   = self._appleRSS.get_top_grossing_apps(limit=5)

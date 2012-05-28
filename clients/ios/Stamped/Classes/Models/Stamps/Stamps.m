@@ -10,8 +10,19 @@
 #import "STConfiguration.h"
 #import "STRestKitLoader.h"
 #import "STSimpleStamp.h"
+#import "STDebug.h"
+#import "Util.h"
 
 #define kStampLimit 20
+
+@interface Stamps ()
+
+@property (nonatomic, readwrite, retain) NSArray* data;
+@property (nonatomic, readwrite, retain) NSArray* identifiers;
+@property (nonatomic, readwrite, retain) STCancellation* cancellation;
+@property (nonatomic, readwrite, assign) NSInteger page;
+
+@end
 
 @implementation Stamps
 
@@ -19,6 +30,10 @@
 @synthesize moreData=_moreData;
 @synthesize scope=_scope;
 @synthesize searchQuery=_searchQuery;
+@synthesize data = _data;
+@synthesize identifiers = _identifiers;
+@synthesize cancellation = _cancellation;
+@synthesize page = _page;
 @synthesize identifier;
 
 - (id)init {
@@ -27,8 +42,6 @@
       _data = [[NSArray alloc] init];
       _identifiers = [[NSArray alloc] init];
       _moreData = NO;
-
-      
   }
   return self;
 }
@@ -79,6 +92,8 @@
             return @"popular";
             break;
         default:
+            [STDebug log:[NSString stringWithFormat:@"bad scope in Stamps,%d", _scope]];
+            [Util warnWithMessage:@"Bad scope in Stamps; please report last log" andBlock:nil];
             break;
     }
     

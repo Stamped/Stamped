@@ -26,6 +26,7 @@ try:
     from errors                 import *
     from libs.ec2_utils         import is_prod_stack
     from pprint                 import pprint, pformat
+    from operator               import itemgetter, attrgetter
     
     from AStampedAPI            import AStampedAPI
     from AAccountDB             import AAccountDB
@@ -896,12 +897,16 @@ class StampedAPI(AStampedAPI):
         account   = self._accountDB.getAccount(authUserId)
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
+        nf_user_id  = None 
+        nf_token    = None 
+        nf_secret   = None
 
-        nf_user_id  = account.linked_accounts.netflix.netflix_user_id
-        nf_token    = account.linked_accounts.netflix.netflix_token
-        nf_secret   = account.linked_accounts.netflix.netflix_secret
+        if account.linked_accounts is not None and account.linked_accounts.netflix is not None:
+            nf_user_id  = account.linked_accounts.netflix.netflix_user_id
+            nf_token    = account.linked_accounts.netflix.netflix_token
+            nf_secret   = account.linked_accounts.netflix.netflix_secret
 
-        if (nf_user_id == None or nf_token == None or nf_secret == None):
+        if (nf_user_id is None or nf_token is None or nf_secret is None):
             logs.info('Returning because of missing account credentials')
             return None
 
@@ -1563,7 +1568,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getSuggestedEntities(self, authUserId, suggested):
-        coords = (suggested.coordinates.lat, suggested.coordinates.lng)
+        coords = None
+        if suggested.coordinates is not None:
+            coords = (suggested.coordinates.lat, suggested.coordinates.lng)
         
         return self._suggestedEntities.getSuggestedEntities(authUserId, 
                                                             coords=coords,
@@ -1641,7 +1648,7 @@ class StampedAPI(AStampedAPI):
 
         fofUserIds          = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
         fofOverlap          = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
-        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap, entityId)
+        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap[:limit], entityId)
 
         fofUsers            = StampedByGroup()
         fofUsers.stamps     = self._enrichStampObjects(fofStamps[:limit])
@@ -1925,7 +1932,7 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credit is not None:
                     for credit in stamp.credit:
-                        user = userIds[credit.user_id]
+                        user                    = userIds[credit.user_id]
                         item                    = CreditSchema()
                         item.user_id            = credit.user_id
                         item.stamp_id           = credit.stamp_id
@@ -3120,6 +3127,207 @@ class StampedAPI(AStampedAPI):
             logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+    @API_CALL
+    def getGuide(self, guideRequest, authUserId):
+
+        try:
+            guide = self._guideDB.getGuide(authUserId)
+        except (StampedUnavailableError, KeyError):
+            # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
+            guide = self._buildGuide(authUserId)
+
+        allItems = getattr(guide, guideRequest.section)
+
+        limit = 20
+        if guideRequest.limit is not None:
+            limit = guideRequest.limit 
+        offset = 0
+        if guideRequest.offset is not None:
+            offset = guideRequest.offset
+
+        entityIds = {}
+        stampIds = {}
+        userIds = {}
+        items = []
+
+        i = 0
+        for item in allItems[offset:]:
+            if guideRequest.subsection is None or guideRequest.subsection in item.tags:
+
+                items.append(item)
+                entityIds[item.entity_id] = None
+                if item.stamp_user_ids is not None:
+                    for userId in item.stamp_user_ids:
+                        userIds[userId] = None 
+                if item.todo_user_ids is not None:
+                    for userId in item.todo_user_ids:
+                        userIds[userId] = None
+                i += 1
+
+            if i >= limit:
+                break
+
+        # Entities 
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            if entity.sources.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                ### TODO: Async process to replace reference
+            else:
+                entityIds[entity.entity_id] = entity
+
+        # Users
+        users = self._userDB.lookupUsers(list(userIds.keys()))
+
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Build guide
+        result = []
+        for item in items:
+            entity = entityIds[item.entity_id]
+            previews = EntityPreviewsSchema()
+            if item.stamp_user_ids is not None:
+                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
+            if item.todo_user_ids is not None:
+                previews.todos = [ userIds[x] for x in item.todo_user_ids ]
+            if previews.stamp_users is not None or previews.todos is not None:
+                entity.previews = previews 
+            result.append(entity)
+
+        return result
+
+        # Build guide
+        return None
+
+
+    @API_CALL
+    def buildGuideAsync(self, authUserId):
+        try:
+            guide = self._guideDB.getGuide(guideRequest, authUserId)
+            if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
+                return
+        except (StampedUnavailableError, KeyError):
+            pass
+
+        self._buildGuide(authUserId)
+
+    def _buildGuide(self, authUserId):
+        user = self.getUser({'user_id': authUserId})
+        now = datetime.utcnow()
+
+        t0 = time.time()
+
+        stampIds = self._collectionDB.getInboxStampIds(user.user_id)
+        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
+        entities = self._entityDB.getEntities(entityIds)
+        todos = set(self._favoriteDB.getFavoriteEntityIds(user.user_id))
+
+        t1 = time.time()
+
+        categories = {}
+        for entity in entities:
+            category = entity.category 
+            if category == 'place':
+                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
+                    category = 'food'
+                else:
+                    category = 'other'
+            if category not in categories:
+                categories[category] = set()
+            categories[category].add(entity)
+
+        def entityScore(**kwargs):
+            numStamps = kwargs.pop('numStamps', 0)
+            numLikes = kwargs.pop('numLikes', 0)
+            numTodos = kwargs.pop('numTodos', 0)
+            created = kwargs.pop('created', 0)
+            result = 0
+            ### TIME
+            t = (time.mktime(now.timetuple()) - created) / 60 / 60 / 24
+            time_score = 0
+            if t < 90:
+                time_score = -0.1 / 90 * t + 1
+            elif t < 280:
+                time_score = -0.9 / 180 * t + 1.4
+            ### STAMPS
+            stamp_score = 0
+            if numStamps < 5:
+                stamp_score = numStamps / 5.0
+            elif numStamps >= 5:
+                stamp_score = 1
+            ### LIKES
+            like_score = 0
+            if numLikes < 20:
+                like_score = numLikes / 20.0
+            elif numLikes >= 20:
+                like_score = 1
+            ### TODOS
+            todo_score = 0
+            if numTodos < 10:
+                todo_score = numTodos / 10.0
+            elif numTodos >= 10:
+                todo_score = 1
+            ### PERSONAL TODO LIST
+            personal_todo_score = 0
+            if entity.entity_id in todos:
+                personal_todo_score = 1
+            result = (3 * time_score) + (5 * stamp_score) + (1 * todo_score) + (1 * like_score) + (3 * personal_todo_score)
+            return result
+
+        stampMap = {}
+        for stamp in stamps:
+            if stamp.entity.entity_id not in stampMap:
+                stampMap[stamp.entity.entity_id] = set()
+            stampMap[stamp.entity.entity_id].add(stamp)
+
+        guide = GuideCache()
+        guide.user_id = user.user_id
+        guide.updated = now
+
+        for category, entities in categories.items():
+            r = []
+            for entity in entities:
+                numLikes = 0
+                numTodos = 0
+                created = 0
+                for stamp in stampMap[entity.entity_id]:
+                    if stamp.stats.num_likes is not None:
+                        numLikes += stamp.stats.num_likes
+                    if stamp.stats.num_todos is not None:
+                        numTodos += stamp.stats.num_todos
+                    if stamp.timestamp.stamped is not None:
+                        created = max(created, time.mktime(stamp.timestamp.stamped.timetuple()))
+                    elif stamp.timestamp.created is not None:
+                        created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
+                score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
+                r.append((entity.entity_id, score, entity.types))
+            r.sort(key=itemgetter(1))
+            r.reverse()
+            cache = []
+            for result in r[:500]:
+                item = GuideCacheItem()
+                item.entity_id = result[0]
+                item.tags = result[2]
+                if len(stampMap[result[0]]) > 0:
+                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
+                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
+                cache.append(item)
+            setattr(guide, category, cache)
+
+        logs.info("Time to build guide: %s seconds" % (time.time() - t0))
+
+        self._guideDB.updateGuide(guide)
+
+        return guide
+
+
+
 
 
 

@@ -85,48 +85,58 @@ class TheTVDB(object):
             return self._parse_entity(item)
         
         return None
-    
+
+    # TODO: There's a lot of similar code to this in other places translating between schemas; consolidate into a single
+    # utility class somewhere!
+    class SingleFieldTranslator(object):
+        def __init__(self, original_name, new_path, conversion_func=lambda x: x):
+            self.__original_name = original_name
+            if isinstance(new_path, basestring):
+                new_path = [new_path]
+            elif not isinstance(new_path, list):
+                raise Exception("Invalid new_path passed to TVDBSingleFieldTranslator()")
+            self.__new_path = new_path
+            self.__conversion_func = conversion_func
+
+        def translateFieldToEntity(self, tvdb_item, entity):
+            elem = tvdb_item.find(self.__original_name)
+            if elem is None or elem.text is None:
+                return
+            elem = elem.text.strip()
+            if len(elem) == 0:
+                return
+            target = entity
+            for i in range(len(self.__new_path) - 1):
+                target = getattr(target, self.__new_path[i])
+            setattr(target, self.__new_path[-1], self.__conversion_func(elem))
+
     def _parse_entity(self, item):
-        _map = {
-            'SeriesName'    : 'title', 
-            'Overview'      : 'desc', 
-            'IMDB_ID'       : 'imdb_id', 
-            'id'            : 'thetvdb_id', 
-            'ContentRating' : 'mpaa_rating', 
-        }
-        
-        _map2 = {
-            'Network'       : ('networks', lambda n: [ BasicEntityMini({ 'title' : n }) ]), 
-            'Actors'        : ('cast',     lambda n: map(lambda _: BasicEntityMini({ 'title' : _ }), filter(lambda _: len(_) > 0, n.split('|')))), 
-            'Genre'         : ('genres',   lambda n: filter(lambda _: len(_) > 0, n.split('|'))), 
-            'Runtime'       : ('length',   lambda n: 60 * int(n)), 
-            'FirstAired'    : ('release_date', parseDateString), 
-        }
+        def makeBasicEntityMini(title, mini_type=BasicEntityMini):
+            result = mini_type()
+            result.title = title
+            return result
+
+        translators = [
+            TheTVDB.SingleFieldTranslator('SeriesName',     'title'),
+            TheTVDB.SingleFieldTranslator('Overview',       'desc'),
+            TheTVDB.SingleFieldTranslator('IMDB_ID',        ['sources', 'imdb_id']),
+            TheTVDB.SingleFieldTranslator('id',             ['sources', 'thetvdb_id']),
+            TheTVDB.SingleFieldTranslator('ContentRating',  'mpaa_rating'),
+            TheTVDB.SingleFieldTranslator('Network',        'networks',     lambda n: [ makeBasicEntityMini(n) ]),
+            TheTVDB.SingleFieldTranslator('Actors',         'cast',
+                                          lambda n: map(lambda _: makeBasicEntityMini(_, mini_type=PersonEntityMini), filter(lambda _: len(_) > 0, n.split('|')))),
+            TheTVDB.SingleFieldTranslator('Genre',          'genres',       lambda n: filter(lambda _: len(_) > 0, n.split('|'))),
+            TheTVDB.SingleFieldTranslator('Runtime',        'length',       lambda n: 60 * int(n)),
+            TheTVDB.SingleFieldTranslator('FirstAired',     'release_date', parseDateString)
+        ]
         
         try:
             entity = MediaCollectionEntity()
             entity.types = [ 'tv', ]
             
-            for k, v in _map.iteritems():
-                elem = item.find(k)
-                
-                if elem is not None and elem.text is not None:
-                    elem = elem.text.strip()
-                    
-                    if len(elem) > 0:
-                        setattr(entity, v, elem)
-            
-            for k, v in _map2.iteritems():
-                elem = item.find(k)
-                
-                if elem is not None and elem.text is not None:
-                    elem = elem.text.strip()
-                    
-                    if len(elem) > 0:
-                        entity_key, func = v
-                        
-                        setattr(entity, entity_key, func(elem))
-            
+            for translator in translators:
+                translator.translateFieldToEntity(item, entity)
+
             if entity.title is None:
                 return None
             
@@ -140,13 +150,11 @@ class TheTVDB(object):
                     image = image.text.strip()
                     
                     if len(image) > 0:
-                        image = ImageSchema({
-                            'sizes' : [ImageSizeSchema({
-                                'url': 'http://thetvdb.com/banners/%s' % image
-                            }),]
-                        })
-                        
-                        entity.images.append(image)
+                        inner_img_schema = ImageSizeSchema()
+                        inner_img_schema.url = 'http://thetvdb.com/banners/%s' % image
+                        img_schema = ImageSchema()
+                        img_schema.sizes = [ inner_img_schema ]
+                        entity.images = [ img_schema ]
                         break
             
             return entity

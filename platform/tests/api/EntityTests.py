@@ -73,7 +73,7 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
         }
         result = self.handleGET(path, data)
         
-        self.assertEqual(result[0]['title'].lower(), self.entity['title'].lower())
+        self.assertEqual(result['entities'][0]['title'].lower(), self.entity['title'].lower())
 
 
 class StampedAPIEntitiesAutoSuggest(StampedAPIEntityTest):
