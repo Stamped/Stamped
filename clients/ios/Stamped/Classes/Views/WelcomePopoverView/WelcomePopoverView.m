@@ -14,7 +14,8 @@
 @end
 
 @interface WelcomePopoverOptionsView : UIView
-- (void)addTitle:(NSString*)title toButton:(UIButton*)button boldText:(NSString*)boldText;
+- (id)initWithFrame:(CGRect)frame delegate:(id)delegate;
+- (CATextLayer*)addTitle:(NSString*)title toButton:(UIButton*)button boldText:(NSString*)boldText;
 @end
 
 @implementation WelcomePopoverView
@@ -39,6 +40,7 @@
         [view release];
                 
         UISwipeGestureRecognizer *gesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swiped:)];
+        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         gesture.direction = UISwipeGestureRecognizerDirectionLeft;
         [_welcomeView addGestureRecognizer:gesture];
         _swipe = gesture;
@@ -58,14 +60,24 @@
 - (void)pushOptionsView {
     
     if (!_optionsView) {
+        
         CGRect frame = _container.bounds;
         frame.origin.x = frame.size.width;
-        WelcomePopoverOptionsView *view = [[WelcomePopoverOptionsView alloc] initWithFrame:frame];
+        WelcomePopoverOptionsView *view = [[WelcomePopoverOptionsView alloc] initWithFrame:frame delegate:self];
         [_container addSubview:view];
         [view release];
         _optionsView = view;
+        
+        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [closeButton addTarget:self action:@selector(close:) forControlEvents:UIControlEventTouchUpInside];
+        [closeButton setImage:[UIImage imageNamed:@"welcome_popover_close.png"] forState:UIControlStateNormal];
+        
+        frame = CGRectMake(-12.0f, -16.0f, 44.0f, 44.0f);
+        frame = [self convertRect:frame toView:self.superview];
+        closeButton.frame = frame;
+        [self.superview addSubview:closeButton];
+
     }
-    
     
     [UIView animateWithDuration:0.3f animations:^{
        
@@ -78,18 +90,7 @@
         _optionsView.frame = frame;
         
     } completion:^(BOOL finished) {
-       
-        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [closeButton addTarget:self action:@selector(close:) forControlEvents:UIControlEventTouchUpInside];
-        [closeButton setImage:[UIImage imageNamed:@"welcome_popover_close.png"] forState:UIControlStateNormal];
-        closeButton.frame = CGRectMake(-12.0f, -16.0f, 44.0f, 44.0f);
-        [self addSubview:closeButton];
-        
-        CABasicAnimation *scale = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-        scale.fromValue = [NSNumber numberWithFloat:0.01f];
-        scale.duration = 0.25f;
-        [closeButton.layer addAnimation:scale forKey:nil];
-        
+               
         _welcomeView.hidden = YES;
         
     }];
@@ -105,6 +106,36 @@
         [self.delegate welcomePopoverViewSelectedClose:self];
     }
     
+}
+
+- (void)login:(id)sender {
+    
+    if ([(id)delegate respondsToSelector:@selector(welcomePopoverViewSelectedLogin:)]) {
+        [self.delegate welcomePopoverViewSelectedLogin:self];
+    }
+    
+}
+
+- (void)email:(id)sender {
+    
+    if ([(id)delegate respondsToSelector:@selector(welcomePopoverViewSelectedEmail:)]) {
+        [self.delegate welcomePopoverViewSelectedEmail:self];
+    }
+}
+
+- (void)twitter:(id)sender {
+    
+    if ([(id)delegate respondsToSelector:@selector(welcomePopoverViewSelectedTwitter:)]) {
+        [self.delegate welcomePopoverViewSelectedTwitter:self];
+    }
+    
+}
+
+- (void)facebook:(id)sender {
+    
+    if ([(id)delegate respondsToSelector:@selector(welcomePopoverViewSelectedFacebook:)]) {
+        [self.delegate welcomePopoverViewSelectedFacebook:self];
+    }
 }
 
 
@@ -138,6 +169,56 @@
         frame.origin.x = (self.bounds.size.width - frame.size.width)/2;
         imageView.frame = frame;
         
+        CGFloat originY = CGRectGetMaxY(frame);
+        
+        imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"welcome_popover_images.png"]];
+        [self addSubview:imageView];
+        [imageView release];
+        
+        frame = imageView.frame;
+        frame.origin.y = originY + 30.0f;
+        frame.origin.x = (self.bounds.size.width - frame.size.width)/2;
+        imageView.frame = frame;
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+        label.textColor = [UIColor colorWithRed:0.204f green:0.447f blue:0.863f alpha:1.0f];
+        //label.font = [UIFont fontWithName:@"" size:12];
+        label.font = [UIFont boldSystemFontOfSize:11];
+        label.backgroundColor = [UIColor whiteColor];
+        label.text = @"Swipe to continue";
+        [self addSubview:label];
+        [label release];
+        [label sizeToFit];
+        
+        originY = CGRectGetMaxY(frame) + 40.0f;
+        
+        frame = label.frame;
+        frame.origin.x = floorf((self.bounds.size.width-frame.size.width)/2);
+        frame.origin.y = originY;
+        label.frame = frame;
+        
+        originY = CGRectGetMaxY(frame) + 8.0f;
+        
+        STBlockUIView *dots = [[STBlockUIView alloc] initWithFrame:CGRectMake((self.bounds.size.width-14.0f)/2, originY, 14.0f, 5.0f)];
+        dots.backgroundColor = [UIColor whiteColor];
+        [self addSubview:dots];
+        [dots setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+
+            [[UIColor colorWithRed:0.204f green:0.447f blue:0.863f alpha:1.0f] setFill];
+            CGFloat height = rect.size.height;
+            
+            CGRect fillRect = CGRectMake(0.0f, 0.0f, height, height);
+            CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:fillRect cornerRadius:height].CGPath);
+            CGContextFillPath(ctx);
+            
+            CGContextSetAlpha(ctx, 0.6f);
+            fillRect = CGRectMake(height + 4.0f, 0.0f,height, height);
+            CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:fillRect cornerRadius:height].CGPath);
+            CGContextFillPath(ctx);
+            
+        }];
+        [dots release];
+
         
     }
     return self;
@@ -151,7 +232,7 @@
 
 @implementation WelcomePopoverOptionsView
 
-- (id)initWithFrame:(CGRect)frame {
+- (id)initWithFrame:(CGRect)frame delegate:(id)delegate {
     
     if ((self = [super initWithFrame:frame])) {
         self.backgroundColor = [UIColor whiteColor];
@@ -166,15 +247,29 @@
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         UIImage *image = [UIImage imageNamed:@"welcome_facebook_btn.png"];
+        [button addTarget:delegate action:@selector(facebook:) forControlEvents:UIControlEventTouchUpInside];
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:image.size.width - 6.0f topCapHeight:0] forState:UIControlStateNormal];
         button.frame = CGRectMake(20.0f, 60.0f, self.bounds.size.width-40.0f, image.size.height);
         [self addSubview:button];
-        
+        CATextLayer *textLayer = [self addTitle:@"Sign in with Facebook" toButton:button boldText:@"Facebook"];
+        textLayer.alignmentMode = @"left";
+        frame = textLayer.frame;
+        frame.origin.x = 60.0f;
+        frame.origin.y -= 1.0f;
+        textLayer.frame = frame;
+
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         image = [UIImage imageNamed:@"welcome_twitter_btn.png"];
+        [button addTarget:delegate action:@selector(twitter:) forControlEvents:UIControlEventTouchUpInside];
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:image.size.width - 6.0f topCapHeight:0] forState:UIControlStateNormal];
         button.frame = CGRectMake(20.0f, 114.0f, self.bounds.size.width-40.0f, image.size.height);
         [self addSubview:button];
+        textLayer = [self addTitle:@"Sign in with Twitter" toButton:button boldText:@"Twitter"];
+        textLayer.alignmentMode = @"left";
+        frame = textLayer.frame;
+        frame.origin.x = 60.0f;
+        frame.origin.y -= 1.0f;
+        textLayer.frame = frame;
         
         UIFont *font = [UIFont systemFontOfSize:11];
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, floorf(CGRectGetMaxY(button.frame) + 10.0f), floorf(self.bounds.size.width-40.0f), font.lineHeight*2)];
@@ -217,6 +312,7 @@
         
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         image = [UIImage imageNamed:@"welcome_email_btn.png"];
+        [button addTarget:delegate action:@selector(email:) forControlEvents:UIControlEventTouchUpInside];
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2)topCapHeight:0] forState:UIControlStateNormal];
         button.frame = CGRectMake(20.0f, originY, 150.0f, image.size.height);
         [self addSubview:button];
@@ -225,6 +321,7 @@
         CGFloat originX = CGRectGetMaxX(button.frame) - 2.0f;
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         image = [UIImage imageNamed:@"welcome_email_btn.png"];
+        [button addTarget:delegate action:@selector(login:) forControlEvents:UIControlEventTouchUpInside];
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         button.frame = CGRectMake(originX, originY, self.bounds.size.width-(originX+20.0f), image.size.height);
         [self addSubview:button];
@@ -235,7 +332,7 @@
     
 }
 
-- (void)addTitle:(NSString*)title toButton:(UIButton*)button boldText:(NSString*)boldText {
+- (CATextLayer*)addTitle:(NSString*)title toButton:(UIButton*)button boldText:(NSString*)boldText {
     
     CTFontRef ctFont = CTFontCreateWithName([[UIScreen mainScreen] scale] == 2.0 ? (CFStringRef)@"Helvetica Neue" : (CFStringRef)@"Helvetica", 11, NULL);
     CTFontRef boldFont = CTFontCreateCopyWithSymbolicTraits(ctFont, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait);
@@ -258,6 +355,7 @@
     layer.alignmentMode = @"center";
     layer.string = string;
     [button.layer addSublayer:layer];
+    return layer;
     
     
 }

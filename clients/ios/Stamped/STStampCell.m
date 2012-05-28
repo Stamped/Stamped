@@ -77,22 +77,7 @@
       view.backgroundColor = [UIColor whiteColor];
       [self addSubview:view];
       [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
-         
-          if (_title) {
-              
-              UIFont *font = [UIFont stampedTitleLightFontWithSize:35];
-              CGSize size = [_title sizeWithFont:font];
-
-              if (_stampImage) {
-                  [_stampImage drawInRect:CGRectMake(floorf(size.width - 7), 19.0f, _stampImage.size.width, _stampImage.size.height)];
-              }
-              
-              [[UIColor stampedBlackColor] setFill];
-              size.width = MIN(rect.size.width - 6.0f, size.width);
-              [_title drawInRect:CGRectMake(rect.origin.x, 18.0f, size.width, size.height) withFont:font lineBreakMode:UILineBreakModeTailTruncation];
-          
-          }
-
+      
           if (_username && _subcategory) {
               [[UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f] setFill];
               UIFont *font = [UIFont boldSystemFontOfSize:10];
@@ -107,6 +92,32 @@
               }
               [[UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f] setFill];
               [_category drawAtPoint:CGPointMake((_categoryImage!=nil) ? _categoryImage.size.width + 5.0f : 0.0f, 54.0f) withFont:[UIFont systemFontOfSize:11]];
+          }
+          
+          if (_title) {
+              
+              UIFont *font = [UIFont stampedTitleLightFontWithSize:35];
+              CGContextSelectFont (ctx, [font.fontName cStringUsingEncoding:NSASCIIStringEncoding], font.pointSize, kCGEncodingMacRoman);
+              CGContextSetCharacterSpacing(ctx, 1.5);
+              CGContextSetFillColorWithColor(ctx, [[UIColor clearColor] CGColor]);
+              CGContextSetTextMatrix(ctx, CGAffineTransformScale(CGAffineTransformIdentity, 1.0f, -1.0f));
+              
+              // get the string length.
+              CGPoint p = CGContextGetTextPosition(ctx);
+              CGContextShowTextAtPoint(ctx, 0, 0, [_title cStringUsingEncoding:NSASCIIStringEncoding], [_title length]);
+              CGPoint v = CGContextGetTextPosition(ctx);
+              
+              // calculate width and draw stamp
+              float width = v.x - p.x;
+              // draw stamp
+              if (_stampImage) {
+                  [_stampImage drawInRect:CGRectMake(MIN(floorf(width - 7), rect.size.width-_stampImage.size.width), 19.0f, _stampImage.size.width, _stampImage.size.height)];
+              }
+              
+              // draw text
+              CGContextSetFillColorWithColor(ctx, [[UIColor stampedBlackColor] CGColor]);
+              CGContextShowTextAtPoint(ctx, 0.0f, 46.0f, [_title cStringUsingEncoding:NSASCIIStringEncoding], [_title length]);
+
           }
 
       }];

@@ -30,6 +30,7 @@
 #import "EntityDetailViewController.h"
 #import "STStampCell.h"
 #import "AccountManager.h"
+#import "DDMenuController.h"
 
 
 @interface STInboxViewController ()
@@ -81,8 +82,19 @@
   
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
 
+    if (!LOGGED_IN) {
+        
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        self.navigationItem.rightBarButtonItem = button;
+        [button release];
+        
+    } else {
+        
+        [Util addCreateStampButtonToController:self];
+
+    }
+    
     [Util addHomeButtonToController:self withBadge:YES];
-    [Util addCreateStampButtonToController:self];
     
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
@@ -100,6 +112,9 @@
     header.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
     [self.tableView addSubview:header];
     [header release];
+    
+
+    
     
 }
 
@@ -284,7 +299,66 @@
     view.imageView.userInteractionEnabled = YES;
     [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
-    if (_stamps.scope == STStampedAPIScopeYou) {
+    if (!LOGGED_IN || (LOGGED_IN && _stamps.scope != STStampedAPIScopeYou)) {
+        
+        UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setTitle:LOGGED_IN ? @"Find friends to follow" : @"Sign in / Create account" forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(noDataAction:) forControlEvents:UIControlEventTouchUpInside];
+        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
+        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
+        [button sizeToFit];
+        [view.imageView addSubview:button];
+        CGRect frame = button.frame;
+        frame.origin.y = 34.0f;
+        frame.size.width += 48.0f;
+        frame.size.height = image.size.height;
+        frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
+        button.frame = frame;
+        CGFloat maxY = CGRectGetMaxY(button.frame);
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+        label.font = [UIFont systemFontOfSize:12];
+        label.backgroundColor = [UIColor clearColor];
+        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
+        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+        [view.imageView addSubview:label];
+        [label release];
+        
+        switch (_stamps.scope) {
+            case STStampedAPIScopeYou:
+                label.text = @"to create stamps.";
+                break;
+            case STStampedAPIScopeFriends:
+                label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
+                break;
+            case STStampedAPIScopeFriendsOfFriends:
+                label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
+                break;
+            case STStampedAPIScopeEveryone:
+                label.text = @"to view popular stamps.";
+                break;
+                
+            default:
+                break;
+        }
+        
+        [label sizeToFit];
+        
+        frame = label.frame;
+        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
+        frame.origin.y = floorf(maxY + 8.0f);
+        label.frame = frame;
+        
+        
+        
+    }
+    
+    if (LOGGED_IN && _stamps.scope == STStampedAPIScopeYou) {
         
         view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
         view.imageView.backgroundColor = view.backgroundColor;
@@ -333,58 +407,18 @@
         label.frame = frame;
         
         UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(noDataTapped:)];
+        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         [view addGestureRecognizer:gesture];
         [gesture release];
         
-    } else {
-        
-        UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
-        [button setTitle:@"Find friends to follow" forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(findFriends:) forControlEvents:UIControlEventTouchUpInside];
-        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-        [button sizeToFit];
-        [view.imageView addSubview:button];
-        CGRect frame = button.frame;
-        frame.origin.y = 34.0f;
-        frame.size.width += 48.0f;
-        frame.size.height = image.size.height;
-        frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
-        button.frame = frame;
-        CGFloat maxY = CGRectGetMaxY(button.frame);
-
-        
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.font = [UIFont systemFontOfSize:12];
-        label.backgroundColor = [UIColor clearColor];
-        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
-        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
-        [view.imageView addSubview:label];
-        [label release];
-        
-        label.text = @"to view their stamps.";
-        [label sizeToFit];
-        
-        frame = label.frame;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
-        frame.origin.y = floorf(maxY + 8.0f);
-        label.frame = frame;
-        
-    }
-    
- 
+    } 
 
 }
 
 
 #pragma mark - No Data Actions
 
-- (void)findFriends:(id)sender {
+- (void)noDataAction:(id)sender {
     
     
 }
@@ -439,6 +473,17 @@
     });
     
 }
+
+
+#pragma mark - UIGestureRecognizerDelegate 
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
+    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    return ![[menuController tap] isEnabled];
+    
+}
+
 
 
 @end

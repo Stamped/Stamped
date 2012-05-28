@@ -125,12 +125,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [self.window makeKeyAndVisible];
     
     // 1st run debugging code..
-    /*
     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
     [menuController.view addSubview:welcomeController.view];
     welcomeController.view.frame = menuController.view.bounds;
     [welcomeController animateIn];
-    */
   //[[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
     
      

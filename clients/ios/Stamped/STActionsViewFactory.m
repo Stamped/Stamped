@@ -55,6 +55,8 @@
     //actionView.backgroundColor = [UIColor blueColor];
     actionView.backgroundColor = [UIColor clearColor];
     
+      
+      /*
     self.layer.cornerRadius = 2.0;
     self.layer.borderColor =[UIColor colorWithRed:.8 green:.8 blue:.8 alpha:.4].CGColor;
     self.layer.borderWidth = 1.0;
@@ -73,6 +75,8 @@
                        (id)[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:.6].CGColor,
                        nil];
     [self.layer addSublayer:gradient];
+      
+      */
     
     CGRect labelFrame = frame;
     labelFrame.size.width = 200;

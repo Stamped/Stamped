@@ -400,7 +400,7 @@
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-        
+    
     if (gestureRecognizer==_tap) {
         
         if (otherGestureRecognizer!=_pan && (_menuFlags.showingLeftView || _menuFlags.showingRightView)) {
