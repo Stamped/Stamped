@@ -897,12 +897,16 @@ class StampedAPI(AStampedAPI):
         account   = self._accountDB.getAccount(authUserId)
 
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
+        nf_user_id  = None 
+        nf_token    = None 
+        nf_secret   = None
 
-        nf_user_id  = account.linked_accounts.netflix.netflix_user_id
-        nf_token    = account.linked_accounts.netflix.netflix_token
-        nf_secret   = account.linked_accounts.netflix.netflix_secret
+        if account.linked_accounts is not None and account.linked_accounts.netflix is not None:
+            nf_user_id  = account.linked_accounts.netflix.netflix_user_id
+            nf_token    = account.linked_accounts.netflix.netflix_token
+            nf_secret   = account.linked_accounts.netflix.netflix_secret
 
-        if (nf_user_id == None or nf_token == None or nf_secret == None):
+        if (nf_user_id is None or nf_token is None or nf_secret is None):
             logs.info('Returning because of missing account credentials')
             return None
 
