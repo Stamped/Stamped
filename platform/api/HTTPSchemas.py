@@ -1737,7 +1737,7 @@ class HTTPEntity(Schema):
 
                         images.append(item)
                     except Exception as e:
-                        logs.warning(e)
+                        logs.warning("Artist album-gallery item failed: %s" % e)
                         pass
 
                 gallery.images = images
