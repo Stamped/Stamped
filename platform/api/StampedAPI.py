@@ -4160,9 +4160,7 @@ class StampedAPI(AStampedAPI):
             ### TODO: decorations returned as dict, not schema. Fix?
             if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
                 try:
-                    menu = MenuSchema()
-                    menu.importData(v)
-                    self._menuDB.update(menu)
+                    self._menuDB.update(v)
                 except Exception:
                     logs.warning('Menu enrichment failed')
                     report()
