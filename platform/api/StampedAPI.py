@@ -2346,7 +2346,9 @@ class StampedAPI(AStampedAPI):
                 # add the default image size
                 supportedSizes['']       = (imageWidth,imageHeight)
 
-                images = getattr(c, 'images', tuple())
+                images = c.images
+                if images is None:
+                    images = ()
                 sizes = []
                 for k,v in supportedSizes.iteritems():
                     logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
