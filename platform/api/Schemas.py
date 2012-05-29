@@ -1365,6 +1365,7 @@ class StampAttributesSchema(Schema):
 class StampContent(Schema):
     @classmethod
     def setSchema(cls):
+        cls.addProperty('content_id',                   basestring)
         cls.addProperty('blurb',                        basestring)
         cls.addNestedPropertyList('images',             ImageSchema)
         cls.addNestedProperty('timestamp',              TimestampSchema, required=True)

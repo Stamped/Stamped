@@ -2106,8 +2106,9 @@ class StampedAPI(AStampedAPI):
 
         # Build content
         content = StampContent()
+        content.content_id = utils.generateUid()
         timestamp = TimestampSchema()
-        timestamp.created = now
+        timestamp.created = time.gmtime(utils.timestampFromUid(content.content_id))
         content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
@@ -2203,7 +2204,7 @@ class StampedAPI(AStampedAPI):
 
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, timestamp.created])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, content.content_id])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2313,7 +2314,7 @@ class StampedAPI(AStampedAPI):
 
     
     @API_CALL
-    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, blurbCreated):
+    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
         logs.info('### Hit addResizedStampImagesAsync')
         assert imageUrl is not None, "stamp image url unavailable!"
 
@@ -2328,13 +2329,9 @@ class StampedAPI(AStampedAPI):
 
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
-        # find the blurb using timestamp and update the images field
-        from pprint import pformat
-        logs.info(pformat(stamp.contents[0]))
-        logs.info(stamp.contents[0].timestamp.created)
-        logs.info('### blurbCreated: %s'  % blurbCreated)
+        # find the blurb using the content_id and update the images field
         for i, c in enumerate(stamp.contents):
-            if c.timestamp.created == blurbCreated:
+            if c.content_id == content_id:
 
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
                 # Add image dimensions to stamp object
