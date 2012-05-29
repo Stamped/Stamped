@@ -4155,6 +4155,7 @@ class StampedAPI(AStampedAPI):
         return FullResolveContainer.FullResolveContainer()
     
     def __handleDecorations(self, entity, decorations):
+        logs.info("HANDLE DECORATIONS: %s" % decorations)
         for k,v in decorations.items():
             ### TODO: decorations returned as dict, not schema. Fix?
             if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
