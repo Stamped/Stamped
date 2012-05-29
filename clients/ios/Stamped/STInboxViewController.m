@@ -70,6 +70,7 @@
           _scope = STStampedAPIScopeFriends;
       }
       _searchQuery = nil;
+      _reloading = YES;
   }
   return self;
 }
