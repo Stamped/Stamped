@@ -166,14 +166,18 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         [tableView release];
         
     }
-    
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
+}
+
+- (void)configurationChanged:(id)notImportant {
+    [self.tableView reloadData];
 }
 
 - (void)viewDidUnload {
     [super viewDidUnload];
     self.tableView = nil;
     self.anchorTableView = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
