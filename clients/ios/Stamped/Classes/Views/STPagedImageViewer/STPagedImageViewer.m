@@ -85,6 +85,8 @@
     [self layoutScrollView];
     [self loadScrollViewWithPage:0];
     [self loadScrollViewWithPage:1];
+    [self layoutScrollViewSubviewsAnimated:NO];
+    [self adjustPageAlphaAnimated:NO];
     
 }
 
@@ -156,12 +158,12 @@
 
 - (void)layoutScrollViewSubviewsAnimated:(BOOL)animated {
 	
-	NSInteger index = [self currentPageIndex];
+	NSInteger index = _currentPage;
 	
     BOOL _enabled = [UIView areAnimationsEnabled];
     [UIView setAnimationsEnabled:animated];
     [UIView beginAnimations:nil context:NULL];
-    [UIView setAnimationDuration:0.5f];
+    [UIView setAnimationDuration:0.05f];
     
 	for (NSInteger page = index -1; page < index+3; page++) {
 		
@@ -303,7 +305,6 @@
 }
 
 - (void)adjustPageAlphaAnimated:(BOOL)animated {
-    return;
     
     BOOL _enabled = [UIView areAnimationsEnabled];
     [UIView setAnimationsEnabled:animated];
@@ -321,7 +322,7 @@
                 
                 CGRect intersection = CGRectIntersection(rect, view.frame);
                 CGFloat diff = intersection.size.width / 200.0f;
-                view.alpha = diff;
+                view.alpha = MAX(0.3f, diff);
                 
             }
 		}
@@ -343,31 +344,35 @@
         _currentPage = page;
 		_pageControl.currentPage = page;
         
-        if (!scrollView.tracking && !scrollView.dragging) {
-            [self layoutScrollViewSubviewsAnimated:NO];
+        if (scrollView.decelerating) {
+            [self layoutScrollViewSubviewsAnimated:YES];
         }
 
 	}
     
-    [self adjustPageAlphaAnimated:NO];
+    [self adjustPageAlphaAnimated:scrollView.decelerating];
 
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
     
-	[self layoutScrollViewSubviewsAnimated:YES];
-    [self adjustPageAlphaAnimated:YES];
+    [self layoutScrollViewSubviewsAnimated:YES];
     
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    
+    if (_observing) {
+        [scrollView removeObserver:self forKeyPath:@"contentOffset"];
+        _observing = NO;
+    }
 	
 	if (_currentPage != [self currentPageIndex]) {
         [self pageChanged];
         [self moveToPage:[self currentPageIndex] animated:YES];
 	}
     
-    [self adjustPageAlphaAnimated:NO];
+    [self adjustPageAlphaAnimated:YES];
 	[self layoutScrollViewSubviewsAnimated:NO];
 
 }

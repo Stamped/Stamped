@@ -65,10 +65,6 @@ class BasicFieldGroup(AFieldGroup):
         for field in self.__fields:
             old_value = self.getValue(destination, field)
             new_value = self.getValue(entity, field)
-            if isinstance(old_value, Schema):
-                old_value = old_value.dataExport()
-            if isinstance(new_value, Schema):
-                new_value = new_value.dataExport()
             if old_value != new_value:
                 self.setValue(destination, field, new_value)
                 modified = True
@@ -79,10 +75,6 @@ class BasicFieldGroup(AFieldGroup):
         for field in self.__decorations:
             old_value = self.getValue(destination, field)
             new_value = self.getValue(entity, field)
-            if isinstance(old_value, Schema):
-                old_value = old_value.dataExport()
-            if isinstance(new_value, Schema):
-                new_value = new_value.dataExport()
             if old_value != new_value:
                 self.setValue(destination, field, new_value)
                 modified = True

@@ -98,13 +98,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #endif
     RKLogConfigureByName("RestKit*", RKLogLevelError);
     RKLogSetAppLoggingLevel(RKLogLevelError);
-    //[self addConfigurations];
-    //[self customizeAppearance];
-    //[self performRestKitMappings];
+    [self addConfigurations];
+    [self customizeAppearance];
+    [self performRestKitMappings];
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];
-    //[[AccountManager sharedManager] authenticate];
+    [[AccountManager sharedManager] authenticate];
     
     STInboxViewController *inboxController = [[STInboxViewController alloc] init];
     STLeftMenuViewController *leftController = [[STLeftMenuViewController alloc] init];
@@ -125,13 +125,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
-    
 
-    /*
     EntityViewController *entity = [[EntityViewController alloc] init];
     [menuController setRootController:entity animated:NO];
     [entity release];
-    */
     
     /*
      STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
