@@ -2340,7 +2340,7 @@ class StampedAPI(AStampedAPI):
         for i, c in enumerate(stamp.contents):
             if c.content_id == content_id:
 
-                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
+                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
                 # Add image dimensions to stamp object
                 image           = ImageSchema()
                 # add the default image size
