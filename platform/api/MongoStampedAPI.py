@@ -29,7 +29,7 @@ from db.mongodb.MongoCommentCollection          import MongoCommentCollection
 from db.mongodb.MongoTodoCollection             import MongoTodoCollection
 from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
-from db.mongodb.MongoUserTodoEntitiesCollection import MongoUserTodoEntitiesCollection
+from db.mongodb.MongoUserTodosEntitiesCollection import MongoUserTodosEntitiesCollection
 from db.mongodb.MongoActivityCollection         import MongoActivityCollection
 from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
 from db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
@@ -103,7 +103,7 @@ class MongoStampedAPI(StampedAPI):
 
     @lazyProperty
     def _userTodoDB(self):
-        return MongoUserTodoEntitiesCollection(self)
+        return MongoUserTodosEntitiesCollection(self)
     
     @lazyProperty
     def _activityDB(self):

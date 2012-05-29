@@ -267,6 +267,46 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
+class StampedAPIActivityTodos(StampedAPIActivityTest):
+    def test_show_todos(self):
+        # Create a new User E who friends User A.
+        (self.userE, self.tokenE) = self.createAccount('UserE')
+        self.createFriendship(self.tokenE, self.userA)
+
+        #  We will have User E todo entity A and verify that this appears in User A's activity feed
+        self.createTodo(self.tokenE, self.entityA['entity_id'])
+
+        path = "activity/show.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            }
+
+        result = self.handleGET(path, data)
+        import pprint
+        pprint.pprint(result)
+
+        # Assert that the UserE's todo appears in User A's activity feed
+        self.async(lambda: self.handleGET(path, data), [
+            lambda x: self.assertEqual(len(x), 3),
+            lambda x: self._assertBody(x, 'UserE added %s as a to-do.' % self.entityA['title']),
+            ])
+
+        self.deleteTodo(self.tokenE, self.entityA['entity_id'])
+
+        # Assert nothing happens to the activity feed when User E removes the todo
+        self.async(lambda: self.handleGET(path, data), [
+            lambda x: self.assertEqual(len(x), 3),
+            lambda x: self._assertBody(x, 'UserE added %s as a to-do.' % self.entityA['title']),
+            ])
+
+        self.deleteAccount(self.tokenE)
+
+        # Assert that deleting the account removed the activity item from User A's feed
+        self.async(lambda: self.handleGET(path, data), [
+            lambda x: self.assertEqual(len(x), 2),
+            ])
+
+        result = self.handleGET(path, data)
 
 if __name__ == '__main__':
     main()

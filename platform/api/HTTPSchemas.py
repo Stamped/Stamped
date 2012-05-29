@@ -2816,7 +2816,7 @@ class HTTPTodo(Schema):
             self.source.stamp_ids   = [ todo.stamp.stamp_id ]
         if todo.previews is not None and todo.previews.todos is not None:
             self.previews           = HTTPStampPreviews()
-            self.previews.todos     = [HTTPUser().importUser(u) for u in todo.previews.todos]
+            self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
         self.created                = todo.timestamp.created
         self.complete               = todo.complete
 
@@ -3193,10 +3193,7 @@ class HTTPActivity(Schema):
                 ### TODO: What should this image be?
                 self.image = _getIconURL('news_todo')
 
-            if len(self.objects.stamps) > 0:
-                self.action = _buildStampAction(self.objects.stamps[0])
-            else:
-                self.action = _buildEntityAction(self.objects.entities[0])
+            self.action = _buildEntityAction(self.objects.entities[0])
 
         elif self.verb == 'comment':
             verb = 'Comment on'
