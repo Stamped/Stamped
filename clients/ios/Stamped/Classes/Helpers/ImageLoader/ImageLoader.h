@@ -23,8 +23,8 @@ typedef  void(^ImageLoaderCompletionHandler)(UIImage *, NSURL *);
 - (void)imageForURL:(NSURL*)url completion:(ImageLoaderCompletionHandler)handler;
 
 /*
- * return thumbnail sized image, from cache or url
+ * load cancelling
  */
-- (void)thumbnailForURL:(NSURL*)url completion:(ImageLoaderCompletionHandler)handler;
+- (void)cancelRequestForURL:(NSURL*)url;
 
 @end

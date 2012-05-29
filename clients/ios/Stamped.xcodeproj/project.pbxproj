@@ -1124,6 +1124,8 @@
 		0358C90F1575080A00FD1597 /* ImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C90D1575080A00FD1597 /* ImageLoader.m */; };
 		0358C9101575080A00FD1597 /* ImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C90D1575080A00FD1597 /* ImageLoader.m */; };
 		0358C9111575080A00FD1597 /* ImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C90D1575080A00FD1597 /* ImageLoader.m */; };
+		0358C92E1575121800FD1597 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0358C92D1575121800FD1597 /* ImageIO.framework */; };
+		0358C932157528D700FD1597 /* Stamped.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 0358C9291575120300FD1597 /* Stamped.entitlements */; };
 		0364A2D715630D9800F068DB /* scope_drag_inner_all.png in Resources */ = {isa = PBXBuildFile; fileRef = 0364A2D515630D9800F068DB /* scope_drag_inner_all.png */; };
 		0364A2D815630D9800F068DB /* scope_drag_inner_all.png in Resources */ = {isa = PBXBuildFile; fileRef = 0364A2D515630D9800F068DB /* scope_drag_inner_all.png */; };
 		0364A2D915630D9800F068DB /* scope_drag_inner_all.png in Resources */ = {isa = PBXBuildFile; fileRef = 0364A2D515630D9800F068DB /* scope_drag_inner_all.png */; };
@@ -4397,6 +4399,8 @@
 		0358C9061575058500FD1597 /* STMusicPopoverController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMusicPopoverController.m; sourceTree = "<group>"; };
 		0358C90C1575080A00FD1597 /* ImageLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageLoader.h; sourceTree = "<group>"; };
 		0358C90D1575080A00FD1597 /* ImageLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageLoader.m; sourceTree = "<group>"; };
+		0358C9291575120300FD1597 /* Stamped.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Stamped.entitlements; sourceTree = "<group>"; };
+		0358C92D1575121800FD1597 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		0364A2D515630D9800F068DB /* scope_drag_inner_all.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scope_drag_inner_all.png; sourceTree = "<group>"; };
 		0364A2D615630D9800F068DB /* scope_drag_inner_all@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scope_drag_inner_all@2x.png"; sourceTree = "<group>"; };
 		0364A2DF15630F4100F068DB /* scope_track.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scope_track.png; sourceTree = "<group>"; };
@@ -5778,6 +5782,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0358C92E1575121800FD1597 /* ImageIO.framework in Frameworks */,
 				034BE0A91562F6980008F160 /* StoreKit.framework in Frameworks */,
 				034BE0AA1562F6980008F160 /* AudioToolbox.framework in Frameworks */,
 				034BE0AB1562F6980008F160 /* libRestKit.a in Frameworks */,
@@ -7749,6 +7754,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				0358C92D1575121800FD1597 /* ImageIO.framework */,
 				635EAADC1523D4ED00D0378D /* StoreKit.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
@@ -7801,6 +7807,7 @@
 		7EC0177B13C3754300ABE6E2 /* Stamped */ = {
 			isa = PBXGroup;
 			children = (
+				0358C9291575120300FD1597 /* Stamped.entitlements */,
 				7EFE8FC813C4D8E300324F34 /* Classes */,
 				7EFE8F8213C3CE3000324F34 /* Interface */,
 				7EC6B4A413C6036500CE83DD /* Images */,
@@ -8458,7 +8465,7 @@
 		7EC0176813C3754300ABE6E2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0440;
 			};
 			buildConfigurationList = 7EC0176B13C3754300ABE6E2 /* Build configuration list for PBXProject "Stamped" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -8557,6 +8564,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				034BE0C21562F6980008F160 /* InfoPlist.strings in Resources */,
+				0358C932157528D700FD1597 /* Stamped.entitlements in Resources */,
 				034BE0C31562F6980008F160 /* MainWindow.xib in Resources */,
 				034BE0C41562F6980008F160 /* main_action_button_bg@2x.png in Resources */,
 				034BE0C51562F6980008F160 /* call_action_button_bg@2x.png in Resources */,
@@ -12971,6 +12979,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = "StampedDev copy.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = NO;
@@ -13022,6 +13031,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = "StampedDev copy.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
@@ -13069,6 +13079,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = "StampedDev copy.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
@@ -13116,6 +13127,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = "Stamped copy.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				COPY_PHASE_STRIP = NO;
@@ -13167,6 +13179,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = "Stamped copy.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				COPY_PHASE_STRIP = YES;
@@ -13214,6 +13227,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = "Stamped copy.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (4VK35T7BP6)";
 				COPY_PHASE_STRIP = YES;
@@ -13292,6 +13306,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = Stamped/Stamped.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
@@ -13421,6 +13436,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = Stamped/Stamped.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -13463,6 +13479,7 @@
 					armv7,
 					armv6,
 				);
+				CODE_SIGN_ENTITLEMENTS = Stamped/Stamped.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
