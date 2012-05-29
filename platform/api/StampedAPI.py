@@ -982,11 +982,7 @@ class StampedAPI(AStampedAPI):
         if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
             if user.stats.distribution is None or len(user.stats.distribution) == 0:
                 distribution = self._getUserStampDistribution(user.user_id)
-                ### HACKY TEMPORARY FIX
-                r = []
-                for i in distribution:
-                    r.append(CategoryDistributionSchema().dataImport(i))
-                user.stats.distribution = r
+                user.stats.distribution = distribution
                 ### TEMP: This should be async
                 self._userDB.updateUserStats(user.user_id, 'distribution', value=distribution)
         
@@ -2334,8 +2330,8 @@ class StampedAPI(AStampedAPI):
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using timestamp and update the images field
         from pprint import pformat
-        logs.info(pformat(stamp.contents))
-        for i, c in enumerate(stamp.contents.dataExport()):
+        logs.info(pformat(stamp.contents[0]))
+        for i, c in enumerate(stamp.contents):
             if c.timestamp.created == blurbCreated:
 
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
