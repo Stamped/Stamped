@@ -959,7 +959,14 @@ class StampedAPI(AStampedAPI):
             categories.setdefault(category, 0)
             categories[category] += 1
 
-        return [ { 'category': k, 'count': v } for k, v in categories.iteritems() ] 
+        result = []
+        for k, v in categories.items():
+            distribution = CategoryDistributionSchema()
+            distribution.category = k 
+            distribution.count = v 
+            result.append(distribution)
+
+        return result
         
     
     ### PUBLIC
