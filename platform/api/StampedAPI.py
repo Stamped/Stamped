@@ -3732,12 +3732,10 @@ class StampedAPI(AStampedAPI):
         if not RawTodo or not RawTodo.todo_id:
             raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
 
-        self._todoDB.completeTodo(authUserId, entityId, complete=complete)
-
-        # Decrement user stats by one
-        self._userDB.updateUserStats(authUserId, 'num_todos', increment=1 if complete else -1)
+        self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
         # Enrich todo
+        RawTodo.complete = True
         todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
         # TODO: Add activity item
@@ -3747,8 +3745,9 @@ class StampedAPI(AStampedAPI):
             #self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
 
         # Update stamp stats
-        for stamp in todo.source_stamps:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+#        if todo.source_stamps is not None:
+#            for stamp in todo.source_stamps:
+#                tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         return todo
 

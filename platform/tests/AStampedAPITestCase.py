@@ -418,7 +418,16 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-    
+
+    def completeTodo(self, token, entityId, complete):
+        path = "todos/complete.json"
+        data = {
+            "oauth_token":  token['access_token'],
+            "entity_id":    entityId,
+            "complete":     complete,
+        }
+        return self.handlePOST(path, data)
+
     def _loadCollection(self, collection, filename=None, drop=True):
         if filename is None:
             filename = "%s.db" % collection
