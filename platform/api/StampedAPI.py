@@ -2356,7 +2356,8 @@ class StampedAPI(AStampedAPI):
                     size.height     = v[1]
                     sizes.append(size)
                 image.sizes = sizes
-                c.images += (image,)
+                images += (image,)
+                c.images = images
 
                 # update the actual stamp content, then update the db
                 stamp.contents[i] = c
