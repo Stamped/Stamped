@@ -11,6 +11,7 @@
 @interface STPagedImageViewer : UIView {
     NSInteger _currentPage;
     NSArray *_views;
+    BOOL _observing;
 }
 
 @property (nonatomic,strong) NSArray *imageURLs;

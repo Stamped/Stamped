@@ -125,13 +125,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
-    
 
-    /*
     EntityViewController *entity = [[EntityViewController alloc] init];
     [menuController setRootController:entity animated:NO];
     [entity release];
-    */
     
     /*
      STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
