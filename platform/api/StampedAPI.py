@@ -2346,7 +2346,9 @@ class StampedAPI(AStampedAPI):
                 # add the default image size
                 supportedSizes['']       = (imageWidth,imageHeight)
 
-                images = getattr(c, 'images', tuple())
+                images = c.images
+                if images is None:
+                    images = ()
                 sizes = []
                 for k,v in supportedSizes.iteritems():
                     logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
@@ -2356,9 +2358,11 @@ class StampedAPI(AStampedAPI):
                     size.height     = v[1]
                     sizes.append(size)
                 image.sizes = sizes
-                c.images += (image,)
+                images += (image,)
+                c.images = images
 
                 # update the actual stamp content, then update the db
+                logs.info('### stamp.contents[i]: %s' % stamp.contents[i])
                 stamp.contents[i] = c
                 logs.info('### about to call updateStamp')
                 self._stampDB.updateStamp(stamp)
