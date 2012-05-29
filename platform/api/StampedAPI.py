@@ -2354,7 +2354,7 @@ class StampedAPI(AStampedAPI):
         self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
 
 
-@API_CALL
+    @API_CALL
     def updateStamp(self, authUserId, stampId, data):
         raise NotImplementedError
         """
