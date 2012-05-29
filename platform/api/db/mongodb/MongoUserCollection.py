@@ -300,11 +300,14 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             query = {'_id': self._getObjectIdFromString(userIdOrIds) }
         
         if value is not None:
-            if isinstance(value, Schema):
-                value = value.dataExport()
             self._collection.update(query, {'$set': {key: value}}, upsert=True)
         else:
             self._collection.update(query, {'$inc': {key: increment}}, upsert=True)
+
+    def updateDistribution(self, userId, distribution):
+        distribution = distribution.dataExport()
+        query = {'_id': self._getObjectIdFromString(userId)}
+        self._collection.update(query, {'$set': {'stats.distribution': distribution}}, upsert=True)
     
     def findUsersByEmail(self, emails, limit=0):
         queryEmails = []
