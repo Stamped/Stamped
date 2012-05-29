@@ -120,11 +120,7 @@ class BasicFieldGroup(AFieldGroup):
         cur = obj
         for p in path[:-1]:
             cur = cur[p]
-        # weird schema error work-around
-        if isinstance(value, SchemaElement):
-            cur[path[-1]] = value.value
-        else:
-            cur[path[-1]] = value
+        cur[path[-1]] = value
 
     def addNameField(self):
         self.addField([self.groupName])
