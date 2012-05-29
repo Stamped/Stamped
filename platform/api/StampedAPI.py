@@ -2309,6 +2309,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, blurbTimestamp):
+        logs.info('### Hit addResizedStampImagesAsync')
         assert imageUrl is not None, "stamp image url unavailable!"
 
         max_size = (960, 960)
@@ -2345,12 +2346,13 @@ class StampedAPI(AStampedAPI):
 
                 # update the actual stamp content, then update the db
                 stamp.content[i] = c
+                logs.info('### about to call updateStamp')
                 self._stampDB.updateStamp(stamp)
                 break
         else:
             raise StampedInputError('Could not find stamp blurb for image resizing')
-        self._stampDB.updateStamp()
 
+        logs.info('### about to add the S3 resized images')
         self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
 
 
