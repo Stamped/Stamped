@@ -20,6 +20,7 @@
 #import "LeftMenuTableCell.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
+#import "STStampedAPI.h"
 
 static NSString* const _inboxNameKey = @"Root.inboxName";
 static NSString* const _iWantToNameKey = @"Root.iWantToName";

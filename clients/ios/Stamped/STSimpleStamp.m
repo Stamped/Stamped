@@ -103,7 +103,7 @@
 }
 
 - (NSDate*)timestamp {
-    return self.stamped;
+    return self.stamped ? self.stamped : self.created;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {

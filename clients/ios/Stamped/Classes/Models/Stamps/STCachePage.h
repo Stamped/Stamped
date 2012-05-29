@@ -13,6 +13,7 @@
 
 @property (nonatomic, readonly, retain) NSDate* start;
 @property (nonatomic, readonly, retain) NSDate* end;
+@property (nonatomic, readonly, retain) NSDate* created;
 @property (nonatomic, readonly, retain) STCachePage* next;
 
 //Convenience methods
@@ -22,11 +23,13 @@
 - (id)initWithObjects:(NSArray<STDatum>*)objects 
                 start:(NSDate*)start
                   end:(NSDate*)end 
+              created:(NSDate*)created
               andNext:(STCachePage*)next;
 
 - (id<STDatum>)objectAtIndex:(NSInteger)index;
 - (NSNumber*)indexForKey:(NSString*)key;
 - (STCachePage*)pageForIndex:(NSInteger)index;
 - (NSNumber*)indexAfterDate:(NSDate*)date;
+- (STCachePage*)pageWithAddedPage:(STCachePage*)page;
 
 @end

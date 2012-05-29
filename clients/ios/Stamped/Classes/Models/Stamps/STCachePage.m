@@ -23,6 +23,7 @@
 @synthesize localIndicesByKey = _localIndicesByKey;
 @synthesize start = _start;
 @synthesize end = _end;
+@synthesize created = _created;
 @synthesize next = _next;
 @synthesize nextOffset = _nextOffset;
 @synthesize count = _count;
@@ -33,13 +34,36 @@
 }
 
 - (id)initWithObjects:(NSArray<STDatum>*)objects 
-                start:(NSDate*)start 
+                start:(NSDate*)start
                   end:(NSDate*)end 
+              created:(NSDate*)created
               andNext:(STCachePage*)next {
     self = [super init];
     if (self) {
         //TODO ensure sorted, with order preservation
         NSAssert1(objects != nil, @"Objects must not be nil for %@", self);
+        if (!created) {
+            created = [NSDate date];
+        }
+        _created = [created retain];
+        NSAssert1(start != nil, @"Start date must not be nil for %@", self);
+        _start = [start retain];
+        NSDate* removalDate = nil;
+        if (next && next.created.timeIntervalSince1970 > _created.timeIntervalSince1970) {
+            removalDate = next.start;
+            NSAssert2(_start.timeIntervalSince1970 > removalDate.timeIntervalSince1970,
+                      @"Attempted to assign a newer next with a start date before or equal to given start date: %@, %@",
+                      start,
+                      removalDate);
+            NSAssert1(end != nil, @"End must be nil if created after next, was %@", end);
+            NSMutableArray* trimmed_objects = [NSMutableArray array];
+            for (id<STDatum> datum in objects) {
+                if (datum.timestamp.timeIntervalSince1970 > removalDate.timeIntervalSince1970) {
+                    [trimmed_objects addObject:datum];
+                }
+            }
+            objects = (NSArray<STDatum>*)trimmed_objects;
+        }
         _localObjects = [[NSArray arrayWithArray:objects] retain];
         NSMutableDictionary* indices = [NSMutableDictionary dictionary];
         NSDate* replacementEnd = nil;
@@ -57,12 +81,14 @@
             }
         }
         _localIndicesByKey = [[NSDictionary dictionaryWithDictionary:indices] retain];
-        NSAssert1(start != nil, @"Start date must not be nil for %@", self);
-        _start = [start retain];
         if (!end) {
+            if (!replacementEnd) {
+                replacementEnd = _start;
+            }
             end = replacementEnd;
         }
         _end = [end retain];
+        NSAssert1(_end, @"End should not be nil for %@", self);
         NSNumber* endIndex = [next indexAfterDate:_end];
         if (endIndex) {
             _next = [[next pageForIndex:endIndex.integerValue] retain];
@@ -86,6 +112,7 @@
         _next = [[decoder decodeObjectForKey:@"next"] retain];
         _nextOffset = [decoder decodeIntegerForKey:@"nextOffset"];
         _count = [decoder decodeIntegerForKey:@"count"];
+        _created = [[decoder decodeObjectForKey:@"created"] retain];
     }
     return self;
 }
@@ -96,6 +123,7 @@
     [_localIndicesByKey release];
     [_start release];
     [_end release];
+    [_created release];
     [_next release];
     [super dealloc];
 }
@@ -105,6 +133,7 @@
     [encoder encodeObject:self.localIndicesByKey forKey:@"localIndicesByKey"];
     [encoder encodeObject:self.start forKey:@"start"];
     [encoder encodeObject:self.end forKey:@"end"];
+    [encoder encodeObject:self.created forKey:@"created"];
     [encoder encodeObject:self.next forKey:@"next"];
     [encoder encodeInteger:self.nextOffset forKey:@"nextOffset"];
     [encoder encodeInteger:self.count forKey:@"count"];
@@ -116,11 +145,11 @@
 
 - (id<STDatum>)objectAtIndex:(NSInteger)index {
     NSAssert1(index >= 0, @"Index must be non-negative, was %d", index);
-    if (index < self.count) {
+    if (index < self.localCount) {
         return [self.localObjects objectAtIndex:index];
     }
     else {
-        return [self.next objectAtIndex:index + self.nextOffset - self.count];
+        return [self.next objectAtIndex:index + self.nextOffset - self.localCount];
     }
 }
 
@@ -131,7 +160,7 @@
             index = nil;
         }
         else {
-            index = [NSNumber numberWithInteger:value + self.count];
+            index = [NSNumber numberWithInteger:value + self.localCount];
         }
     }
     return index;
@@ -149,19 +178,22 @@
 }
 
 - (STCachePage*)pageForIndex:(NSInteger)index; {
-    if (index < self.count) {
+    if (index < self.localCount) {
         return self;
     }
     else {
-        return [self.next pageForIndex:index + self.nextOffset - self.count];
+        return [self.next pageForIndex:index + self.nextOffset - self.localCount];
     }
 }
 
+/*
+ Nil if and only if count == 0 or beyond end
+ */
 - (NSNumber*)indexAfterDate:(NSDate*)date {
     NSNumber* index = nil;
     for (NSInteger i = self.localCount - 1; i >= 0; i--) {
         id<STDatum> datum = [self objectAtIndex:i];
-        if ([datum.timestamp compare:date] == NSOrderedAscending) {
+        if (datum.timestamp.timeIntervalSince1970 > date.timeIntervalSince1970) {
             if (index == nil) {
                 index = [self.next indexAfterDate:date];
                 index = [self adjustedNextIndex:index];
@@ -173,6 +205,41 @@
         }
     }
     return index;
+}
+
+- (STCachePage*)pageWithAddedPage:(STCachePage*)page {
+    if (page.count == 0) {
+        return self;
+    }
+    if (self.created.timeIntervalSince1970 > page.created.timeIntervalSince1970) {
+        NSLog(@"Tried to add a page older than current page,%@,%@",page.created, self.created);
+        return self;
+    }
+    if (self.count == 0) {
+        return page;
+    }
+    if (self.start.timeIntervalSince1970 > page.start.timeIntervalSince1970) {
+        NSLog(@"%@ was before %@:", self.start, page.start);
+        //self starts before page
+        STCachePage* next;
+        if (self.next) {
+            next = [self.next pageWithAddedPage:page];
+        }
+        else {
+            next = page;
+        }
+        if (next == self.next) {
+            return self;
+        }
+        else {
+            return [[[STCachePage alloc] initWithObjects:self.localObjects start:self.start end:self.end created:self.created andNext:next] autorelease];
+        }
+    }
+    else {
+        NSLog(@"%@ was not before %@:%@,%@", self.start, page.start,self, page);
+        //Create new page pointing to this as next
+        return [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
+    }
 }
 
 /*

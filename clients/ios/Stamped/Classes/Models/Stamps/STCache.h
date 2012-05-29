@@ -11,6 +11,8 @@
 #import "STCachePage.h"
 
 extern NSString* const STCacheDidChangeNotification;
+extern NSString* const STCacheWillLoadPageNotification;
+extern NSString* const STCacheDidLoadPageNotification;
 
 @protocol STCachePageSource <NSObject, NSCoding>
 
@@ -25,6 +27,7 @@ extern NSString* const STCacheDidChangeNotification;
 
 @required
 @property (nonatomic, readonly, retain) id<STCachePageSource> pageSource;
+@property (nonatomic, readonly, copy) NSURL* directory;
 
 @optional
 @property (nonatomic, readonly, assign) NSTimeInterval pageFaultAge;
@@ -47,7 +50,7 @@ extern NSString* const STCacheDidChangeNotification;
 
 @end
 
-@interface STCacheSnapshot : NSObject <NSCoding>
+@interface STCacheSnapshot : NSObject
 
 - (id)objectAtIndex:(NSInteger)index;
 
@@ -55,7 +58,7 @@ extern NSString* const STCacheDidChangeNotification;
 
 @end
 
-@interface STCache : NSObject <NSCoding, STCacheConfiguration>
+@interface STCache : NSObject <STCacheConfiguration>
 
 + (STCancellation*)cacheForName:(NSString*)name 
                     accelerator:(id<STCacheAccelerator>)accel 
@@ -65,23 +68,26 @@ extern NSString* const STCacheDidChangeNotification;
 + (STCancellation*)deleteCacheWithName:(NSString*)name 
                            andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
-- (STCancellation*)saveWithName:(NSString*)name 
-                    accelerator:(id<STCacheAccelerator>)accel 
+- (STCancellation*)saveWithAccelerator:(id<STCacheAccelerator>)accel 
                     andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)ensureSavedSince:(NSDate*)date
-                               name:(NSString*)name 
                         accelerator:(id<STCacheAccelerator>)accel
                         andCallback:(void (^)(NSDate* date, NSError* error, STCancellation* cancellation))block;
 
 - (STCacheSnapshot*)snapshot;
 - (void)cancelPendingRequests;
-- (void)refreshRange:(NSRange)range;
+- (void)refreshAtIndex:(NSInteger)index force:(BOOL)force;
+
+- (BOOL)hasMore;
 
 @property (nonatomic, readwrite, retain) id<STCachePageSource> pageSource;
 @property (nonatomic, readwrite, assign) NSTimeInterval pageFaultAge;
 @property (nonatomic, readwrite, assign) NSInteger preferredPageSize;
 @property (nonatomic, readwrite, assign) NSInteger minimumPageSize;
+@property (nonatomic, readonly, copy) NSURL* directory;
+@property (nonatomic, readonly, copy) NSString* name;
+@property (nonatomic, readwrite, copy) NSNumber* autoSaveAge;
 
 @end
 

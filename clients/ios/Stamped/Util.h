@@ -187,4 +187,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)appendView:(UIView*)child toParentView:(UIView*)parent;
 
++ (NSURL*)cacheDirectory;
+
 @end
