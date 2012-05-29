@@ -2322,7 +2322,6 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
-        logs.info('### Hit addResizedStampImagesAsync')
         assert imageUrl is not None, "stamp image url unavailable!"
 
         max_size = (960, 960)
@@ -2336,7 +2335,6 @@ class StampedAPI(AStampedAPI):
 
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
-        logs.info('### num contents: %d' % len(stamp.contents))
         # find the blurb using the content_id and update the images field
         for i, c in enumerate(stamp.contents):
             if c.content_id == content_id:
@@ -2352,7 +2350,6 @@ class StampedAPI(AStampedAPI):
                     images = ()
                 sizes = []
                 for k,v in supportedSizes.iteritems():
-                    logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
                     size            = ImageSizeSchema()
                     size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
@@ -2366,16 +2363,11 @@ class StampedAPI(AStampedAPI):
                 contents = list(stamp.contents)
                 contents[i] = c
                 stamp.contents = contents
-                logs.info('### about to call updateStamp.  len(stamp.contents): %d' % len(stamp.contents))
                 self._stampDB.updateStamp(stamp)
-
-                stamp = self._stampDB.getStamp(stampId)
-                logs.info('### after updatestamp.  len(stamp.contents): %d' % len(stamp.contents))
                 break
         else:
             raise StampedInputError('Could not find stamp blurb for image resizing')
 
-        logs.info('### about to add the S3 resized images')
         self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, supportedSizes)
 
 
