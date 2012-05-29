@@ -982,7 +982,11 @@ class StampedAPI(AStampedAPI):
         if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
             if user.stats.distribution is None or len(user.stats.distribution) == 0:
                 distribution = self._getUserStampDistribution(user.user_id)
-                user.stats.distribution = distribution
+                ### HACKY TEMPORARY FIX
+                r = []
+                for i in distribution:
+                    r.append(CategoryDistributionSchema().dataImport(i))
+                user.stats.distribution = r
                 ### TEMP: This should be async
                 self._userDB.updateUserStats(user.user_id, 'distribution', value=distribution)
         
