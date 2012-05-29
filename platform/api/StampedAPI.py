@@ -991,7 +991,7 @@ class StampedAPI(AStampedAPI):
                 distribution = self._getUserStampDistribution(user.user_id)
                 user.stats.distribution = distribution
                 ### TEMP: This should be async
-                self._userDB.updateUserStats(user.user_id, 'distribution', value=distribution)
+                self._userDB.updateDistribution(user.user_id, distribution)
         
         return user
     
@@ -2115,7 +2115,7 @@ class StampedAPI(AStampedAPI):
         content = StampContent()
         content.content_id = utils.generateUid()
         timestamp = TimestampSchema()
-        timestamp.created = time.gmtime(utils.timestampFromUid(content.content_id))
+        timestamp.created = now  #time.gmtime(utils.timestampFromUid(content.content_id))
         content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
@@ -2233,7 +2233,7 @@ class StampedAPI(AStampedAPI):
             self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
             self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
             distribution = self._getUserStampDistribution(authUserId)
-            self._userDB.updateUserStats(authUserId, 'distribution',     value=distribution)
+            self._userDB.updateDistribution(authUserId, distribution)
             
             # Asynchronously add references to the stamp in follower's inboxes and 
             # add activity for credit and mentions
@@ -2340,12 +2340,15 @@ class StampedAPI(AStampedAPI):
         for i, c in enumerate(stamp.contents):
             if c.content_id == content_id:
 
-                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
+                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
                 # Add image dimensions to stamp object
                 image           = ImageSchema()
                 # add the default image size
                 supportedSizes['']       = (imageWidth,imageHeight)
 
+                images = c.images
+                if images is None:
+                    images = ()
                 sizes = []
                 for k,v in supportedSizes.iteritems():
                     logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
@@ -2355,9 +2358,11 @@ class StampedAPI(AStampedAPI):
                     size.height     = v[1]
                     sizes.append(size)
                 image.sizes = sizes
-                c.images.append(image)
+                images += (image,)
+                c.images = images
 
                 # update the actual stamp content, then update the db
+                logs.info('### stamp.contents[i]: %s' % stamp.contents[i])
                 stamp.contents[i] = c
                 logs.info('### about to call updateStamp')
                 self._stampDB.updateStamp(stamp)
@@ -2583,7 +2588,7 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_stamps',      increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', increment=1)
         distribution = self._getUserStampDistribution(authUserId)
-        self._userDB.updateUserStats(authUserId, 'distribution', value=distribution)
+        self._userDB.updateDistribution(authUserId, distribution)
         
         # Update credit stats if credit given
         if stamp.credit is not None and len(stamp.credit) > 0:

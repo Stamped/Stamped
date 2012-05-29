@@ -789,7 +789,7 @@ def generateUid():
     return str(bson.objectid.ObjectId())
 
 def timestampFromUid(oid_str):
-    return ObjectId(oid_str).generation_time.replace(tzinfo=None)
+    return bson.objectid.ObjectId(oid_str).generation_time.replace(tzinfo=None)
 
 def get_basic_stats(collection, key):
     """
