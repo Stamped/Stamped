@@ -2198,7 +2198,7 @@ class StampedAPI(AStampedAPI):
 
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl, imageWidth, imageHeight, stamp.stamp_id, timestamp])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, timestamp])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2308,7 +2308,7 @@ class StampedAPI(AStampedAPI):
 
     
     @API_CALL
-    def addResizedStampImagesAsync(self, imageId, imageUrl, imageWidth, imageHeight, stampId, blurbTimestamp):
+    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, blurbTimestamp):
         assert imageUrl is not None, "stamp image url unavailable!"
 
         max_size = (960, 960)
@@ -2320,7 +2320,6 @@ class StampedAPI(AStampedAPI):
             }
 
 
-        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using timestamp and update the images field
@@ -2348,10 +2347,14 @@ class StampedAPI(AStampedAPI):
                 stamp.content[i] = c
                 self._stampDB.updateStamp(stamp)
                 break
-
+        else:
+            raise StampedInputError('Could not find stamp blurb for image resizing')
         self._stampDB.updateStamp()
-    
-    @API_CALL
+
+        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
+
+
+@API_CALL
     def updateStamp(self, authUserId, stampId, data):
         raise NotImplementedError
         """
