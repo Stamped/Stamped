@@ -70,13 +70,13 @@ class BasicFieldGroup(AFieldGroup):
                 modified = True
         return modified
 
-    def syncDecorations(self, entity, destination):
+    def syncDecorations(self, source, destination):
         modified = False
         for field in self.__decorations:
-            old_value = self.getValue(destination, field)
-            new_value = self.getValue(entity, field)
+            old_value = self.getDecorationValue(destination, field)
+            new_value = self.getDecorationValue(source, field)
             if old_value != new_value:
-                self.setValue(destination, field, new_value)
+                self.setDecorationValue(destination, field, new_value)
                 modified = True
         return modified
 
@@ -103,6 +103,28 @@ class BasicFieldGroup(AFieldGroup):
         for p in path[:-1]:
             cur = getattr(cur, p)
         setattr(cur, path[-1], value)
+
+    def getDecorationValue(self, obj, path):
+        cur = obj
+        for p in path[:-1]:
+            if p in cur:
+                cur = cur[p]
+            else:
+                return None
+        if path[-1] in cur:
+            return cur[path[-1]]
+        else:
+            return None
+
+    def setDecorationValue(self, obj, path, value):
+        cur = obj
+        for p in path[:-1]:
+            cur = cur[p]
+        # weird schema error work-around
+        if isinstance(value, SchemaElement):
+            cur[path[-1]] = value.value
+        else:
+            cur[path[-1]] = value
 
     def addNameField(self):
         self.addField([self.groupName])
