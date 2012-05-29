@@ -2336,6 +2336,7 @@ class StampedAPI(AStampedAPI):
 
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
+        logs.info('### num contents: %d' % len(stamp.contents))
         # find the blurb using the content_id and update the images field
         for i, c in enumerate(stamp.contents):
             if c.content_id == content_id:
