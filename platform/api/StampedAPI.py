@@ -2324,7 +2324,7 @@ class StampedAPI(AStampedAPI):
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using timestamp and update the images field
-        for i, c in enumerate(stamp.content):
+        for i, c in enumerate(stamp.contents):
             if c.timestamp == blurbTimestamp:
 
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
@@ -2345,7 +2345,7 @@ class StampedAPI(AStampedAPI):
                 c.images.append(image)
 
                 # update the actual stamp content, then update the db
-                stamp.content[i] = c
+                stamp.contents[i] = c
                 logs.info('### about to call updateStamp')
                 self._stampDB.updateStamp(stamp)
                 break
