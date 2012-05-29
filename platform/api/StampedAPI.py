@@ -3461,7 +3461,7 @@ class StampedAPI(AStampedAPI):
         items = []
 
         i = 0
-        for item in allItems[offset:]:
+        for item in allItems:
             if guideRequest.subsection is None or guideRequest.subsection in item.tags:
 
                 items.append(item)
@@ -3474,8 +3474,10 @@ class StampedAPI(AStampedAPI):
                         userIds[userId] = None
                 i += 1
 
-            if i >= limit:
+            if i >= limit + offset:
                 break
+
+        items = items[offset:]
 
         # Entities 
         entities = self._entityDB.getEntities(entityIds.keys())
