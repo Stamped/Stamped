@@ -2115,7 +2115,7 @@ class StampedAPI(AStampedAPI):
         content = StampContent()
         content.content_id = utils.generateUid()
         timestamp = TimestampSchema()
-        timestamp.created = time.gmtime(utils.timestampFromUid(content.content_id))
+        timestamp.created = now  #time.gmtime(utils.timestampFromUid(content.content_id))
         content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
