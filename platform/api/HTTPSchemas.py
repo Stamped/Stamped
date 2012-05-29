@@ -1785,10 +1785,13 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for screenshot in entity.screenshots:
-                    item = HTTPImageSchema().dataImport(screenshot)
+                    item = HTTPImageSchema().dataImport(screenshot.dataExport())
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                if self.galleries is None:
+                    self.galleries = [gallery]
+                else:
+                    self.galleries += (gallery,)
 
 
         # Generic item
