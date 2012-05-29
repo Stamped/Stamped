@@ -9,6 +9,7 @@
 #import "EntityViewController.h"
 #import "EntityHeaderView.h"
 #import "STPhotoViewController.h"
+#import "STPagedImageViewer.h"
 
 @interface EntityViewController ()
 
@@ -24,6 +25,18 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    STPagedImageViewer *view = [[STPagedImageViewer alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 400.0f)];
+    view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [self.view addSubview:view];
+    [view release];
+    
+    NSURL *url = [NSURL URLWithString:@"http://static.stamped.com/assets/img/public-home/screen-stamp-useful.png"];
+    NSURL *url1 = [NSURL URLWithString:@"http://static.stamped.com/assets/img/public-home/screen-shared-stamp.png"];
+    NSURL *url2 = [NSURL URLWithString:@"http://static.stamped.com/assets/img/public-home/screen-five-star.png"];
+
+    [view setImageURLs:[NSArray arrayWithObjects:url, url1, url2, nil]];
+    
 }
 
 - (void)viewDidUnload {
@@ -55,7 +68,6 @@
     
     return nil;
 }
-
 
 
 #pragma mark - UITableViewDelegate
