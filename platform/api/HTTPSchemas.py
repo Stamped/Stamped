@@ -3117,7 +3117,6 @@ class HTTPActivity(Schema):
         if self.verb == 'follow':
             if len(self.subjects) == 1:
                 verb = 'is now following'
-                self.image = self.subjects[0].image_url
             else:
                 verb = 'are now following'
                 self.image = _getIconURL('news_follow_group')
@@ -3141,9 +3140,7 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s gave you credit.' % (subjects)
                 self.body_references = subjectReferences
-                if len(self.subjects) == 1:
-                    self.image = self.subjects[0].image_url
-                else:
+                if len(self.subjects) > 1:
                     self.image = _getIconURL('news_stamp_group')
             else:
                 verb = 'gave'
@@ -3151,7 +3148,6 @@ class HTTPActivity(Schema):
                 userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                 self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
                 self.body_references = subjectReferences + userObjectReferences
-                self.image = self.subjects[0].image_url
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
@@ -3170,10 +3166,7 @@ class HTTPActivity(Schema):
                 self.footer = 'via %s' % stampUserObjects
                 self.footer_references = stampUserReferences
 
-            if len(self.subjects) == 1:
-                self.image = self.subjects[0].image_url
-            else:
-                ### TODO: What should this image be?
+            if len(self.subjects) > 1:
                 self.image = _getIconURL('news_like_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
@@ -3187,10 +3180,7 @@ class HTTPActivity(Schema):
             self.body = '%s %s %s as a to-do.' % (subjects, verb, entityObjects)
             self.body_references = subjectReferences + entityObjectReferences
 
-            if len(self.subjects) == 1:
-                self.image = self.subjects[0].image_url
-            else:
-                ### TODO: What should this image be?
+            if len(self.subjects) > 1:
                 self.image = _getIconURL('news_todo_group')
 
             if len(self.objects.stamps) > 0:
@@ -3207,7 +3197,6 @@ class HTTPActivity(Schema):
             self.header_references = stampObjectReferences
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
-            self.image = self.subjects[0].image_url
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'reply':
@@ -3219,7 +3208,6 @@ class HTTPActivity(Schema):
             self.header_references = stampObjectReferences
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
-            self.image = self.subjects[0].image_url
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'mention':
@@ -3238,12 +3226,10 @@ class HTTPActivity(Schema):
                 self.body = '%s' % stampBlurbObjects
                 self.body_references = stampBlurbObjectReferences
 
-            self.image = self.subjects[0].image_url
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb.startswith('friend_'):
             self.icon = _getIconURL('news_friend')
-            self.image = self.subjects[0].image_url
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
@@ -3272,7 +3258,6 @@ class HTTPActivity(Schema):
                 self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
 
             self.body_references = subjectReferences + stampObjectReferences
-            self.image = self.subjects[0].image_url
             self.action = _buildStampAction(self.objects.stamps[0])
 
         else:
