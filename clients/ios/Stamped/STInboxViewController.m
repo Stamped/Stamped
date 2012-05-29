@@ -335,7 +335,7 @@
     view.imageView.userInteractionEnabled = YES;
     [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
-    if (!LOGGED_IN || (LOGGED_IN && _stamps.scope != STStampedAPIScopeYou)) {
+    if (!LOGGED_IN || (LOGGED_IN && self.scope != STStampedAPIScopeYou)) {
         
         UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -365,7 +365,7 @@
         [view.imageView addSubview:label];
         [label release];
         
-        switch (_stamps.scope) {
+        switch (self.scope) {
             case STStampedAPIScopeYou:
                 label.text = @"to create stamps.";
                 break;
@@ -394,7 +394,7 @@
         
     }
     
-    if (LOGGED_IN && _stamps.scope == STStampedAPIScopeYou) {
+    if (LOGGED_IN && self.scope == STStampedAPIScopeYou) {
         
         view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
         view.imageView.backgroundColor = view.backgroundColor;
