@@ -36,7 +36,7 @@ _cases = [
                 "lng" : -73.988658
             },
         },
-        {'category': 'food',
+        {'category': 'place',
          'coordinates': {'lat': 40.736623, 'lng': -73.988658},
          'details': {'contact': {'phone': u'(212) 353-8345',
                                  'phone_source': 'factual',
@@ -69,7 +69,7 @@ _cases = [
                 "lng" : -73.962501
             },
         },
-        {'category': 'food',
+        {'category': 'place',
          'coordinates': {'lat': 40.709982, 'lng': -73.962501},
          'details': {'contact': {'phone': u'(718) 387-7400',
                                  'phone_source': 'factual',

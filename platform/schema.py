@@ -9,6 +9,7 @@ import Globals
 import copy
 import pprint
 import logs
+import utils
 
 class SchemaException(Exception):
     pass
@@ -226,7 +227,10 @@ class Schema(object):
         return properties
 
     def dataImport(self, properties, **kwargs):
-        overflow = kwargs.pop('overflow', False)
+        overflow = False
+        if 'overflow' in kwargs and kwargs['overflow'] == True:
+            overflow = True
+            
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
         try:
@@ -242,7 +246,7 @@ class Schema(object):
                             nested = self.__properties[k]
                         else:
                             nested = p[_kindKey]()
-                        nested.dataImport(v)
+                        nested.dataImport(v, **kwargs)
                         self.__setattr__(k, nested)
 
                     elif p[_typeKey] == _nestedPropertyListKey and v is not None:
@@ -262,17 +266,17 @@ class Schema(object):
         return self
 
     @classmethod
-    def addProperty(cls, name, kind, required=False):
-        cls.__addProperty(_propertyKey, name, kind, required=required)
+    def addProperty(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_propertyKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addPropertyList(cls, name, kind, required=False):
-        cls.__addProperty(_propertyListKey, name, kind, required=required)
+    def addPropertyList(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_propertyListKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addNestedProperty(cls, name, kind, required=False):
-        cls.__addProperty(_nestedPropertyKey, name, kind, required=required)
+    def addNestedProperty(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_nestedPropertyKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addNestedPropertyList(cls, name, kind, required=False):
-        cls.__addProperty(_nestedPropertyListKey, name, kind, required=required)
+    def addNestedPropertyList(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_nestedPropertyListKey, name, kind, required=required, **kwargs)

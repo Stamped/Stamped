@@ -52,7 +52,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 except KeyError:
                     raise StampedInputError("invalid subcategory '%s'" % subcategory)
         
-        if category != 'place' and category != 'food':
+        if category != 'place':
             coords = None
         
         suggested    = self._getGlobalSuggestedEntities(coords, category, subcategory)

@@ -66,7 +66,7 @@ def _log(level, msg, *args, **kwargs):
         localData.log[level] = True
 
     # else:
-    msg = "{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, msg)
+    msg = u"{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, msg)
     if level == 'warning':
         log.warning(msg, *args, **kwargs)
     elif level == 'info':

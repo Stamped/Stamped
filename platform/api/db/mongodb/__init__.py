@@ -10,7 +10,7 @@ import MongoDeletedEntityCollection
 import MongoCreditGiversCollection
 import MongoCreditReceivedCollection
 import MongoEntityCollection
-import MongoFavoriteCollection
+import MongoTodoCollection
 import MongoFollowersCollection
 import MongoFriendsCollection
 import MongoFriendshipCollection
@@ -18,7 +18,7 @@ import MongoInboxStampsCollection
 import MongoStampCollection
 import MongoStampCommentsCollection
 import MongoUserCollection
-import MongoUserFavEntitiesCollection
+import MongoUserTodoEntitiesCollection
 import MongoUserStampsCollection
 # import MongoEntitySearcher
 import MongoPlacesEntityCollection

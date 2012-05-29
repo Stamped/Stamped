@@ -130,8 +130,6 @@ def _street(val):
 def _category(entity):
     if entity.isType('restaurant'):
         return 'Food & Beverage > Restaurants'
-    elif entity.category == 'food':
-        return 'Food & Beverage'
     else:
         return None
 
@@ -683,7 +681,7 @@ def resolveEntities(size=None, log=None):
     entityDB   = stampedAPI._entityDB
     
     rs = entityDB._collection.find({
-    "category" : "food",
+    "kind" : "place",
     })
     if not size:
         size = rs.count()
@@ -809,7 +807,7 @@ def enrichAll():
     entityDB   = stampedAPI._entityDB
     
     rs = entityDB._collection.find({
-        "category" : "food",
+        "kind" : "place",
         "sources.factual.factual_timestamp": {'$exists':False},
     })
     li = list(rs)
@@ -842,7 +840,7 @@ def resolveAll():
     f = Factual()
     
     rs = entityDB._collection.find({
-        "category" : "food",
+        "kind" : "place",
     })
     li = list(rs)
     for i in range(len(li)):
