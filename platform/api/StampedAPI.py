@@ -959,7 +959,14 @@ class StampedAPI(AStampedAPI):
             categories.setdefault(category, 0)
             categories[category] += 1
 
-        return [ { 'category': k, 'count': v } for k, v in categories.iteritems() ] 
+        result = []
+        for k, v in categories.items():
+            distribution = CategoryDistributionSchema()
+            distribution.category = k 
+            distribution.count = v 
+            result.append(distribution)
+
+        return result
         
     
     ### PUBLIC
@@ -982,11 +989,7 @@ class StampedAPI(AStampedAPI):
         if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
             if user.stats.distribution is None or len(user.stats.distribution) == 0:
                 distribution = self._getUserStampDistribution(user.user_id)
-                ### HACKY TEMPORARY FIX
-                r = []
-                for i in distribution:
-                    r.append(CategoryDistributionSchema().dataImport(i))
-                user.stats.distribution = r
+                user.stats.distribution = distribution
                 ### TEMP: This should be async
                 self._userDB.updateUserStats(user.user_id, 'distribution', value=distribution)
         
@@ -2110,8 +2113,9 @@ class StampedAPI(AStampedAPI):
 
         # Build content
         content = StampContent()
+        content.content_id = utils.generateUid()
         timestamp = TimestampSchema()
-        timestamp.created = now
+        timestamp.created = time.gmtime(utils.timestampFromUid(content.content_id))
         content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
@@ -2207,7 +2211,7 @@ class StampedAPI(AStampedAPI):
 
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, timestamp.created])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, content.content_id])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2317,7 +2321,7 @@ class StampedAPI(AStampedAPI):
 
     
     @API_CALL
-    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, blurbCreated):
+    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
         logs.info('### Hit addResizedStampImagesAsync')
         assert imageUrl is not None, "stamp image url unavailable!"
 
@@ -2332,11 +2336,9 @@ class StampedAPI(AStampedAPI):
 
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
-        # find the blurb using timestamp and update the images field
-        from pprint import pformat
-        logs.info(pformat(stamp.contents))
+        # find the blurb using the content_id and update the images field
         for i, c in enumerate(stamp.contents):
-            if c.timestamp.created == blurbCreated:
+            if c.content_id == content_id:
 
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
                 # Add image dimensions to stamp object
