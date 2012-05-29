@@ -484,6 +484,9 @@ class StampedAPI(AStampedAPI):
         
         # Remove activity items
         self._activityDB.removeUserActivity(account.user_id)
+
+        # Remove guide
+        ### TODO
         
         # Remove custom entities
         ### TODO: Do this?

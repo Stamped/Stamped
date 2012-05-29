@@ -3120,7 +3120,7 @@ class HTTPActivity(Schema):
                 self.image = self.subjects[0].image_url
             else:
                 verb = 'are now following'
-                self.image = _getIconURL('news_follow')
+                self.image = _getIconURL('news_follow_group')
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
@@ -3144,7 +3144,7 @@ class HTTPActivity(Schema):
                 if len(self.subjects) == 1:
                     self.image = self.subjects[0].image_url
                 else:
-                    self.image = _getIconURL('news_credit')
+                    self.image = _getIconURL('news_stamp_group')
             else:
                 verb = 'gave'
                 offset = len(subjects) + len(verb) + 2
@@ -3174,7 +3174,7 @@ class HTTPActivity(Schema):
                 self.image = self.subjects[0].image_url
             else:
                 ### TODO: What should this image be?
-                self.image = _getIconURL('news_like')
+                self.image = _getIconURL('news_like_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
@@ -3191,7 +3191,7 @@ class HTTPActivity(Schema):
                 self.image = self.subjects[0].image_url
             else:
                 ### TODO: What should this image be?
-                self.image = _getIconURL('news_todo')
+                self.image = _getIconURL('news_todo_group')
 
             if len(self.objects.stamps) > 0:
                 self.action = _buildStampAction(self.objects.stamps[0])
