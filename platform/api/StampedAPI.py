@@ -2372,7 +2372,7 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError('Could not find stamp blurb for image resizing')
 
         logs.info('### about to add the S3 resized images')
-        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
+        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, supportedSizes)
 
 
     @API_CALL
