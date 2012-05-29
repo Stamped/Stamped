@@ -2366,9 +2366,13 @@ class StampedAPI(AStampedAPI):
                 contents = list(stamp.contents)
                 contents[i] = c
                 stamp.contents = contents
-                logs.info('### about to call updateStamp')
+                logs.info('### about to call updateStamp.  len(stamp.contents): %d' % len(stamp.contents))
                 self._stampDB.updateStamp(stamp)
-                break
+
+                stamp = self._stampDB.getStamp(stampId)
+                logs.info('### after updatestamp.  len(stamp.contents): %d' % len(stamp.contents))
+
+            break
         else:
             raise StampedInputError('Could not find stamp blurb for image resizing')
 
