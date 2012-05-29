@@ -65,6 +65,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         _name = [name copy];
         _directory = [[configuration directory] copy];
         _pageSource = [[configuration pageSource] retain];
+        _autoSaveAge = [[NSNumber numberWithInteger:3*60] retain];
         if ([configuration respondsToSelector:@selector(pageFaultAge)]) {
             _pageFaultAge = configuration.pageFaultAge;
         }
@@ -103,6 +104,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         _preferredPageSize = [decoder decodeIntegerForKey:@"preferredPageSize"];
         _minimumPageSize = [decoder decodeIntegerForKey:@"minimumPageSize"];
         _page = [[decoder decodeObjectForKey:@"page"] retain];
+        _autoSaveAge = [[decoder decodeObjectForKey:@"autoSaveAge"] retain];
         [self commonInit];
     }
     return self;
@@ -118,6 +120,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     [_refreshStack release];
     [_cancellation cancel];
     [_cancellation release];
+    [_autoSaveAge release];
     [super dealloc];
 }
 
@@ -129,37 +132,8 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     [encoder encodeInteger:self.preferredPageSize forKey:@"preferredPageSize"];
     [encoder encodeInteger:self.minimumPageSize forKey:@"minimumPageSize"];
     [encoder encodeObject:self.page forKey:@"page"];
+    [encoder encodeObject:self.autoSaveAge forKey:@"autoSaveAge"];
 }
-
-/*
- + (NSArray*)sortedURLsForName:(NSString*)name andDirectory:(NSURL*)directory {
- NSArray* contents = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:directory 
- includingPropertiesForKeys:[NSArray arrayWithObjects:NSURLNameKey, NSURLCreationDateKey, nil] 
- options:NSDirectoryEnumerationSkipsHiddenFiles
- error:nil];
- if (contents) {
- NSMutableArray* filteredContents = [NSMutableArray array];
- for (NSURL* file in contents) {
- NSString* filename = file.lastPathComponent;
- NSDate* creationDate = nil;
- if ([filename hasPrefix:name] && [file getResourceValue:&creationDate forKey:NSURLCreationDateKey error:nil]) {
- [filteredContents addObject:file];
- }
- }
- contents = filteredContents;
- if (filteredContents.count) {
- [filteredContents sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
- NSDate* creation1 = nil;
- [obj1 getResourceValue:&creation1 forKey:NSURLCreationDateKey error:nil];
- NSDate* creation2 = nil;
- [obj2 getResourceValue:&creation2 forKey:NSURLCreationDateKey error:nil];
- return [creation1 compare:creation2];
- }];
- }
- }
- return contents;
- }
- */
 
 + (STCancellation*)cacheForName:(NSString*)name 
                     accelerator:(id<STCacheAccelerator>)accel 
@@ -169,7 +143,15 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     [Util executeAsync:^{
         NSURL* directory = [config directory];
         NSURL* file = [directory URLByAppendingPathComponent:name];
-        STCache* result = [NSKeyedUnarchiver unarchiveObjectWithFile:file.path];
+        STCache* result = nil;
+        @try {
+            result = [NSKeyedUnarchiver unarchiveObjectWithFile:file.path];
+        }
+        @catch (NSException *exception) {
+            [[NSFileManager defaultManager] removeItemAtURL:file error:nil];
+        }
+        @finally {
+        }
         if (!result) {
             result = [[[STCache alloc] initWithName:name andConfiguartion:config] autorelease];
         }
@@ -258,14 +240,17 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         self.page = newPage;
         if (updated) {
             [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidChangeNotification object:self];
-            [self saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-                NSLog(@"Saved:%d",success);
-            }];
+            if (self.autoSaveAge) {
+                
+                NSDate* date = [NSDate dateWithTimeIntervalSince1970:[[NSDate date] timeIntervalSince1970] - self.autoSaveAge.integerValue];
+                [self ensureSavedSince:date accelerator:nil andCallback:^(NSDate* date, NSError* error, STCancellation* cancellation) {
+                    
+                }];
+            }
         }
     }
-    NSLog(@"Count was %d now %d", count, self.page.count);
     [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidLoadPageNotification object:self];
-    if (count < self.page.count && self.page.count < 100) {
+    if (count < self.page.count && self.page.count < 30) {
         [self refreshAtIndex:self.page.count force:YES];
     }
     [self continueRequests];
@@ -310,7 +295,6 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         startDate = page.start;
         stale = [self stale:page.created];
     }
-    NSLog(@"Refresh request: %d,%d,%d,%d", index, force, stale, self.page.count);
     if (stale || force) {
         NSInteger minimumSize = self.minimumPageSize;
         NSInteger preferredSize = self.preferredPageSize;
@@ -319,7 +303,6 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
                                                 withMinimumSize:minimumSize
                                                   preferredSize:preferredSize
                                                     andCallback:^(STCachePage *page, NSError *error, STCancellation *cancellation) {
-                                                        NSLog(@"got a page:%@",page);
                                                         [self handlePage:page withMinimumSize:minimumSize preferredSize:preferredSize withCancellation:cancellation];
                                                     }];
     }
@@ -371,6 +354,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 }
 
 - (id)objectAtIndex:(NSInteger)index {
+    NSAssert2(index < self.count, @"Index is beyond count: %d, %d", index, self.count);
     return [_page objectAtIndex:index];
 }
 

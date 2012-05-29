@@ -430,7 +430,7 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)todoWithStampID:(NSString*)stampID 
                           entityID:(NSString*)entityID 
                        andCallback:(void(^)(id<STTodo>,NSError*,STCancellation*))block {
-    NSString* path = @"/favorites/create.json";
+    NSString* path = @"/todos/create.json";
     NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
                             stampID, @"stamp_id",
                             entityID, @"entity_id",

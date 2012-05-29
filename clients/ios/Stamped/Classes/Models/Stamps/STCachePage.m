@@ -97,7 +97,7 @@
             _next = nil;
         }
         _nextOffset = [_next indexAfterDate:_end].integerValue;
-        _count = _localObjects.count + next.count - _nextOffset;
+        _count = _localObjects.count + _next.count - _nextOffset;
     }
     return self;
 }
@@ -149,6 +149,7 @@
         return [self.localObjects objectAtIndex:index];
     }
     else {
+        NSAssert1(self.next, @"Next must not be nil for index %d", index);
         return [self.next objectAtIndex:index + self.nextOffset - self.localCount];
     }
 }
@@ -193,7 +194,7 @@
     NSNumber* index = nil;
     for (NSInteger i = self.localCount - 1; i >= 0; i--) {
         id<STDatum> datum = [self objectAtIndex:i];
-        if (datum.timestamp.timeIntervalSince1970 > date.timeIntervalSince1970) {
+        if (datum.timestamp.timeIntervalSince1970 >= date.timeIntervalSince1970) {
             if (index == nil) {
                 index = [self.next indexAfterDate:date];
                 index = [self adjustedNextIndex:index];
@@ -219,7 +220,6 @@
         return page;
     }
     if (self.start.timeIntervalSince1970 > page.start.timeIntervalSince1970) {
-        NSLog(@"%@ was before %@:", self.start, page.start);
         //self starts before page
         STCachePage* next;
         if (self.next) {
@@ -236,7 +236,6 @@
         }
     }
     else {
-        NSLog(@"%@ was not before %@:%@,%@", self.start, page.start,self, page);
         //Create new page pointing to this as next
         return [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
     }
