@@ -11,16 +11,40 @@
 
 @implementation STConsumptionLazyList
 
-- (void)setGenericSlice:(STGenericSlice *)genericSlice {
-  //NSLog(@"consumptionSlice:%@",genericSlice);
-  NSAssert1([genericSlice isMemberOfClass:[STConsumptionSlice class]], @"slice must be a consumption slice; was %@", genericSlice);
-  [super setGenericSlice:genericSlice];
+@synthesize scope = _scope;
+@synthesize section = _section;
+@synthesize subsection = _subsection;
+
+- (id)initWithScope:(STStampedAPIScope)scope
+            section:(NSString*)section 
+         subsection:(NSString*)subsection {
+    self = [super init];
+    if (self) {
+        _scope = scope;
+        _section = [section copy];
+        _subsection = [subsection copy];
+    }
+    return self;
 }
 
-- (STCancellation*)makeStampedAPICallWithSlice:(STGenericSlice*)slice 
-                                   andCallback:(void (^)(NSArray* results, NSError* error, STCancellation* cancellation))block {
-  //NSLog(@"Consumption:%@,%@",slice.offset, slice.limit);
-  return [[STStampedAPI sharedInstance] stampsForConsumptionSlice:(id)slice andCallback:block];
+- (void)dealloc
+{
+    [_section release];
+    [_subsection release];
+    [super dealloc];
+}
+
+- (STCancellation*)fetchWithRange:(NSRange)range
+                      andCallback:(void (^)(NSArray* results, NSError* error, STCancellation* cancellation))block {
+    return [[STStampedAPI sharedInstance] entitiesWithScope:self.scope
+                                                    section:self.section
+                                                 subsection:self.subsection
+                                                      limit:[NSNumber numberWithInteger:range.length]
+                                                     offset:[NSNumber numberWithInteger:range.location]
+                                                andCallback:^(NSArray<STEntityDetail> *entities, NSError *error, STCancellation *cancellation) {
+                                                    block((id)entities, error, cancellation); 
+                                                }];
+    
 }
 
 @end

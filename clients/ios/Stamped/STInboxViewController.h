@@ -9,7 +9,6 @@
 #import "STTableViewController.h"
 #import "STLazyList.h"
 #import "STRestViewController.h"
-#import "Stamps.h"
 
 @interface STInboxViewController : STRestViewController
 @end

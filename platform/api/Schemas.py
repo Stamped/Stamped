@@ -1457,15 +1457,18 @@ class RawTodo(Schema):
         cls.addProperty('todo_id',                  basestring)
         cls.addProperty('user_id',                  basestring, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addPropertyList('source_stamp_ids',     basestring)
         cls.addProperty('stamp_id',                 basestring)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
 
-    def enrich(self, user, entity, previews=None, stamp=None):
+    def enrich(self, user, entity, previews=None, source_stamps=None, stamp=None):
         todo = Todo()
         todo.dataImport(self.dataExport(), overflow=True)
         todo.user   = user
         todo.entity = entity
+        if source_stamps is not None:
+            todo.source_stamps = source_stamps
         if stamp is not None:
             todo.stamp  = stamp
         if previews is not None:
@@ -1478,7 +1481,9 @@ class Todo(Schema):
     def setSchema(cls):
         cls.addProperty('todo_id',                  basestring)
         cls.addProperty('user',                     UserMini, required=True)
+#        cls.addNestedProperty('source',             TodoSource, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addNestedPropertyList('source_stamps',  Stamp)
         cls.addNestedProperty('stamp',              Stamp)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
@@ -1487,6 +1492,7 @@ class Todo(Schema):
     def __init__(self):
         Schema.__init__(self)
         self.entity = BasicEntity()
+        self.complete = False
 
 
 # ######## #

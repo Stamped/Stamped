@@ -437,7 +437,7 @@
             string = NSLocalizedString(@"you + friends", @"you + friends");
             break;
         case STStampedAPIScopeFriendsOfFriends:
-            string = NSLocalizedString(@"friends of friends", @"friends of friends");
+            string = NSLocalizedString(@"robby", @"robby");
             break;
         case STStampedAPIScopeEveryone:
             string = NSLocalizedString(@"everyone", @"everyone");

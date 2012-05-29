@@ -46,6 +46,26 @@ class StampedAPITodosShow(StampedAPITodoTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 0)
 
+class StampedAPITodosComplete(StampedAPITodoTest):
+    def test_complete(self):
+        todo = self.completeTodo(self.tokenB, self.entity['entity_id'], True)
+        path = "todos/show.json"
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            }
+        result = self.handleGET(path, data)
+        print(result)
+        self.assertEqual(result[0]['complete'], True)
+
+    def test_uncomplete(self):
+        todo = self.completeTodo(self.tokenB, self.entity['entity_id'], False)
+        path = "todos/show.json"
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            }
+        result = self.handleGET(path, data)
+        self.assertEqual(result[0]['complete'], False)
+
 class StampedAPITodosAlreadyComplete(StampedAPITodoTest):
     def test_create_completed(self):
         self.entityB    = self.createEntity(self.tokenB)
@@ -59,8 +79,6 @@ class StampedAPITodosAlreadyComplete(StampedAPITodoTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 2)
 
-        from pprint import pformat
-        print(pformat(result))
         if result[0]['source']['entity']['entity_id'] == self.entityB['entity_id']:
             self.assertTrue(result[0]['complete'])
         else:
@@ -74,6 +92,7 @@ class StampedAPITodosAlreadyOnList(StampedAPITodoTest):
     def test_already_on_list(self):
         with expected_exception():
             self.todoB = self.createTodo(self.tokenB, self.entity['entity_id'])
+
 
 class StampedAPITodosViaStamp(StampedAPITodoTest):
     def test_show_via_stamp(self):

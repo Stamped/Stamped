@@ -157,6 +157,25 @@ typedef enum {
 - (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                                        andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)stampsWithScope:(STStampedAPIScope)scope
+                              date:(NSDate*)date 
+                             limit:(NSInteger)limit 
+                            offset:(NSInteger)offset
+                       andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)stampsWithUserID:(NSString*)userID
+                               date:(NSDate*)date 
+                              limit:(NSInteger)limit 
+                             offset:(NSInteger)offset
+                        andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)entitiesWithScope:(STStampedAPIScope)scope 
+                             section:(NSString*)section
+                          subsection:(NSString*)subsection 
+                               limit:(NSNumber*)limit
+                              offset:(NSNumber*)offset 
+                         andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block;
+
 - (void)followerIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* followerIDs, NSError* error))block;
 
 - (void)addFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;

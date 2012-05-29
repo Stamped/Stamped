@@ -29,6 +29,9 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             ('timestamp.created', pymongo.DESCENDING)])
 
     def _convertFromMongo(self, document):
+        """
+        Keep in mind this is returning a RawTodo, which is less-enriched than a Todo
+        """
         if document is None:
             return None
 
@@ -42,16 +45,16 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 
         stampData = document.pop('stamp', None)
         if stampData is not None:
-            document['stamp_id'] = stampData['stamp_id']
+            document['source_stamp_ids'] = [stampData['stamp_id']]
 
         if 'favorite_id' in document:
             document['todo_id'] = document['favorite_id']
             del(document['favorite_id'])
 
-        todo = self._obj().dataImport(document, overflow=self._overflow)
-        todo.entity = entity
+        rawtodo = self._obj().dataImport(document, overflow=self._overflow)
+        rawtodo.entity = entity
 
-        return todo
+        return rawtodo
 
     ### PUBLIC
 

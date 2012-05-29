@@ -7,7 +7,16 @@
 //
 
 #import "STGenericSliceList.h"
+#import "STStampedAPI.h"
 
-@interface STConsumptionLazyList : STGenericSliceList
+@interface STConsumptionLazyList : STGenericLazyList
+
+- (id)initWithScope:(STStampedAPIScope)scope
+            section:(NSString*)section 
+         subsection:(NSString*)subsection;
+
+@property (nonatomic, readonly, copy) NSString* section;
+@property (nonatomic, readonly, copy) NSString* subsection;
+@property (nonatomic, readonly, assign) STStampedAPIScope scope;
 
 @end

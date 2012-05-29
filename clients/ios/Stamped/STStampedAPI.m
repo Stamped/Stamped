@@ -454,7 +454,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                                        andCallback:(void(^)(NSArray<STTodo>*, NSError*, STCancellation*))block {
-    NSString* path = @"/favorites/show.json";
+    NSString* path = @"/todos/show.json";
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
                                                    params:slice.asDictionaryParams
@@ -749,13 +749,13 @@ static STStampedAPI* _sharedInstance;
 
 - (NSString*)stringForScope:(STStampedAPIScope)scope {
     if (scope == STStampedAPIScopeYou) {
-        return @"you";
+        return @"me";
     }
     else if (scope == STStampedAPIScopeFriends) {
-        return @"friends";
+        return @"inbox";
     }
     else if (scope == STStampedAPIScopeFriendsOfFriends) {
-        return @"fof";
+        return @"robby";
     }
     else {
         return @"everyone";
@@ -795,6 +795,76 @@ static STStampedAPI* _sharedInstance;
                                                   mapping:[STSimpleEntityAutoCompleteResult mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
                                                   block((id)results, error, cancellation); 
+                                              }];
+}
+
+
+- (STCancellation*)stampsWithScope:(STStampedAPIScope)scope
+                              date:(NSDate*)date 
+                             limit:(NSInteger)limit 
+                            offset:(NSInteger)offset
+                       andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/stamps/collection.json";
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   [self stringForScope:scope], @"scope",
+                                   [NSNumber numberWithInteger:limit], @"limit",
+                                   [NSNumber numberWithInteger:[date timeIntervalSince1970]], @"before",
+                                   nil];
+    if (offset != 0) {
+        [params setObject:[NSNumber numberWithInteger:offset] forKey:@"offset"];
+    }
+    if (scope == STStampedAPIScopeFriendsOfFriends) {
+        [params setObject:@"4e57048accc2175fcd000001" forKey:@"user_id"];
+    }
+    NSAssert1(date, @"Date must not be nil for %@", self);
+    return [[STRestKitLoader sharedInstance] loadWithPath:path
+                                                     post:NO
+                                                   params:params
+                                                  mapping:[STSimpleStamp mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      for (id<STStamp> stamp in results) {
+                                                          [self.stampCache setObject:stamp forKey:stamp.stampID];
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+- (STCancellation*)stampsWithUserID:(NSString*)userID
+                               date:(NSDate*)date 
+                              limit:(NSInteger)limit 
+                             offset:(NSInteger)offset
+                        andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+    //TODO
+}
+
+- (STCancellation*)entitiesWithScope:(STStampedAPIScope)scope 
+                             section:(NSString*)section
+                          subsection:(NSString*)subsection 
+                               limit:(NSNumber*)limit
+                              offset:(NSNumber*)offset 
+                         andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/stamps/guide.json";
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   [self stringForScope:scope], @"scope",
+                                   section, @"section",
+                                   nil];
+    if (subsection) {
+        [params setObject:subsection forKey:@"subsection"];
+    }
+    if (limit) {
+        [params setObject:limit forKey:@"limit"];
+    }
+    if (offset) {
+        [params setObject:offset forKey:@"offset"];
+    }
+    return [[STRestKitLoader sharedInstance] loadWithPath:path
+                                                     post:NO
+                                                   params:params
+                                                  mapping:[STSimpleEntityDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation);
                                               }];
 }
 

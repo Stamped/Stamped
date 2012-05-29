@@ -7,10 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0301372415668BC700B55B47 /* Stamps.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301372315668BC700B55B47 /* Stamps.m */; };
-		0301372515668BC700B55B47 /* Stamps.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301372315668BC700B55B47 /* Stamps.m */; };
-		0301372615668BC700B55B47 /* Stamps.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301372315668BC700B55B47 /* Stamps.m */; };
-		0301372715668BC700B55B47 /* Stamps.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301372315668BC700B55B47 /* Stamps.m */; };
 		0301379415668DBE00B55B47 /* NoDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378315668DBE00B55B47 /* NoDataView.m */; };
 		0301379515668DBE00B55B47 /* NoDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378315668DBE00B55B47 /* NoDataView.m */; };
 		0301379615668DBE00B55B47 /* NoDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378315668DBE00B55B47 /* NoDataView.m */; };
@@ -1545,6 +1541,14 @@
 		633FB5FB1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 633FB5F51571545600D7D776 /* OLD_shelf_background@2x.png */; };
 		633FB5FC1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 633FB5F51571545600D7D776 /* OLD_shelf_background@2x.png */; };
 		633FB5FD1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 633FB5F51571545600D7D776 /* OLD_shelf_background@2x.png */; };
+		633FB60C15717E7000D7D776 /* STCachePage.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB60B15717E7000D7D776 /* STCachePage.m */; };
+		633FB60D15717E7000D7D776 /* STCachePage.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB60B15717E7000D7D776 /* STCachePage.m */; };
+		633FB60E15717E7000D7D776 /* STCachePage.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB60B15717E7000D7D776 /* STCachePage.m */; };
+		633FB60F15717E7000D7D776 /* STCachePage.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB60B15717E7000D7D776 /* STCachePage.m */; };
+		633FB61215717F3B00D7D776 /* STCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB61115717F3A00D7D776 /* STCache.m */; };
+		633FB61315717F3B00D7D776 /* STCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB61115717F3A00D7D776 /* STCache.m */; };
+		633FB61415717F3B00D7D776 /* STCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB61115717F3A00D7D776 /* STCache.m */; };
+		633FB61515717F3B00D7D776 /* STCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 633FB61115717F3A00D7D776 /* STCache.m */; };
 		634BA4B9153CA8BE003F96AB /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
 		634BA4BA153CA8BE003F96AB /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
 		634CC952154F42AF000CA620 /* TEMP_noImage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 634CC951154F42AF000CA620 /* TEMP_noImage@2x.png */; };
@@ -1741,9 +1745,25 @@
 		638D7758152BBC93006E4988 /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
 		638D775B152CA018006E4988 /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
 		638D775C152CA018006E4988 /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
+		6394407B1573BD3600234DA6 /* STSharedCaches.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394407A1573BD3600234DA6 /* STSharedCaches.m */; };
+		6394407C1573BD3600234DA6 /* STSharedCaches.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394407A1573BD3600234DA6 /* STSharedCaches.m */; };
+		6394407D1573BD3600234DA6 /* STSharedCaches.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394407A1573BD3600234DA6 /* STSharedCaches.m */; };
+		6394407E1573BD3600234DA6 /* STSharedCaches.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394407A1573BD3600234DA6 /* STSharedCaches.m */; };
+		6394408715742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394408615742E9E00234DA6 /* STEntityDetailCellFactory.m */; };
+		6394408815742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394408615742E9E00234DA6 /* STEntityDetailCellFactory.m */; };
+		6394408915742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394408615742E9E00234DA6 /* STEntityDetailCellFactory.m */; };
+		6394408A15742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 6394408615742E9E00234DA6 /* STEntityDetailCellFactory.m */; };
 		6398B928152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B929152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
 		6398B92A152243CC0044BB0C /* STWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 6398B927152243CA0044BB0C /* STWeakProxy.m */; };
+		639DABFA1572F4D70046C46F /* STInboxPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABF91572F4D70046C46F /* STInboxPageSource.m */; };
+		639DABFB1572F4D70046C46F /* STInboxPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABF91572F4D70046C46F /* STInboxPageSource.m */; };
+		639DABFC1572F4D70046C46F /* STInboxPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABF91572F4D70046C46F /* STInboxPageSource.m */; };
+		639DABFD1572F4D70046C46F /* STInboxPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABF91572F4D70046C46F /* STInboxPageSource.m */; };
+		639DAC001572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */; };
+		639DAC011572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */; };
+		639DAC021572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */; };
+		639DAC031572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */; };
 		63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
 		63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
 		63A6E280153DBACC00D84915 /* STStampedBySource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E27F153DBACC00D84915 /* STStampedBySource.m */; };
@@ -4305,8 +4325,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0301372215668BC700B55B47 /* Stamps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamps.h; sourceTree = "<group>"; };
-		0301372315668BC700B55B47 /* Stamps.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamps.m; sourceTree = "<group>"; };
 		0301378215668DBE00B55B47 /* NoDataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoDataView.h; sourceTree = "<group>"; };
 		0301378315668DBE00B55B47 /* NoDataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoDataView.m; sourceTree = "<group>"; };
 		0301378515668DBE00B55B47 /* STDetailActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDetailActionItem.h; sourceTree = "<group>"; };
@@ -4599,6 +4617,11 @@
 		633FB5EF1570224B00D7D776 /* SearchEntitiesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesTableViewCell.m; sourceTree = "<group>"; };
 		633FB5F41571545600D7D776 /* OLD_shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OLD_shelf_background.png; sourceTree = "<group>"; };
 		633FB5F51571545600D7D776 /* OLD_shelf_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "OLD_shelf_background@2x.png"; sourceTree = "<group>"; };
+		633FB60A15717E7000D7D776 /* STCachePage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = STCachePage.h; path = Stamps/STCachePage.h; sourceTree = "<group>"; };
+		633FB60B15717E7000D7D776 /* STCachePage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = STCachePage.m; path = Stamps/STCachePage.m; sourceTree = "<group>"; };
+		633FB61015717F3A00D7D776 /* STCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = STCache.h; path = Stamps/STCache.h; sourceTree = "<group>"; };
+		633FB61115717F3A00D7D776 /* STCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = STCache.m; path = Stamps/STCache.m; sourceTree = "<group>"; };
+		633FB6161571928C00D7D776 /* STDatum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDatum.h; sourceTree = "<group>"; };
 		634BA4B7153CA8BD003F96AB /* STStampedByView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedByView.h; sourceTree = "<group>"; };
 		634BA4B8153CA8BD003F96AB /* STStampedByView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedByView.m; sourceTree = "<group>"; };
 		634CC951154F42AF000CA620 /* TEMP_noImage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_noImage@2x.png"; sourceTree = "<group>"; };
@@ -4772,8 +4795,16 @@
 		638D7756152BBC92006E4988 /* STSimpleUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleUser.m; sourceTree = "<group>"; };
 		638D7759152CA016006E4988 /* STStampDetailCommentsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailCommentsView.h; sourceTree = "<group>"; };
 		638D775A152CA017006E4988 /* STStampDetailCommentsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampDetailCommentsView.m; sourceTree = "<group>"; };
+		639440791573BD3600234DA6 /* STSharedCaches.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSharedCaches.h; sourceTree = "<group>"; };
+		6394407A1573BD3600234DA6 /* STSharedCaches.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSharedCaches.m; sourceTree = "<group>"; };
+		6394408515742E9E00234DA6 /* STEntityDetailCellFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailCellFactory.h; sourceTree = "<group>"; };
+		6394408615742E9E00234DA6 /* STEntityDetailCellFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailCellFactory.m; sourceTree = "<group>"; };
 		6398B926152243C90044BB0C /* STWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STWeakProxy.h; sourceTree = "<group>"; };
 		6398B927152243CA0044BB0C /* STWeakProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STWeakProxy.m; sourceTree = "<group>"; };
+		639DABF81572F4D70046C46F /* STInboxPageSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInboxPageSource.h; sourceTree = "<group>"; };
+		639DABF91572F4D70046C46F /* STInboxPageSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInboxPageSource.m; sourceTree = "<group>"; };
+		639DABFE1572F6AA0046C46F /* STGenericCacheConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGenericCacheConfiguration.h; sourceTree = "<group>"; };
+		639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGenericCacheConfiguration.m; sourceTree = "<group>"; };
 		63A649881532668E001D9314 /* STPlaylistViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistViewFactory.h; sourceTree = "<group>"; };
 		63A649891532668E001D9314 /* STPlaylistViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistViewFactory.m; sourceTree = "<group>"; };
 		63A6E27E153DBACC00D84915 /* STStampedBySource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedBySource.h; sourceTree = "<group>"; };
@@ -5884,19 +5915,17 @@
 		0301372015668BAF00B55B47 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				0301372115668BBC00B55B47 /* Stamps */,
+				633FB60A15717E7000D7D776 /* STCachePage.h */,
+				633FB60B15717E7000D7D776 /* STCachePage.m */,
+				633FB61015717F3A00D7D776 /* STCache.h */,
+				633FB61115717F3A00D7D776 /* STCache.m */,
+				639DABF81572F4D70046C46F /* STInboxPageSource.h */,
+				639DABF91572F4D70046C46F /* STInboxPageSource.m */,
+				639DABFE1572F6AA0046C46F /* STGenericCacheConfiguration.h */,
+				639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */,
 			);
 			name = Models;
 			path = Classes/Models;
-			sourceTree = "<group>";
-		};
-		0301372115668BBC00B55B47 /* Stamps */ = {
-			isa = PBXGroup;
-			children = (
-				0301372215668BC700B55B47 /* Stamps.h */,
-				0301372315668BC700B55B47 /* Stamps.m */,
-			);
-			path = Stamps;
 			sourceTree = "<group>";
 		};
 		0301378015668DB300B55B47 /* Views */ = {
@@ -6452,6 +6481,7 @@
 				63313525156C1AEE00BF9B8D /* STTodoSource.h */,
 				63313531156C268C00BF9B8D /* STLoginResponse.h */,
 				633FB589156FEEA700D7D776 /* STEntityAutoCompleteResult.h */,
+				633FB6161571928C00D7D776 /* STDatum.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6697,6 +6727,8 @@
 				63CA463D15406B6700CCDD2A /* STStampNew.m */,
 				63B4F68F1554628800C52C28 /* STConsumptionSlice.h */,
 				63B4F6901554628800C52C28 /* STConsumptionSlice.m */,
+				639440791573BD3600234DA6 /* STSharedCaches.h */,
+				6394407A1573BD3600234DA6 /* STSharedCaches.m */,
 			);
 			name = "Stamped API";
 			sourceTree = "<group>";
@@ -6815,6 +6847,8 @@
 		63C98407154DD6C3000180DC /* Cell Factories */ = {
 			isa = PBXGroup;
 			children = (
+				6394408515742E9E00234DA6 /* STEntityDetailCellFactory.h */,
+				6394408615742E9E00234DA6 /* STEntityDetailCellFactory.m */,
 				63C98408154DD702000180DC /* STStampCellFactory.h */,
 				63C98409154DD702000180DC /* STStampCellFactory.m */,
 				63C98412154DDA70000180DC /* STUserCellFactory.h */,
@@ -11716,7 +11750,6 @@
 				0364C0EF1564981600EE18C1 /* STRestViewController.m in Sources */,
 				0364C1001564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1041564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
-				0301372715668BC700B55B47 /* Stamps.m in Sources */,
 				0301379715668DBE00B55B47 /* NoDataView.m in Sources */,
 				0301379B15668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379F15668DBE00B55B47 /* STBlockUIView.m in Sources */,
@@ -11743,6 +11776,12 @@
 				0358C90315746E8100FD1597 /* STPagedImageViewer.m in Sources */,
 				0358C90A1575058500FD1597 /* STMusicPopoverController.m in Sources */,
 				0358C9111575080A00FD1597 /* ImageLoader.m in Sources */,
+				633FB60F15717E7000D7D776 /* STCachePage.m in Sources */,
+				633FB61515717F3B00D7D776 /* STCache.m in Sources */,
+				639DABFD1572F4D70046C46F /* STInboxPageSource.m in Sources */,
+				639DAC031572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
+				6394407E1573BD3600234DA6 /* STSharedCaches.m in Sources */,
+				6394408A15742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12011,7 +12050,6 @@
 				0364C0EE1564981600EE18C1 /* STRestViewController.m in Sources */,
 				0364C0FF1564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1031564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
-				0301372615668BC700B55B47 /* Stamps.m in Sources */,
 				0301379615668DBE00B55B47 /* NoDataView.m in Sources */,
 				0301379A15668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379E15668DBE00B55B47 /* STBlockUIView.m in Sources */,
@@ -12040,6 +12078,12 @@
 				0358C90215746E8100FD1597 /* STPagedImageViewer.m in Sources */,
 				0358C9091575058500FD1597 /* STMusicPopoverController.m in Sources */,
 				0358C9101575080A00FD1597 /* ImageLoader.m in Sources */,
+				633FB60E15717E7000D7D776 /* STCachePage.m in Sources */,
+				633FB61415717F3B00D7D776 /* STCache.m in Sources */,
+				639DABFC1572F4D70046C46F /* STInboxPageSource.m in Sources */,
+				639DAC021572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
+				6394407D1573BD3600234DA6 /* STSharedCaches.m in Sources */,
+				6394408915742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12307,7 +12351,6 @@
 				0364C0ED1564981600EE18C1 /* STRestViewController.m in Sources */,
 				0364C0FE1564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1021564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
-				0301372515668BC700B55B47 /* Stamps.m in Sources */,
 				0301379515668DBE00B55B47 /* NoDataView.m in Sources */,
 				0301379915668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379D15668DBE00B55B47 /* STBlockUIView.m in Sources */,
@@ -12336,6 +12379,12 @@
 				0358C90115746E8100FD1597 /* STPagedImageViewer.m in Sources */,
 				0358C9081575058500FD1597 /* STMusicPopoverController.m in Sources */,
 				0358C90F1575080A00FD1597 /* ImageLoader.m in Sources */,
+				633FB60D15717E7000D7D776 /* STCachePage.m in Sources */,
+				633FB61315717F3B00D7D776 /* STCache.m in Sources */,
+				639DABFB1572F4D70046C46F /* STInboxPageSource.m in Sources */,
+				639DAC011572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
+				6394407C1573BD3600234DA6 /* STSharedCaches.m in Sources */,
+				6394408815742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12615,7 +12664,6 @@
 				0364C0EC1564981600EE18C1 /* STRestViewController.m in Sources */,
 				0364C0FD1564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1011564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
-				0301372415668BC700B55B47 /* Stamps.m in Sources */,
 				0301379415668DBE00B55B47 /* NoDataView.m in Sources */,
 				0301379815668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379C15668DBE00B55B47 /* STBlockUIView.m in Sources */,
@@ -12644,6 +12692,12 @@
 				0358C90015746E8100FD1597 /* STPagedImageViewer.m in Sources */,
 				0358C9071575058500FD1597 /* STMusicPopoverController.m in Sources */,
 				0358C90E1575080A00FD1597 /* ImageLoader.m in Sources */,
+				633FB60C15717E7000D7D776 /* STCachePage.m in Sources */,
+				633FB61215717F3B00D7D776 /* STCache.m in Sources */,
+				639DABFA1572F4D70046C46F /* STInboxPageSource.m in Sources */,
+				639DAC001572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
+				6394407B1573BD3600234DA6 /* STSharedCaches.m in Sources */,
+				6394408715742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

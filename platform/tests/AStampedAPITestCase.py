@@ -322,7 +322,7 @@ class AStampedAPITestCase(AStampedTestCase):
                 "title": "Good Food",
                 "subtitle": "Peoria, IL",
                 "desc": "American food in America", 
-                "category": "food",
+                "category": "place",
                 "subcategory": "restaurant",
                 "address": "123 Main Street, Peoria, IL",
                 "coordinates": "40.714623,-74.006605"
@@ -418,7 +418,16 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-    
+
+    def completeTodo(self, token, entityId, complete):
+        path = "todos/complete.json"
+        data = {
+            "oauth_token":  token['access_token'],
+            "entity_id":    entityId,
+            "complete":     complete,
+        }
+        return self.handlePOST(path, data)
+
     def _loadCollection(self, collection, filename=None, drop=True):
         if filename is None:
             filename = "%s.db" % collection

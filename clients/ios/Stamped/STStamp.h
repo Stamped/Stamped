@@ -15,8 +15,9 @@
 #import "STBadge.h"
 #import "STContentItem.h"
 #import "STPreviews.h"
+#import "STDatum.h"
 
-@protocol STStamp <NSObject>
+@protocol STStamp <STDatum>
 
 @required
 
