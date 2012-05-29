@@ -60,7 +60,7 @@ class AExternalSource(object):
             for k in path[:-1]:
                 cur = entity[k]
         if data is None:
-            if path[-1] in cur:
+            if hasattr(cur, path[-1]):
                 delattr(cur, path[-1])
         else:
             setattr(cur, path[-1], data)

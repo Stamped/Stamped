@@ -11,7 +11,7 @@ __license__   = "TODO"
 
 import datetime, gzip, httplib, json, logging, os, pickle, re, string, sys
 import htmlentitydefs, threading, time, traceback, urllib, urllib2
-import keys.aws, logs, math, random, boto
+import keys.aws, logs, math, random, boto, bson
 
 from errors              import *
 from boto.ec2.connection import EC2Connection
@@ -20,6 +20,7 @@ from functools           import wraps
 from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
+
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -784,6 +785,12 @@ def runMongoCommand(mongo_cmd, db='stamped', verbose=False):
     except ValueError:
         return ret[0]
 
+def generateUid():
+    return str(bson.objectid.ObjectId())
+
+def timestampFromUid(oid_str):
+    return bson.objectid.ObjectId(oid_str).generation_time.replace(tzinfo=None)
+
 def get_basic_stats(collection, key):
     """
         Returns the mean, standard deviation, max, and min values for the key 
@@ -939,6 +946,3 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
                 return option[0]
         
         print "invalid input"
-
-def timestampFromObjectId(oid_str):
-    return ObjectId(oid_str).generation_time.replace(tzinfo=None)

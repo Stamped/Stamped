@@ -49,6 +49,15 @@
                       withMinimumSize:(NSInteger)minimumSize
                         preferredSize:(NSInteger)preferredSize 
                           andCallback:(void (^)(STCachePage* page, NSError* error, STCancellation* cancellation))block {
+    if ([STStampedAPI sharedInstance].currentUser == nil && self.scope != STStampedAPIScopeEveryone) {
+        STCancellation* cancellation = [STCancellation cancellation];
+        [Util executeOnMainThread:^{
+            if (!cancellation.cancelled) {
+                block(nil, [NSError errorWithDomain:@"stamped.no_user" code:0 userInfo:nil], cancellation);
+            }
+        }];
+        return cancellation;
+    }
    return [[STStampedAPI sharedInstance] stampsWithScope:self.scope date:date limit:minimumSize offset:0 andCallback:^(NSArray<STStamp> *stamps, NSError *error, STCancellation *cancellation) {
        if (stamps) {
            //TODO handle multiple stamps at a specific time

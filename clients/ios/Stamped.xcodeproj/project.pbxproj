@@ -2782,6 +2782,7 @@
 		63DC7B57152E1867001BA610 /* STStampButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DC7B55152E1867001BA610 /* STStampButton.m */; };
 		63DE12D31533223F00074FCD /* STMultipleChoiceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */; };
 		63DE12D41533223F00074FCD /* STMultipleChoiceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */; };
+		63DE1B921575104400E70FD9 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63DE1B911575104400E70FD9 /* ImageIO.framework */; };
 		63E252FB15347856007AD006 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
 		63E252FC15347856007AD006 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
 		63E252FF153478DE007AD006 /* STTablePopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FE153478DE007AD006 /* STTablePopUp.m */; };
@@ -4928,6 +4929,7 @@
 		63DC7B55152E1867001BA610 /* STStampButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampButton.m; sourceTree = "<group>"; };
 		63DE12D11533223F00074FCD /* STMultipleChoiceButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMultipleChoiceButton.h; sourceTree = "<group>"; };
 		63DE12D21533223F00074FCD /* STMultipleChoiceButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMultipleChoiceButton.m; sourceTree = "<group>"; };
+		63DE1B911575104400E70FD9 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		63E252F915347856007AD006 /* STPlaylistPopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistPopUp.h; sourceTree = "<group>"; };
 		63E252FA15347856007AD006 /* STPlaylistPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistPopUp.m; sourceTree = "<group>"; };
 		63E252FD153478DE007AD006 /* STTablePopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTablePopUp.h; sourceTree = "<group>"; };
@@ -5814,6 +5816,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63DE1B921575104400E70FD9 /* ImageIO.framework in Frameworks */,
 				63BA779A1545F69400EE95DA /* StoreKit.framework in Frameworks */,
 				63BA779B1545F69400EE95DA /* AudioToolbox.framework in Frameworks */,
 				63BA779C1545F69400EE95DA /* libRestKit.a in Frameworks */,

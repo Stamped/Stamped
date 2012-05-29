@@ -959,7 +959,14 @@ class StampedAPI(AStampedAPI):
             categories.setdefault(category, 0)
             categories[category] += 1
 
-        return [ { 'category': k, 'count': v } for k, v in categories.iteritems() ] 
+        result = []
+        for k, v in categories.items():
+            distribution = CategoryDistributionSchema()
+            distribution.category = k 
+            distribution.count = v 
+            result.append(distribution)
+
+        return result
         
     
     ### PUBLIC
@@ -979,8 +986,12 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
-        if self.__version > 0 and user.stats.distribution is not None and len(user.stats.distribution) == 0:
-            user.stats.distribution = self._getUserStampDistribution(user.user_id)
+        if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
+            if user.stats.distribution is None or len(user.stats.distribution) == 0:
+                distribution = self._getUserStampDistribution(user.user_id)
+                user.stats.distribution = distribution
+                ### TEMP: This should be async
+                self._userDB.updateDistribution(user.user_id, distribution)
         
         return user
     
@@ -2102,12 +2113,14 @@ class StampedAPI(AStampedAPI):
 
         # Build content
         content = StampContent()
+        content.content_id = utils.generateUid()
+        timestamp = TimestampSchema()
+        timestamp.created = now  #time.gmtime(utils.timestampFromUid(content.content_id))
+        content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
-            timestamp = TimestampSchema()
-            timestamp.created = now
-            content.timestamp = timestamp
+
 
         # Add image to stamp
         if imageData is not None:
@@ -2149,27 +2162,6 @@ class StampedAPI(AStampedAPI):
         if imageUrl is not None:
             if imageWidth is None or imageHeight is None:
                 raise StampedInputError("invalid image dimensions")
-
-            imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
-            # Add image dimensions to stamp object
-            image           = ImageSchema()
-            supportedSizes   = {
-                ''        : (imageWidth, imageHeight),   #original size
-                '-ios1x'  : (200, 200),
-                '-ios2x'  : (400, 400),
-                '-web'    : (580, 580),
-                '-mobile' : (572, 572),
-                }
-            sizes = []
-            for k,v in supportedSizes.iteritems():
-                logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
-                size            = ImageSizeSchema()
-                size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
-                size.width      = v[0]
-                size.height     = v[1]
-                sizes.append(size)
-            image.sizes = sizes
-            content.images.append(image)
             imageExists = True
 
         # Update content if stamp exists
@@ -2219,7 +2211,7 @@ class StampedAPI(AStampedAPI):
 
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, content.content_id])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2241,7 +2233,7 @@ class StampedAPI(AStampedAPI):
             self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
             self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
             distribution = self._getUserStampDistribution(authUserId)
-            self._userDB.updateUserStats(authUserId, 'distribution',     value=distribution)
+            self._userDB.updateDistribution(authUserId, distribution)
             
             # Asynchronously add references to the stamp in follower's inboxes and 
             # add activity for credit and mentions
@@ -2329,11 +2321,55 @@ class StampedAPI(AStampedAPI):
 
     
     @API_CALL
-    def addResizedStampImagesAsync(self, imageId, imageUrl):
+    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
+        logs.info('### Hit addResizedStampImagesAsync')
         assert imageUrl is not None, "stamp image url unavailable!"
-        
-        self._imageDB.addResizedStampImages(imageUrl, imageId)
-    
+
+        max_size = (960, 960)
+        supportedSizes   = {
+            '-ios1x'  : (200, None),
+            '-ios2x'  : (400, None),
+            '-web'    : (580, None),
+            '-mobile' : (572, None),
+            }
+
+
+        # get stamp using stamp_id
+        stamp = self._stampDB.getStamp(stampId)
+        # find the blurb using the content_id and update the images field
+        for i, c in enumerate(stamp.contents):
+            if c.content_id == content_id:
+
+                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
+                # Add image dimensions to stamp object
+                image           = ImageSchema()
+                # add the default image size
+                supportedSizes['']       = (imageWidth,imageHeight)
+
+                images = getattr(c, 'images', tuple())
+                sizes = []
+                for k,v in supportedSizes.iteritems():
+                    logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
+                    size            = ImageSizeSchema()
+                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.width      = v[0]
+                    size.height     = v[1]
+                    sizes.append(size)
+                image.sizes = sizes
+                c.images += (image,)
+
+                # update the actual stamp content, then update the db
+                stamp.contents[i] = c
+                logs.info('### about to call updateStamp')
+                self._stampDB.updateStamp(stamp)
+                break
+        else:
+            raise StampedInputError('Could not find stamp blurb for image resizing')
+
+        logs.info('### about to add the S3 resized images')
+        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
+
+
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):
         raise NotImplementedError
@@ -2548,7 +2584,7 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_stamps',      increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', increment=1)
         distribution = self._getUserStampDistribution(authUserId)
-        self._userDB.updateUserStats(authUserId, 'distribution', value=distribution)
+        self._userDB.updateDistribution(authUserId, distribution)
         
         # Update credit stats if credit given
         if stamp.credit is not None and len(stamp.credit) > 0:
@@ -3441,7 +3477,7 @@ class StampedAPI(AStampedAPI):
         items = []
 
         i = 0
-        for item in allItems[offset:]:
+        for item in allItems:
             if guideRequest.subsection is None or guideRequest.subsection in item.tags:
 
                 items.append(item)
@@ -3454,8 +3490,10 @@ class StampedAPI(AStampedAPI):
                         userIds[userId] = None
                 i += 1
 
-            if i >= limit:
+            if i >= limit + offset:
                 break
+
+        items = items[offset:]
 
         # Entities 
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3515,7 +3553,7 @@ class StampedAPI(AStampedAPI):
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
         entities = self._entityDB.getEntities(entityIds)
-        todos = set(self._favoriteDB.getFavoriteEntityIds(user.user_id))
+        todos = set(self._todoDB.getTodoEntityIds(user.user_id))
 
         t1 = time.time()
 

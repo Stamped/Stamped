@@ -730,28 +730,28 @@ class HTTPUser(Schema):
                                         cache=user.timestamp.image_cache, 
                                         sizes=[144, 110, 92, 74, 72, 62, 55, 46, 37, 31])
         
+        distributionData = {}
         if 'distribution' in stats:
-            data = {}
             for item in stats['distribution']:
-                data[item['category']] = item['count']
+                distributionData[item['category']] = item['count']
                 
-            order = [
-                'place',
-                'book',
-                'film', 
-                'music',
-                'app',
-                'other',
-            ]
-            distribution = []
-            for i in order:
-                d           = HTTPCategoryDistribution()
-                d.category  = i
-                d.name      = i.title()
-                d.count     = data.pop(i, 0)
-                d.icon      = _getIconURL('cat_%s' % i, client=client)
-                distribution.append(d)
-            self.distribution = distribution
+        distribution = []
+        order = [
+            'place',
+            'book',
+            'film', 
+            'music',
+            'app',
+            'other',
+        ]
+        for i in order:
+            d           = HTTPCategoryDistribution()
+            d.category  = i
+            d.name      = i.title()
+            d.count     = distributionData.pop(i, 0)
+            d.icon      = _getIconURL('cat_%s' % i, client=client)
+            distribution.append(d)
+        self.distribution = distribution
         
         return self
 

@@ -199,6 +199,10 @@ class Schema(object):
         else:
             return False
 
+    #TODO: make this a true repr string
+    def __repr__(self):
+        return str(self)
+
     def __str__(self):
         return '[%s %s]' % (self.__class__, self.dataExport())
 
