@@ -68,7 +68,7 @@
         _scrollView = [scrollView retain];
         [scrollView release];
         
-        CGRect frame = CGRectMake(self.scrollView.frame.size.width - 58.0f, 4.0f, 50.0f, 44.0f);
+        CGRect frame = CGRectMake(floorf(self.scrollView.frame.size.width - 58.0f), 4.0f, 50.0f, 44.0f);
         
         // close
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -81,7 +81,7 @@
         
         for (NSInteger i = 0; i < self.categories.count; i++) {
             
-            frame.origin.y += 48.0f;
+            frame.origin.y = floorf(frame.origin.y + 48.0f);
             NSString *category = [self.categories objectAtIndex:i];
             UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"create_menu_%@.png", category]];
             UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -95,7 +95,7 @@
 
         }
         
-        frame.origin.y += 48.0f;
+        frame.origin.y = floorf(frame.origin.y + 48.0f);
 
         // more
         button = [UIButton buttonWithType:UIButtonTypeCustom];

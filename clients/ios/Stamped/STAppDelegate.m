@@ -40,6 +40,7 @@
 #import "DDMenuController.h"
 #import "STWelcomeViewController.h"
 #import "STIWantToViewController.h"
+#import "STSharedCaches.h"
 
 #import "STCreateStampViewController.h"
 
@@ -124,7 +125,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
     
-    // 1st run debugging code..
+
     /*
      STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
      [menuController.view addSubview:welcomeController.view];
@@ -170,7 +171,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    
+    /* NSLog(@"Going to background");
+    [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        NSLog(@"Saved"); 
+    }];
+     */
 }
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {

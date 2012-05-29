@@ -90,7 +90,7 @@ static const CGFloat _kReadMoreHeightCutoff = 90;
     self.backgroundColor = [UIColor clearColor];
     
     self.gradient = [CAGradientLayer layer];
-    [self.layer addSublayer:self.gradient];
+    //[self.layer addSublayer:self.gradient];
     [self addSubview:nameView];
     if (self.uncollapsedValueHeight > _kReadMoreHeightCutoff) {
       CGRect frame = CGRectMake(0, 0, 290, CGRectGetMaxY(nameView.frame)+14);
@@ -128,6 +128,7 @@ static const CGFloat _kReadMoreHeightCutoff = 90;
       self.frame = frame;
       [self addSubview:valueView];
     }
+      
     self.gradient.anchorPoint = CGPointMake(0, 0);
     self.gradient.position = CGPointMake(0, 0);
     self.gradient.frame = self.layer.frame;

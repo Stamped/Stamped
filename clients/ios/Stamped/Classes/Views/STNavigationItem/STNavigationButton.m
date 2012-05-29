@@ -14,8 +14,8 @@
 #define kBackButton @"nav_back_button.png"
 #define kBackButtonHi @"nav_back_button.png"
 
-#define kDoneButton @"gifture_nav_buttton_done.png"
-#define kDoneButtonHi @"gifture_nav_buttton_done.png"
+#define kDoneButton @"nav_done_btn.png"
+#define kDoneButtonHi @"nav_done_btn.png"
 
 #define BUTTON_BUFFER 20.0f
 #define BUTTON_IMAGE_BUFFER 24.0f

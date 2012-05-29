@@ -13,6 +13,7 @@
 #import "STSimplePlaylist.h"
 #import <RestKit/RestKit.h>
 #import "STSimpleImageList.h"
+#import "STSimplePreviews.h"
 
 #pragma mark - Attributes
 
@@ -32,89 +33,95 @@
 @synthesize metadata = _metadata;
 @synthesize galleries = _galleries;
 @synthesize playlist = _playlist;
+@synthesize previews = _previews;
 
 - (id)initWithCoder:(NSCoder *)decoder {
-  self = [super initWithCoder:decoder];
-  if (self) {
-    _caption = [[decoder decodeObjectForKey:@"caption"] retain];
-    _address = [[decoder decodeObjectForKey:@"address"] retain];
-    _addressStreet = [[decoder decodeObjectForKey:@"addressStreet"] retain];
-    _addressCity = [[decoder decodeObjectForKey:@"addressCity"] retain];
-    _addressState = [[decoder decodeObjectForKey:@"addressState"] retain];
-    _addressZip = [[decoder decodeObjectForKey:@"addressZip"] retain];
-    _addressCountry = [[decoder decodeObjectForKey:@"addressCountry"] retain];
-    _neighborhood = [[decoder decodeObjectForKey:@"neighborhood"] retain];
-    _actions = [[decoder decodeObjectForKey:@"actions"] retain];
-    _metadata = [[decoder decodeObjectForKey:@"metadata"] retain];
-    _galleries = [[decoder decodeObjectForKey:@"galleries"] retain];
-    _playlist = [[decoder decodeObjectForKey:@"playlist"] retain];
-  }
-  return self;
+    self = [super initWithCoder:decoder];
+    if (self) {
+        _caption = [[decoder decodeObjectForKey:@"caption"] retain];
+        _address = [[decoder decodeObjectForKey:@"address"] retain];
+        _addressStreet = [[decoder decodeObjectForKey:@"addressStreet"] retain];
+        _addressCity = [[decoder decodeObjectForKey:@"addressCity"] retain];
+        _addressState = [[decoder decodeObjectForKey:@"addressState"] retain];
+        _addressZip = [[decoder decodeObjectForKey:@"addressZip"] retain];
+        _addressCountry = [[decoder decodeObjectForKey:@"addressCountry"] retain];
+        _neighborhood = [[decoder decodeObjectForKey:@"neighborhood"] retain];
+        _actions = [[decoder decodeObjectForKey:@"actions"] retain];
+        _metadata = [[decoder decodeObjectForKey:@"metadata"] retain];
+        _galleries = [[decoder decodeObjectForKey:@"galleries"] retain];
+        _playlist = [[decoder decodeObjectForKey:@"playlist"] retain];
+        _previews = [[decoder decodeObjectForKey:@"previews"] retain];
+    }
+    return self;
 }
 
 - (void)dealloc {
-  [_caption release];
-  
-  [_address release];
-  [_addressStreet release];
-  [_addressCity release];
-  [_addressState release];
-  [_addressZip release];
-  [_addressCountry release];
-  [_neighborhood release];
-  
-  [_actions release];
-  [_metadata release];
-  [_galleries release];
-  [_playlist release];
-  
-  [super dealloc];
+    [_caption release];
+    
+    [_address release];
+    [_addressStreet release];
+    [_addressCity release];
+    [_addressState release];
+    [_addressZip release];
+    [_addressCountry release];
+    [_neighborhood release];
+    
+    [_actions release];
+    [_metadata release];
+    [_galleries release];
+    [_playlist release];
+    [_previews release];
+    
+    [super dealloc];
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-  [super encodeWithCoder:encoder];
-  [encoder encodeObject:self.caption forKey:@"caption"];
-  [encoder encodeObject:self.address forKey:@"address"];
-  [encoder encodeObject:self.addressStreet forKey:@"addressStreet"];
-  [encoder encodeObject:self.addressCity forKey:@"addressCity"];
-  [encoder encodeObject:self.addressState forKey:@"addressState"];
-  [encoder encodeObject:self.addressCountry forKey:@"addressCountry"];
-  [encoder encodeObject:self.neighborhood forKey:@"neighborhood"];
-  [encoder encodeObject:self.actions forKey:@"actions"];
-  [encoder encodeObject:self.metadata forKey:@"metadata"];
-  [encoder encodeObject:self.galleries forKey:@"galleries"];
-  [encoder encodeObject:self.playlist forKey:@"playlist"];
+    [super encodeWithCoder:encoder];
+    [encoder encodeObject:self.caption forKey:@"caption"];
+    [encoder encodeObject:self.address forKey:@"address"];
+    [encoder encodeObject:self.addressStreet forKey:@"addressStreet"];
+    [encoder encodeObject:self.addressCity forKey:@"addressCity"];
+    [encoder encodeObject:self.addressState forKey:@"addressState"];
+    [encoder encodeObject:self.addressCountry forKey:@"addressCountry"];
+    [encoder encodeObject:self.neighborhood forKey:@"neighborhood"];
+    [encoder encodeObject:self.actions forKey:@"actions"];
+    [encoder encodeObject:self.metadata forKey:@"metadata"];
+    [encoder encodeObject:self.galleries forKey:@"galleries"];
+    [encoder encodeObject:self.playlist forKey:@"playlist"];
+    [encoder encodeObject:self.previews forKey:@"previews"];
 }
 
 + (RKObjectMapping*)mapping {
-  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleEntityDetail class]];
-  
-  [mapping mapKeyPathsToAttributes:
-   @"entity_id", @"entityID",
-   @"address_street", @"addressStreet",
-   @"address_city", @"addressCity",
-   @"address_state", @"addressState",
-   @"address_zip", @"addressZip",
-   @"address_country", @"addressCountry",
-   nil];
-  
-  [mapping mapAttributes:
-   @"title",
-   @"subtitle",
-   @"category",
-   @"subcategory",
-   @"coordinates",
-   @"address",
-   @"neighborhood",
-   @"caption",
-   nil];
-  
-  [mapping mapRelationship:@"images" withMapping:[STSimpleImageList mapping]];
-  [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
-  [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
-  [mapping mapRelationship:@"galleries" withMapping:[STSimpleGallery mapping]];
-  [mapping mapRelationship:@"playlist" withMapping:[STSimplePlaylist mapping]];
-  return mapping;
+    RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleEntityDetail class]];
+    
+    [mapping mapKeyPathsToAttributes:
+     @"entity_id", @"entityID",
+     @"address_street", @"addressStreet",
+     @"address_city", @"addressCity",
+     @"address_state", @"addressState",
+     @"address_zip", @"addressZip",
+     @"address_country", @"addressCountry",
+     nil];
+    
+    [mapping mapAttributes:
+     @"title",
+     @"subtitle",
+     @"category",
+     @"subcategory",
+     @"coordinates",
+     @"address",
+     @"neighborhood",
+     @"caption",
+     nil];
+    
+    [mapping mapRelationship:@"images" withMapping:[STSimpleImageList mapping]];
+    [mapping mapRelationship:@"actions" withMapping:[STSimpleActionItem mapping]];
+    [mapping mapRelationship:@"metadata" withMapping:[STSimpleMetadataItem mapping]];
+    [mapping mapRelationship:@"galleries" withMapping:[STSimpleGallery mapping]];
+    [mapping mapRelationship:@"playlist" withMapping:[STSimplePlaylist mapping]];
+    [mapping mapRelationship:@"previews" withMapping:[STSimplePreviews mapping]];
+    
+    return mapping;
 }
 
 

@@ -23,6 +23,7 @@
 #import "STConfiguration.h"
 #import "STConsumptionToolbarItem.h"
 #import "STConsumptionToolbar.h"
+#import "STGenericCellFactory.h"
 
 //Film
 static NSString* _movieNameKey = @"Consumption.film.movie.name";
@@ -85,14 +86,9 @@ static NSString* const _filterType = @"filter";
 @synthesize consumptionToolbar = consumptionToolbar_;
 
 - (void)update {
-  STConsumptionSlice* slice = [[[STConsumptionSlice alloc] init] autorelease];
-  slice.category = self.category;
-  if (self.subcategory) {
-    slice.subcategory = self.subcategory;
-  }
-  slice.scope = [[STStampedAPI sharedInstance] stringForScope:self.scope];
-  [lazyList_ shrinkToCount:0];
-  lazyList_.genericSlice = slice;
+    self.tableDelegate.lazyList = [[[STConsumptionLazyList alloc] initWithScope:self.scope
+                                                                        section:self.category
+                                                                     subsection:self.subcategory] autorelease];
   [tableDelegate_ reloadStampedData];
 }
 
@@ -149,7 +145,7 @@ static NSString* const _filterType = @"filter";
     [array addObject:albums];
     
     STConsumptionToolbarItem* songs = [[[STConsumptionToolbarItem alloc] init] autorelease];
-    songs.value = @"song";
+    songs.value = @"track";
     songs.name = [STConfiguration value:_songNameKey];
     songs.icon = [STConfiguration value:_songIconKey];
     songs.backIcon = [STConfiguration value:_songBackIconKey];
@@ -173,10 +169,9 @@ static NSString* const _filterType = @"filter";
     // Custom initialization
     scope_ = STStampedAPIScopeFriends;
     tableDelegate_ = [[STGenericTableDelegate alloc] init];
-    lazyList_ = [[STConsumptionLazyList alloc] init];
     tableDelegate_.style = STCellStyleConsumption;
     tableDelegate_.lazyList = lazyList_;
-    tableDelegate_.tableViewCellFactory = [STStampCellFactory sharedInstance];
+    tableDelegate_.tableViewCellFactory = [STGenericCellFactory sharedInstance];
     __block STConsumptionViewController* weak = self;
     tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
       [weak.tableView reloadData];

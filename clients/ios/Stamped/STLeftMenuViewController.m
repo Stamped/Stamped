@@ -20,6 +20,8 @@
 #import "LeftMenuTableCell.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
+#import "STNavigationItem.h"
+#import "STStampedAPI.h"
 
 static NSString* const _inboxNameKey = @"Root.inboxName";
 static NSString* const _iWantToNameKey = @"Root.iWantToName";
@@ -171,6 +173,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)viewDidUnload {
     [super viewDidUnload];
     self.tableView = nil;
+    self.anchorTableView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -247,6 +250,21 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    
+    if (self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
+        
+        // controller is already root, lets just pop it to root like a tab bar
+        DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        UINavigationController *navController = (UINavigationController*)[menuController rootViewController];
+        if (navController && [navController isKindOfClass:[UINavigationController class]]) {
+            [menuController showRootController:YES];
+            [navController popToRootViewControllerAnimated:NO];
+            return;
+        }
+        
+    }
+    
+    
     NSString *key = (tableView == self.tableView) ? [_dataSource objectAtIndex:indexPath.row] : [_anchorDataSource objectAtIndex:indexPath.row];
     NSString *value = (tableView == self.tableView) ? [_controllerStore objectForKey:key] : [_anchorControllerStore objectForKey:key];
     
@@ -260,7 +278,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     } else {
         
-        STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleBordered target:self action:@selector(done:)];
+        STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
         controller.navigationItem.rightBarButtonItem = item;
         [item release];
 
@@ -308,6 +326,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [controller dismissModalViewControllerAnimated:YES];
     
 }
+
 
 #pragma mark - Configurations
 

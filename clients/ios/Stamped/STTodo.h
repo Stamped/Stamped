@@ -11,8 +11,9 @@
 #import "STUser.h"
 #import "STPreviews.h"
 #import "STEntity.h"
+#import "STDatum.h"
 
-@protocol STTodo <NSObject>
+@protocol STTodo <STDatum>
 
 @property (nonatomic, readonly, copy) NSString* todoID;
 @property (nonatomic, readonly, copy) NSString* userID;

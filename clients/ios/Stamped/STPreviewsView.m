@@ -33,21 +33,21 @@
 @synthesize pair = pair_;
 
 - (id)initWithUser:(id<STUser>)user icon:(UIImage*)icon action:(id<STAction>)action andContext:(STActionContext*)context {
-  self = [super init];
-  if (self) {
-    user_ = [user retain];
-    icon_ = [icon retain];
-    pair_ = [[STActionPair actionPairWithAction:action andContext:context] retain];
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        user_ = [user retain];
+        icon_ = [icon retain];
+        pair_ = [[STActionPair actionPairWithAction:action andContext:context] retain];
+    }
+    return self;
 }
 
 - (void)dealloc
 {
-  [user_ release];
-  [icon_ release];
-  [pair_ release];
-  [super dealloc];
+    [user_ release];
+    [icon_ release];
+    [pair_ release];
+    [super dealloc];
 }
 
 @end
@@ -67,17 +67,17 @@ static const NSInteger _cellsPerRow = 7;
 @synthesize items = items_;
 
 + (NSInteger)totalItemsForPreviews:(id<STPreviews>)previews {
-  if (previews) {
-      return previews.credits.count + previews.likes.count + previews.todos.count; //+ previews.comments.count;
-  }
-  return 0;
+    if (previews) {
+        return previews.credits.count + previews.likes.count + previews.todos.count + previews.stampUsers.count;
+    }
+    return 0;
 }
 
 + (NSInteger)totalRowsForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
-  NSInteger itemsCount = [STPreviewsView totalItemsForPreviews:previews];
-  NSInteger rows = itemsCount / _cellsPerRow;
-  rows += itemsCount % _cellsPerRow ? 1 : 0;
-  return MIN(maxRows,rows);
+    NSInteger itemsCount = [STPreviewsView totalItemsForPreviews:previews];
+    NSInteger rows = itemsCount / _cellsPerRow;
+    rows += itemsCount % _cellsPerRow ? 1 : 0;
+    return MIN(maxRows,rows);
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -90,7 +90,7 @@ static const NSInteger _cellsPerRow = 7;
 - (void)setupWithPreview:(id<STPreviews>)previews maxRows:(NSInteger)maxRows {
     
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-        
+    
     UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"inbox_cell_dash.png"]];
     [self addSubview:imageView];
     
@@ -98,7 +98,7 @@ static const NSInteger _cellsPerRow = 7;
     frame.origin.y -= 8.0f;
     imageView.frame = frame;
     [imageView release];
-
+    
     NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
     if (total > 0) {
         NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
@@ -117,6 +117,19 @@ static const NSInteger _cellsPerRow = 7;
                 STActionContext* context = [STActionContext context];
                 id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
                 STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:credit.user icon:image action:action andContext:context] autorelease];
+                [items_ addObject:item];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> user in previews.stampUsers) {
+            if (items_.count < limit) {
+                UIImage* image = [Util stampImageForUser:user withSize:STStampImageSize12];
+                STActionContext* context = [STActionContext context];
+                context.user = user;
+                id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+                STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:user icon:image action:action andContext:context] autorelease];
                 [items_ addObject:item];
             }
             else {
@@ -150,19 +163,19 @@ static const NSInteger _cellsPerRow = 7;
             }
         }
         /*
-        UIImage* commentIcon = [UIImage imageNamed:@"comment_mini"];
-        for (id<STComment> comment in previews.comments) {
-            if (items_.count < limit) {
-                STActionContext* context = [STActionContext context];
-                context.user = comment.user;
-                id<STAction> action = [STStampedActions actionViewUser:comment.user.userID withOutputContext:context];
-                STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:comment.user icon:commentIcon action:action andContext:context] autorelease];
-                [items_ addObject:item];
-            }
-            else {
-                break;
-            }
-        }
+         UIImage* commentIcon = [UIImage imageNamed:@"comment_mini"];
+         for (id<STComment> comment in previews.comments) {
+         if (items_.count < limit) {
+         STActionContext* context = [STActionContext context];
+         context.user = comment.user;
+         id<STAction> action = [STStampedActions actionViewUser:comment.user.userID withOutputContext:context];
+         STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:comment.user icon:commentIcon action:action andContext:context] autorelease];
+         [items_ addObject:item];
+         }
+         else {
+         break;
+         }
+         }
          */
         for (NSInteger i = limit - 1; i >= 0; i--) {
             NSInteger col = i % _cellsPerRow;
@@ -221,7 +234,7 @@ static const NSInteger _cellsPerRow = 7;
             }
         }
     }
-
+    
     
 }
 
@@ -230,70 +243,68 @@ static const NSInteger _cellsPerRow = 7;
 }
 
 - (void)dealloc {
-  [items_ release];
-  [super dealloc];
+    [items_ release];
+    [super dealloc];
 }
 
 + (CGFloat)previewHeightForStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView previewHeightForPreviews:stamp.previews andMaxRows:maxRows];
+    return [STPreviewsView previewHeightForPreviews:stamp.previews andMaxRows:maxRows];
 }
 
 + (CGFloat)previewHeightForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows] * _cellHeight;
+    return [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows] * _cellHeight;
 }
 
 + (NSArray*)imagesForPreviewWithStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView imagesForPreviewWithPreviews:stamp.previews andMaxRows:maxRows];
+    return [STPreviewsView imagesForPreviewWithPreviews:stamp.previews andMaxRows:maxRows];
 }
 
 + (NSArray*)imagesForPreviewWithPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
-  NSMutableArray* images = [NSMutableArray array];
-  NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
-  if (total > 0) {
-    NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
-    NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
-    BOOL continuedFlag = NO;
-    if (limit < total) {
-      // TODO add support for continued button
-      continuedFlag = YES;
+    NSMutableArray* images = [NSMutableArray array];
+    NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
+    if (total > 0) {
+        NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
+        NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
+        BOOL continuedFlag = NO;
+        if (limit < total) {
+            // TODO add support for continued button
+            continuedFlag = YES;
+        }
+        
+        for (id<STStamp> credit in previews.credits) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> user in previews.stampUsers) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> like in previews.likes) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> todo in previews.todos) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
     }
-    
-    for (id<STStamp> credit in previews.credits) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-    for (id<STUser> like in previews.likes) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-    for (id<STUser> todo in previews.todos) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-      /*
-    for (id<STComment> comment in previews.comments) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:comment.user withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-       */
-  }
-  return images;
+    return images;
 }
 
 @end

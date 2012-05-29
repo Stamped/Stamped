@@ -13,6 +13,7 @@
 #import "STPlaylist.h"
 #import "STEntity.h"
 #import "STImage.h"
+#import "STPreviews.h"
 
 @protocol STEntityDetail <STEntity>
 
@@ -30,5 +31,6 @@
 @property (nonatomic, readonly, retain) NSArray<STMetadataItem>* metadata;
 @property (nonatomic, readonly, retain) NSArray<STGallery>* galleries;
 @property (nonatomic, readonly, retain) id<STPlaylist> playlist;
+@property (nonatomic, readonly, retain) id<STPreviews> previews;
 
 @end

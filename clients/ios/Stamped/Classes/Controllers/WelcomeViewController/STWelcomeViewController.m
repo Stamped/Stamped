@@ -7,13 +7,17 @@
 //
 
 #import "STWelcomeViewController.h"
+#import "LoginViewController.h"
 #import "WelcomePopoverView.h"
+#import "DDMenuController.h"
 
 @interface STWelcomeViewController ()
 
 @end
 
 @implementation STWelcomeViewController
+@synthesize delegate;
+
 
 - (id)init {
     if ((self = [super init])) {
@@ -92,6 +96,27 @@
 
 
 #pragma mark - WelcomePopoverViewDelegate
+
+- (void)welcomePopoverViewSelectedTwitter:(WelcomePopoverView*)view {
+    
+}
+
+- (void)welcomePopoverViewSelectedFacebook:(WelcomePopoverView*)view {
+    
+}
+
+- (void)welcomePopoverViewSelectedEmail:(WelcomePopoverView*)view {
+    
+}
+
+- (void)welcomePopoverViewSelectedLogin:(WelcomePopoverView*)view {
+    
+    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    LoginViewController *controller = [[LoginViewController alloc] init];
+    [menuController presentModalViewController:controller animated:YES];
+    [controller release];
+    
+}
 
 - (void)welcomePopoverViewSelectedClose:(WelcomePopoverView*)view {
     
