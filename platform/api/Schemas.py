@@ -84,20 +84,20 @@ class Client(Schema):
 class HoursSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('open',                            basestring)
-        cls.addProperty('close',                           basestring)
-        cls.addProperty('desc',                            basestring)
+        cls.addProperty('open',                         basestring)
+        cls.addProperty('close',                        basestring)
+        cls.addProperty('desc',                         basestring)
 
 class TimesSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('sun',                 HoursSchema)
-        cls.addNestedPropertyList('mon',                 HoursSchema)
-        cls.addNestedPropertyList('tue',                 HoursSchema)
-        cls.addNestedPropertyList('wed',                 HoursSchema)
-        cls.addNestedPropertyList('thu',                 HoursSchema)
-        cls.addNestedPropertyList('fri',                 HoursSchema)
-        cls.addNestedPropertyList('sat',                 HoursSchema)
+        cls.addNestedPropertyList('sun',                HoursSchema)
+        cls.addNestedPropertyList('mon',                HoursSchema)
+        cls.addNestedPropertyList('tue',                HoursSchema)
+        cls.addNestedPropertyList('wed',                HoursSchema)
+        cls.addNestedPropertyList('thu',                HoursSchema)
+        cls.addNestedPropertyList('fri',                HoursSchema)
+        cls.addNestedPropertyList('sat',                HoursSchema)
 
 
 # ########## #

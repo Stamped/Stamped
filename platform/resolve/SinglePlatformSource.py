@@ -49,8 +49,8 @@ class SinglePlatformSource(BasicSource):
                         logs.debug('Regenerated menu for %s' % singleplatform_id)
         except HTTPError as e:
             logs.warning("HttpError %s from SinglePlatform for %s" % (e.code,singleplatform_id))
-        except Exception:
-            report("unexpected SinglePlatformSource error")
+        except Exception as e:
+            report("unexpected SinglePlatformSource error: %s" % e)
         return True
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
