@@ -979,8 +979,12 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
-        if self.__version > 0 and user.stats.distribution is not None and len(user.stats.distribution) == 0:
-            user.stats.distribution = self._getUserStampDistribution(user.user_id)
+        if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
+            if user.stats.distribution is None or len(user.stats.distribution) == 0:
+                distribution = self._getUserStampDistribution(user.user_id)
+                user.stats.distribution = distribution
+                ### TEMP: This should be async
+                self._userDB.updateUserStats(user.user_id, 'distribution', value=distribution)
         
         return user
     
