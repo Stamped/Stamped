@@ -3061,7 +3061,11 @@ class StampedAPI(AStampedAPI):
         
         if timeSlice.limit is None or timeSlice.limit <= 0 or timeSlice.limit > 50:
             timeSlice.limit = 50
-        
+
+        # Add one second to timeSlice.before to make the query inclusive of the timestamp passed
+        if timeSlice.before is not None:
+            timeSlice.before = timeSlice.before + timedelta(seconds=1)
+
         # Buffer of 10 additional stamps
         limit = timeSlice.limit
         timeSlice.limit = limit + 10
