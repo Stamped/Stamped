@@ -4274,6 +4274,7 @@ class StampedAPI(AStampedAPI):
             # Enrich entity
             decorations = {}
             modified    = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=4)
+            logs.info("MODIFIED: %s | DECORATIONS: %s" % (modified, decorations))
             
             # Return successor if entity is tombstoned
             if entity.sources.tombstone_id is not None and entity.sources.tombstone_id != '': # HACK: Why is tombstone_id == ''?
