@@ -2331,6 +2331,8 @@ class StampedAPI(AStampedAPI):
         # find the blurb using timestamp and update the images field
         from pprint import pformat
         logs.info(pformat(stamp.contents[0]))
+        logs.info(stamp.contents[0].timestamp.created)
+        logs.info('### blurbCreated: %s'  % blurbCreated)
         for i, c in enumerate(stamp.contents):
             if c.timestamp.created == blurbCreated:
 
