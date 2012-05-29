@@ -2102,12 +2102,13 @@ class StampedAPI(AStampedAPI):
 
         # Build content
         content = StampContent()
+        timestamp = TimestampSchema()
+        timestamp.created = now
+        content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
-            timestamp = TimestampSchema()
-            timestamp.created = now
-            content.timestamp = timestamp
+
 
         # Add image to stamp
         if imageData is not None:
@@ -2324,6 +2325,8 @@ class StampedAPI(AStampedAPI):
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using timestamp and update the images field
+        from pprint import pformat
+        logs.info(pformat(stamp.contents))
         for i, c in enumerate(stamp.contents):
             if c.timestamp.created == blurbCreated:
 
