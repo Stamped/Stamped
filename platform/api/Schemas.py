@@ -1481,7 +1481,7 @@ class Todo(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('todo_id',                  basestring)
-        cls.addProperty('user',                     UserMini, required=True)
+        cls.addNestedProperty('user',               UserMini, required=True)
 #        cls.addNestedProperty('source',             TodoSource, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
         cls.addNestedPropertyList('source_stamps',  Stamp)
