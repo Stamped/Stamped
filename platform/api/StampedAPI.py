@@ -2149,27 +2149,6 @@ class StampedAPI(AStampedAPI):
         if imageUrl is not None:
             if imageWidth is None or imageHeight is None:
                 raise StampedInputError("invalid image dimensions")
-
-            imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
-            # Add image dimensions to stamp object
-            image           = ImageSchema()
-            supportedSizes   = {
-                ''        : (imageWidth, imageHeight),   #original size
-                '-ios1x'  : (200, 200),
-                '-ios2x'  : (400, 400),
-                '-web'    : (580, 580),
-                '-mobile' : (572, 572),
-                }
-            sizes = []
-            for k,v in supportedSizes.iteritems():
-                logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
-                size            = ImageSizeSchema()
-                size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
-                size.width      = v[0]
-                size.height     = v[1]
-                sizes.append(size)
-            image.sizes = sizes
-            content.images.append(image)
             imageExists = True
 
         # Update content if stamp exists
@@ -2219,7 +2198,7 @@ class StampedAPI(AStampedAPI):
 
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl, imageWidth, imageHeight, stamp.stamp_id, timestamp])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2329,10 +2308,48 @@ class StampedAPI(AStampedAPI):
 
     
     @API_CALL
-    def addResizedStampImagesAsync(self, imageId, imageUrl):
+    def addResizedStampImagesAsync(self, imageId, imageUrl, imageWidth, imageHeight, stampId, blurbTimestamp):
         assert imageUrl is not None, "stamp image url unavailable!"
-        
-        self._imageDB.addResizedStampImages(imageUrl, imageId)
+
+        max_size = (960, 960)
+        supportedSizes   = {
+            '-ios1x'  : (200, None),
+            '-ios2x'  : (400, None),
+            '-web'    : (580, None),
+            '-mobile' : (572, None),
+            }
+
+
+        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, sizes)
+        # get stamp using stamp_id
+        stamp = self._stampDB.getStamp(stampId)
+        # find the blurb using timestamp and update the images field
+        for i, c in enumerate(stamp.content):
+            if c.timestamp == blurbTimestamp:
+
+                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
+                # Add image dimensions to stamp object
+                image           = ImageSchema()
+                # add the default image size
+                supportedSizes['']       = (imageWidth,imageHeight)
+
+                sizes = []
+                for k,v in supportedSizes.iteritems():
+                    logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
+                    size            = ImageSizeSchema()
+                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.width      = v[0]
+                    size.height     = v[1]
+                    sizes.append(size)
+                image.sizes = sizes
+                c.images.append(image)
+
+                # update the actual stamp content, then update the db
+                stamp.content[i] = c
+                self._stampDB.updateStamp(stamp)
+                break
+
+        self._stampDB.updateStamp()
     
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):
