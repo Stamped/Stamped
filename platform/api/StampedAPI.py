@@ -2362,8 +2362,9 @@ class StampedAPI(AStampedAPI):
                 c.images = images
 
                 # update the actual stamp content, then update the db
-                logs.info('### stamp.contents[i]: %s' % stamp.contents[i])
-                stamp.contents[i] = c
+                contents = list(stamp.contents)
+                contents[i] = c
+                stamp.contents = contents
                 logs.info('### about to call updateStamp')
                 self._stampDB.updateStamp(stamp)
                 break

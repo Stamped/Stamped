@@ -138,6 +138,14 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertIsInstance(key, basestring)
         self.assertLength(key, length)
 
+    def assertGreater(self, first, second, msg=None):
+        try:
+            self.assertTrue(first > second)
+        except AssertionError:
+            if msg is not None:
+                raise AssertionError(msg)
+            raise AssertionError('"%s" unexpectedly not greater than "%s"' % (first, second))
+
     ### HELPER FUNCTIONS
     def createAccount(self, name='TestUser', password="12345", **kwargs):
         global _test_case, _accounts
