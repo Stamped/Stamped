@@ -177,6 +177,8 @@ class FactualSource(GenericSource):
                 'opentable_nickname',
                 'opentable',
                 'foursquare',
+                'instagram',
+                'menu',
             ],
             kinds=[
                 'place',
