@@ -281,15 +281,16 @@ class StampedAPIActivityTodos(StampedAPIActivityTest):
             "oauth_token": self.tokenA['access_token'],
             }
 
-        result = self.handleGET(path, data)
-        import pprint
-        pprint.pprint(result)
-
-        # Assert that the UserE's todo appears in User A's activity feed
+        # Assert that the UserE's todo appears in User A's activity feed and that they include the entity and stamp
         self.async(lambda: self.handleGET(path, data), [
             lambda x: self.assertEqual(len(x), 3),
             lambda x: self._assertBody(x, 'UserE added %s as a to-do.' % self.entityA['title']),
+            lambda x: self.assertEqual(len(x[0]['objects']['entities']), 1),
+            lambda x: self.assertEqual(len(x[0]['objects']['stamps']), 1),
             ])
+
+#        self.assertEqual(len(result[0]['objects']['entities']), 1)
+#        self.assertEqual(len(result[0]['objects']['entities']), 1)
 
         self.deleteTodo(self.tokenE, self.entityA['entity_id'])
 
