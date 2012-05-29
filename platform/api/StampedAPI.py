@@ -1516,33 +1516,9 @@ class StampedAPI(AStampedAPI):
             process -= 1
             if process > 0:
                 # asynchronously merge & enrich entity
-                self.mergeEntity(entity)
-        
-        return results
-    
-    @API_CALL
-    def searchEntitiesOld(self, 
-                          query, 
-                          coords=None, 
-                          authUserId=None, 
-                          category=None, 
-                          subcategory=None, 
-                          prefix=False, 
-                          local=False, 
-                          full=True, 
-                          page=0, 
-                          limit=10):
-        results = self._entitySearcher.getSearchResults(query=query, 
-                                                        coords=coords, 
-                                                        category_filter=category, 
-                                                        subcategory_filter=subcategory, 
-                                                        full=full, 
-                                                        prefix=prefix, 
-                                                        local=local, 
-                                                        user=authUserId, 
-                                                        limit=((page + 1) * limit))
-        offset  = limit * page
-        results = results[offset : offset + limit]
+                ### TODO: This section is causing problems. Commenting out for now...
+                # self.mergeEntity(entity) 
+                pass
         
         return results
     
