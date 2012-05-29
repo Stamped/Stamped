@@ -3537,7 +3537,7 @@ class StampedAPI(AStampedAPI):
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
         entities = self._entityDB.getEntities(entityIds)
-        todos = set(self._favoriteDB.getFavoriteEntityIds(user.user_id))
+        todos = set(self._todoDB.getTodoEntityIds(user.user_id))
 
         t1 = time.time()
 
