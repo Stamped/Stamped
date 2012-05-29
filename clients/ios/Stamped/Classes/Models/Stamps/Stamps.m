@@ -206,6 +206,9 @@
 }
 
 
+#pragma mark - Single Stamp Loading
+
+
 #pragma mark - Setters
 
 - (void)setScope:(STStampedAPIScope)scope {

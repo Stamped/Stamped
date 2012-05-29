@@ -17,6 +17,7 @@
     #import "UIColor+Stamped.h"
     #import "STNavigationItem.h"
     #import "STStampedAPI.h"
+    #import "Util.h"
 #endif
 
 #define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)

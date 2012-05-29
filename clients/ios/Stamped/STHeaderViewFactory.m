@@ -7,17 +7,13 @@
 //
 
 #import "STHeaderViewFactory.h"
-#import "Util.h"
-#import <QuartzCore/QuartzCore.h>
 #import <CoreText/CoreText.h>
-#import "UIColor+Stamped.h"
-#import "UIFont+Stamped.h"
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
 #import "STPlaceAnnotation.h"
 #import "STActionManager.h"
 #import "STSimpleAction.h"
-#import "ShowImageViewController.h"
+#import "STPhotoViewController.h"
 
 static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
 
@@ -161,9 +157,8 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
     if (imageView) {
       [view addSubview:imageView];
       UIView* imageButtom = [Util tapViewWithFrame:imageView.frame andCallback:^{
-        ShowImageViewController* controller = [[[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil] autorelease];
-        controller.imageURL = imagePath;
-        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+          STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:imagePath]];
+          [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }];
       [view addSubview:imageButtom];
     }

@@ -220,6 +220,7 @@
                 
             }];
             _badgeView = view;
+            [view release];
             
         }
         
@@ -228,7 +229,7 @@
         frame.size.width = floorf(size.width + 16.0f);
         frame.size.height = 20.0f;
         frame.origin.x = floorf(self.bounds.size.width - (frame.size.width+58.0f));
-        frame.origin.y = floorf((self.bounds.size.height-frame.size.height)/2);
+        frame.origin.y = floorf(((self.bounds.size.height-frame.size.height)/2) + 2.0f);
         _badgeView.frame = frame;
         [_badgeView setNeedsDisplay];
 

@@ -15,7 +15,7 @@
 #import "STMenuPopUp.h"
 #import "STActionManager.h"
 #import "STProfileViewController.h"
-#import "ShowImageViewController.h"
+#import "STPhotoViewController.h"
 
 @interface STStampedActions ()
 
@@ -172,9 +172,8 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_image"] && source.sourceID != nil) {
       handled = YES;
       if (flag) {
-        ShowImageViewController* controller = [[[ShowImageViewController alloc] init] autorelease];
-        controller.imageURL = source.sourceID;
-        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+          STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:source.sourceID]];
+          [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }
     }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {

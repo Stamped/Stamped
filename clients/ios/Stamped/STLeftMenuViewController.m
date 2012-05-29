@@ -20,6 +20,7 @@
 #import "LeftMenuTableCell.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
+#import "STNavigationItem.h"
 
 static NSString* const _inboxNameKey = @"Root.inboxName";
 static NSString* const _iWantToNameKey = @"Root.iWantToName";
@@ -171,6 +172,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)viewDidUnload {
     [super viewDidUnload];
     self.tableView = nil;
+    self.anchorTableView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -323,6 +325,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [controller dismissModalViewControllerAnimated:YES];
     
 }
+
 
 #pragma mark - Configurations
 
