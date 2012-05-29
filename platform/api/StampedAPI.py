@@ -4155,7 +4155,6 @@ class StampedAPI(AStampedAPI):
         return FullResolveContainer.FullResolveContainer()
     
     def __handleDecorations(self, entity, decorations):
-        logs.info("HANDLE DECORATIONS: %s" % decorations)
         for k,v in decorations.items():
             ### TODO: decorations returned as dict, not schema. Fix?
             if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
@@ -4272,7 +4271,6 @@ class StampedAPI(AStampedAPI):
             # Enrich entity
             decorations = {}
             modified    = self.__full_resolve.enrichEntity(entity, decorations, max_iterations=4)
-            logs.info("MODIFIED: %s | DECORATIONS: %s" % (modified, decorations))
             
             # Return successor if entity is tombstoned
             if entity.sources.tombstone_id is not None and entity.sources.tombstone_id != '': # HACK: Why is tombstone_id == ''?
