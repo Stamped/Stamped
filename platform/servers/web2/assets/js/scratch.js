@@ -1,3 +1,25 @@
+
+
+
+
+                // NOTE: metadata embedding approach doesn't work because it 
+                // includes unicode u'' prefix on strings
+                
+                /*var $metadata = $this.prev('.source-metadata');
+                console.debug("METADATA: " + );
+                var metadata  = $.parseJSON($metadata.text());
+                console.debug("METADATA: " + metadata);*/
+
+            
+            /*// initialize actions
+            $sdetail.find('.action').each(function(i, elem) {
+                var $elem = $(elem);
+                
+                if ($elem.hasClass('action-menu')) {
+                    $elem.find('a.link').click(
+                }
+            });*/
+
                         /*var $comments_div = $target.find('.comments');
                         $comments_div.css({
                             'height' : $comments_div.height(), 

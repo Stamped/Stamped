@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
     <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/libs/colorbox.css">-->
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.fancybox.css?v=2.0.6">
+    <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.jscrollpane.css">
     
     <style>
         {% custom_css "profile" %}
@@ -35,7 +36,7 @@
                     <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                         {% handlebars_template "profile-image-large" user %}
                         
-                        <div class="floatleft profile-section0">
+                        <div class="floatleft profile-section profile-section-default">
                             <p class='profile-title'>
                                 {{user.name}}
                             </p>
@@ -130,7 +131,9 @@
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
     <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
     <!--<script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>-->
-    <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.pack.js?v=2.0.6"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.fancybox{% if IS_PROD %}.pack{% endif %}.js?v=2.0.6"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
     
     <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>

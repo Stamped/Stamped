@@ -1,0 +1,118 @@
+/* jquery.jscrollpane.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * NOTE: original version by Kelvin Luck (http://jscrollpane.kelvinluck.com/)
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+@import "elements.less";
+
+@handle-color:  #444;
+@track-color:   #999;
+@jsp-size:      12px;
+
+.jspContainer {
+    overflow: hidden;
+    position: relative;
+}
+
+.jspPane {
+    position: absolute;
+}
+
+.jspVerticalBar {
+    position: absolute;
+    top:   0;
+    right: 0;
+    
+    width:  @jsp-size;
+    height: 100%;
+}
+
+.jspHorizontalBar {
+    position: absolute;
+    bottom: 0;
+    left:   0;
+    
+    width:  100%;
+    height: @jsp-size;
+}
+
+.jspVerticalBar *,
+.jspHorizontalBar * {
+    margin: 0;
+    padding: 0;
+}
+
+.jspCap {
+    display: none;
+}
+
+.jspHorizontalBar .jspCap {
+    float: left;
+}
+
+.jspTrack {
+    background: @track-color;
+    position: relative;
+    
+    .rounded(6px);
+}
+
+.jspDrag {
+    background: @handle-color;
+    cursor: pointer;
+    
+    position: relative;
+    top:  0;
+    left: 0;
+    
+    .rounded(6px);
+}
+
+.jspHorizontalBar .jspTrack,
+.jspHorizontalBar .jspDrag {
+    float: left;
+    height: 100%;
+}
+
+.jspArrow {
+    background: #50506d;
+    text-indent: -20000px;
+    display: block;
+    cursor: pointer;
+}
+
+.jspArrow.jspDisabled {
+    cursor: default;
+    background: #80808d;
+}
+
+.jspVerticalBar .jspArrow {
+    height: @jsp-size;
+}
+
+.jspHorizontalBar .jspArrow {
+    width: @jsp-size;
+    float: left;
+    height: 100%;
+}
+
+.jspVerticalBar .jspArrow:focus {
+    outline: none;
+}
+
+.jspCorner {
+    background: #eeeef4;
+    float: left;
+    height: 100%;
+}
+
+/* Yuk! CSS Hack for IE6 3 pixel bug :( */
+* html .jspCorner {
+    margin: 0 -3px 0 0;
+}
+
