@@ -25,6 +25,7 @@ try:
     from GenericSource              import generatorSource
     from pprint                     import pformat
     from gevent.pool                import Pool
+    from api.Schemas                import TimesSchema
 except:
     report()
     raise
@@ -352,7 +353,7 @@ class FactualSource(GenericSource):
                             broken = True
                             break
                     if not broken and len(hours) > 0:
-                        entity.hours = hours
+                        entity.hours = TimesSchema().dataImport(hours)
                 except ValueError:
                     logs.warning('bad json for hours')
 
