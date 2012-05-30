@@ -764,6 +764,7 @@ class HTTPUserMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('color_primary',                basestring)
         cls.addProperty('color_secondary',              basestring)
@@ -2895,28 +2896,37 @@ class HTTPActivity(Schema):
                 subjects.append(HTTPUserMini().importUserMini(user))
             self.subjects = subjects
 
-        if activity.objects is not None:
-            self.objects = HTTPActivityObjects()
-
-            if activity.objects.users is not None:
+        def _addUserObjects():
+            if activity.objects is not None and activity.objects.users is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 userobjects = []
                 for user in activity.objects.users:
                     userobjects.append(HTTPUserMini().importUserMini(user))
                 self.objects.users = userobjects 
 
-            if activity.objects.stamps is not None:
+        def _addStampObjects():
+            if activity.objects is not None and activity.objects.stamps is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 stampobjects = []
                 for stamp in activity.objects.stamps:
                     stampobjects.append(HTTPStamp().importStamp(stamp))
                 self.objects.stamps = stampobjects 
 
-            if activity.objects.entities is not None:
+        def _addEntityObjects():
+            if activity.objects is not None and activity.objects.entities is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 entityobjects = []
                 for entity in activity.objects.entities:
                     entityobjects.append(HTTPEntityMini().importEntity(entity))
                 self.objects.entities = entityobjects 
 
-            if activity.objects.comments is not None:
+        def _addCommentObjects():
+            if activity.objects is not None and activity.objects.comments is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 commentobjects = []
                 for comment in activity.objects.comments:
                     comment = HTTPComment().importComment(comment)
@@ -3115,6 +3125,8 @@ class HTTPActivity(Schema):
             raise Exception("Too many stamps! \n%s" % stamps)
 
         if self.verb == 'follow':
+            _addUserObjects()
+
             if len(self.subjects) == 1:
                 verb = 'is now following'
             else:
@@ -3135,6 +3147,8 @@ class HTTPActivity(Schema):
             self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
+            _addStampObjects
+
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
             if activity.personal:
@@ -3152,6 +3166,8 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'like':
+            _addStampObjects()
+
             self.icon = _getIconURL('news_like')
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verb = 'liked'
@@ -3172,6 +3188,8 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'todo':
+            _addEntityObjects()
+
             self.icon = _getIconURL('news_todo')
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verb = 'added'
@@ -3183,9 +3201,16 @@ class HTTPActivity(Schema):
             if len(self.subjects) > 1:
                 self.image = _getIconURL('news_todo_group')
 
-            self.action = _buildEntityAction(self.objects.entities[0])
+            if activity.objects.stamps is not None and len(activity.objects.stamps) > 0:
+                _addStampObjects()
+                self.action = _buildStampAction(self.objects.stamps[0])
+            else:
+                self.action = _buildEntityAction(self.objects.entities[0])
 
         elif self.verb == 'comment':
+            _addStampObjects()
+            _addCommentObjects()
+
             verb = 'Comment on'
             offset = len(verb) + 1
             commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -3197,6 +3222,9 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'reply':
+            _addStampObjects()
+            _addCommentObjects()
+
             verb = 'Reply on'
             offset = len(verb) + 1
             commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -3208,6 +3236,9 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'mention':
+            _addStampObjects()
+            _addCommentObjects()
+
             verb = 'Mention on'
             offset = len(verb) + 1
             commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments, required=False)
@@ -3230,6 +3261,8 @@ class HTTPActivity(Schema):
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
+            _addStampObjects()
+            
             actionMapping = {
                 'listen'    : ('listened to', ''),
                 'playlist'  : ('added', 'to their playlist'),
