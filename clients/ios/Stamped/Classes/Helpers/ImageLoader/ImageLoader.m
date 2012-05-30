@@ -30,7 +30,7 @@ static NSMutableDictionary *_connections;
         _connections = [[NSMutableDictionary alloc] init];
         
         NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		path = [[path stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"ImageCache"];
+		path = [[path stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"ImageCacheeree"];
 		_cachePath = [path retain];
         [[NSFileManager defaultManager] createDirectoryAtPath:_cachePath withIntermediateDirectories:YES attributes:nil error:nil];
         
@@ -47,6 +47,25 @@ static NSMutableDictionary *_connections;
 
 - (void)imageForURL:(NSURL*)url completion:(ImageLoaderCompletionHandler)handler {
     if (!url) return;
+    
+    NSString *path = [url lastPathComponent];
+    if ([_connections objectForKey:path]) {
+        // already loading..
+        
+        NSMutableDictionary *connectionData = [[_connections objectForKey:path] mutableCopy];
+        if ([connectionData objectForKey:@"handlers"]) {
+            NSMutableArray *array = [[connectionData objectForKey:@"handlers"] mutableCopy];
+            [array addObject:[handler copy]];
+            [connectionData setValue:array forKey:@"handlers"];
+            [array release];
+        } else {
+            [connectionData setValue:[NSArray arrayWithObject:[handler copy]] forKey:@"handlers"];
+        }
+        [_connections setObject:connectionData forKey:path];
+        [connectionData release];
+        
+        return; 
+    }
     
     NSString *cachePath = [NSString stringWithFormat:@"%@/%@", _cachePath, [url lastPathComponent]];
     
@@ -86,7 +105,6 @@ static NSMutableDictionary *_connections;
 }
 
 
-
 #pragma mark - NSURLConnectionDelegate
 
 - (void)cancelRequestForURL:(NSURL*)url {
@@ -94,7 +112,6 @@ static NSMutableDictionary *_connections;
     NSString *path = [url lastPathComponent];
     
     if ([_connections objectForKey:path]) {
-        NSLog(@"CANCEL");
         NSDictionary *data = [_connections objectForKey:path];
         NSURLConnection *connection = [data objectForKey:@"connection"];
         NSMutableData *mutableData = [data objectForKey:@"data"];
@@ -121,7 +138,6 @@ static NSMutableDictionary *_connections;
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
 
-    NSLog(@"FAILED");
     NSString *path = [[[connection originalRequest] URL] lastPathComponent];
     
     if ([_connections objectForKey:path]) {
@@ -150,8 +166,8 @@ static NSMutableDictionary *_connections;
         if (data!=nil && [data length] > 0) {
            
             NSString *cachePath = [NSString stringWithFormat:@"%@/%@", _cachePath, path];
-            [data writeToFile:cachePath atomically:NO];
             image = [UIImage imageWithData:data];
+            [UIImageJPEGRepresentation(image, 0.8) writeToFile:cachePath atomically:NO];
 
         }
         
@@ -159,6 +175,17 @@ static NSMutableDictionary *_connections;
 
         dispatch_async(dispatch_get_main_queue(), ^{
             handler(image, url);
+            [handler release];
+
+            if ([connection objectForKey:@"handlers"]) {
+                NSArray *handlers = [connection objectForKey:@"handlers"];
+                for (id obj in handlers) {
+                    ImageLoaderCompletionHandler handler = (ImageLoaderCompletionHandler)obj;
+                    handler(image, url);
+                    [handler release];
+                }
+            }
+            
             [_connections removeObjectForKey:path];
         });
         

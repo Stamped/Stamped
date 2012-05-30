@@ -7,6 +7,7 @@
 //
 
 #import "STPagedImageViewer.h"
+#import "STPageControl.h"
 #import "ImageLoader.h"
 
 #define kPageViewGap 50.0f
@@ -34,9 +35,12 @@
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
                         
-        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+        self.backgroundColor = [UIColor colorWithRed:0.901f green:0.901f blue:0.901f alpha:1.0f];
+        
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(40.0f, (self.bounds.size.height-310.0f)/2, self.bounds.size.width - 80.0f, 310.0f)];
         scrollView.delegate = (id<UIScrollViewDelegate>)self;
-        scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin;
+        scrollView.clipsToBounds = NO;
+        scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
         scrollView.pagingEnabled = YES;
         scrollView.showsHorizontalScrollIndicator = NO;
         scrollView.showsVerticalScrollIndicator = NO;
@@ -48,7 +52,11 @@
         
         scrollView.backgroundColor = [UIColor redColor];
         
-        UIPageControl *pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height-10.0f, self.bounds.size.width, 10.0f)];
+        STPageControl *pageControl = [[STPageControl alloc] initWithFrame:CGRectZero];
+        pageControl.radius = 2.5;
+        pageControl.defaultColor = [UIColor stampedLightGrayColor];
+        pageControl.selectedColor = [UIColor stampedDarkGrayColor];
+        pageControl.spacing = 12.0f;
         pageControl.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         [self addSubview:pageControl];
         _pageControl = [pageControl retain];
@@ -72,6 +80,22 @@
 - (void)reloadData {
     
     
+    
+}
+
+
+#pragma mark - Touches
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self.scrollView touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self.scrollView touchesMoved:touches withEvent:event];
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self.scrollView touchesCancelled:touches withEvent:event];
 }
 
 
@@ -81,7 +105,14 @@
     [_imageURLs release], _imageURLs = nil;
     _imageURLs = [imageURLs retain];
     
+    CGRect frame = self.pageControl.frame;
+    frame.size = [self.pageControl sizeForNumberOfPages:[_imageURLs count]];
+    frame.origin.x = floorf((self.bounds.size.width-frame.size.width)/2);
+    frame.origin.y = floorf(self.bounds.size.height - 14.0f);
+        
+    self.pageControl.frame = frame;
     self.pageControl.numberOfPages = [_imageURLs count];
+
     [self layoutScrollView];
     [self loadScrollViewWithPage:0];
     [self loadScrollViewWithPage:1];
@@ -146,7 +177,7 @@
 		
 	}
 	
-	CGSize size = CGSizeMake(self.bounds.size.width*[self numberOfPages], self.scrollView.frame.size.height);
+	CGSize size = CGSizeMake(self.scrollView.frame.size.width*[self numberOfPages], self.scrollView.frame.size.height);
 	if (!CGSizeEqualToSize(size, self.scrollView.contentSize)) {
 		self.scrollView.contentSize = size;
 	}
@@ -158,6 +189,7 @@
 
 - (void)layoutScrollViewSubviewsAnimated:(BOOL)animated {
 	
+    return;
 	NSInteger index = _currentPage;
 	
     BOOL _enabled = [UIView areAnimationsEnabled];
@@ -274,12 +306,7 @@
     [view setIndex:page];
     [view setImageURL:[self.imageURLs objectAtIndex:page]];
     
-    CGRect frame = CGRectMake(floorf(self.bounds.size.width * page), self.bounds.origin.y, self.bounds.size.width, self.bounds.size.height - 10.0f);
-    if (page > _currentPage) {
-        frame.origin.x -= 40.0f;
-    } else if (page < _currentPage) {
-        frame.origin.x += 40.0f;
-    }
+    CGRect frame = CGRectMake(floorf(self.scrollView.frame.size.width * page), 0.0f, self.scrollView.frame.size.width, self.scrollView.frame.size.height);
     
     if (!CGRectEqualToRect(view.frame, frame)) {
         BOOL enabled = [UIView areAnimationsEnabled];
@@ -395,7 +422,7 @@
     
     if ((self = [super initWithFrame:frame])) {
         
-        self.backgroundColor = [UIColor clearColor];
+        self.backgroundColor = [UIColor blueColor];
             
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectZero];
         imageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -510,8 +537,8 @@
             
             if (image) {
                 
-                CGFloat heightFactor = image.size.height / (self.frame.size.height-20.0f);
-                CGFloat widthFactor = image.size.width / (self.frame.size.width-60.0f);
+                CGFloat heightFactor = image.size.height / (self.frame.size.height);
+                CGFloat widthFactor = image.size.width / (self.frame.size.width-30.0f);
                 
                 CGFloat scaleFactor = MAX(heightFactor, widthFactor);
                 

@@ -417,6 +417,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
     def getUserLikesHistory(self, userId):
         return self.user_likes_history_collection.getUserLikes(userId)
+
+    def removeUserLikesHistory(self, userId):
+        return self.user_likes_history_collection.removeUserLikes(userId)
     
     def countStampLikes(self, stampId):
         return len(self.getStampLikes(stampId))

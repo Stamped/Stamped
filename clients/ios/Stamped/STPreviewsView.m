@@ -82,7 +82,6 @@ static const NSInteger _cellsPerRow = 7;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
-        self.backgroundColor = [UIColor whiteColor];
     }
     return self;
 }
@@ -90,14 +89,7 @@ static const NSInteger _cellsPerRow = 7;
 - (void)setupWithPreview:(id<STPreviews>)previews maxRows:(NSInteger)maxRows {
     
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"inbox_cell_dash.png"]];
-    [self addSubview:imageView];
-    
-    CGRect frame = imageView.frame;
-    frame.origin.y -= 8.0f;
-    imageView.frame = frame;
-    [imageView release];
+
     
     NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
     if (total > 0) {

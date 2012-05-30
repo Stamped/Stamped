@@ -45,8 +45,8 @@ class AMongoCollectionView(AMongoCollection):
         # -----------------------------
         if timeSlice.before is not None:
             add_or_query ([
-                {'timestamp.stamped': { '$lte': timeSlice.before }},
-                {'timestamp.created': { '$lte': timeSlice.before }} # Legacy support
+                {'timestamp.stamped': { '$lt': timeSlice.before }},
+                {'timestamp.created': { '$lt': timeSlice.before }} # Legacy support
             ])
 
         # handle category / subcategory filters
