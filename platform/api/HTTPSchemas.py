@@ -764,6 +764,7 @@ class HTTPUserMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('color_primary',                basestring)
         cls.addProperty('color_secondary',              basestring)

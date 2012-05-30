@@ -380,6 +380,7 @@ class UserMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('name',                 basestring)
         cls.addProperty('screen_name',          basestring)
         cls.addProperty('color_primary',        basestring)
         cls.addProperty('color_secondary',      basestring)
