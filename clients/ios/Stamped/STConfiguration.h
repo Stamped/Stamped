@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString* const STConfigurationValueDidChangeNotification;
+
 @interface STConfigurationItem : NSObject
 
 - (id)initWithValue:(id)value key:(NSString*)key andSection:(NSString*)section;

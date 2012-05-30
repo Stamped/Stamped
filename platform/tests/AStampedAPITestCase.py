@@ -138,6 +138,14 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertIsInstance(key, basestring)
         self.assertLength(key, length)
 
+    def assertGreater(self, first, second, msg=None):
+        try:
+            self.assertTrue(first > second)
+        except AssertionError:
+            if msg is not None:
+                raise AssertionError(msg)
+            raise AssertionError('"%s" unexpectedly not greater than "%s"' % (first, second))
+
     ### HELPER FUNCTIONS
     def createAccount(self, name='TestUser', password="12345", **kwargs):
         global _test_case, _accounts
@@ -186,7 +194,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "client_secret"     : c_secret,
             "name"              : name,
             "screen_name"       : name,
-            "facebook_token"    : fb_user_token,
+            "user_token"    : fb_user_token,
         }
         response = self.handlePOST(path, data)
         self.assertIn('user', response)
@@ -242,7 +250,7 @@ class AStampedAPITestCase(AStampedTestCase):
         data = {
             "client_id":        c_id,
             "client_secret":    c_secret,
-            "fb_token":         fb_user_token,
+            "user_token":       fb_user_token,
             }
         return self.handlePOST(path, data)
 
@@ -322,7 +330,7 @@ class AStampedAPITestCase(AStampedTestCase):
                 "title": "Good Food",
                 "subtitle": "Peoria, IL",
                 "desc": "American food in America", 
-                "category": "food",
+                "category": "place",
                 "subcategory": "restaurant",
                 "address": "123 Main Street, Peoria, IL",
                 "coordinates": "40.714623,-74.006605"
@@ -418,7 +426,16 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-    
+
+    def completeTodo(self, token, entityId, complete):
+        path = "todos/complete.json"
+        data = {
+            "oauth_token":  token['access_token'],
+            "entity_id":    entityId,
+            "complete":     complete,
+        }
+        return self.handlePOST(path, data)
+
     def _loadCollection(self, collection, filename=None, drop=True):
         if filename is None:
             filename = "%s.db" % collection

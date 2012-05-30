@@ -82,6 +82,15 @@
     NSString *category = [[Util categories] objectAtIndex:sender.tag];
     UIViewController *controller = nil;
   
+    NSDictionary* categoryMapping = [NSDictionary dictionaryWithObjectsAndKeys:
+                                     @"food", @"food",
+                                     @"book", @"book",
+                                     @"music", @"music",
+                                     @"film", @"film",
+                                     @"app", @"download",
+                                     @"app", @"other",
+                                     nil];
+    category = [categoryMapping objectForKey:category];
     if (category) {
         if ([category isEqualToString:@"food"]) {
             controller = [[[STConsumptionMapViewController alloc] init] autorelease];

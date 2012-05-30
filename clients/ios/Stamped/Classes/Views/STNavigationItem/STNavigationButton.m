@@ -14,8 +14,8 @@
 #define kBackButton @"nav_back_button.png"
 #define kBackButtonHi @"nav_back_button.png"
 
-#define kDoneButton @"gifture_nav_buttton_done.png"
-#define kDoneButtonHi @"gifture_nav_buttton_done.png"
+#define kDoneButton @"nav_done_btn.png"
+#define kDoneButtonHi @"nav_done_btn.png"
 
 #define BUTTON_BUFFER 20.0f
 #define BUTTON_IMAGE_BUFFER 24.0f
@@ -109,7 +109,7 @@
 	[button setTitle:aTitle forState:UIControlStateNormal];
 	[button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
 	[button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-	[button.titleLabel setShadowColor:[UIColor blackColor]];
+	[button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f]];
 	
     UIImage *image = [[UIImage imageNamed:(style == UIBarButtonItemStyleDone) ? kDoneButton : kButton] stretchableImageWithLeftCapWidth:15.0f topCapHeight:0.0f];
 	CGSize size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
@@ -139,7 +139,7 @@
         [button setTitle:aTitle forState:UIControlStateNormal];
         [button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
         [button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-        [button.titleLabel setShadowColor:[UIColor blackColor]];
+        [button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f]];
         size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
             
     } else {

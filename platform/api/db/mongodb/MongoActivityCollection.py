@@ -202,14 +202,20 @@ class MongoActivityCollection(AActivityDB):
         self._removeActivityIds(toRemove)
 
     def removeActivity(self, verb, userId, **kwargs):
+        entityId    = kwargs.pop('entityId', None)
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
         friendId    = kwargs.pop('friendId', None)
 
         subjects    = [ userId ]
 
-        if verb in ['like', 'todo'] and stampId is not None:
+        if verb == 'like' and stampId is not None:
             objects = { 'stamp_ids' : [ stampId ] }
+            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
+            self._removeSubject(activityIds, userId)
+
+        if verb == 'todo' and entityId is not None:
+            objects = { 'entity_ids' : [ entityId ] }
             activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
             self._removeSubject(activityIds, userId)
 

@@ -79,7 +79,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)setupWithTodo:(id<STTodo>)todo {
-    id<STEntity> entity = todo.entity;//todo.source.entity;
+    id<STEntity> entity = todo.source.entity;
     _titleView.text = entity.title;
     [_titleView sizeToFit];
     _subtitleView.text = entity.subtitle;

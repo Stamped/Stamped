@@ -12,7 +12,8 @@ from utils                              import lazyProperty
 
 from ATodoDB                            import ATodoDB
 from AMongoCollectionView               import AMongoCollectionView
-from MongoUserTodoEntitiesCollection    import MongoUserTodoEntitiesCollection
+from MongoUserTodosEntitiesCollection   import MongoUserTodosEntitiesCollection
+from MongoUserTodosHistoryCollection    import MongoUserTodosHistoryCollection
 from api.Schemas                        import *
 from Entity                             import buildEntity
 
@@ -29,6 +30,9 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             ('timestamp.created', pymongo.DESCENDING)])
 
     def _convertFromMongo(self, document):
+        """
+        Keep in mind this is returning a RawTodo, which is less-enriched than a Todo
+        """
         if document is None:
             return None
 
@@ -42,28 +46,35 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 
         stampData = document.pop('stamp', None)
         if stampData is not None:
-            document['stamp_id'] = stampData['stamp_id']
+            document['source_stamp_ids'] = [stampData['stamp_id']]
 
         if 'favorite_id' in document:
             document['todo_id'] = document['favorite_id']
             del(document['favorite_id'])
 
-        todo = self._obj().dataImport(document, overflow=self._overflow)
-        todo.entity = entity
+        rawtodo = self._obj().dataImport(document, overflow=self._overflow)
+        rawtodo.entity = entity
 
-        return todo
+        return rawtodo
 
     ### PUBLIC
 
     @lazyProperty
     def user_todo_entities_collection(self):
-        return MongoUserTodoEntitiesCollection()
+        return MongoUserTodosEntitiesCollection()
+
+    @lazyProperty
+    def user_todos_history_collection(self):
+        return MongoUserTodosHistoryCollection()
 
     def addTodo(self, todo):
         todo = self._addObject(todo)
 
+        # Add a reference to the todo in the user's 'todo' history collection
+        self.user_todos_history_collection.addUserTodo(todo.user_id, todo.todo_id)
+
         # Add links to todo
-        self.user_todo_entities_collection.addUserTodoEntity(\
+        self.user_todo_entities_collection.addUserTodosEntity(\
             todo.user_id, todo.entity.entity_id)
 
         return todo
@@ -74,7 +85,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
                                      'user_id': userId})
 
             # Remove links to todo
-            self.user_todo_entities_collection.removeUserTodoEntity(\
+            self.user_todo_entities_collection.removeUserTodosEntity(\
                 userId, entityId)
         except:
             logs.warning("Cannot remove document")
@@ -100,7 +111,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         return n
 
     def getTodoEntityIds(self, userId):
-        return self.user_todo_entities_collection.getUserTodoEntities(userId)
+        return self.user_todo_entities_collection.getUserTodosEntities(userId)
 
     def getTodosFromEntityId(self, entityId, limit=10):
         ### TODO: Convert to index collection
@@ -112,6 +123,12 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         query = { 'entity.entity_id' : entityId, 'user_id' : { '$in' : userIds } }
         documents = self._collection.find(query, fields=['user_id']).sort('$natural', pymongo.DESCENDING).limit(limit)
         return map(lambda x: x['user_id'], documents)
+
+    def getUserTodosHistory(self, userId):
+        return self.user_todos_history_collection.getUserTodos(userId)
+
+    def removeUserTodosHistory(self, userId):
+        return self.user_todos_history_collection.removeUserTodos(userId)
 
     def completeTodo(self, entityId, userId, complete=True):
         try:

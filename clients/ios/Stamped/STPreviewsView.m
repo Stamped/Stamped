@@ -15,213 +15,191 @@
 #import "UIColor+Stamped.h"
 #import "STButton.h"
 #import "STActionPair.h"
+#import "ImageLoader.h"
 
-@interface STPreviewsViewItem : NSObject
+#define kPreviewCellWidth 33.0f
+#define kPreviewCellHeight 33.0f
 
-- (id)initWithUser:(id<STUser>)user icon:(UIImage*)icon action:(id<STAction>)action andContext:(STActionContext*)context;
-
-@property (nonatomic, readonly, retain) id<STUser> user;
-@property (nonatomic, readonly, retain) UIImage* icon;
-@property (nonatomic, readonly, retain) STActionPair* pair;
-
+@interface STPreviewView : UIControl {
+    UIImageView *_imageView;
+    UIView *highlightView;
+}
+@property (nonatomic, retain) UIImageView *iconImageView;
+@property (nonatomic, retain) NSURL *imageURL;
 @end
 
-@implementation STPreviewsViewItem
-
-@synthesize user = user_;
-@synthesize icon = icon_;
-@synthesize pair = pair_;
-
-- (id)initWithUser:(id<STUser>)user icon:(UIImage*)icon action:(id<STAction>)action andContext:(STActionContext*)context {
-  self = [super init];
-  if (self) {
-    user_ = [user retain];
-    icon_ = [icon retain];
-    pair_ = [[STActionPair actionPairWithAction:action andContext:context] retain];
-  }
-  return self;
-}
-
-- (void)dealloc
-{
-  [user_ release];
-  [icon_ release];
-  [pair_ release];
-  [super dealloc];
-}
-
-@end
 
 @interface STPreviewsView ()
-
-@property (nonatomic, readonly, retain) NSMutableArray* items;
-
+@property (nonatomic, readonly, retain) NSMutableArray *views;
 @end
 
 @implementation STPreviewsView
+@synthesize views=_views;
 
 static const CGFloat _cellWidth = 35;
 static const CGFloat _cellHeight = 35;
 static const NSInteger _cellsPerRow = 7;
 
-@synthesize items = items_;
-
-+ (NSInteger)totalItemsForPreviews:(id<STPreviews>)previews {
-  if (previews) {
-      return previews.credits.count + previews.likes.count + previews.todos.count; //+ previews.comments.count;
-  }
-  return 0;
-}
-
-+ (NSInteger)totalRowsForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
-  NSInteger itemsCount = [STPreviewsView totalItemsForPreviews:previews];
-  NSInteger rows = itemsCount / _cellsPerRow;
-  rows += itemsCount % _cellsPerRow ? 1 : 0;
-  return MIN(maxRows,rows);
-}
-
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
-        self.backgroundColor = [UIColor whiteColor];
+        _views = [[NSMutableArray alloc] init];
+        
+        // alloc initial preview views
+        for (NSInteger i = 0; i < 7; i++) {
+            STPreviewView *view = [[STPreviewView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, kPreviewCellWidth, kPreviewCellHeight)];
+            [_views addObject:view];
+            [view release];
+        }
+        
     }
     return self;
 }
 
+- (void)dealloc {
+    [_views release], _views=nil;
+    [super dealloc];
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    NSLog(@"touches began");
+    
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    NSLog(@"touches moved");
+    
+}
+
+
+#pragma mark - Reuse
+
+- (STPreviewView*)dequeuePreviewViewAtIndex:(NSInteger)index {
+    
+    if (index < [self.views count]) {
+
+        STPreviewView *view = [[self.views objectAtIndex:index] retain];
+        if (view.allTargets) {
+            for (id target in [[view allTargets] allObjects]) {
+                if (target && ![target isEqual:[NSNull null]]) {
+                    [view removeTarget:target action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+                    [target release];
+                }
+            }
+        }
+      
+        return view;
+    }
+    
+    STPreviewView *view = [[STPreviewView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, kPreviewCellWidth, kPreviewCellHeight)];
+    [_views addObject:view];
+    
+    return [view autorelease];
+    
+}
+
+
+#pragma mark - Setup
+
 - (void)setupWithPreview:(id<STPreviews>)previews maxRows:(NSInteger)maxRows {
     
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-        
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"inbox_cell_dash.png"]];
-    [self addSubview:imageView];
     
-    CGRect frame = imageView.frame;
-    frame.origin.y -= 8.0f;
-    imageView.frame = frame;
-    [imageView release];
-
+    NSInteger index = 0;
     NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
     if (total > 0) {
-        NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
-        CGFloat height = numberOfRows * _cellHeight;
-        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, _cellWidth * MIN(_cellsPerRow, total), height);
-        NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
-        BOOL continuedFlag = NO;
-        if (limit < total) {
-            // TODO add support for continued button
-            continuedFlag = YES;
-        }
-        items_ = [[NSMutableArray alloc] init];
-        for (id<STStamp> credit in previews.credits) {
-            if (items_.count < limit) {
-                UIImage* image = [Util stampImageForUser:credit.user withSize:STStampImageSize12];
-                STActionContext* context = [STActionContext context];
-                id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
-                STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:credit.user icon:image action:action andContext:context] autorelease];
-                [items_ addObject:item];
-            }
-            else {
-                break;
-            }
-        }
-        UIImage* likeIcon = [UIImage imageNamed:@"like_mini"];
-        for (id<STUser> like in previews.likes) {
-            if (items_.count < limit) {
-                STActionContext* context = [STActionContext context];
-                context.user = like;
-                id<STAction> action = [STStampedActions actionViewUser:like.userID withOutputContext:context];
-                STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:like icon:likeIcon action:action andContext:context] autorelease];
-                [items_ addObject:item];
-            }
-            else {
-                break;
-            }
-        }
-        UIImage* todoIcon = [UIImage imageNamed:@"todo_mini"];
-        for (id<STUser> todo in previews.todos) {
-            if (items_.count < limit) {
-                STActionContext* context = [STActionContext context];
-                context.user = todo;
-                id<STAction> action = [STStampedActions actionViewUser:todo.userID withOutputContext:context];
-                STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:todo icon:todoIcon action:action andContext:context] autorelease];
-                [items_ addObject:item];
-            }
-            else {
-                break;
-            }
-        }
-        /*
-        UIImage* commentIcon = [UIImage imageNamed:@"comment_mini"];
-        for (id<STComment> comment in previews.comments) {
-            if (items_.count < limit) {
-                STActionContext* context = [STActionContext context];
-                context.user = comment.user;
-                id<STAction> action = [STStampedActions actionViewUser:comment.user.userID withOutputContext:context];
-                STPreviewsViewItem* item = [[[STPreviewsViewItem alloc] initWithUser:comment.user icon:commentIcon action:action andContext:context] autorelease];
-                [items_ addObject:item];
-            }
-            else {
-                break;
-            }
-        }
-         */
-        for (NSInteger i = limit - 1; i >= 0; i--) {
-            NSInteger col = i % _cellsPerRow;
-            NSInteger row = i / _cellsPerRow;
-            CGFloat xOffset = col * _cellWidth;
-            CGFloat yOffset = row * _cellHeight;
-            if (i == limit - 1 && continuedFlag) {
-                UIView* box = [[[UIView alloc] initWithFrame:CGRectMake(xOffset, yOffset, 31, 31)] autorelease];
-                box.backgroundColor = [UIColor colorWithWhite:.85 alpha:1];
-                box.layer.borderColor = [UIColor whiteColor].CGColor;
-                box.layer.borderWidth = 1;
-                UIView* dots = [Util viewWithText:@"..." 
-                                             font:[UIFont stampedBoldFontWithSize:20]
-                                            color:[UIColor stampedGrayColor]
-                                             mode:UILineBreakModeClip
-                                       andMaxSize:CGSizeMake(31, 31)];
-                dots.frame = [Util centeredAndBounded:dots.frame.size inFrame:CGRectMake(0, 0, 31, 31)];
-                [box addSubview:dots];
-                [self addSubview:box];
-            }
-            else {
-                STPreviewsViewItem* item = [items_ objectAtIndex:i];
-                UIView* userImage = [Util profileImageViewForUser:item.user withSize:STProfileImageSize31];
-                userImage.layer.shadowOpacity = 0.1f;
-                userImage.layer.shadowRadius = 1.5f;
-                [Util reframeView:userImage withDeltas:CGRectMake(xOffset, yOffset, 0, 0)];
-                [self addSubview:userImage];
-                UIImageView* imageView = [[[UIImageView alloc] initWithImage:item.icon] autorelease];
-                [Util reframeView:imageView withDeltas:CGRectMake(xOffset + userImage.frame.size.width * .6, yOffset + userImage.frame.size.height * .6, 0, 0)];
-                [self addSubview:imageView];
-                //UIView* button = [Util tapViewWithFrame:CGRectMake(xOffset, yOffset, _cellWidth, _cellHeight) target:self selector:@selector(previewClicked:) andMessage:item];
-                //[self addSubview:button];
-            }
-        }
-        for (NSInteger i = limit - 1; i >= 0; i--) {
-            NSInteger col = i % _cellsPerRow;
-            NSInteger row = i / _cellsPerRow;
-            CGFloat xOffset = col * _cellWidth;
-            CGFloat yOffset = row * _cellHeight;
-            CGFloat padding = 5;
-            if (i == limit - 1 && continuedFlag) {
-            }
-            else {
-                STPreviewsViewItem* item = [items_ objectAtIndex:i];
-                CGRect buttonFrame = CGRectMake(xOffset-padding, yOffset-padding, 31+ 2*padding, 31+ 2*padding);
-                CGRect viewFrame = CGRectMake(0, 0, buttonFrame.size.width, buttonFrame.size.height);
-                UIView* activeView = [[[UIView alloc] initWithFrame:viewFrame] autorelease];
-                activeView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:.3 alpha:.3];
-                activeView.layer.cornerRadius = padding;
-                STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
-                                                         normalView:[[[UIView alloc] initWithFrame:viewFrame] autorelease]
-                                                         activeView:activeView
-                                                             target:item.pair
-                                                          andAction:@selector(executeActionWithArg:)] autorelease];
-                [self addSubview:button];
-            }
-        }
-    }
 
+        NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
+        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, floorf(_cellWidth * MIN(_cellsPerRow, total)), floorf(numberOfRows * _cellHeight));
+        NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
+        BOOL continuedFlag = (limit < total);
+        
+        for (id<STStamp> credit in previews.credits) {
+            if (index >= limit) break;
+            
+            UIImage *image = [Util stampImageForUser:credit.user withSize:STStampImageSize12];
+            STActionContext *context = [STActionContext context];
+            id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
+            STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
+            view.iconImageView.image = image;
+            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            index++;
+            
+        }
+        for (id<STUser> user in previews.stampUsers) {
+            if (index >= limit) break;
+            
+            UIImage *image = [Util stampImageForUser:user withSize:STStampImageSize12];
+            STActionContext *context = [STActionContext context];
+            context.user = user;
+            id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+            STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
+            view.iconImageView.image = image;
+            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            index++;
+            
+        }
+        
+        UIImage *likeIcon = [UIImage imageNamed:@"like_mini"];
+        for (id<STUser> like in previews.likes) {
+            if (index >= limit) break;
+            
+            STActionContext *context = [STActionContext context];
+            context.user = like;
+            id<STAction> action = [STStampedActions actionViewUser:like.userID withOutputContext:context];
+            STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
+            view.iconImageView.image = likeIcon;
+            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            index++;
+            
+        }
+        
+        UIImage *todoIcon = [UIImage imageNamed:@"todo_mini"];
+        for (id<STUser> todo in previews.todos) {
+            if (index >= limit)   break;
+          
+            STActionContext *context = [STActionContext context];
+            context.user = todo;
+            id<STAction> action = [STStampedActions actionViewUser:todo.userID withOutputContext:context];
+            STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
+            view.iconImageView.image = todoIcon;
+            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            index++;
+            
+        }
+
+        for (NSInteger i = 0; i < self.views.count; i++) {
+           
+            NSInteger col = i % _cellsPerRow;
+            NSInteger row = i / _cellsPerRow;
+            CGFloat xOffset = col * _cellWidth;
+            CGFloat yOffset = row * _cellHeight;
+           
+            if (i == limit - 1 && continuedFlag) {
+                
+                UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+                [button setImage:[UIImage imageNamed:@"previews_more_icon.png"] forState:UIControlStateNormal];
+                button.frame = CGRectMake(xOffset, yOffset, 33, 33);
+                [self addSubview:button];
+                
+            } else {
+                
+                STPreviewView *view = [_views objectAtIndex:i];
+                view.frame = CGRectMake(xOffset, yOffset-1.0f, kPreviewCellWidth, kPreviewCellHeight);
+                if (!view.superview) {
+                    [self addSubview:view];
+                }
+                
+            }
+        }
+   
+    }
+    
     
 }
 
@@ -229,71 +207,198 @@ static const NSInteger _cellsPerRow = 7;
     [self setupWithPreview:stamp.previews maxRows:maxRows];
 }
 
-- (void)dealloc {
-  [items_ release];
-  [super dealloc];
+
+#pragma mark Class Methods
+
++ (NSInteger)totalItemsForPreviews:(id<STPreviews>)previews {
+    if (previews) {
+        return previews.credits.count + previews.likes.count + previews.todos.count + previews.stampUsers.count;
+    }
+    return 0;
+}
+
++ (NSInteger)totalRowsForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
+    NSInteger itemsCount = [STPreviewsView totalItemsForPreviews:previews];
+    NSInteger rows = itemsCount / _cellsPerRow;
+    rows += itemsCount % _cellsPerRow ? 1 : 0;
+    return MIN(maxRows,rows);
 }
 
 + (CGFloat)previewHeightForStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView previewHeightForPreviews:stamp.previews andMaxRows:maxRows];
+    return [STPreviewsView previewHeightForPreviews:stamp.previews andMaxRows:maxRows];
 }
 
 + (CGFloat)previewHeightForPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows] * _cellHeight;
+    return [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows] * _cellHeight;
 }
 
 + (NSArray*)imagesForPreviewWithStamp:(id<STStamp>)stamp andMaxRows:(NSInteger)maxRows {
-  return [STPreviewsView imagesForPreviewWithPreviews:stamp.previews andMaxRows:maxRows];
+    return [STPreviewsView imagesForPreviewWithPreviews:stamp.previews andMaxRows:maxRows];
 }
 
 + (NSArray*)imagesForPreviewWithPreviews:(id<STPreviews>)previews andMaxRows:(NSInteger)maxRows {
-  NSMutableArray* images = [NSMutableArray array];
-  NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
-  if (total > 0) {
-    NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
-    NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
-    BOOL continuedFlag = NO;
-    if (limit < total) {
-      // TODO add support for continued button
-      continuedFlag = YES;
+    NSMutableArray* images = [NSMutableArray array];
+    NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
+    if (total > 0) {
+        NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
+        NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
+        BOOL continuedFlag = NO;
+        if (limit < total) {
+            // TODO add support for continued button
+            continuedFlag = YES;
+        }
+        
+        for (id<STStamp> credit in previews.credits) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> user in previews.stampUsers) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> like in previews.likes) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+        for (id<STUser> todo in previews.todos) {
+            if (images.count < limit) {
+                [images addObject:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
+            }
+            else {
+                break;
+            }
+        }
+    }
+    return images;
+}
+
+@end
+
+
+#pragma mark - STPreviewView
+
+@implementation STPreviewView
+@synthesize imageURL=_imageURL;
+@synthesize iconImageView;
+
+- (id)initWithFrame:(CGRect)frame {
+    
+    if ((self = [super initWithFrame:frame])) {
+        
+        UIView *background = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, 2.0f, 2.0f)];
+        background.userInteractionEnabled = NO;
+        background.backgroundColor = [UIColor whiteColor];
+        background.layer.shadowPath = [UIBezierPath bezierPathWithRect:background.bounds].CGPath;
+        background.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        background.layer.shadowRadius = 1.0f;
+        background.layer.shadowOpacity = 0.2f;
+        background.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+        background.layer.shouldRasterize = YES;
+        [self addSubview:background];
+        [background release];
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, 3.0f, 3.0f)];
+        imageView.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:imageView];
+        _imageView = imageView;
+        [imageView release];
+        
+        imageView = [[UIImageView alloc] initWithFrame:CGRectMake(self.bounds.size.width - 14.0f, self.bounds.size.height- 14.0f, 16.0f, 16.0f)];
+        imageView.contentMode = UIViewContentModeCenter;
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+        [self addSubview:imageView];
+        self.iconImageView = imageView;
+        [imageView release];
+        
+    }
+    return self;
+    
+}
+
+- (void)dealloc {
+    self.iconImageView = nil;
+    [super dealloc];
+}
+
+- (void)setImageURL:(NSURL *)imageURL {
+    if (_imageURL && [_imageURL isEqual:imageURL]) return;
+    [_imageURL release], _imageURL=nil;
+    _imageURL = [imageURL retain];
+    
+    _imageView.image = nil;
+    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image) {
+
+        UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
+        [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+        UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        return scaledImage;
+        
+    } styleIdentifier:@"st_preview@2x.jpg" completion:^(UIImage *image, NSURL *url) {
+        if ([_imageURL isEqual:url]) {
+            _imageView.image = image;
+        }
+    }];
+    
+}
+
+- (void)adjustHighlight:(BOOL)highlighted {
+    
+    if (highlighted) {
+        
+        if (!highlightView) {
+            UIView *view = [[UIView alloc] initWithFrame:_imageView.frame];
+            view.backgroundColor = [UIColor blackColor];
+            view.layer.cornerRadius = 2.0f;
+            view.layer.masksToBounds = YES;
+            [view setAlpha: 0.5];
+            [self addSubview:view];
+            [view release];
+            highlightView = view;
+        }
+        
+    } else {
+        
+        if (highlightView) {
+            __block UIView *view = highlightView;
+            highlightView = nil;
+            BOOL _enabled = [UIView areAnimationsEnabled];
+            [UIView setAnimationsEnabled:YES];
+            [UIView animateWithDuration:0.25f animations:^{
+                view.alpha = 0.0f;
+            } completion:^(BOOL finished) {
+                [view removeFromSuperview];
+            }];
+            [UIView setAnimationsEnabled:_enabled];
+            
+        }
+        
     }
     
-    for (id<STStamp> credit in previews.credits) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-    for (id<STUser> like in previews.likes) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-    for (id<STUser> todo in previews.todos) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-      /*
-    for (id<STComment> comment in previews.comments) {
-      if (images.count < limit) {
-        [images addObject:[Util profileImageURLForUser:comment.user withSize:STProfileImageSize31]];
-      }
-      else {
-        break;
-      }
-    }
-       */
-  }
-  return images;
 }
+
+- (void)setHighlighted:(BOOL)highlighted {
+    [super setHighlighted:highlighted];
+    [self adjustHighlight:highlighted];
+}
+
+- (void)setSelected:(BOOL)selected {
+    [super setSelected:selected];
+    [self adjustHighlight:selected];
+}
+
 
 @end

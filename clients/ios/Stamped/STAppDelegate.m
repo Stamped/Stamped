@@ -38,8 +38,9 @@
 #import "STImageCache.h"
 #import "STStampedAPI.h"
 #import "DDMenuController.h"
-#import "STWelcomeViewController.h"
+#import "STMenuController.h"
 #import "STIWantToViewController.h"
+#import "STSharedCaches.h"
 
 #import "STCreateStampViewController.h"
 
@@ -110,7 +111,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:inboxController];
     _navigationController = [navController retain];
-    DDMenuController *menuController = [[DDMenuController alloc] initWithRootViewController:navController];
+    STMenuController *menuController = [[STMenuController alloc] initWithRootViewController:navController];
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
     self.menuController = menuController;
@@ -123,14 +124,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
-    
-    // 1st run debugging code..
-    /*
-     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
-     [menuController.view addSubview:welcomeController.view];
-     welcomeController.view.frame = menuController.view.bounds;
-     [welcomeController animateIn];
-     */
+
     //[[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
     
     
@@ -170,7 +164,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    
+    /* NSLog(@"Going to background");
+    [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        NSLog(@"Saved"); 
+    }];
+     */
 }
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {

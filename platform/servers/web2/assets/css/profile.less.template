@@ -14,6 +14,12 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+
+/* **************************************************************************
+                         CUSTOM COLOR SCHEME SETUP
+   ************************************************************************** */
+
+
 {{#user}}
 @user_primary:   #{{color_primary}};   /* #004ab2 */
 @user_secondary: #{{color_secondary}}; /* #0057d1 */
@@ -31,15 +37,24 @@
 /*@primary:   fade(@user_primary,   80%);
 @secondary: fade(@user_secondary, 80%);*/
 
-.user-gradient(@angle: 135deg, @a: 50%) {
-    @c0: fade(@primary,   @a);
-    @c1: fade(@secondary, @a);
+
+/* **************************************************************************
+                         CUSTOM COLOR SCHEME RULES
+   ************************************************************************** */
+
+
+.user-gradient2(@angle: 135deg, @c0, @c1) {
     
     background: -webkit-linear-gradient(@angle, @c0, @c1);
     background: -moz-linear-gradient(@angle, @c0, @c1);
     background: -o-linear-gradient(@angle, @c0, @c1);
     background: linear-gradient(@angle, @c0, @c1);
 }
+
+.user-gradient(@angle: 135deg, @a: 50%) {
+    .user-gradient2(@angle, fade(@primary, @a), fade(@secondary, @a));
+}
+
 
 .post-header, .stamp-card-pre {
     .user-gradient(135deg);
@@ -54,7 +69,7 @@
     width:  100%;
     margin: 0;
     
-    .inset-stamp .number {
+    .stamp-count {
         color: @user_dark;
     }
 }
@@ -110,18 +125,36 @@ body.other      #stamp-category-nav-bar ol li.other div {
     background-color: fade(@primary, 25%);
 }
 
-.action:hover {
-    background-color: fade(@primary, 50%);
-}
-.action:active {
-    background-color: fade(@primary, 80%);
-}
+/*
+.sdetail_body {
+    .section-entity {
+        .entity-data {
+            .entity-actions {
+                .action {
+                    @c0: #f2f2f2;
+                    
+                    &:hover {
+                        .user-gradient2(90deg, @c0, fade(@primary, 15%));
+                    }
+                    &:active {
+                        .user-gradient2(90deg, @c0, fade(@primary, 25%));
+                    }
+                }
+            }
+        }
+    }
+}*/
 
-/* target webkit-browsers */
+
+/* **************************************************************************
+                            WEBKIT-SPECIFIC RULES
+   ************************************************************************** */
+
+    
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     .user-logo-large {
         background-image: none;
-        .user-gradient(135deg);
+        .user-gradient(135deg, 80%);
         
         @mask-image: url(/assets/img/stamped_logo_mask.png);
         
@@ -134,7 +167,7 @@ body.other      #stamp-category-nav-bar ol li.other div {
     
     .user-logo-small {
         background-image: none;
-        .user-gradient(135deg);
+        .user-gradient(135deg, 80%);
         @mask-image: url(/assets/img/stamped_email_mask.png);
         
         -webkit-mask: @mask-image no-repeat;

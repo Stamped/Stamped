@@ -39,4 +39,9 @@ CGColorRef CreatePatternColor(CGImageRef image);
 void aspectDrawImageInRect(CGContextRef ctx, CGImageRef cgImage, CGRect rect);
 
 
+/*
+ * Fill stamp gradient
+ */
+void drawStampGradient(CGColorRef topColor, CGColorRef bottomColor, CGContextRef ctx);
+
 @end

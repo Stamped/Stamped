@@ -7,14 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "STStamp.h"
+#import "STEntityDetail.h"
 #import "STCancellation.h"
 
 @interface STConsumptionCell : UITableViewCell
 
-- (id)initWithStamp:(id<STStamp>)stamp;
+- (id)initWithEntityDetail:(id<STEntityDetail>)entityDetail;
 
-+ (CGFloat)cellHeightForStamp:(id<STStamp>)stamp;
-+ (STCancellation*)prepareForStamp:(id<STStamp>)stamp withCallback:(void (^)(NSError* error, STCancellation* cancellation))block;
++ (CGFloat)cellHeightForEntityDetail:(id<STEntityDetail>)entityDetail;
+
++ (STCancellation*)prepareForEntityDetail:(id<STEntityDetail>)entityDetail
+                             withCallback:(void (^)(NSError* error, STCancellation* cancellation))block;
 
 @end

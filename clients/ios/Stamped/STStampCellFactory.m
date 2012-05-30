@@ -20,19 +20,16 @@
 static STStampCellFactory* _sharedInstance;
 
 + (void)initialize {
-  _sharedInstance = [[STStampCellFactory alloc] init];
+    _sharedInstance = [[STStampCellFactory alloc] init];
 }
 
 + (STStampCellFactory*)sharedInstance {
-  return _sharedInstance;
+    return _sharedInstance;
 }
 
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView data:(id)data andStyle:(NSString*)style {
-  if ([[data class] conformsToProtocol:@protocol(STStamp)]) {
-    if ([style isEqualToString:STCellStyleConsumption]) {
-      return [[[STConsumptionCell alloc] initWithStamp:data] autorelease];
-    }
-    else {
+    if ([[data class] conformsToProtocol:@protocol(STStamp)]) {
+        
         
         STStampCell *cell = [tableView dequeueReusableCellWithIdentifier:[STStampCell cellIdentifier]];
         if (cell == nil) {
@@ -40,45 +37,34 @@ static STStampCellFactory* _sharedInstance;
         }
         [cell setupWithStamp:data];
         return cell;
-    
     }
-  }
-  else {
-    [STDebug log:[NSString stringWithFormat:@"%@ created error cell because %@ was not a stamp", self, data]];
-    return [[STErrorCellFactory sharedInstance] cellForTableView:tableView data:data andStyle:style];
-  }
+    else {
+        [STDebug log:[NSString stringWithFormat:@"%@ created error cell because %@ was not a stamp", self, data]];
+        return [[STErrorCellFactory sharedInstance] cellForTableView:tableView data:data andStyle:style];
+    }
 }
 
 - (CGFloat)cellHeightForTableView:(UITableView*)tableView data:(id)data andStyle:(NSString*)style {
-  if ([[data class] conformsToProtocol:@protocol(STStamp)]) {
-    if ([style isEqualToString:STCellStyleConsumption]) {
-      return [STConsumptionCell cellHeightForStamp:data];
+    if ([[data class] conformsToProtocol:@protocol(STStamp)]) {
+        
+        return [STStampCell heightForStamp:data];
     }
     else {
-      return [STStampCell heightForStamp:data];
+        return [[STErrorCellFactory sharedInstance] cellHeightForTableView:tableView data:data andStyle:style];
     }
-  }
-  else {
-    return [[STErrorCellFactory sharedInstance] cellHeightForTableView:tableView data:data andStyle:style];
-  }
 }
 
 - (CGFloat)loadingCellHeightForTableView:(UITableView*)tableView andStyle:(NSString*)style {
-  return 91;
+    return 91;
 }
 
 - (STCancellation*)prepareForData:(id)data 
                          andStyle:(NSString*)style 
                      withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
-  if ([[data class] conformsToProtocol:@protocol(STStamp)]) {
-    if ([style isEqualToString:STCellStyleConsumption]) {
-      return [STConsumptionCell prepareForStamp:data withCallback:block];
+    if ([[data class] conformsToProtocol:@protocol(STStamp)]) {
+        return [STStampCell prepareForStamp:data withCallback:block];
     }
-    else {
-      return [STStampCell prepareForStamp:data withCallback:block];
-    }
-  }
-  return [STCancellation dispatchNoopCancellationWithCallback:block];
+    return [STCancellation dispatchNoopCancellationWithCallback:block];
 }
 
 @end

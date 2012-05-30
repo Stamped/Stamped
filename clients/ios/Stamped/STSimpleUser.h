@@ -13,6 +13,7 @@
 
 @interface STSimpleUser : NSObject <STUser, NSCoding>
 
+@property (nonatomic, readwrite, copy) NSString* name;
 @property (nonatomic, readwrite, copy) NSString* userID;
 @property (nonatomic, readwrite, copy) NSString* screenName;
 @property (nonatomic, readwrite, copy) NSString* primaryColor;

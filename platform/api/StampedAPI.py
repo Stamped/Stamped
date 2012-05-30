@@ -35,7 +35,7 @@ try:
     from AUserDB                import AUserDB
     from AStampDB               import AStampDB
     from ACommentDB             import ACommentDB
-    from ATodoDB            import ATodoDB
+    from ATodoDB                import ATodoDB
     from ACollectionDB          import ACollectionDB
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
@@ -61,7 +61,7 @@ except Exception:
     report()
     raise
 
-CREDIT_BENEFIT  = 2 # Per credit
+CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
 
 # TODO (travis): refactor API function calling conventions to place optional last 
@@ -286,7 +286,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        user = self._facebook.getUserInfo(new_fb_account.facebook_token)
+        user = self._facebook.getUserInfo(new_fb_account.user_token)
 
         account = None
         try:
@@ -438,7 +438,9 @@ class StampedAPI(AStampedAPI):
         todoEntityIds = self._todoDB.getTodoEntityIds(account.user_id)
         for entityId in todoEntityIds:
             self._todoDB.removeTodo(account.user_id, entityId)
-        
+        # Remove todos history
+        self._todoDB.removeUserTodosHistory(account.user_id)
+
         # Remove stamps / collections
         stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         
@@ -481,9 +483,15 @@ class StampedAPI(AStampedAPI):
             
             # Decrement stamp stats by one
             self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
+
+        # Remove like history
+        self._stampDB.removeUserLikesHistory(account.user_id)
         
         # Remove activity items
         self._activityDB.removeUserActivity(account.user_id)
+
+        # Remove guide
+        ### TODO
         
         # Remove custom entities
         ### TODO: Do this?
@@ -959,7 +967,14 @@ class StampedAPI(AStampedAPI):
             categories.setdefault(category, 0)
             categories[category] += 1
 
-        return [ { 'category': k, 'count': v } for k, v in categories.iteritems() ] 
+        result = []
+        for k, v in categories.items():
+            distribution = CategoryDistributionSchema()
+            distribution.category = k 
+            distribution.count = v 
+            result.append(distribution)
+
+        return result
         
     
     ### PUBLIC
@@ -979,8 +994,12 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view user")
         
-        if self.__version > 0 and user.stats.distribution is not None and len(user.stats.distribution) == 0:
-            user.stats.distribution = self._getUserStampDistribution(user.user_id)
+        if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
+            if user.stats.distribution is None or len(user.stats.distribution) == 0:
+                distribution = self._getUserStampDistribution(user.user_id)
+                user.stats.distribution = distribution
+                ### TEMP: This should be async
+                self._userDB.updateDistribution(user.user_id, distribution)
         
         return user
     
@@ -1505,33 +1524,9 @@ class StampedAPI(AStampedAPI):
             process -= 1
             if process > 0:
                 # asynchronously merge & enrich entity
-                self.mergeEntity(entity)
-        
-        return results
-    
-    @API_CALL
-    def searchEntitiesOld(self, 
-                          query, 
-                          coords=None, 
-                          authUserId=None, 
-                          category=None, 
-                          subcategory=None, 
-                          prefix=False, 
-                          local=False, 
-                          full=True, 
-                          page=0, 
-                          limit=10):
-        results = self._entitySearcher.getSearchResults(query=query, 
-                                                        coords=coords, 
-                                                        category_filter=category, 
-                                                        subcategory_filter=subcategory, 
-                                                        full=full, 
-                                                        prefix=prefix, 
-                                                        local=local, 
-                                                        user=authUserId, 
-                                                        limit=((page + 1) * limit))
-        offset  = limit * page
-        results = results[offset : offset + limit]
+                ### TODO: This section is causing problems. Commenting out for now...
+                # self.mergeEntity(entity) 
+                pass
         
         return results
     
@@ -2102,12 +2097,14 @@ class StampedAPI(AStampedAPI):
 
         # Build content
         content = StampContent()
+        content.content_id = utils.generateUid()
+        timestamp = TimestampSchema()
+        timestamp.created = now  #time.gmtime(utils.timestampFromUid(content.content_id))
+        content.timestamp = timestamp
         if blurbData is not None:
             content.blurb = blurbData.strip()
             content.mentions = self._extractMentions(blurbData)
-            timestamp = TimestampSchema()
-            timestamp.created = now
-            content.timestamp = timestamp
+
 
         # Add image to stamp
         if imageData is not None:
@@ -2149,27 +2146,6 @@ class StampedAPI(AStampedAPI):
         if imageUrl is not None:
             if imageWidth is None or imageHeight is None:
                 raise StampedInputError("invalid image dimensions")
-
-            imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(now.timetuple())))
-            # Add image dimensions to stamp object
-            image           = ImageSchema()
-            supportedSizes   = {
-                ''        : (imageWidth, imageHeight),   #original size
-                '-ios1x'  : (200, 200),
-                '-ios2x'  : (400, 400),
-                '-web'    : (580, 580),
-                '-mobile' : (572, 572),
-                }
-            sizes = []
-            for k,v in supportedSizes.iteritems():
-                logs.info('adding image %s%s.jpg size %d' % (imageId, k, v[0]))
-                size            = ImageSizeSchema()
-                size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
-                size.width      = v[0]
-                size.height     = v[1]
-                sizes.append(size)
-            image.sizes = sizes
-            content.images.append(image)
             imageExists = True
 
         # Update content if stamp exists
@@ -2219,7 +2195,7 @@ class StampedAPI(AStampedAPI):
 
         if imageExists:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageId, imageUrl])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, content.content_id])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2241,7 +2217,7 @@ class StampedAPI(AStampedAPI):
             self._userDB.updateUserStats(authUserId, 'num_stamps_left',  increment=-1)
             self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
             distribution = self._getUserStampDistribution(authUserId)
-            self._userDB.updateUserStats(authUserId, 'distribution',     value=distribution)
+            self._userDB.updateDistribution(authUserId, distribution)
             
             # Asynchronously add references to the stamp in follower's inboxes and 
             # add activity for credit and mentions
@@ -2329,11 +2305,56 @@ class StampedAPI(AStampedAPI):
 
     
     @API_CALL
-    def addResizedStampImagesAsync(self, imageId, imageUrl):
+    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
         assert imageUrl is not None, "stamp image url unavailable!"
-        
-        self._imageDB.addResizedStampImages(imageUrl, imageId)
-    
+
+        max_size = (960, 960)
+        supportedSizes   = {
+            '-ios1x'  : (200, None),
+            '-ios2x'  : (400, None),
+            '-web'    : (580, None),
+            '-mobile' : (572, None),
+            }
+
+
+        # get stamp using stamp_id
+        stamp = self._stampDB.getStamp(stampId)
+        # find the blurb using the content_id and update the images field
+        for i, c in enumerate(stamp.contents):
+            if c.content_id == content_id:
+
+                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
+                # Add image dimensions to stamp object
+                image           = ImageSchema()
+                # add the default image size
+                supportedSizes['']       = (imageWidth,imageHeight)
+
+                images = c.images
+                if images is None:
+                    images = ()
+                sizes = []
+                for k,v in supportedSizes.iteritems():
+                    size            = ImageSizeSchema()
+                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.width      = v[0]
+                    size.height     = v[1]
+                    sizes.append(size)
+                image.sizes = sizes
+                images += (image,)
+                c.images = images
+
+                # update the actual stamp content, then update the db
+                contents = list(stamp.contents)
+                contents[i] = c
+                stamp.contents = contents
+                self._stampDB.updateStamp(stamp)
+                break
+        else:
+            raise StampedInputError('Could not find stamp blurb for image resizing')
+
+        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, supportedSizes)
+
+
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):
         raise NotImplementedError
@@ -2548,7 +2569,7 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_stamps',      increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', increment=1)
         distribution = self._getUserStampDistribution(authUserId)
-        self._userDB.updateUserStats(authUserId, 'distribution', value=distribution)
+        self._userDB.updateDistribution(authUserId, distribution)
         
         # Update credit stats if credit given
         if stamp.credit is not None and len(stamp.credit) > 0:
@@ -2898,6 +2919,12 @@ class StampedAPI(AStampedAPI):
         if self._stampDB.checkLike(authUserId, stampId):
             raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
 
+        # Check if user has liked the stamp previously; if so, don't give credit
+        previouslyLiked = False
+        history = self._stampDB.getUserLikesHistory(authUserId)
+        if stampId in history:
+            previouslyLiked = True 
+
         # Add like
         self._stampDB.addLike(authUserId, stampId)
         
@@ -2920,25 +2947,17 @@ class StampedAPI(AStampedAPI):
             stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True
         
-        # Give credit once a given threshold is hit
-        benefit = None
-        if stamp.stats.num_likes >= 3 and not stamp.stats.like_threshold_hit:
-            benefit = LIKE_BENEFIT
-            
-            # Update stamp stats
-            self._stampDB.giveLikeCredit(stamp.stamp_id)
-            stamp.stats.like_threshold_hit = True
-            
+        # Give credit if not previously liked
+        if not previouslyLiked and stamp.user.user_id != authUserId:
             # Update user stats with new credit
             self._userDB.updateUserStats(stamp.user.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
         
-        # Add activity for stamp owner (if not self)
-        if stamp.user.user_id != authUserId:
+            # Add activity for stamp owner
             self._addActivity(verb          = 'like', 
                               userId        = authUserId, 
                               stampId       = stamp.stamp_id,
                               friendId      = stamp.user.user_id,
-                              benefit       = benefit)
+                              benefit       = LIKE_BENEFIT)
 
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
@@ -2973,8 +2992,9 @@ class StampedAPI(AStampedAPI):
         else:
             stamp.stats.num_likes  = 0
         
+        ### NOTE (5/28/12): Removing deletion for now, and only adding new activity items if first time liked
         # Remove activity
-        self._activityDB.removeActivity('like', authUserId, stampId=stampId)
+        # self._activityDB.removeActivity('like', authUserId, stampId=stampId)
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
@@ -3020,7 +3040,11 @@ class StampedAPI(AStampedAPI):
         
         if timeSlice.limit is None or timeSlice.limit <= 0 or timeSlice.limit > 50:
             timeSlice.limit = 50
-        
+
+        # Add one second to timeSlice.before to make the query inclusive of the timestamp passed
+        if timeSlice.before is not None:
+            timeSlice.before = timeSlice.before + timedelta(seconds=1)
+
         # Buffer of 10 additional stamps
         limit = timeSlice.limit
         timeSlice.limit = limit + 10
@@ -3127,205 +3151,6 @@ class StampedAPI(AStampedAPI):
             logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-
-    @API_CALL
-    def getGuide(self, guideRequest, authUserId):
-
-        try:
-            guide = self._guideDB.getGuide(authUserId)
-        except (StampedUnavailableError, KeyError):
-            # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
-            guide = self._buildGuide(authUserId)
-
-        allItems = getattr(guide, guideRequest.section)
-
-        limit = 20
-        if guideRequest.limit is not None:
-            limit = guideRequest.limit 
-        offset = 0
-        if guideRequest.offset is not None:
-            offset = guideRequest.offset
-
-        entityIds = {}
-        stampIds = {}
-        userIds = {}
-        items = []
-
-        i = 0
-        for item in allItems[offset:]:
-            if guideRequest.subsection is None or guideRequest.subsection in item.tags:
-
-                items.append(item)
-                entityIds[item.entity_id] = None
-                if item.stamp_user_ids is not None:
-                    for userId in item.stamp_user_ids:
-                        userIds[userId] = None 
-                if item.todo_user_ids is not None:
-                    for userId in item.todo_user_ids:
-                        userIds[userId] = None
-                i += 1
-
-            if i >= limit:
-                break
-
-        # Entities 
-        entities = self._entityDB.getEntities(entityIds.keys())
-
-        for entity in entities:
-            if entity.sources.tombstone_id is not None:
-                # Convert to newer entity
-                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
-                entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
-            else:
-                entityIds[entity.entity_id] = entity
-
-        # Users
-        users = self._userDB.lookupUsers(list(userIds.keys()))
-
-        for user in users:
-            userIds[user.user_id] = user.minimize()
-
-        # Build guide
-        result = []
-        for item in items:
-            entity = entityIds[item.entity_id]
-            previews = EntityPreviewsSchema()
-            if item.stamp_user_ids is not None:
-                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
-            if item.todo_user_ids is not None:
-                previews.todos = [ userIds[x] for x in item.todo_user_ids ]
-            if previews.stamp_users is not None or previews.todos is not None:
-                entity.previews = previews 
-            result.append(entity)
-
-        return result
-
-        # Build guide
-        return None
-
-
-    @API_CALL
-    def buildGuideAsync(self, authUserId):
-        try:
-            guide = self._guideDB.getGuide(guideRequest, authUserId)
-            if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
-                return
-        except (StampedUnavailableError, KeyError):
-            pass
-
-        self._buildGuide(authUserId)
-
-    def _buildGuide(self, authUserId):
-        user = self.getUser({'user_id': authUserId})
-        now = datetime.utcnow()
-
-        t0 = time.time()
-
-        stampIds = self._collectionDB.getInboxStampIds(user.user_id)
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
-        entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
-        entities = self._entityDB.getEntities(entityIds)
-        todos = set(self._todoDB.getTodoEntityIds(user.user_id))
-
-        t1 = time.time()
-
-        categories = {}
-        for entity in entities:
-            category = entity.category 
-            if category == 'place':
-                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
-                    category = 'food'
-                else:
-                    category = 'other'
-            if category not in categories:
-                categories[category] = set()
-            categories[category].add(entity)
-
-        def entityScore(**kwargs):
-            numStamps = kwargs.pop('numStamps', 0)
-            numLikes = kwargs.pop('numLikes', 0)
-            numTodos = kwargs.pop('numTodos', 0)
-            created = kwargs.pop('created', 0)
-            result = 0
-            ### TIME
-            t = (time.mktime(now.timetuple()) - created) / 60 / 60 / 24
-            time_score = 0
-            if t < 90:
-                time_score = -0.1 / 90 * t + 1
-            elif t < 280:
-                time_score = -0.9 / 180 * t + 1.4
-            ### STAMPS
-            stamp_score = 0
-            if numStamps < 5:
-                stamp_score = numStamps / 5.0
-            elif numStamps >= 5:
-                stamp_score = 1
-            ### LIKES
-            like_score = 0
-            if numLikes < 20:
-                like_score = numLikes / 20.0
-            elif numLikes >= 20:
-                like_score = 1
-            ### TODOS
-            todo_score = 0
-            if numTodos < 10:
-                todo_score = numTodos / 10.0
-            elif numTodos >= 10:
-                todo_score = 1
-            ### PERSONAL TODO LIST
-            personal_todo_score = 0
-            if entity.entity_id in todos:
-                personal_todo_score = 1
-            result = (3 * time_score) + (5 * stamp_score) + (1 * todo_score) + (1 * like_score) + (3 * personal_todo_score)
-            return result
-
-        stampMap = {}
-        for stamp in stamps:
-            if stamp.entity.entity_id not in stampMap:
-                stampMap[stamp.entity.entity_id] = set()
-            stampMap[stamp.entity.entity_id].add(stamp)
-
-        guide = GuideCache()
-        guide.user_id = user.user_id
-        guide.updated = now
-
-        for category, entities in categories.items():
-            r = []
-            for entity in entities:
-                numLikes = 0
-                numTodos = 0
-                created = 0
-                for stamp in stampMap[entity.entity_id]:
-                    if stamp.stats.num_likes is not None:
-                        numLikes += stamp.stats.num_likes
-                    if stamp.stats.num_todos is not None:
-                        numTodos += stamp.stats.num_todos
-                    if stamp.timestamp.stamped is not None:
-                        created = max(created, time.mktime(stamp.timestamp.stamped.timetuple()))
-                    elif stamp.timestamp.created is not None:
-                        created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
-                score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
-                r.append((entity.entity_id, score, entity.types))
-            r.sort(key=itemgetter(1))
-            r.reverse()
-            cache = []
-            for result in r[:500]:
-                item = GuideCacheItem()
-                item.entity_id = result[0]
-                item.tags = result[2]
-                if len(stampMap[result[0]]) > 0:
-                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
-                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
-                cache.append(item)
-            setattr(guide, category, cache)
-
-        logs.info("Time to build guide: %s seconds" % (time.time() - t0))
-
-        self._guideDB.updateGuide(guide)
-
-        return guide
-
 
 
 
@@ -3596,6 +3421,227 @@ class StampedAPI(AStampedAPI):
         stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId=authUserId)
 
         return stamps, count
+
+    """
+
+     #####                         
+    #     # #    # # #####  ###### 
+    #       #    # # #    # #      
+    #  #### #    # # #    # #####  
+    #     # #    # # #    # #      
+    #     # #    # # #    # #      
+     #####   ####  # #####  ###### 
+    """
+
+    @API_CALL
+    def getGuide(self, guideRequest, authUserId):
+
+        # Hack to return kevin's guide for popular 
+        if guideRequest != 'inbox':
+            user = self._userDB.getUserByScreenName('kevin')
+            authUserId = user.user_id 
+
+        try:
+            guide = self._guideDB.getGuide(authUserId)
+        except (StampedUnavailableError, KeyError):
+            # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
+            guide = self._buildGuide(authUserId)
+
+        try:
+            allItems = getattr(guide, guideRequest.section)
+        except AttributeError:
+            logs.warning("Guide request for invalid section: %s" % guideRequest.section)
+            raise StampedInputError()
+
+        limit = 20
+        if guideRequest.limit is not None:
+            limit = guideRequest.limit 
+        offset = 0
+        if guideRequest.offset is not None:
+            offset = guideRequest.offset
+
+        entityIds = {}
+        stampIds = {}
+        userIds = {}
+        items = []
+
+        i = 0
+        for item in allItems:
+            if guideRequest.subsection is None or guideRequest.subsection in item.tags:
+
+                items.append(item)
+                entityIds[item.entity_id] = None
+                if item.stamp_user_ids is not None:
+                    for userId in item.stamp_user_ids:
+                        userIds[userId] = None 
+                if item.todo_user_ids is not None:
+                    for userId in item.todo_user_ids:
+                        userIds[userId] = None
+                i += 1
+
+            if i >= limit + offset:
+                break
+
+        items = items[offset:]
+
+        # Entities 
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            if entity.sources.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                ### TODO: Async process to replace reference
+            else:
+                entityIds[entity.entity_id] = entity
+
+        # Users
+        users = self._userDB.lookupUsers(list(userIds.keys()))
+
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Build guide
+        result = []
+        for item in items:
+            entity = entityIds[item.entity_id]
+            previews = EntityPreviewsSchema()
+            if item.stamp_user_ids is not None:
+                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
+            if item.todo_user_ids is not None:
+                previews.todos = [ userIds[x] for x in item.todo_user_ids ]
+            if previews.stamp_users is not None or previews.todos is not None:
+                entity.previews = previews 
+            result.append(entity)
+
+        return result
+
+        # Build guide
+        return None
+
+
+    @API_CALL
+    def buildGuideAsync(self, authUserId):
+        try:
+            guide = self._guideDB.getGuide(guideRequest, authUserId)
+            if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
+                return
+        except (StampedUnavailableError, KeyError):
+            pass
+
+        self._buildGuide(authUserId)
+
+    def _buildGuide(self, authUserId):
+        user = self.getUser({'user_id': authUserId})
+        now = datetime.utcnow()
+
+        t0 = time.time()
+
+        stampIds = self._collectionDB.getInboxStampIds(user.user_id)
+        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
+        entities = self._entityDB.getEntities(entityIds)
+        todos = set(self._todoDB.getTodoEntityIds(user.user_id))
+
+        t1 = time.time()
+
+        sections = {}
+        for entity in entities:
+            section = entity.category 
+            if section == 'place':
+                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
+                    section = 'food'
+                else:
+                    section = 'other'
+            if section not in sections:
+                sections[section] = set()
+            sections[section].add(entity)
+
+        def entityScore(**kwargs):
+            numStamps = kwargs.pop('numStamps', 0)
+            numLikes = kwargs.pop('numLikes', 0)
+            numTodos = kwargs.pop('numTodos', 0)
+            created = kwargs.pop('created', 0)
+            result = 0
+            ### TIME
+            t = (time.mktime(now.timetuple()) - created) / 60 / 60 / 24
+            time_score = 0
+            if t < 90:
+                time_score = -0.1 / 90 * t + 1
+            elif t < 280:
+                time_score = -0.9 / 180 * t + 1.4
+            ### STAMPS
+            stamp_score = 0
+            if numStamps < 5:
+                stamp_score = numStamps / 5.0
+            elif numStamps >= 5:
+                stamp_score = 1
+            ### LIKES
+            like_score = 0
+            if numLikes < 20:
+                like_score = numLikes / 20.0
+            elif numLikes >= 20:
+                like_score = 1
+            ### TODOS
+            todo_score = 0
+            if numTodos < 10:
+                todo_score = numTodos / 10.0
+            elif numTodos >= 10:
+                todo_score = 1
+            ### PERSONAL TODO LIST
+            personal_todo_score = 0
+            if entity.entity_id in todos:
+                personal_todo_score = 1
+            result = (3 * time_score) + (5 * stamp_score) + (1 * todo_score) + (1 * like_score) + (3 * personal_todo_score)
+            return result
+
+        stampMap = {}
+        for stamp in stamps:
+            if stamp.entity.entity_id not in stampMap:
+                stampMap[stamp.entity.entity_id] = set()
+            stampMap[stamp.entity.entity_id].add(stamp)
+
+        guide = GuideCache()
+        guide.user_id = user.user_id
+        guide.updated = now
+
+        for section, entities in sections.items():
+            r = []
+            for entity in entities:
+                numLikes = 0
+                numTodos = 0
+                created = 0
+                for stamp in stampMap[entity.entity_id]:
+                    if stamp.stats.num_likes is not None:
+                        numLikes += stamp.stats.num_likes
+                    if stamp.stats.num_todos is not None:
+                        numTodos += stamp.stats.num_todos
+                    if stamp.timestamp.stamped is not None:
+                        created = max(created, time.mktime(stamp.timestamp.stamped.timetuple()))
+                    elif stamp.timestamp.created is not None:
+                        created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
+                score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
+                r.append((entity.entity_id, score, entity.types))
+            r.sort(key=itemgetter(1))
+            r.reverse()
+            cache = []
+            for result in r[:500]:
+                item = GuideCacheItem()
+                item.entity_id = result[0]
+                item.tags = result[2]
+                if len(stampMap[result[0]]) > 0:
+                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
+                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
+                cache.append(item)
+            setattr(guide, section, cache)
+
+        logs.info("Time to build guide: %s seconds" % (time.time() - t0))
+
+        self._guideDB.updateGuide(guide)
+
+        return guide
+
     
     
     """
@@ -3609,29 +3655,39 @@ class StampedAPI(AStampedAPI):
     """
 
 
-    def _enrichTodo(self, rawTodo, user=None, entity=None, stamp=None, followerIds=None, authUserId=None):
+    def _enrichTodo(self, rawTodo, user=None, entity=None, source_stamps=None, stamp=None, friendIds=None, authUserId=None):
         if user is None or user.user_id != rawTodo.user_id:
             user = self._userDB.getUser(rawTodo.user_id).minimize()
 
         if entity is None or entity.entity_id != rawTodo.entity.entity_id:
             entity = self._entityDB.getEntity(rawTodo.entity.entity_id)
 
-        if rawTodo.stamp_id is not None:
-            stamp = self._stampDB.getStamp(rawTodo.stamp_id)
-            stamp = self._enrichStampObjects(stamp, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
+        if source_stamps is None and rawTodo.source_stamp_ids is not None:
+            # Enrich stamps
+            source_stamps = self._stampDB.getStamps(rawTodo.source_stamp_ids, limit=len(rawTodo.source_stamp_ids))
+            source_stamps = self._enrichStampObjects(source_stamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
+
+        # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
+        # this is necessary only for backward compatability.  The new RawTodo schema includes the stamp_id val
+        if stamp is None and rawTodo.complete and rawTodo.stamp_id is None and authUserId:
+            stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
+            if stamp is not None:
+                todo.stamp_id = stamp.stamp_id
 
         previews = None
-        if followerIds is not None:
+        if friendIds is not None:
             previews = StampPreviews()
 
-            # TODO: We definitely want to reassess how we obtain the preview todos list.  For now, we'll pull all friends
-            #  and check every friend's todo list.  This may be suboptimal.  An alernative would be to add
-            #  the preview_todos to the entityStats collection, though this could grow large for popular items
-            friendTodos = self._todoDB.getTodosFromUsersForEntity(followerIds, entity.entity_id)
-            previews.todos = [todo.user for todo in friendTodos]
+            # TODO: We may want to optimize how we pull in followers' todos by adding a new ref collection as we do
+            #  for likes on stamps.
+            friendIds = self._todoDB.getTodosFromUsersForEntity(friendIds, entity.entity_id)
+            users = self._userDB.lookupUsers(friendIds, limit=10)
+            users =  map(lambda x: x.minimize(), users)
+            logs.info('### after: %s' % users)
+            previews.todos = users
 
 
-        return rawTodo.enrich(user, entity, previews, stamp)
+        return rawTodo.enrich(user, entity, previews, source_stamps, stamp)
     
     @API_CALL
     def addTodo(self, authUserId, entityRequest, stampId=None):
@@ -3644,7 +3700,7 @@ class StampedAPI(AStampedAPI):
         todo.timestamp.created  = datetime.utcnow()
         
         if stampId is not None:
-            todo.stamp_id = stampId
+            todo.source_stamp_ids = [stampId]
 
         # Check to verify that user hasn't already todoed entity
         try:
@@ -3658,10 +3714,18 @@ class StampedAPI(AStampedAPI):
         if exists:
             raise StampedDuplicationError("Todo already exists")
 
-        # Check if user has already stamped entity, mark as complete if so
-        if self._stampDB.checkStamp(authUserId, entity.entity_id):
+        # Check if user has already stamped the todo entity, mark as complete and provide stamp_id, if so
+        users_stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
+        if users_stamp is not None:
             todo.complete = True
-        
+            todo.stamp_id = users_stamp.stamp_id
+
+        # Check if user has todoed the stamp previously; if so, don't send activity alerts
+        previouslyTodoed = False
+        history = self._todoDB.getUserTodosHistory(authUserId)
+        if todo.todo_id in history:
+            previouslyTodoed = True
+
         todo = self._todoDB.addTodo(todo)
         
         # Increment stats
@@ -3670,27 +3734,28 @@ class StampedAPI(AStampedAPI):
         # User
         user = self._userDB.getUser(authUserId).minimize()
 
-        followerIds = self._friendshipDB.getFollowers(user.user_id)
+        friendIds = self._friendshipDB.getFriends(user.user_id)
 
         # Enrich todo
-        todo = self._enrichTodo(todo, user=user, entity=entity, followerIds=followerIds, authUserId=authUserId)
+        todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
         
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
-        
-        # Add activity for stamp owner (if not self)
+
+        # Add activity to all of your friends who stamped the entity
+        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entity.entity_id)
         ### TODO: Verify user isn't being blocked
-        ### TODO: Make async
-        if stampId is not None and todo.stamp.user.user_id != authUserId:
+        if not previouslyTodoed and friendStamps is not None:
+            for stamp in friendStamps:
+                if stamp.user.user_id != authUserId:
+                    self._addActivity(verb          = 'todo',
+                                      userId        = authUserId,
+                                      entityId      = entity.entity_id,
+                                      friendId      = stamp.user.user_id,
+                                      stampId       = stamp.stamp_id)
 
-            self._addActivity(verb          = 'todo',
-                              userId        = authUserId, 
-                              entityId      = entity.entity_id,
-                              friendId      = todo.stamp.user.user_id,
-                              stampId       = stampId)
-
-            # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
+                    # Update stamp stats
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
         
         return todo
 
@@ -3702,23 +3767,25 @@ class StampedAPI(AStampedAPI):
         if not RawTodo or not RawTodo.todo_id:
             raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
 
-        self._todoDB.completeTodo(authUserId, entityId)
-
-        # Decrement user stats by one
-        self._userDB.updateUserStats(authUserId, 'num_todos', increment=-1)
+        self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
         # Enrich todo
+        RawTodo.complete = True
         todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
-        if todo.stamp is not None and todo.stamp.stamp_id is not None:
-            # Remove activity
-            self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
+        # TODO: Add activity item
 
-            # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[todo.stamp.stamp_id])
+        #if todo.stamp is not None and todo.stamp.stamp_id is not None:
+            # Remove activity
+            #self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
+
+        # Update stamp stats
+#        if todo.source_stamps is not None:
+#            for stamp in todo.source_stamps:
+#                tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         return todo
-    
+
     @API_CALL
     def removeTodo(self, authUserId, entityId):
         ### TODO: Fail gracefully if todo doesn't exist
@@ -3735,12 +3802,16 @@ class StampedAPI(AStampedAPI):
         # Enrich todo
         todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
-        if todo.stamp is not None and todo.stamp.stamp_id is not None:
-            # Remove activity
-            self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
+        friendIds = self._friendshipDB.getFriends(authUserId)
 
-            # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[todo.stamp.stamp_id])
+        # Remove your todo from all of your friends' stamp previews
+        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
+        ### TODO: Verify user isn't being blocked
+        if friendStamps is not None:
+            for stamp in friendStamps:
+                if stamp.user.user_id != authUserId:
+                    # Update stamp stats
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
         
         return todo
     
@@ -3768,13 +3839,14 @@ class StampedAPI(AStampedAPI):
         
         # Extract entities & stamps
         entityIds   = {}
-        stampIds    = {}
+        sourceStampIds    = {}
         
         for rawTodo in todoData:
             entityIds[str(rawTodo.entity.entity_id)] = None
             
-            if rawTodo.stamp_id is not None:
-                stampIds[str(rawTodo.stamp_id)] = None
+            if rawTodo.source_stamp_ids is not None:
+                for stamp_id in rawTodo.source_stamp_ids:
+                    sourceStampIds[str(stamp_id)] = None
 
         # User
         user = self._userDB.getUser(authUserId).minimize()
@@ -3786,11 +3858,11 @@ class StampedAPI(AStampedAPI):
             entityIds[str(entity.entity_id)] = entity
         
         # Enrich stamps
-        stamps = self._stampDB.getStamps(stampIds.keys(), limit=len(stampIds.keys()))
+        stamps = self._stampDB.getStamps(sourceStampIds.keys(), limit=len(sourceStampIds.keys()))
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds)
         
         for stamp in stamps:
-            stampIds[str(stamp.stamp_id)] = stamp
+            sourceStampIds[str(stamp.stamp_id)] = stamp
 
         followerIds = self._friendshipDB.getFollowers(user.user_id)
 
@@ -3798,10 +3870,10 @@ class StampedAPI(AStampedAPI):
         for rawTodo in todoData:
             try:
                 entity      = entityIds[rawTodo.entity.entity_id]
-                stamp       = None
-                if rawTodo.stamp_id is not None:
-                    stamp = stampIds[rawTodo.stamp_id]
-                todo    = self._enrichTodo(rawTodo, user, entity, stamp, followerIds=followerIds, authUserId=authUserId)
+                stamps       = None
+                if rawTodo.source_stamp_ids is not None:
+                    stamps = [sourceStampIds[sid] for sid in rawTodo.source_stamp_ids]
+                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=followerIds, authUserId=authUserId)
                 result.append(todo)
             except Exception as e:
                 logs.debug("RAW TODO: %s" % rawTodo)
@@ -3847,6 +3919,7 @@ class StampedAPI(AStampedAPI):
         elif verb == 'like':
             objects.stamp_ids       = [ kwargs['stampId'] ] 
             group                   = True
+            groupRange              = timedelta(days=1)
 
         elif verb == 'todo':
             objects.user_ids        = [ kwargs['friendId'] ]
@@ -4103,9 +4176,7 @@ class StampedAPI(AStampedAPI):
             ### TODO: decorations returned as dict, not schema. Fix?
             if k == 'menu': # and v.__class__.__name__ == 'MenuSchema': 
                 try:
-                    menu = MenuSchema()
-                    menu.importData(v)
-                    self._menuDB.update(menu)
+                    self._menuDB.update(v)
                 except Exception:
                     logs.warning('Menu enrichment failed')
                     report()

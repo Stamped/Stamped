@@ -15,6 +15,57 @@
     position: relative;
 }
 
+.stamp-gallery-header {
+    margin: 1em 5% 0;
+    
+    .stamp-gallery-sort {
+        position: relative;
+        z-index: 80;
+        float: left;
+        
+        .item {
+            display: none;
+            position: absolute;
+            
+            .arrow {
+                display: none;
+                font-size: 80%;
+            }
+        }
+        
+        .selected {
+            display: block;
+            position: relative;
+            
+            .arrow {
+                display: inline;
+            }
+        }
+    }
+    
+    .stamp-gallery-view-map {
+        float: right;
+    }
+    
+    .expanded {
+        background: #fff;
+        .rounded(4px);
+        
+        .item, .selected {
+            display: block;
+            position: absolute;
+            
+            .arrow {
+                display: none;
+            }
+        }
+        
+        .item:first-child {
+            position: relative;
+        }
+    }
+}
+
 .stamp-gallery {
     position: relative;
     width: 75%;
@@ -89,7 +140,7 @@
             text-align: left;
             float: left;
             margin-left: 58px + 24px;
-            text-align: justify;
+            text-align: left;
             padding-right: 32px;
             
             .stamp-contents {
@@ -347,9 +398,8 @@ a.lightbox {
 
 .blurb, .normal_blurb {
     display: block;
-    text-align: justify;
+    text-align: left;
     quotes: "\201C" "\201D";
-    line-height: 135%;
     font-family: 'arial', sans-serif;
     color: #666;
     
@@ -500,25 +550,42 @@ ul.user-category-distribution {
 
 .sdetail_wrapper {
     background: #fff;
-    width: 100%;
+    width:  100%;
+    height: 100%;
     
     position: fixed;
     top: 15%;
     z-index: 100;
 }
 
-body.sdetail_popup {
+
+body.sdetail_popup_animation, body.sdetail_popup {
     .post-header {
         background: #fff;
     }
     
     #main-page-content-body {
-        visibility: hidden !important;
+        visibility: visible !important;
         
         #stamp-category-nav-bar {
-            visibility: hidden !important;
+            opacity: 0;
         }
+    }
+}
+
+body.sdetail_popup {
+    /* hide scrollbars when displaying sdetail */
+    /* TODO: find a way of doing this that does not result in the scroll 
+     * position jumping */
+    /*overflow: hidden;*/
+    
+    #main-page-content-body {
+        visibility: hidden !important;
         
+        /*#stamp-category-nav-bar {
+            visibility: hidden !important;
+            opacity: 0;
+        }*/
         #main-content {
             visibility: hidden !important;
         }

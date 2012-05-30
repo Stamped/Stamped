@@ -84,20 +84,20 @@ class Client(Schema):
 class HoursSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('open',                            basestring)
-        cls.addProperty('close',                           basestring)
-        cls.addProperty('desc',                            basestring)
+        cls.addProperty('open',                         basestring)
+        cls.addProperty('close',                        basestring)
+        cls.addProperty('desc',                         basestring)
 
 class TimesSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('sun',                 HoursSchema)
-        cls.addNestedPropertyList('mon',                 HoursSchema)
-        cls.addNestedPropertyList('tue',                 HoursSchema)
-        cls.addNestedPropertyList('wed',                 HoursSchema)
-        cls.addNestedPropertyList('thu',                 HoursSchema)
-        cls.addNestedPropertyList('fri',                 HoursSchema)
-        cls.addNestedPropertyList('sat',                 HoursSchema)
+        cls.addNestedPropertyList('sun',                HoursSchema)
+        cls.addNestedPropertyList('mon',                HoursSchema)
+        cls.addNestedPropertyList('tue',                HoursSchema)
+        cls.addNestedPropertyList('wed',                HoursSchema)
+        cls.addNestedPropertyList('thu',                HoursSchema)
+        cls.addNestedPropertyList('fri',                HoursSchema)
+        cls.addNestedPropertyList('sat',                HoursSchema)
 
 
 # ########## #
@@ -334,7 +334,7 @@ class FacebookAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('facebook_token',               basestring, required=True)
+        cls.addProperty('user_token',               basestring, required=True)
 
 class TwitterAccountNew(Schema):
     @classmethod
@@ -380,6 +380,7 @@ class UserMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',              basestring, required=True)
+        cls.addProperty('name',                 basestring)
         cls.addProperty('screen_name',          basestring)
         cls.addProperty('color_primary',        basestring)
         cls.addProperty('color_secondary',      basestring)
@@ -1365,6 +1366,7 @@ class StampAttributesSchema(Schema):
 class StampContent(Schema):
     @classmethod
     def setSchema(cls):
+        cls.addProperty('content_id',                   basestring)
         cls.addProperty('blurb',                        basestring)
         cls.addNestedPropertyList('images',             ImageSchema)
         cls.addNestedProperty('timestamp',              TimestampSchema, required=True)
@@ -1457,15 +1459,18 @@ class RawTodo(Schema):
         cls.addProperty('todo_id',                  basestring)
         cls.addProperty('user_id',                  basestring, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addPropertyList('source_stamp_ids',     basestring)
         cls.addProperty('stamp_id',                 basestring)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
 
-    def enrich(self, user, entity, previews=None, stamp=None):
+    def enrich(self, user, entity, previews=None, source_stamps=None, stamp=None):
         todo = Todo()
         todo.dataImport(self.dataExport(), overflow=True)
         todo.user   = user
         todo.entity = entity
+        if source_stamps is not None:
+            todo.source_stamps = source_stamps
         if stamp is not None:
             todo.stamp  = stamp
         if previews is not None:
@@ -1477,8 +1482,10 @@ class Todo(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('todo_id',                  basestring)
-        cls.addProperty('user',                     UserMini, required=True)
+        cls.addNestedProperty('user',               UserMini, required=True)
+#        cls.addNestedProperty('source',             TodoSource, required=True)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
+        cls.addNestedPropertyList('source_stamps',  Stamp)
         cls.addNestedProperty('stamp',              Stamp)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
@@ -1487,6 +1494,7 @@ class Todo(Schema):
     def __init__(self):
         Schema.__init__(self)
         self.entity = BasicEntity()
+        self.complete = False
 
 
 # ######## #

@@ -303,6 +303,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             self._collection.update(query, {'$set': {key: value}}, upsert=True)
         else:
             self._collection.update(query, {'$inc': {key: increment}}, upsert=True)
+
+    def updateDistribution(self, userId, distribution):
+        r = []
+        for i in distribution:
+            r.append(i.dataExport())
+        query = {'_id': self._getObjectIdFromString(userId)}
+        self._collection.update(query, {'$set': {'stats.distribution': r}}, upsert=True)
     
     def findUsersByEmail(self, emails, limit=0):
         queryEmails = []

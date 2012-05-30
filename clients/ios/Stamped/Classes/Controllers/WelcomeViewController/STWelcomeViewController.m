@@ -7,13 +7,17 @@
 //
 
 #import "STWelcomeViewController.h"
+#import "LoginViewController.h"
 #import "WelcomePopoverView.h"
+#import "DDMenuController.h"
 
 @interface STWelcomeViewController ()
 
 @end
 
 @implementation STWelcomeViewController
+@synthesize delegate;
+
 
 - (id)init {
     if ((self = [super init])) {
@@ -93,9 +97,43 @@
 
 #pragma mark - WelcomePopoverViewDelegate
 
+- (void)welcomePopoverViewSelectedTwitter:(WelcomePopoverView*)view {
+    
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionTwitter];
+    }
+    
+}
+
+- (void)welcomePopoverViewSelectedFacebook:(WelcomePopoverView*)view {
+    
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionFacebook];
+    }
+
+}
+
+- (void)welcomePopoverViewSelectedEmail:(WelcomePopoverView*)view {
+    
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionSignup];
+    }
+
+}
+
+- (void)welcomePopoverViewSelectedLogin:(WelcomePopoverView*)view {
+
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionLogin];
+    }
+    
+}
+
 - (void)welcomePopoverViewSelectedClose:(WelcomePopoverView*)view {
     
-    [self.view removeFromSuperview];
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewControllerDismiss:)]) {
+        [self.delegate stWelcomeViewControllerDismiss:self];
+    }
     
 }
 

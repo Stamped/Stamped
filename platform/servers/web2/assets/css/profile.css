@@ -59,6 +59,53 @@
 #main-content {
   position: relative;
 }
+.stamp-gallery-header {
+  margin: 1em 5% 0;
+}
+.stamp-gallery-header .stamp-gallery-sort {
+  position: relative;
+  z-index: 80;
+  float: left;
+}
+.stamp-gallery-header .stamp-gallery-sort .item {
+  display: none;
+  position: absolute;
+}
+.stamp-gallery-header .stamp-gallery-sort .item .arrow {
+  display: none;
+  font-size: 80%;
+}
+.stamp-gallery-header .stamp-gallery-sort .selected {
+  display: block;
+  position: relative;
+}
+.stamp-gallery-header .stamp-gallery-sort .selected .arrow {
+  display: inline;
+}
+.stamp-gallery-header .stamp-gallery-view-map {
+  float: right;
+}
+.stamp-gallery-header .expanded {
+  background: #fff;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.stamp-gallery-header .expanded .item,
+.stamp-gallery-header .expanded .selected {
+  display: block;
+  position: absolute;
+}
+.stamp-gallery-header .expanded .item .arrow,
+.stamp-gallery-header .expanded .selected .arrow {
+  display: none;
+}
+.stamp-gallery-header .expanded .item:first-child {
+  position: relative;
+}
 .stamp-gallery {
   position: relative;
   width: 75%;
@@ -129,7 +176,7 @@
   text-align: left;
   float: left;
   margin-left: 82px;
-  text-align: justify;
+  text-align: left;
   padding-right: 32px;
 }
 .stamp-gallery-item .content .content_2 {
@@ -211,6 +258,8 @@ a.lightbox {
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
+  -ms-transition: opacity 0.2s ease-out;
+  -o-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
 }
 a.lightbox .zoom {
@@ -367,9 +416,8 @@ a.lightbox .zoom {
 .blurb,
 .normal_blurb {
   display: block;
-  text-align: justify;
+  text-align: left;
   quotes: "\201C" "\201D";
-  line-height: 135%;
   font-family: 'arial', sans-serif;
   color: #666;
   line-height: 125%;
@@ -496,18 +544,39 @@ ul.user-category-distribution li .bargraph .value {
 .sdetail_wrapper {
   background: #fff;
   width: 100%;
+  height: 100%;
   position: fixed;
   top: 15%;
   z-index: 100;
 }
+body.sdetail_popup_animation .post-header,
 body.sdetail_popup .post-header {
   background: #fff;
 }
+body.sdetail_popup_animation #main-page-content-body,
+body.sdetail_popup #main-page-content-body {
+  visibility: visible !important;
+}
+body.sdetail_popup_animation #main-page-content-body #stamp-category-nav-bar,
+body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
+  opacity: 0;
+}
+body.sdetail_popup {
+  /* hide scrollbars when displaying sdetail */
+
+  /* TODO: find a way of doing this that does not result in the scroll 
+     * position jumping */
+
+  /*overflow: hidden;*/
+
+}
 body.sdetail_popup #main-page-content-body {
   visibility: hidden !important;
-}
-body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
-  visibility: hidden !important;
+  /*#stamp-category-nav-bar {
+            visibility: hidden !important;
+            opacity: 0;
+        }*/
+
 }
 body.sdetail_popup #main-page-content-body #main-content {
   visibility: hidden !important;

@@ -310,14 +310,6 @@ header {
                 top:  0;
                 left: 0;
                 
-                .innerbg {
-                    background: url(/assets/img/profile_cover_default.1.png) repeat;
-                    
-                    position: absolute;
-                    width:   100%;
-                    height:  100%;
-                }
-                
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
@@ -353,7 +345,7 @@ header {
                     margin: 0 auto;
                     padding: 18px 20px 0;
                     
-                    .number {
+                    .stamp-count {
                         .stamped-font();
                         
                         font-size: 2em;
@@ -380,6 +372,39 @@ header {
     background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
     height: 16px;
 }
+
+.innerbg {
+    background: url(/assets/img/covers/default_cover_temp.png) repeat;
+    position: absolute;
+    width:   100%;
+    height:  100%;
+}
+
+body.place .innerbg {
+    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+body.music .innerbg {
+    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+body.book .innerbg {
+    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+body.film .innerbg {
+    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+body.other .innerbg {
+    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
+    background-size: 100% 100%;
+}
+
 
 
 /* **************************************************************************
@@ -460,17 +485,39 @@ header {
     }
 }
 
+.profile-section0 {
+    .floatleft;
+    
+    a.screen-name {
+        color: #000;
+    }
+    
+    p.profile-title {
+        position: relative;
+        .stamped-font();
+        
+        line-height: 100%;
+        font-size: 7em;
+        letter-spacing: .05em;
+        color: #000;
+        
+        display: block;
+        margin:  0;
+        padding: 0;
+        
+        /*text-shadow: 0.05em 0.05em 0.03em #aaa;
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;*/
+    }
+}
+
+/*
 .profile-section {
     display: none;
     
     &.profile-section-default {
         display: block;
     }
-}
-
-.profile-section0 {
-    .floatleft;
-    width: 35%;
 }
 
 .profile-section1, .profile-section2 {
@@ -489,7 +536,7 @@ header {
 .profile-section3 {
     .floatright;
     width: 45%;
-}
+}*/
 
 
 /* **************************************************************************
@@ -658,6 +705,9 @@ header {
     position: fixed;
     display:  block;
     z-index: 1000;
+    
+    opacity: 1;
+    .transition(opacity, 0.4s, ease-out);
     
     visibility: hidden;
     
@@ -1044,9 +1094,5 @@ footer .copyright a, footer .copyright a {
     /*text-shadow: 0.05em 0.05em 0.03em #aaa;
     font-smooth: always;
     -webkit-font-smoothing: antialiased;*/
-}
-
-.large {
-    font-size: 2.2em;
 }
 

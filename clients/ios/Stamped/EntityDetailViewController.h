@@ -9,7 +9,6 @@
 #import <RestKit/RestKit.h>
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
-#import "ShowImageViewController.h"
 #import "STViewController.h"
 #import "Util.h"
 #import "STEntityDetail.h"

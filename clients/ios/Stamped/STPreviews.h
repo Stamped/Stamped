@@ -18,5 +18,6 @@
 @property (nonatomic, readonly, copy) NSArray<STUser>* likes;
 @property (nonatomic, readonly, copy) NSArray<STComment>* comments;
 @property (nonatomic, readonly, copy) NSArray<STStamp>* credits;
+@property (nonatomic, readonly, copy) NSArray<STUser>* stampUsers;
 
 @end
