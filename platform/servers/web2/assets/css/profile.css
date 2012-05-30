@@ -59,6 +59,21 @@
 #main-content {
   position: relative;
 }
+.stamp-gallery-header {
+  margin: 1em 5% 0;
+}
+.stamp-gallery-header .stamp-gallery-sort {
+  float: left;
+}
+.stamp-gallery-header .stamp-gallery-sort .item {
+  display: none;
+}
+.stamp-gallery-header .stamp-gallery-sort .item:first-child {
+  display: block;
+}
+.stamp-gallery-header .stamp-gallery-view-map {
+  float: right;
+}
 .stamp-gallery {
   position: relative;
   width: 75%;

@@ -26,6 +26,7 @@
 {% block main %}
     {{ block.super }}
     
+    {% block profile-header %}
     <div class="profile-header-wrapper">
         <div class="profile-header">
             <div class="profile-content-page">
@@ -56,6 +57,7 @@
             </div>
         </div>
     </div>
+    {% endblock profile-header %}
     
     {% block stamp_category_nav_bar %}
     <nav id="stamp-category-nav-bar" style="display: block;">
@@ -90,6 +92,18 @@
     
     {% block pre_profile_main_content %}
     <div id="main-content" class="fixedwidth">
+        
+        <div class='stamp-gallery-header'>
+            <div class='stamp-gallery-sort'>
+                <a href="#" class='item'><div>Newest</div></a>
+                <a href="#" class='item'><div>Popular</div></a>
+            </div>
+            
+            <div class='stamp-gallery-view-map'>
+                <a href="#">View Map</a>
+            </div>
+        </div>
+        
         {% endblock pre_profile_main_content %}
         
         {% block profile_main_content %}

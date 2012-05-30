@@ -46,7 +46,7 @@ TODO:
         * CLOSE - "Anatomy of eDetail section" spec
         * Polish social sharing buttons
         * DONE - Opening / closing animations
-        * Comment collapsing ala Google Plus
+        * CLOSE - Comment collapsing ala Google Plus
         * Move like / todo / comment counters to their own section
     * First cut at map view integration
     * Profile Page:
