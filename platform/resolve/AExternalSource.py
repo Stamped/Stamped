@@ -26,7 +26,7 @@ class AExternalSource(object):
     @abstractmethod
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
-        Hook for creating/updating external resouces associated with an entity, writing to decorator-specific entity 
+        Hook for creating/updating external resources associated with an entity, writing to decorator-specific entity
         fields if necessary.
 
         Returns True if the entity was modified.
@@ -47,7 +47,7 @@ class AExternalSource(object):
     
     def writeField(self, entity, data, path):
         """
-        Writes the given data to the field indentified by path.
+        Writes the given data to the field identified by path.
 
         Entity may be any indexable object, such that path is identifies a valid nesting.
 
@@ -58,9 +58,9 @@ class AExternalSource(object):
         cur = entity
         if len(path) > 1:
             for k in path[:-1]:
-                cur = entity[k]
+                cur = getattr(entity, k)
         if data is None:
-            if path[-1] in cur:
+            if hasattr(cur, path[-1]):
                 delattr(cur, path[-1])
         else:
             setattr(cur, path[-1], data)
