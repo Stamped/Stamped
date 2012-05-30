@@ -306,7 +306,7 @@ class OAuthLogin(Schema):
 class OAuthFacebookLogin(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('fb_token',                     basestring, required=True)
+        cls.addProperty('user_token',                     basestring, required=True)
 
 class OAuthTwitterLogin(Schema):
     @classmethod
@@ -429,11 +429,12 @@ class HTTPFacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('email',                        basestring)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('facebook_token',               basestring, required=True)
+
 
     def convertToFacebookAccountNew(self):
         return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
@@ -442,12 +443,13 @@ class HTTPTwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         cls.addProperty('user_token',                   basestring, required=True)
         cls.addProperty('user_secret',                  basestring, required=True)
+        cls.addProperty('email',                        basestring)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+
 
     def convertToTwitterAccountNew(self):
         return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)

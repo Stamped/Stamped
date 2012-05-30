@@ -334,7 +334,7 @@ class FacebookAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('facebook_token',               basestring, required=True)
+        cls.addProperty('user_token',               basestring, required=True)
 
 class TwitterAccountNew(Schema):
     @classmethod
