@@ -288,12 +288,6 @@ header .header-body a.button {
   top: 0;
   left: 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .innerbg {
-  background: url(/assets/img/profile_cover_default.1.png) repeat;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
 }
@@ -326,7 +320,7 @@ header .header-body a.button {
   margin: 0 auto;
   padding: 18px 20px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp .number {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp .stamp-count {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
@@ -345,6 +339,32 @@ header .header-body a.button {
 .ribbon-bottom {
   background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
   height: 16px;
+}
+.innerbg {
+  background: url(/assets/img/covers/default_cover_temp.png) repeat;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+body.place .innerbg {
+  background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
+  background-size: 100% 100%;
+}
+body.music .innerbg {
+  background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
+  background-size: 100% 100%;
+}
+body.book .innerbg {
+  background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
+  background-size: 100% 100%;
+}
+body.film .innerbg {
+  background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
+  background-size: 100% 100%;
+}
+body.other .innerbg {
+  background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
+  background-size: 100% 100%;
 }
 /* **************************************************************************
                                 PROFILE IMAGES
@@ -457,34 +477,55 @@ header .header-body a.button {
 .user-gallery :nth-child(n+11) {
   display: none;
 }
-.profile-section {
-  display: none;
-}
-.profile-section.profile-section-default {
-  display: block;
-}
 .profile-section0 {
   float: left;
-  width: 35%;
 }
-.profile-section1,
-.profile-section2 {
-  float: right;
-  width: 18%;
+.profile-section0 a.screen-name {
+  color: #000;
 }
-.profile-section1 .number,
-.profile-section2 .number {
+.profile-section0 p.profile-title {
+  position: relative;
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
-  font-size: 2em;
+  line-height: 100%;
+  font-size: 7em;
   letter-spacing: .05em;
   color: #000;
+  display: block;
+  margin: 0;
+  padding: 0;
+  /*text-shadow: 0.05em 0.05em 0.03em #aaa;
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;*/
+
 }
+/*
+.profile-section {
+    display: none;
+    
+    &.profile-section-default {
+        display: block;
+    }
+}
+
+.profile-section1, .profile-section2 {
+    .floatright;
+    width: 18%;
+    
+    .number {
+        .stamped-font();
+        
+        font-size: 2em;
+        letter-spacing: .05em;
+        color: #000;
+    }
+}
+
 .profile-section3 {
-  float: right;
-  width: 45%;
-}
+    .floatright;
+    width: 45%;
+}*/
 /* **************************************************************************
                            CRINKLED STATIC GOOGLE MAP
    ************************************************************************** */
@@ -538,6 +579,8 @@ header .header-body a.button {
 
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
+  -ms-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
   left: 0px;
   border-width: 2px 0 2px 2px;
@@ -568,6 +611,8 @@ header .header-body a.button {
 
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
+  -ms-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
   left: 37px;
   border-width: 2px 0;
@@ -598,6 +643,8 @@ header .header-body a.button {
 
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
+  -ms-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
   left: 72px;
   border-width: 2px 0;
@@ -628,6 +675,8 @@ header .header-body a.button {
 
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
+  -ms-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
   left: 107px;
   border-width: 2px 2px 2px 0;
@@ -644,6 +693,8 @@ header .header-body a.button {
   background: #333;
   -webkit-transition: opacity 0.1s ease-in-out;
   -moz-transition: opacity 0.1s ease-in-out;
+  -ms-transition: opacity 0.1s ease-in-out;
+  -o-transition: opacity 0.1s ease-in-out;
   transition: opacity 0.1s ease-in-out;
   opacity: 0.10;
 }
@@ -658,6 +709,8 @@ header .header-body a.button {
   height: 18px;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
+  -ms-transition: all 0.1s linear;
+  -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
   -webkit-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
   -moz-transform: perspective(200px) translate(-2px, 0) scale(0.8, 0.8);
@@ -705,6 +758,12 @@ header .header-body a.button {
   position: fixed;
   display: block;
   z-index: 1000;
+  opacity: 1;
+  -webkit-transition: opacity 0.4s ease-out;
+  -moz-transition: opacity 0.4s ease-out;
+  -ms-transition: opacity 0.4s ease-out;
+  -o-transition: opacity 0.4s ease-out;
+  transition: opacity 0.4s ease-out;
   visibility: hidden;
   background: #262626;
   -webkit-border-radius: 8px;
@@ -750,6 +809,8 @@ header .header-body a.button {
   transform: scale(0.8, 0.8);
   -webkit-transition: all 0.3s ease-out;
   -moz-transition: all 0.3s ease-out;
+  -ms-transition: all 0.3s ease-out;
+  -o-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
   /*@params: 0.3s ease-out;
                 @args: opacity @params, transform @params;
@@ -773,6 +834,8 @@ header .header-body a.button {
   opacity: 1;
   -webkit-transition: all 0s linear;
   -moz-transition: all 0s linear;
+  -ms-transition: all 0s linear;
+  -o-transition: all 0s linear;
   transition: all 0s linear;
   -webkit-transform: scale(1, 1);
   -moz-transform: scale(1, 1);
@@ -786,6 +849,8 @@ header .header-body a.button {
   opacity: 1;
   -webkit-transition: all 0s linear;
   -moz-transition: all 0s linear;
+  -ms-transition: all 0s linear;
+  -o-transition: all 0s linear;
   transition: all 0s linear;
   -webkit-transform: scale(1, 1);
   -moz-transform: scale(1, 1);
@@ -868,6 +933,8 @@ body.other #stamp-category-nav-bar ol li.other a:hover {
   opacity: 1;
   -webkit-transition: all 0s linear;
   -moz-transition: all 0s linear;
+  -ms-transition: all 0s linear;
+  -o-transition: all 0s linear;
   transition: all 0s linear;
   -webkit-transform: scale(1, 1);
   -moz-transform: scale(1, 1);
@@ -1769,7 +1836,4 @@ a.pronounced-title {
     font-smooth: always;
     -webkit-font-smoothing: antialiased;*/
 
-}
-.large {
-  font-size: 2.2em;
 }

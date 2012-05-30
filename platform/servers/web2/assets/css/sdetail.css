@@ -50,7 +50,7 @@
 }
 .sdetail_body .section-entity {
   float: right;
-  width: 30%;
+  width: 35%;
   padding: .25em;
 }
 .sdetail_body .section-entity .close-button {
@@ -60,46 +60,81 @@
 .sdetail_body .section-entity .stamp-preview {
   margin: 1em auto;
 }
-.sdetail_body .section-entity .actions {
-  margin: 2em auto;
+.sdetail_body .section-entity .entity-data {
+  font-size: 80%;
 }
-.sdetail_body .section-entity .actions .action {
+.sdetail_body .section-entity .entity-data .entity-data-header {
+  padding: .5em 24px .5em 12px;
+}
+.sdetail_body .section-entity .entity-data .entity-data-header p.entity-title {
+  color: #999;
+}
+.sdetail_body .section-entity .entity-data .entity-data-header p.entity-caption {
+  color: #bfbfbf;
+}
+.sdetail_body .section-entity .entity-data .entity-actions .action {
+  padding: .5em 24px .5em 12px;
+  border: 1px solid #f2f2f2;
+  border-bottom: 1px solid ##dbdbdb;
+  background: #f2f2f2;
+  background: -webkit-linear-gradient(90deg, #f2f2f2, #ffffff);
+  background: -moz-linear-gradient(90deg, #f2f2f2, #ffffff);
+  background: -ms-linear-gradient(90deg, #f2f2f2, #ffffff);
+  background: -o-linear-gradient(90deg, #f2f2f2, #ffffff);
+}
+.sdetail_body .section-entity .entity-data .entity-actions .action:hover,
+.sdetail_body .section-entity .entity-data .entity-actions .action:active {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  padding: 2px;
 }
-.sdetail_body .section-entity .actions .action .sources {
-  clear: both;
+.sdetail_body .section-entity .entity-data .entity-actions .action:hover {
+  background: #cccccc;
+  background: -webkit-linear-gradient(90deg, #cccccc, #ffffff);
+  background: -moz-linear-gradient(90deg, #cccccc, #ffffff);
+  background: -ms-linear-gradient(90deg, #cccccc, #ffffff);
+  background: -o-linear-gradient(90deg, #cccccc, #ffffff);
 }
-.sdetail_body .section-entity .actions .action .sources .source {
-  margin: 0 1em 1em;
+.sdetail_body .section-entity .entity-data .entity-actions .action:active {
+  background: #b2b2b2;
+  background: -webkit-linear-gradient(90deg, #b2b2b2, #ffffff);
+  background: -moz-linear-gradient(90deg, #b2b2b2, #ffffff);
+  background: -ms-linear-gradient(90deg, #b2b2b2, #ffffff);
+  background: -o-linear-gradient(90deg, #b2b2b2, #ffffff);
 }
-.sdetail_body .section-entity .actions .action .sources .source .metadata {
+.sdetail_body .section-entity .entity-data .entity-actions .action .lhs {
+  float: left;
+  background: transparent;
+}
+.sdetail_body .section-entity .entity-data .entity-actions .action .rhs {
+  float: right;
+}
+.sdetail_body .section-entity .entity-data .entity-actions .action .rhs .source .link {
   display: none;
 }
-.sdetail_body .section-entity .actions .action .sources .source a.link .action-icon {
-  display: inline-block;
-  min-width: 48px;
-  text-align: center;
+.sdetail_body .section-entity .entity-data .entity-metadata {
+  /*.metadata-item:nth-child(-1) {
+                    background: red;
+                    border:bottom: 0 none;
+                }*/
+
 }
-.sdetail_body .section-entity .actions .action .sources .source a.link .action-icon img {
-  margin: 0 auto;
+.sdetail_body .section-entity .entity-data .entity-metadata .metadata-item {
+  padding: .5em 24px .5em 12px;
+  border-bottom: 1px solid #f2f2f2;
 }
-.sdetail_body .section-entity .actions .action .sources .source a.link div.name {
-  display: inline-block;
-  font-size: 80%;
+.sdetail_body .section-entity .entity-data .entity-metadata .metadata-item .key {
+  color: #999;
+  text-align: left;
+  float: left;
 }
-.sdetail_body .section-entity .actions .action .sources .source a.link div.name img.source-icon {
-  max-width: 32px;
-}
-.sdetail_body .section-entity .actions .action .sources .source a.link:hover,
-.sdetail_body .section-entity .actions .action .sources .source a.link:active,
-.sdetail_body .section-entity .actions .action .sources .source a.link:visited {
-  text-decoration: none;
+.sdetail_body .section-entity .entity-data .entity-metadata .metadata-item .value {
+  color: #bfbfbf;
+  text-align: right;
+  float: right;
 }
 .sdetail_body .section-stamp {
   float: left;

@@ -47,7 +47,7 @@
     
     .section-entity {
         float: right;
-        width: 30%;
+        width: 35%;
         //border: 2px solid red;
         padding: .25em;
         
@@ -60,48 +60,90 @@
             margin: 1em auto;
         }
         
-        .actions {
-            margin: 2em auto;
+        .entity-data {
+            font-size: 80%;
             
-            .action {
-                .rounded(4px);
-                padding: 2px;
+            .entity-padding() {
+                padding: .5em 24px .5em 12px;
+            }
+            
+            .entity-data-header {
+                .entity-padding();
                 
-                .sources {
-                    .source {
-                        margin: 0 1em 1em;
-                        
-                        .metadata {
-                            display: none;
-                        }
-                        
-                        a.link {
-                            .action-icon {
-                                display: inline-block;
-                                min-width: 48px;
-                                text-align: center;
-                                
-                                img {
-                                    margin: 0 auto;
-                                }
-                            }
-                            
-                            div.name {
-                                display: inline-block;
-                                font-size: 80%;
-                                
-                                img.source-icon {
-                                    max-width: 32px;
-                                }
-                            }
-                        }
-                        a.link:hover, a.link:active, a.link:visited {
-                            text-decoration: none;
-                        }
+                p.entity-title {
+                    color: #999;
+                }
+                
+                p.entity-caption {
+                    color: #bfbfbf;
+                }
+            }
+            
+            .entity-actions {
+                .action {
+                    .entity-padding();
+                    
+                    border: 1px solid #f2f2f2;
+                    border-bottom: 1px solid ##dbdbdb;
+                    
+                    @angle: 90deg;
+                    @c0: #f2f2f2;
+                    @c1: #fff;
+                    
+                    .linear-gradient2(@angle, @c0, @c1);
+                    
+                    &:hover, &:active {
+                        .rounded(4px);
                     }
                     
-                    clear: both;
+                    &:hover {
+                        .linear-gradient2(@angle, darken(@c0, 15%), @c1);
+                    }
+                    
+                    &:active {
+                        .linear-gradient2(@angle, darken(@c0, 25%), @c1);
+                    }
+                    
+                    .lhs {
+                        float: left;
+                        background: transparent;
+                    }
+                    
+                    .rhs {
+                        float: right;
+                        
+                        .source {
+                            .link {
+                                display: none;
+                            }
+                        }
+                    }
                 }
+            }
+            
+            .entity-metadata {
+                .metadata-item {
+                    .entity-padding();
+                    
+                    border-bottom: 1px solid #f2f2f2;
+                    
+                    .key {
+                        color: #999;
+                        text-align: left;
+                        float: left;
+                    }
+                    
+                    .value {
+                        color: #bfbfbf;
+                        text-align: right;
+                        float: right;
+                    }
+                }
+                
+                /*.metadata-item:nth-child(-1) {
+                    background: red;
+                    border:bottom: 0 none;
+                }*/
             }
         }
     }

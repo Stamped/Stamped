@@ -211,6 +211,8 @@ a.lightbox {
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
+  -ms-transition: opacity 0.2s ease-out;
+  -o-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
 }
 a.lightbox .zoom {
@@ -369,7 +371,6 @@ a.lightbox .zoom {
   display: block;
   text-align: left;
   quotes: "\201C" "\201D";
-  line-height: 135%;
   font-family: 'arial', sans-serif;
   color: #666;
   line-height: 125%;
@@ -500,14 +501,25 @@ ul.user-category-distribution li .bargraph .value {
   top: 15%;
   z-index: 100;
 }
+body.sdetail_popup_animation .post-header,
 body.sdetail_popup .post-header {
   background: #fff;
 }
+body.sdetail_popup_animation #main-page-content-body,
+body.sdetail_popup #main-page-content-body {
+  visibility: visible !important;
+}
+body.sdetail_popup_animation #main-page-content-body #stamp-category-nav-bar,
+body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
+  opacity: 0;
+}
 body.sdetail_popup #main-page-content-body {
   visibility: hidden !important;
-}
-body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
-  visibility: hidden !important;
+  /*#stamp-category-nav-bar {
+            visibility: hidden !important;
+            opacity: 0;
+        }*/
+
 }
 body.sdetail_popup #main-page-content-body #main-content {
   visibility: hidden !important;

@@ -294,18 +294,24 @@ def sdetail(request, schema, **kwargs):
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         user  = travis_test.user
         #stamp = travis_test.stamps[(-schema.stamp_num) - 1]
+        stamp  = travis_test.sdetail_stamp
+        entity = travis_test.sdetail_entity
     else:
-        user  = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+        user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+        stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
+        
+        if stamp is None:
+            raise StampedUnavailableError("stamp does not exist")
+        
+        entity = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     
-    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
+    """
+    from pprint import pprint
+    pprint(stamp)
     
-    if stamp is None:
-        raise StampedUnavailableError("stamp does not exist")
-    
-    entity = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
-    
-    #from pprint import pprint
-    #pprint(stamp)
+    from pprint import pprint
+    pprint(entity)
+    """
     
     #stamp = Stamp().importData(stamp)
     '''

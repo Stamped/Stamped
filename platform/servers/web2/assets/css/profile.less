@@ -349,7 +349,6 @@ a.lightbox {
     display: block;
     text-align: left;
     quotes: "\201C" "\201D";
-    line-height: 135%;
     font-family: 'arial', sans-serif;
     color: #666;
     
@@ -507,18 +506,29 @@ ul.user-category-distribution {
     z-index: 100;
 }
 
-body.sdetail_popup {
+
+body.sdetail_popup_animation, body.sdetail_popup {
     .post-header {
         background: #fff;
     }
     
     #main-page-content-body {
-        visibility: hidden !important;
+        visibility: visible !important;
         
         #stamp-category-nav-bar {
-            visibility: hidden !important;
+            opacity: 0;
         }
+    }
+}
+
+body.sdetail_popup {
+    #main-page-content-body {
+        visibility: hidden !important;
         
+        /*#stamp-category-nav-bar {
+            visibility: hidden !important;
+            opacity: 0;
+        }*/
         #main-content {
             visibility: hidden !important;
         }
