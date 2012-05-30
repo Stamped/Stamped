@@ -4193,7 +4193,10 @@ class StampedAPI(AStampedAPI):
             successor_id = tombstoneId
             successor    = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
-            
+
+            # TODO: Because we create a new FullResolveContainer() here instead of using self.__full_resolve, we are not
+            # reading from or writing to  the joint history about what sources have failed recently and are still
+            # cooling down.
             merger = FullResolveContainer.FullResolveContainer()
             merger.addSource(EntitySource(entity, merger.groups))
             successor_decorations = {}
