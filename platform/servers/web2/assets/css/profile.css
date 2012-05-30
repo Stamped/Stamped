@@ -258,8 +258,9 @@ body.other .innerbg {
   width: 75%;
   clear: both;
   text-align: center;
-  padding: 1.5em;
+  padding: 1.5em 0;
   margin: 0;
+  left: -24px;
 }
 .stamp-gallery .top-wave {
   background: url(/assets/img/main-topcap.png) left top repeat-x;

@@ -1330,7 +1330,6 @@ var g_update_stamps = null;
                             }, 
                             
                             afterShow : function() {
-                                // TODO: custom scroll bars
                                 $('.entity-menu').jScrollPane();
                             }
                         };

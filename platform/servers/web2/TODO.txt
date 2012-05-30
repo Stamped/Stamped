@@ -44,16 +44,17 @@
 TODO:
     * align stamp-gallery with profile header
     * prep test for anthony w/ and w/out opacity applied to user's custom colors
+    * fix link colors throughout (including visited states)
     
     * sDetail:
-        * CLOSE - "Anatomy of eDetail section" spec
+        * BETA - "Anatomy of eDetail section" spec
         * Polish social sharing buttons
         * DONE - Opening / closing animations
-        * CLOSE - Comment collapsing ala Google Plus
+        * BETA - Comment collapsing ala Google Plus
         * Move like / todo / comment counters to their own section
-    * CLOSE - First cut at map view integration
+    * BETA - First cut at map view integration
     * Profile Page:
-        * CLOSE - Header functionality w/ temp header images
+        * BETA - Header functionality w/ temp header images
         * DONE- Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
@@ -85,7 +86,6 @@ TODO:
     * use a Backbone model to hold StampedClient state s.t. you could bind log-in / log-out to body-level CSS tags?
     * experiment with making innerbg fixed for parallax
     * experiment with static map styling
-    * is it possible to use the n in nth-child?
     
     * experiment with the idea of having no stamped-specific likes at all -- just FB likes?
     
@@ -137,13 +137,7 @@ OLD:
     * figure out how to install less on Ubuntu and have it actually work..
         * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
     * change moment.js to only be relative after a month
-
-
-NOTES:
-    * no feedback icons in case of no feedback looks inconsistent
-
-
-CHANGELIST:
+    * no feedback icons if no feedback exists looks inconsistent
     * temporary category-specific header covers
     * basic header text now matches mocks
     * profile scrolls to top after category selection change
