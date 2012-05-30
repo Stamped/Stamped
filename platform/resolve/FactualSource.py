@@ -25,11 +25,7 @@ try:
     from GenericSource              import generatorSource
     from pprint                     import pformat
     from gevent.pool                import Pool
-<<<<<<< HEAD
     from api.Schemas                import TimesSchema
-=======
-    from Schemas                    import *
->>>>>>> af56d9b282ee812726e9e33571ca9d96528923d3
 except:
     report()
     raise
