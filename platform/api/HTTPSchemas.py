@@ -3164,6 +3164,7 @@ class HTTPActivity(Schema):
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
             if activity.personal:
+                self.benefit = len(self.subjects)
                 self.body = '%s gave you credit.' % (subjects)
                 self.body_references = subjectReferences
                 if len(self.subjects) > 1:
@@ -3188,7 +3189,9 @@ class HTTPActivity(Schema):
             self.body = '%s %s %s.' % (subjects, verb, stampObjects)
             self.body_references = subjectReferences + stampObjectReferences
 
-            if not activity.personal:
+            if activity.personal:
+                self.benefit = len(self.subjects)
+            else:
                 stampUsers = map(lambda x: x.user, self.objects.stamps)
                 stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                 self.footer = 'via %s' % stampUserObjects
