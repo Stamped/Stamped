@@ -1114,12 +1114,13 @@ class StampedAPI(AStampedAPI):
             suggested = {
                 'mariobatali':      1, 
                 'nymag':            2,
-                'UrbanDaddy':       3,
-                'parislemon':       4, 
-                'michaelkors':      5, 
-                'petertravers':     6,
-                'rebeccaminkoff':   7, 
-                'austinchronicle':  8,
+                'TIME':             3,
+                'UrbanDaddy':       4,
+                'parislemon':       5, 
+                'michaelkors':      6, 
+                'petertravers':     7,
+                'rebeccaminkoff':   8, 
+                'austinchronicle':  9,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
