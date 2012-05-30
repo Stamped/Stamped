@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@class STPageControl;
 @interface STPagedImageViewer : UIView {
     NSInteger _currentPage;
     NSArray *_views;
@@ -16,7 +17,7 @@
 
 @property (nonatomic,strong) NSArray *imageURLs;
 @property (nonatomic,strong,readonly) UIScrollView *scrollView;
-@property (nonatomic,strong,readonly) UIPageControl *pageControl;
+@property (nonatomic,strong,readonly) STPageControl *pageControl;
 
 - (void)moveToPage:(NSInteger)page animated:(BOOL)animated;
 
