@@ -3138,13 +3138,19 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
+
+                if len(self.subjects) == 1:
+                    self.action = _buildUserAction(self.subjects[0])
+                else:
+                    ### TODO: Action to go to follower list
+                    pass
             else:
                 offset = len(subjects) + len(verb) + 2
                 userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                 self.body = '%s %s %s.' % (subjects, verb, userObjects)
                 self.body_references = subjectReferences + userObjectReferences
 
-            self.action = _buildUserAction(self.objects.users[0])
+                self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
             _addStampObjects
