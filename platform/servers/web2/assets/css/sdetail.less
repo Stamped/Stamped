@@ -17,6 +17,10 @@
 @shadow: rgba(50, 50, 50, 0.75);
 @shadow-light: fade(@shadow, 15%);
 
+@text0: #666;
+@text1: #999;
+@text2: #444;
+
 .shadowed {
     .box-shadow(0, 3px, 4px, 0, @shadow-light);
 }
@@ -70,12 +74,17 @@
             .entity-data-header {
                 .entity-padding();
                 
+                p {
+                    margin:  0 0 .3em;
+                    padding: 0;
+                }
+                
                 p.entity-title {
-                    color: #999;
+                    color: @text2;
                 }
                 
                 p.entity-caption {
-                    color: #bfbfbf;
+                    color: @text1;
                 }
             }
             
@@ -113,6 +122,8 @@
                         float: right;
                         
                         .source {
+                            display: inline-block;
+                            
                             .link {
                                 display: none;
                             }
@@ -128,22 +139,73 @@
                     border-bottom: 1px solid #f2f2f2;
                     
                     .key {
-                        color: #999;
+                        color: @text0;
                         text-align: left;
                         float: left;
                     }
                     
-                    .value {
-                        color: #bfbfbf;
+                    .rhs-value {
+                        display: none;
+                        
+                        .nav {
+                            display: none;
+                            color: @text1 !important;
+                            cursor: pointer;
+                        }
+                    }
+                    
+                    .inner-value, .rhs-value-cast, .rhs-value-overview, .rhs-value-description {
+                        display: block;
+                        color: @text1;
                         text-align: right;
                         float: right;
+                        
+                        .expand {
+                            display: block;
+                        }
+                        
+                        p.resizable {
+                            margin:  0;
+                            padding: 0;
+                        }
+                    }
+                    
+                    .inner-value-cast, .inner-value-overview, .inner-value-description {
+                        float: none;
+                        clear: both;
+                        font-size: 90%;
+                        text-align: left !important;
+                        margin: 2em 0 1em;
+                        
+                        p.resizable {
+                            max-height: 4.5em;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
                     }
                 }
                 
-                /*.metadata-item:nth-child(-1) {
-                    background: red;
-                    border:bottom: 0 none;
-                }*/
+                .metadata-item-expanded {
+                    .rhs-value-cast, .rhs-value-overview, .rhs-value-description {
+                        .expand {
+                            display: none;
+                        }
+                        .collapse {
+                            display: block;
+                        }
+                    }
+                    
+                    .inner-value-cast, .inner-value-overview, .inner-value-description {
+                        p.resizable {
+                            max-height: none !important;
+                        }
+                    }
+                }
+                
+                
+                .metadata-item:last-child {
+                    border-bottom: 0 none;
+                }
             }
         }
     }
@@ -348,19 +410,27 @@
                     }
                     
                     ol.comment-list {
-                        li.comment:nth-child(n+4) {
-                            .transform(scale(0.001));
+                        li.comment {
+                            display: none;
+                            /*.transform(scale(0.001));
                             
                             line-height: 0;
                             opacity: 0;
                             height:  0;
                             
                             margin:  0;
-                            padding: 0;
+                            padding: 0;*/
                         }
                         
-                        li.comment:nth-child(3) {
-                            border-bottom: 0 none;
+                        li.comment:nth-last-child(-n+2) {
+                            display: block;
+                            /*.transform(scale(1));
+                            
+                            line-height: normal;
+                            height: auto;
+                            opacity: 1;
+                            
+                            padding: 1em @space 0;*/
                         }
                     }
                 }

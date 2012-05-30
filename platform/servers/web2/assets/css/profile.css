@@ -497,6 +497,7 @@ ul.user-category-distribution li .bargraph .value {
 .sdetail_wrapper {
   background: #fff;
   width: 100%;
+  height: 100%;
   position: fixed;
   top: 15%;
   z-index: 100;
@@ -512,6 +513,15 @@ body.sdetail_popup #main-page-content-body {
 body.sdetail_popup_animation #main-page-content-body #stamp-category-nav-bar,
 body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
   opacity: 0;
+}
+body.sdetail_popup {
+  /* hide scrollbars when displaying sdetail */
+
+  /* TODO: find a way of doing this that does not result in the scroll 
+     * position jumping */
+
+  /*overflow: hidden;*/
+
 }
 body.sdetail_popup #main-page-content-body {
   visibility: hidden !important;

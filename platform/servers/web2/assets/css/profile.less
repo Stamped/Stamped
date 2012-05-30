@@ -499,7 +499,8 @@ ul.user-category-distribution {
 
 .sdetail_wrapper {
     background: #fff;
-    width: 100%;
+    width:  100%;
+    height: 100%;
     
     position: fixed;
     top: 15%;
@@ -522,6 +523,11 @@ body.sdetail_popup_animation, body.sdetail_popup {
 }
 
 body.sdetail_popup {
+    /* hide scrollbars when displaying sdetail */
+    /* TODO: find a way of doing this that does not result in the scroll 
+     * position jumping */
+    /*overflow: hidden;*/
+    
     #main-page-content-body {
         visibility: hidden !important;
         

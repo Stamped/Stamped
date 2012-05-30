@@ -25,6 +25,7 @@ var g_update_stamps = null;
         var sdetail_wrapper_sel     = '.' + sdetail_wrapper;
         var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
         var update_navbar_layout    = null;
+        var close_sdetail_func      = null;
         
         var is_blacklisted_image    = function(url) {
             return (url.indexOf(static_prefix) != -1);
@@ -360,10 +361,7 @@ var g_update_stamps = null;
                             $target.removeClass('animating');
                         });
                         
-                        // initialize sDetail close button logic
-                        $target.find('.close-button a').click(function(event) {
-                            event.preventDefault();
-                            
+                        close_sdetail_func = function() {
                             resize_sdetail_wrapper($target, 'closing', function() {
                                 $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
                                 update_dynamic_header();
@@ -371,6 +369,17 @@ var g_update_stamps = null;
                                 //update_gallery_layout(true);
                                 //init_infinite_scroll();
                             });
+                            
+                            close_sdetail_func = null;
+                        };
+                        
+                        // initialize sDetail close button logic
+                        $target.find('.close-button a').click(function(event) {
+                            event.preventDefault();
+                            
+                            if (close_sdetail_func !== null) {
+                                close_sdetail_func();
+                            }
                             
                             return false;
                         });
@@ -1259,6 +1268,15 @@ var g_update_stamps = null;
                 console.debug("METADATA: " + metadata);*/
             }
             
+            $sdetail.find('a.nav').click(function(event) {
+                event.preventDefault();
+                var $this = $(this);
+                
+                $this.parents('.metadata-item').toggleClass('metadata-item-expanded');
+                
+                return false;
+            });
+            
             /*// initialize actions
             $sdetail.find('.action').each(function(i, elem) {
                 var $elem = $(elem);
@@ -1285,6 +1303,14 @@ var g_update_stamps = null;
         update_stamps();
         init_gallery();
         update_navbar_layout();
+        
+        $(document).bind('keydown', function(e) {
+            if (e.which == 27) {
+                if (close_sdetail_func !== null) {
+                    close_sdetail_func();
+                }
+            }
+        });
         
         return;
         

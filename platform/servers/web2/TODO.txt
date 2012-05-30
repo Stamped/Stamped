@@ -43,7 +43,7 @@
 
 TODO:
     * sDetail:
-        * "Anatomy of eDetail section" spec
+        * CLOSE - "Anatomy of eDetail section" spec
         * Polish social sharing buttons
         * DONE - Opening / closing animations
         * Comment collapsing ala Google Plus
@@ -144,4 +144,7 @@ CHANGELIST:
     * temporary category-specific header covers
     * basic header text now matches mocks
     * profile scrolls to top after category selection change
+    * scrollbars are now properly hidden / disabled during sdetail popup
+    * ESC key now closes all lightboxes and the sdetail popup
+    * text highlight color is no longer hot pink; instead, it inherits the browser's default as usual
 
