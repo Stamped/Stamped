@@ -224,4 +224,25 @@ void aspectDrawImageInRect(CGContextRef ctx, CGImageRef cgImage, CGRect rect) {
 
 }
 
+void drawStampGradient(CGColorRef topColor, CGColorRef bottomColor, CGContextRef ctx) {
+	
+    CGRect rect = CGContextGetClipBoundingBox(ctx);    
+    const CGFloat *bottom = CGColorGetComponents(bottomColor);
+    const CGFloat *top = CGColorGetComponents(topColor);
+    
+    CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
+    size_t _numLocations = 2;
+    CGFloat _locations[2] = { 0.0, 1.0 };
+    CGFloat _colors[8] = { top[0], top[1], top[2], top[3], bottom[0], bottom[1], bottom[2], bottom[3] };
+    CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
+    CGColorSpaceRelease(_rgb);
+    
+    CGPoint start = CGPointMake(0.0f, rect.size.height);
+    CGPoint end = CGPointMake(rect.size.width, 0.0f);
+    
+    CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
+    CGGradientRelease(gradient);
+	
+}
+
 @end

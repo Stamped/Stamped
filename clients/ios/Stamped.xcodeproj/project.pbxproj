@@ -1276,6 +1276,34 @@
 		03CF2FE81575818E009423B0 /* STDetailTextCallout.m in Sources */ = {isa = PBXBuildFile; fileRef = 03CF2FE61575818E009423B0 /* STDetailTextCallout.m */; };
 		03CF2FE91575818E009423B0 /* STDetailTextCallout.m in Sources */ = {isa = PBXBuildFile; fileRef = 03CF2FE61575818E009423B0 /* STDetailTextCallout.m */; };
 		03CF2FEA1575818E009423B0 /* STDetailTextCallout.m in Sources */ = {isa = PBXBuildFile; fileRef = 03CF2FE61575818E009423B0 /* STDetailTextCallout.m */; };
+		03E005B815767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005B715767C2300CDFEFF /* gradient_table_bg@2x.png */; };
+		03E005B915767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005B715767C2300CDFEFF /* gradient_table_bg@2x.png */; };
+		03E005BA15767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005B715767C2300CDFEFF /* gradient_table_bg@2x.png */; };
+		03E005BB15767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005B715767C2300CDFEFF /* gradient_table_bg@2x.png */; };
+		03E005BD1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */; };
+		03E005BE1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */; };
+		03E005BF1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */; };
+		03E005C01576805900CDFEFF /* login_twitter_bird@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */; };
+		03E005C41576871900CDFEFF /* SocialSignupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005C31576871900CDFEFF /* SocialSignupViewController.m */; };
+		03E005C51576871900CDFEFF /* SocialSignupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005C31576871900CDFEFF /* SocialSignupViewController.m */; };
+		03E005C61576871900CDFEFF /* SocialSignupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005C31576871900CDFEFF /* SocialSignupViewController.m */; };
+		03E005C71576871900CDFEFF /* SocialSignupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005C31576871900CDFEFF /* SocialSignupViewController.m */; };
+		03E005CB1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005CA1576889400CDFEFF /* SocialSignupHeaderView.m */; };
+		03E005CC1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005CA1576889400CDFEFF /* SocialSignupHeaderView.m */; };
+		03E005CD1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005CA1576889400CDFEFF /* SocialSignupHeaderView.m */; };
+		03E005CE1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005CA1576889400CDFEFF /* SocialSignupHeaderView.m */; };
+		03E005D215768A4800CDFEFF /* StampColorPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005D115768A4800CDFEFF /* StampColorPickerView.m */; };
+		03E005D315768A4800CDFEFF /* StampColorPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005D115768A4800CDFEFF /* StampColorPickerView.m */; };
+		03E005D415768A4800CDFEFF /* StampColorPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005D115768A4800CDFEFF /* StampColorPickerView.m */; };
+		03E005D515768A4800CDFEFF /* StampColorPickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005D115768A4800CDFEFF /* StampColorPickerView.m */; };
+		03E005D815768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */; };
+		03E005D915768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */; };
+		03E005DA15768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */; };
+		03E005DB15768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */; };
+		03E005DC15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
+		03E005DD15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
+		03E005DE15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
+		03E005DF15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
 		03E4A47D1562B453007B5DF4 /* GTMOAuthViewControllerTouch.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E4A47B1562B453007B5DF4 /* GTMOAuthViewControllerTouch.m */; };
 		03E4A47E1562B453007B5DF4 /* GTMOAuthViewTouch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03E4A47C1562B453007B5DF4 /* GTMOAuthViewTouch.xib */; };
 		03E4A4831562B492007B5DF4 /* GTMOAuthAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E4A4801562B492007B5DF4 /* GTMOAuthAuthentication.m */; };
@@ -1433,6 +1461,18 @@
 		03F896C4156AB79A009DD321 /* corner_top_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F896BE156AB79A009DD321 /* corner_top_right@2x.png */; };
 		03F896C5156AB79A009DD321 /* corner_top_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F896BE156AB79A009DD321 /* corner_top_right@2x.png */; };
 		03F896C6156AB79A009DD321 /* corner_top_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F896BE156AB79A009DD321 /* corner_top_right@2x.png */; };
+		03FDC52A15766FB70024A55C /* STMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC52915766FB70024A55C /* STMenuController.m */; };
+		03FDC52B15766FB70024A55C /* STMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC52915766FB70024A55C /* STMenuController.m */; };
+		03FDC52C15766FB70024A55C /* STMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC52915766FB70024A55C /* STMenuController.m */; };
+		03FDC52D15766FB70024A55C /* STMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC52915766FB70024A55C /* STMenuController.m */; };
+		03FDC531157671840024A55C /* TwitterAccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC530157671840024A55C /* TwitterAccountsViewController.m */; };
+		03FDC532157671840024A55C /* TwitterAccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC530157671840024A55C /* TwitterAccountsViewController.m */; };
+		03FDC533157671840024A55C /* TwitterAccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC530157671840024A55C /* TwitterAccountsViewController.m */; };
+		03FDC534157671840024A55C /* TwitterAccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC530157671840024A55C /* TwitterAccountsViewController.m */; };
+		03FDC538157671F40024A55C /* STSingleTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC537157671F40024A55C /* STSingleTableCell.m */; };
+		03FDC539157671F40024A55C /* STSingleTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC537157671F40024A55C /* STSingleTableCell.m */; };
+		03FDC53A157671F40024A55C /* STSingleTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC537157671F40024A55C /* STSingleTableCell.m */; };
+		03FDC53B157671F40024A55C /* STSingleTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03FDC537157671F40024A55C /* STSingleTableCell.m */; };
 		1E1A1B06141C007700B7C627 /* WelcomeView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B05141C007700B7C627 /* WelcomeView.xib */; };
 		1E1A1B0C141C023500B7C627 /* first_run_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B0B141C023400B7C627 /* first_run_bg@2x.png */; };
 		1E1A1B63141C2A5E00B7C627 /* WelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E1A1B62141C2A5D00B7C627 /* WelcomeViewController.m */; };
@@ -1500,10 +1540,6 @@
 		63313535156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63313536156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63313537156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
-		633173B51575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
-		633173B61575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
-		633173B71575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
-		633173B81575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
 		63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C691540CFE400C8F7D3 /* STPeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C681540CFE400C8F7D3 /* STPeopleViewController.m */; };
@@ -4487,6 +4523,16 @@
 		03A51D4D1575C7E50096A153 /* previews_more_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "previews_more_icon@2x.png"; sourceTree = "<group>"; };
 		03CF2FE51575818E009423B0 /* STDetailTextCallout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDetailTextCallout.h; sourceTree = "<group>"; };
 		03CF2FE61575818E009423B0 /* STDetailTextCallout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDetailTextCallout.m; sourceTree = "<group>"; };
+		03E005B715767C2300CDFEFF /* gradient_table_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gradient_table_bg@2x.png"; sourceTree = "<group>"; };
+		03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "login_twitter_bird@2x.png"; sourceTree = "<group>"; };
+		03E005C21576871900CDFEFF /* SocialSignupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialSignupViewController.h; sourceTree = "<group>"; };
+		03E005C31576871900CDFEFF /* SocialSignupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialSignupViewController.m; sourceTree = "<group>"; };
+		03E005C91576889400CDFEFF /* SocialSignupHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialSignupHeaderView.h; sourceTree = "<group>"; };
+		03E005CA1576889400CDFEFF /* SocialSignupHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialSignupHeaderView.m; sourceTree = "<group>"; };
+		03E005D015768A4800CDFEFF /* StampColorPickerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampColorPickerView.h; sourceTree = "<group>"; };
+		03E005D115768A4800CDFEFF /* StampColorPickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampColorPickerView.m; sourceTree = "<group>"; };
+		03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_picker_check@2x.png"; sourceTree = "<group>"; };
+		03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_picker_white_border@2x.png"; sourceTree = "<group>"; };
 		03E4A47A1562B453007B5DF4 /* GTMOAuthViewControllerTouch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTMOAuthViewControllerTouch.h; sourceTree = "<group>"; };
 		03E4A47B1562B453007B5DF4 /* GTMOAuthViewControllerTouch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTMOAuthViewControllerTouch.m; sourceTree = "<group>"; };
 		03E4A47C1562B453007B5DF4 /* GTMOAuthViewTouch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GTMOAuthViewTouch.xib; sourceTree = "<group>"; };
@@ -4546,6 +4592,12 @@
 		03F896AF156AA51F009DD321 /* nav_list_btn_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_list_btn_bg@2x.png"; sourceTree = "<group>"; };
 		03F896BD156AB79A009DD321 /* corner_top_left@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "corner_top_left@2x.png"; sourceTree = "<group>"; };
 		03F896BE156AB79A009DD321 /* corner_top_right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "corner_top_right@2x.png"; sourceTree = "<group>"; };
+		03FDC52815766FB70024A55C /* STMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMenuController.h; sourceTree = "<group>"; };
+		03FDC52915766FB70024A55C /* STMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMenuController.m; sourceTree = "<group>"; };
+		03FDC52F157671840024A55C /* TwitterAccountsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwitterAccountsViewController.h; sourceTree = "<group>"; };
+		03FDC530157671840024A55C /* TwitterAccountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TwitterAccountsViewController.m; sourceTree = "<group>"; };
+		03FDC536157671F40024A55C /* STSingleTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSingleTableCell.h; sourceTree = "<group>"; };
+		03FDC537157671F40024A55C /* STSingleTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSingleTableCell.m; sourceTree = "<group>"; };
 		1E1A1B05141C007700B7C627 /* WelcomeView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = WelcomeView.xib; path = Interfaces/WelcomeView.xib; sourceTree = SOURCE_ROOT; };
 		1E1A1B0B141C023400B7C627 /* first_run_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "first_run_bg@2x.png"; sourceTree = "<group>"; };
 		1E1A1B61141C2A5D00B7C627 /* WelcomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WelcomeViewController.h; sourceTree = "<group>"; };
@@ -4606,7 +4658,6 @@
 		63313531156C268C00BF9B8D /* STLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoginResponse.h; sourceTree = "<group>"; };
 		63313532156C273300BF9B8D /* STSimpleLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleLoginResponse.h; sourceTree = "<group>"; };
 		63313533156C273300BF9B8D /* STSimpleLoginResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleLoginResponse.m; sourceTree = "<group>"; };
-		633173B41575C45A0033E90C /* StampedDev copy-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "StampedDev copy-Info.plist"; path = "../../../../Downloads/StampedDev copy-Info.plist"; sourceTree = "<group>"; };
 		63323C621540C1A400C8F7D3 /* STTodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoViewController.h; sourceTree = "<group>"; };
 		63323C631540C1A400C8F7D3 /* STTodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTodoViewController.m; sourceTree = "<group>"; };
 		63323C671540CFE400C8F7D3 /* STPeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPeopleViewController.h; sourceTree = "<group>"; };
@@ -5985,6 +6036,9 @@
 		0301378015668DB300B55B47 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				03E005CF15768A3700CDFEFF /* StampColorPickerView */,
+				03E005C81576888800CDFEFF /* SocialSignupHeaderView */,
+				03FDC535157671DF0024A55C /* STSingleTableCell */,
 				03CF2FE415758183009423B0 /* STDetailTextCalloutView */,
 				0358C95115755ECC00FD1597 /* STStampTitleView */,
 				0358C8FD15746E6B00FD1597 /* STPagedImageViewer */,
@@ -6136,6 +6190,9 @@
 		0364C0E11564867B00EE18C1 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				03E005C11576870400CDFEFF /* SocialSignupViewController */,
+				03FDC52E157671730024A55C /* TwitterAccountsViewController */,
+				03FDC52715766FA90024A55C /* STMenuController */,
 				0358C9041575056900FD1597 /* STMusicPopoverController */,
 				0397DBA21574226E0063F81C /* STPhotoViewController */,
 				0397DB7615741B2C0063F81C /* EntityViewController */,
@@ -6288,6 +6345,33 @@
 			path = STDetailTextCalloutView;
 			sourceTree = "<group>";
 		};
+		03E005C11576870400CDFEFF /* SocialSignupViewController */ = {
+			isa = PBXGroup;
+			children = (
+				03E005C21576871900CDFEFF /* SocialSignupViewController.h */,
+				03E005C31576871900CDFEFF /* SocialSignupViewController.m */,
+			);
+			path = SocialSignupViewController;
+			sourceTree = "<group>";
+		};
+		03E005C81576888800CDFEFF /* SocialSignupHeaderView */ = {
+			isa = PBXGroup;
+			children = (
+				03E005C91576889400CDFEFF /* SocialSignupHeaderView.h */,
+				03E005CA1576889400CDFEFF /* SocialSignupHeaderView.m */,
+			);
+			path = SocialSignupHeaderView;
+			sourceTree = "<group>";
+		};
+		03E005CF15768A3700CDFEFF /* StampColorPickerView */ = {
+			isa = PBXGroup;
+			children = (
+				03E005D015768A4800CDFEFF /* StampColorPickerView.h */,
+				03E005D115768A4800CDFEFF /* StampColorPickerView.m */,
+			);
+			path = StampColorPickerView;
+			sourceTree = "<group>";
+		};
 		03E4A4791562B453007B5DF4 /* GMTOAuthTemp */ = {
 			isa = PBXGroup;
 			children = (
@@ -6316,6 +6400,33 @@
 				03E4A47C1562B453007B5DF4 /* GTMOAuthViewTouch.xib */,
 			);
 			path = GMTOAuthTemp;
+			sourceTree = "<group>";
+		};
+		03FDC52715766FA90024A55C /* STMenuController */ = {
+			isa = PBXGroup;
+			children = (
+				03FDC52815766FB70024A55C /* STMenuController.h */,
+				03FDC52915766FB70024A55C /* STMenuController.m */,
+			);
+			path = STMenuController;
+			sourceTree = "<group>";
+		};
+		03FDC52E157671730024A55C /* TwitterAccountsViewController */ = {
+			isa = PBXGroup;
+			children = (
+				03FDC52F157671840024A55C /* TwitterAccountsViewController.h */,
+				03FDC530157671840024A55C /* TwitterAccountsViewController.m */,
+			);
+			path = TwitterAccountsViewController;
+			sourceTree = "<group>";
+		};
+		03FDC535157671DF0024A55C /* STSingleTableCell */ = {
+			isa = PBXGroup;
+			children = (
+				03FDC536157671F40024A55C /* STSingleTableCell.h */,
+				03FDC537157671F40024A55C /* STSingleTableCell.m */,
+			);
+			path = STSingleTableCell;
 			sourceTree = "<group>";
 		};
 		1E5AFFB2141D29EC00772F11 /* Products */ = {
@@ -7830,7 +7941,6 @@
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
 				1E5AFFC5141D2A5000772F11 /* Vendor */,
 				7EC0177213C3754300ABE6E2 /* Products */,
-				633173B41575C45A0033E90C /* StampedDev copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -7960,6 +8070,10 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */,
+				03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */,
+				03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */,
+				03E005B715767C2300CDFEFF /* gradient_table_bg@2x.png */,
 				03A51D4D1575C7E50096A153 /* previews_more_icon@2x.png */,
 				03A51D481575902E0096A153 /* stamp_cell_shadow_footer@2x.png */,
 				03A51D3915758E330096A153 /* stamp_cell_media_hi.png */,
@@ -9356,13 +9470,16 @@
 				03F2335C156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F91571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FD1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
-				633173B81575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 				03A51D3415758DBA0096A153 /* stamp_cell_comment_hi.png in Resources */,
 				03A51D3815758DBA0096A153 /* stamp_cell_comment_hi@2x.png in Resources */,
 				03A51D3E15758E330096A153 /* stamp_cell_media_hi.png in Resources */,
 				03A51D4215758E330096A153 /* stamp_cell_media_hi@2x.png in Resources */,
 				03A51D4C1575902E0096A153 /* stamp_cell_shadow_footer@2x.png in Resources */,
 				03A51D511575C7E50096A153 /* previews_more_icon@2x.png in Resources */,
+				03E005BB15767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */,
+				03E005C01576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
+				03E005DB15768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
+				03E005DF15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10087,13 +10204,16 @@
 				03F2335B156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F81571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FC1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
-				633173B71575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 				03A51D3315758DBA0096A153 /* stamp_cell_comment_hi.png in Resources */,
 				03A51D3715758DBA0096A153 /* stamp_cell_comment_hi@2x.png in Resources */,
 				03A51D3D15758E330096A153 /* stamp_cell_media_hi.png in Resources */,
 				03A51D4115758E330096A153 /* stamp_cell_media_hi@2x.png in Resources */,
 				03A51D4B1575902E0096A153 /* stamp_cell_shadow_footer@2x.png in Resources */,
 				03A51D501575C7E50096A153 /* previews_more_icon@2x.png in Resources */,
+				03E005BA15767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */,
+				03E005BF1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
+				03E005DA15768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
+				03E005DE15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10818,13 +10938,16 @@
 				03F2335A156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F71571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FB1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
-				633173B61575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 				03A51D3215758DBA0096A153 /* stamp_cell_comment_hi.png in Resources */,
 				03A51D3615758DBA0096A153 /* stamp_cell_comment_hi@2x.png in Resources */,
 				03A51D3C15758E330096A153 /* stamp_cell_media_hi.png in Resources */,
 				03A51D4015758E330096A153 /* stamp_cell_media_hi@2x.png in Resources */,
 				03A51D4A1575902E0096A153 /* stamp_cell_shadow_footer@2x.png in Resources */,
 				03A51D4F1575C7E50096A153 /* previews_more_icon@2x.png in Resources */,
+				03E005B915767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */,
+				03E005BE1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
+				03E005D915768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
+				03E005DD15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11552,13 +11675,16 @@
 				03F23359156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F61571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FA1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
-				633173B51575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 				03A51D3115758DBA0096A153 /* stamp_cell_comment_hi.png in Resources */,
 				03A51D3515758DBA0096A153 /* stamp_cell_comment_hi@2x.png in Resources */,
 				03A51D3B15758E330096A153 /* stamp_cell_media_hi.png in Resources */,
 				03A51D3F15758E330096A153 /* stamp_cell_media_hi@2x.png in Resources */,
 				03A51D491575902E0096A153 /* stamp_cell_shadow_footer@2x.png in Resources */,
 				03A51D4E1575C7E50096A153 /* previews_more_icon@2x.png in Resources */,
+				03E005B815767C2300CDFEFF /* gradient_table_bg@2x.png in Resources */,
+				03E005BD1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
+				03E005D815768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
+				03E005DC15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11895,6 +12021,12 @@
 				6394408A15742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 				0358C95715755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FEA1575818E009423B0 /* STDetailTextCallout.m in Sources */,
+				03FDC52D15766FB70024A55C /* STMenuController.m in Sources */,
+				03FDC534157671840024A55C /* TwitterAccountsViewController.m in Sources */,
+				03FDC53B157671F40024A55C /* STSingleTableCell.m in Sources */,
+				03E005C71576871900CDFEFF /* SocialSignupViewController.m in Sources */,
+				03E005CE1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
+				03E005D515768A4800CDFEFF /* StampColorPickerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12199,6 +12331,12 @@
 				6394408915742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 				0358C95615755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FE91575818E009423B0 /* STDetailTextCallout.m in Sources */,
+				03FDC52C15766FB70024A55C /* STMenuController.m in Sources */,
+				03FDC533157671840024A55C /* TwitterAccountsViewController.m in Sources */,
+				03FDC53A157671F40024A55C /* STSingleTableCell.m in Sources */,
+				03E005C61576871900CDFEFF /* SocialSignupViewController.m in Sources */,
+				03E005CD1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
+				03E005D415768A4800CDFEFF /* StampColorPickerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12502,6 +12640,12 @@
 				6394408815742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 				0358C95515755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FE81575818E009423B0 /* STDetailTextCallout.m in Sources */,
+				03FDC52B15766FB70024A55C /* STMenuController.m in Sources */,
+				03FDC532157671840024A55C /* TwitterAccountsViewController.m in Sources */,
+				03FDC539157671F40024A55C /* STSingleTableCell.m in Sources */,
+				03E005C51576871900CDFEFF /* SocialSignupViewController.m in Sources */,
+				03E005CC1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
+				03E005D315768A4800CDFEFF /* StampColorPickerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12817,6 +12961,12 @@
 				6394408715742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
 				0358C95415755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FE71575818E009423B0 /* STDetailTextCallout.m in Sources */,
+				03FDC52A15766FB70024A55C /* STMenuController.m in Sources */,
+				03FDC531157671840024A55C /* TwitterAccountsViewController.m in Sources */,
+				03FDC538157671F40024A55C /* STSingleTableCell.m in Sources */,
+				03E005C41576871900CDFEFF /* SocialSignupViewController.m in Sources */,
+				03E005CB1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
+				03E005D215768A4800CDFEFF /* StampColorPickerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12945,8 +13095,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -12974,8 +13124,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -12996,8 +13146,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -13020,8 +13170,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -13043,8 +13193,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -13067,8 +13217,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

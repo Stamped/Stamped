@@ -43,6 +43,14 @@ static const NSInteger _cellsPerRow = 7;
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         _views = [[NSMutableArray alloc] init];
+        
+        // alloc initial preview views
+        for (NSInteger i = 0; i < 7; i++) {
+            STPreviewView *view = [[STPreviewView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, kPreviewCellWidth, kPreviewCellHeight)];
+            [_views addObject:view];
+            [view release];
+        }
+        
     }
     return self;
 }
@@ -52,13 +60,25 @@ static const NSInteger _cellsPerRow = 7;
     [super dealloc];
 }
 
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    NSLog(@"touches began");
+    
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    NSLog(@"touches moved");
+    
+}
+
 
 #pragma mark - Reuse
 
 - (STPreviewView*)dequeuePreviewViewAtIndex:(NSInteger)index {
     
     if (index < [self.views count]) {
-        
+
         STPreviewView *view = [[self.views objectAtIndex:index] retain];
         if (view.allTargets) {
             for (id target in [[view allTargets] allObjects]) {
@@ -271,6 +291,7 @@ static const NSInteger _cellsPerRow = 7;
 
 @implementation STPreviewView
 @synthesize imageURL=_imageURL;
+@synthesize iconImageView;
 
 - (id)initWithFrame:(CGRect)frame {
     
@@ -318,7 +339,15 @@ static const NSInteger _cellsPerRow = 7;
     _imageURL = [imageURL retain];
     
     _imageView.image = nil;
-    [[ImageLoader sharedLoader] imageForURL:_imageURL completion:^(UIImage *image, NSURL *url) {
+    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image) {
+
+        UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
+        [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+        UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        return scaledImage;
+        
+    } styleIdentifier:@"st_preview@2x.jpg" completion:^(UIImage *image, NSURL *url) {
         if ([_imageURL isEqual:url]) {
             _imageView.image = image;
         }
@@ -326,15 +355,14 @@ static const NSInteger _cellsPerRow = 7;
     
 }
 
-- (void)setHighlighted:(BOOL)highlighted {
-    [super setHighlighted:highlighted];
+- (void)adjustHighlight:(BOOL)highlighted {
     
     if (highlighted) {
         
         if (!highlightView) {
             UIView *view = [[UIView alloc] initWithFrame:_imageView.frame];
             view.backgroundColor = [UIColor blackColor];
-            view.layer.cornerRadius = 4.0f;
+            view.layer.cornerRadius = 2.0f;
             view.layer.masksToBounds = YES;
             [view setAlpha: 0.5];
             [self addSubview:view];
@@ -362,6 +390,15 @@ static const NSInteger _cellsPerRow = 7;
     
 }
 
+- (void)setHighlighted:(BOOL)highlighted {
+    [super setHighlighted:highlighted];
+    [self adjustHighlight:highlighted];
+}
+
+- (void)setSelected:(BOOL)selected {
+    [super setSelected:selected];
+    [self adjustHighlight:selected];
+}
 
 
 @end

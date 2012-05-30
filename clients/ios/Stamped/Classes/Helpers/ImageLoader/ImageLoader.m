@@ -45,7 +45,7 @@ static NSMutableDictionary *_connections;
     [super dealloc];
 }
 
-- (void)imageForURL:(NSURL*)url completion:(ImageLoaderCompletionHandler)handler {
+- (void)imageForURL:(NSURL*)url style:(ImageLoaderStyler)style styleIdentifier:(NSString*)identifier completion:(ImageLoaderCompletionHandler)handler {
     if (!url) return;
     
     NSString *path = [url lastPathComponent];
@@ -67,7 +67,7 @@ static NSMutableDictionary *_connections;
         return; 
     }
     
-    NSString *cachePath = [NSString stringWithFormat:@"%@/%@", _cachePath, [url lastPathComponent]];
+    NSString *cachePath = [NSString stringWithFormat:@"%@/%@%@", _cachePath, path, identifier==nil ? @"" : identifier];
     
     if ([[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
         
@@ -75,7 +75,7 @@ static NSMutableDictionary *_connections;
          * Load image from disk cache
          */
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
            
             UIImage *image = [UIImage imageWithContentsOfFile:cachePath];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -96,12 +96,23 @@ static NSMutableDictionary *_connections;
         [request release];
         
         NSMutableData *data = [[NSMutableData alloc] init];
-        NSDictionary *connectionData = [[NSDictionary alloc] initWithObjectsAndKeys:data, @"data", [handler copy], @"handler", connection, @"connection", nil];
-        [_connections setObject:connectionData forKey:[url lastPathComponent]];
+        NSMutableDictionary *connectionData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:data, @"data", [handler copy], @"handler", connection, @"connection", nil];
+       
+        if (style) {
+            [connectionData setObject:[style copy] forKey:@"style"];
+            [connectionData setObject:identifier forKey:@"style_identifier"];
+        }
+        
+        [_connections setObject:connectionData forKey:path];
+        [connectionData release];
         [connection release];
         
     }
 
+}
+
+- (void)imageForURL:(NSURL*)url completion:(ImageLoaderCompletionHandler)handler {
+    [self imageForURL:url style:nil styleIdentifier:nil completion:handler];
 }
 
 
@@ -168,6 +179,18 @@ static NSMutableDictionary *_connections;
             NSString *cachePath = [NSString stringWithFormat:@"%@/%@", _cachePath, path];
             image = [UIImage imageWithData:data];
             [UIImageJPEGRepresentation(image, 0.8) writeToFile:cachePath atomically:NO];
+            
+            if ([connection objectForKey:@"style"]) {
+                
+                ImageLoaderStyler style = (ImageLoaderStyler)[connection objectForKey:@"style"];
+                image = style(image);
+                NSString *identifier = [connection objectForKey:@"style_identifier"];
+
+                cachePath = [NSString stringWithFormat:@"%@%@", cachePath, identifier];
+                [UIImageJPEGRepresentation(image, 1.0) writeToFile:cachePath atomically:NO];
+                
+            }
+            
 
         }
         
