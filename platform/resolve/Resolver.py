@@ -1583,13 +1583,13 @@ def demo(generic_source, default_title, subcategory=None):
 
     This demo queries the EntityDB for an entity matching the
     given title (or default_title). If a subcategory is given,
-    the query is restricted to that category. Othewise, the
+    the query is restricted to that category. Otherwise, the
     query is title-based and the type is determined by the 
     results subcategory.
 
     Once an entity is selected, it is converted to a query and
-    resolved against the given source, with extemely verbose 
-    output enabled (not necessarilly to logger, possibly stdout).
+    resolved against the given source, with extremely verbose
+    output enabled (not necessarily to logger, possibly stdout).
     The count option (1 by default) will be passed to resolve.
 
     If the entity was successfully resolved, demo() will attempt to

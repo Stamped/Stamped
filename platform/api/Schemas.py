@@ -813,7 +813,7 @@ class PlaceEntity(BasicEntity):
         cls.addProperty('gallery_source',                   basestring)
         cls.addProperty('gallery_timestamp',                datetime)
 
-        cls.addNestedProperty('hours',                      HoursSchema)
+        cls.addNestedProperty('hours',                      TimesSchema)
         cls.addProperty('hours_source',                     basestring)
         cls.addProperty('hours_timestamp',                  datetime)
 

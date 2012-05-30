@@ -1114,12 +1114,13 @@ class StampedAPI(AStampedAPI):
             suggested = {
                 'mariobatali':      1, 
                 'nymag':            2,
-                'UrbanDaddy':       3,
-                'parislemon':       4, 
-                'michaelkors':      5, 
-                'petertravers':     6,
-                'rebeccaminkoff':   7, 
-                'austinchronicle':  8,
+                'TIME':             3,
+                'UrbanDaddy':       4,
+                'parislemon':       5, 
+                'michaelkors':      6, 
+                'petertravers':     7,
+                'rebeccaminkoff':   8, 
+                'austinchronicle':  9,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
@@ -4264,7 +4265,10 @@ class StampedAPI(AStampedAPI):
             successor_id = tombstoneId
             successor    = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
-            
+
+            # TODO: Because we create a new FullResolveContainer() here instead of using self.__full_resolve, we are not
+            # reading from or writing to  the joint history about what sources have failed recently and are still
+            # cooling down.
             merger = FullResolveContainer.FullResolveContainer()
             merger.addSource(EntitySource(entity, merger.groups))
             successor_decorations = {}
@@ -4312,6 +4316,17 @@ class StampedAPI(AStampedAPI):
     def _resolveEntityLinks(self, entity):
         
         def _resolveStub(stub, sources):
+            """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
+
+            Tries to fast resolve Stamped DB using existing third-party source IDs.
+            Failing that (for one source at a time, not for all sources) tries to use standard resolution against
+                StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
+                falling back?)
+            Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
+                if there were any.
+            If none of this works, throws a KeyError.
+            """
+
             source          = None
             source_id       = None
             entity_id       = None

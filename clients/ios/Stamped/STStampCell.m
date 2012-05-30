@@ -21,8 +21,9 @@
 #import "STDetailTextCallout.h"
 #import "ImageLoader.h"
 
-@interface STStampCellAvatarView : UIImageView
+@interface STStampCellAvatarView : UIView
 @property(nonatomic,retain) NSURL *imageURL;
+@property(nonatomic,retain) UIImageView *imageView;
 @end
 
 @implementation STStampCell
@@ -433,22 +434,37 @@
 
 @implementation STStampCellAvatarView
 @synthesize imageURL=_imageURL;
+@synthesize imageView=_imageView;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         self.userInteractionEnabled = YES;
-        self.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
-        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
-        self.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
-        self.layer.shadowRadius = 1.0f;
-        self.layer.shadowOpacity = 0.2f;
-        self.layer.borderColor = [UIColor whiteColor].CGColor;
-        self.layer.borderWidth = 1.0f;
+        
+        UIView *background = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, 2.0f, 2.0f)];
+        background.userInteractionEnabled = NO;
+        background.backgroundColor = [UIColor whiteColor];
+        background.layer.shadowPath = [UIBezierPath bezierPathWithRect:background.bounds].CGPath;
+        background.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        background.layer.shadowRadius = 1.0f;
+        background.layer.shadowOpacity = 0.2f;
+        background.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+        background.layer.shouldRasterize = YES;
+        [self addSubview:background];
+        [background release];
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, 3.0f, 3.0f)];
+        imageView.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:imageView];
+        self.imageView = imageView;
+        [imageView release];
+
     }
     return self;
 }
 
 - (void)dealloc {
+    [_imageView release], _imageView=nil;
     [_imageURL release], _imageURL=nil;
     [super dealloc];
 }
@@ -458,10 +474,10 @@
     [_imageURL release], _imageURL=nil;
     _imageURL = [imageURL retain];
     
-    self.image = nil;
+    self.imageView.image = nil;
     [[ImageLoader sharedLoader] imageForURL:_imageURL completion:^(UIImage *image, NSURL *url) {
         if ([_imageURL isEqual:url]) {
-            self.image = image;
+            self.imageView.image = image;
         }
     }];
     
