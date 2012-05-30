@@ -10,6 +10,7 @@
 
 @implementation STSimpleUser
 
+@synthesize name = _name;
 @synthesize userID = _userID;
 @synthesize screenName = _screenName;
 @synthesize primaryColor = _primaryColor;
@@ -20,6 +21,7 @@
 - (id)initWithCoder:(NSCoder *)decoder {
     self = [super init];
     if (self) {
+        _name = [[decoder decodeObjectForKey:@"name"] retain];
         _userID = [[decoder decodeObjectForKey:@"userID"] retain];
         _screenName = [[decoder decodeObjectForKey:@"screenName"] retain];
         _primaryColor = [[decoder decodeObjectForKey:@"primaryColor"] retain];
@@ -32,6 +34,7 @@
 
 - (void)dealloc
 {
+    [_name release];
     [_userID release];
     [_screenName release];
     [_primaryColor release];
@@ -42,6 +45,7 @@
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
+    [encoder encodeObject:self.name forKey:@"name"];
     [encoder encodeObject:self.userID forKey:@"userID"];
     [encoder encodeObject:self.screenName forKey:@"screenName"];
     [encoder encodeObject:self.primaryColor forKey:@"primaryColor"];
@@ -62,6 +66,7 @@
      nil];
     
     [mapping mapAttributes:
+     @"name",
      @"privacy",
      nil];
     
@@ -73,6 +78,7 @@
         return nil;
     }
     STSimpleUser* user = [[[STSimpleUser alloc] init] autorelease];
+    user.name = legacyUser.name;
     user.userID = legacyUser.userID;
     user.screenName = legacyUser.screenName;
     user.primaryColor = legacyUser.primaryColor;

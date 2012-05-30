@@ -12,7 +12,6 @@
 
 @interface STSimpleUserDetail : STSimpleUser <STUserDetail, NSCoding>
 
-@property (nonatomic, readwrite, copy) NSString* name;
 @property (nonatomic, readwrite, copy) NSString* bio;
 @property (nonatomic, readwrite, copy) NSString* website;
 @property (nonatomic, readwrite, copy) NSString* location;

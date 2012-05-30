@@ -518,7 +518,7 @@
         _configuration = [[STActivityCellConfiguration alloc] initWithActivity:activity andScope:scope];
         self.accessoryType = UITableViewCellAccessoryNone;
         UIView* imageView = nil;
-        if (self.configuration.hasCredit) {
+        if (self.configuration.hasCredit && self.scope == STStampedAPIScopeYou) {
             UIView* background = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, self.configuration.height)] autorelease];
             background.backgroundColor = [UIColor whiteColor];
             [self addSubview:background];
@@ -591,14 +591,22 @@
             }
             if (self.scope != STStampedAPIScopeYou && users.count == 1) {
                 id<STUser> userForDetail = [users objectAtIndex:0];
-                CGPoint nameOrigin = CGPointMake(self.configuration.contentOffset + 61, y + 20);
-                UIView* nameView = [Util viewWithText:userForDetail.screenName
+                CGPoint nameOrigin = CGPointMake(self.configuration.contentOffset + 61, y + 20 - self.configuration.bodyFontAction.ascender);
+                UIView* nameView = [Util viewWithText:userForDetail.name ? userForDetail.name : @"John Doe"
                                                  font:self.configuration.bodyFontAction
                                                 color:self.configuration.bodyColorNormal
                                                  mode:UILineBreakModeTailTruncation
                                            andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
                 [Util reframeView:nameView withDeltas:CGRectMake(nameOrigin.x, nameOrigin.y, 0, 0)];
                 [self addSubview:nameView];
+                CGPoint screenameOrigin = CGPointMake(self.configuration.contentOffset + 61, y + 36 - self.configuration.headerFontNormal.ascender);
+                UIView* screennameView = [Util viewWithText:[NSString stringWithFormat:@"@%@", userForDetail.screenName]
+                                                       font:self.configuration.headerFontNormal
+                                                      color:self.configuration.headerColorNormal
+                                                       mode:UILineBreakModeTailTruncation
+                                                 andMaxSize:CGSizeMake(150, CGFLOAT_MAX)];
+                [Util reframeView:screennameView withDeltas:CGRectMake(screenameOrigin.x, screenameOrigin.y, 0, 0)];
+                [self addSubview:screennameView];
             }
         }
         y += self.configuration.imagesHeight.floatValue + self.configuration.footerPadding;

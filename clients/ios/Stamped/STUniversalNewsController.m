@@ -36,6 +36,7 @@
 
 - (void)_toggleButtonClicked:(id)notImportant {
     self.scope = self.scope == STStampedAPIScopeYou ? STStampedAPIScopeFriends : STStampedAPIScopeYou;
+    [self updateRightButton];
 }
 
 - (void)updateRightButton {
