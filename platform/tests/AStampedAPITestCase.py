@@ -137,7 +137,15 @@ class AStampedAPITestCase(AStampedTestCase):
     def assertValidKey(self, key, length=24):
         self.assertIsInstance(key, basestring)
         self.assertLength(key, length)
-    
+
+    def assertGreater(self, first, second, msg=None):
+        try:
+            self.assertTrue(first > second)
+        except AssertionError:
+            if msg is not None:
+                raise AssertionError(msg)
+            raise AssertionError('"%s" unexpectedly not greater than "%s"' % (first, second))
+
     ### HELPER FUNCTIONS
     def createAccount(self, name='TestUser', password="12345", **kwargs):
         global _test_case, _accounts
@@ -180,7 +188,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/create_with_facebook.json"
+        path = "account/create/facebook.json"
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
@@ -210,7 +218,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/create_with_twitter.json"
+        path = "account/create/twitter.json"
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
@@ -238,7 +246,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "oauth2/login_with_facebook.json"
+        path = "oauth2/login/facebook.json"
         data = {
             "client_id":        c_id,
             "client_secret":    c_secret,
@@ -250,7 +258,7 @@ class AStampedAPITestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "oauth2/login_with_twitter.json"
+        path = "oauth2/login/twitter.json"
         data = {
             "client_id":      c_id,
             "client_secret":  c_secret,
@@ -322,7 +330,7 @@ class AStampedAPITestCase(AStampedTestCase):
                 "title": "Good Food",
                 "subtitle": "Peoria, IL",
                 "desc": "American food in America", 
-                "category": "food",
+                "category": "place",
                 "subcategory": "restaurant",
                 "address": "123 Main Street, Peoria, IL",
                 "coordinates": "40.714623,-74.006605"
@@ -395,8 +403,8 @@ class AStampedAPITestCase(AStampedTestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
     
-    def createFavorite(self, token, entityId, stampId=None):
-        path = "favorites/create.json"
+    def createTodo(self, token, entityId, stampId=None):
+        path = "todos/create.json"
         data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId,
@@ -405,20 +413,29 @@ class AStampedAPITestCase(AStampedTestCase):
         if stampId != None:
             data['stamp_id'] = stampId
         
-        favorite = self.handlePOST(path, data)
-        self.assertValidKey(favorite['favorite_id'])
+        todo = self.handlePOST(path, data)
+        self.assertValidKey(todo['todo_id'])
         
-        return favorite
+        return todo
     
-    def deleteFavorite(self, token, entityId):
-        path = "favorites/remove.json"
+    def deleteTodo(self, token, entityId):
+        path = "todos/remove.json"
         data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-    
+
+    def completeTodo(self, token, entityId, complete):
+        path = "todos/complete.json"
+        data = {
+            "oauth_token":  token['access_token'],
+            "entity_id":    entityId,
+            "complete":     complete,
+        }
+        return self.handlePOST(path, data)
+
     def _loadCollection(self, collection, filename=None, drop=True):
         if filename is None:
             filename = "%s.db" % collection

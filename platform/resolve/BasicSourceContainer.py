@@ -11,6 +11,7 @@ import Globals
 from logs import log, report
 
 try:
+    import sys, traceback, string
     from ASourceContainer       import ASourceContainer
     from ASourceController      import ASourceController
     from datetime               import datetime
@@ -112,7 +113,11 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                         logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                             except Exception as e:
+                                exc_type, exc_value, exc_traceback = sys.exc_info()
+                                f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                                f = string.joinfields(f, '')
                                 logs.warning("Source '%s' threw an exception when enriching '%s': %s" % (source, pformat(entity), e.message) , exc_info=1 )
+                                logs.warning(f)
                                 failedSources.add(source)
                                 self.__failedValues[source] += self.failedIncrement
                                 if self.__failedValues[source] < self.failedCutoff:

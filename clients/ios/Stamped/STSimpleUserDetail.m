@@ -11,7 +11,6 @@
 
 @implementation STSimpleUserDetail
 
-@synthesize name = _name;
 @synthesize bio = _bio;
 @synthesize website = _website;
 @synthesize location = _location;
@@ -32,7 +31,6 @@
 - (id)initWithCoder:(NSCoder *)decoder {
   self = [super initWithCoder:decoder];
   if (self) {
-    _name = [[decoder decodeObjectForKey:@"name"] retain];
     _bio = [[decoder decodeObjectForKey:@"bio"] retain];
     _website = [[decoder decodeObjectForKey:@"website"] retain];
     _location = [[decoder decodeObjectForKey:@"location"] retain];
@@ -55,7 +53,6 @@
 
 - (void)dealloc
 {
-  [_name release];
   [_bio release];
   [_website release];
   [_location release];
@@ -78,7 +75,6 @@
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
   [super encodeWithCoder:encoder];
-  [encoder encodeObject:self.name forKey:@"name"];
   [encoder encodeObject:self.bio forKey:@"bio"];
   [encoder encodeObject:self.website forKey:@"website"];
   [encoder encodeObject:self.location forKey:@"location"];
@@ -122,8 +118,8 @@
   [mapping mapAttributes:
   //From User
    @"privacy",
-   //From UserDetail
    @"name",
+   //From UserDetail
    @"bio",
    @"website",
    @"location",

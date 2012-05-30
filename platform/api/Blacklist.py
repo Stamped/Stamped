@@ -106,6 +106,7 @@ screen_names = set([
     "statistics",
     "terms",
     "tos",
+    "todos",
     "translate",
     "trends",
     "update_discoverability",

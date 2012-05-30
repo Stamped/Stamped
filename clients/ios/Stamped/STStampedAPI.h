@@ -35,6 +35,7 @@
 #import "STConsumptionSlice.h"
 #import "STActivityCount.h"
 #import "STLoginResponse.h"
+#import "STEntityAutoCompleteResult.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -101,8 +102,8 @@ typedef enum {
 - (STCancellation*)entityResultsForEntitySuggested:(STEntitySuggested*)entitySuggested 
                                        andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
-- (void)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
-                         andCallback:(void(^)(NSArray<STEntitySearchResult>* results, NSError* error))block;
+- (STCancellation*)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
+                                    andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
 
@@ -146,10 +147,34 @@ typedef enum {
                                  token:(NSString*)token
                            andCallback:(void(^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
+                                         coordinates:(NSString*)coordinates
+                                            category:(NSString*)category
+                                         andCallback:(void(^)(NSArray<STEntityAutoCompleteResult>* results, NSError* error, STCancellation* cancellation))block;
+
 - (void)isTododWithEntityID:(NSString*)entityID andCallback:(void(^)(BOOL,NSError*))block;
 
 - (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                                        andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)stampsWithScope:(STStampedAPIScope)scope
+                              date:(NSDate*)date 
+                             limit:(NSInteger)limit 
+                            offset:(NSInteger)offset
+                       andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)stampsWithUserID:(NSString*)userID
+                               date:(NSDate*)date 
+                              limit:(NSInteger)limit 
+                             offset:(NSInteger)offset
+                        andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)entitiesWithScope:(STStampedAPIScope)scope 
+                             section:(NSString*)section
+                          subsection:(NSString*)subsection 
+                               limit:(NSNumber*)limit
+                              offset:(NSNumber*)offset 
+                         andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block;
 
 - (void)followerIDsForUserID:(NSString*)userID andCallback:(void(^)(NSArray* followerIDs, NSError* error))block;
 

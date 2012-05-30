@@ -165,6 +165,23 @@ class Netflix(object):
                 return item[returnKey]
         return None
 
+    def autocomplete(self, term):
+        results = self.__get(
+            service         = 'catalog/titles/autocomplete',
+            term            = term,
+        )
+        print (results)
+        autocomplete = results.pop('autocomplete', None)
+        if autocomplete is None or 'autocomplete_item' not in self.__asList(autocomplete)[0]:
+            return []
+
+        print autocomplete
+        completions = []
+        for title in self.__asList(self.__asList(autocomplete)[0]['autocomplete_item']):
+            completions.append( { 'completion' : title['title']['short'] } )
+        return completions
+
+
     def searchTitles(self, title, start=0, count=100):
         """
         Searches the netflix catalog for titles with a given search string.
@@ -349,6 +366,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
 
+    if 'autocomplete' in methods:         pprint( netflix.autocomplete(title) )
     if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
     if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
@@ -359,8 +377,8 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getTitleDetails'
-    params['title'] = 'ghostbusters'
+    methods = 'autocomplete'
+    params['title'] = 'ghostbuts'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

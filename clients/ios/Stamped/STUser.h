@@ -10,6 +10,7 @@
 
 @protocol STUser <NSObject>
 
+@property (nonatomic, readonly, copy) NSString* name;
 @property (nonatomic, readonly, copy) NSString* userID;
 @property (nonatomic, readonly, copy) NSString* screenName;
 @property (nonatomic, readonly, copy) NSString* primaryColor;

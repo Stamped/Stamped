@@ -109,12 +109,12 @@ class LikeAction(ASimulatedUserAction):
         
         return parent._parent.handlePOST(path, data)
 
-class AddFavoriteAction(ASimulatedUserAction):
+class AddTodoAction(ASimulatedUserAction):
     def __init__(self, weight, repeat=1):
         ASimulatedUserAction.__init__(self, weight, repeat)
     
     def _execute(self, parent, user):
-        return parent._parent.createFavorite(user.token, parent.getRandomEntityID())
+        return parent._parent.createTodo(user.token, parent.getRandomEntityID())
 
 class NullAction(ASimulatedUserAction):
     def __init__(self, weight, repeat=1):

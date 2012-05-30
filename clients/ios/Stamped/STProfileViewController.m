@@ -18,7 +18,7 @@
 #import "UIColor+Stamped.h"
 #import "STButton.h"
 #import "STUsersViewController.h"
-#import "ShowImageViewController.h"
+#import "STPhotoViewController.h"
 #import "STProfileSource.h"
 
 @interface STProfileViewController ()
@@ -178,19 +178,19 @@ static const NSInteger _headerHeight = 95;
     [Util reframeView:bioView withDeltas:CGRectMake(textOffset, CGRectGetMaxY(screenName.frame), 0, 0)];
     [self.header addSubview:bioView];
   }
-  self.header.backgroundColor = [UIColor whiteColor];
-  self.header.layer.shadowColor = [UIColor blackColor].CGColor;
-  self.header.layer.shadowOpacity = .5;
-  self.header.layer.shadowRadius = 2;
-  self.header.layer.shadowOffset = CGSizeMake(0, 2);
-  [self.scrollView addSubview:self.header];
+    self.header.backgroundColor = [UIColor whiteColor];
+    self.header.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.header.layer.shadowOpacity = .5;
+    self.header.layer.shadowRadius = 2;
+    self.header.layer.shadowOffset = CGSizeMake(0, 2);
+    self.header.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.header.bounds].CGPath;
+    [self.scrollView addSubview:self.header];
 }
 
 - (void)userImageTapped:(id)sender {
-  ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
-  controller.imageURL = [Util largeProfileImageURLWithUser:self.userDetail];
-  [[Util sharedNavigationController] pushViewController:controller animated:YES];
-  [controller release];
+    STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:[Util largeProfileImageURLWithUser:self.userDetail]]];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [controller release];
 }
 
 @end

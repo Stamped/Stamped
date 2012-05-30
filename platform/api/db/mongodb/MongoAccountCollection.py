@@ -36,6 +36,33 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
            document['name_lower'] = unicode(document['name']).lower()
         
         return document
+
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        # TODO: Eventually remove all instances of alerts.ios_alert_fav and alerts.email_alert_fav and replace them
+        #  with the their equivalent "_todo" fields  For now, we convert for the sake of backward compatability
+
+        if 'alerts' in document and 'ios_alert_fav' in document['alerts']:
+            document['alerts']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
+            del(document['alerts']['ios_alert_fav'])
+        if 'alerts' in document and 'email_alert_fav' in document['alerts']:
+            document['alerts']['email_alert_todo'] = document['alerts']['email_alert_fav']
+            del(document['alerts']['email_alert_fav'])
+
+        if 'stats' in document and 'num_faves' in document['stats']:
+            document['stats']['num_todos'] = document['stats']['num_faves']
+            del(document['stats']['num_faves'])
+
+        if self._obj is not None:
+            return self._obj().dataImport(document, overflow=self._overflow)
+        else:
+            return document
     
     ### PUBLIC
     

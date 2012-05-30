@@ -183,7 +183,7 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size)
         return url
     
-    def addResizedStampImages(self, image_url, imageId):
+    def addResizedStampImages(self, image_url, imageId, max_size, sizes):
         """
         image_url is the temp url
         """
@@ -195,16 +195,9 @@ class S3ImageDB(AImageDB):
         
         image    = self.getImage(f)
         prefix   = 'stamps/%s' % imageId
-        max_size = (960, 960)
-        
-        sizes   = {
-            'ios1x'  : (200, None),
-            'ios2x'  : (400, None),
-            'web'    : (580, None),
-            'mobile' : (572, None),
-        }
-        
+
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
+
     
     def changeProfileImageName(self, oldScreenName, newScreenName):
         # Filename is lowercase screen name
@@ -261,7 +254,7 @@ class S3ImageDB(AImageDB):
         if sizes is not None:
             for name, size in sizes.iteritems():
                 resized = resizeImage(image, size)
-                name = '%s-%s' % (prefix, name)
+                name = '%s%s' % (prefix, name)
                 self._addJPG(name, resized)
     
     def _addJPG(self, name, image):

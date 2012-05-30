@@ -56,8 +56,8 @@ class AEntityMatcher(object):
         return self.stamped_api._activityDB
     
     @property
-    def _favoriteDB(self):
-        return self.stamped_api._favoriteDB
+    def _todoDB(self):
+        return self.stamped_api._todoDB
     
     @property
     def _deletedEntityDB(self):
@@ -318,12 +318,12 @@ class AEntityMatcher(object):
                         self._activityDB.update(item)
             
             # update all favorites references of entity2 with entity1
-            docs = self._favoriteDB._collection.find({ 
+            docs = self._todoDB._collection.find({
                 'entity.entity_id' : entity2.entity_id }, output=list)
             
             if docs is not None and len(docs) > 0:
                 for doc in docs:
-                    item = self._favoriteDB._convertFromMongo(doc)
+                    item = self._todoDB._convertFromMongo(doc)
                     entity1.exportSchema(item.entity)
                     
                     if self.options.verbose:
@@ -331,15 +331,15 @@ class AEntityMatcher(object):
                                   (item.favorite_id, entity2.entity_id, entity1.entity_id))
                     
                     if not self.options.noop:
-                        self._favoriteDB.update(item)
+                        self._todoDB.update(item)
             
             # update all userfaventities references of entity2 with entity1
-            docs = self._favoriteDB.user_fav_entities_collection._collection.find({ 
+            docs = self._todoDB.user_todo_entities_collection._collection.find({
                 'ref_ids' : entity2.entity_id }, output=list)
             
             if docs is not None and len(docs) > 0:
                 for doc in docs:
-                    item = self._favoriteDB.user_fav_entities_collection._convertFromMongo(doc)
+                    item = self._todoDB.user_todo_entities_collection._convertFromMongo(doc)
                     refs = item['ref_ids']
                     found = False
                     
@@ -359,7 +359,7 @@ class AEntityMatcher(object):
                                   (entity2.entity_id, entity1.entity_id))
                     
                     if not self.options.noop:
-                        self._favoriteDB.user_fav_entities_collection.update(item)
+                        self._todoDB.user_todo_entities_collection.update(item)
         
         filter_func = (lambda e: e is not None and e.entity_id != entity1.entity_id)
         entities = filter(filter_func, entities)

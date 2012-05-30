@@ -9,6 +9,7 @@ import Globals
 import copy
 import pprint
 import logs
+import utils
 
 class SchemaException(Exception):
     pass
@@ -56,7 +57,6 @@ class Schema(object):
 
     @classmethod
     def _postSetSchema(cls):
-        cls._duplicates        = set()
         cls._required_fields   = set()
 
         properties = cls._propertyInfo
@@ -65,8 +65,6 @@ class Schema(object):
             t = info[_typeKey]
             if info['required']:
                 cls._required_fields.add(name)
-        for dup in cls._duplicates:
-            del cls._duplicates[dup]
 
     @classmethod
     def setSchema(cls):
@@ -123,8 +121,6 @@ class Schema(object):
                     return self.__properties[name]
                 else:
                     return None
-        elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate attribute used')
         else:
             return object.__getattribute__(self, name)
 
@@ -173,8 +169,6 @@ class Schema(object):
                         if name not in self.__properties or self.__properties[name] is None:
                             self.__required_count += 1
                     self.__properties[name] = value
-        elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate attribute used')
         else:
             if not name.startswith('_Schema__') and not name.startswith('__'):
                 logs.warning('Setting non-schema field "%s"' % (name))
@@ -189,8 +183,6 @@ class Schema(object):
                     if name in self.__properties and self.__properties[name] is not None:
                         self.__required_count -= 1
                 del self.__properties[name]
-        elif name in self.__class__._duplicates:
-            raise SchemaException('Duplicate attribute used')
         else:
             object.__delattr__(self, name)
 
@@ -206,6 +198,10 @@ class Schema(object):
                 return True
         else:
             return False
+
+    #TODO: make this a true repr string
+    def __repr__(self):
+        return str(self)
 
     def __str__(self):
         return '[%s %s]' % (self.__class__, self.dataExport())
@@ -235,6 +231,10 @@ class Schema(object):
         return properties
 
     def dataImport(self, properties, **kwargs):
+        overflow = False
+        if 'overflow' in kwargs and kwargs['overflow'] == True:
+            overflow = True
+            
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
         try:
@@ -250,7 +250,7 @@ class Schema(object):
                             nested = self.__properties[k]
                         else:
                             nested = p[_kindKey]()
-                        nested.dataImport(v)
+                        nested.dataImport(v, **kwargs)
                         self.__setattr__(k, nested)
 
                     elif p[_typeKey] == _nestedPropertyListKey and v is not None:
@@ -261,25 +261,26 @@ class Schema(object):
                     else:
                         self.__setattr__(k, v)
                 except (AttributeError, KeyError):
-                    if kwargs.pop('overflow', False) == True:
-                        continue
+                    if not overflow:
+                        logs.warning("AttributeError: %s (%s)" % (k, self.__class__.__name__))
+                        raise
         except Exception as e:
             logs.warning(e)
             raise
         return self
 
     @classmethod
-    def addProperty(cls, name, kind, required=False):
-        cls.__addProperty(_propertyKey, name, kind, required=required)
+    def addProperty(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_propertyKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addPropertyList(cls, name, kind, required=False):
-        cls.__addProperty(_propertyListKey, name, kind, required=required)
+    def addPropertyList(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_propertyListKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addNestedProperty(cls, name, kind, required=False):
-        cls.__addProperty(_nestedPropertyKey, name, kind, required=required)
+    def addNestedProperty(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_nestedPropertyKey, name, kind, required=required, **kwargs)
 
     @classmethod
-    def addNestedPropertyList(cls, name, kind, required=False):
-        cls.__addProperty(_nestedPropertyListKey, name, kind, required=required)
+    def addNestedPropertyList(cls, name, kind, required=False, **kwargs):
+        cls.__addProperty(_nestedPropertyListKey, name, kind, required=required, **kwargs)

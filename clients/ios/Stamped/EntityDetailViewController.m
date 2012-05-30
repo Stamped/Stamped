@@ -130,7 +130,7 @@ static BOOL _addedStampButton = NO;
     [self.loadingView stopAnimating];
     //[self.loadingView removeFromSuperview];
     self.synchronousWrapper = [STSynchronousWrapper wrapperForEntityDetail:self.entityDetail 
-                                                                 withFrame:CGRectMake(0, 0, 320, self.scrollView.frame.size.height) 
+                                                                 withFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.scrollView.frame.size.height)
                                                                   andStyle:@"EntityDetail" 
                                                                   delegate:self.scrollView];
     [self.scrollView appendChildView:self.synchronousWrapper];

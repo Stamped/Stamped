@@ -13,18 +13,27 @@
 @interface STRightMenuViewController ()
 - (void)animateIn:(BOOL)animated;
 @property (nonatomic,readonly,retain) NSArray *categories;
-@property(nonatomic,strong) UIScrollView *scrollView;
+@property(nonatomic,retain) UIScrollView *scrollView;
+@property(nonatomic,retain) NSDictionary *categoryMapping; 
 @end
 
 @implementation STRightMenuViewController
 
 @synthesize categories = _categories;
 @synthesize scrollView = _scrollView;
+@synthesize categoryMapping = _categoryMapping;
 
 - (id)init {
   if ((self = [super init])) {
       //_categories = [[NSArray alloc] initWithObjects:@"music", @"food", @"book", @"film", @"other", nil];
       _categories = [[NSArray alloc] initWithObjects:@"places", @"books", @"music", @"movies", @"apps", nil];
+      _categoryMapping = [[NSDictionary alloc] initWithObjectsAndKeys:
+                          @"place", @"places",
+                          @"book", @"books",
+                          @"music", @"music",
+                          @"film", @"movies",
+                          @"app", @"apps",
+                          nil];
       _buttons = [[NSMutableArray alloc] init];
   }
   return self;
@@ -32,6 +41,7 @@
 
 - (void)dealloc {
     [_categories release], _categories=nil;
+    [_categoryMapping release], _categoryMapping=nil;
     self.scrollView = nil;
     [super dealloc];
 }
@@ -58,7 +68,7 @@
         _scrollView = [scrollView retain];
         [scrollView release];
         
-        CGRect frame = CGRectMake(self.scrollView.frame.size.width - 58.0f, 4.0f, 50.0f, 44.0f);
+        CGRect frame = CGRectMake(floorf(self.scrollView.frame.size.width - 58.0f), 4.0f, 50.0f, 44.0f);
         
         // close
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -71,7 +81,7 @@
         
         for (NSInteger i = 0; i < self.categories.count; i++) {
             
-            frame.origin.y += 48.0f;
+            frame.origin.y = floorf(frame.origin.y + 48.0f);
             NSString *category = [self.categories objectAtIndex:i];
             UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"create_menu_%@.png", category]];
             UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -85,7 +95,7 @@
 
         }
         
-        frame.origin.y += 48.0f;
+        frame.origin.y = floorf(frame.origin.y + 48.0f);
 
         // more
         button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -252,13 +262,17 @@
 - (void)buttonHit:(UIButton*)button {
    
     NSString *category = [self.categories objectAtIndex:button.tag];
+    //Map to BE category strings
+    category = [self.categoryMapping objectForKey:category];
     STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [menuController pushViewController:controller animated:YES];
     
+    /*
     if ([menuController.rootViewController isKindOfClass:[UINavigationController class]]) {
         [(UINavigationController*)menuController.rootViewController setNavigationBarHidden:YES animated:NO];
     }
+     */
     
     [controller release];
     

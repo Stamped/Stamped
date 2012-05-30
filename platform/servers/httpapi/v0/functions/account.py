@@ -70,7 +70,7 @@ def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
 @require_http_methods(["POST"])
 def remove(request, authUserId, **kwargs):
     account = stampedAPI.removeAccount(authUserId)
-    account = HTTPAccount().dataImport(account.dataExport())
+    account = HTTPAccount().importAccount(account)
     
     return transformOutput(account.dataExport())
 

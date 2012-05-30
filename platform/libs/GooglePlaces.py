@@ -12,7 +12,7 @@ from optparse       import OptionParser
 from Geocoder       import Geocoder
 from AKeyBasedAPI   import AKeyBasedAPI
 from AEntitySource  import AExternalServiceEntitySource
-from api.Schemas    import PlaceEntity
+from api.Schemas    import PlaceEntity, CoordinatesSchema
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
 
@@ -161,12 +161,14 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         if not valid and subcategory not in self.google_subcategory_whitelist:
             return None
         
-        entity = PlaceEntity()
-        entity.title = result['name']
-        entity.lat   = result['geometry']['location']['lat']
-        entity.lng   = result['geometry']['location']['lng']
-        entity.googleplaces_id          = result['id']
-        entity.googleplaces_reference   = result['reference']
+        entity                                  = PlaceEntity()
+        entity.title                            = result['name']
+        coordinates                             = CoordinatesSchema()
+        coordinates.lat                         = result['geometry']['location']['lat']
+        coordinates.lng                         = result['geometry']['location']['lng']
+        entity.coordinates                      = coordinates
+        entity.sources.googleplaces_id          = result['id']
+        entity.sources.googleplaces_reference   = result['reference']
         
         # TODO: TYPE
         types = set(entity.types)
@@ -518,11 +520,11 @@ def test_lrucache(arbitrary_arg, copies):
     random.seed()
 
     entity = PlaceEntity()
-    entity.title = 'Test'
-    entity.lat   = float(random.randint(0,100000))
-    entity.lng   = float(random.randint(0,100000))
-    entity.googleplaces_id          = 'theGooglePlacesId'
-    entity.googleplaces_reference   = 'theGooglePlacesReference'
+    entity.title                            = 'Test'
+    entity.lat                              = float(random.randint(0,100000))
+    entity.lng                              = float(random.randint(0,100000))
+    entity.sources.googleplaces_id          = 'theGooglePlacesId'
+    entity.sources.googleplaces_reference   = 'theGooglePlacesReference'
 
     entities = []
     for x in xrange(copies):

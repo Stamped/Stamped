@@ -20,6 +20,15 @@
 #import "LeftMenuTableCell.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
+#import "STNavigationItem.h"
+#import "STStampedAPI.h"
+
+static NSString* const _inboxNameKey = @"Root.inboxName";
+static NSString* const _iWantToNameKey = @"Root.iWantToName";
+static NSString* const _newsNameKey = @"Root.newsName";
+static NSString* const _debugNameKey = @"Root.debugName";
+static NSString* const _todoNameKey = @"Root.todoName";
+static NSString* const _settingsNameKey = @"Root.settingsName";
 
 
 @implementation STLeftMenuViewController
@@ -33,17 +42,17 @@
         _selectedIndexPath = [[NSIndexPath indexPathForRow:0 inSection:0] retain];
         
         NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    @"Root.inbox", @"Stamps",
-                                    @"Root.iWantTo", @"I Want to...",
-                                    @"Root.news", @"News",
-                                    @"Root.debug", @"Debug",
+                                    @"Root.inbox", _inboxNameKey,
+                                    @"Root.iWantTo", _iWantToNameKey,
+                                    @"Root.news", _newsNameKey,
+                                    @"Root.debug", _debugNameKey,
                                     nil];
-        _dataSource = [[NSArray arrayWithObjects:@"Stamps", @"I Want to...", @"News", @"Debug", nil] retain];
+        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _newsNameKey, _debugNameKey, nil] retain];
         _controllerStore = [navigators retain];
         
-        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", @"To-Do", @"Root.settings", @"Settings",
+        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", _todoNameKey, @"Root.settings", _settingsNameKey,
                       nil] retain];
-        _anchorDataSource = [[NSArray arrayWithObjects:@"To-Do", @"Settings", nil] retain];
+        _anchorDataSource = [[NSArray arrayWithObjects:_todoNameKey, _settingsNameKey, nil] retain];
         
     }
     return self;
@@ -157,13 +166,18 @@
         [tableView release];
         
     }
-    
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
+}
+
+- (void)configurationChanged:(id)notImportant {
+    [self.tableView reloadData];
 }
 
 - (void)viewDidUnload {
     [super viewDidUnload];
     self.tableView = nil;
+    self.anchorTableView = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -200,10 +214,10 @@
             cell.delegate = (id<LeftMenuTableCellDelegate>)self;
         }
         
-        cell.titleLabel.text = [_dataSource objectAtIndex:indexPath.row];
+        cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
         cell.border = YES;
         
-        if ([cell.titleLabel.text isEqualToString:@"News"]) {
+        if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
             [cell setBadgeCount:_unreadCount];
         } else {
             [cell setBadgeCount:0];
@@ -228,7 +242,7 @@
     
     cell.titleLabel.textColor = [UIColor colorWithRed:0.4f green:0.4f blue:0.4f alpha:1.0f];
     cell.topBorder = (indexPath.row==1);
-    cell.titleLabel.text = [_anchorDataSource objectAtIndex:indexPath.row];
+    cell.titleLabel.text = [STConfiguration value:[_anchorDataSource objectAtIndex:indexPath.row]];
     cell.icon = [UIImage imageNamed:[NSString stringWithFormat:@"left_menu_icon_%@.png", [cell.titleLabel.text lowercaseString]]];
 
     return cell;
@@ -240,6 +254,21 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    
+    if (self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
+        
+        // controller is already root, lets just pop it to root like a tab bar
+        DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        UINavigationController *navController = (UINavigationController*)[menuController rootViewController];
+        if (navController && [navController isKindOfClass:[UINavigationController class]]) {
+            [menuController showRootController:YES];
+            [navController popToRootViewControllerAnimated:NO];
+            return;
+        }
+        
+    }
+    
+    
     NSString *key = (tableView == self.tableView) ? [_dataSource objectAtIndex:indexPath.row] : [_anchorDataSource objectAtIndex:indexPath.row];
     NSString *value = (tableView == self.tableView) ? [_controllerStore objectForKey:key] : [_anchorControllerStore objectForKey:key];
     
@@ -247,13 +276,13 @@
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
 
-    if (self.tableView == tableView || [key isEqualToString:@"To-Do"]) {
+    if (self.tableView == tableView || YES) {
         
         [menuController setRootController:navController animated:YES];
         
     } else {
         
-        STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleBordered target:self action:@selector(done:)];
+        STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
         controller.navigationItem.rightBarButtonItem = item;
         [item release];
 
@@ -300,6 +329,18 @@
     UIViewController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller dismissModalViewControllerAnimated:YES];
     
+}
+
+
+#pragma mark - Configurations
+
++ (void)setupConfigurations {
+    [STConfiguration addString:@"The Feed" forKey:_inboxNameKey];
+    [STConfiguration addString:@"The Guide" forKey:_iWantToNameKey];
+    [STConfiguration addString:@"Activity" forKey:_newsNameKey];
+    [STConfiguration addString:@"People" forKey:_debugNameKey];
+    [STConfiguration addString:@"To-Do" forKey:_todoNameKey];
+    [STConfiguration addString:@"Settings" forKey:_settingsNameKey];
 }
 
 

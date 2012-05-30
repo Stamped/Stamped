@@ -269,8 +269,6 @@
 		
 	} else {
 		
-        self.tableView.scrollEnabled = NO;
-
 		if (_noDataView==nil) {
             
             CGFloat yOffset = self.tableView.tableHeaderView ? self.tableView.tableHeaderView.bounds.size.height : 0.0f;

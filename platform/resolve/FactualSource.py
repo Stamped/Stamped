@@ -25,6 +25,7 @@ try:
     from GenericSource              import generatorSource
     from pprint                     import pformat
     from gevent.pool                import Pool
+    from Schemas                    import *
 except:
     report()
     raise
@@ -333,7 +334,7 @@ class FactualSource(GenericSource):
                 raw_hours_s = data['hours']
                 try:
                     raw_hours = json.loads(raw_hours_s)
-                    hours = {}
+                    hours = TimesSchema()
                     broken = False
                     for k,v in raw_hours.items():
                         k = int(k)-1
@@ -341,13 +342,13 @@ class FactualSource(GenericSource):
                             day = self.__hours_map[k]
                             times = []
                             for slot in v:
-                                time_d = {}
-                                time_d['open'] = slot[0]
-                                time_d['close'] = slot[1]
+                                time_d = HoursSchema()
+                                time_d.open = slot[0]
+                                time_d.close = slot[1]
                                 if len(slot) > 2:
-                                    time_d['desc'] = slot[2]
+                                    time_d.desc = slot[2]
                                 times.append(time_d)
-                            hours[day] = times
+                            setattr(hours, day, times)
                         else:
                             broken = True
                             break

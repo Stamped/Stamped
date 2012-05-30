@@ -7,7 +7,8 @@
 //
 
 #import "STTableViewController.h"
+#import "STRestViewController.h"
 
-@interface STUniversalNewsController : STTableViewController
+@interface STUniversalNewsController : STRestViewController
 
 @end

@@ -47,7 +47,7 @@ try:
     from GooglePlacesSource         import GooglePlacesSource
     from AmazonSource               import AmazonSource
     from time                       import time
-    from Entity                     import subcategories, deriveTypesFromSubcategories, deriveKindFromSubcategory
+    from Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
 except:
     report()
     raise
@@ -322,18 +322,12 @@ def _convertCategorySubcategory(category, subcategory):
     types   = None
 
     if subcategory is not None:
-        kinds = set([deriveKindFromSubcategory(subcategory)])
-        types = set(deriveTypesFromSubcategories([subcategory]))
+        kinds = mapSubcategoryToKinds(subcategory)
+        types = mapSubcategoryToTypes(subcategory)
 
     elif category is not None:
-        kinds = set()
-        types = set()
-        for s, c in subcategories.iteritems():
-            if category == c:
-                kinds.add(deriveKindFromSubcategory(s))
-                t = set(deriveTypesFromSubcategories([s]))
-                for i in t:
-                    types.add(i)
+        kinds = mapCategoryToKinds(category)
+        types = mapCategoryToTypes(category)
 
     logs.debug('KINDS: %s' % kinds)
     logs.debug('TYPES: %s' % types)

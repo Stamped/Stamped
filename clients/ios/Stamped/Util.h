@@ -143,7 +143,7 @@ extern NSString* const kKeychainTwitterToken;
 
 + (CAGradientLayer*)addGradientToLayer:(CALayer*)view withColors:(NSArray*)colors vertical:(BOOL)vertical;
 
-+ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size;
++ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size;
 
 /*
 + (UIView*)profileImageViewForUser:(id<STUser>)user 
@@ -186,5 +186,7 @@ extern NSString* const kKeychainTwitterToken;
 + (NSNumber*)numberFromString:(NSString*)string;
 
 + (void)appendView:(UIView*)child toParentView:(UIView*)parent;
+
++ (NSURL*)cacheDirectory;
 
 @end

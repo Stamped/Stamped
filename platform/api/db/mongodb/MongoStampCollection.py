@@ -8,22 +8,23 @@ __license__   = "TODO"
 import Globals, utils
 import bson, logs, pprint, pymongo, re
 
-from datetime                       import datetime
-from utils                          import lazyProperty
-from api.Schemas                    import *
-from Entity                         import buildEntity
+from datetime                           import datetime
+from utils                              import lazyProperty
+from api.Schemas                        import *
+from Entity                             import buildEntity
 
-from api.AStampDB                   import AStampDB
-from AMongoCollection               import AMongoCollection
-from AMongoCollectionView           import AMongoCollectionView
-from MongoUserLikesCollection       import MongoUserLikesCollection
-from MongoStampLikesCollection      import MongoStampLikesCollection
-from MongoStampViewsCollection      import MongoStampViewsCollection
-from MongoUserStampsCollection      import MongoUserStampsCollection
-from MongoInboxStampsCollection     import MongoInboxStampsCollection
-from MongoDeletedStampCollection    import MongoDeletedStampCollection
-from MongoCreditGiversCollection    import MongoCreditGiversCollection
-from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
+from api.AStampDB                       import AStampDB
+from AMongoCollection                   import AMongoCollection
+from AMongoCollectionView               import AMongoCollectionView
+from MongoUserLikesCollection           import MongoUserLikesCollection
+from MongoUserLikesHistoryCollection    import MongoUserLikesHistoryCollection
+from MongoStampLikesCollection          import MongoStampLikesCollection
+from MongoStampViewsCollection          import MongoStampViewsCollection
+from MongoUserStampsCollection          import MongoUserStampsCollection
+from MongoInboxStampsCollection         import MongoInboxStampsCollection
+from MongoDeletedStampCollection        import MongoDeletedStampCollection
+from MongoCreditGiversCollection        import MongoCreditGiversCollection
+from MongoCreditReceivedCollection      import MongoCreditReceivedCollection
 
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     
@@ -117,6 +118,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def user_likes_collection(self):
         return MongoUserLikesCollection()
     
+    @lazyProperty
+    def user_likes_history_collection(self):
+        return MongoUserLikesHistoryCollection()
+    
     def addStamp(self, stamp):
         return self._addObject(stamp)
     
@@ -146,6 +151,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self.user_stamps_collection.removeAllUserStamps(userId)
     
     def addInboxStampReference(self, userIds, stampId):
+        if not isinstance(userIds, list):
+            userIds = [ userIds ]
         # Add a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.addInboxStamps(userIds, stampId)
     
@@ -250,18 +257,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         return self._collection.find(query).count()
     
-    def checkStamp(self, userId, entityId):
-        try:
-            document = self._collection.find_one({
-                'user.user_id': userId, 
-                'entity.entity_id': entityId,
-            })
-            if document['_id'] != None:
-                return True
-            raise
-        except Exception:
-            return False
-    
     def updateStampStats(self, stampId, stat, value=None, increment=1):
         key = 'stats.%s' % (stat)
         if value is not None:
@@ -275,7 +270,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 {'$inc': {key: increment}, 
                  '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
-    
+
+
     def getStampFromUserEntity(self, userId, entityId):
         try:
             document = self._collection.find_one({
@@ -285,6 +281,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return self._convertFromMongo(document)
         except Exception:
             return None
+
+    def checkStamp(self, userId, entityId):
+        return self.getStampFromUserEntity(userId, entityId) is not None
     
     def getStampsFromUsersForEntity(self, userIds, entityId):
         try:
@@ -380,18 +379,15 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return map(self._convertFromMongo, documents)
         except Exception:
             return []
-    
-    def giveLikeCredit(self, stampId):
-        self._collection.update(
-            {'_id': self._getObjectIdFromString(stampId)}, 
-            {'$set': {'stats.like_threshold_hit': True}}
-        )
+
         
     def addLike(self, userId, stampId):
         # Add a reference to the user in the stamp's 'like' collection
         self.stamp_likes_collection.addStampLike(stampId, userId) 
         # Add a reference to the stamp in the user's 'like' collection
         self.user_likes_collection.addUserLike(userId, stampId) 
+        # Add a reference to the stamp in the user's 'like' history collection
+        self.user_likes_history_collection.addUserLike(userId, stampId)
         # Update the modified timestamp
         self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
             {'$set': {'timestamp.modified': datetime.utcnow()}})
@@ -418,6 +414,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def getUserLikes(self, userId):
         # Return stamp ids that a user has "liked"
         return self.user_likes_collection.getUserLikes(userId) 
+
+    def getUserLikesHistory(self, userId):
+        return self.user_likes_history_collection.getUserLikes(userId)
+
+    def removeUserLikesHistory(self, userId):
+        return self.user_likes_history_collection.removeUserLikes(userId)
     
     def countStampLikes(self, stampId):
         return len(self.getStampLikes(stampId))

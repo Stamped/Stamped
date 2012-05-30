@@ -36,16 +36,16 @@ urlpatterns = patterns('',
     ### OAUTH
     (r'v0/oauth2/token.json',                       'v0.functions.oauth2.token'),
     (r'v0/oauth2/login.json',                       'v0.functions.oauth2.login'),
-    (r'v0/oauth2/login_with_facebook.json',         'v0.functions.oauth2.loginWithFacebook'),
-    (r'v0/oauth2/login_with_twitter.json',          'v0.functions.oauth2.loginWithTwitter'),
+    (r'v0/oauth2/login/facebook.json',              'v0.functions.oauth2.loginWithFacebook'),
+    (r'v0/oauth2/login/twitter.json',               'v0.functions.oauth2.loginWithTwitter'),
 
     ### ACCOUNT
     #
     # DOCUMENTED SAMPLE PATH DATA
     # establishes mapping of the REST command account/create to the implementing function, platform.servers.httpapi.v0.functions.account.create
     (r'v0/account/create.json',                     'v0.functions.account.create'),
-    (r'v0/account/create_with_facebook.json',       'v0.functions.account.createWithFacebook'),
-    (r'v0/account/create_with_twitter.json',        'v0.functions.account.createWithTwitter'),
+    (r'v0/account/create/facebook.json',            'v0.functions.account.createWithFacebook'),
+    (r'v0/account/create/twitter.json',             'v0.functions.account.createWithTwitter'),
     (r'v0/account/remove.json',                     'v0.functions.account.remove'),
     (r'v0/account/settings.json',                   'v0.functions.account.settings'),
     (r'v0/account/update_profile.json',             'v0.functions.account.update_profile'),
@@ -110,8 +110,8 @@ urlpatterns = patterns('',
     (r'v0/entities/show.json',                      'v0.functions.entities.show'),
     (r'v0/entities/update.json',                    'v0.functions.entities.update'),
     (r'v0/entities/remove.json',                    'v0.functions.entities.remove'),
+    (r'v0/entities/autosuggest.json',               'v0.functions.entities.autosuggest'),
     (r'v0/entities/search.json',                    'v0.functions.entities.search'),
-    (r'v0/entities/nearby.json',                    'v0.functions.entities.nearby'),
     (r'v0/entities/menu.json',                      'v0.functions.entities.menu'),
     (r'v0/entities/stamped_by.json',                'v0.functions.entities.stampedBy'),
     (r'v0/entities/suggested.json',                 'v0.functions.entities.suggested'),
@@ -127,6 +127,7 @@ urlpatterns = patterns('',
     (r'v0/stamps/remove.json',                      'v0.functions.stamps.remove'),
     (r'v0/stamps/collection.json',                  'v0.functions.stamps.collection'),
     (r'v0/stamps/search.json',                      'v0.functions.stamps.search'),
+    (r'v0/stamps/guide.json',                       'v0.functions.stamps.guide'),
     
     (r'v0/stamps/likes/create.json',                'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                'v0.functions.stamps.likesRemove'),
@@ -145,10 +146,11 @@ urlpatterns = patterns('',
     (r'v0/collections/suggested.json',              'v0.functions.collections.suggested'),
     (r'v0/collections/consumption.json',            'v0.functions.collections.consumption'),
     
-    ### FAVORITES
-    (r'v0/favorites/create.json',                   'v0.functions.favorites.create'),
-    (r'v0/favorites/remove.json',                   'v0.functions.favorites.remove'),
-    (r'v0/favorites/show.json',                     'v0.functions.favorites.show'),
+    ### TODOS
+    (r'v0/todos/create.json',                       'v0.functions.todos.create'),
+    (r'v0/todos/complete.json',                     'v0.functions.todos.complete'),
+    (r'v0/todos/remove.json',                       'v0.functions.todos.remove'),
+    (r'v0/todos/show.json',                         'v0.functions.todos.show'),
     
     ### ACTIVITY
     (r'v0/activity/show.json',                      'v0.functions.activity.show'),

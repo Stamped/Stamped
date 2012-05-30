@@ -8,8 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import sys, time
 
-from MongoStampedAPI import MongoStampedAPI
-from Entity          import setFields
+from resolve.EntitySearch   import EntitySearch
 from optparse       import OptionParser
 from pprint         import pprint
 
@@ -163,61 +162,47 @@ def parseCommandLine():
 
 def main():
     options, args = parseCommandLine()
-    
-    api      = MongoStampedAPI(lite_mode=True)
-    searcher = api._entitySearcher
-    
-    for i in xrange(1):
-        t1 = time.time()
-        results  = searcher.getSearchResults(query=args[0], 
-                                             coords=options.location, 
-                                             limit=options.limit, 
-                                             category_filter=options.category, 
-                                             subcategory_filter=options.subcategory, 
-                                             full=options.full, 
-                                             prefix=options.prefix, 
-                                             local=options.Local)
+
+    t1 = time.time()
+    results = EntitySearch().searchEntities(query=args[0],
+                                            limit=options.limit,
+                                            coords=options.location,
+                                            category=options.category,
+                                            subcategory=options.subcategory)
+    t2 = time.time()
+
+    duration = (t2 - t1) * 1000.0
+    print "search took %g ms" % duration
         
-        t2 = time.time()
-        duration = (t2 - t1) * 1000.0
-        print "search took %g ms" % duration
-        
-        # display all results
-        for result in results:
-            entity   = result[0]
-            distance = result[1]
-            
-            setFields(entity, detailed=True)
-            
-            if options.verbose:
-                data = entity.getDataAsDict()
-                if not options.Stats:
-                    try:
-                        del data['stats']
-                    except:
-                        pass
-            else:
-                data = { }
-                data['title']  = utils.normalize(entity.title)
-                data['subtitle'] = entity.subtitle
-                
-                #data['titles'] = utils.normalize(entity.simplified_title)
-                
-                data['subcategory'] = utils.normalize(entity.subcategory)
-                if 'address' in entity:
-                    data['addr'] = utils.normalize(entity.address)
-                #data['subtitle'] = utils.normalize(entity.subtitle)
-                
-                if options.Stats:
-                    data['stats'] = entity.getDataAsDict()['stats']
-            
-            if distance >= 0:
-                data['distance'] = distance
-            
-            pprint(data)
-        
-        print
-        print
+    # display all results
+    for result in results:
+        entity   = result
+
+        if options.verbose:
+            data = entity.dataExport()
+            if not options.Stats:
+                try:
+                    del data['stats']
+                except:
+                    pass
+        else:
+            data = { }
+            data['title']  = utils.normalize(entity.title)
+            data['subtitle'] = entity.subtitle
+
+            #data['titles'] = utils.normalize(entity.simplified_title)
+
+            data['subcategory'] = utils.normalize(entity.subcategory)
+            if hasattr(entity, 'address_locality') and entity.address_locality is not None:
+                data['addr'] = entity.formatAddress()
+            #data['subtitle'] = utils.normalize(entity.subtitle)
+
+            if options.Stats:
+                data['stats'] = entity.dataExport()['stats']
+        pprint(data)
+
+    print
+    print
 
 if __name__ == '__main__':
     main()

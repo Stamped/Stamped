@@ -285,6 +285,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def updateUserStats(self, userIdOrIds, stat, value=None, increment=1):
         if userIdOrIds is None or len(userIdOrIds) == 0:
             raise Exception("Invalid ids")
+
+        # TODO: Note that the following check and conversion is necessary for backward compatability
+        if stat == 'num_todos':
+            stat = 'num_faves'
             
         key = 'stats.%s' % stat
         
@@ -299,6 +303,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             self._collection.update(query, {'$set': {key: value}}, upsert=True)
         else:
             self._collection.update(query, {'$inc': {key: increment}}, upsert=True)
+
+    def updateDistribution(self, userId, distribution):
+        r = []
+        for i in distribution:
+            r.append(i.dataExport())
+        query = {'_id': self._getObjectIdFromString(userId)}
+        self._collection.update(query, {'$set': {'stats.distribution': r}}, upsert=True)
     
     def findUsersByEmail(self, emails, limit=0):
         queryEmails = []

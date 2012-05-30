@@ -26,50 +26,57 @@
 #import "STEveryoneStampsList.h"
 #import "STSliderScopeView.h"
 #import "STStampedActions.h"
+#import "STCache.h"
+#import "STSharedCaches.h"
 
 #import "EntityDetailViewController.h"
 #import "STStampCell.h"
 #import "AccountManager.h"
-
+#import "DDMenuController.h"
+#import "STActionManager.h"
 
 @interface STInboxViewController ()
 
 @property (nonatomic, readonly, retain) STSliderScopeView *slider;
-@property (nonatomic, readonly, retain) Stamps *stamps;
-@property (nonatomic, readonly, retain) Stamps *searchStamps;
+@property (nonatomic, readwrite, assign) STStampedAPIScope scope;
+@property (nonatomic, readwrite, copy) NSString* searchQuery;
+@property (nonatomic, readwrite, retain) STCache* cache;
+@property (nonatomic, readwrite, retain) STCacheSnapshot* snapshot;
+@property (nonatomic, readwrite, retain) NSArray<STStamp>* searchResults;
+@property (nonatomic, readwrite, assign) BOOL reloading;
 
 @end
 
 @implementation STInboxViewController
 
 @synthesize slider = _slider;
-@synthesize stamps = _stamps;
-@synthesize searchStamps = _searchStamps;
+@synthesize scope = _scope;
+@synthesize searchQuery = _searchQuery;
+@synthesize cache = _cache;
+@synthesize snapshot = _snapshot;
+@synthesize searchResults = _searchResults;
+@synthesize reloading = _reloading;
 
 - (id)init {
   if (self = [super init]) {
       
-      _stamps = [[Stamps alloc] init];
-      _stamps.identifier = [[self class] description];
-      
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stampsChanged:) name:[NSString stringWithFormat:@"stamps-%@", _stamps.identifier] object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
 
-      if ([AccountManager sharedManager].currentUser == nil) {
-          _stamps.scope = STStampedAPIScopeEveryone;
+      if ([STStampedAPI sharedInstance].currentUser == nil) {
+          _scope = STStampedAPIScopeEveryone;
       } else {
-          _stamps.scope = STStampedAPIScopeFriends;
+          _scope = STStampedAPIScopeFriends;
       }
-      
+      _searchQuery = nil;
+      _reloading = YES;
   }
   return self;
 }
 
 - (void)dealloc {
     
-    if (_searchStamps) {
-        [_searchStamps release], _searchStamps=nil;
-    }
-    [_stamps release], _stamps=nil;
     [_slider release], _slider=nil;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -81,18 +88,29 @@
   
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
 
+    if (!LOGGED_IN) {
+        
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        self.navigationItem.rightBarButtonItem = button;
+        [button release];
+        
+    } else {
+        
+        [Util addCreateStampButtonToController:self];
+
+    }
+    
     [Util addHomeButtonToController:self withBadge:YES];
-    [Util addCreateStampButtonToController:self];
     
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;
         self.footerView = _slider;
-        _slider.scope = _stamps.scope;
+        _slider.scope = self.scope;
     }
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search stamps"];
-    [self reloadDataSource];
+    [self.tableView reloadData];
     
     
     UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0.0f, -300.0f, self.view.bounds.size.width, 241.0f)];
@@ -100,7 +118,8 @@
     header.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
     [self.tableView addSubview:header];
     [header release];
-    
+
+    [self updateCache];
 }
 
 - (void)viewDidUnload {
@@ -108,85 +127,124 @@
     [_slider release];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    //Resume cache ops
+}
+
 - (void)viewDidDisappear:(BOOL)animated {
+    //Todo cancel pending cache ops
     [super viewDidDisappear:animated];
 }
 
 
-#pragma mark - Stamps Notifications 
+#pragma mark - Cache Methods
 
-- (void)stampsChanged:(NSNotification *)notification {
-    
-    NSInteger sections = [self.tableView numberOfSections];
-    UITableView *tableView = self.searching ? _searchResultsTableView : self.tableView;
-    
-    if (sections == 0 && ![_stamps isEmpty]) {
-        
-        [tableView beginUpdates];
-        [tableView insertSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-        [tableView endUpdates];
-        
-    } else {
-        
-        CGPoint offset = tableView.contentOffset;
-        [tableView reloadData];
-        tableView.contentOffset = offset;
-        
+- (void)updateCache {
+    self.cache = nil;
+    self.snapshot = nil;
+    STCache* fastCache = [STSharedCaches cacheForInboxScope:self.scope];
+    if (!fastCache) {
+        [STSharedCaches cacheForInboxScope:self.scope withCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
+            NSLog(@"hereafdsa:%@",cache);
+            if (cache) {
+                //Fast cache will be set this time
+                [self updateCache];
+            }
+        }];
     }
+    else {
+        self.cache = fastCache;
+        self.snapshot = self.cache.snapshot;
+        [self reloadDataSource];
+    }
+    [self.tableView reloadData];
+}
 
+- (void)cacheWillLoadPage:(NSNotification *)notification {
+    self.reloading = YES;
+    [self.tableView reloadData];
+}
+
+- (void)cacheDidLoadPage:(NSNotification *)notification {
+    self.reloading = NO;
     [self dataSourceDidFinishLoading];
+    [self.tableView reloadData];
+}
 
+- (void)cacheUpdate:(NSNotification *)notification {
+    NSLog(@"Got cache notification");
+    if (self.cache) {
+        self.snapshot = self.cache.snapshot;
+        NSLog(@"New count is %d", self.snapshot.count);
+        [self.tableView reloadData];
+    }
 }
 
 
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
-    [_stamps setScope:scope];
-    [self.tableView reloadData];
-    [self dataSourceDidFinishLoading];
-    [self.tableView setContentOffset:CGPointMake(0.0f, 48.0f)];
-    [self reloadDataSource];
+    self.scope = scope;
+    [self updateCache];
+    if (self.showsSearchBar) {
+        [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
+    }
 }
 
 
 #pragma mark - UITableViewDataSouce
 
+- (id<STStamp>)stampForTableView:(UITableView*)tableView atIndexPath:(NSIndexPath*)indexPath {
+    id<STStamp> stamp = nil;
+    if (tableView == _searchResultsTableView) {
+        stamp = [self.searchResults objectAtIndex:indexPath.row];
+    }
+    else {
+        stamp = [self.snapshot objectAtIndex:indexPath.row];
+    }
+    return stamp;
+}
+
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps : _stamps stampAtIndex:indexPath.row];
-    return [STStampCell heightForStamp:stamp];
+    id<STStamp> stamp = [self stampForTableView:tableView atIndexPath:indexPath];
+    if (stamp) {
+        return [STStampCell heightForStamp:stamp];
+    }
+    else {
+        //TODO get number
+        return 44;
+    }
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    
     if (tableView == _searchResultsTableView) {
-        return [_searchStamps isEmpty] ? 0 : 1;
+        return self.searchResults.count == 0 ? 0 : 1;
     }
-    
-    return [_stamps isEmpty] ? 0 : 1;
-    
+    else {
+        return self.snapshot.count == 0 ? 0 : 1;
+    }
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    
     if (tableView == _searchResultsTableView) {
-        return [_searchStamps numberOfStamps];
+        return self.searchResults.count;
     }
-    
-    return [_stamps numberOfStamps];
+    else {
+        return self.snapshot.count;
+    }
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   
     static NSString *CellIdentifier = @"CellIdentifier";
-    
+    [self.cache refreshAtIndex:indexPath.row+1 force:NO];
     STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
         cell.delegate = (id<STStampCellDelegate>)self;
     }
     
-    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps : _stamps stampAtIndex:indexPath.row];
+    id<STStamp> stamp = [self stampForTableView:tableView atIndexPath:indexPath];
     [cell setupWithStamp:stamp];
     
     return cell;
@@ -197,10 +255,11 @@
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-
-    id<STStamp> stamp = [(tableView == _searchResultsTableView) ? _searchStamps :_stamps stampAtIndex:indexPath.row];
-    [[STStampedActions sharedInstance] viewStampWithStampID:stamp.stampID];
-    
+    id<STStamp> stamp = [self stampForTableView:tableView atIndexPath:indexPath];
+    STActionContext* context = [STActionContext context];
+    context.stamp = stamp;
+    id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
 
@@ -210,7 +269,7 @@
     
     UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
     NSIndexPath *indexPath = [tableview indexPathForCell:cell];
-    id<STStamp> stamp = [(tableview==_searchResultsTableView) ? _searchStamps :_stamps stampAtIndex:indexPath.row];
+    id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
     [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
@@ -228,30 +287,25 @@
 - (void)stSearchViewDidEndSearching:(STSearchView*)view {
     [super stSearchViewDidEndSearching:view];
     
-    if (_searchStamps) {
-        [_searchStamps release], _searchStamps=nil;
-    }
-    
+    self.searchResults = nil;
+    self.searchQuery = nil;
 }
 
 - (void)stSearchViewDidBeginSearching:(STSearchView *)view {
     [super stSearchViewDidBeginSearching:view];
     
-    if (!_searchStamps) {
-        _searchStamps = [[Stamps alloc] init];
-        _searchStamps.identifier = [[self class] description];
-    }
-    
+    self.searchQuery = nil;
 }
 
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
     [super stSearchView:view textDidChange:text];
-    _stamps.searchQuery = text;
+    self.searchQuery = text;
 }
 
 - (void)stSearchViewHitSearch:(STSearchView *)view withText:(NSString*)text {
     
-    [_searchStamps searchWithQuery:text];
+    //TODO
+    //[_searchStamps searchWithQuery:text];
     
 }
 
@@ -259,24 +313,24 @@
 #pragma mark - STRestController 
 
 - (BOOL)dataSourceReloading {
-    return [_stamps isReloading];
+    return self.reloading;
 }
 
 - (void)loadNextPage {
-    [_stamps loadNextPage];
+    [self.cache refreshAtIndex:self.snapshot.count force:NO];
 }
 
 - (BOOL)dataSourceHasMoreData {
-    return [_stamps hasMoreData];
+    return self.cache.hasMore;
 }
 
 - (void)reloadDataSource {
-    [_stamps reloadData];
+    [self.cache refreshAtIndex:-1 force:YES];
     [super reloadDataSource];
 }
 
 - (BOOL)dataSourceIsEmpty {
-    return [_stamps isEmpty];
+    return self.snapshot.count == 0;
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
@@ -284,7 +338,66 @@
     view.imageView.userInteractionEnabled = YES;
     [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
-    if (_stamps.scope == STStampedAPIScopeYou) {
+    if (!LOGGED_IN || (LOGGED_IN && self.scope != STStampedAPIScopeYou)) {
+        
+        UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setTitle:LOGGED_IN ? @"Find friends to follow" : @"Sign in / Create account" forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(noDataAction:) forControlEvents:UIControlEventTouchUpInside];
+        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
+        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
+        [button sizeToFit];
+        [view.imageView addSubview:button];
+        CGRect frame = button.frame;
+        frame.origin.y = 34.0f;
+        frame.size.width += 48.0f;
+        frame.size.height = image.size.height;
+        frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
+        button.frame = frame;
+        CGFloat maxY = CGRectGetMaxY(button.frame);
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+        label.font = [UIFont systemFontOfSize:12];
+        label.backgroundColor = [UIColor clearColor];
+        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
+        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+        [view.imageView addSubview:label];
+        [label release];
+        
+        switch (self.scope) {
+            case STStampedAPIScopeYou:
+                label.text = @"to create stamps.";
+                break;
+            case STStampedAPIScopeFriends:
+                label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
+                break;
+            case STStampedAPIScopeFriendsOfFriends:
+                label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
+                break;
+            case STStampedAPIScopeEveryone:
+                label.text = @"to view popular stamps.";
+                break;
+                
+            default:
+                break;
+        }
+        
+        [label sizeToFit];
+        
+        frame = label.frame;
+        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
+        frame.origin.y = floorf(maxY + 8.0f);
+        label.frame = frame;
+        
+        
+        
+    }
+    
+    if (LOGGED_IN && self.scope == STStampedAPIScopeYou) {
         
         view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
         view.imageView.backgroundColor = view.backgroundColor;
@@ -333,58 +446,18 @@
         label.frame = frame;
         
         UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(noDataTapped:)];
+        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         [view addGestureRecognizer:gesture];
         [gesture release];
         
-    } else {
-        
-        UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
-        [button setTitle:@"Find friends to follow" forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(findFriends:) forControlEvents:UIControlEventTouchUpInside];
-        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-        [button sizeToFit];
-        [view.imageView addSubview:button];
-        CGRect frame = button.frame;
-        frame.origin.y = 34.0f;
-        frame.size.width += 48.0f;
-        frame.size.height = image.size.height;
-        frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
-        button.frame = frame;
-        CGFloat maxY = CGRectGetMaxY(button.frame);
-
-        
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.font = [UIFont systemFontOfSize:12];
-        label.backgroundColor = [UIColor clearColor];
-        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
-        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
-        [view.imageView addSubview:label];
-        [label release];
-        
-        label.text = @"to view their stamps.";
-        [label sizeToFit];
-        
-        frame = label.frame;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
-        frame.origin.y = floorf(maxY + 8.0f);
-        label.frame = frame;
-        
-    }
-    
- 
+    } 
 
 }
 
 
 #pragma mark - No Data Actions
 
-- (void)findFriends:(id)sender {
+- (void)noDataAction:(id)sender {
     
     
 }
@@ -439,6 +512,17 @@
     });
     
 }
+
+
+#pragma mark - UIGestureRecognizerDelegate 
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
+    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    return ![[menuController tap] isEnabled];
+    
+}
+
 
 
 @end

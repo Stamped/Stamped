@@ -326,7 +326,7 @@ class MongoFriendshipCollection(AFriendshipDB):
                 pass
             
             summation = 0.0
-            for category in [ 'food', 'music', 'film', 'book', 'other' ]:
+            for category in [ 'place', 'music', 'film', 'book', 'app', 'other' ]:
                 diff = user_categories[category] - categories[category]
                 summation += diff * diff
             

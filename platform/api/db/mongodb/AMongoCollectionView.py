@@ -44,16 +44,21 @@ class AMongoCollectionView(AMongoCollection):
         # handle before / since filters
         # -----------------------------
         if timeSlice.before is not None:
-            query['timestamp.stamped'] = { '$lte': timeSlice.before }
-            query['timestamp.created'] = { '$lte': timeSlice.before } # Legacy support
-        
+            add_or_query ([
+                {'timestamp.stamped': { '$lt': timeSlice.before }},
+                {'timestamp.created': { '$lt': timeSlice.before }} # Legacy support
+            ])
+
         # handle category / subcategory filters
         # -------------------------------------
         if timeSlice.category is not None:
             raise NotImplementedError("NEED TO BUILD TIMESLICE CATEGORIES")
-            kinds           = deriveKindFromCategory(timeSlice.category) 
-            types           = deriveTypesFromCategory(timeSlice.category)
-            subcategories   = deriveSubcategoriesFromCategory(timeSlice.category)
+            # kinds           = deriveKindFromCategory(timeSlice.category) 
+            # types           = deriveTypesFromCategory(timeSlice.category)
+            # subcategories   = deriveSubcategoriesFromCategory(timeSlice.category)
+            kinds           = mapCategoryToKinds(timeSlice.category) 
+            types           = mapCategoryToTypes(timeSlice.category)
+            subcategories   = mapCategoryToSubcategories(timeSlice.category)
             
             kinds_and_types = []
             if len(kinds) > 0:
@@ -135,9 +140,12 @@ class AMongoCollectionView(AMongoCollection):
         # -------------------------------------
         if searchSlice.category is not None:
             raise NotImplementedError("NEED TO BUILD searchSlice CATEGORIES")
-            kinds           = deriveKindFromCategory(searchSlice.category) 
-            types           = deriveTypesFromCategory(searchSlice.category)
-            subcategories   = deriveSubcategoriesFromCategory(searchSlice.category)
+            # kinds           = deriveKindFromCategory(searchSlice.category) 
+            # types           = deriveTypesFromCategory(searchSlice.category)
+            # subcategories   = deriveSubcategoriesFromCategory(searchSlice.category)
+            kinds           = mapCategoryToKinds(searchSlice.category) 
+            types           = mapCategoryToTypes(searchSlice.category)
+            subcategories   = mapCategoryToSubcategories(searchSlice.category)
             
             kinds_and_types = []
             if len(kinds) > 0:
@@ -288,9 +296,12 @@ class AMongoCollectionView(AMongoCollection):
         # handle category / subcategory filters
         # -------------------------------------
         if genericCollectionSlice.category is not None:
-            kinds           = deriveKindFromCategory(genericCollectionSlice.category) 
-            types           = deriveTypesFromCategory(genericCollectionSlice.category)
-            subcategories   = deriveSubcategoriesFromCategory(genericCollectionSlice.category)
+            # kinds           = deriveKindFromCategory(genericCollectionSlice.category) 
+            # types           = deriveTypesFromCategory(genericCollectionSlice.category)
+            # subcategories   = deriveSubcategoriesFromCategory(genericCollectionSlice.category)
+            kinds           = mapCategoryToKinds(genericCollectionSlice.category) 
+            types           = mapCategoryToTypes(genericCollectionSlice.category)
+            subcategories   = mapCategoryToSubcategories(genericCollectionSlice.category)
             
             kinds_and_types = []
             if len(kinds) > 0:

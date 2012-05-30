@@ -76,9 +76,6 @@ class SuggestedSearchTests(ASearchTestSuite):
     def test_place(self):
         self._test_suggestions(category='place', coords=(40.7360067, -73.98884296)) # NYC
     
-    def test_food(self):
-        self._test_suggestions(category='food', coords=(37.7622, -122.42)) # SF
-    
     def test_music(self):
         self._test_suggestions(category='music')
     
