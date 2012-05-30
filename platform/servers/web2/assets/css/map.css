@@ -24,7 +24,7 @@ footer {
 }
 .stamp-map {
   position: relative;
-  margin: 10px 0 0;
+  margin: 0 0 0;
   -webkit-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   -moz-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   -ms-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
@@ -121,4 +121,7 @@ footer {
 }
 .stamp-map .stamp-map-canvas .marker .marker-content p.blurb:hover {
   cursor: text;
+}
+#main-content {
+  visibility: visible;
 }

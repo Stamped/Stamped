@@ -32,6 +32,24 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
+#@handleHTTPRequest(requires_auth=False,
+#                   requires_client=True,
+#                   http_schema=HTTPAccountNew,
+#                   conversion=HTTPAccountNew.convertToAccount,
+#                   upload='profile_image')
+#@require_http_methods(["POST"])
+#def upgradeAccount(request, client_id, http_schema, schema, **kwargs):
+#    logs.info('account schema passed in: %s' % schema)
+#    schema = stampedAPI.addAccount(schema, http_schema.profile_image)
+#
+#    user   = HTTPUser().importAccount(schema)
+#    logs.user(user.user_id)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
+
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPFacebookAccountNew,

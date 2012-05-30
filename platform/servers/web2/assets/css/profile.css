@@ -59,6 +59,53 @@
 #main-content {
   position: relative;
 }
+.stamp-gallery-header {
+  margin: 1em 5% 0;
+}
+.stamp-gallery-header .stamp-gallery-sort {
+  position: relative;
+  z-index: 80;
+  float: left;
+}
+.stamp-gallery-header .stamp-gallery-sort .item {
+  display: none;
+  position: absolute;
+}
+.stamp-gallery-header .stamp-gallery-sort .item .arrow {
+  display: none;
+  font-size: 80%;
+}
+.stamp-gallery-header .stamp-gallery-sort .selected {
+  display: block;
+  position: relative;
+}
+.stamp-gallery-header .stamp-gallery-sort .selected .arrow {
+  display: inline;
+}
+.stamp-gallery-header .stamp-gallery-view-map {
+  float: right;
+}
+.stamp-gallery-header .expanded {
+  background: #fff;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.stamp-gallery-header .expanded .item,
+.stamp-gallery-header .expanded .selected {
+  display: block;
+  position: absolute;
+}
+.stamp-gallery-header .expanded .item .arrow,
+.stamp-gallery-header .expanded .selected .arrow {
+  display: none;
+}
+.stamp-gallery-header .expanded .item:first-child {
+  position: relative;
+}
 .stamp-gallery {
   position: relative;
   width: 75%;

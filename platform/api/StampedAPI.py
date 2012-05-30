@@ -286,7 +286,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        user = self._facebook.getUserInfo(new_fb_account.facebook_token)
+        user = self._facebook.getUserInfo(new_fb_account.user_token)
 
         account = None
         try:

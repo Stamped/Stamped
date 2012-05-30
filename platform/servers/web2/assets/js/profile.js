@@ -16,13 +16,15 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        var client      = new StampedClient();
-        var screen_name = STAMPED_PRELOAD.user.screen_name;
-        var $body       = $('body');
-        
+        var client                  = new StampedClient();
+        var screen_name             = STAMPED_PRELOAD.user.screen_name;
+        var $body                   = $('body');
+        var selected                = 'selected';
+        var selected_sel            = '.' + selected;
         var sdetail_popup           = 'sdetail_popup';
         var sdetail_wrapper         = 'sdetail_wrapper';
         var sdetail_wrapper_sel     = '.' + sdetail_wrapper;
+        var collapsed_header        = 'collapsed-header';
         var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
         var update_navbar_layout    = null;
         var close_sdetail_func      = null;
@@ -771,7 +773,7 @@ var g_update_stamps = null;
             // nearest value s.t. it's either at maximum size or minimum size
             var cur_ratio = Math.round(last_ratio);
             
-            if (!$body.hasClass(sdetail_popup)) {
+            if (!($body.hasClass(sdetail_popup) || $body.hasClass(collapsed_header))) {
                 // if we're not in sdetail, set the dynamic header's size ratio to be 
                 // proportional to the window's current vertical scroll offset
                 cur_ratio = (header_height - $window.scrollTop()) / header_height;
@@ -1048,6 +1050,8 @@ var g_update_stamps = null;
                     }
                     
                     History.pushState(params, title, params_str);
+                } else {
+                    alert("TODO: support navigation when browser history is disabled");
                 }
                 
                 return false;
@@ -1310,6 +1314,63 @@ var g_update_stamps = null;
                     close_sdetail_func();
                 }
             }
+        });
+        
+        $('.stamp-gallery-sort a.item').click(function(event) {
+            event.preventDefault();
+            var $this   = $(this);
+            var $parent = $this.parent('.stamp-gallery-sort');
+            
+            if ($parent.hasClass('expanded')) {
+                $parent.removeClass('expanded').find(selected_sel).removeClass(selected);
+                $this.addClass('selected');
+                
+                var sort = undefined;
+                
+                if ($this.hasClass('sort-modified')) {
+                    sort = 'modified';
+                } else if ($this.hasClass('sort-popularity')) {
+                    sort = 'popularity';
+                }
+                
+                if (typeof(sort) !== 'undefined') {
+                    var params = get_custom_params({
+                        sort : sort
+                    });
+                    
+                    if (History && History.enabled) {
+                        var params_str = get_custom_params_string(params);
+                        
+                        History.pushState(params, document.title, params_str);
+                    } else {
+                        alert("TODO: support navigation when browser history is disabled");
+                    }
+                }
+            } else {
+                $parent.addClass('expanded');
+            }
+            
+            return false;
+        });
+        
+        $('.stamp-gallery-view-map a').click(function(event) {
+            event.preventDefault();
+            var $this = $(this);
+            
+            // TODO
+            console.debug("TODO: stamp-gallery-view-map functionality");
+            
+            if (History && History.enabled) {
+                //var params_str = get_custom_params_string(params);
+                //History.pushState(params, title, params_str);
+            } 
+            
+            var url = get_custom_url({}, "/" + screen_name + "/map");
+            var title = "Stamped - " + screen_name + " - map";
+            
+            window.location = url;
+            
+            return false;
         });
         
         return;
