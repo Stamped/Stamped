@@ -18,7 +18,7 @@ import MongoInboxStampsCollection
 import MongoStampCollection
 import MongoStampCommentsCollection
 import MongoUserCollection
-import MongoUserTodoEntitiesCollection
+import MongoUserTodosEntitiesCollection
 import MongoUserStampsCollection
 # import MongoEntitySearcher
 import MongoPlacesEntityCollection

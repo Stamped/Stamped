@@ -9,20 +9,20 @@ import Globals
 
 from AMongoCollection import AMongoCollection
 
-class MongoUserLikesHistoryCollection(AMongoCollection):
-    
+class MongoUserTodosHistoryCollection(AMongoCollection):
+
     def __init__(self):
-        AMongoCollection.__init__(self, collection='userlikeshistory')
-    
+        AMongoCollection.__init__(self, collection='usertodoshistory')
+
     ### PUBLIC
-    
-    def addUserLike(self, userId, stampId):
-        self._createRelationship(keyId=userId, refId=stampId)
+
+    def addUserTodo(self, userId, todoId):
+        self._createRelationship(keyId=userId, refId=todoId)
         return True
-            
-    def getUserLikes(self, userId, limit=None):
+
+    def getUserTodos(self, userId, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId, limit)
 
-    def removeUserLikes(self, userId):
+    def removeUserTodos(self, userId):
         return self._removeAllRelationships(userId)

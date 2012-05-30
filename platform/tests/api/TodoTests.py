@@ -19,8 +19,7 @@ class StampedAPITodoTest(AStampedAPITestCase):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.entity = self.createEntity(self.tokenA)
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
-        self.todo = self.createTodo(self.tokenB,\
-            self.entity['entity_id'])
+        self.todo = self.createTodo(self.tokenB, self.entity['entity_id'])
 
     def tearDown(self):
         self.deleteTodo(self.tokenB, self.entity['entity_id'])
@@ -65,6 +64,29 @@ class StampedAPITodosComplete(StampedAPITodoTest):
             }
         result = self.handleGET(path, data)
         self.assertEqual(result[0]['complete'], False)
+
+class StampedAPITodosPreviews(StampedAPITodoTest):
+    def test_previews_friends(self):
+        # Create User C and User D, who also todo the tntity.  User B should see both users in the preview
+        (self.userC, self.tokenC) = self.createAccount('UserC')
+        (self.userD, self.tokenD) = self.createAccount('UserD')
+        self.createFriendship(self.tokenC, self.userB)
+        self.createFriendship(self.tokenD, self.userB)
+        self.todo = self.createTodo(self.tokenC, self.entity['entity_id'])
+        self.todo = self.createTodo(self.tokenD, self.entity['entity_id'])
+
+        path = "todos/show.json"
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            }
+        result = self.handleGET(path, data)
+
+        self.assertEqual(len(result[0]['previews']['todos']), 2)
+
+        self.deleteTodo(self.tokenD, self.entity['entity_id'])
+        self.deleteTodo(self.tokenC, self.entity['entity_id'])
+        self.deleteAccount(self.tokenD)
+        self.deleteAccount(self.tokenC)
 
 class StampedAPITodosAlreadyComplete(StampedAPITodoTest):
     def test_create_completed(self):
