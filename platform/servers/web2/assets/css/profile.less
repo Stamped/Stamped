@@ -19,19 +19,50 @@
     margin: 1em 5% 0;
     
     .stamp-gallery-sort {
+        position: relative;
+        z-index: 80;
         float: left;
         
         .item {
             display: none;
+            position: absolute;
+            
+            .arrow {
+                display: none;
+                font-size: 80%;
+            }
         }
         
-        .item:first-child {
+        .selected {
             display: block;
+            position: relative;
+            
+            .arrow {
+                display: inline;
+            }
         }
     }
     
     .stamp-gallery-view-map {
         float: right;
+    }
+    
+    .expanded {
+        background: #fff;
+        .rounded(4px);
+        
+        .item, .selected {
+            display: block;
+            position: absolute;
+            
+            .arrow {
+                display: none;
+            }
+        }
+        
+        .item:first-child {
+            position: relative;
+        }
     }
 }
 

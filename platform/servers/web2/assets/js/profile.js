@@ -16,10 +16,11 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        var client      = new StampedClient();
-        var screen_name = STAMPED_PRELOAD.user.screen_name;
-        var $body       = $('body');
-        
+        var client                  = new StampedClient();
+        var screen_name             = STAMPED_PRELOAD.user.screen_name;
+        var $body                   = $('body');
+        var selected                = 'selected';
+        var selected_sel            = '.' + selected;
         var sdetail_popup           = 'sdetail_popup';
         var sdetail_wrapper         = 'sdetail_wrapper';
         var sdetail_wrapper_sel     = '.' + sdetail_wrapper;
@@ -1317,10 +1318,37 @@ var g_update_stamps = null;
         
         $('.stamp-gallery-sort a.item').click(function(event) {
             event.preventDefault();
-            var $this = $(this);
+            var $this   = $(this);
+            var $parent = $this.parent('.stamp-gallery-sort');
             
-            // TODO
-            console.debug("TODO: stamp-gallery-sort functionality");
+            if ($parent.hasClass('expanded')) {
+                $parent.removeClass('expanded').find(selected_sel).removeClass(selected);
+                $this.addClass('selected');
+                
+                var sort = undefined;
+                
+                if ($this.hasClass('sort-modified')) {
+                    sort = 'modified';
+                } else if ($this.hasClass('sort-popularity')) {
+                    sort = 'popularity';
+                }
+                
+                if (typeof(sort) !== 'undefined') {
+                    var params = get_custom_params({
+                        sort : sort
+                    });
+                    
+                    if (History && History.enabled) {
+                        var params_str = get_custom_params_string(params);
+                        
+                        History.pushState(params, document.title, params_str);
+                    } else {
+                        alert("TODO: support navigation when browser history is disabled");
+                    }
+                }
+            } else {
+                $parent.addClass('expanded');
+            }
             
             return false;
         });
