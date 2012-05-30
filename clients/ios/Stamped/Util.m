@@ -779,24 +779,36 @@ static Rdio* _rdio;
     return gradient;
 }
 
-+ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
++ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size {
     
     UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
     imageView.layer.borderWidth = 1.5;
     imageView.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
     imageView.layer.borderColor = [UIColor whiteColor].CGColor;
-    imageView.layer.shadowOffset = CGSizeMake(0,2);
+    imageView.layer.shadowOffset = CGSizeMake(0,1);
     imageView.layer.shadowOpacity = .3;
-    imageView.layer.shadowRadius = 2;
+    imageView.layer.shadowRadius = 1;
     imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
     
-    
-    UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:size];
+    STProfileImageSize profileSize = STProfileImageSize31;
+    if (size > profileSize) {
+        profileSize = STProfileImageSize37;
+        if (size > profileSize) {
+            profileSize = STProfileImageSize46;
+            if (size > profileSize) {
+                profileSize = STProfileImageSize55;
+                if (size > profileSize) {
+                    profileSize = STProfileImageSize72;
+                }
+            }
+        }
+    }
+    UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
     if (cachedImage) {
         imageView.image = cachedImage;
     }
     else {
-        [[STImageCache sharedInstance] userImageForUser:user size:size andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+        [[STImageCache sharedInstance] userImageForUser:user size:profileSize andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
             imageView.image = image;
         }];
     }

@@ -1468,6 +1468,10 @@
 		63313535156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63313536156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63313537156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
+		633173B51575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
+		633173B61575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
+		633173B71575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
+		633173B81575C45A0033E90C /* StampedDev copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 633173B41575C45A0033E90C /* StampedDev copy-Info.plist */; };
 		63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C691540CFE400C8F7D3 /* STPeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C681540CFE400C8F7D3 /* STPeopleViewController.m */; };
@@ -4393,7 +4397,6 @@
 		031F0E8F156D6B6D007C1C03 /* refresh_sticky_end@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "refresh_sticky_end@2x.png"; sourceTree = "<group>"; };
 		031F0E94156D88F7007C1C03 /* welcome_popover_images@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_popover_images@2x.png"; sourceTree = "<group>"; };
 		034BE3441562F6980008F160 /* StampedEther copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StampedEther copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		034BE3461562F6980008F160 /* StampedEther copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "StampedEther copy-Info.plist"; path = "/Users/devin/Documents/iOS Dev/Stamped/clients/ios/StampedEther copy-Info.plist"; sourceTree = "<absolute>"; };
 		0358C8FE15746E8100FD1597 /* STPagedImageViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPagedImageViewer.h; sourceTree = "<group>"; };
 		0358C8FF15746E8100FD1597 /* STPagedImageViewer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPagedImageViewer.m; sourceTree = "<group>"; };
 		0358C9051575058500FD1597 /* STMusicPopoverController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMusicPopoverController.h; sourceTree = "<group>"; };
@@ -4561,6 +4564,7 @@
 		63313531156C268C00BF9B8D /* STLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoginResponse.h; sourceTree = "<group>"; };
 		63313532156C273300BF9B8D /* STSimpleLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleLoginResponse.h; sourceTree = "<group>"; };
 		63313533156C273300BF9B8D /* STSimpleLoginResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleLoginResponse.m; sourceTree = "<group>"; };
+		633173B41575C45A0033E90C /* StampedDev copy-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "StampedDev copy-Info.plist"; path = "../../../../Downloads/StampedDev copy-Info.plist"; sourceTree = "<group>"; };
 		63323C621540C1A400C8F7D3 /* STTodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoViewController.h; sourceTree = "<group>"; };
 		63323C631540C1A400C8F7D3 /* STTodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTodoViewController.m; sourceTree = "<group>"; };
 		63323C671540CFE400C8F7D3 /* STPeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPeopleViewController.h; sourceTree = "<group>"; };
@@ -6455,6 +6459,7 @@
 				63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */,
 				63733FFA1521217400EEFAB3 /* STViewDelegateDependent.h */,
 				6323F0D31524DF8900BE408C /* STMenu.h */,
+				633CEF4715386FFB009E1C06 /* STStampedByGroup.h */,
 				6323F0D41524E08C00BE408C /* STSubmenu.h */,
 				6323F0D51524E10E00BE408C /* STMenuSection.h */,
 				6323F0D61524E16900BE408C /* STMenuItem.h */,
@@ -6470,7 +6475,6 @@
 				63CC443F152DEE6D0026BB25 /* STTodo.h */,
 				63E5E6A8152E2B1F00579369 /* STImage.h */,
 				633CEF4615386F92009E1C06 /* STStampedBy.h */,
-				633CEF4715386FFB009E1C06 /* STStampedByGroup.h */,
 				633F26AF153883DF00391F15 /* STUserDetail.h */,
 				633F26C61538D04000391F15 /* STBadge.h */,
 				633F26D71538DBE400391F15 /* STDistributionItem.h */,
@@ -7764,7 +7768,7 @@
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
 				1E5AFFC5141D2A5000772F11 /* Vendor */,
 				7EC0177213C3754300ABE6E2 /* Products */,
-				034BE3461562F6980008F160 /* StampedEther copy-Info.plist */,
+				633173B41575C45A0033E90C /* StampedDev copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -9284,6 +9288,7 @@
 				03F2335C156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F91571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FD1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
+				633173B81575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10008,6 +10013,7 @@
 				03F2335B156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F81571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FC1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
+				633173B71575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10732,6 +10738,7 @@
 				03F2335A156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F71571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FB1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
+				633173B61575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11459,6 +11466,7 @@
 				03F23359156EEA8700473221 /* login_keyboard_btn@2x.png in Resources */,
 				633FB5F61571545600D7D776 /* OLD_shelf_background.png in Resources */,
 				633FB5FA1571545600D7D776 /* OLD_shelf_background@2x.png in Resources */,
+				633173B51575C45A0033E90C /* StampedDev copy-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12837,8 +12845,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -12866,8 +12874,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -12912,8 +12920,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "76F6A54C-E023-4C52-930D-C8B217842441";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "76F6A54C-E023-4C52-930D-C8B217842441";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -12959,8 +12967,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "76F6A54C-E023-4C52-930D-C8B217842441";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "76F6A54C-E023-4C52-930D-C8B217842441";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
