@@ -42,10 +42,18 @@
 
 
 TODO:
-    * ask anthony what 'screen' blending mode means for header cover images
-    * test entity headers on profile page
-        * need to transform both gradient and header image layer together w/ perspective
-        * transform parent
+    * sDetail:
+        * CLOSE - "Anatomy of eDetail section" spec
+        * Polish social sharing buttons
+        * DONE - Opening / closing animations
+        * Comment collapsing ala Google Plus
+        * Move like / todo / comment counters to their own section
+    * First cut at map view integration
+    * Profile Page:
+        * Header functionality w/ temp header images
+        * Sort stamps by popularity
+    
+    * experiment with 'screen' blending mode for header cover images
     
     * SDETAIL
         * layout and initialize social buttons correctly
@@ -130,4 +138,13 @@ OLD:
 
 NOTES:
     * no feedback icons in case of no feedback looks inconsistent
+
+
+CHANGELIST:
+    * temporary category-specific header covers
+    * basic header text now matches mocks
+    * profile scrolls to top after category selection change
+    * scrollbars are now properly hidden / disabled during sdetail popup
+    * ESC key now closes all lightboxes and the sdetail popup
+    * text highlight color is no longer hot pink; instead, it inherits the browser's default as usual
 

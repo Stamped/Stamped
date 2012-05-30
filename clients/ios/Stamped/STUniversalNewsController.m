@@ -14,14 +14,18 @@
 #import "Util.h"
 
 @interface STUniversalNewsController ()
+
 @property (nonatomic, readonly, retain) NSMutableArray* newsItems;
 @property (nonatomic, readwrite, assign) STStampedAPIScope scope;
+@property (nonatomic, readwrite, assign) BOOL reloading;
+
 @end
 
 @implementation STUniversalNewsController
 
 @synthesize newsItems = newsItems_;
 @synthesize scope = scope_;
+@synthesize reloading = _reloading;
 
 - (id)init {
     if ((self = [super init])) {
@@ -30,9 +34,30 @@
     return self;    
 }
 
+- (void)_toggleButtonClicked:(id)notImportant {
+    self.scope = self.scope == STStampedAPIScopeYou ? STStampedAPIScopeFriends : STStampedAPIScopeYou;
+    [self updateRightButton];
+}
+
+- (void)updateRightButton {
+    NSString* scope = self.scope == STStampedAPIScopeYou ? @"Friends" : @"You";
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:scope
+                                                                               style:UIBarButtonItemStyleDone
+                                                                              target:self 
+                                                                              action:@selector(_toggleButtonClicked:)] autorelease];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.tableView.backgroundColor = [UIColor clearColor];
+    [Util addGradientToLayer:self.view.layer 
+                  withColors:[NSArray arrayWithObjects:
+                              [UIColor whiteColor],
+                              [UIColor colorWithWhite:.85 alpha:1],
+                              nil]
+                    vertical:YES];
     [Util addHomeButtonToController:self withBadge:NO];
+    [self updateRightButton];
     [self reloadDataSource];
 }
 
@@ -53,7 +78,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (self.newsItems) {
-      return self.newsItems.count;
+        return self.newsItems.count;
     }
     return 0;
 }
@@ -68,17 +93,17 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-   
+    
     id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
     return [[[STActivityCell alloc] initWithActivity:activity andScope:self.scope] autorelease];
-
+    
 }
 
 
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
- 
+    
     id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
     if (activity.action) {
         [[STActionManager sharedActionManager] didChooseAction:activity.action withContext:[STActionContext context]];
@@ -89,39 +114,41 @@
 #pragma mark - DataSource Reloading
 
 - (void)reloadStampedData {
-  STGenericSlice* slice = [[[STGenericSlice alloc] init] autorelease];
-  slice.limit = [NSNumber numberWithInteger:100];
-  if (self.scope == STStampedAPIScopeYou) {
-    [[STStampedAPI sharedInstance] activitiesForYouWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
-      if (activities) {
-        NSLog(@"activities:%@",activities);
-        newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
-        [self.tableView reloadData];
-      }
-      else {
-        NSLog(@"activity error: %@",error);
-      }
-    }];
-  }
-  else {
-    [[STStampedAPI sharedInstance] activitiesForFriendsWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
-      if (activities) {
-        NSLog(@"activities:%@",activities);
-        newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
-        [self.tableView reloadData];
-      }
-      else {
-        NSLog(@"activity error: %@",error);
-      }
-    }];
-  }
+    STGenericSlice* slice = [[[STGenericSlice alloc] init] autorelease];
+    slice.limit = [NSNumber numberWithInteger:100];
+    if (self.scope == STStampedAPIScopeYou) {
+        [[STStampedAPI sharedInstance] activitiesForYouWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
+            if (activities) {
+                NSLog(@"activities:%@",activities);
+                newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
+                [self.tableView reloadData];
+            }
+            else {
+                NSLog(@"activity error: %@",error);
+            }
+            [self dataSourceDidFinishLoading];
+        }];
+    }
+    else {
+        [[STStampedAPI sharedInstance] activitiesForFriendsWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
+            if (activities) {
+                NSLog(@"activities:%@",activities);
+                newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
+                [self.tableView reloadData];
+            }
+            else {
+                NSLog(@"activity error: %@",error);
+            }
+            [self dataSourceDidFinishLoading];
+        }];
+    }
 }
 
 
 #pragma mark - STRestViewController Methods
 
 - (BOOL)dataSourceReloading {
-    return NO; //self.reloading;
+    return self.reloading;
 }
 
 - (void)loadNextPage {
@@ -129,16 +156,26 @@
 }
 
 - (BOOL)dataSourceHasMoreData {
-    return NO; //self.cache.hasMore;
+    return self.reloading;
 }
 
 - (void)reloadDataSource {
+    self.reloading = YES;
     [self reloadStampedData];
     [super reloadDataSource];
 }
 
+- (void)dataSourceDidFinishLoading {
+    self.reloading = NO;
+    [super dataSourceDidFinishLoading];
+}
+
 - (BOOL)dataSourceIsEmpty {
     return self.newsItems.count == 0;
+}
+
+- (void)noDataTapped:(id)notImportant {
+    [Util warnWithMessage:@"not implemented yet..." andBlock:nil];
 }
 
 - (void)setupNoDataView:(NoDataView*)view {

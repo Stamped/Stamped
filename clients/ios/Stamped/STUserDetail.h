@@ -12,7 +12,6 @@
 
 @protocol STUserDetail <STUser>
 
-@property (nonatomic, readonly, copy) NSString* name;
 @property (nonatomic, readonly, copy) NSString* bio;
 @property (nonatomic, readonly, copy) NSString* website;
 @property (nonatomic, readonly, copy) NSString* location;

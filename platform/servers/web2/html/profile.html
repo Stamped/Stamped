@@ -35,61 +35,13 @@
                         {% handlebars_template "profile-image-large" user %}
                         
                         <div class="floatleft profile-section0">
+                            <p class='profile-title'>
+                                {{user.name}}
+                            </p>
+                            
                             <p>
-                                <a class='pronounced-title large' href="/{{user.screen_name}}">{{user.name}}</a>
                                 <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
-                            
-                            <p>
-                                {{user.bio}}
-                            </p>
-                            
-                            <!-- TODO: FOLLOW button -->
-                        </div>
-                        
-                        <div class="profile-sections">
-                            <ol class="profile-nav">
-                                <li><a href="#" class="up-arrow"></a></li>
-                                <li><a href="#" class="down-arrow"></a></li>
-                            </ol>
-                            
-                            <!-- # followers and # friends -->
-                            <div class="profile-section profile-section-default">
-                                <div class="floatleft profile-section2">
-                                    <p class="number">{{user.num_friends}}</p>
-                                    <p>following</p>
-                                    
-                                    {% with users=friends %}
-                                        {% handlebars_template "user-gallery" %}
-                                    {% endwith %}
-                                </div>
-                                
-                                <div class="floatleft profile-section1">
-                                    <p class="number">{{user.num_followers}}</p>
-                                    <p>followers</p>
-                                    
-                                    {% with users=followers %}
-                                        {% handlebars_template "user-gallery" %}
-                                    {% endwith %}
-                                </div>
-                            </div>
-                            
-                            <!-- stamp distribution -->
-                            <div class="profile-section profile-section3">
-                                <!--<p class="stamp-category-{{vertical.category}}">
-                                    <span class="icon"></span>-->
-                                
-                                <ul class="user-category-distribution clearfix">
-                                {% for vertical in user.distribution %}
-                                    <li>
-                                        <img src="{{vertical.icon}}" />
-                                        <div class="bargraph">
-                                            <div class="value"></div>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +49,7 @@
                 <div class="profile-header-post">
                     <div class="ribbon-bottom"></div>
                     <div class="inset-stamp">
-                        <div class="number">{{user.num_stamps}}</div>
+                        <div class="stamp-count">{{user.num_stamps}}</div>
                         <p>STAMPS</p>
                     </div>
                 </div>

@@ -38,6 +38,7 @@
   self.radius = 1.5;
   self.spacing = 6;
   self.backgroundColor = [UIColor clearColor];
+    self.contentMode = UIViewContentModeRedraw;
 }
 
 #pragma mark - Public Methods.
@@ -100,6 +101,11 @@
   [self setNeedsDisplay];
 }
 
+- (void)setCurrentPage:(NSInteger)currentPage {
+    currentPage_ = currentPage;
+    [self setNeedsDisplay];
+}
+
 - (void)drawRect:(CGRect)rect {
   // Fetch non-atomic state for basic-consistency even if volatile.
   NSInteger pages = numberOfPages_;
@@ -138,7 +144,7 @@
 
 - (CGSize)sizeForNumberOfPages:(NSInteger)pageCount {
   // Fetch non-atomic state for basic-consistency even if volatile.
-  NSInteger pages = numberOfPages_;
+  NSInteger pages = pageCount;
   CGFloat radius = radius_;
   CGFloat spacing = spacing_;
   
@@ -146,7 +152,7 @@
     return CGSizeMake(0, 0);
   
   // Return bounding box padded with one radius on each side.
-  return CGSizeMake((spacing*pages)+radius*4, radius*4);
+  return CGSizeMake((spacing*pages)+(radius*4), radius*4);
 }
 
 @end

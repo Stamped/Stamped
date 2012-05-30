@@ -155,7 +155,7 @@
     else {
         self.cache = fastCache;
         self.snapshot = self.cache.snapshot;
-        [self.cache refreshAtIndex:-1 force:YES];
+        [self reloadDataSource];
     }
     [self.tableView reloadData];
 }
@@ -185,8 +185,10 @@
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
     self.scope = scope;
-    [self.tableView setContentOffset:CGPointMake(0.0f, 48.0f)];
     [self updateCache];
+    if (self.showsSearchBar) {
+        [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
+    }
 }
 
 

@@ -766,6 +766,7 @@ class HTTPUserMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                      basestring, required=True)
+        cls.addProperty('name',                         basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('color_primary',                basestring)
         cls.addProperty('color_secondary',              basestring)
@@ -1089,12 +1090,12 @@ class HTTPEntity(Schema):
         self.subtitle           = entity.subtitle
         self.category           = entity.category
         self.subcategory        = entity.subcategory
-
+        
         self.caption            = self.subtitle # Default
         self.last_modified      = entity.timestamp.created
-
+        
         subcategory             = self._formatSubcategory(self.subcategory)
-
+        
         # Place
         if entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
@@ -1256,13 +1257,16 @@ class HTTPEntity(Schema):
             self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
             self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
             self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
-
+            
+            if entity.subcategory == 'movie':
+                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+            
             # Actions: Watch Now
-
+            
             actionType  = 'watch'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
+            
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Watch on iTunes'
@@ -1283,11 +1287,10 @@ class HTTPEntity(Schema):
             self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
-
             actionType  = 'add_to_instant_queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
+            
             if (entity.sources.netflix_id is not None and
                 entity.sources.netflix_is_instant_available is not None and
                 entity.sources.netflix_instant_available_until is not None and
@@ -1306,7 +1309,7 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-
+            
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
             # Actions: Download
@@ -1327,14 +1330,13 @@ class HTTPEntity(Schema):
 
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
-
             if entity.length is not None:
                 length = self._formatFilmLength(entity.length)
                 if length is not None:
                     self.caption = length
 
             # Metadata
-
+            
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
@@ -1344,11 +1346,11 @@ class HTTPEntity(Schema):
             self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
             # Actions: Watch Now
-
+            
             actionType  = 'watch'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
+            
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Watch on iTunes'
@@ -1356,8 +1358,10 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.itunes_id
                 source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
+                
                 if getattr(entity.sources, 'itunes_url', None) is not None:
                     source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
+                
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
@@ -1365,27 +1369,30 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-
+            
             self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
-
+            
             # Actions: Find Tickets
-
+            
             actionType  = 'tickets'
             actionIcon  = _getIconURL('act_ticket_primary', client=client)
             if len(self.actions) == 0:
                 actionIcon = _getIconURL('act_ticket', client=client)
+            
             sources     = []
-
             if getattr(entity.sources, 'fandango_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Buy from Fandango'
                 source.source       = 'fandango'
                 source.source_id    = entity.sources.fandango_id
+                
                 if getattr(entity.sources, 'fandango_url', None) is not None:
                     source.link     = entity.sources.fandango_url
+                
                 # Only add icon if no "watch now"
                 if len(self.actions) == 0:
                     source.icon   = _getIconURL('src_fandango', client=client)
+                
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
@@ -2897,28 +2904,37 @@ class HTTPActivity(Schema):
                 subjects.append(HTTPUserMini().importUserMini(user))
             self.subjects = subjects
 
-        if activity.objects is not None:
-            self.objects = HTTPActivityObjects()
-
-            if activity.objects.users is not None:
+        def _addUserObjects():
+            if activity.objects is not None and activity.objects.users is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 userobjects = []
                 for user in activity.objects.users:
                     userobjects.append(HTTPUserMini().importUserMini(user))
                 self.objects.users = userobjects 
 
-            if activity.objects.stamps is not None:
+        def _addStampObjects():
+            if activity.objects is not None and activity.objects.stamps is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 stampobjects = []
                 for stamp in activity.objects.stamps:
                     stampobjects.append(HTTPStamp().importStamp(stamp))
                 self.objects.stamps = stampobjects 
 
-            if activity.objects.entities is not None:
+        def _addEntityObjects():
+            if activity.objects is not None and activity.objects.entities is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 entityobjects = []
                 for entity in activity.objects.entities:
                     entityobjects.append(HTTPEntityMini().importEntity(entity))
                 self.objects.entities = entityobjects 
 
-            if activity.objects.comments is not None:
+        def _addCommentObjects():
+            if activity.objects is not None and activity.objects.comments is not None:
+                if self.objects is None:
+                    self.objects = HTTPActivityObjects()
                 commentobjects = []
                 for comment in activity.objects.comments:
                     comment = HTTPComment().importComment(comment)
@@ -3117,6 +3133,8 @@ class HTTPActivity(Schema):
             raise Exception("Too many stamps! \n%s" % stamps)
 
         if self.verb == 'follow':
+            _addUserObjects()
+
             if len(self.subjects) == 1:
                 verb = 'is now following'
             else:
@@ -3128,18 +3146,27 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
+
+                if len(self.subjects) == 1:
+                    self.action = _buildUserAction(self.subjects[0])
+                else:
+                    ### TODO: Action to go to follower list
+                    pass
             else:
                 offset = len(subjects) + len(verb) + 2
                 userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                 self.body = '%s %s %s.' % (subjects, verb, userObjects)
                 self.body_references = subjectReferences + userObjectReferences
 
-            self.action = _buildUserAction(self.objects.users[0])
+                self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
+            _addStampObjects
+
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
             if activity.personal:
+                self.benefit = len(self.subjects)
                 self.body = '%s gave you credit.' % (subjects)
                 self.body_references = subjectReferences
                 if len(self.subjects) > 1:
@@ -3154,6 +3181,8 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'like':
+            _addStampObjects()
+
             self.icon = _getIconURL('news_like')
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verb = 'liked'
@@ -3162,7 +3191,9 @@ class HTTPActivity(Schema):
             self.body = '%s %s %s.' % (subjects, verb, stampObjects)
             self.body_references = subjectReferences + stampObjectReferences
 
-            if not activity.personal:
+            if activity.personal:
+                self.benefit = len(self.subjects)
+            else:
                 stampUsers = map(lambda x: x.user, self.objects.stamps)
                 stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                 self.footer = 'via %s' % stampUserObjects
@@ -3174,6 +3205,8 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'todo':
+            _addEntityObjects()
+
             self.icon = _getIconURL('news_todo')
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verb = 'added'
@@ -3185,9 +3218,16 @@ class HTTPActivity(Schema):
             if len(self.subjects) > 1:
                 self.image = _getIconURL('news_todo_group')
 
-            self.action = _buildEntityAction(self.objects.entities[0])
+            if activity.objects.stamps is not None and len(activity.objects.stamps) > 0:
+                _addStampObjects()
+                self.action = _buildStampAction(self.objects.stamps[0])
+            else:
+                self.action = _buildEntityAction(self.objects.entities[0])
 
         elif self.verb == 'comment':
+            _addStampObjects()
+            _addCommentObjects()
+
             verb = 'Comment on'
             offset = len(verb) + 1
             commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -3199,6 +3239,9 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'reply':
+            _addStampObjects()
+            _addCommentObjects()
+
             verb = 'Reply on'
             offset = len(verb) + 1
             commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments)
@@ -3210,6 +3253,9 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'mention':
+            _addStampObjects()
+            _addCommentObjects()
+
             verb = 'Mention on'
             offset = len(verb) + 1
             commentObjects, commentObjectReferences = _formatCommentObjects(self.objects.comments, required=False)
@@ -3232,6 +3278,8 @@ class HTTPActivity(Schema):
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
+            _addStampObjects()
+            
             actionMapping = {
                 'listen'    : ('listened to', ''),
                 'playlist'  : ('added', 'to their playlist'),
