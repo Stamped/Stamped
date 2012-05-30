@@ -3124,7 +3124,7 @@ class HTTPActivity(Schema):
             raise Exception("Too many stamps! \n%s" % stamps)
 
         if self.verb == 'follow':
-            self._addUserObjects()
+            _addUserObjects()
 
             if len(self.subjects) == 1:
                 verb = 'is now following'
@@ -3146,7 +3146,7 @@ class HTTPActivity(Schema):
             self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
-            self._addStampObjects
+            _addStampObjects
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
@@ -3165,7 +3165,7 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'like':
-            self._addStampObjects()
+            _addStampObjects()
 
             self.icon = _getIconURL('news_like')
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -3187,7 +3187,7 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'todo':
-            self._addEntityObjects()
+            _addEntityObjects()
 
             self.icon = _getIconURL('news_todo')
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -3201,14 +3201,14 @@ class HTTPActivity(Schema):
                 self.image = _getIconURL('news_todo_group')
 
             if activity.objects.stamps is not None and len(activity.objects.stamps) > 0:
-                self._addStampObjects()
+                _addStampObjects()
                 self.action = _buildStampAction(self.objects.stamps[0])
             else:
                 self.action = _buildEntityAction(self.objects.entities[0])
 
         elif self.verb == 'comment':
-            self._addStampObjects()
-            self._addCommentObjects()
+            _addStampObjects()
+            _addCommentObjects()
 
             verb = 'Comment on'
             offset = len(verb) + 1
@@ -3221,8 +3221,8 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'reply':
-            self._addStampObjects()
-            self._addCommentObjects()
+            _addStampObjects()
+            _addCommentObjects()
 
             verb = 'Reply on'
             offset = len(verb) + 1
@@ -3235,8 +3235,8 @@ class HTTPActivity(Schema):
             self.action = _buildStampAction(self.objects.stamps[0])
 
         elif self.verb == 'mention':
-            self._addStampObjects()
-            self._addCommentObjects()
+            _addStampObjects()
+            _addCommentObjects()
 
             verb = 'Mention on'
             offset = len(verb) + 1
@@ -3260,7 +3260,7 @@ class HTTPActivity(Schema):
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
-            self._addStampObjects()
+            _addStampObjects()
             
             actionMapping = {
                 'listen'    : ('listened to', ''),
