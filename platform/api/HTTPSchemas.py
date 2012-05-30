@@ -42,8 +42,7 @@ def _coordinatesDictToFlat(coordinates):
         if isinstance(coordinates, Schema):
             coordinates = coordinates.dataExport()
 
-        if not isinstance(coordinates['lat'], float) or \
-           not isinstance(coordinates['lng'], float):
+        if not isinstance(coordinates['lat'], float) or not isinstance(coordinates['lng'], float):
             raise
         
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
@@ -2903,6 +2902,9 @@ class HTTPActivity(Schema):
             for user in activity.subjects:
                 subjects.append(HTTPUserMini().importUserMini(user))
             self.subjects = subjects
+
+        if not activity.personal:
+            del(self.benefit)
 
         def _addUserObjects():
             if activity.objects is not None and activity.objects.users is not None:
