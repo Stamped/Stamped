@@ -141,9 +141,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             if groupObj.eligible(entity):
                 currentSource = groupObj.getSource(entity)
                 if currentSource is None:
-                    if groupObj.isSet(entity):
-                        return False
-                    return True
+                    # Either the group is just not set, or it's set with initial data that we don't want to overwrite.
+                    # TODO: More details on this! What exactly causes groups to be set without sources?
+                    return not groupObj.isSet(entity)
                 else:
                     priority = self.getGroupPriority(group, source)
                     currentPriority = self.getGroupPriority(group, currentSource)
