@@ -1220,7 +1220,7 @@ class HTTPEntity(Schema):
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
 
-            if len(entity.authors) > 0:
+            if entity.authors is not None and len(entity.authors) > 0:
                 self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
@@ -1256,7 +1256,7 @@ class HTTPEntity(Schema):
         # TV
         elif entity.kind == 'media_collection' and entity.isType('tv'):
 
-            if len(entity.networks) > 0:
+            if entity.networks is not None and len(entity.networks) > 0:
                 self.caption = self._formatMetadataList(entity.networks, 'title')
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
@@ -1464,10 +1464,10 @@ class HTTPEntity(Schema):
             if entity.isType('artist'):
                 self.caption = 'Artist'
 
-            elif entity.isType('album') and len(entity.artists) > 0:
+            elif entity.isType('album') and entity.artists is not None and len(entity.artists) > 0:
                 self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
-            elif entity.isType('track') and len(entity.artists) > 0:
+            elif entity.isType('track') and entity.artists is not None and len(entity.artists) > 0:
                 self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
             # Metadata
@@ -1478,7 +1478,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres), optional=True)
 
             elif entity.isType('album'):
-                if len(entity.artists) > 0:
+                if entity.artists is not None and len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
                         source              = HTTPActionSource()
@@ -1495,7 +1495,7 @@ class HTTPEntity(Schema):
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.isType('track'):
-                if len(entity.artists) > 0:
+                if entity.artists is not None and len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
                         source              = HTTPActionSource()
@@ -1763,7 +1763,7 @@ class HTTPEntity(Schema):
 
         elif entity.kind == 'software' and entity.isType('app'):
 
-            if len(entity.authors) > 0:
+            if entity.authors is not None and len(entity.authors) > 0:
                 self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
