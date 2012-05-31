@@ -1901,7 +1901,7 @@ class HTTPEntity(Schema):
                 stampPreviews = []
                 for item in entity.previews.stamps:
                     stampPreviews.append(HTTPStampPreview().importStampPreview(item))
-                previews.stamp_users = stampPreviews
+                previews.stamps = stampPreviews
 
             self.previews = previews 
 
