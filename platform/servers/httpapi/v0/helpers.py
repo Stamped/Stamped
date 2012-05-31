@@ -307,7 +307,7 @@ def checkOAuth(request):
     ### Validate OAuth Access Token
     try:
         authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)
-        if authenticated_user_id == None:
+        if authenticated_user_id is None:
             raise StampedAuthError("invalid_request", "User not found")
         
         logs.user(authenticated_user_id)
