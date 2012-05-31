@@ -50,6 +50,12 @@ def remove(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(True)
 
+@handleHTTPRequest(http_schema=HTTPLinkedAccount)
+@require_http_methods(["POST"])
+def update(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.updateLinkedAccount(authUserId, http_schema.service_name)
+
+    return transformOutput(True)
 
 
 @handleHTTPRequest(http_schema=HTTPLinkedAccounts)

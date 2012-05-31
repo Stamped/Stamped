@@ -278,6 +278,15 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
+    def verifyLinkedAccount(self, user_token):
+        if linkedAccount.service_name == 'facebook':
+            self._verifyFacebookAccount(linkedAccount.token)
+        elif linkedAccount.service_name == 'twitter':
+            self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
+        elif linkedAccount.service_name == 'netflix':
+            pass
+        return True
+
     def _verifyFacebookAccount(self, user_token):
         # Check to see if the Facebook credentials are valid and if no Stamped user is using the twitter account
         user = self._facebook.getUserInfo(user_token)
@@ -761,43 +770,31 @@ class StampedAPI(AStampedAPI):
     def _getFacebookFriends(self, token):
         if token is None:
             raise StampedIllegalActionError("Connecting to Facebook requires a valid token")
-        
-        friends     = []
-        facebookIds = []
-        params      = {}
-        
-        while True:
-            result  = utils.getFacebook(token, '/me/friends', params)
-            friends = friends + result['data']
-            
-            if 'paging' in result and 'next' in result['paging']:
-                url = urlparse.urlparse(result['paging']['next'])
-                params = dict([part.split('=') for part in url[4].split('&')])
-                
-                if 'offset' in params and int(params['offset']) == len(friends):
-                    continue
 
-            break
-        
-        for friend in friends:
-            facebookIds.append(friend['id'])
-        
+        facebookIds = self._facebook.getFriendIds(token)
         return self._userDB.findUsersByFacebook(facebookIds)
 
     @API_CALL
     def addLinkedAccount(self, authUserId, linkedAccount):
-        # Verify account is valid and send out alerts, if applicable
+        # Verify account is valid and
+        self.verifyLinkedAccount(linkedAccount)
+
+        self._accountDB.addLinkedAccount(authUserId, linkedAccount)
+
+        # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
-            self._verifyFacebookAccount(linkedAccount.token)
             tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
         elif linkedAccount.service_name == 'twitter':
-            self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
             tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
 
-        elif linkedAccount.service_name == 'netflix':
-            pass
+    @API_CALL
+    def updateLinkedAccount(self, authUserId, linkedAccount):
+        # Before we do anything, verify that the account is valid
+        self.verifyLinkedAccount(linkedAccount)
+        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
+        return self.addLinkedAccount(authUserId, linkedAccount)
 
-        return self._accountDB.addLinkedAccount(authUserId, linkedAccount)
+
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, **kwargs):
@@ -822,15 +819,15 @@ class StampedAPI(AStampedAPI):
         return True
     
     @API_CALL
-    def removeLinkedAccount(self, authUserId, linkedAccount):
-        if linkedAccount not in ['facebook', 'twitter', 'netflix']:
-            raise StampedIllegalActionError("Invalid linked account: %s" % linkedAccount)
+    def removeLinkedAccount(self, authUserId, service_name):
+        if service_name not in ['facebook', 'twitter', 'netflix']:
+            raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
         
-        self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
+        self._accountDB.removeLinkedAccount(authUserId, service_name)
         return True
     
     @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
+    def alertFollowersFromTwitterAsync(self, authUserId):
 
         ### TODO: Deprecate passing parameter "twitterIds"
         
@@ -1064,33 +1061,21 @@ class StampedAPI(AStampedAPI):
         return self._userDB.findUsersByPhone(phone, limit=100)
     
     @API_CALL
-    def findUsersByTwitter(self, authUserId, twitterIds=None, twitterKey=None, twitterSecret=None):
+    def findUsersByTwitter(self, authUserId, twitterKey, twitterSecret):
         ### TODO: Add check for privacy settings?
-        
         users = []
 
         # Grab friend list from Facebook API
-        if twitterKey is not None and twitterSecret is not None:
-            users = self._getTwitterFriends(twitterKey, twitterSecret)
-        elif twitterIds is not None:
-            ### DEPRECATED
-            users = self._userDB.findUsersByTwitter(twitterIds, limit=100)
-        
+        users = self._getTwitterFriends(twitterKey, twitterSecret)
         return users
     
     @API_CALL
-    def findUsersByFacebook(self, authUserId, facebookIds=None, facebookToken=None):
+    def findUsersByFacebook(self, authUserId, facebookToken=None):
         ### TODO: Add check for privacy settings?
-        
         users = []
 
         # Grab friend list from Facebook API
-        if facebookToken is not None:
-            users = self._getFacebookFriends(facebookToken)
-        elif facebookIds is not None:
-            ### DEPRECATED
-            users = self._userDB.findUsersByFacebook(facebookIds, limit=100)
-        
+        users = self._getFacebookFriends(facebookToken)
         return users
     
     @API_CALL
