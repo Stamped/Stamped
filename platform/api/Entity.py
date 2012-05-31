@@ -492,7 +492,7 @@ def upgradeEntityData(entityData):
             image.sizes = [ size ]
             new.images = [ image ]
             break
-    if len(new.images) > 0:
+    if new.images is not None and len(new.images) > 0:
         new.images_source = 'seed'
         new.images_timestamp = seedTimestamp
     
