@@ -987,16 +987,14 @@ static Rdio* _rdio;
 
 + (void)addHomeButtonToController:(UIViewController*)controller withBadge:(BOOL)flag {
     
-    UIImage* normalImage = [UIImage imageNamed:@"nav_btn_menu"];
+    STNavigationItem *button = [[STNavigationItem alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(_homeButtonClicked:)];
+    controller.navigationItem.leftBarButtonItem = button;
     
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.frame = CGRectMake(0.0f, 0.0f, 44.0f, 44.0f);
-    [button setImage:normalImage forState:UIControlStateNormal];
-    [button addTarget:self action:@selector(_homeButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-    
-    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:button];
-    controller.navigationItem.leftBarButtonItem = item;
-    [item release];
+    if (flag || YES) {
+        
+        [Util addUnreadBadgeToView:button.customView origin:CGPointMake(10, 10)];
+        
+    }
     
 }
 

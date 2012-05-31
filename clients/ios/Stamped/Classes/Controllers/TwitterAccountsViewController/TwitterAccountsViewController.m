@@ -10,9 +10,10 @@
 #import "STSingleTableCell.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
-#import <Twitter/Twitter.h>
+#import "STTwitter.h"
 
 #import "SocialSignupViewController.h"
+#import "SignupWelcomeViewController.h"
 
 
 @interface TwitterAccountsViewController ()
@@ -101,6 +102,11 @@
         [imageView release];
         
     }
+    
+    [[STTwitter sharedInstance] requestAccess:^(BOOL granted) {
+        [self.tableView reloadData];
+    }];
+    
 
 }
 
@@ -135,7 +141,7 @@
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    return 2;
+    return [[STTwitter sharedInstance] numberOfAccounts];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -148,7 +154,8 @@
         cell.titleLabel.textAlignment = UITextAlignmentCenter;
     }
     
-    cell.titleLabel.text = @"@lkdjf";
+    ACAccount *account = [[STTwitter sharedInstance] accountAtIndex:indexPath.row];
+    cell.titleLabel.text = [NSString stringWithFormat:@"@%@", account.username];
     
     return cell;
 }
@@ -158,7 +165,7 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    SocialSignupViewController *controller = [[SocialSignupViewController alloc] init];
+    SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeTwitter];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
     

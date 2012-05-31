@@ -289,6 +289,14 @@ class iTunesGroup(AKindTypeGroup):
         self.addField(['sources', 'itunes_id'])
         self.addField(['sources', 'itunes_url'])
 
+class FormattedAddressGroup(APlaceGroup):
+
+    def __init__(self):
+        APlaceGroup.__init__(self, 'formatted_address')
+        fields = [ ['formatted_address'] ]
+        for field in fields:
+            self.addField(field)
+
 class AddressGroup(APlaceGroup):
 
     def __init__(self):
@@ -522,6 +530,7 @@ class SKUNumberGroup(ABookGroup):
         ABookGroup.__init__(self, 'sku_number')
         self.addNameField()
 
+
 allGroups = [
     FactualGroup,
     SinglePlatformGroup,
@@ -546,6 +555,7 @@ allGroups = [
     ImagesGroup,
 
     AddressGroup,
+    FormattedAddressGroup,
     CoordinatesGroup,
     PhoneGroup,
     SiteGroup,

@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "STUser.h"
 #import "STComment.h"
+#import "STStampPreview.h"
 
 @protocol STStamp;
 
@@ -17,7 +18,7 @@
 @property (nonatomic, readonly, copy) NSArray<STUser>* todos;
 @property (nonatomic, readonly, copy) NSArray<STUser>* likes;
 @property (nonatomic, readonly, copy) NSArray<STComment>* comments;
-@property (nonatomic, readonly, copy) NSArray<STStamp>* credits;
-@property (nonatomic, readonly, copy) NSArray<STUser>* stampUsers;
+@property (nonatomic, readonly, copy) NSArray<STStampPreview>* credits;
+@property (nonatomic, readonly, copy) NSArray<STStampPreview>* stamps;
 
 @end

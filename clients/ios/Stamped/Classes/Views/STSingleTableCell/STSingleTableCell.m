@@ -118,27 +118,20 @@
     
     CGContextRestoreGState(ctx);
     
-    /*
     CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 2.0f, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.05f].CGColor);
     [[UIColor colorWithRed:0.862f green:0.862f blue:0.862f alpha:1.0f] setStroke];
     CGContextAddPath(ctx, path);
     CGContextStrokePath(ctx);
-    */
     
-    CGContextAddPath(ctx, path);
+    // draw gradient stroke
+    if (!highlighted) {
 
-    if (highlighted) {
-
-        [[UIColor whiteColor] setStroke];
-        CGContextStrokePath(ctx);
-
-    } else {
-        
+        CGContextAddPath(ctx, path);
         CGContextReplacePathWithStrokedPath(ctx);
         CGContextClip(ctx);
         drawGradient([UIColor colorWithRed:0.886f green:0.886f blue:0.886f alpha:1.0f].CGColor, [UIColor colorWithRed:0.862f green:0.862f blue:0.862f alpha:1.0f].CGColor, ctx);
 
-    }
+    } 
      
 
     

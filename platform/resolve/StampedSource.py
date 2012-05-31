@@ -317,7 +317,7 @@ class EntityProxyPlace(_EntityProxyObject, ResolverPlace):
     @lazyProperty
     def coordinates(self):
         try:
-            return (self.entity.lat, self.entity.lng)
+            return (self.entity.coordinates.lat, self.entity.coordinates.lng)
         except Exception:
             return None
 
@@ -331,9 +331,19 @@ class EntityProxyPlace(_EntityProxyObject, ResolverPlace):
                 'postcode': self.entity.address_postcode,
                 'country':  self.entity.address_country,
             }
+        except Exception:
+            return ''
+
+    @lazyProperty
+    def address_string(self):
+        try:
             return self.entity.formatAddress()
         except Exception:
             return ''
+
+    @lazyProperty
+    def phone(self):
+        return self.entity.phone
 
 
 class EntityProxyApp(_EntityProxyObject, ResolverSoftware):

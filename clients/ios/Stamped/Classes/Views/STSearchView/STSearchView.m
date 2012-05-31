@@ -15,8 +15,16 @@
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
+
         
-        self.backgroundColor = [UIColor colorWithPatternImage:[[UIImage imageNamed:@"search_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+        UIImageView *background = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"search_header_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+        background.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self addSubview:background];
+        [background release];
+        
+        frame = background.frame;
+        frame.size.width = self.bounds.size.width;
+        background.frame = frame;
 
         UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
         gesture.delegate = (id<UIGestureRecognizerDelegate>)self;

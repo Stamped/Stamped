@@ -38,7 +38,7 @@ class StampedAPICommentTest(AStampedAPITestCase):
 
 class StampedAPICommentsShow(StampedAPICommentTest):
     def test_show(self):
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -77,13 +77,13 @@ class StampedAPICommentsMentions(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[2])
+        self.assertIn('mentions', result[0])
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -93,14 +93,14 @@ class StampedAPICommentsMentions(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[2])
-        self.assertTrue(len(result[2]['mentions']) == 2)
+        self.assertIn('mentions', result[0])
+        self.assertTrue(len(result[0]['mentions']) == 2)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -110,13 +110,13 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[2])
+        self.assertIn('mentions', result[0])
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -125,13 +125,13 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[2])
+        self.assertIn('mentions', result[0])
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -140,13 +140,13 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[2])
+        self.assertIn('mentions', result[0])
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -155,13 +155,13 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue('mentions' not in result[2] or len(result[2]['mentions']) == 0)
+        self.assertTrue('mentions' not in result[0] or len(result[0]['mentions']) == 0)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -170,13 +170,13 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue('mentions' not in result[2] or len(result[2]['mentions']) == 0)
+        self.assertTrue('mentions' not in result[0] or len(result[0]['mentions']) == 0)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -186,13 +186,13 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+        self.assertTrue(result[0]['blurb'] == blurb.decode('utf-8'))
 
         self.deleteComment(self.tokenA, commentUTF['comment_id'])
 
@@ -201,13 +201,13 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+        self.assertTrue(result[0]['blurb'] == blurb.decode('utf-8'))
 
         self.deleteComment(self.tokenA, commentUTF['comment_id'])
 
@@ -216,13 +216,13 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+        self.assertTrue(result[0]['blurb'] == blurb.decode('utf-8'))
 
         self.deleteComment(self.tokenA, commentUTF['comment_id'])
 
@@ -231,13 +231,13 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/show.json"
+        path = "comments/list.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+        self.assertTrue(result[0]['blurb'] == blurb.decode('utf-8'))
 
         self.deleteComment(self.tokenA, commentUTF['comment_id'])
 
