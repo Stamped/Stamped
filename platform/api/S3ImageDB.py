@@ -265,10 +265,10 @@ class S3ImageDB(AImageDB):
         out     = StringIO()
 
         try:
-            image.save(out, 'jpeg', optimize=True)
+            image.save(out, 'jpeg', optimize=True, quality=90)
         except IOError as e:
             ImageFile.MAXBLOCK = (image.size[0] * image.size[1]) + 1
-            image.save(out, 'jpeg', optimize=True)
+            image.save(out, 'jpeg', optimize=True, quality=90)
         
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))

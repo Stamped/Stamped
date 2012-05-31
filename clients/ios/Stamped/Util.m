@@ -21,6 +21,8 @@
 #import "UIFont+Stamped.h"
 #import "STStampedAPI.h"
 #import "STConfiguration.h"
+#import "DDMenuController.h"
+#import <RestKit/RestKit.h>
 #import "STMenuController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
@@ -1090,11 +1092,46 @@ static Rdio* _rdio;
     [parent addSubview:child];
 }
 
-+ (NSURL *)cacheDirectory {
++ (NSString*)_baseCache {
     NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString* cacheDir = [paths objectAtIndex:0];
-    NSLog(@"cache Dir:%@", [NSURL URLWithString:cacheDir]);
-    return [NSURL fileURLWithPath:cacheDir];
+    return [paths objectAtIndex:0];
+}
+
++ (NSString*)_cachePrefix {
+    return @"com.stamped.cache.";
+}
+
++ (NSURL*)_cacheForVersion:(NSString*)version {
+    return [[NSURL fileURLWithPath:[self _baseCache]] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@%@",[self _cachePrefix], version]];
+}
+
++ (void)removeOldCacheDirectories {
+    NSString* current = [self cacheDirectory].lastPathComponent;
+    NSArray* items = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[self _baseCache] error:nil];
+    for (NSString* item in items) {
+        if ([item hasPrefix:[self _cachePrefix]] && ![item isEqualToString:current]) {
+            NSURL* url = [[NSURL fileURLWithPath:[self _baseCache]] URLByAppendingPathComponent:item];
+            NSLog(@"Removing old cached: %@", item);
+            NSError* error = nil;
+            [[NSFileManager defaultManager] removeItemAtURL:url error:&error];
+            if (error) {
+                NSLog(@"Removal failed!: %@", error);
+            }
+        }
+    }
+}
+
++ (NSURL *)cacheDirectory {
+    NSDictionary *appInfo = [[NSBundle mainBundle] infoDictionary];
+    NSString *versionStr = [NSString stringWithFormat:@"%@.%@", 
+                            [appInfo objectForKey:@"CFBundleShortVersionString"], 
+                            [appInfo objectForKey:@"CFBundleVersion"]];
+    return [self _cacheForVersion:versionStr];
+}
+
++ (BOOL)isOffline {
+    RKClient* client = [RKClient sharedClient];
+    return client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable;
 }
 
 @end

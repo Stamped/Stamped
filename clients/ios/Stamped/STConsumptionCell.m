@@ -122,7 +122,6 @@
         
         [Util addGradientToLayer:self.layer withColors:[UIColor stampedLightGradient] vertical:YES];
         
-        __block STConsumptionCell* weakSelf = self;
         NSString* imageURL = [Util entityImageURLForEntity:self.entityDetail];
         if (imageURL) {
             self.entityImageCancellation = [[STImageCache sharedInstance] imageForImageURL:imageURL

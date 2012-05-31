@@ -278,6 +278,35 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
+    def _verifyFacebookAccount(self, user_token):
+        # Check to see if the Facebook credentials are valid and if no Stamped user is using the twitter account
+        user = self._facebook.getUserInfo(user_token)
+
+        account = None
+        try:
+            account = self.getAccountByFacebookId(user['id'])
+        except StampedUnavailableError:
+            pass
+        if account is not None:
+            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+
+        return user
+
+    def _verifyTwitterAccount(self, user_token, user_secret):
+        # Check to see if the Twitter credentials are valid and if no Stamped user is using the twitter account
+        user = self._twitter.verifyCredentials(user_token, user_secret)
+
+        account = None
+        try:
+            account = self.getAccountByTwitterId(user['id'])
+        except StampedUnavailableError:
+            pass
+        if account is not None:
+            raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
+
+        return user
+
+
     @API_CALL
     def addFacebookAccount(self, new_fb_account):
         """
@@ -286,25 +315,16 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        user = self._facebook.getUserInfo(new_fb_account.user_token)
-
-        account = None
-        try:
-            account = self.getAccountByFacebookId(user['id'])
-        except StampedUnavailableError:
-            pass
-        # Check if the facebook account is already tied to a Stamped account
-        if account is not None:
-            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
-
+        user = self._verifyFacebookAccount(new_fb_account.user_token)
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
-        logs.info(account)
-        account.linked_accounts             = LinkedAccounts()
-        fb_acct                             = FacebookAccountSchema()
-        fb_acct.facebook_id                 = user['id']
-        fb_acct.facebook_name               = user['name']
-        fb_acct.facebook_screen_name        = user.pop('username', None)
-        account.linked_accounts.facebook    = fb_acct
+
+        account.linked                      = LinkedAccounts()
+        fb_acct                             = LinkedAccount()
+        fb_acct.service_name                = 'facebook'
+        fb_acct.user_id                     = user['id']
+        fb_acct.name                   = user['name']
+        fb_acct.screen_name            = user.pop('username', None)
+        account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
@@ -320,25 +340,16 @@ class StampedAPI(AStampedAPI):
         """
 
         # First, get user information from Twitter using the passed in token
-        user = self._twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
-
-        account = None
-        try:
-            account = self.getAccountByTwitterId(user['id'])
-        except StampedUnavailableError:
-            pass
-            # Check if the twitter account is already tied to a Stamped account
-        if account is not None:
-            raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
-
+        user = self._verifyTwitterAccount(new_tw_account.user_token, new_tw_account.user_secret)
         account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
 
-        account.linked_accounts             = LinkedAccounts()
-        tw_acct                             = TwitterAccountSchema()
-        tw_acct.twitter_id                  = user['id']
-        tw_acct.twitter_screen_name         = user['screen_name']
-        tw_acct.twitter_name                = user.pop('name', None)
-        account.linked_accounts.twitter     = tw_acct
+        account.linked                      = LinkedAccounts()
+        tw_acct                             = LinkedAccount()
+        tw_acct.service_name                = 'twitter'
+        tw_acct.user_id                     = user['id']
+        tw_acct.screen_name                 = user['screen_name']
+        tw_acct.name                        = user.pop('name', None)
+        account.linked.twitter              = tw_acct
         account.auth_service                = 'twitter'
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
@@ -553,11 +564,14 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateAccountSettingsAsync(self, old_screen_name, new_screen_name):
         self._imageDB.changeProfileImageName(old_screen_name.lower(), new_screen_name.lower())
-    
+
     @API_CALL
     def getAccount(self, authUserId):
-        account = self._accountDB.getAccount(authUserId)
-        return account
+        return self._accountDB.getAccount(authUserId)
+
+    @API_CALL
+    def getLinkedAccounts(self, authUserId):
+        return self.getAccount(authUserId).linked
 
     #TODO: Consolidate getAccountByFacebookId and getAccountByTwitterId?  After linked account generification is complete
 
@@ -762,12 +776,28 @@ class StampedAPI(AStampedAPI):
                 
                 if 'offset' in params and int(params['offset']) == len(friends):
                     continue
+
             break
         
         for friend in friends:
             facebookIds.append(friend['id'])
         
         return self._userDB.findUsersByFacebook(facebookIds)
+
+    @API_CALL
+    def addLinkedAccount(self, authUserId, linkedAccount):
+        # Verify account is valid and send out alerts, if applicable
+        if linkedAccount.service_name == 'facebook':
+            self._verifyFacebookAccount(linkedAccount.token)
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
+        elif linkedAccount.service_name == 'twitter':
+            self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
+
+        elif linkedAccount.service_name == 'netflix':
+            pass
+
+        return self._accountDB.addLinkedAccount(authUserId, linkedAccount)
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, **kwargs):
@@ -793,44 +823,31 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def removeLinkedAccount(self, authUserId, linkedAccount):
-        if linkedAccount not in ['facebook', 'twitter']:
+        if linkedAccount not in ['facebook', 'twitter', 'netflix']:
             raise StampedIllegalActionError("Invalid linked account: %s" % linkedAccount)
         
         self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
         return True
     
-    ### DEPRECATED
     @API_CALL
-    def alertFollowersFromTwitter(self, authUserId, twitterIds):
-        account = self._accountDB.getAccount(authUserId)
-        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
-            return False
-        
-        # Perform the actual alerts asynchronously
-        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId, twitterIds])
-        
-        return True
-    
-    @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId, twitterIds=None, twitterKey=None, twitterSecret=None):
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
 
         ### TODO: Deprecate passing parameter "twitterIds"
         
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Twitter)
-        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
+        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id):
             return False
+
+#        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
+#            return False
         
         users = []
 
         # Grab friend list from Twitter API
-        if twitterKey is not None and twitterSecret is not None:
-            users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
-        elif twitterIds is not None:
-            ### DEPRECATED
-            users = self._userDB.findUsersByTwitter(twitterIds)
-        
+        users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
+
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
@@ -842,44 +859,32 @@ class StampedAPI(AStampedAPI):
         self._addActivity(verb          = 'friend_twitter', 
                           userId        = authUserId, 
                           recipientIds  = userIds,
-                          body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
-        
-        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
-        
-        return True
-    
-    ### DEPRECATED
-    @API_CALL
-    def alertFollowersFromFacebook(self, authUserId, facebookIds):
-        account = self._accountDB.getAccount(authUserId)
-        if account.facebook_alerts_sent == True or not account.facebook_name:
-            return False
-        
-        # Perform the actual alerts asynchronously
-        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, facebookIds])
+                          body          = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
+
+        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
+
+#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
+#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
         
         return True
     
     @API_CALL
-    def alertFollowersFromFacebookAsync(self, authUserId, facebookIds=None, facebookToken=None):
+    def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
         
         ### TODO: Deprecate passing parameter "facebookIds"
         
         account   = self._accountDB.getAccount(authUserId)
         
         # Only send alert once (when the user initially connects to Facebook)
-        if account.facebook_alerts_sent == True or not account.facebook_name:
-            return
+        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id):
+            return False
+#        if account.facebook_alerts_sent == True or not account.facebook_name:
+#            return
         
         users = []
 
         # Grab friend list from Facebook API
-        if facebookToken is not None:
-            users = self._getFacebookFriends(facebookToken)
-        elif facebookIds is not None:
-            ### DEPRECATED
-            users = self._userDB.findUsersByFacebook(facebookIds)
+        users = self._getFacebookFriends(facebookToken)
         
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
@@ -893,9 +898,10 @@ class StampedAPI(AStampedAPI):
                           userId        = authUserId, 
                           recipientIds  = userIds,
                           body          = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
-        
-        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
-        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
+
+        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
+#        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
+#        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
 
     @API_CALL
     def addToNetflixInstant(self, authUserId, netflixId):
@@ -909,10 +915,10 @@ class StampedAPI(AStampedAPI):
         nf_token    = None 
         nf_secret   = None
 
-        if account.linked_accounts is not None and account.linked_accounts.netflix is not None:
-            nf_user_id  = account.linked_accounts.netflix.netflix_user_id
-            nf_token    = account.linked_accounts.netflix.netflix_token
-            nf_secret   = account.linked_accounts.netflix.netflix_secret
+        if account.linked is not None and account.linked.netflix is not None:
+            nf_user_id  = account.linked.netflix.user_id
+            nf_token    = account.linked.netflix.token
+            nf_secret   = account.linked.netflix.secret
 
         if (nf_user_id is None or nf_token is None or nf_secret is None):
             logs.info('Returning because of missing account credentials')
@@ -1417,7 +1423,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        if self.__version > 0 and entity.isType('artist'):
+        if entity.isType('artist') and entity.albums is not None:
             albumIds = {}
             for album in entity.albums:
                 if album.entity_id is not None:
@@ -1620,39 +1626,59 @@ class StampedAPI(AStampedAPI):
         except StampedUnavailableError:
             stats = self.updateEntityStatsAsync(entityId)
 
+        userIds = {}
+
+        # Get popular stamp data
         popularUserIds = map(str, stats.popular_users[:limit])
         popularStamps = self._stampDB.getStampsFromUsersForEntity(popularUserIds, entityId)
         popularStamps.sort(key=lambda x: popularUserIds.index(x.user.user_id))
 
+        # Get friend stamp data
+        if authUserId is not None:
+            friendUserIds = self._friendshipDB.getFriends(authUserId)
+            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
+
+        # Build user list
+        for stamp in popularStamps:
+            userIds[stamp.user.user_id] = None
+        if authUserId is not None:
+            for stamp in friendStamps:
+                userIds[stamp.user.user_id] = None 
+
+        users = self._userDB.lookupUsers(userIds.keys())
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Populate popular stamps
         stampedby = StampedBy()
 
+        stampPreviewList = []
+        for stamp in popularStamps:
+            preview = StampPreview()
+            preview.stamp_id = stamp.stamp_id 
+            preview.user = userIds[stamp.user.user_id]
+            stampPreviewList.append(preview)
+
         allUsers            = StampedByGroup()
-        allUsers.stamps     = self._enrichStampObjects(popularStamps)
+        allUsers.stamps     = stampPreviewList
         allUsers.count      = stats.num_stamps
         stampedby.all       = allUsers
 
-        if authUserId is None:
-            return stampedby
+        # Populate friend stamps
+        if authUserId is not None:
+            stampPreviewList = []
+            for stamp in friendStamps:
+                preview = StampPreview()
+                preview.stamp_id = stamp.stamp_id 
+                preview.user = userIds[stamp.user.user_id]
+                stampPreviewList.append(preview)
 
-        friendUserIds       = self._friendshipDB.getFriends(authUserId)
-        friendStamps        = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
-
-        friendUsers         = StampedByGroup()
-        friendUsers.stamps  = self._enrichStampObjects(friendStamps[:limit])
-        friendUsers.count   = len(friendStamps)
-        stampedby.friends   = friendUsers 
-
-        fofUserIds          = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
-        fofOverlap          = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
-        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap[:limit], entityId)
-
-        fofUsers            = StampedByGroup()
-        fofUsers.stamps     = self._enrichStampObjects(fofStamps[:limit])
-        fofUsers.count      = len(fofStamps)
-        stampedby.fof       = fofUsers
+            friendUsers         = StampedByGroup()
+            friendUsers.stamps  = stampPreviewList
+            friendUsers.count   = min(len(friendStamps), 99)
+            stampedby.friends   = friendUsers
 
         return stampedby
-
 
     def updateEntityStatsAsync(self, entityId):
         numStamps = self._stampDB.countStampsForEntity(entityId)
@@ -1940,7 +1966,7 @@ class StampedAPI(AStampedAPI):
                     stamp.credit = credits
 
                 # Previews
-                previews = StampPreviews()
+                previews = Previews()
                 for stat in stats:
                     if str(stat.stamp_id) == str(stamp.stamp_id):
                         break 
@@ -1996,13 +2022,14 @@ class StampedAPI(AStampedAPI):
                         for i in stat.preview_credits[:previewLength]:
                             try:
                                 credit = underlyingStampIds[str(i)]
-                                credit.user = userIds[str(credit.user.user_id)]
-                                credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                creditPreviews.append(credit.minimize())
+                                stampPreview = StampPreview()
+                                stampPreview.user = userIds[str(credit.user.user_id)]
+                                stampPreview.stamp_id = i
+                                creditPreviews.append(stampPreview)
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
-                                logs.debug("Stamp: %s" % stamp)
+                                logs.debug("Stamp preview: %s" % stampPreview)
                                 continue
                     previews.credits = creditPreviews
 
@@ -2549,10 +2576,10 @@ class StampedAPI(AStampedAPI):
         
         # Remove comments
         ### TODO: Make this more efficient?
-        comments = self._commentDB.getCommentsForStamp(stampId)
-        for comment in comments:
+        commentIds = self._commentDB.getCommentIds(stampId)
+        for commentId in commentIds:
             # Remove comment
-            self._commentDB.removeComment(comment.comment_id)
+            self._commentDB.removeComment(commentId)
         
         # Remove activity
         self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -2839,10 +2866,8 @@ class StampedAPI(AStampedAPI):
         return comment
     
     @API_CALL
-    def getComments(self, stampId, authUserId, **kwargs): 
-        stamp = self._stampDB.getStamp(stampId)
-        
-        ### TODO: Add slicing (before, since, limit, quality)
+    def getComments(self, commentSlice, authUserId): 
+        stamp = self._stampDB.getStamp(commentSlice.stamp_id)
         
         # Check privacy of stamp
         if stamp.user.privacy == True:
@@ -2853,7 +2878,10 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
               
-        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id, 
+                                                            limit=commentSlice.limit, 
+                                                            before=commentSlice.before,
+                                                            offset=commentSlice.offset)
         
         # Get user objects
         userIds = {}
@@ -2875,15 +2903,9 @@ class StampedAPI(AStampedAPI):
                 comment.user = userIds[comment.user.user_id]
                 comments.append(comment)
         
-        comments = sorted(comments, key=lambda k: k.timestamp.created)
-        
-        tasks.invoke(tasks.APITasks.getComments, args=[authUserId, stampId])
+        # comments = sorted(comments, key=lambda k: k.timestamp.created)
         
         return comments
-    
-    @API_CALL
-    def getCommentsAsync(self, authUserId, stampId):
-        self._stampDB.addView(authUserId, stampId)
     
     
     """
@@ -3288,7 +3310,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             if stamp.stamp_id in commentPreviews:
                 if stamp.previews is None:
-                    stamp.previews = StampPreviews()
+                    stamp.previews = Previews()
                 stamp.previews.comments = commentPreviews[stamp.stamp_id]
             
             stamps.append(stamp)
@@ -3472,9 +3494,9 @@ class StampedAPI(AStampedAPI):
 
                 items.append(item)
                 entityIds[item.entity_id] = None
-                if item.stamp_user_ids is not None:
-                    for userId in item.stamp_user_ids:
-                        userIds[userId] = None 
+                if item.stamps is not None:
+                    for stampPreview in item.stamps:
+                        userIds[stampPreview.user.user_id] = None 
                 if item.todo_user_ids is not None:
                     for userId in item.todo_user_ids:
                         userIds[userId] = None
@@ -3507,12 +3529,16 @@ class StampedAPI(AStampedAPI):
         result = []
         for item in items:
             entity = entityIds[item.entity_id]
-            previews = EntityPreviewsSchema()
-            if item.stamp_user_ids is not None:
-                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
+            previews = Previews()
+            if item.stamps is not None:
+                stamps = []
+                for stampPreview in item.stamps:
+                    stampPreview.user = userIds[stampPreview.user.user_id]
+                    stamps.append(stampPreview)
+                previews.stamps = stamps
             if item.todo_user_ids is not None:
                 previews.todos = [ userIds[x] for x in item.todo_user_ids ]
-            if previews.stamp_users is not None or previews.todos is not None:
+            if previews.stamps is not None or previews.todos is not None:
                 entity.previews = previews 
             result.append(entity)
 
@@ -3632,8 +3658,16 @@ class StampedAPI(AStampedAPI):
                 item.entity_id = result[0]
                 item.tags = result[2]
                 if len(stampMap[result[0]]) > 0:
-                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
-                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
+                    preview = []
+                    for stamp in stampMap[result[0]]:
+                        stampPreview = StampPreview()
+                        stampPreview.stamp_id = stamp.stamp_id 
+                        userPreview = UserMini()
+                        userPreview.user_id = stamp.user.user_id
+                        stampPreview.user = userPreview
+                        preview.append(stampPreview)
+                    if len(preview) > 0:
+                        item.stamps = preview
                 cache.append(item)
             setattr(guide, section, cache)
 
@@ -3677,7 +3711,7 @@ class StampedAPI(AStampedAPI):
 
         previews = None
         if friendIds is not None:
-            previews = StampPreviews()
+            previews = Previews()
 
             # TODO: We may want to optimize how we pull in followers' todos by adding a new ref collection as we do
             #  for likes on stamps.
@@ -4384,6 +4418,10 @@ class StampedAPI(AStampedAPI):
         def _resolveTracks(entity):
             trackList = []
             tracksModified = False
+
+            if entity.tracks is None:
+                return tracksModified 
+
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
@@ -4422,6 +4460,10 @@ class StampedAPI(AStampedAPI):
         def _resolveAlbums(entity):
             albumList = []
             albumsModified = False
+
+            if entity.albums is None:
+                return albumsModified 
+
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
@@ -4460,6 +4502,10 @@ class StampedAPI(AStampedAPI):
         def _resolveArtists(entity):
             artistList = []
             artistsModified = False
+
+            if entity.artists is None:
+                return albumsModified 
+
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
@@ -4498,16 +4544,17 @@ class StampedAPI(AStampedAPI):
 
         if entity.isType('artist') or entity.isType('track'):
             # Enrich albums instead
-            for albumItem in entity.albums:
-                try:
-                    albumItem, albumModified = _resolveStub(albumItem, musicSources)
-                    if albumItem.entity_id is not None:
-                        if albumItem.isType('album'):
-                            self.mergeEntityId(albumItem.entity_id)
-                    else:
-                        self.mergeEntity(albumItem)
-                except Exception as e:
-                    logs.warning('Failed to enrich album: %s' % e)
+            if entity.albums is not None:
+                for albumItem in entity.albums:
+                    try:
+                        albumItem, albumModified = _resolveStub(albumItem, musicSources)
+                        if albumItem.entity_id is not None:
+                            if albumItem.isType('album'):
+                                self.mergeEntityId(albumItem.entity_id)
+                        else:
+                            self.mergeEntity(albumItem)
+                    except Exception as e:
+                        logs.warning('Failed to enrich album: %s' % e)
 
         return modified
 

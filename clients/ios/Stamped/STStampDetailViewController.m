@@ -256,7 +256,7 @@
     
     _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
     [self.scrollView appendChildView:_headerView];
-    for (NSInteger i = 0; i < self.stamp.contents.count; i++) {
+    for (NSInteger i = 0; i < 1; i++) {
         _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp 
                                                                    index:i 
                                                                    style:STStampDetailCommentsViewStyleNormal 

@@ -20,8 +20,8 @@
 
 @interface STSettingsViewController ()
 
-- (void)addHeader:(NSString*)header;
-- (void)addSectionWithCells:(NSArray*)cells;
+//- (void)addHeader:(NSString*)header;
+//- (void)addSectionWithCells:(NSArray*)cells;
 
 @end
 

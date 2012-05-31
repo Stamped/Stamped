@@ -115,7 +115,7 @@ static const NSInteger _cellsPerRow = 7;
         NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
         BOOL continuedFlag = (limit < total);
         
-        for (id<STStamp> credit in previews.credits) {
+        for (id<STStampPreview> credit in previews.credits) {
             if (index >= limit) break;
             
             UIImage *image = [Util stampImageForUser:credit.user withSize:STStampImageSize12];
@@ -128,7 +128,8 @@ static const NSInteger _cellsPerRow = 7;
             index++;
             
         }
-        for (id<STUser> user in previews.stampUsers) {
+        for (id<STStampPreview> preview in previews.stamps) {
+            id<STUser> user = preview.user;
             if (index >= limit) break;
             
             UIImage *image = [Util stampImageForUser:user withSize:STStampImageSize12];
@@ -173,7 +174,7 @@ static const NSInteger _cellsPerRow = 7;
             
         }
 
-        for (NSInteger i = 0; i < self.views.count; i++) {
+        for (NSInteger i = 0; i < limit; i++) {
            
             NSInteger col = i % _cellsPerRow;
             NSInteger row = i / _cellsPerRow;
@@ -212,7 +213,7 @@ static const NSInteger _cellsPerRow = 7;
 
 + (NSInteger)totalItemsForPreviews:(id<STPreviews>)previews {
     if (previews) {
-        return previews.credits.count + previews.likes.count + previews.todos.count + previews.stampUsers.count;
+        return previews.credits.count + previews.likes.count + previews.todos.count + previews.stamps.count;
     }
     return 0;
 }
@@ -248,7 +249,7 @@ static const NSInteger _cellsPerRow = 7;
             continuedFlag = YES;
         }
         
-        for (id<STStamp> credit in previews.credits) {
+        for (id<STStampPreview> credit in previews.credits) {
             if (images.count < limit) {
                 [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
             }
@@ -256,7 +257,8 @@ static const NSInteger _cellsPerRow = 7;
                 break;
             }
         }
-        for (id<STUser> user in previews.stampUsers) {
+        for (id<STStampPreview> preview in previews.stamps) {
+            id<STUser> user = preview.user;
             if (images.count < limit) {
                 [images addObject:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
             }
@@ -291,7 +293,7 @@ static const NSInteger _cellsPerRow = 7;
 
 @implementation STPreviewView
 @synthesize imageURL=_imageURL;
-@synthesize iconImageView;
+@synthesize iconImageView = _iconImageView;
 
 - (id)initWithFrame:(CGRect)frame {
     

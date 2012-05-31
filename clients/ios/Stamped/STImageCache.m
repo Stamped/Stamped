@@ -37,7 +37,7 @@ static STImageCache* _sharedInstance;
     self = [super init];
     if (self) {
         cache_ = [[STHybridCacheSource alloc] initWithCachePath:@"com.stamped.Images" relativeToCacheDir:YES];
-        cache_.maxMemoryCount = 400;
+        cache_.maxMemoryCost = 400;
         cache_.delegate = self;
     }
     return self;
@@ -81,7 +81,7 @@ static STImageCache* _sharedInstance;
                         andCallback:(void(^)(UIImage* image, NSError* error, STCancellation* cancellation))block {
     NSAssert(URL != nil, @"Requested nil URL");
     STCancellation* cancellation = [STCancellation cancellation];
-    [self.cache objectForKey:URL forceUpdate:YES withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+    [self.cache objectForKey:URL forceUpdate:YES cacheAfterCancel:YES withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
         if (!cancellation.cancelled) {
             block((UIImage*)model, error, cancellation);
         }

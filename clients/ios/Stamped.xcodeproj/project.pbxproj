@@ -475,14 +475,12 @@
 		034BE0A71562F6980008F160 /* STShareButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E748E155AFBF60022CD2E /* STShareButton.m */; };
 		034BE0A91562F6980008F160 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 635EAADC1523D4ED00D0378D /* StoreKit.framework */; };
 		034BE0AA1562F6980008F160 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
-		034BE0AB1562F6980008F160 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
 		034BE0AC1562F6980008F160 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E07EC1C14C73FD400A2B5F0 /* libz.dylib */; };
 		034BE0AD1562F6980008F160 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED043E6149FCA3E00E46284 /* libxml2.dylib */; };
 		034BE0AE1562F6980008F160 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		034BE0AF1562F6980008F160 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB03FD314672B40004F7A1C /* MessageUI.framework */; };
 		034BE0B01562F6980008F160 /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E99C9B81458B4E000B116AC /* Twitter.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		034BE0B11562F6980008F160 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED608961420F69B001C499D /* AddressBook.framework */; };
-		034BE0B21562F6980008F160 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		034BE0B31562F6980008F160 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC1C65113F459B50070CE6D /* Security.framework */; };
 		034BE0B41562F6980008F160 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193B13CE0C8500378139 /* CFNetwork.framework */; };
 		034BE0B51562F6980008F160 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193C13CE0C8500378139 /* CoreData.framework */; };
@@ -1577,10 +1575,14 @@
 		630426AE1566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
 		630426AF1566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
 		630426B01566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
-		63145D4C156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
-		63145D4D156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
-		63145D4E156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
-		63145D4F156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
+		631563EF1577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F01577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F11577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F21577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F61577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
+		631563F71577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
+		631563F81577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
+		631563F91577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
 		63159A861544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A871544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A8A1544E95A008E75DD /* STRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A891544E959008E75DD /* STRightMenuViewController.m */; };
@@ -2801,6 +2803,8 @@
 		63BA7A631548861700EE95DA /* STPreviewsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A621548861500EE95DA /* STPreviewsView.m */; };
 		63BA7A641548861700EE95DA /* STPreviewsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A621548861500EE95DA /* STPreviewsView.m */; };
 		63BA7A651548861700EE95DA /* STPreviewsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A621548861500EE95DA /* STPreviewsView.m */; };
+		63BBC9801577CD2A0088DFC7 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
+		63BBC9811577CD480088DFC7 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
@@ -4738,8 +4742,11 @@
 		630426A81566A5EA006907E5 /* STPersistentCacheSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPersistentCacheSource.m; sourceTree = "<group>"; };
 		630426AC1566CB06006907E5 /* STHybridCacheSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHybridCacheSource.h; sourceTree = "<group>"; };
 		630426AD1566CB07006907E5 /* STHybridCacheSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHybridCacheSource.m; sourceTree = "<group>"; };
-		63145D4A156AEACE0027EC92 /* STStampMini.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampMini.h; sourceTree = "<group>"; };
-		63145D4B156AEACE0027EC92 /* STStampMini.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampMini.m; sourceTree = "<group>"; };
+		631563ED1577F03D00849CB2 /* STActionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionView.h; sourceTree = "<group>"; };
+		631563EE1577F03D00849CB2 /* STActionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionView.m; sourceTree = "<group>"; };
+		631563F31577F22100849CB2 /* STStampPreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampPreview.h; sourceTree = "<group>"; };
+		631563F41577F27D00849CB2 /* STSimpleStampPreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleStampPreview.h; sourceTree = "<group>"; };
+		631563F51577F27D00849CB2 /* STSimpleStampPreview.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleStampPreview.m; sourceTree = "<group>"; };
 		63159A841544A9A5008E75DD /* STActivityCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityCell.h; sourceTree = "<group>"; };
 		63159A851544A9A5008E75DD /* STActivityCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActivityCell.m; sourceTree = "<group>"; };
 		63159A881544E959008E75DD /* STRightMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRightMenuViewController.h; sourceTree = "<group>"; };
@@ -6010,17 +6017,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63BBC9811577CD480088DFC7 /* libOAuthTouch.a in Frameworks */,
+				63BBC9801577CD2A0088DFC7 /* libRestKit.a in Frameworks */,
 				0358C92E1575121800FD1597 /* ImageIO.framework in Frameworks */,
 				034BE0A91562F6980008F160 /* StoreKit.framework in Frameworks */,
 				034BE0AA1562F6980008F160 /* AudioToolbox.framework in Frameworks */,
-				034BE0AB1562F6980008F160 /* libRestKit.a in Frameworks */,
 				034BE0AC1562F6980008F160 /* libz.dylib in Frameworks */,
 				034BE0AD1562F6980008F160 /* libxml2.dylib in Frameworks */,
 				034BE0AE1562F6980008F160 /* Accounts.framework in Frameworks */,
 				034BE0AF1562F6980008F160 /* MessageUI.framework in Frameworks */,
 				034BE0B01562F6980008F160 /* Twitter.framework in Frameworks */,
 				034BE0B11562F6980008F160 /* AddressBook.framework in Frameworks */,
-				034BE0B21562F6980008F160 /* libOAuthTouch.a in Frameworks */,
 				034BE0B31562F6980008F160 /* Security.framework in Frameworks */,
 				034BE0B41562F6980008F160 /* CFNetwork.framework in Frameworks */,
 				034BE0B51562F6980008F160 /* CoreData.framework in Frameworks */,
@@ -6858,6 +6865,8 @@
 				6323F10515250C8000BE408C /* STMenuPopUp.m */,
 				6323F1151526261400BE408C /* STPlayerPopUp.h */,
 				6323F1161526261A00BE408C /* STPlayerPopUp.m */,
+				631563ED1577F03D00849CB2 /* STActionView.h */,
+				631563EE1577F03D00849CB2 /* STActionView.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -6916,6 +6925,7 @@
 				63313531156C268C00BF9B8D /* STLoginResponse.h */,
 				633FB589156FEEA700D7D776 /* STEntityAutoCompleteResult.h */,
 				633FB6161571928C00D7D776 /* STDatum.h */,
+				631563F31577F22100849CB2 /* STStampPreview.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -7016,12 +7026,12 @@
 				637A183015595F7400148C0B /* STSimpleActivityCount.m */,
 				636273E6155AB0D7006AF7B8 /* STSimpleImageList.h */,
 				636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */,
-				63145D4A156AEACE0027EC92 /* STStampMini.h */,
-				63145D4B156AEACE0027EC92 /* STStampMini.m */,
 				6331352B156C1DD300BF9B8D /* STSimpleTodoSource.h */,
 				6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */,
 				633FB58A156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.h */,
 				633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */,
+				631563F41577F27D00849CB2 /* STSimpleStampPreview.h */,
+				631563F51577F27D00849CB2 /* STSimpleStampPreview.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -12293,7 +12303,6 @@
 				030137AB15668DBE00B55B47 /* STTextPopoverView.m in Sources */,
 				030137B91566BD9200B55B47 /* WelcomePopoverView.m in Sources */,
 				030137BF1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
-				63145D4F156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A6156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CE156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E4156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -12339,6 +12348,8 @@
 				03E006831577DFCC00CDFEFF /* STAuth.m in Sources */,
 				03E0068E1577E88500CDFEFF /* STEvents.m in Sources */,
 				03E006951577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
+				631563F21577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F91577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12617,7 +12628,6 @@
 				030137BE1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
 				630426AB1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
 				630426B01566CB07006907E5 /* STHybridCacheSource.m in Sources */,
-				63145D4E156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A5156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CD156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E3156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -12663,6 +12673,8 @@
 				03E006821577DFCC00CDFEFF /* STAuth.m in Sources */,
 				03E0068D1577E88500CDFEFF /* STEvents.m in Sources */,
 				03E006941577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
+				631563F11577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F81577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12940,7 +12952,6 @@
 				030137BD1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
 				630426AA1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
 				630426AF1566CB07006907E5 /* STHybridCacheSource.m in Sources */,
-				63145D4D156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A4156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CC156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E2156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -12986,6 +12997,8 @@
 				03E006811577DFCC00CDFEFF /* STAuth.m in Sources */,
 				03E0068C1577E88500CDFEFF /* STEvents.m in Sources */,
 				03E006931577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
+				631563F01577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F71577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13275,7 +13288,6 @@
 				030137BC1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
 				630426A91566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
 				630426AE1566CB07006907E5 /* STHybridCacheSource.m in Sources */,
-				63145D4C156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A3156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CB156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E1156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -13321,6 +13333,8 @@
 				03E006801577DFCC00CDFEFF /* STAuth.m in Sources */,
 				03E0068B1577E88500CDFEFF /* STEvents.m in Sources */,
 				03E006921577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
+				631563EF1577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F61577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

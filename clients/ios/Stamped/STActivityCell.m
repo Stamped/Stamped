@@ -194,7 +194,7 @@
         if (self.hasCredit) {
             NSInteger count = self.activity.benefit.integerValue;
             NSString* format;
-            if (count > 1) {
+            if (count == 1) {
                 format = @"You earned %d more stamp!";
             }
             else {
@@ -374,7 +374,7 @@
 
 - (CGFloat)imagesPadding {
     if (self.hasImages) {
-        return 12 - self.bodyFontNormal.descender;
+        return 12 - self.bodyFontNormal.descender - 6;
     }
     else {
         return 0;
@@ -478,12 +478,12 @@
     bodyView.lineBreakMode = UILineBreakModeWordWrap;
     bodyView.text = text;
     bodyView.layer.shadowColor = [UIColor whiteColor].CGColor;
-    bodyView.layer.shadowOpacity = 1;
-    bodyView.layer.shadowOffset = CGSizeMake(0, .5);
+    bodyView.layer.shadowOpacity = .6;
+    bodyView.layer.shadowOffset = CGSizeMake(0, 1);
     bodyView.layer.shadowRadius = 0;
     if (references.count > 0) { 
         NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
-        CTFontRef font2 = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", font.pointSize, NULL);
+        CTFontRef font2 = CTFontCreateWithName((CFStringRef)@"HelveticaNeue-Bold", font.pointSize, NULL);
         [linkAttributes setValue:(id)font2 forKey:(NSString*)kCTFontAttributeName];
         CFRelease(font);
         bodyView.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
@@ -610,23 +610,34 @@
             }
         }
         y += self.configuration.imagesHeight.floatValue + self.configuration.footerPadding;
-        CGFloat timestampX = self.configuration.contentOffset;
-        if (self.configuration.footer) {
-            timestampX = 11 + [self addAttributedText:self.configuration.footer
-                                           frame:CGRectMake(self.configuration.contentOffset, y, self.configuration.footerWidth, self.configuration.footerHeight.floatValue)
-                                            font:self.configuration.footerFontNormal
-                                           color:self.configuration.footerColorNormal
-                                          offset:0
-                                      references:self.activity.footerReferences
-                                          toView:self];
-        }
         UIView* timestampView = [Util viewWithText:[Util userReadableTimeSinceDate:self.activity.created]
                                               font:self.configuration.footerFontTimestamp
                                              color:self.configuration.footerColorTimestamp
                                               mode:UILineBreakModeClip
                                         andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+        CGFloat timestampX = self.configuration.contentOffset;
+        CGFloat footerX;
+        if (self.scope == STStampedAPIScopeYou) {
+            footerX = self.configuration.contentOffset;
+        }
+        else {
+            footerX = self.configuration.contentOffset + timestampView.frame.size.width + 13;
+        }
+        if (self.configuration.footer) {
+                CGFloat maxFooterX = 11 + [self addAttributedText:self.configuration.footer
+                                                    frame:CGRectMake(footerX, y, self.configuration.footerWidth, self.configuration.footerHeight.floatValue)
+                                                     font:self.configuration.footerFontNormal
+                                                    color:self.configuration.footerColorNormal
+                                                   offset:0
+                                               references:self.activity.footerReferences
+                                                   toView:self];
+            if (self.scope == STStampedAPIScopeYou) {
+                timestampX = maxFooterX;
+            }
+        }
         [Util reframeView:timestampView withDeltas:CGRectMake(timestampX, y, 0, 0)];
         [self addSubview:timestampView];
+        
         if (!self.configuration.iconOnImages && self.configuration.hasIcon) {
             UIImageView* iconView = [[[UIImageView alloc] initWithFrame:self.configuration.iconFrame] autorelease];
             if (self.configuration.useStampIcon) {

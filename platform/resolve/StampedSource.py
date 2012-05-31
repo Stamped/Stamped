@@ -88,14 +88,14 @@ class EntityProxyArtist(_EntityProxyObject, ResolverPerson):
     @lazyProperty
     def albums(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['albums'] ]
+            return [ { 'name' : item.title } for item in self.entity.albums ]
         except Exception:
             return []
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['tracks'] ]
+            return [ { 'name' : item.title } for item in self.entity.tracks ]
         except Exception:
             return []
 
@@ -111,14 +111,14 @@ class EntityProxyAlbum(_EntityProxyObject, ResolverMediaCollection):
     @lazyProperty
     def artists(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['artists'] ]
+            return [ { 'name' : item.title } for item in self.entity.artists ]
         except Exception:
             return []
 
     @lazyProperty
     def tracks(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['tracks'] ]
+            return [ { 'name' : item.title } for item in self.entity.tracks ]
         except Exception:
             return []
 
@@ -131,31 +131,31 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
         _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
 
-    @lazyProperty
+    @property # @lazyProperty
     def artists(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['artists'] ]
+            return [ { 'name' : item.title } for item in self.entity.artists ]
         except Exception:
             return []
 
     @lazyProperty
     def albums(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['albums'] ]
+            return [ { 'name' : item.title } for item in self.entity.albums ]
         except Exception:
             return []
 
     @lazyProperty
     def length(self):
         try:
-            return int(self.entity['length'])
+            return int(self.entity.length)
         except Exception:
             return -1
 
 def _fixCast(cast):
     newcast = []
-    import pprint
-    pprint.pprint('fixCast  cast: %s' % cast)
+    if cast is None:
+        return newcast
     try:
         # if it's just a string, construct a list of dictionaries with 'title' keys
         if isinstance(cast, basestring):
@@ -181,7 +181,6 @@ def _fixCast(cast):
             newcast.append(newitem)
     except Exception as e:
         print('ERROR: %s' % e)
-    pprint.pprint('newcast: %s' % newcast)
     return newcast
 
 
@@ -196,35 +195,35 @@ class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
     @lazyProperty 
     def cast(self):
         try:
-            return _fixCast(self.entity['cast'])#[ { 'name' : item['title'] } for item in self.entity['cast'] ]
+            return _fixCast(self.entity.cast)#[ { 'name' : item.title } for item in self.entity.cast ]
         except Exception:
             return []
 
     @lazyProperty 
     def directors(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['directors'] ]
+            return [ { 'name' : item.title } for item in self.entity.directors ]
         except Exception:
             return []
 
     @lazyProperty 
     def release_date(self):
         try:
-            return self.entity['release_date']
+            return self.entity.release_date
         except Exception:
             return None
 
     @lazyProperty 
     def length(self):
         try:
-            return int(self.entity['length'])
+            return int(self.entity.length)
         except Exception:
             return -1
 
     @lazyProperty 
     def mpaa_rating(self):
         try:
-            return self.entity['mpaa_rating']
+            return self.entity.mpaa_rating
         except Exception:
             return None
 
@@ -240,28 +239,28 @@ class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
     @lazyProperty 
     def cast(self):
         try:
-            return _fixCast(self.entity['cast'])# [ { 'name' : item['title'] } for item in self.entity['cast'] ]
+            return _fixCast(self.entity.cast)# [ { 'name' : item.title } for item in self.entity.cast ]
         except Exception:
             return []
 
     @lazyProperty 
     def directors(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['directors'] ]
+            return [ { 'name' : item.title } for item in self.entity.directors ]
         except Exception:
             return []
 
     @lazyProperty 
     def length(self):
         try:
-            return int(self.entity['length'])
+            return int(self.entity.length)
         except Exception:
             return -1
 
     @lazyProperty 
     def rating(self):
         try:
-            return self.entity['mpaa_rating']
+            return self.entity.mpaa_rating
         except Exception:
             return None
 
@@ -277,35 +276,35 @@ class EntityProxyBook(_EntityProxyObject, ResolverMediaItem):
     @lazyProperty 
     def authors(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['authors'] ]
+            return [ { 'name' : item.title } for item in self.entity.authors ]
         except Exception:
             return []
 
     @lazyProperty 
     def publishers(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['publishers'] ]
+            return [ { 'name' : item.title } for item in self.entity.publishers ]
         except Exception:
             return []
 
     @lazyProperty
     def release_date(self):
         try:
-            return self.entity['release_date']
+            return self.entity.release_date
         except Exception:
             return None
 
     @lazyProperty
     def length(self):
         try:
-            return int(self.entity['length'])
+            return int(self.entity.length)
         except Exception:
             return -1
 
     @lazyProperty
     def isbn(self):
         try:
-            return self.entity['isbn']
+            return self.entity.isbn
         except:
             return ''
 
@@ -318,7 +317,7 @@ class EntityProxyPlace(_EntityProxyObject, ResolverPlace):
     @lazyProperty
     def coordinates(self):
         try:
-            return (self.entity['lat'], self.entity['lng'])
+            return (self.entity.lat, self.entity.lng)
         except Exception:
             return None
 
@@ -348,14 +347,14 @@ class EntityProxyApp(_EntityProxyObject, ResolverSoftware):
     @lazyProperty
     def release_date(self):
         try:
-            return self.entity['release_date']
+            return self.entity.release_date
         except Exception:
             return None
 
     @lazyProperty 
     def authors(self):
         try:
-            return [ { 'name' : item['title'] } for item in self.entity['authors'] ]
+            return [ { 'name' : item.title } for item in self.entity.authors ]
         except Exception:
             return []
 
@@ -497,7 +496,7 @@ class StampedSource(GenericSource):
             if entity.isType('app'):
                 return self.appFromEntity(entity)
 
-        raise ValueError('Unrecognized entity %s (%s)' % (entity['title'], entity))
+        raise ValueError('Unrecognized entity %s (%s)' % (entity.title, entity))
     
     def matchSource(self, query):
         if query.kind == 'search':
