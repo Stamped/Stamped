@@ -11,7 +11,7 @@ import sys, time
 from resolve.EntitySearch   import EntitySearch
 from optparse       import OptionParser
 from pprint         import pprint
-from api.Entity     import oldCategories
+from api.Entity     import categories
 
 # TODO: AUTOSUGGEST
     # after setting up CDN, going to have to run a cache-warming process
@@ -160,8 +160,8 @@ def parseCommandLine():
         lat, lng = options.location.split(',')
         options.location = (float(lat), float(lng))
 
-    if options.category and options.category not in oldCategories:
-        raise Exception("Unrecognized category: '%s'" % options.category)
+    if options.category and options.category not in categories:
+        raise Exception("Unrecognized category: '%s'; must be one of: %s" % (options.category, ", ".join(categories)))
     
     return (options, args)
 
