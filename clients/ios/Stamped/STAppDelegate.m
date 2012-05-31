@@ -132,6 +132,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     grid_.hidden = YES;
     [self.window addSubview:grid_];
     STLog(@"Finished Loading application");
+    [Util executeAsync:^{
+        [Util removeOldCacheDirectories];
+    }];
     return YES;
 }
 
@@ -409,9 +412,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Light" size:35] forKey:@"UIFont.stampedTitleLightFont" inSection:@"UIFont"];
     
     CGFloat fontSize = 12;
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
     
     //UIColor
     

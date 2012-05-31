@@ -36,6 +36,7 @@
 #import "STActivityCount.h"
 #import "STLoginResponse.h"
 #import "STEntityAutoCompleteResult.h"
+#import "STHybridCacheSource.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -62,6 +63,19 @@ typedef enum {
 - (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope;
 
 - (id<STStamp>)cachedStampForStampID:(NSString*)stampID;
+
+- (void)cacheStamp:(id<STStamp>)stamp;
+
+- (id<STPreviews>)cachedStampPreviewsForStampID:(NSString*)stampID;
+
+- (id<STStampedBy>)cachedStampedByForEntityID:(NSString*)entityID;
+
+- (id<STUser>)cachedUser:(NSString*)userID;
+
+- (void)cacheUser:(id<STUser>)user;
+
+- (STCancellation*)stampedByForEntityID:(NSString*)entityID
+                            andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
                        andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;

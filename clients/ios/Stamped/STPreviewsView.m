@@ -173,7 +173,7 @@ static const NSInteger _cellsPerRow = 7;
             
         }
 
-        for (NSInteger i = 0; i < self.views.count; i++) {
+        for (NSInteger i = 0; i < limit; i++) {
            
             NSInteger col = i % _cellsPerRow;
             NSInteger row = i / _cellsPerRow;
@@ -291,7 +291,7 @@ static const NSInteger _cellsPerRow = 7;
 
 @implementation STPreviewView
 @synthesize imageURL=_imageURL;
-@synthesize iconImageView;
+@synthesize iconImageView = _iconImageView;
 
 - (id)initWithFrame:(CGRect)frame {
     

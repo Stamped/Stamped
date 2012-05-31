@@ -61,7 +61,7 @@ static NSString* const _subcategoryType = @"subcategory";
 static NSString* const _categoryType = @"category";
 static NSString* const _filterType = @"filter";
 
-@interface STConsumptionViewController () <STScopeSliderDelegate, STConsumptionToolbarDelegate>
+@interface STConsumptionViewController () <STConsumptionToolbarDelegate>
 
 - (STConsumptionToolbarItem*)setupToolbarItems;
 

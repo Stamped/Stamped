@@ -13,7 +13,7 @@
 #import "STDebugDatumViewController.h"
 #import "STDebug.h"
 
-extern NSString* const STConfigurationValueDidChangeNotification = @"STConfigurationValueDidChangeNotification";
+NSString* const STConfigurationValueDidChangeNotification = @"STConfigurationValueDidChangeNotification";
 
 @interface STConfigurationSectionController : STTableViewController <UITableViewDataSource, UITableViewDelegate>
 

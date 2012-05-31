@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "UIColor+Stamped.h"
+#import "UIFont+Stamped.h"
 
 @implementation SearchEntitiesAutoSuggestCell
 
@@ -20,7 +21,7 @@
   self = [self initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
   if (self) {
     customTextLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 0, 264, 47)];
-    customTextLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+      customTextLabel_.font = [UIFont stampedBoldFontWithSize:16];
     customTextLabel_.textColor = [UIColor stampedBlackColor];
     customTextLabel_.highlightedTextColor = [UIColor whiteColor];
     [self.contentView addSubview:customTextLabel_];
