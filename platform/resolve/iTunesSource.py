@@ -77,7 +77,7 @@ class _iTunesObject(object):
                 entity_field = 'song'
                 if self.isType('artist'):
                     entity_field = 'album,song'
-                results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field)['results']
+                results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field, limit=1000)['results']
                 m = {
                     'tracks':[],
                     'albums':[],
