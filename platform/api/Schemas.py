@@ -1421,7 +1421,7 @@ class StampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('count',                    int)
-        cls.addNestedPropertyList('stamps',         Stamp)
+        cls.addNestedPropertyList('stamps',         StampPreview)
 
 class StampedBy(Schema):
     @classmethod

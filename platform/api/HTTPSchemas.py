@@ -2765,14 +2765,14 @@ class HTTPStampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('count',                int)
-        cls.addNestedPropertyList('stamps',     HTTPStamp)
+        cls.addNestedPropertyList('stamps',     HTTPStampPreview)
 
     def importStampedByGroup(self, group):
         if group.count is not None:
             self.count = group.count 
 
         if group.stamps is not None:
-            self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
+            self.stamps = [HTTPStampPreview().importStampPreview(s) for s in group.stamps]
 
         return self
 
