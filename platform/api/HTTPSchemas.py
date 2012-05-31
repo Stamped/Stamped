@@ -983,12 +983,6 @@ class HTTPEntityPlaylist(Schema):
         cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
         cls.addProperty('name',                 basestring)
 
-class HTTPEntityPreviewsSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('stamp_users',            HTTPUserMini)
-        cls.addNestedPropertyList('todos',                  HTTPUserMini)
-
 class HTTPEntityStampedBy(Schema):
     @classmethod
     def setSchema(cls):
@@ -1041,7 +1035,7 @@ class HTTPEntity(Schema):
         cls.addProperty('caption',                      basestring)
         cls.addNestedPropertyList('images',             HTTPImageSchema)
         cls.addProperty('last_modified',                basestring)
-        cls.addNestedProperty('previews',               HTTPEntityPreviewsSchema)
+        cls.addNestedProperty('previews',               HTTPPreviews)
 
         # Location
         cls.addProperty('address',                      basestring)
@@ -1889,7 +1883,7 @@ class HTTPEntity(Schema):
         # Previews
 
         if entity.previews is not None:
-            previews = HTTPEntityPreviewsSchema()
+            previews = HTTPPreviews()
 
             if entity.previews.todos is not None:
                 users = []
