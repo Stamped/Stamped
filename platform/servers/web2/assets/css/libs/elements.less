@@ -98,9 +98,11 @@
 }
 
 .transition-duration(@duration: 0.2s) {
-    -moz-transition-duration: @duration;
     -webkit-transition-duration: @duration;
-    transition-duration: @duration;
+    -moz-transition-duration:    @duration;
+    -ms-transition-duration:     @duration;
+    -o-transition-duration:      @duration;
+    transition-duration:         @duration;
 }
 
 .rotation(@deg: 5deg){
@@ -117,8 +119,10 @@
 
 .transition(@target: all, @duration: 0.2s, @ease: ease-out) {
     -webkit-transition: @target @duration @ease;
-    -moz-transition: @target @duration @ease;
-    transition: @target @duration @ease;
+    -moz-transition:    @target @duration @ease;
+    -ms-transition:     @target @duration @ease;
+    -o-transition:      @target @duration @ease;
+    transition:         @target @duration @ease;
 }
 
 .inner-shadow(@horizontal: 0, @vertical: 1px, @blur: 2px, @alpha: 0.4) {

@@ -20,10 +20,7 @@
 #import "STSimpleStamp.h"
 #import "STDetailTextCallout.h"
 #import "ImageLoader.h"
-
-@interface STStampCellAvatarView : UIImageView
-@property(nonatomic,retain) NSURL *imageURL;
-@end
+#import "STAvatarView.h"
 
 @implementation STStampCell
 
@@ -53,7 +50,7 @@
       _footerImageView = footer;
       
       // user image view
-      STStampCellAvatarView *imageView = [[STStampCellAvatarView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
+      STAvatarView *imageView = [[STAvatarView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
       [self addSubview:imageView];
       _userImageView = imageView;
       [imageView release];
@@ -428,43 +425,3 @@
 
 @end
 
-
-#pragma mark - STStampCellAvatarView
-
-@implementation STStampCellAvatarView
-@synthesize imageURL=_imageURL;
-
-- (id)initWithFrame:(CGRect)frame {
-    if ((self = [super initWithFrame:frame])) {
-        self.userInteractionEnabled = YES;
-        self.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
-        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
-        self.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
-        self.layer.shadowRadius = 1.0f;
-        self.layer.shadowOpacity = 0.2f;
-        self.layer.borderColor = [UIColor whiteColor].CGColor;
-        self.layer.borderWidth = 1.0f;
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [_imageURL release], _imageURL=nil;
-    [super dealloc];
-}
-
-- (void)setImageURL:(NSURL *)imageURL {
-    if (_imageURL && [_imageURL isEqual:imageURL]) return;
-    [_imageURL release], _imageURL=nil;
-    _imageURL = [imageURL retain];
-    
-    self.image = nil;
-    [[ImageLoader sharedLoader] imageForURL:_imageURL completion:^(UIImage *image, NSURL *url) {
-        if ([_imageURL isEqual:url]) {
-            self.image = image;
-        }
-    }];
-    
-}
-
-@end

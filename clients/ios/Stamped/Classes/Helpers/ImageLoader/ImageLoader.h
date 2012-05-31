@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
-typedef  void(^ImageLoaderCompletionHandler)(UIImage *, NSURL *);
+typedef void(^ImageLoaderCompletionHandler)(UIImage *, NSURL *);
+typedef UIImage*(^ImageLoaderStyler)(UIImage*);
 
 @interface ImageLoader : NSObject {
     
@@ -21,6 +22,11 @@ typedef  void(^ImageLoaderCompletionHandler)(UIImage *, NSURL *);
  * return full size image, from cache or url
  */
 - (void)imageForURL:(NSURL*)url completion:(ImageLoaderCompletionHandler)handler;
+
+/*
+ * return full size image, from cache or url, style image and cache both
+ */
+- (void)imageForURL:(NSURL*)url style:(ImageLoaderStyler)style styleIdentifier:(NSString*)identifier completion:(ImageLoaderCompletionHandler)handler;
 
 /*
  * load cancelling

@@ -1,4 +1,31 @@
 
+
+
+
+                // NOTE: metadata embedding approach doesn't work because it 
+                // includes unicode u'' prefix on strings
+                
+                /*var $metadata = $this.prev('.source-metadata');
+                console.debug("METADATA: " + );
+                var metadata  = $.parseJSON($metadata.text());
+                console.debug("METADATA: " + metadata);*/
+
+            
+            /*// initialize actions
+            $sdetail.find('.action').each(function(i, elem) {
+                var $elem = $(elem);
+                
+                if ($elem.hasClass('action-menu')) {
+                    $elem.find('a.link').click(
+                }
+            });*/
+
+                        /*var $comments_div = $target.find('.comments');
+                        $comments_div.css({
+                            'height' : $comments_div.height(), 
+                            'overflow-y' : 'scroll'
+                        });*/
+
 document.URL.replace(/^.*\/(\w{1,20})\/?/, "$1");
 //$("#data").append("<pre><code style='font-size: 12px; font-family: \"courier new\" monospace;'>" + JSON.stringify(user.toJSON(), null, 4) + "</code></pre>");
 

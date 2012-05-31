@@ -334,7 +334,7 @@ class FacebookAccountNew(Schema):
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('facebook_token',               basestring, required=True)
+        cls.addProperty('user_token',               basestring, required=True)
 
 class TwitterAccountNew(Schema):
     @classmethod
@@ -670,7 +670,6 @@ class BasicEntity(BasicEntityMini):
         self.schema_version = 0
         self.kind = 'other'
         self.types = []
-        self.images = [] # Temp
         self.sources = EntitySourcesSchema()
         self.timestamp = TimestampSchema()
 
@@ -813,7 +812,7 @@ class PlaceEntity(BasicEntity):
         cls.addProperty('gallery_source',                   basestring)
         cls.addProperty('gallery_timestamp',                datetime)
 
-        cls.addNestedProperty('hours',                      HoursSchema)
+        cls.addNestedProperty('hours',                      TimesSchema)
         cls.addProperty('hours_source',                     basestring)
         cls.addProperty('hours_timestamp',                  datetime)
 
@@ -836,9 +835,6 @@ class PlaceEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'place'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.gallery            = []
-        self.cuisine            = []
 
     def formatAddress(self, extendStreet=False, breakLines=False):
         street      = self.address_street
@@ -946,12 +942,6 @@ class PersonEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'person'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres         = []
-        self.tracks         = []
-        self.albums         = []
-        self.movies         = []
-        self.books          = []
 
     @property
     def subtitle(self):
@@ -1026,15 +1016,6 @@ class BasicMediaEntity(BasicEntity):
 
     def __init__(self):
         BasicEntity.__init__(self)
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres         = []
-        self.artists        = []
-        self.authors        = []
-        self.directors      = []
-        self.cast           = []
-        self.publishers     = []
-        self.studios        = []
-        self.networks       = []
 
 class MediaCollectionEntity(BasicMediaEntity):
 
@@ -1053,13 +1034,13 @@ class MediaCollectionEntity(BasicMediaEntity):
     @property
     def subtitle(self):
         if self.isType('album'):
-            if len(self.artists) > 0:
+            if self.artists is not None and len(self.artists) > 0:
                 return 'Album by %s' % ', '.join(unicode(i.title) for i in self.artists)
 
             return 'Album'
 
         if self.isType('tv'):
-            if len(self.networks) > 0:
+            if self.networks is not None and len(self.networks) > 0:
                 return 'TV Show (%s)' % ', '.join(unicode(i.title) for i in self.networks)
 
             return 'TV Show'
@@ -1103,8 +1084,6 @@ class MediaItemEntity(BasicMediaEntity):
     def __init__(self):
         BasicMediaEntity.__init__(self)
         self.kind = 'media_item'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.albums = []
 
     def minimize(self):
         return BasicEntity.minimize(self, 'length')
@@ -1117,12 +1096,12 @@ class MediaItemEntity(BasicMediaEntity):
             return 'Movie'
 
         if self.isType('track'):
-            if len(self.artists) > 0:
+            if self.artists is not None and len(self.artists) > 0:
                 return 'Song by %s' % ', '.join(unicode(i.title) for i in self.artists)
             return 'Song'
 
         if self.isType('book'):
-            if len(self.authors) > 0:
+            if self.authors is not None and len(self.authors) > 0:
                 return '%s' % ', '.join(unicode(i.title) for i in self.authors)
             return 'Book'
 
@@ -1184,17 +1163,11 @@ class SoftwareEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'software'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres             = []
-        self.screenshots        = []
-        self.authors            = []
-        self.publishers         = []
-        self.supported_devices  = []
 
     @property
     def subtitle(self):
         if self.isType('app'):
-            if len(self.authors) > 0:
+            if self.authors is not None and len(self.authors) > 0:
                 return 'App (%s)' % ', '.join(unicode(i.title) for i in self.authors)
             return 'App'
 

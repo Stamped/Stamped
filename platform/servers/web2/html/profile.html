@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
     <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/libs/colorbox.css">-->
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.fancybox.css?v=2.0.6">
+    <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.jscrollpane.css">
     
     <style>
         {% custom_css "profile" %}
@@ -26,6 +27,7 @@
 {% block main %}
     {{ block.super }}
     
+    {% block profile-header %}
     <div class="profile-header-wrapper">
         <div class="profile-header">
             <div class="profile-content-page">
@@ -34,62 +36,14 @@
                     <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                         {% handlebars_template "profile-image-large" user %}
                         
-                        <div class="floatleft profile-section0">
+                        <div class="floatleft profile-section profile-section-default">
+                            <p class='profile-title'>
+                                {{user.name}}
+                            </p>
+                            
                             <p>
-                                <a class='pronounced-title large' href="/{{user.screen_name}}">{{user.name}}</a>
                                 <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
-                            
-                            <p>
-                                {{user.bio}}
-                            </p>
-                            
-                            <!-- TODO: FOLLOW button -->
-                        </div>
-                        
-                        <div class="profile-sections">
-                            <ol class="profile-nav">
-                                <li><a href="#" class="up-arrow"></a></li>
-                                <li><a href="#" class="down-arrow"></a></li>
-                            </ol>
-                            
-                            <!-- # followers and # friends -->
-                            <div class="profile-section profile-section-default">
-                                <div class="floatleft profile-section2">
-                                    <p class="number">{{user.num_friends}}</p>
-                                    <p>following</p>
-                                    
-                                    {% with users=friends %}
-                                        {% handlebars_template "user-gallery" %}
-                                    {% endwith %}
-                                </div>
-                                
-                                <div class="floatleft profile-section1">
-                                    <p class="number">{{user.num_followers}}</p>
-                                    <p>followers</p>
-                                    
-                                    {% with users=followers %}
-                                        {% handlebars_template "user-gallery" %}
-                                    {% endwith %}
-                                </div>
-                            </div>
-                            
-                            <!-- stamp distribution -->
-                            <div class="profile-section profile-section3">
-                                <!--<p class="stamp-category-{{vertical.category}}">
-                                    <span class="icon"></span>-->
-                                
-                                <ul class="user-category-distribution clearfix">
-                                {% for vertical in user.distribution %}
-                                    <li>
-                                        <img src="{{vertical.icon}}" />
-                                        <div class="bargraph">
-                                            <div class="value"></div>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -97,13 +51,14 @@
                 <div class="profile-header-post">
                     <div class="ribbon-bottom"></div>
                     <div class="inset-stamp">
-                        <div class="number">{{user.num_stamps}}</div>
+                        <div class="stamp-count">{{user.num_stamps}}</div>
                         <p>STAMPS</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% endblock profile-header %}
     
     {% block stamp_category_nav_bar %}
     <nav id="stamp-category-nav-bar" style="display: block;">
@@ -138,6 +93,23 @@
     
     {% block pre_profile_main_content %}
     <div id="main-content" class="fixedwidth">
+        
+        <div class='stamp-gallery-header'>
+            <div class='stamp-gallery-sort'>
+                <a href="#" class='item selected sort-modified' title='Sort stamps by most recent'>
+                    Newest<span class='arrow'> &#x25BC</span>
+                </a>
+                
+                <a href="#" class='item sort-popularity' title='Sort stamps by popularity'>
+                    Popular<span class='arrow'> &#x25BC</span>
+                </a>
+            </div>
+            
+            <div class='stamp-gallery-view-map'>
+                <a href="#">View Map</a>
+            </div>
+        </div>
+        
         {% endblock pre_profile_main_content %}
         
         {% block profile_main_content %}
@@ -159,7 +131,9 @@
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
     <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
     <!--<script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>-->
-    <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.pack.js?v=2.0.6"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.fancybox{% if IS_PROD %}.pack{% endif %}.js?v=2.0.6"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
     
     <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>

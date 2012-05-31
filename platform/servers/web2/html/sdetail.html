@@ -84,10 +84,10 @@
                     {% with comments=stamp.previews.comments %}
                         {% if comments and comments|length > 0 %}
                             <div class="comments collapsed">
-                                {% if comments|length > 3 %}
+                                {% if comments|length > 2 %}
                                     <div class="comments-nav">
-                                        <a class="show" href="#">View all {{comments|length}} comments.</a>
-                                        <a class="hide" href="#">Collapse comments.</a>
+                                        <a class="show" href="#">View all {{comments|length}} comments</a>
+                                        <a class="hide" href="#">Collapse comments</a>
                                     </div>
                                 {% endif %}
                                 
@@ -133,51 +133,98 @@
         
         {% handlebars_template "stamp-image" stamp %}
         
-        <div class="actions">
-            {% for a in entity.actions %}
-                {% with action=a.action %}
-                    <div class="action action-{{action.type}}">
-                        
-                        <!-- TODO: more clean & secure way of embedding JSON -->
-                        <!--<div class="metadata action-metadata" style="display: none;">
-                            {{action}}
-                        </div>-->
-                        
-                        {% if action.sources.0 %}
-                            <div class="sources">
-                                {% for source in action.sources %}
-                                    <div class="source source-{{source.source}}">
-                                        <!-- TODO: more clean & secure way of embedding JSON -->
-                                        <!--<div class="metadata source-metadata" style="display: none;">
-                                            {{source}}
-                                        </div>-->
-                                        
-                                        <div class='entity-title' style="display: none;">
-                                            {{stamp.entity.title}}
-                                        </div>
-                                        
-                                        <a class="link" title="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}" href="{{source.link}}">
-                                            <!-- TODO: replace these icons with sprite assets from anthony -->
-                                            <div class="action-icon">
-                                                <img alt="{{a.name}}" src="{{a.icon}}" />
-                                            </div>
-                                            
-                                            <div class="name">
-                                                {% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}
-                                                
+        <div class='entity-data'>
+            <div class='entity-data-header'>
+                <p class='entity-title'>
+                    {{entity.title}}
+                </p>
+                
+                <p class='entity-caption'>
+                    {{entity.caption}}
+                </p>
+            </div>
+            
+            <div class="entity-actions">
+                {% for a in entity.actions %}
+                    {% with action=a.action %}
+                        <a class='action-link' href="#">
+                            <div class="action action-{{action.type}} clearfix">
+                                <div class='entity-title' style="display: none;">
+                                    {{stamp.entity.title}}
+                                </div>
+                                
+                                <div class='lhs'>
+                                    {% if a.icon %}
+                                        <img class='action-icon' src="{{a.icon}}" />
+                                    {% endif %}
+                                    
+                                    {{a.name}}
+                                </div>
+                                
+                                {% if action.sources.0 %}
+                                    <div class="rhs">
+                                        {% for source in action.sources %}
+                                            <div class="source source-{{source.source}}">
                                                 {% if source.icon %}
                                                     <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
-/>
+        />
                                                 {% endif %}
                                             </div>
-                                        </a>
+                                        {% endfor %}
                                     </div>
-                                {% endfor %}
+                                {% endif %}
                             </div>
-                        {% endif %}
+                        </a>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+            
+            <div class='entity-metadata'>
+                {% for item in entity.metadata %}
+                    <div class='metadata-item clearfix'>
+                        <div class='key'>
+                            {{item.name}}
+                        </div>
+                        
+                        <div class='rhs-value rhs-value-{{item.name|lower}}'>
+                            {% if item.name|lower == 'description' or item.name|lower == 'overview' or item.name|lower == 'biography' %}
+                                <a class='nav expand'>Read more</a>
+                                <a class='nav collapse'>Read less</a>
+                            {% else %}{% if item.name|lower == 'tracks' %}
+                                <a class='nav expand'>See all tracks</a>
+                                <a class='nav collapse'>See less</a>
+                            {% else %}{% if item.name|lower == 'albums' %}
+                                <a class='nav expand'>See all albums</a>
+                                <a class='nav collapse'>See less</a>
+                            {% else %}{% if item.name|lower == 'cast' %}
+                                <a class='nav expand'>See all</a>
+                                <a class='nav collapse'>See less</a>
+                            {% else %}
+                                <a class='nav expand'>See more</a>
+                                <a class='nav collapse'>See less</a>
+                            {% endif %}{% endif %}{% endif %}{% endif %}
+                        </div>
+                        
+                        <div class='inner-value inner-value-{{item.name|lower}}'>
+                            <p class='resizable'>
+                                {% if item.action and item.action.type == 'link' %}
+                                    <a href="{{item.action.sources.0.link}}">
+                                {% endif %}
+                                
+                                {% if item.icon %}
+                                    <img src="{{item.icon}}" alt="{{item.value}}" />
+                                {% endif %}
+                                
+                                {{item.value}}
+                                
+                                {% if item.action and item.action.type == 'link' %}
+                                    </a>
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
-                {% endwith %}
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
     </div>
     

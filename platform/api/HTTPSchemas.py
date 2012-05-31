@@ -42,8 +42,7 @@ def _coordinatesDictToFlat(coordinates):
         if isinstance(coordinates, Schema):
             coordinates = coordinates.dataExport()
 
-        if not isinstance(coordinates['lat'], float) or \
-           not isinstance(coordinates['lng'], float):
+        if not isinstance(coordinates['lat'], float) or not isinstance(coordinates['lng'], float):
             raise
         
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
@@ -306,7 +305,7 @@ class OAuthLogin(Schema):
 class OAuthFacebookLogin(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('fb_token',                     basestring, required=True)
+        cls.addProperty('user_token',                     basestring, required=True)
 
 class OAuthTwitterLogin(Schema):
     @classmethod
@@ -429,11 +428,12 @@ class HTTPFacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('user_token',                   basestring, required=True)
+        cls.addProperty('email',                        basestring)
         cls.addProperty('phone',                        int)
         cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('facebook_token',               basestring, required=True)
+
 
     def convertToFacebookAccountNew(self):
         return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
@@ -442,12 +442,13 @@ class HTTPTwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
         cls.addProperty('user_token',                   basestring, required=True)
         cls.addProperty('user_secret',                  basestring, required=True)
+        cls.addProperty('email',                        basestring)
+        cls.addProperty('phone',                        int)
+        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+
 
     def convertToTwitterAccountNew(self):
         return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
@@ -868,18 +869,19 @@ class HTTPEndpointResponse(Schema):
 
 def _addImages(dest, images):
     newImages = []
-    for image in images:
-        if len(image.sizes) == 0:
-            continue
-        newimg = HTTPImageSchema()
-        sizes = []
-        for size in image.sizes:
-            if size.url is not None:
-                newsize = HTTPImageSizeSchema()
-                newsize.url = _cleanImageURL(size.url)
-                sizes.append(newsize)
-        newimg.sizes = sizes
-        newImages.append(newimg)
+    if images is not None:
+        for image in images:
+            if len(image.sizes) == 0:
+                continue
+            newimg = HTTPImageSchema()
+            sizes = []
+            for size in image.sizes:
+                if size.url is not None:
+                    newsize = HTTPImageSizeSchema()
+                    newsize.url = _cleanImageURL(size.url)
+                    sizes.append(newsize)
+            newimg.sizes = sizes
+            newImages.append(newimg)
 
     dest.images = newImages
 
@@ -1058,6 +1060,14 @@ class HTTPEntity(Schema):
 
             self.metadata = metadata
 
+    def _formatMetadataList(self, data, attribute=None):
+        if data is None or len(data) == 0:
+            return None
+        if attribute is not None:
+            return ', '.join(unicode(getattr(i, attribute)) for i in data)
+        else:
+            return ', '.join(unicode(i) for i in data)
+
     def _formatReleaseDate(self, date):
         try:
             return date.strftime("%h %d, %Y")
@@ -1088,12 +1098,12 @@ class HTTPEntity(Schema):
         self.subtitle           = entity.subtitle
         self.category           = entity.category
         self.subcategory        = entity.subcategory
-
+        
         self.caption            = self.subtitle # Default
         self.last_modified      = entity.timestamp.created
-
+        
         subcategory             = self._formatSubcategory(self.subcategory)
-
+        
         # Place
         if entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
@@ -1105,7 +1115,7 @@ class HTTPEntity(Schema):
 
             # Metadata
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
-            self._addMetadata('Cuisine', ', '.join(unicode(i) for i in entity.cuisine))
+            self._addMetadata('Cuisine', self._formatMetadataList(entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
@@ -1210,15 +1220,15 @@ class HTTPEntity(Schema):
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
 
-            if len(entity.authors) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
+            if entity.authors is not None and len(entity.authors) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', ', '.join(unicode(i.title) for i in entity.publishers))
+            self._addMetadata('Publisher', self._formatMetadataList(entity.publishers, 'title'))
 
             # Actions: Buy
 
@@ -1246,22 +1256,25 @@ class HTTPEntity(Schema):
         # TV
         elif entity.kind == 'media_collection' and entity.isType('tv'):
 
-            if len(entity.networks) > 0:
-                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
+            if entity.networks is not None and len(entity.networks) > 0:
+                self.caption = self._formatMetadataList(entity.networks, 'title')
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
-
+            self._addMetadata('Cast', self._formatMetadataList(entity.cast, 'title'), extended=True, optional=True)
+            self._addMetadata('Director', self._formatMetadataList(entity.directors, 'title'), optional=True)
+            self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
+            
+            if entity.subcategory == 'movie':
+                self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
+            
             # Actions: Watch Now
-
+            
             actionType  = 'watch'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
+            
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Watch on iTunes'
@@ -1282,11 +1295,10 @@ class HTTPEntity(Schema):
             self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
-
             actionType  = 'add_to_instant_queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
+            
             if (entity.sources.netflix_id is not None and
                 entity.sources.netflix_is_instant_available is not None and
                 entity.sources.netflix_instant_available_until is not None and
@@ -1305,7 +1317,7 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-
+            
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
 
             # Actions: Download
@@ -1326,28 +1338,27 @@ class HTTPEntity(Schema):
 
         # Movie
         elif entity.kind == 'media_item' and entity.isType('movie'):
-
             if entity.length is not None:
                 length = self._formatFilmLength(entity.length)
                 if length is not None:
                     self.caption = length
 
             # Metadata
-
+            
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            self._addMetadata('Cast', self._formatMetadataList(entity.cast, 'title'), extended=True, optional=True)
+            self._addMetadata('Director', self._formatMetadataList(entity.directors, 'title'), optional=True)
+            self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
             # Actions: Watch Now
-
+            
             actionType  = 'watch'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
-
+            
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Watch on iTunes'
@@ -1355,8 +1366,10 @@ class HTTPEntity(Schema):
                 source.source_id    = entity.sources.itunes_id
                 source.source_data  = { 'preview_url': entity.sources.itunes_preview }
                 source.icon         = _getIconURL('src_itunes', client=client)
+                
                 if getattr(entity.sources, 'itunes_url', None) is not None:
                     source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
+                
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
@@ -1364,27 +1377,30 @@ class HTTPEntity(Schema):
                     source_id   = source.source_id,
                 )
                 sources.append(source)
-
+            
             self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
-
+            
             # Actions: Find Tickets
-
+            
             actionType  = 'tickets'
             actionIcon  = _getIconURL('act_ticket_primary', client=client)
             if len(self.actions) == 0:
                 actionIcon = _getIconURL('act_ticket', client=client)
+            
             sources     = []
-
             if getattr(entity.sources, 'fandango_id', None) is not None:
                 source              = HTTPActionSource()
                 source.name         = 'Buy from Fandango'
                 source.source       = 'fandango'
                 source.source_id    = entity.sources.fandango_id
+                
                 if getattr(entity.sources, 'fandango_url', None) is not None:
                     source.link     = entity.sources.fandango_url
+                
                 # Only add icon if no "watch now"
                 if len(self.actions) == 0:
                     source.icon   = _getIconURL('src_fandango', client=client)
+                
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
@@ -1448,21 +1464,21 @@ class HTTPEntity(Schema):
             if entity.isType('artist'):
                 self.caption = 'Artist'
 
-            elif entity.isType('album') and len(entity.artists) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
+            elif entity.isType('album') and entity.artists is not None and len(entity.artists) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
-            elif entity.isType('track') and len(entity.artists) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
+            elif entity.isType('track') and entity.artists is not None and len(entity.artists) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_music', client=client))
             if entity.isType('artist'):
                 self._addMetadata('Biography', entity.desc, key='desc')
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres), optional=True)
 
             elif entity.isType('album'):
-                if len(entity.artists) > 0:
+                if entity.artists is not None and len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
                         source              = HTTPActionSource()
@@ -1474,12 +1490,12 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.isType('track'):
-                if len(entity.artists) > 0:
+                if entity.artists is not None and len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
                         source              = HTTPActionSource()
@@ -1491,7 +1507,7 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
 
@@ -1747,13 +1763,13 @@ class HTTPEntity(Schema):
 
         elif entity.kind == 'software' and entity.isType('app'):
 
-            if len(entity.authors) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
+            if entity.authors is not None and len(entity.authors) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_app', client=client))
-            self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+            self._addMetadata('Genre', self._formatMetadataList(entity.genres))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
             # Actions: Download
@@ -2896,6 +2912,9 @@ class HTTPActivity(Schema):
                 subjects.append(HTTPUserMini().importUserMini(user))
             self.subjects = subjects
 
+        if not activity.personal:
+            del(self.benefit)
+
         def _addUserObjects():
             if activity.objects is not None and activity.objects.users is not None:
                 if self.objects is None:
@@ -3138,13 +3157,19 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
+
+                if len(self.subjects) == 1:
+                    self.action = _buildUserAction(self.subjects[0])
+                else:
+                    ### TODO: Action to go to follower list
+                    pass
             else:
                 offset = len(subjects) + len(verb) + 2
                 userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
                 self.body = '%s %s %s.' % (subjects, verb, userObjects)
                 self.body_references = subjectReferences + userObjectReferences
 
-            self.action = _buildUserAction(self.objects.users[0])
+                self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
             _addStampObjects
@@ -3152,6 +3177,7 @@ class HTTPActivity(Schema):
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
             if activity.personal:
+                self.benefit = len(self.subjects)
                 self.body = '%s gave you credit.' % (subjects)
                 self.body_references = subjectReferences
                 if len(self.subjects) > 1:
@@ -3176,7 +3202,9 @@ class HTTPActivity(Schema):
             self.body = '%s %s %s.' % (subjects, verb, stampObjects)
             self.body_references = subjectReferences + stampObjectReferences
 
-            if not activity.personal:
+            if activity.personal:
+                self.benefit = len(self.subjects)
+            else:
                 stampUsers = map(lambda x: x.user, self.objects.stamps)
                 stampUserObjects, stampUserReferences = _formatUserObjects(stampUsers, offset=4)
                 self.footer = 'via %s' % stampUserObjects

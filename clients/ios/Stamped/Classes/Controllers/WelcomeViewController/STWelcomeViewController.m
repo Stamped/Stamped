@@ -99,28 +99,41 @@
 
 - (void)welcomePopoverViewSelectedTwitter:(WelcomePopoverView*)view {
     
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionTwitter];
+    }
+    
 }
 
 - (void)welcomePopoverViewSelectedFacebook:(WelcomePopoverView*)view {
     
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionFacebook];
+    }
+
 }
 
 - (void)welcomePopoverViewSelectedEmail:(WelcomePopoverView*)view {
     
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionSignup];
+    }
+
 }
 
 - (void)welcomePopoverViewSelectedLogin:(WelcomePopoverView*)view {
-    
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-    LoginViewController *controller = [[LoginViewController alloc] init];
-    [menuController presentModalViewController:controller animated:YES];
-    [controller release];
+
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewController:selectedOption:)]) {
+        [self.delegate stWelcomeViewController:self selectedOption:STWelcomeViewControllerOptionLogin];
+    }
     
 }
 
 - (void)welcomePopoverViewSelectedClose:(WelcomePopoverView*)view {
     
-    [self.view removeFromSuperview];
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewControllerDismiss:)]) {
+        [self.delegate stWelcomeViewControllerDismiss:self];
+    }
     
 }
 

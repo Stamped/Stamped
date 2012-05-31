@@ -286,7 +286,7 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        user = self._facebook.getUserInfo(new_fb_account.facebook_token)
+        user = self._facebook.getUserInfo(new_fb_account.user_token)
 
         account = None
         try:
@@ -1114,12 +1114,13 @@ class StampedAPI(AStampedAPI):
             suggested = {
                 'mariobatali':      1, 
                 'nymag':            2,
-                'UrbanDaddy':       3,
-                'parislemon':       4, 
-                'michaelkors':      5, 
-                'petertravers':     6,
-                'rebeccaminkoff':   7, 
-                'austinchronicle':  8,
+                'TIME':             3,
+                'UrbanDaddy':       4,
+                'parislemon':       5, 
+                'michaelkors':      6, 
+                'petertravers':     7,
+                'rebeccaminkoff':   8, 
+                'austinchronicle':  9,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
@@ -1416,7 +1417,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        if self.__version > 0 and entity.isType('artist'):
+        if entity.isType('artist') and entity.albums is not None:
             albumIds = {}
             for album in entity.albums:
                 if album.entity_id is not None:
@@ -4264,7 +4265,10 @@ class StampedAPI(AStampedAPI):
             successor_id = tombstoneId
             successor    = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
-            
+
+            # TODO: Because we create a new FullResolveContainer() here instead of using self.__full_resolve, we are not
+            # reading from or writing to  the joint history about what sources have failed recently and are still
+            # cooling down.
             merger = FullResolveContainer.FullResolveContainer()
             merger.addSource(EntitySource(entity, merger.groups))
             successor_decorations = {}
@@ -4312,6 +4316,17 @@ class StampedAPI(AStampedAPI):
     def _resolveEntityLinks(self, entity):
         
         def _resolveStub(stub, sources):
+            """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
+
+            Tries to fast resolve Stamped DB using existing third-party source IDs.
+            Failing that (for one source at a time, not for all sources) tries to use standard resolution against
+                StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
+                falling back?)
+            Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
+                if there were any.
+            If none of this works, throws a KeyError.
+            """
+
             source          = None
             source_id       = None
             entity_id       = None
@@ -4369,6 +4384,10 @@ class StampedAPI(AStampedAPI):
         def _resolveTracks(entity):
             trackList = []
             tracksModified = False
+
+            if entity.tracks is None:
+                return tracksModified 
+
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
@@ -4407,6 +4426,10 @@ class StampedAPI(AStampedAPI):
         def _resolveAlbums(entity):
             albumList = []
             albumsModified = False
+
+            if entity.albums is None:
+                return albumsModified 
+
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
@@ -4445,6 +4468,10 @@ class StampedAPI(AStampedAPI):
         def _resolveArtists(entity):
             artistList = []
             artistsModified = False
+
+            if entity.artists is None:
+                return albumsModified 
+
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
@@ -4483,16 +4510,17 @@ class StampedAPI(AStampedAPI):
 
         if entity.isType('artist') or entity.isType('track'):
             # Enrich albums instead
-            for albumItem in entity.albums:
-                try:
-                    albumItem, albumModified = _resolveStub(albumItem, musicSources)
-                    if albumItem.entity_id is not None:
-                        if albumItem.isType('album'):
-                            self.mergeEntityId(albumItem.entity_id)
-                    else:
-                        self.mergeEntity(albumItem)
-                except Exception as e:
-                    logs.warning('Failed to enrich album: %s' % e)
+            if entity.albums is not None:
+                for albumItem in entity.albums:
+                    try:
+                        albumItem, albumModified = _resolveStub(albumItem, musicSources)
+                        if albumItem.entity_id is not None:
+                            if albumItem.isType('album'):
+                                self.mergeEntityId(albumItem.entity_id)
+                        else:
+                            self.mergeEntity(albumItem)
+                    except Exception as e:
+                        logs.warning('Failed to enrich album: %s' % e)
 
         return modified
 

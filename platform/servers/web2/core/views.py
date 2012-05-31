@@ -246,7 +246,7 @@ def map(request, schema, **kwargs):
         user        = travis_test.user
         user_id     = user['user_id']
         
-        stamps      = filter(lambda s: 'coordinates' in s['entity'], travis_test.stamps)
+        stamps      = filter(lambda s: s['entity'].get('coordinates', None) is not None, travis_test.stamps)
         stamps      = stamps[schema.offset : schema.offset + schema.limit]
     else:
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
@@ -255,7 +255,7 @@ def map(request, schema, **kwargs):
         stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
     
     # TODO: bake this into stampedAPIProxy request
-    stamps    = filter(lambda s: 'coordinates' in s['entity'], stamps)
+    stamps    = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
@@ -270,7 +270,7 @@ def map(request, schema, **kwargs):
             'offset' : schema.offset + len(stamps), 
         })
     
-    body_classes = _get_body_classes('map', schema)
+    body_classes = _get_body_classes('map collapsed-header', schema)
     
     return stamped_render(request, 'map.html', {
         'user'          : user, 
@@ -287,25 +287,33 @@ def map(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPStampDetail)
 def sdetail(request, schema, **kwargs):
-    body_classes = _get_body_classes('sdetail', schema)
+    body_classes = _get_body_classes('sdetail collapsed-header', schema)
     
     logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         user  = travis_test.user
         #stamp = travis_test.stamps[(-schema.stamp_num) - 1]
+        
+        #stamp  = travis_test.sdetail_stamp
+        #entity = travis_test.sdetail_entity
     else:
-        user  = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+        user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
     
-    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
+    stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")
     
     entity = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     
-    #from pprint import pprint
-    #pprint(stamp)
+    """
+    from pprint import pprint
+    pprint(stamp)
+    
+    from pprint import pprint
+    pprint(entity)
+    """
     
     #stamp = Stamp().importData(stamp)
     '''

@@ -23,6 +23,7 @@
 #import "STConfiguration.h"
 #import "DDMenuController.h"
 #import <RestKit/RestKit.h>
+#import "STMenuController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";

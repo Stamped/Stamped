@@ -11,13 +11,13 @@
 #import "STCancellation.h"
 
 @protocol STStampCellDelegate;
-@class STBlockUIView, STPreviewsView, STDetailTextCallout, STStampCellAvatarView;
+@class STBlockUIView, STPreviewsView, STDetailTextCallout, STAvatarView;
 @interface STStampCell : UITableViewCell {
     STBlockUIView *_headerView;
     STBlockUIView *_commentView;
     STPreviewsView *_statsView;
     CAShapeLayer *_statsDots;
-    STStampCellAvatarView *_userImageView;
+    STAvatarView *_userImageView;
     UIImageView *_footerImageView;
     UILabel *_dateLabel;    
     UIImage *_stampImage;

@@ -8,6 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+typedef enum {
+    STWelcomeViewControllerOptionLogin = 0,
+    STWelcomeViewControllerOptionSignup,
+    STWelcomeViewControllerOptionTwitter,
+    STWelcomeViewControllerOptionFacebook,
+} STWelcomeViewControllerOption;
+
 @protocol STWelcomeViewControllerDelegate;
 @class WelcomePopoverView;
 @interface STWelcomeViewController : UIViewController {
@@ -19,4 +26,6 @@
 
 @end
 @protocol STWelcomeViewControllerDelegate
+- (void)stWelcomeViewControllerDismiss:(STWelcomeViewController*)controller;
+- (void)stWelcomeViewController:(STWelcomeViewController*)controller selectedOption:(STWelcomeViewControllerOption)option;
 @end

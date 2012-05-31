@@ -194,7 +194,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "client_secret"     : c_secret,
             "name"              : name,
             "screen_name"       : name,
-            "facebook_token"    : fb_user_token,
+            "user_token"    : fb_user_token,
         }
         response = self.handlePOST(path, data)
         self.assertIn('user', response)
@@ -250,7 +250,7 @@ class AStampedAPITestCase(AStampedTestCase):
         data = {
             "client_id":        c_id,
             "client_secret":    c_secret,
-            "fb_token":         fb_user_token,
+            "user_token":       fb_user_token,
             }
         return self.handlePOST(path, data)
 
