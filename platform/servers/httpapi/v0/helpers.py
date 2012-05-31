@@ -140,7 +140,7 @@ def handleHTTPRequest(requires_auth=True,
                 logs.info("%s %s" % (request.method, request.path))
                 
                 if not valid_origin:
-                    logs.warn("INVALID ORIGIN: %s" % origin)
+                    logs.warning("INVALID ORIGIN: %s" % origin)
                 
                 params = {}
                 
@@ -308,7 +308,7 @@ def checkOAuth(request):
     try:
         authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)
         if authenticated_user_id == None:
-            raise
+            raise StampedAuthError("invalid_request", "User not found")
         
         logs.user(authenticated_user_id)
         logs.client(client_id)
