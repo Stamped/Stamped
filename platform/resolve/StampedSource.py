@@ -154,8 +154,8 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
 
 def _fixCast(cast):
     newcast = []
-    import pprint
-    pprint.pprint('fixCast  cast: %s' % cast)
+    if cast is None:
+        return newcast
     try:
         # if it's just a string, construct a list of dictionaries with 'title' keys
         if isinstance(cast, basestring):
@@ -181,7 +181,6 @@ def _fixCast(cast):
             newcast.append(newitem)
     except Exception as e:
         print('ERROR: %s' % e)
-    pprint.pprint('newcast: %s' % newcast)
     return newcast
 
 

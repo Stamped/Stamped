@@ -823,6 +823,64 @@ class HTTPEmail(Schema):
     def setSchema(cls):
         cls.addProperty('email',                basestring)
 
+# ######## #
+# Comments #
+# ######## #
+
+class HTTPComment(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',           basestring, required=True)
+        cls.addNestedProperty('user',           HTTPUserMini, required=True)
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('restamp_id',           basestring)
+        cls.addProperty('blurb',                basestring, required=True)
+        cls.addNestedPropertyList('mentions',   MentionSchema)
+        cls.addProperty('created',              basestring)
+
+    def importComment(self, comment):
+        self.dataImport(comment.dataExport(), overflow=True)
+        self.created = comment.timestamp.created
+        self.user = HTTPUserMini().importUserMini(comment.user)
+        return self
+
+class HTTPCommentNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('blurb',                basestring, required=True)
+
+class HTTPCommentId(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',           basestring, required=True)
+
+
+# ######## #
+# Previews #
+# ######## #
+
+class HTTPStampPreview(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addNestedProperty('user',                       HTTPUserMini)
+
+    def importStampPreview(self, stampPreview):
+        logs.info("STAMP PREVIEW: %s" % stampPreview)
+        self.stamp_id = stampPreview.stamp_id
+        self.user = HTTPUserMini().importUserMini(stampPreview.user)
+        return self 
+
+class HTTPPreviews(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('stamps',                 HTTPStampPreview)
+        cls.addNestedPropertyList('credits',                HTTPStampPreview)
+        cls.addNestedPropertyList('todos',                  HTTPUserMini)
+        cls.addNestedPropertyList('likes',                  HTTPUserMini)
+        cls.addNestedPropertyList('comments',               HTTPComment)
+
 
 # ########## #
 # ClientLogs #
@@ -2455,37 +2513,6 @@ class HTTPGuideRequest(Schema):
 
 
 
-# ######## #
-# Comments #
-# ######## #
-
-class HTTPComment(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',           basestring, required=True)
-        cls.addNestedProperty('user',           HTTPUserMini, required=True)
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addProperty('restamp_id',           basestring)
-        cls.addProperty('blurb',                basestring, required=True)
-        cls.addNestedPropertyList('mentions',   MentionSchema)
-        cls.addProperty('created',              basestring)
-
-    def importComment(self, comment):
-        self.dataImport(comment.dataExport(), overflow=True)
-        self.created = comment.timestamp.created
-        self.user = HTTPUserMini().importUserMini(comment.user)
-        return self
-
-class HTTPCommentNew(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addProperty('blurb',                basestring, required=True)
-
-class HTTPCommentId(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',           basestring, required=True)
 
 
 # ###### #
@@ -2536,14 +2563,6 @@ class HTTPStampMini(Schema):
         self.is_liked           = False
         self.is_fav             = False
 
-class HTTPStampPreviews(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('likes',              HTTPUserMini)
-        cls.addNestedPropertyList('todos',              HTTPUserMini)
-        cls.addNestedPropertyList('credits',            HTTPStampMini)
-        cls.addNestedPropertyList('comments',           HTTPComment)
-
 class HTTPStamp(Schema):
     @classmethod
     def setSchema(cls):
@@ -2552,7 +2571,7 @@ class HTTPStamp(Schema):
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent, required=True)
         cls.addNestedPropertyList('credit',     CreditSchema)
-        cls.addNestedProperty('previews',       HTTPStampPreviews)
+        cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
         cls.addProperty('url',                  basestring)
@@ -2652,7 +2671,7 @@ class HTTPStamp(Schema):
 
     def importStamp(self, stamp):
         self.importStampMini(stamp)
-        previews = HTTPStampPreviews()
+        previews = HTTPPreviews()
 
         if stamp.previews.comments is not None:
             comments = []
@@ -2679,7 +2698,7 @@ class HTTPStamp(Schema):
         if stamp.previews.credits is not None:
             credits = []
             for credit in stamp.previews.credits:
-                credit  = HTTPStamp().importStampMini(credit).minimize()
+                credit  = HTTPStampPreview().importStampPreview(credit)
                 credits.append(credit)
             previews.credits = credits
 
@@ -2747,14 +2766,14 @@ class HTTPStampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('count',                int)
-        cls.addNestedPropertyList('stamps',     HTTPStamp)
+        cls.addNestedPropertyList('stamps',     HTTPStampPreview)
 
     def importStampedByGroup(self, group):
         if group.count is not None:
             self.count = group.count 
 
         if group.stamps is not None:
-            self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
+            self.stamps = [HTTPStampPreview().importStampPreview(s) for s in group.stamps]
 
         return self
 
@@ -2820,7 +2839,7 @@ class HTTPTodo(Schema):
         #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         #cls.addNestedProperty('stamp',          HTTPStamp)
         cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
-        cls.addNestedProperty('previews',       HTTPStampPreviews)
+        cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addProperty('created',              basestring)
         cls.addProperty('complete',             bool)
 
@@ -2832,7 +2851,7 @@ class HTTPTodo(Schema):
         if todo.stamp is not None:
             self.source.stamp_ids   = [ todo.stamp.stamp_id ]
         if todo.previews is not None and todo.previews.todos is not None:
-            self.previews           = HTTPStampPreviews()
+            self.previews           = HTTPPreviews()
             self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
         self.created                = todo.timestamp.created
         self.complete               = todo.complete
@@ -3172,7 +3191,7 @@ class HTTPActivity(Schema):
                 self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
-            _addStampObjects
+            _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
