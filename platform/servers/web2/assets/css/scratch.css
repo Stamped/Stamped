@@ -1,3 +1,34 @@
+
+
+/*
+.profile-section {
+    display: none;
+    
+    &.profile-section-default {
+        display: block;
+    }
+}
+
+.profile-section1, .profile-section2 {
+    .floatright;
+    width: 18%;
+    
+    .number {
+        .stamped-font();
+        
+        font-size: 2em;
+        letter-spacing: .05em;
+        color: #000;
+    }
+}
+
+.profile-section3 {
+    .floatright;
+    width: 45%;
+}*/
+
+
+
 /*-webkit-font-smoothing: antialiased;*/
 
             /*.bqstart {

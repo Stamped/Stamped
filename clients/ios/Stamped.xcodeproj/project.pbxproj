@@ -1304,6 +1304,46 @@
 		03E005DD15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
 		03E005DE15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
 		03E005DF15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */; };
+		03E005E31576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005E21576AA0A00CDFEFF /* STTextFieldTableCell.m */; };
+		03E005E41576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005E21576AA0A00CDFEFF /* STTextFieldTableCell.m */; };
+		03E005E51576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005E21576AA0A00CDFEFF /* STTextFieldTableCell.m */; };
+		03E005E61576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005E21576AA0A00CDFEFF /* STTextFieldTableCell.m */; };
+		03E005E81576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005E71576AC3800CDFEFF /* signup_text_field_bg@2x.png */; };
+		03E005E91576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005E71576AC3800CDFEFF /* signup_text_field_bg@2x.png */; };
+		03E005EA1576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005E71576AC3800CDFEFF /* signup_text_field_bg@2x.png */; };
+		03E005EB1576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E005E71576AC3800CDFEFF /* signup_text_field_bg@2x.png */; };
+		03E005EF1576B6AA00CDFEFF /* STAvatarView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005EE1576B6AA00CDFEFF /* STAvatarView.m */; };
+		03E005F01576B6AA00CDFEFF /* STAvatarView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005EE1576B6AA00CDFEFF /* STAvatarView.m */; };
+		03E005F11576B6AA00CDFEFF /* STAvatarView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005EE1576B6AA00CDFEFF /* STAvatarView.m */; };
+		03E005F21576B6AA00CDFEFF /* STAvatarView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005EE1576B6AA00CDFEFF /* STAvatarView.m */; };
+		03E005F71576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005F61576E2DC00CDFEFF /* StampCustomizeViewController.m */; };
+		03E005F81576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005F61576E2DC00CDFEFF /* StampCustomizeViewController.m */; };
+		03E005F91576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005F61576E2DC00CDFEFF /* StampCustomizeViewController.m */; };
+		03E005FA1576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005F61576E2DC00CDFEFF /* StampCustomizeViewController.m */; };
+		03E005FE1576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005FD1576E6D100CDFEFF /* StampColorPickerSliderView.m */; };
+		03E005FF1576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005FD1576E6D100CDFEFF /* StampColorPickerSliderView.m */; };
+		03E006001576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005FD1576E6D100CDFEFF /* StampColorPickerSliderView.m */; };
+		03E006011576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E005FD1576E6D100CDFEFF /* StampColorPickerSliderView.m */; };
+		03E006091576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006031576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png */; };
+		03E0060A1576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006031576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png */; };
+		03E0060B1576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006031576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png */; };
+		03E0060C1576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006031576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png */; };
+		03E006121576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006111576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png */; };
+		03E006131576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006111576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png */; };
+		03E006141576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006111576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png */; };
+		03E006151576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006111576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png */; };
+		03E006171576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006161576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png */; };
+		03E006181576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006161576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png */; };
+		03E006191576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006161576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png */; };
+		03E0061A1576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006161576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png */; };
+		03E006261577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006211577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png */; };
+		03E006271577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006211577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png */; };
+		03E006281577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006211577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png */; };
+		03E006291577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E006211577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png */; };
+		03E0062B157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E0062A157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png */; };
+		03E0062C157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E0062A157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png */; };
+		03E0062D157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E0062A157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png */; };
+		03E0062E157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E0062A157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png */; };
 		03E4A47D1562B453007B5DF4 /* GTMOAuthViewControllerTouch.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E4A47B1562B453007B5DF4 /* GTMOAuthViewControllerTouch.m */; };
 		03E4A47E1562B453007B5DF4 /* GTMOAuthViewTouch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03E4A47C1562B453007B5DF4 /* GTMOAuthViewTouch.xib */; };
 		03E4A4831562B492007B5DF4 /* GTMOAuthAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 03E4A4801562B492007B5DF4 /* GTMOAuthAuthentication.m */; };
@@ -4533,6 +4573,20 @@
 		03E005D115768A4800CDFEFF /* StampColorPickerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampColorPickerView.m; sourceTree = "<group>"; };
 		03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_picker_check@2x.png"; sourceTree = "<group>"; };
 		03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_picker_white_border@2x.png"; sourceTree = "<group>"; };
+		03E005E11576AA0A00CDFEFF /* STTextFieldTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTextFieldTableCell.h; sourceTree = "<group>"; };
+		03E005E21576AA0A00CDFEFF /* STTextFieldTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTextFieldTableCell.m; sourceTree = "<group>"; };
+		03E005E71576AC3800CDFEFF /* signup_text_field_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "signup_text_field_bg@2x.png"; sourceTree = "<group>"; };
+		03E005ED1576B6AA00CDFEFF /* STAvatarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAvatarView.h; sourceTree = "<group>"; };
+		03E005EE1576B6AA00CDFEFF /* STAvatarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAvatarView.m; sourceTree = "<group>"; };
+		03E005F51576E2DC00CDFEFF /* StampCustomizeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampCustomizeViewController.h; sourceTree = "<group>"; };
+		03E005F61576E2DC00CDFEFF /* StampCustomizeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampCustomizeViewController.m; sourceTree = "<group>"; };
+		03E005FC1576E6D100CDFEFF /* StampColorPickerSliderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampColorPickerSliderView.h; sourceTree = "<group>"; };
+		03E005FD1576E6D100CDFEFF /* StampColorPickerSliderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampColorPickerSliderView.m; sourceTree = "<group>"; };
+		03E006031576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_color_slider_hue_track@2x.png"; sourceTree = "<group>"; };
+		03E006111576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_color_slider_thumb@2x.png"; sourceTree = "<group>"; };
+		03E006161576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_color_slider_brighness_track@2x.png"; sourceTree = "<group>"; };
+		03E006211577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_color_slider_hud_bg@2x.png"; sourceTree = "<group>"; };
+		03E0062A157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_color_slider_arrow@2x.png"; sourceTree = "<group>"; };
 		03E4A47A1562B453007B5DF4 /* GTMOAuthViewControllerTouch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTMOAuthViewControllerTouch.h; sourceTree = "<group>"; };
 		03E4A47B1562B453007B5DF4 /* GTMOAuthViewControllerTouch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTMOAuthViewControllerTouch.m; sourceTree = "<group>"; };
 		03E4A47C1562B453007B5DF4 /* GTMOAuthViewTouch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GTMOAuthViewTouch.xib; sourceTree = "<group>"; };
@@ -6036,6 +6090,9 @@
 		0301378015668DB300B55B47 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				03E005FB1576E6C500CDFEFF /* StampColorPickerSliderView */,
+				03E005EC1576B69A00CDFEFF /* STAvatarView */,
+				03E005E01576A9F900CDFEFF /* STTextFieldTableCell */,
 				03E005CF15768A3700CDFEFF /* StampColorPickerView */,
 				03E005C81576888800CDFEFF /* SocialSignupHeaderView */,
 				03FDC535157671DF0024A55C /* STSingleTableCell */,
@@ -6190,6 +6247,7 @@
 		0364C0E11564867B00EE18C1 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				03E005F41576E2D000CDFEFF /* StampCustomizeViewController */,
 				03E005C11576870400CDFEFF /* SocialSignupViewController */,
 				03FDC52E157671730024A55C /* TwitterAccountsViewController */,
 				03FDC52715766FA90024A55C /* STMenuController */,
@@ -6370,6 +6428,42 @@
 				03E005D115768A4800CDFEFF /* StampColorPickerView.m */,
 			);
 			path = StampColorPickerView;
+			sourceTree = "<group>";
+		};
+		03E005E01576A9F900CDFEFF /* STTextFieldTableCell */ = {
+			isa = PBXGroup;
+			children = (
+				03E005E11576AA0A00CDFEFF /* STTextFieldTableCell.h */,
+				03E005E21576AA0A00CDFEFF /* STTextFieldTableCell.m */,
+			);
+			path = STTextFieldTableCell;
+			sourceTree = "<group>";
+		};
+		03E005EC1576B69A00CDFEFF /* STAvatarView */ = {
+			isa = PBXGroup;
+			children = (
+				03E005ED1576B6AA00CDFEFF /* STAvatarView.h */,
+				03E005EE1576B6AA00CDFEFF /* STAvatarView.m */,
+			);
+			path = STAvatarView;
+			sourceTree = "<group>";
+		};
+		03E005F41576E2D000CDFEFF /* StampCustomizeViewController */ = {
+			isa = PBXGroup;
+			children = (
+				03E005F51576E2DC00CDFEFF /* StampCustomizeViewController.h */,
+				03E005F61576E2DC00CDFEFF /* StampCustomizeViewController.m */,
+			);
+			path = StampCustomizeViewController;
+			sourceTree = "<group>";
+		};
+		03E005FB1576E6C500CDFEFF /* StampColorPickerSliderView */ = {
+			isa = PBXGroup;
+			children = (
+				03E005FC1576E6D100CDFEFF /* StampColorPickerSliderView.h */,
+				03E005FD1576E6D100CDFEFF /* StampColorPickerSliderView.m */,
+			);
+			path = StampColorPickerSliderView;
 			sourceTree = "<group>";
 		};
 		03E4A4791562B453007B5DF4 /* GMTOAuthTemp */ = {
@@ -8070,6 +8164,12 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				03E0062A157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png */,
+				03E006211577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png */,
+				03E006161576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png */,
+				03E006111576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png */,
+				03E006031576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png */,
+				03E005E71576AC3800CDFEFF /* signup_text_field_bg@2x.png */,
 				03E005D615768ED300CDFEFF /* stamp_picker_check@2x.png */,
 				03E005D715768ED300CDFEFF /* stamp_picker_white_border@2x.png */,
 				03E005BC1576805900CDFEFF /* login_twitter_bird@2x.png */,
@@ -9480,6 +9580,12 @@
 				03E005C01576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
 				03E005DB15768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
 				03E005DF15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
+				03E005EB1576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */,
+				03E0060C1576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */,
+				03E006151576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */,
+				03E0061A1576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */,
+				03E006291577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */,
+				03E0062E157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10214,6 +10320,12 @@
 				03E005BF1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
 				03E005DA15768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
 				03E005DE15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
+				03E005EA1576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */,
+				03E0060B1576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */,
+				03E006141576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */,
+				03E006191576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */,
+				03E006281577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */,
+				03E0062D157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10948,6 +11060,12 @@
 				03E005BE1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
 				03E005D915768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
 				03E005DD15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
+				03E005E91576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */,
+				03E0060A1576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */,
+				03E006131576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */,
+				03E006181576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */,
+				03E006271577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */,
+				03E0062C157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11685,6 +11803,12 @@
 				03E005BD1576805900CDFEFF /* login_twitter_bird@2x.png in Resources */,
 				03E005D815768ED300CDFEFF /* stamp_picker_check@2x.png in Resources */,
 				03E005DC15768ED300CDFEFF /* stamp_picker_white_border@2x.png in Resources */,
+				03E005E81576AC3800CDFEFF /* signup_text_field_bg@2x.png in Resources */,
+				03E006091576F08400CDFEFF /* stamp_color_slider_hue_track@2x.png in Resources */,
+				03E006121576F18E00CDFEFF /* stamp_color_slider_thumb@2x.png in Resources */,
+				03E006171576F26300CDFEFF /* stamp_color_slider_brighness_track@2x.png in Resources */,
+				03E006261577183100CDFEFF /* stamp_color_slider_hud_bg@2x.png in Resources */,
+				03E0062B157718BF00CDFEFF /* stamp_color_slider_arrow@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12027,6 +12151,10 @@
 				03E005C71576871900CDFEFF /* SocialSignupViewController.m in Sources */,
 				03E005CE1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
 				03E005D515768A4800CDFEFF /* StampColorPickerView.m in Sources */,
+				03E005E61576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */,
+				03E005F21576B6AA00CDFEFF /* STAvatarView.m in Sources */,
+				03E005FA1576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
+				03E006011576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12337,6 +12465,10 @@
 				03E005C61576871900CDFEFF /* SocialSignupViewController.m in Sources */,
 				03E005CD1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
 				03E005D415768A4800CDFEFF /* StampColorPickerView.m in Sources */,
+				03E005E51576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */,
+				03E005F11576B6AA00CDFEFF /* STAvatarView.m in Sources */,
+				03E005F91576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
+				03E006001576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12646,6 +12778,10 @@
 				03E005C51576871900CDFEFF /* SocialSignupViewController.m in Sources */,
 				03E005CC1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
 				03E005D315768A4800CDFEFF /* StampColorPickerView.m in Sources */,
+				03E005E41576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */,
+				03E005F01576B6AA00CDFEFF /* STAvatarView.m in Sources */,
+				03E005F81576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
+				03E005FF1576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12967,6 +13103,10 @@
 				03E005C41576871900CDFEFF /* SocialSignupViewController.m in Sources */,
 				03E005CB1576889400CDFEFF /* SocialSignupHeaderView.m in Sources */,
 				03E005D215768A4800CDFEFF /* StampColorPickerView.m in Sources */,
+				03E005E31576AA0A00CDFEFF /* STTextFieldTableCell.m in Sources */,
+				03E005EF1576B6AA00CDFEFF /* STAvatarView.m in Sources */,
+				03E005F71576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
+				03E005FE1576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,6 +8,10 @@
 
 #import "SocialSignupViewController.h"
 #import "StampColorPickerView.h"
+#import "SocialSignupHeaderView.h"
+#import "STTextFieldTableCell.h"
+#import "StampCustomizeViewController.h"
+#import "StampCustomizerViewController.h"
 
 @interface SocialSignupViewController ()
 @end
@@ -17,13 +21,15 @@
 
 - (id)init {
     if ((self = [super init])) {
-        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification  object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     }
     return self;
 }
 
 - (void)dealloc {
     self.tableView = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
@@ -33,6 +39,7 @@
     if (!_tableView) {
         
         UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        tableView.showsVerticalScrollIndicator = NO;
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         tableView.allowsSelection = NO;
         tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -41,6 +48,18 @@
         [self.view addSubview:tableView];
         self.tableView = tableView;
         [tableView release];
+        
+        SocialSignupHeaderView *header = [[SocialSignupHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 104.0f)];
+        header.backgroundColor = [UIColor clearColor];
+        tableView.tableHeaderView = header;
+        [header release];
+        
+        StampColorPickerView *view = [[StampColorPickerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 220.0f)];
+        view.backgroundColor = [UIColor clearColor];
+        view.delegate = (id<StampColorPickerDelegate>)self;
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        tableView.tableFooterView = view;
+        [view release];
         
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -82,39 +101,27 @@
 
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if (indexPath.row == 2) {
-        return 200.0f;
-    }
-    
-    return 100.0f;
+    return 60.0f;
     
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    return 2;
+    return 1;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    static NSString *CellIdentifier = @"CellIDentifier";
+    static NSString *CellIdentifier = @"CellIdentifier";
     
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    STTextFieldTableCell *cell = (STTextFieldTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[STTextFieldTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.textField.delegate = (id<UITextFieldDelegate>)self;
+        cell.textField.returnKeyType = UIReturnKeyDone;
+        cell.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+        cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
     }
-    
-    if (indexPath.row == 1) {
-        
-        StampColorPickerView *view = [[StampColorPickerView alloc] initWithFrame:cell.bounds];
-        view.backgroundColor = [UIColor clearColor];
-        view.delegate = (id<StampColorPickerDelegate>)self;
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [cell addSubview:view];
-        [view release];
-        
-        
-    }
-    
+    cell.titleLabel.text = @"username";
     return cell;
     
 }
@@ -125,36 +132,125 @@
     
 }
 
-- (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
+- (CGFloat)tableView:(UITableView*)tableView heightForFooterInSection:(NSInteger)section {
     
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, tableView.bounds.size.width, 30.0f)];
+    return 30.0f;
+    
+}
+
+- (UIView*)labelWithTitle:(NSString*)title {
+    
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 30.0f)];
     
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.backgroundColor = [UIColor clearColor];
     label.textColor = [UIColor colorWithRed:0.600f green:0.600f blue:0.600f alpha:1.0f];
     label.shadowColor = [UIColor whiteColor];
     label.shadowOffset = CGSizeMake(0.0f, 1.0f);
     label.font = [UIFont boldSystemFontOfSize:12];
-    
-    if (section == 0) {
-        label.text = @"Create your username";
-    } else if (section == 1) {
-        label.text = @"Choose your stamp color";
-    }
-    
+    label.text = title;
+
     [label sizeToFit];
     CGRect frame = label.frame;
-    frame.origin.x = 10.0f;
-    frame.origin.y = floorf((view.bounds.size.height-frame.size.height)/2);
+    frame.origin.x = 15.0f;
+    frame.origin.y = floorf(((view.bounds.size.height-frame.size.height)/2) + 6.0f);
     label.frame = frame;
     [view addSubview:label];
     [label release];
+    
+    UIView *border = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, view.bounds.size.width, 1.0f)];
+    border.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    border.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.05f];
+    [view addSubview:border];
+    [border release];
+    
+    border = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 1.0f, view.bounds.size.width, 1.0f)];
+    border.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    border.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6f];
+    [view addSubview:border];
+    [border release];
     
     return [view autorelease];
     
 }
 
+- (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
+    
+    return [self labelWithTitle:@"Create your username"];
+    
+}
+
+- (UIView*)tableView:(UITableView*)tableView viewForFooterInSection:(NSInteger)section {
+    
+    return [self labelWithTitle:@"Choose your stamp color"];
+    
+}
+
+
+#pragma mark - StampCustomizeViewControllerDelegate
+
+- (void)stampCustomizeViewControllerCancelled:(StampCustomizeViewController*)controller {
+    [self dismissModalViewControllerAnimated:YES];
+}
+
+- (void)stampCustomizeViewController:(StampCustomizeViewController*)controller doneWithColors:(NSArray*)colors {
+    [self dismissModalViewControllerAnimated:YES];
+    
+    if ([self.tableView.tableHeaderView respondsToSelector:@selector(setStampColors:)]) {
+        [(SocialSignupHeaderView*)self.tableView.tableHeaderView setStampColors:colors];
+    }
+    
+}
+
 
 #pragma mark - StampColorPickerDelegate
+
+- (void)stampColorPickerViewSelectedCustomize:(StampColorPickerView*)view {
+    
+    StampCustomizeViewController *controller = [[StampCustomizeViewController alloc] init];
+    controller.delegate = (id<StampCustomizeViewControllerDelegate>)self;
+    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+    [self presentModalViewController:navController animated:YES];
+    [navController release];
+    [controller release];
+    
+}
+
+- (void)stampColorPickerView:(StampColorPickerView*)view selectedColors:(NSArray*)colors {
+    
+    if ([self.tableView.tableHeaderView respondsToSelector:@selector(setStampColors:)]) {
+        [(SocialSignupHeaderView*)self.tableView.tableHeaderView setStampColors:colors];
+    }
+    
+}
+
+
+#pragma mark - UIKeyboard Notfications
+
+- (void)keyboardWillShow:(NSNotification*)notification {    
+    
+    CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
+        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, keyboardFrame.size.height, 0);
+    } completion:^(BOOL finished){}];
+    
+}
+
+- (void)keyboardWillHide:(NSNotification*)notification {
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.tableView.contentInset = UIEdgeInsetsZero;
+    }];
+    
+}
+
+
+#pragma mark - UITextFieldDelegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return YES;
+}
 
 
 @end

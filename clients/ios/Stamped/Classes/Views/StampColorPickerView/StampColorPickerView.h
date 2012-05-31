@@ -17,5 +17,6 @@
 
 @end
 @protocol StampColorPickerDelegate
-
+- (void)stampColorPickerViewSelectedCustomize:(StampColorPickerView*)view;
+- (void)stampColorPickerView:(StampColorPickerView*)view selectedColors:(NSArray*)color;
 @end

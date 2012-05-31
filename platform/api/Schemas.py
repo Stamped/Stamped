@@ -670,7 +670,6 @@ class BasicEntity(BasicEntityMini):
         self.schema_version = 0
         self.kind = 'other'
         self.types = []
-        self.images = [] # Temp
         self.sources = EntitySourcesSchema()
         self.timestamp = TimestampSchema()
 
@@ -836,9 +835,6 @@ class PlaceEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'place'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.gallery            = []
-        self.cuisine            = []
 
     def formatAddress(self, extendStreet=False, breakLines=False):
         street      = self.address_street
@@ -946,12 +942,6 @@ class PersonEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'person'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres         = []
-        self.tracks         = []
-        self.albums         = []
-        self.movies         = []
-        self.books          = []
 
     @property
     def subtitle(self):
@@ -1026,15 +1016,6 @@ class BasicMediaEntity(BasicEntity):
 
     def __init__(self):
         BasicEntity.__init__(self)
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres         = []
-        self.artists        = []
-        self.authors        = []
-        self.directors      = []
-        self.cast           = []
-        self.publishers     = []
-        self.studios        = []
-        self.networks       = []
 
 class MediaCollectionEntity(BasicMediaEntity):
 
@@ -1103,8 +1084,6 @@ class MediaItemEntity(BasicMediaEntity):
     def __init__(self):
         BasicMediaEntity.__init__(self)
         self.kind = 'media_item'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.albums = []
 
     def minimize(self):
         return BasicEntity.minimize(self, 'length')
@@ -1184,12 +1163,6 @@ class SoftwareEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'software'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres             = []
-        self.screenshots        = []
-        self.authors            = []
-        self.publishers         = []
-        self.supported_devices  = []
 
     @property
     def subtitle(self):

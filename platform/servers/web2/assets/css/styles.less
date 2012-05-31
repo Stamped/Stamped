@@ -12,25 +12,8 @@
    ************************************************************************** */
 
 
-@import "libs/h5bp.min.css";
-@import "libs/elements.less";
+@import "common.less";
 
-@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
-
-@font-face {
-    font-family: StampedFallbackFont;
-    font-style:  normal;
-    font-weight: 400;
-    
-    src: local("☺"),
-         url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
-}
-
-.stamped-font() {
-    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
-    font-style:  normal;
-    font-weight: normal;
-}
 
 /* **************************************************************************
                             BASIC HIGH-LEVEL SETUP
@@ -80,45 +63,9 @@ ol, ul {
     margin:  0;
 }
 
-.replaced {
-    display: block;
-    text-indent: -9999em;
-    overflow: hidden;
-}
-
-.fullwidth {
-    position: relative;
-    width: 100%;
-}
-
-.fullsize {
-    position: relative;
-    width:  100%;
-    height: 100%;
-}
-
-.floatleft {
-    float: left;
-}
-
-.floatright {
-    float: right;
-}
-
-footer, .fixedwidth {
-    position: relative;
-    display: block;
-    
-    max-width: @fixed-width;
-    min-width: 360px;
-    width: @fixed-width;
-    
-    margin: 0 auto;
-}
-
 
 /* **************************************************************************
-                                GENERIC FIXED HEADER
+                              GENERIC FIXED HEADER
    ************************************************************************** */
 
 
@@ -231,6 +178,16 @@ header {
     }
 }
 
+.post-header {
+    .fullwidth;
+    .box-shadow(0, 3px, 3px, 0, @shadow);
+    
+    position: relative;
+    display:  block;
+    
+    height: 16px;
+}
+
 .user-logo-large {
     position: absolute;
     
@@ -257,112 +214,6 @@ header {
     z-index: 101;
 }
 
-
-/* **************************************************************************
-                                PROFILE HEADER
-   ************************************************************************** */
-
-
-@outer: #E5E5E5;
-@inner: #FEFEFE;
-@shadow: rgba(50,50,50,0.35);
-
-.post-header {
-    .fullwidth;
-    .box-shadow(0, 3px, 3px, 0, @shadow);
-    
-    position: relative;
-    display:  block;
-    
-    height: 16px;
-}
-
-#main-page-content {
-    position: relative;
-    top:  86px;
-    left: 0;
-}
-
-.profile-header-wrapper {
-    .fullwidth;
-    
-    position: relative;
-    top:  0;
-    left: 0;
-    
-    .profile-header {
-        .linear-gradient(left, @outer, @inner, @outer);
-        
-        /* darken the background */
-        /*background-color: rgba(0, 0, 0, 0.246094);*/
-        
-        /* TODO: get this mask working; kind of want blend-mode multiply... */
-        /*background: transparent url(/assets/img/noisemask.png) left top repeat;*/
-        
-        .profile-content-page {
-            position: relative;
-            z-index: 50;
-            top:  0;
-            left: 0;
-            
-            .profile-header-body {
-                position: relative;
-                top:  0;
-                left: 0;
-                
-                .profile-header-body-fixedwidth {
-                    padding: 34px 0;
-                    
-                    .profile-image-large {
-                        .floatleft;
-                    }
-                    
-                    .floatleft, .profile-image-large {
-                        margin: 0 24px 0 0;
-                    }
-                    
-                    p {
-                        margin: 0;
-                    }
-                }
-            }
-            
-            .profile-header-post {
-                .box-shadow(0, -3px, 3px, 0, @shadow);
-                
-                height: 16px;
-                
-                .inset-stamp {
-                    background: url(/assets/img/insetstamp2.png) center top no-repeat;
-                    text-align: center;
-                    position: relative;
-                    top: -75px;
-                    
-                    width: 167px;
-                    min-height: 75px;
-                    z-index: 52;
-                    
-                    margin: 0 auto;
-                    padding: 18px 20px 0;
-                    
-                    .stamp-count {
-                        .stamped-font();
-                        
-                        font-size: 2em;
-                        letter-spacing: .05em;
-                        margin: 0 0 -.25em;
-                    }
-                    
-                    p {
-                        margin: 0 0 .5em;
-                        color: #000;
-                    }
-                }
-            }
-        }
-    }
-}
-
 .ribbon-top {
     background: url(/assets/img/ribbon-top.png) left top repeat-x;
     height: 16px;
@@ -373,38 +224,11 @@ header {
     height: 16px;
 }
 
-.innerbg {
-    background: url(/assets/img/covers/default_cover_temp.png) repeat;
-    position: absolute;
-    width:   100%;
-    height:  100%;
+#main-page-content {
+    position: relative;
+    top:  86px;
+    left: 0;
 }
-
-body.place .innerbg {
-    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
-}
-
-body.music .innerbg {
-    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
-}
-
-body.book .innerbg {
-    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
-}
-
-body.film .innerbg {
-    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
-}
-
-body.other .innerbg {
-    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
-}
-
 
 
 /* **************************************************************************
@@ -484,59 +308,6 @@ body.other .innerbg {
         display: none;
     }
 }
-
-.profile-section0 {
-    .floatleft;
-    
-    a.screen-name {
-        color: #000;
-    }
-    
-    p.profile-title {
-        position: relative;
-        .stamped-font();
-        
-        line-height: 100%;
-        font-size: 7em;
-        letter-spacing: .05em;
-        color: #000;
-        
-        display: block;
-        margin:  0;
-        padding: 0;
-        
-        /*text-shadow: 0.05em 0.05em 0.03em #aaa;
-        font-smooth: always;
-        -webkit-font-smoothing: antialiased;*/
-    }
-}
-
-/*
-.profile-section {
-    display: none;
-    
-    &.profile-section-default {
-        display: block;
-    }
-}
-
-.profile-section1, .profile-section2 {
-    .floatright;
-    width: 18%;
-    
-    .number {
-        .stamped-font();
-        
-        font-size: 2em;
-        letter-spacing: .05em;
-        color: #000;
-    }
-}
-
-.profile-section3 {
-    .floatright;
-    width: 45%;
-}*/
 
 
 /* **************************************************************************
@@ -683,182 +454,6 @@ body.other .innerbg {
 .static-map-small {
     /*.static-map(@size: 140px, @b: 2px, @angle: 35deg, @perspective: 200px)*/
     .static-map(140px, 2px, 35deg, 200px);
-}
-
-
-/* **************************************************************************
-                            STAMP CATEGORY NAV BAR
-   ************************************************************************** */
-
-
-.active() {
-    opacity: 1;
-    .transition(all, 0s, linear);
-    .transform(scale(1, 1));
-}
-
-#main-content {
-    visibility: hidden;
-}
-
-#stamp-category-nav-bar {
-    position: fixed;
-    display:  block;
-    z-index: 1000;
-    
-    opacity: 1;
-    .transition(opacity, 0.4s, ease-out);
-    
-    visibility: hidden;
-    
-    background: #262626;
-    .rounded(8px);
-    .box-shadow(0, 0, 4px, 0, @shadow);
-    
-    top:   50%;
-    right: 40px;
-    
-    /*@params:  0.8s ease-in-out;
-    @targets: top @params, left @params;
-    
-    -webkit-transition: @targets;
-    -moz-transition: @targets;
-    transition: @targets;*/
-    
-    margin: -180px 0 0;
-    padding: 0;
-    
-    ol {
-        li {
-            position: relative;
-            
-            a {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat -192px 0;
-                
-                text-align: center;
-                display: block;
-                width:  60px;
-                height: 60px;
-                margin: 6px 0;
-                
-                position: relative;
-                z-index: 1000;
-                
-                opacity: 0;
-                .transform(scale(.8, .8));
-                .transition(all, 0.3s, ease-out);
-                
-                /*@params: 0.3s ease-out;
-                @args: opacity @params, transform @params;
-                
-                -webkit-transition: @args;
-                -moz-transition: @args;
-                transition: @args;*/
-            }
-            
-            div {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat;
-                position: absolute;
-                left: 15px;
-                top:  17px;
-                
-                display: block;
-                width:  30px;
-                height: 30px;
-                
-                z-index: 999;
-            }
-        }
-        
-        a:hover {
-            .active();
-            /*background-position: -252px 0;*/
-        }
-        a:active {
-            .active();
-        }
-        
-        li.default div {
-            background-position: 0 0;
-        }
-        li.default a:hover + div, li.default a:active + div {
-            background-position: 0 -32px;
-        }
-        
-        li.place div {
-            background-position: -32px 0;
-        }
-        li.place a:hover + div, li.place a:active + div {
-            background-position: -32px -32px;
-        }
-        
-        li.music div {
-            background-position: -64px 0;
-        }
-        li.music a:hover + div, li.music a:active + div {
-            background-position: -64px -32px;
-        }
-        
-        li.book div {
-            background-position: -96px 0;
-        }
-        li.book a:hover + div, li.book a:active + div {
-            background-position: -96px -32px;
-        }
-        
-        li.film div {
-            background-position: -128px 0;
-        }
-        li.film a:hover + div, li.film a:active + div {
-            background-position: -128px -32px;
-        }
-        
-        li.other div {
-            background-position: -160px 0;
-        }
-        li.other a:hover + div, .other a:active + div {
-            background-position: -160px -32px;
-        }
-    }
-}
-
-body.default #stamp-category-nav-bar ol li.default div {
-    background-position: 0 -32px;
-}
-
-body.place #stamp-category-nav-bar ol li.place div {
-    background-position: -32px -32px;
-}
-
-body.music #stamp-category-nav-bar ol li.music div {
-    background-position: -64px -32px;
-}
-
-body.book #stamp-category-nav-bar ol li.book div {
-    background-position: -96px -32px;
-}
-
-body.film #stamp-category-nav-bar ol li.film div {
-    background-position: -128px -32px;
-}
-
-body.other #stamp-category-nav-bar ol li.other div {
-    background-position: -160px -32px;
-}
-
-
-body.default    #stamp-category-nav-bar ol li.default, 
-body.place      #stamp-category-nav-bar ol li.place, 
-body.music      #stamp-category-nav-bar ol li.music, 
-body.book       #stamp-category-nav-bar ol li.book, 
-body.film       #stamp-category-nav-bar ol li.film, 
-body.other      #stamp-category-nav-bar ol li.other {
-    a, a:hover {
-        .active();
-        
-        pointer-events: none;
-        cursor: default;
-    }
 }
 
 

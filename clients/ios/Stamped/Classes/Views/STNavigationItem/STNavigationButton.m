@@ -105,11 +105,10 @@
 	//CGFloat barHeight = _landscape ? 32.0f : 44.0f;
 	
 	FTNavButton *button = [FTNavButton buttonWithType:UIButtonTypeCustom];
-	//button.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 	[button setTitle:aTitle forState:UIControlStateNormal];
 	[button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
 	[button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-	[button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f]];
+	[button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
 	
     UIImage *image = [[UIImage imageNamed:(style == UIBarButtonItemStyleDone) ? kDoneButton : kButton] stretchableImageWithLeftCapWidth:15.0f topCapHeight:0.0f];
 	CGSize size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
@@ -139,7 +138,7 @@
         [button setTitle:aTitle forState:UIControlStateNormal];
         [button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
         [button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-        [button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f]];
+        [button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
         size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
             
     } else {

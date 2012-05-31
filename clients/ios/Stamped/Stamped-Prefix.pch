@@ -17,6 +17,7 @@
     #import "UIFont+Stamped.h"
     #import "UIColor+Stamped.h"
     #import "STNavigationItem.h"
+    #import "STRootViewController.h"
     #import "STStampedAPI.h"
     #import "Util.h"
     #import "QuartzUtils.h"
