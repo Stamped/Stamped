@@ -475,14 +475,12 @@
 		034BE0A71562F6980008F160 /* STShareButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 637E748E155AFBF60022CD2E /* STShareButton.m */; };
 		034BE0A91562F6980008F160 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 635EAADC1523D4ED00D0378D /* StoreKit.framework */; };
 		034BE0AA1562F6980008F160 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FF1152112D600EEFAB3 /* AudioToolbox.framework */; };
-		034BE0AB1562F6980008F160 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
 		034BE0AC1562F6980008F160 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E07EC1C14C73FD400A2B5F0 /* libz.dylib */; };
 		034BE0AD1562F6980008F160 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED043E6149FCA3E00E46284 /* libxml2.dylib */; };
 		034BE0AE1562F6980008F160 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ECCF0D9149EABEC00B56FA0 /* Accounts.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		034BE0AF1562F6980008F160 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB03FD314672B40004F7A1C /* MessageUI.framework */; };
 		034BE0B01562F6980008F160 /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E99C9B81458B4E000B116AC /* Twitter.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		034BE0B11562F6980008F160 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED608961420F69B001C499D /* AddressBook.framework */; };
-		034BE0B21562F6980008F160 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		034BE0B31562F6980008F160 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC1C65113F459B50070CE6D /* Security.framework */; };
 		034BE0B41562F6980008F160 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193B13CE0C8500378139 /* CFNetwork.framework */; };
 		034BE0B51562F6980008F160 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193C13CE0C8500378139 /* CoreData.framework */; };
@@ -2673,6 +2671,8 @@
 		63BA7A631548861700EE95DA /* STPreviewsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A621548861500EE95DA /* STPreviewsView.m */; };
 		63BA7A641548861700EE95DA /* STPreviewsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A621548861500EE95DA /* STPreviewsView.m */; };
 		63BA7A651548861700EE95DA /* STPreviewsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A621548861500EE95DA /* STPreviewsView.m */; };
+		63BBC9801577CD2A0088DFC7 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 63733FD81521046300EEFAB3 /* libRestKit.a */; };
+		63BBC9811577CD480088DFC7 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		63BC667E1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BC66801522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
@@ -5830,17 +5830,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63BBC9811577CD480088DFC7 /* libOAuthTouch.a in Frameworks */,
+				63BBC9801577CD2A0088DFC7 /* libRestKit.a in Frameworks */,
 				0358C92E1575121800FD1597 /* ImageIO.framework in Frameworks */,
 				034BE0A91562F6980008F160 /* StoreKit.framework in Frameworks */,
 				034BE0AA1562F6980008F160 /* AudioToolbox.framework in Frameworks */,
-				034BE0AB1562F6980008F160 /* libRestKit.a in Frameworks */,
 				034BE0AC1562F6980008F160 /* libz.dylib in Frameworks */,
 				034BE0AD1562F6980008F160 /* libxml2.dylib in Frameworks */,
 				034BE0AE1562F6980008F160 /* Accounts.framework in Frameworks */,
 				034BE0AF1562F6980008F160 /* MessageUI.framework in Frameworks */,
 				034BE0B01562F6980008F160 /* Twitter.framework in Frameworks */,
 				034BE0B11562F6980008F160 /* AddressBook.framework in Frameworks */,
-				034BE0B21562F6980008F160 /* libOAuthTouch.a in Frameworks */,
 				034BE0B31562F6980008F160 /* Security.framework in Frameworks */,
 				034BE0B41562F6980008F160 /* CFNetwork.framework in Frameworks */,
 				034BE0B51562F6980008F160 /* CoreData.framework in Frameworks */,

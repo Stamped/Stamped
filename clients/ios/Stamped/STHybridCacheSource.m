@@ -22,7 +22,6 @@
 @property (nonatomic, readwrite, copy) NSString* path;
 @property (nonatomic, readwrite, retain) NSMutableDictionary* delegateCancellations;
 @property (nonatomic, readonly, retain) NSObject* fileLock;
-@property (atomic, readwrite, assign) BOOL runningCompressor;
 
 - (NSInteger)modifyPersistentCost:(NSInteger)delta;
 
@@ -40,15 +39,13 @@
 @synthesize delegateCancellations = delegateCancellations_;
 @synthesize persistentCost = persistentCost_;
 @synthesize fileLock = fileLock_;
-@synthesize runningCompressor = runningCompressor_;
+@synthesize memoryCost = memoryCost_;
 
 - (id)initWithCachePath:(NSString*)path relativeToCacheDir:(BOOL)relative {
     self = [super init];
     if (self) {
         if (relative) {
-            NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-            NSString* cacheDir = [paths objectAtIndex:0];
-            path = [NSString stringWithFormat:@"%@/%@", cacheDir, path];
+            path = [NSString stringWithFormat:@"%@/%@", [Util cacheDirectory].path, path];
         }
         path_ = [path copy];
         cache_ = [[NSCache alloc] init];
@@ -57,7 +54,9 @@
         cacheKeys_ = [[NSMutableDictionary alloc] init];
         delegateCancellations_ = [[NSMutableDictionary alloc] init];
         fileLock_ = [[NSObject alloc] init];
-        self.runningCompressor = YES;
+        self.memoryCost = ^(id<NSCoding> object) {
+            return 1;
+        };
     }
     return self;
 }
@@ -73,12 +72,12 @@
     [super dealloc];
 }
 
-- (NSInteger)maxMemoryCount {
-    return self.cache.countLimit;
+- (NSInteger)maxMemoryCost {
+    return self.cache.totalCostLimit;
 }
 
-- (void)setMaxMemoryCount:(NSInteger)maxMemoryCount {
-    self.cache.countLimit = maxMemoryCount;
+- (void)setMaxMemoryCost:(NSInteger)maxMemoryCost {
+    self.cache.totalCostLimit = maxMemoryCost;
 }
 
 - (NSNumber*)ageFromDate:(NSDate*)date {
@@ -160,7 +159,7 @@
                 [Util executeOnMainThread:^{
                     if (![self.cache objectForKey:key]) {
                         //NSLog(@"Upgrading %@ in %@", [result title], self.path);
-                        [self.cache setObject:result forKey:key];
+                        [self.cache setObject:result forKey:key cost:self.memoryCost(result)];
                         [self.cacheKeys setObject:key forKey:[NSValue valueWithPointer:result]];
                         [self.cacheDates setObject:date forKey:key];
                     }
@@ -180,10 +179,15 @@
         }
         NSString* basePath = [self basePathForKey:key];
         if (![manager fileExistsAtPath:basePath]) {
-            [manager createDirectoryAtPath:basePath withIntermediateDirectories:YES attributes:[NSDictionary dictionary] error:nil];
+            NSError* dirError = nil;
+            [manager createDirectoryAtPath:basePath withIntermediateDirectories:YES attributes:nil error:&dirError];
+            if (dirError) {
+                NSLog(@"%@",dirError);
+            }
         }
+        
         BOOL success = [NSKeyedArchiver archiveRootObject:object toFile:fullPath];
-        //NSLog(@"Archived %@ at %@ , %d", [object title], fullPath, success);
+        //NSLog(@"Archived %@ at %@ , %d", object, fullPath, success);
         if (success) {
             [manager setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                                     [NSDate date], NSFileModificationDate,
@@ -219,7 +223,8 @@
 
 - (STCancellation*)objectForKey:(NSString*)key 
                     forceUpdate:(BOOL)update 
-                   withCallback:(void (^)(id<NSCoding>, NSError*, STCancellation*))block {
+               cacheAfterCancel:(BOOL)cacheAfterCancel
+                   withCallback:(void (^)(id<NSCoding> model, NSError* error, STCancellation* cancellation))block {
     id<NSCoding> fastResult = nil;
     [self fastCachedObjectForKey:key];
     if (fastResult) {
@@ -281,36 +286,31 @@
 
 - (void)setObject:(id<NSCoding>)object forKey:(NSString*)key {
     @synchronized (self) {
+        NSDate* date = [NSDate date];
         [self.cacheDates setObject:[NSDate date] forKey:key];
         [self.cacheKeys setObject:key forKey:[NSValue valueWithPointer:object]];
-        [self.cache setObject:object forKey:key];
+        [self.cache setObject:object forKey:key cost:self.memoryCost(object)];
+        [Util executeAsync:^{
+            [self threadSafeArchiveObject:object withKey:key andDate:date]; 
+        }];
     }
 }
 
 - (void)removeCacheBookkeepingForObject:(id<NSCoding>)object withKey:(NSString*)key {
     if (object) {
+        if (!key) {
+            key = [[[self.cacheKeys objectForKey:[NSValue valueWithPointer:object]] retain] autorelease];
+        }
         [self.cacheKeys removeObjectForKey:[NSValue valueWithPointer:object]];
     }
-    [self.cacheDates removeObjectForKey:key];
+    if (key) {
+        [self.cacheDates removeObjectForKey:key];
+    }
 }
 
 - (void)cache:(NSCache *)cache willEvictObject:(id)obj {
     NSAssert1(obj, @"object should not have been null (%@)", obj);
-    [Util executeAsync:^{
-        NSString* key = nil;
-        NSDate* date = nil;
-        @synchronized (self) {
-            key = [[self.cacheKeys objectForKey:[NSValue valueWithPointer:obj]] retain];
-            //NSLog(@"Evicted %@ from cache for %@", [obj title], self.path);
-            date = [[self.cacheDates objectForKey:key] retain];
-            [self removeCacheBookkeepingForObject:obj withKey:key];
-        }
-        if (obj && key && date) {
-            [self threadSafeArchiveObject:obj withKey:key andDate:date];
-        }
-        [key release];
-        [date release];
-    }];
+    [self removeCacheBookkeepingForObject:obj withKey:nil];
 }
 
 - (void)cancellationWasCancelled:(STCancellation *)cancellation {
@@ -335,32 +335,13 @@
 }
 
 - (void)shrinkPersistentStore {
-    self.runningCompressor = NO;
+    //TODO
 }
 
 - (void)fastMemoryPurge {
     [self.cache removeAllObjects];
     [self.cacheDates removeAllObjects];
     [self.cacheKeys removeAllObjects];
-}
-
-- (void)setRunningCompressor:(BOOL)runningCompressor {
-    @synchronized (self) {
-        if (runningCompressor_ != runningCompressor) {
-            runningCompressor_ = runningCompressor;
-            if (runningCompressor_) {
-                [Util executeAsync:^{
-                    [self shrinkPersistentStore];
-                }];
-            }
-        }
-    }
-}
-
-- (BOOL)runningCompressor {
-    @synchronized (self) {
-        return runningCompressor_;
-    }
 }
 
 @end

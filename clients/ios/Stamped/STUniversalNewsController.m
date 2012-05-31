@@ -50,6 +50,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.tableView.backgroundColor = [UIColor clearColor];
+    //self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [Util addGradientToLayer:self.view.layer 
                   withColors:[NSArray arrayWithObjects:
                               [UIColor whiteColor],

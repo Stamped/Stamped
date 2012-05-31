@@ -67,8 +67,10 @@
 @interface STStampedAPI () <STCacheModelSourceDelegate, STPersistentCacheSourceDelegate, STHybridCacheSourceDelegate>
 
 @property (nonatomic, readonly, retain) STPersistentCacheSource* menuCache;
-@property (nonatomic, readonly, retain) STCacheModelSource* stampCache;
+@property (nonatomic, readonly, retain) STHybridCacheSource* stampCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* entityDetailCache;
+@property (nonatomic, readonly, retain) STHybridCacheSource* stampedByCache;
+@property (nonatomic, readonly, retain) NSCache* userCache;
 @property (nonatomic, readwrite, retain) id<STActivityCount> lastCount;
 
 - (void)path:(NSString*)path WithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
@@ -80,7 +82,9 @@
 @synthesize menuCache = _menuCache;
 @synthesize stampCache = _stampCache;
 @synthesize entityDetailCache = entityDetailCache_;
+@synthesize stampedByCache = _stampedByCache;
 @synthesize lastCount = lastCount_;
+@synthesize userCache = _userCache;
 
 static STStampedAPI* _sharedInstance;
 
@@ -101,22 +105,38 @@ static STStampedAPI* _sharedInstance;
     self = [super init];
     if (self) {
         _menuCache = [[STPersistentCacheSource alloc] initWithDelegate:self andDirectoryPath:@"Menus" relativeToCacheDir:YES];
-        _stampCache = [[STCacheModelSource alloc] initWithDelegate:self];
+        _stampCache = [[STHybridCacheSource alloc] initWithCachePath:@"Stamps" relativeToCacheDir:YES];
+        _stampCache.delegate = self;
         entityDetailCache_ = [[STHybridCacheSource alloc] initWithCachePath:@"Entities" relativeToCacheDir:YES];
         entityDetailCache_.delegate = self;
-        entityDetailCache_.maxMemoryCount = 20;
+        entityDetailCache_.maxMemoryCost = 20;
         entityDetailCache_.maxAge = [NSNumber numberWithInteger:60];
+        _stampedByCache = [[STHybridCacheSource alloc] initWithCachePath:@"StampedBy" relativeToCacheDir:YES];
+        _stampedByCache.delegate = self;
+        _stampedByCache.maxAge = [NSNumber numberWithInteger:1 * 24 * 60 * 60];
+        _userCache = [[NSCache alloc] init];
     }
     return self;
 }
 
 - (void)dealloc
 {
+    
     [_menuCache release];
     [_stampCache release];
+    [_stampedByCache release];
+    [_userCache release];
     [entityDetailCache_ release];
     [lastCount_ release];
     [super dealloc];
+}
+
+- (id<STUser>)cachedUser:(NSString*)userID {
+    
+}
+
+- (void)cacheUser:(id<STUser>)user {
+    
 }
 
 - (id<STUser>)currentUser {
@@ -124,13 +144,31 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (id<STStamp>)cachedStampForStampID:(NSString*)stampID {
-    return [self.stampCache cachedValueForKey:stampID];
+    return (id<STStamp>)[self.stampCache fastCachedObjectForKey:stampID];
+}
+
+- (void)cacheStamp:(id<STStamp>)stamp {
+    [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+}
+
+- (id<STPreviews>)cachedStampPreviewsForStampID:(NSString*)stampID {
+    return nil;
+}
+
+- (id<STStampedBy>)cachedStampedByForEntityID:(NSString*)entityID {
+    return (id)[self.stampedByCache fastCachedObjectForKey:entityID];
+}
+
+- (STHybridCacheSource*)userCache {
+    
 }
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
                        andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block {
     NSAssert(stampID != nil,@"stampID must not be nil");
-    return [self.stampCache fetchWithKey:stampID callback:block];
+    return [self.stampCache objectForKey:stampID forceUpdate:NO cacheAfterCancel:NO withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+        block((id)model, error, cancellation);
+    }];
 }
 
 
@@ -146,7 +184,7 @@ static STStampedAPI* _sharedInstance;
                     [self.stampCache removeObjectForKey:stamp.stampID];
                 }
                 else {
-                    [self.stampCache setObject:stamp forKey:stamp.stampID];
+                    [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
                     [array addObject:stamp];
                 }
             }
@@ -251,7 +289,7 @@ static STStampedAPI* _sharedInstance;
                                                    params:entitySearch.asDictionaryParams
                                                   mapping:[STSimpleEntitySearchSection mapping]
                                               andCallback:^(NSArray* result, NSError *error, STCancellation *cancellation) {
-                                                  block(result, error, cancellation); 
+                                                  block((id)result, error, cancellation); 
                                               }];
 }
 
@@ -295,9 +333,12 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)entityDetailForEntityID:(NSString*)entityID
                                forceUpdate:(BOOL)forceUpdate
                                andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block {
-    return [self.entityDetailCache objectForKey:entityID forceUpdate:forceUpdate withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
-        block((id<STEntityDetail>)model, error, cancellation);
-    }];
+    return [self.entityDetailCache objectForKey:entityID 
+                                    forceUpdate:forceUpdate 
+                               cacheAfterCancel:NO 
+                                   withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+                                       block((id<STEntityDetail>)model, error, cancellation);
+                                   }];
 }
 
 - (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block{
@@ -591,29 +632,6 @@ static STStampedAPI* _sharedInstance;
                           withKey:(NSString*)key 
                  andCurrentObject:(id)object 
                      withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block {
-    if (cache == self.stampCache) {
-        NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamp_id"];
-        NSString* path = @"/stamps/show.json";
-        STCancellation* cancellation = [[STRestKitLoader sharedInstance] loadWithPath:path 
-                                                                                 post:NO 
-                                                                               params:params 
-                                                                              mapping:[STSimpleStamp mapping] 
-                                                                          andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation2) {
-                                                                              id<STStamp> stamp = nil;
-                                                                              if (!cancellation2.cancelled) {
-                                                                                  if (array && [array count] > 0) {
-                                                                                      stamp = [array objectAtIndex:0];
-                                                                                  }
-                                                                                  if (stamp) {
-                                                                                      block(stamp, 1, nil, cancellation2);
-                                                                                  }
-                                                                                  else {
-                                                                                      block(nil, -1, error, cancellation2);
-                                                                                  }
-                                                                              }
-                                                                          }];
-        return cancellation;
-    }
     NSAssert2(NO, @"unknown cache (%@) asked for key %@", cache, key);
     return nil;
 }
@@ -724,6 +742,17 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation *)objectForHybridCache:(STHybridCacheSource *)cache 
                                  withKey:(NSString *)key
                             withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
+    if (cache == self.stampCache) {
+        NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamp_id"];
+        NSString* path = @"/stamps/show.json";
+        return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
+                                                            post:NO 
+                                                          params:params 
+                                                         mapping:[STSimpleStamp mapping] 
+                                                     andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                         block(result, error, cancellation);
+                                                     }];
+    }
     if (cache == self.entityDetailCache) {
         NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"entity_id"];
         NSString* path = @"/entities/show.json";
@@ -733,6 +762,16 @@ static STStampedAPI* _sharedInstance;
                                                          mapping:[STSimpleEntityDetail mapping]
                                                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
                                                          block(result, error, cancellation);
+                                                     }];
+    }
+    if (cache == self.stampedByCache) {
+        NSString* path = @"/entities/stamped_by.json";
+        return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
+                                                            post:NO 
+                                                          params:[NSDictionary dictionaryWithObject:key forKey:@"entity_id"] 
+                                                         mapping:[STSimpleStampedBy mapping]
+                                                     andCallback:^(id stampedBy, NSError* error, STCancellation* cancellation) {
+                                                         block(stampedBy, block, cancellation);
                                                      }];
     }
     NSAssert1(NO, @"Unknown hybrid cache %@", cache);
@@ -824,7 +863,7 @@ static STStampedAPI* _sharedInstance;
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
                                                   if (results) {
                                                       for (id<STStamp> stamp in results) {
-                                                          [self.stampCache setObject:stamp forKey:stamp.stampID];
+                                                          [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
                                                       }
                                                   }
                                                   block((id)results, error, cancellation);
@@ -836,7 +875,28 @@ static STStampedAPI* _sharedInstance;
                               limit:(NSInteger)limit 
                              offset:(NSInteger)offset
                         andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
-    //TODO
+    NSString* path = @"/stamps/collection.json";
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   userID, @"userID",
+                                   [NSNumber numberWithInteger:limit], @"limit",
+                                   [NSNumber numberWithInteger:[date timeIntervalSince1970]], @"before",
+                                   nil];
+    if (offset != 0) {
+        [params setObject:[NSNumber numberWithInteger:offset] forKey:@"offset"];
+    }
+    NSAssert1(date, @"Date must not be nil for %@", self);
+    return [[STRestKitLoader sharedInstance] loadWithPath:path
+                                                     post:NO
+                                                   params:params
+                                                  mapping:[STSimpleStamp mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      for (id<STStamp> stamp in results) {
+                                                          [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
 }
 
 - (STCancellation*)entitiesWithScope:(STStampedAPIScope)scope 
@@ -868,9 +928,16 @@ static STStampedAPI* _sharedInstance;
                                               }];
 }
 
+- (STCancellation*)stampedByForEntityID:(NSString*)entityID
+                            andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block {
+    return [self.stampedByCache objectForKey:entityID forceUpdate:NO cacheAfterCancel:NO withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+        block((id)model, error, cancellation); 
+    }];
+}
+
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];
-    [self.stampCache fastPurge];
+    [self.stampCache fastMemoryPurge];
     //[self.menuCache purge];
 }
 

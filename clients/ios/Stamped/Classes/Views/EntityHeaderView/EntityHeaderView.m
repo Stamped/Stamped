@@ -142,8 +142,8 @@
             [mapView setRegion:region animated:YES];
             STPlaceAnnotation* annotation = [[[STPlaceAnnotation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
             [mapView addAnnotation:annotation];
-            NSString* encodedTitle = [entity.title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
-            NSString* url = [NSString stringWithFormat:@"http://www.google.com/maps?q=%@@%@", encodedTitle, entity.coordinates];
+            //NSString* encodedTitle = [entity.title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+            //NSString* url = [NSString stringWithFormat:@"http://www.google.com/maps?q=%@@%@", encodedTitle, entity.coordinates];
             
             /*
             UIView* tapView = [Util tapViewWithFrame:mapView.frame andCallback:^{
