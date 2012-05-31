@@ -8,19 +8,24 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol StampColorPickerSliderView;
+
+@protocol StampColorPickerSliderDelegate;
+@class StampColorPickerColorView;
 @interface StampColorPickerSliderView : UIView {
+   
     UISlider *_hueSlider;
     UISlider *_brightnessSlider;
+    UIImageView *_arrowView;
+
+    StampColorPickerColorView *_firstColorView;
+    StampColorPickerColorView *_secondColorView;
+    
 }
 
-@property(nonatomic,assign) id <StampColorPickerSliderView> delegate;
-@property(nonatomic,retain) UIColor *color1;
-@property(nonatomic,retain) UIColor *color2;
-
-- (NSArray*)colors;
+@property(nonatomic,assign) id <StampColorPickerSliderDelegate> delegate;
+@property(nonatomic,assign) NSArray *colors;
 
 @end
-@protocol StampColorPickerSliderView
+@protocol StampColorPickerSliderDelegate
 - (void)stampColorPickerSliderView:(StampColorPickerSliderView*)view pickedColors:(NSArray*)colors;
 @end

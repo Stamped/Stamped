@@ -12,6 +12,7 @@
 @protocol StampCustomizeViewControllerDelegate;
 @interface StampCustomizeViewController : UIViewController {
     StampColorPickerSliderView *_sliderView;
+    UIView *_stampView;
 }
 
 - (id)initWithColors:(NSArray*)colors;

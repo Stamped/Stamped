@@ -19,19 +19,14 @@
 
 @implementation STMenuController
 
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    
-    if (!LOGGED_IN) {
+    if (!LOGGED_IN || YES) {
         [self showWelcome];
     }
     
-    
 }
-
-
 
 
 #pragma mark - Welcome

@@ -8,32 +8,79 @@
 
 #import "StampColorPickerSliderView.h"
 
+@interface StampColorPickerColorView : UIControl {
+    UIView *_colorView;
+    UIView *_backgroundView;
+}
+@property(nonatomic,assign) CGFloat brightness;
+@property(nonatomic,assign) CGFloat hue;
+@property(nonatomic,retain) UIColor *color;
+@end
+
 @interface StampColorPickerSliderView ()
 - (void)resetBrightnessSlider;
 @end
 
 @implementation StampColorPickerSliderView
 @synthesize delegate;
-@synthesize color1;
-@synthesize color2;
+@synthesize colors=_colors;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
+        
+        
+        StampColorPickerColorView *view = [[StampColorPickerColorView alloc] initWithFrame:CGRectMake(80.0f, 14.0f, 38.0f, 38.0f)];
+        [view addTarget:self action:@selector(colorViewSelected:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:view];
+        [view release];
+        _firstColorView = view;
+        _firstColorView.selected = YES;
+        
+        view = [[StampColorPickerColorView alloc] initWithFrame:CGRectMake(self.bounds.size.width - 118.0f, 14.0f, 38.0f, 38.0f)];
+        [view addTarget:self action:@selector(colorViewSelected:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:view];
+        [view release];
+        _secondColorView = view;
+        
+        UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 50.0f, self.bounds.size.width, self.bounds.size.height - 50.0f)];
+        [self addSubview:container];
+        [container release];
+        
+        UIImage *image = [UIImage imageNamed:@"stamp_color_slider_hud_bg.png"];
+        UIImageView *hud = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
+        [container addSubview:hud];
+        [hud release];
+    
+        CGRect frame = hud.frame;
+        frame.origin.y = container.bounds.size.height - (image.size.height+6.0f);
+        frame.origin.x = 10.0f;
+        frame.size.width = self.bounds.size.width - 20.0f;
+        hud.frame = frame;
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"stamp_color_slider_arrow.png"]];
+        [container addSubview:imageView];
+        [imageView release];
+        _arrowView = imageView;
+        
+        frame = imageView.frame;
+        frame.origin.y = hud.frame.origin.y - (frame.size.height-4.0f);
+        frame.origin.x = CGRectGetMidX(_firstColorView.frame) - (frame.size.width/2);
+        imageView.frame = frame;
 
         UIImage *track = [UIImage imageNamed:@"stamp_color_slider_hue_track.png"];
-        UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake((self.bounds.size.width-track.size.width)/2, 10.0f, track.size.width, 40.0f)];
+        UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake((self.bounds.size.width-track.size.width)/2, 18.0f, track.size.width, 40.0f)];
         [slider setMinimumTrackImage:track forState:UIControlStateNormal];
         [slider setMaximumTrackImage:track forState:UIControlStateNormal];
         [slider setThumbImage:[UIImage imageNamed:@"stamp_color_slider_thumb.png"] forState:UIControlStateNormal];
         [slider addTarget:self action:@selector(hueChanged:) forControlEvents:UIControlEventValueChanged];
-        [self addSubview:slider];
+        [container addSubview:slider];
         [slider release];
         _hueSlider = slider;
         
-        slider = [[UISlider alloc] initWithFrame:CGRectMake((self.bounds.size.width-track.size.width)/2, 50.0f, track.size.width, 40.0f)];
+        slider = [[UISlider alloc] initWithFrame:CGRectMake((self.bounds.size.width-track.size.width)/2, 56.0f, track.size.width, 40.0f)];
         [slider setThumbImage:[UIImage imageNamed:@"stamp_color_slider_thumb.png"] forState:UIControlStateNormal];
         [slider addTarget:self action:@selector(brightnessChanged:) forControlEvents:UIControlEventValueChanged];
-        [self addSubview:slider];
+        [container addSubview:slider];
         [slider release];
         _brightnessSlider = slider;
         
@@ -41,10 +88,14 @@
     return self;
 }
 
+- (void)dealloc {
+    [super dealloc];
+}
+
 - (void)colorChanged {
     
     if ([(id)delegate respondsToSelector:@selector(stampColorPickerSliderView:pickedColors:)]) {
-        [self.delegate stampColorPickerSliderView:self pickedColors:[NSArray arrayWithObjects:self.color1, self.color2, nil]];
+        [self.delegate stampColorPickerSliderView:self pickedColors:[self colors]];
     }
     
 }
@@ -85,17 +136,97 @@
     
 }
 
+- (void)convertToString {
+    
+    /*
+    NSInteger redIntValue = primaryRed_ * 255.99999f;
+    NSInteger greenIntValue = primaryGreen_ * 255.99999f;
+    NSInteger blueIntValue = primaryBlue_ * 255.99999f;
+    
+    NSString* redHexValue = [NSString stringWithFormat:@"%02x", redIntValue]; 
+    NSString* greenHexValue = [NSString stringWithFormat:@"%02x", greenIntValue];
+    NSString* blueHexValue = [NSString stringWithFormat:@"%02x", blueIntValue];
+    
+    NSString* primaryColor = [NSString stringWithFormat:@"%@%@%@", redHexValue, greenHexValue, blueHexValue];
+    
+    redIntValue = secondaryRed_ * 255.99999f;
+    greenIntValue = secondaryGreen_ * 255.99999f;
+    blueIntValue = secondaryBlue_ * 255.99999f;
+    
+    redHexValue = [NSString stringWithFormat:@"%02x", redIntValue]; 
+    greenHexValue = [NSString stringWithFormat:@"%02x", greenIntValue];
+    blueHexValue = [NSString stringWithFormat:@"%02x", blueIntValue];
+    
+    NSString* secondaryColor = [NSString stringWithFormat:@"%@%@%@", redHexValue, greenHexValue, blueHexValue];
+    
+    [delegate_ stampCustomizer:self chosePrimaryColor:primaryColor secondaryColor:secondaryColor];
+    */
+    
+}
+
 
 #pragma mark - Actions
 
+- (void)colorViewSelected:(StampColorPickerColorView*)sender {
+    
+    _firstColorView.selected = NO;
+    _secondColorView.selected = NO;
+    [_hueSlider setValue:sender.hue animated:YES];
+    [_brightnessSlider setValue:sender.brightness animated:YES];
+    [self resetBrightnessSlider];
+    sender.selected = YES;
+    
+    [UIView animateWithDuration:0.2f animations:^{
+        CGRect frame = _arrowView.frame;
+        frame.origin.x = CGRectGetMidX(sender.frame) - (frame.size.width/2);
+        _arrowView.frame = frame;
+    }];
+    
+}
+
 - (void)hueChanged:(UISlider*)slider {
     
-    [self resetBrightnessSlider];
+    if (_firstColorView.selected) {
+        _firstColorView.hue = slider.value;
+    } else if (_secondColorView.selected) {
+        _secondColorView.hue = slider.value;
+    }
     
+    CGFloat alpha = 1.0;
+    if (_brightnessSlider.value > 0.5) {
+        alpha = ((1.0 - 0.2) * ((1 - _brightnessSlider.value) / 0.5)) + 0.2;
+    }
+    StampColorPickerColorView *selectedView = _firstColorView.selected ? _firstColorView : _secondColorView;
+    UIColor *result = [UIColor colorWithHue:slider.value saturation:1.0 brightness:selectedView.brightness alpha:alpha];
+    selectedView.color = result;
+    
+    [self resetBrightnessSlider];
+    [self colorChanged];
+
 }
 
 - (void)brightnessChanged:(UISlider*)slider {
     
+    CGFloat value = slider.value;
+    CGFloat brightness = 1.0;
+    CGFloat alpha = 1.0;
+    if (value <= 0.5) {
+        brightness = ((1.0 - 0.1) * (value / 0.5)) + 0.1;
+    } else {
+        alpha = ((1.0 - 0.2) * ((1 - value) / 0.5)) + 0.2;
+    }
+    
+    UIColor *result = [UIColor colorWithHue:_hueSlider.value saturation:1.0 brightness:brightness alpha:alpha];
+
+    if (_firstColorView.selected) {
+        _firstColorView.brightness = value;
+        _firstColorView.color = result;
+    } else if (_secondColorView.selected) {
+        _secondColorView.brightness = value;
+        _secondColorView.color = result;
+    }
+    
+    [self colorChanged];
     
 }
 
@@ -104,9 +235,165 @@
 
 - (NSArray*)colors {
     
-    return [NSArray arrayWithObjects:self.color1, self.color2, nil];
+    return [NSArray arrayWithObjects:_firstColorView.color, _secondColorView.color, nil];
     
 }
 
 
+#pragma mark - Setters
+
+- (void)setColors:(NSArray *)colors {
+    if (!colors || [colors count] < 2) return;
+    
+    _firstColorView.color = [colors objectAtIndex:0];
+    _secondColorView.color = [colors objectAtIndex:1];
+
+    CGFloat saturation, hue, brightness;
+    [self getHue:&hue saturation:&saturation brightness:&brightness alpha:NULL fromColor:_firstColorView.color];
+    if (saturation < 1.0) {
+         brightness = ((-0.5 * (saturation - 1)) / 0.8) + 0.5;
+    } else {
+         brightness *= 0.5;
+    }
+    _firstColorView.hue = hue;
+    _firstColorView.brightness = brightness;
+    
+    [self getHue:&hue saturation:&saturation brightness:&brightness alpha:NULL fromColor:_secondColorView.color];
+    if (saturation < 1.0) {
+        brightness = ((-0.5 * (saturation - 1)) / 0.8) + 0.5;
+    } else {
+        brightness *= 0.5;
+    }
+    _secondColorView.hue = hue;
+    _secondColorView.brightness = brightness;
+    
+    StampColorPickerColorView *selectedView = _firstColorView.selected ? _firstColorView : _secondColorView;
+    _brightnessSlider.value = selectedView.brightness;
+    _hueSlider.value = selectedView.hue;
+    
+    [self resetBrightnessSlider];
+
+}
+
+
+#pragma mark - Color Helper 
+
+- (void)getHue:(CGFloat*)hue saturation:(CGFloat*)saturation brightness:(CGFloat*)brightness alpha:(CGFloat*)alpha fromColor:(UIColor*)color {
+    if ([color respondsToSelector:@selector(getHue:saturation:brightness:alpha:)]) {
+        [color getHue:hue saturation:saturation brightness:brightness alpha:alpha];
+        return;
+    }
+    CGColorRef colorRef = color.CGColor;
+    size_t numComponents = CGColorGetNumberOfComponents(colorRef);
+    if (numComponents < 4)
+        return;
+    
+    const CGFloat* components = CGColorGetComponents(colorRef);
+    CGFloat r = components[0];
+    CGFloat g = components[1];
+    CGFloat b = components[2];
+    
+    CGFloat min, max, delta;
+    min = MIN(MIN(r, g), b);
+    max = MAX(MAX(r, g), b);
+    *brightness = max;
+    delta = max - min;
+    if (max != 0)
+        *saturation = delta / max;
+    else {
+        // r = g = b = 0
+        // s = 0, brightness is undefined
+        *saturation = 0;
+        *hue = -1;
+        return;
+    }
+    if (r == max)
+        *hue = (g - b) / delta;
+    else if(g == max)
+        *hue = 2 + (b - r) / delta;
+    else
+        *hue = 4 + (r - g) / delta;
+    *hue *= 60;
+    if (*hue < 0)
+        *hue += 360;
+    
+    *hue = (*hue / 360);
+}
+
+
+
 @end
+
+
+#pragma mark - StampColorPickerColorView
+
+@implementation StampColorPickerColorView
+@synthesize brightness;
+@synthesize hue;
+@synthesize color=_color;
+
+- (id)initWithFrame:(CGRect)frame {
+    
+    if ((self = [super initWithFrame:frame])) {
+        
+        self.backgroundColor = [UIColor clearColor];
+        
+        UIView *background = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, 2.0f, 2.0f)];
+        background.userInteractionEnabled = NO;
+        background.backgroundColor = [UIColor whiteColor];
+        background.layer.shadowPath = [UIBezierPath bezierPathWithRect:background.bounds].CGPath;
+        background.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        background.layer.shadowRadius = 1.0f;
+        background.layer.shadowOpacity = 0.2f;
+        background.layer.rasterizationScale = [[UIScreen mainScreen] scale];
+        background.layer.shouldRasterize = YES;
+        [self addSubview:background];
+        [background release];
+        _backgroundView = background;
+        
+        UIView *view = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, 4.0f, 4.0f)];
+        view.userInteractionEnabled = NO;
+        view.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:view];
+        _colorView = view;
+        [view release];
+        
+    }
+    return self;
+    
+}
+
+- (void)dealloc {
+    [_color release], _color=nil;
+    [super dealloc];
+}
+
+- (void)drawRect:(CGRect)rect {
+    if (!self.selected) return;
+    
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetAlpha(ctx, 0.4f);
+    CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:2.0f].CGPath);
+    CGContextClip(ctx);
+    drawGradient([UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f].CGColor, [UIColor colorWithRed:0.349f green:0.349f blue:0.349f alpha:1.0f].CGColor, ctx);
+    
+    
+}
+
+- (void)setColor:(UIColor *)color {
+    [_color release], _color=nil;
+    _color = [color retain];
+    _colorView.backgroundColor = _color;
+}
+
+- (void)setSelected:(BOOL)selected {
+    [super setSelected:selected];
+    
+    _backgroundView.layer.shadowOpacity = selected ? 0.0f : 0.2f;
+    [self setNeedsDisplay];
+
+}
+
+@end
+

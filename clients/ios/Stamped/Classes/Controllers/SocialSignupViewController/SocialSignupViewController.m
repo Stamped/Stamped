@@ -207,14 +207,8 @@
 
 - (void)stampColorPickerViewSelectedCustomize:(StampColorPickerView*)view {
     
-    /*
-    StampCustomizerViewController *controllerTest = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:[NSBundle mainBundle]];
-    [self presentModalViewController:controllerTest animated:YES];
-    
-    return;
-    */
-    
     StampCustomizeViewController *controller = [[StampCustomizeViewController alloc] init];
+    controller.delegate = (id<StampCustomizeViewControllerDelegate>)self;
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     [self presentModalViewController:navController animated:YES];
     [navController release];
