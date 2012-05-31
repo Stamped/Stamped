@@ -272,14 +272,14 @@ def checkClient(request):
     try:
         logs.client(client_id)
         if not stampedAuth.verifyClientCredentials(client_id, client_secret):
-            raise
+            raise 
 
         client = stampedAuth.getClientDetails(client_id)
         stampedAPI.setVersion(client.api_version)
         
         return client_id
     except Exception, e:
-        logs.info(e)
+        logs.warning("Invalid client credentials (%s)" % e)
         raise StampedAuthError("access_denied", "Invalid client credentials")
 
 def optionalOAuth(request):

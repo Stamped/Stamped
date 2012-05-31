@@ -3105,15 +3105,17 @@ class StampedAPI(AStampedAPI):
         
         return stamps
 
-    def _getUserStampIds(self, userId, authUserId=None):
-        user = self._userDB.getUser(userId)
-        return self._collectionDB.getUserStampIds(user.user_id)
-
-    def _getScopeStampIds(self, scope, authUserId=None):
+    def _getScopeStampIds(self, scope=None, userId=None, authUserId=None):
         """
         If not logged in return "popular" results. Also, allow scope to be set to "popular" if 
-        not logged in; otherwise, raise exception.
+        not logged in or to user stamps; otherwise, raise exception.
         """
+
+        if userId is not None and scope == 'credit':
+            return self._collectionDB.getUserCreditStampIds(userId)
+
+        if userId is not None:
+            self._collectionDB.getUserStampIds(userId)
 
         if scope is None:
             return None
@@ -3136,42 +3138,21 @@ class StampedAPI(AStampedAPI):
         if scope == 'friends':
             raise NotImplementedError()
 
-        if scope == 'fof':
-            return self._collectionDB.getFofStampIds(authUserId)
-
         return None
 
     @API_CALL
     def getStampCollection(self, timeSlice, authUserId=None):
-
-        # User
-        if timeSlice.user_id is not None:
-            t0 = time.time()
-            stampIds    = self._getUserStampIds(timeSlice.user_id, authUserId)
-            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
-
-        # Inbox
-        else:
-            t0 = time.time()
-            stampIds    = self._getScopeStampIds(timeSlice.scope, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
+        t0 = time.time()
+        stampIds    = self._getScopeStampIds(timeSlice.scope, timeSlice.user_id, authUserId)
+        logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
     @API_CALL
     def searchStampCollection(self, searchSlice, authUserId=None):
-
-        # User
-        if searchSlice.user_id is not None:
-            t0 = time.time()
-            stampIds    = self._getUserStampIds(searchSlice.user_id, authUserId)
-            logs.debug('Time for _getUserStampIds: %s' % (time.time() - t0))
-
-        # Inbox
-        else:
-            t0 = time.time()
-            stampIds    = self._getScopeStampIds(searchSlice.scope, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
+        t0 = time.time()
+        stampIds    = self._getScopeStampIds(searchSlice.scope, searchSlice.user_id, authUserId)
+        logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
 
