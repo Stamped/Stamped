@@ -3502,7 +3502,7 @@ class StampedAPI(AStampedAPI):
         result = []
         for item in items:
             entity = entityIds[item.entity_id]
-            previews = EntityPreviewsSchema()
+            previews = Previews()
             if item.stamps is not None:
                 stamps = []
                 for stampPreview in item.stamps:
