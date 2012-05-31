@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, logs, time
+import Globals, logs, time, pymongo
 
 from datetime import datetime
 from utils import lazyProperty
@@ -23,6 +23,7 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         ACommentDB.__init__(self)
 
         self._collection.ensure_index('user.user_id')
+        self._collection.ensure_index('timestamp.created')
     
     ### PUBLIC
 
@@ -57,15 +58,33 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     def getCommentIds(self, stampId):
         return self.stamp_comments_collection.getStampCommentIds(stampId)
     
-    def getCommentsForStamp(self, stampId, limit=0):
+    def getCommentsForStamp(self, stampId, **kwargs):
+        before  = kwargs.pop('before', None)
+        limit   = kwargs.pop('limit', 0)
+        offset  = kwargs.pop('offset', 0)
+        
         ### TODO: Add paging
         documentIds = []
         for documentId in self.getCommentIds(stampId):
             documentIds.append(self._getObjectIdFromString(documentId))
+
+        query = { '_id': { '$in': documentIds } }
+        if before is not None:
+            query['timestamp.created'] = { '$lte': before }
+
+        if limit == 0 and offset > 0:
+            queryLimit = 0
+        elif limit < 0 or offset < 0:
+            queryLimit = 0
+        else:
+            queryLimit = limit + offset
+
         comments = []
-        for document in self._getMongoDocumentsFromIds(documentIds, limit=limit):
+        documents = self._collection.find(query).sort('timestamp.created', pymongo.DESCENDING).limit(queryLimit)
+
+        for document in documents:
             comments.append(self._convertFromMongo(document))
-        return comments
+        return comments[offset:]
     
     def getCommentsAcrossStamps(self, stampIds, limit=4):
         commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds, limit)

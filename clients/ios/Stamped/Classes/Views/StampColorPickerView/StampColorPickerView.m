@@ -155,6 +155,28 @@
 }
 
 
+#pragma mark - Getters
+
+- (NSArray*)colors {
+    
+    StampPickerView *view = nil;
+    
+    for (StampPickerView *aView in _views) {
+        if (aView.selected) {
+            view = aView;
+            break;
+        }
+    }
+    
+    if (view != nil) {
+        return [NSArray arrayWithObjects:view.color1, view.color2, nil];
+    }
+    
+    return nil;
+    
+}
+
+
 #pragma mark - Actions
 
 - (void)stampPicked:(StampPickerView*)sender {

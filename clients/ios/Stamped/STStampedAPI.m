@@ -70,6 +70,7 @@
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* entityDetailCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampedByCache;
+@property (nonatomic, readonly, retain) NSCache* stampPreviewsCache;
 @property (nonatomic, readonly, retain) NSCache* userCache;
 @property (nonatomic, readonly, retain) NSCache* entityCache;
 @property (nonatomic, readwrite, retain) id<STActivityCount> lastCount;
@@ -84,6 +85,7 @@
 @synthesize stampCache = _stampCache;
 @synthesize entityDetailCache = entityDetailCache_;
 @synthesize stampedByCache = _stampedByCache;
+@synthesize stampPreviewsCache = _stampPreviewsCache;
 @synthesize lastCount = lastCount_;
 @synthesize userCache = _userCache;
 @synthesize entityCache = _entityCache;
@@ -116,6 +118,7 @@ static STStampedAPI* _sharedInstance;
         _stampedByCache = [[STHybridCacheSource alloc] initWithCachePath:@"StampedBy" relativeToCacheDir:YES];
         _stampedByCache.delegate = self;
         _stampedByCache.maxAge = [NSNumber numberWithInteger:1 * 24 * 60 * 60];
+        _stampPreviewsCache =[[NSCache alloc] init];
         _userCache = [[NSCache alloc] init];
         _entityCache = [[NSCache alloc] init];
     }
@@ -131,6 +134,7 @@ static STStampedAPI* _sharedInstance;
     [_menuCache release];
     [_stampCache release];
     [_stampedByCache release];
+    [_stampPreviewsCache release];
     [_userCache release];
     [_entityCache release];
     [entityDetailCache_ release];
@@ -166,8 +170,12 @@ static STStampedAPI* _sharedInstance;
     [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
 }
 
-- (id<STPreviews>)cachedStampPreviewsForStampID:(NSString*)stampID {
-    return nil;
+- (id<STPreviews>)cachedPreviewsForStampID:(NSString*)stampID {
+    return [self.stampPreviewsCache objectForKey:stampID];
+}
+
+- (void)cachePreviews:(id<STPreviews>)previews forStampID:(NSString*)stampID {
+    return [self.stampPreviewsCache setObject:previews forKey:stampID];
 }
 
 - (id<STStampedBy>)cachedStampedByForEntityID:(NSString*)entityID {
@@ -808,7 +816,6 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)loginWithFacebookID:(NSString*)userID 
                                  token:(NSString*)token
                            andCallback:(void(^)(id<STLoginResponse>, NSError*, STCancellation*))block {
-    //TODO
     NSString* path = @"/account/create_using_facebook.json";
     NSDictionary* params = nil;
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path

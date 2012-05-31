@@ -278,6 +278,35 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
+    def _verifyFacebookAccount(self, user_token):
+        # Check to see if the Facebook credentials are valid and if no Stamped user is using the twitter account
+        user = self._facebook.getUserInfo(user_token)
+
+        account = None
+        try:
+            account = self.getAccountByFacebookId(user['id'])
+        except StampedUnavailableError:
+            pass
+        if account is not None:
+            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+
+        return user
+
+    def _verifyTwitterAccount(self, user_token, user_secret):
+        # Check to see if the Twitter credentials are valid and if no Stamped user is using the twitter account
+        user = self._twitter.verifyCredentials(user_token, user_secret)
+
+        account = None
+        try:
+            account = self.getAccountByTwitterId(user['id'])
+        except StampedUnavailableError:
+            pass
+        if account is not None:
+            raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
+
+        return user
+
+
     @API_CALL
     def addFacebookAccount(self, new_fb_account):
         """
@@ -286,25 +315,16 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        user = self._facebook.getUserInfo(new_fb_account.user_token)
-
-        account = None
-        try:
-            account = self.getAccountByFacebookId(user['id'])
-        except StampedUnavailableError:
-            pass
-        # Check if the facebook account is already tied to a Stamped account
-        if account is not None:
-            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
-
+        user = self._verifyFacebookAccount(new_fb_account.user_token)
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
-        logs.info(account)
-        account.linked_accounts             = LinkedAccounts()
-        fb_acct                             = FacebookAccountSchema()
-        fb_acct.facebook_id                 = user['id']
-        fb_acct.facebook_name               = user['name']
-        fb_acct.facebook_screen_name        = user.pop('username', None)
-        account.linked_accounts.facebook    = fb_acct
+
+        account.linked                      = LinkedAccounts()
+        fb_acct                             = LinkedAccount()
+        fb_acct.service_name                = 'facebook'
+        fb_acct.user_id                     = user['id']
+        fb_acct.name                   = user['name']
+        fb_acct.screen_name            = user.pop('username', None)
+        account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
@@ -320,25 +340,16 @@ class StampedAPI(AStampedAPI):
         """
 
         # First, get user information from Twitter using the passed in token
-        user = self._twitter.verifyCredentials(new_tw_account.user_token, new_tw_account.user_secret)
-
-        account = None
-        try:
-            account = self.getAccountByTwitterId(user['id'])
-        except StampedUnavailableError:
-            pass
-            # Check if the twitter account is already tied to a Stamped account
-        if account is not None:
-            raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
-
+        user = self._verifyTwitterAccount(new_tw_account.user_token, new_tw_account.user_secret)
         account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
 
-        account.linked_accounts             = LinkedAccounts()
-        tw_acct                             = TwitterAccountSchema()
-        tw_acct.twitter_id                  = user['id']
-        tw_acct.twitter_screen_name         = user['screen_name']
-        tw_acct.twitter_name                = user.pop('name', None)
-        account.linked_accounts.twitter     = tw_acct
+        account.linked                      = LinkedAccounts()
+        tw_acct                             = LinkedAccount()
+        tw_acct.service_name                = 'twitter'
+        tw_acct.user_id                     = user['id']
+        tw_acct.screen_name                 = user['screen_name']
+        tw_acct.name                        = user.pop('name', None)
+        account.linked.twitter              = tw_acct
         account.auth_service                = 'twitter'
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
@@ -553,11 +564,14 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateAccountSettingsAsync(self, old_screen_name, new_screen_name):
         self._imageDB.changeProfileImageName(old_screen_name.lower(), new_screen_name.lower())
-    
+
     @API_CALL
     def getAccount(self, authUserId):
-        account = self._accountDB.getAccount(authUserId)
-        return account
+        return self._accountDB.getAccount(authUserId)
+
+    @API_CALL
+    def getLinkedAccounts(self, authUserId):
+        return self.getAccount(authUserId).linked
 
     #TODO: Consolidate getAccountByFacebookId and getAccountByTwitterId?  After linked account generification is complete
 
@@ -762,12 +776,28 @@ class StampedAPI(AStampedAPI):
                 
                 if 'offset' in params and int(params['offset']) == len(friends):
                     continue
+
             break
         
         for friend in friends:
             facebookIds.append(friend['id'])
         
         return self._userDB.findUsersByFacebook(facebookIds)
+
+    @API_CALL
+    def addLinkedAccount(self, authUserId, linkedAccount):
+        # Verify account is valid and send out alerts, if applicable
+        if linkedAccount.service_name == 'facebook':
+            self._verifyFacebookAccount(linkedAccount.token)
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
+        elif linkedAccount.service_name == 'twitter':
+            self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
+
+        elif linkedAccount.service_name == 'netflix':
+            pass
+
+        return self._accountDB.addLinkedAccount(authUserId, linkedAccount)
     
     @API_CALL
     def updateLinkedAccounts(self, authUserId, **kwargs):
@@ -793,44 +823,31 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def removeLinkedAccount(self, authUserId, linkedAccount):
-        if linkedAccount not in ['facebook', 'twitter']:
+        if linkedAccount not in ['facebook', 'twitter', 'netflix']:
             raise StampedIllegalActionError("Invalid linked account: %s" % linkedAccount)
         
         self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
         return True
     
-    ### DEPRECATED
     @API_CALL
-    def alertFollowersFromTwitter(self, authUserId, twitterIds):
-        account = self._accountDB.getAccount(authUserId)
-        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
-            return False
-        
-        # Perform the actual alerts asynchronously
-        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId, twitterIds])
-        
-        return True
-    
-    @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId, twitterIds=None, twitterKey=None, twitterSecret=None):
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
 
         ### TODO: Deprecate passing parameter "twitterIds"
         
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Twitter)
-        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
+        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id):
             return False
+
+#        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
+#            return False
         
         users = []
 
         # Grab friend list from Twitter API
-        if twitterKey is not None and twitterSecret is not None:
-            users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
-        elif twitterIds is not None:
-            ### DEPRECATED
-            users = self._userDB.findUsersByTwitter(twitterIds)
-        
+        users = self._getTwitterFriends(twitterKey, twitterSecret, followers=True)
+
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
@@ -842,44 +859,32 @@ class StampedAPI(AStampedAPI):
         self._addActivity(verb          = 'friend_twitter', 
                           userId        = authUserId, 
                           recipientIds  = userIds,
-                          body          = 'Your Twitter friend %s joined Stamped.' % account.twitter_screen_name)
-        
-        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
-        
-        return True
-    
-    ### DEPRECATED
-    @API_CALL
-    def alertFollowersFromFacebook(self, authUserId, facebookIds):
-        account = self._accountDB.getAccount(authUserId)
-        if account.facebook_alerts_sent == True or not account.facebook_name:
-            return False
-        
-        # Perform the actual alerts asynchronously
-        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, facebookIds])
+                          body          = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
+
+        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
+
+#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
+#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
         
         return True
     
     @API_CALL
-    def alertFollowersFromFacebookAsync(self, authUserId, facebookIds=None, facebookToken=None):
+    def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
         
         ### TODO: Deprecate passing parameter "facebookIds"
         
         account   = self._accountDB.getAccount(authUserId)
         
         # Only send alert once (when the user initially connects to Facebook)
-        if account.facebook_alerts_sent == True or not account.facebook_name:
-            return
+        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id):
+            return False
+#        if account.facebook_alerts_sent == True or not account.facebook_name:
+#            return
         
         users = []
 
         # Grab friend list from Facebook API
-        if facebookToken is not None:
-            users = self._getFacebookFriends(facebookToken)
-        elif facebookIds is not None:
-            ### DEPRECATED
-            users = self._userDB.findUsersByFacebook(facebookIds)
+        users = self._getFacebookFriends(facebookToken)
         
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
@@ -893,9 +898,10 @@ class StampedAPI(AStampedAPI):
                           userId        = authUserId, 
                           recipientIds  = userIds,
                           body          = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
-        
-        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
-        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
+
+        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
+#        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
+#        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
 
     @API_CALL
     def addToNetflixInstant(self, authUserId, netflixId):
@@ -909,10 +915,10 @@ class StampedAPI(AStampedAPI):
         nf_token    = None 
         nf_secret   = None
 
-        if account.linked_accounts is not None and account.linked_accounts.netflix is not None:
-            nf_user_id  = account.linked_accounts.netflix.netflix_user_id
-            nf_token    = account.linked_accounts.netflix.netflix_token
-            nf_secret   = account.linked_accounts.netflix.netflix_secret
+        if account.linked is not None and account.linked.netflix is not None:
+            nf_user_id  = account.linked.netflix.user_id
+            nf_token    = account.linked.netflix.token
+            nf_secret   = account.linked.netflix.secret
 
         if (nf_user_id is None or nf_token is None or nf_secret is None):
             logs.info('Returning because of missing account credentials')
@@ -2570,10 +2576,10 @@ class StampedAPI(AStampedAPI):
         
         # Remove comments
         ### TODO: Make this more efficient?
-        comments = self._commentDB.getCommentsForStamp(stampId)
-        for comment in comments:
+        commentIds = self._commentDB.getCommentIds(stampId)
+        for commentId in commentIds:
             # Remove comment
-            self._commentDB.removeComment(comment.comment_id)
+            self._commentDB.removeComment(commentId)
         
         # Remove activity
         self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -2860,10 +2866,8 @@ class StampedAPI(AStampedAPI):
         return comment
     
     @API_CALL
-    def getComments(self, stampId, authUserId, **kwargs): 
-        stamp = self._stampDB.getStamp(stampId)
-        
-        ### TODO: Add slicing (before, since, limit, quality)
+    def getComments(self, commentSlice, authUserId): 
+        stamp = self._stampDB.getStamp(commentSlice.stamp_id)
         
         # Check privacy of stamp
         if stamp.user.privacy == True:
@@ -2874,7 +2878,10 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
               
-        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id, 
+                                                            limit=commentSlice.limit, 
+                                                            before=commentSlice.before,
+                                                            offset=commentSlice.offset)
         
         # Get user objects
         userIds = {}
@@ -2896,15 +2903,9 @@ class StampedAPI(AStampedAPI):
                 comment.user = userIds[comment.user.user_id]
                 comments.append(comment)
         
-        comments = sorted(comments, key=lambda k: k.timestamp.created)
-        
-        tasks.invoke(tasks.APITasks.getComments, args=[authUserId, stampId])
+        # comments = sorted(comments, key=lambda k: k.timestamp.created)
         
         return comments
-    
-    @API_CALL
-    def getCommentsAsync(self, authUserId, stampId):
-        self._stampDB.addView(authUserId, stampId)
     
     
     """

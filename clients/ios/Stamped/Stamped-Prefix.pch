@@ -21,6 +21,7 @@
     #import "STStampedAPI.h"
     #import "Util.h"
     #import "QuartzUtils.h"
+    #import "STEvents.h"
 #endif
 
 #define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)

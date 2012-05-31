@@ -36,33 +36,32 @@ typedef enum{
 @protocol EGORefreshTableHeaderDelegate;
 @class EGORefreshArrowView, GiftureActivityView, GiftureRefreshPatternView;
 @interface EGORefreshTableHeaderView : UIView {
-	
-    UIView *_patternView;
-    
+	    
 	EGOPullRefreshState _state;
-    
-    EGORefreshArrowView *_arrowView;
+    UIImageView *_arrowView;
+    UIImageView *_shelftView;
 	UIActivityIndicatorView *_activityView;
     UILabel *_titleLabel;
     BOOL _ended;
-        
-    BOOL _delegateRefreshTableHeaderDataSourceIsLoading;
-	BOOL _delegateRefreshTableHeaderDidTriggerRefresh;
-    BOOL _delegateDataSourceIsEmpty;
-    
     CGFloat _triggerOffset;
+    
+    struct {
+        unsigned int delegateRefreshTableHeaderDataSourceIsLoading:1;
+        unsigned int delegateRefreshTableHeaderDidTriggerRefresh:1;
+        unsigned int delegateDataSourceIsEmpty:1;
+    } _refreshFlags;
+    
     
 }
 
 @property(nonatomic,assign) id <EGORefreshTableHeaderDelegate> delegate;
 @property(nonatomic) UIEdgeInsets tableInset; // used for saving table inset state
+@property(nonatomic,assign) BOOL showingSearch;
 
 - (void)updateRefreshState:(UIScrollView*)scrollView;
 - (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView;
 - (void)egoRefreshScrollViewDidEndDragging:(UIScrollView *)scrollView;
 - (void)egoRefreshScrollViewDataSourceDidFinishedLoading:(UIScrollView *)scrollView;
-- (void)setWhiteStyle;
-- (void)setBlackStyle;
 
 @end
 @protocol EGORefreshTableHeaderDelegate

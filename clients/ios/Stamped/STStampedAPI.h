@@ -66,7 +66,9 @@ typedef enum {
 
 - (void)cacheStamp:(id<STStamp>)stamp;
 
-- (id<STPreviews>)cachedStampPreviewsForStampID:(NSString*)stampID;
+- (id<STPreviews>)cachedPreviewsForStampID:(NSString*)stampID;
+
+- (void)cachePreviews:(id<STPreviews>)previews forStampID:(NSString*)stampID;
 
 - (id<STStampedBy>)cachedStampedByForEntityID:(NSString*)entityID;
 

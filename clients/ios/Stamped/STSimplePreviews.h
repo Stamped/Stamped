@@ -15,8 +15,8 @@
 @property (nonatomic, readwrite, copy) NSArray<STUser>* todos;
 @property (nonatomic, readwrite, copy) NSArray<STUser>* likes;
 @property (nonatomic, readwrite, copy) NSArray<STComment>* comments;
-@property (nonatomic, readwrite, copy) NSArray<STStamp>* credits;
-@property (nonatomic, readwrite, copy) NSArray<STUser>* stampUsers;
+@property (nonatomic, readwrite, copy) NSArray<STStampPreview>* credits;
+@property (nonatomic, readwrite, copy) NSArray<STStampPreview>* stamps;
 
 + (RKObjectMapping*)mapping;
 
