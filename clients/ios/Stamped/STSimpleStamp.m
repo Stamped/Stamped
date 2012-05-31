@@ -47,7 +47,6 @@
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stampID];
     if (cachedStamp) {
         [self autorelease];
-        NSLog(@"Recycled stamp:%@", stampID);
         return (id)[cachedStamp retain];
     }
     else {

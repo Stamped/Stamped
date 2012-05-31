@@ -7,6 +7,7 @@
 //
 
 #import "STSimpleUser.h"
+#import "STStampedAPI.h"
 
 @implementation STSimpleUser
 
@@ -18,18 +19,31 @@
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
 
+static int _reused = 0;
+static int _not = 0;
+
 - (id)initWithCoder:(NSCoder *)decoder {
-    self = [super init];
-    if (self) {
-        _name = [[decoder decodeObjectForKey:@"name"] retain];
-        _userID = [[decoder decodeObjectForKey:@"userID"] retain];
-        _screenName = [[decoder decodeObjectForKey:@"screenName"] retain];
-        _primaryColor = [[decoder decodeObjectForKey:@"primaryColor"] retain];
-        _secondaryColor = [[decoder decodeObjectForKey:@"secondaryColor"] retain];
-        _privacy = [[decoder decodeObjectForKey:@"privacy"] retain];
-        _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+    NSString* userID = [decoder decodeObjectForKey:@"userID"];
+    NSAssert1(userID, @"UserID should not be none for %@", self);
+    id<STUser> cachedUser = [[STStampedAPI sharedInstance] cachedUserForUserID:userID];
+    if (cachedUser) {
+        [self autorelease];
+        return (id)[cachedUser retain];
     }
-    return self;
+    else {
+        self = [super init];
+        if (self) {
+            _name = [[decoder decodeObjectForKey:@"name"] retain];
+            _userID = [userID retain];
+            _screenName = [[decoder decodeObjectForKey:@"screenName"] retain];
+            _primaryColor = [[decoder decodeObjectForKey:@"primaryColor"] retain];
+            _secondaryColor = [[decoder decodeObjectForKey:@"secondaryColor"] retain];
+            _privacy = [[decoder decodeObjectForKey:@"privacy"] retain];
+            _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+            [[STStampedAPI sharedInstance] cacheUser:self];
+        }
+        return self;
+    }
 }
 
 - (void)dealloc

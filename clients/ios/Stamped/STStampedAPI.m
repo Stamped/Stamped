@@ -71,6 +71,7 @@
 @property (nonatomic, readonly, retain) STHybridCacheSource* entityDetailCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampedByCache;
 @property (nonatomic, readonly, retain) NSCache* userCache;
+@property (nonatomic, readonly, retain) NSCache* entityCache;
 @property (nonatomic, readwrite, retain) id<STActivityCount> lastCount;
 
 - (void)path:(NSString*)path WithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>,NSError*))block;
@@ -85,6 +86,7 @@
 @synthesize stampedByCache = _stampedByCache;
 @synthesize lastCount = lastCount_;
 @synthesize userCache = _userCache;
+@synthesize entityCache = _entityCache;
 
 static STStampedAPI* _sharedInstance;
 
@@ -115,28 +117,41 @@ static STStampedAPI* _sharedInstance;
         _stampedByCache.delegate = self;
         _stampedByCache.maxAge = [NSNumber numberWithInteger:1 * 24 * 60 * 60];
         _userCache = [[NSCache alloc] init];
+        _entityCache = [[NSCache alloc] init];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    
+    _menuCache.delegate = nil;
+    _stampCache.delegate = nil;
+    entityDetailCache_.delegate = nil;
+    _stampedByCache.delegate = nil;
     [_menuCache release];
     [_stampCache release];
     [_stampedByCache release];
     [_userCache release];
+    [_entityCache release];
     [entityDetailCache_ release];
     [lastCount_ release];
     [super dealloc];
 }
 
-- (id<STUser>)cachedUser:(NSString*)userID {
-    
+- (id<STUser>)cachedUserForUserID:(NSString*)userID {
+    return [self.userCache objectForKey:userID];
 }
 
 - (void)cacheUser:(id<STUser>)user {
-    
+    [self.userCache setObject:user forKey:user.userID];
+}
+
+- (id<STEntity>)cachedEntityForEntityID:(NSString*)entityID {
+    return [self.entityCache objectForKey:entityID];
+}
+
+- (void)cacheEntity:(id<STEntity>)entity {
+    [self.entityCache setObject:entity forKey:entity.entityID];
 }
 
 - (id<STUser>)currentUser {
@@ -157,10 +172,6 @@ static STStampedAPI* _sharedInstance;
 
 - (id<STStampedBy>)cachedStampedByForEntityID:(NSString*)entityID {
     return (id)[self.stampedByCache fastCachedObjectForKey:entityID];
-}
-
-- (STHybridCacheSource*)userCache {
-    
 }
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
@@ -291,13 +302,6 @@ static STStampedAPI* _sharedInstance;
                                               andCallback:^(NSArray* result, NSError *error, STCancellation *cancellation) {
                                                   block((id)result, error, cancellation); 
                                               }];
-}
-
-- (STCancellation*)entityForEntityID:(NSString*)entityID 
-                         andCallback:(void(^)(id<STEntity> entity, NSError* error, STCancellation* cancellation))block {
-    return [self entityDetailForEntityID:entityID andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
-        block(detail, error, cancellation);
-    }];
 }
 
 - (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block {
@@ -938,6 +942,8 @@ static STStampedAPI* _sharedInstance;
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];
     [self.stampCache fastMemoryPurge];
+    [self.stampedByCache fastMemoryPurge];
+    [self.userCache removeAllObjects];
     //[self.menuCache purge];
 }
 

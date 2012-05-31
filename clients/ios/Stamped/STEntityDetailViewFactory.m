@@ -59,8 +59,8 @@
         NSArray* components;
         if (context.stamp) {
             components = [NSArray arrayWithObjects:
-                          @"header",
                           @"actions",
+                          @"header",
                           //@"playlist",
                           nil];
         }

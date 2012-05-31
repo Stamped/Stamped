@@ -70,9 +70,13 @@ typedef enum {
 
 - (id<STStampedBy>)cachedStampedByForEntityID:(NSString*)entityID;
 
-- (id<STUser>)cachedUser:(NSString*)userID;
+- (id<STUser>)cachedUserForUserID:(NSString*)userID;
 
 - (void)cacheUser:(id<STUser>)user;
+
+- (id<STEntity>)cachedEntityForEntityID:(NSString*)entityID;
+
+- (void)cacheEntity:(id<STEntity>)entity;
 
 - (STCancellation*)stampedByForEntityID:(NSString*)entityID
                             andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
@@ -102,9 +106,6 @@ typedef enum {
                                andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
 
 - (void)deleteStampWithStampID:(NSString*)stampID andCallback:(void(^)(BOOL,NSError*))block;
-
-- (STCancellation*)entityForEntityID:(NSString*)entityID 
-                         andCallback:(void(^)(id<STEntity> entity, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)entityDetailForEntityID:(NSString*)entityID
                                andCallback:(void(^)(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation))block;
