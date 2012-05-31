@@ -42,16 +42,19 @@
 
 
 TODO:
+    * align stamp-gallery with profile header
+    * prep test for anthony w/ and w/out opacity applied to user's custom colors
+    
     * sDetail:
         * CLOSE - "Anatomy of eDetail section" spec
         * Polish social sharing buttons
         * DONE - Opening / closing animations
-        * Comment collapsing ala Google Plus
+        * CLOSE - Comment collapsing ala Google Plus
         * Move like / todo / comment counters to their own section
-    * First cut at map view integration
+    * CLOSE - First cut at map view integration
     * Profile Page:
-        * Header functionality w/ temp header images
-        * Sort stamps by popularity
+        * CLOSE - Header functionality w/ temp header images
+        * DONE- Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
     

@@ -42,8 +42,7 @@ def _coordinatesDictToFlat(coordinates):
         if isinstance(coordinates, Schema):
             coordinates = coordinates.dataExport()
 
-        if not isinstance(coordinates['lat'], float) or \
-           not isinstance(coordinates['lng'], float):
+        if not isinstance(coordinates['lat'], float) or not isinstance(coordinates['lng'], float):
             raise
         
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
@@ -830,6 +829,63 @@ class HTTPEmail(Schema):
     def setSchema(cls):
         cls.addProperty('email',                basestring)
 
+# ######## #
+# Comments #
+# ######## #
+
+class HTTPComment(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',           basestring, required=True)
+        cls.addNestedProperty('user',           HTTPUserMini, required=True)
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('restamp_id',           basestring)
+        cls.addProperty('blurb',                basestring, required=True)
+        cls.addNestedPropertyList('mentions',   MentionSchema)
+        cls.addProperty('created',              basestring)
+
+    def importComment(self, comment):
+        self.dataImport(comment.dataExport(), overflow=True)
+        self.created = comment.timestamp.created
+        self.user = HTTPUserMini().importUserMini(comment.user)
+        return self
+
+class HTTPCommentNew(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',             basestring, required=True)
+        cls.addProperty('blurb',                basestring, required=True)
+
+class HTTPCommentId(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',           basestring, required=True)
+
+
+# ######## #
+# Previews #
+# ######## #
+
+class HTTPStampPreview(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addNestedProperty('user',                       HTTPUserMini)
+
+    def importStampPreview(self, stampPreview):
+        self.stamp_id = stampPreview.stamp_id
+        self.user = HTTPUserMini().importUserMini(stampPreview.user)
+        return self 
+
+class HTTPPreviews(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('stamps',                 HTTPStampPreview)
+        cls.addNestedPropertyList('credits',                HTTPStampPreview)
+        cls.addNestedPropertyList('todos',                  HTTPUserMini)
+        cls.addNestedPropertyList('likes',                  HTTPUserMini)
+        cls.addNestedPropertyList('comments',               HTTPComment)
+
 
 # ########## #
 # ClientLogs #
@@ -876,18 +932,19 @@ class HTTPEndpointResponse(Schema):
 
 def _addImages(dest, images):
     newImages = []
-    for image in images:
-        if len(image.sizes) == 0:
-            continue
-        newimg = HTTPImageSchema()
-        sizes = []
-        for size in image.sizes:
-            if size.url is not None:
-                newsize = HTTPImageSizeSchema()
-                newsize.url = _cleanImageURL(size.url)
-                sizes.append(newsize)
-        newimg.sizes = sizes
-        newImages.append(newimg)
+    if images is not None:
+        for image in images:
+            if len(image.sizes) == 0:
+                continue
+            newimg = HTTPImageSchema()
+            sizes = []
+            for size in image.sizes:
+                if size.url is not None:
+                    newsize = HTTPImageSizeSchema()
+                    newsize.url = _cleanImageURL(size.url)
+                    sizes.append(newsize)
+            newimg.sizes = sizes
+            newImages.append(newimg)
 
     dest.images = newImages
 
@@ -931,12 +988,6 @@ class HTTPEntityPlaylist(Schema):
     def setSchema(cls):
         cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
         cls.addProperty('name',                 basestring)
-
-class HTTPEntityPreviewsSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('stamp_users',            HTTPUserMini)
-        cls.addNestedPropertyList('todos',                  HTTPUserMini)
 
 class HTTPEntityStampedBy(Schema):
     @classmethod
@@ -990,7 +1041,7 @@ class HTTPEntity(Schema):
         cls.addProperty('caption',                      basestring)
         cls.addNestedPropertyList('images',             HTTPImageSchema)
         cls.addProperty('last_modified',                basestring)
-        cls.addNestedProperty('previews',               HTTPEntityPreviewsSchema)
+        cls.addNestedProperty('previews',               HTTPPreviews)
 
         # Location
         cls.addProperty('address',                      basestring)
@@ -1066,6 +1117,14 @@ class HTTPEntity(Schema):
 
             self.metadata = metadata
 
+    def _formatMetadataList(self, data, attribute=None):
+        if data is None or len(data) == 0:
+            return None
+        if attribute is not None:
+            return ', '.join(unicode(getattr(i, attribute)) for i in data)
+        else:
+            return ', '.join(unicode(i) for i in data)
+
     def _formatReleaseDate(self, date):
         try:
             return date.strftime("%h %d, %Y")
@@ -1113,7 +1172,7 @@ class HTTPEntity(Schema):
 
             # Metadata
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
-            self._addMetadata('Cuisine', ', '.join(unicode(i) for i in entity.cuisine))
+            self._addMetadata('Cuisine', self._formatMetadataList(entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
@@ -1218,15 +1277,15 @@ class HTTPEntity(Schema):
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
 
-            if len(entity.authors) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
+            if entity.authors is not None and len(entity.authors) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', ', '.join(unicode(i.title) for i in entity.publishers))
+            self._addMetadata('Publisher', self._formatMetadataList(entity.publishers, 'title'))
 
             # Actions: Buy
 
@@ -1254,15 +1313,15 @@ class HTTPEntity(Schema):
         # TV
         elif entity.kind == 'media_collection' and entity.isType('tv'):
 
-            if len(entity.networks) > 0:
-                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
+            if entity.networks is not None and len(entity.networks) > 0:
+                self.caption = self._formatMetadataList(entity.networks, 'title')
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            self._addMetadata('Cast', self._formatMetadataList(entity.cast, 'title'), extended=True, optional=True)
+            self._addMetadata('Director', self._formatMetadataList(entity.directors, 'title'), optional=True)
+            self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
@@ -1346,9 +1405,9 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            self._addMetadata('Cast', self._formatMetadataList(entity.cast, 'title'), extended=True, optional=True)
+            self._addMetadata('Director', self._formatMetadataList(entity.directors, 'title'), optional=True)
+            self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
             # Actions: Watch Now
@@ -1462,21 +1521,21 @@ class HTTPEntity(Schema):
             if entity.isType('artist'):
                 self.caption = 'Artist'
 
-            elif entity.isType('album') and len(entity.artists) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
+            elif entity.isType('album') and entity.artists is not None and len(entity.artists) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
-            elif entity.isType('track') and len(entity.artists) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
+            elif entity.isType('track') and entity.artists is not None and len(entity.artists) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_music', client=client))
             if entity.isType('artist'):
                 self._addMetadata('Biography', entity.desc, key='desc')
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres), optional=True)
 
             elif entity.isType('album'):
-                if len(entity.artists) > 0:
+                if entity.artists is not None and len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
                         source              = HTTPActionSource()
@@ -1488,12 +1547,12 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
             elif entity.isType('track'):
-                if len(entity.artists) > 0:
+                if entity.artists is not None and len(entity.artists) > 0:
                     artist = entity.artists[0]
                     if artist.entity_id is not None:
                         source              = HTTPActionSource()
@@ -1505,7 +1564,7 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
 
@@ -1761,13 +1820,13 @@ class HTTPEntity(Schema):
 
         elif entity.kind == 'software' and entity.isType('app'):
 
-            if len(entity.authors) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
+            if entity.authors is not None and len(entity.authors) > 0:
+                self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_app', client=client))
-            self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+            self._addMetadata('Genre', self._formatMetadataList(entity.genres))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
             # Actions: Download
@@ -1830,7 +1889,7 @@ class HTTPEntity(Schema):
         # Previews
 
         if entity.previews is not None:
-            previews = HTTPEntityPreviewsSchema()
+            previews = HTTPPreviews()
 
             if entity.previews.todos is not None:
                 users = []
@@ -1838,11 +1897,11 @@ class HTTPEntity(Schema):
                     users.append(HTTPUserMini().importUserMini(user))
                 previews.todos = users
             
-            if entity.previews.stamp_users is not None:
-                users = []
-                for user in entity.previews.stamp_users:
-                    users.append(HTTPUserMini().importUserMini(user))
-                previews.stamp_users = users 
+            if entity.previews.stamps is not None:
+                stampPreviews = []
+                for item in entity.previews.stamps:
+                    stampPreviews.append(HTTPStampPreview().importStampPreview(item))
+                previews.stamps = stampPreviews
 
             self.previews = previews 
 
@@ -2453,37 +2512,6 @@ class HTTPGuideRequest(Schema):
 
 
 
-# ######## #
-# Comments #
-# ######## #
-
-class HTTPComment(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',           basestring, required=True)
-        cls.addNestedProperty('user',           HTTPUserMini, required=True)
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addProperty('restamp_id',           basestring)
-        cls.addProperty('blurb',                basestring, required=True)
-        cls.addNestedPropertyList('mentions',   MentionSchema)
-        cls.addProperty('created',              basestring)
-
-    def importComment(self, comment):
-        self.dataImport(comment.dataExport(), overflow=True)
-        self.created = comment.timestamp.created
-        self.user = HTTPUserMini().importUserMini(comment.user)
-        return self
-
-class HTTPCommentNew(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addProperty('blurb',                basestring, required=True)
-
-class HTTPCommentId(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',           basestring, required=True)
 
 
 # ###### #
@@ -2534,14 +2562,6 @@ class HTTPStampMini(Schema):
         self.is_liked           = False
         self.is_todo            = False
 
-class HTTPStampPreviews(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('likes',              HTTPUserMini)
-        cls.addNestedPropertyList('todos',              HTTPUserMini)
-        cls.addNestedPropertyList('credits',            HTTPStampMini)
-        cls.addNestedPropertyList('comments',           HTTPComment)
-
 class HTTPStamp(Schema):
     @classmethod
     def setSchema(cls):
@@ -2550,7 +2570,7 @@ class HTTPStamp(Schema):
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent, required=True)
         cls.addNestedPropertyList('credit',     CreditSchema)
-        cls.addNestedProperty('previews',       HTTPStampPreviews)
+        cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
         cls.addProperty('url',                  basestring)
@@ -2650,7 +2670,7 @@ class HTTPStamp(Schema):
 
     def importStamp(self, stamp):
         self.importStampMini(stamp)
-        previews = HTTPStampPreviews()
+        previews = HTTPPreviews()
 
         if stamp.previews.comments is not None:
             comments = []
@@ -2677,7 +2697,7 @@ class HTTPStamp(Schema):
         if stamp.previews.credits is not None:
             credits = []
             for credit in stamp.previews.credits:
-                credit  = HTTPStamp().importStampMini(credit).minimize()
+                credit  = HTTPStampPreview().importStampPreview(credit)
                 credits.append(credit)
             previews.credits = credits
 
@@ -2745,14 +2765,14 @@ class HTTPStampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('count',                int)
-        cls.addNestedPropertyList('stamps',     HTTPStamp)
+        cls.addNestedPropertyList('stamps',     HTTPStampPreview)
 
     def importStampedByGroup(self, group):
         if group.count is not None:
             self.count = group.count 
 
         if group.stamps is not None:
-            self.stamps = [HTTPStamp().importStamp(s) for s in group.stamps]
+            self.stamps = [HTTPStampPreview().importStampPreview(s) for s in group.stamps]
 
         return self
 
@@ -2760,18 +2780,14 @@ class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('friends',        HTTPStampedByGroup)
-        cls.addNestedProperty('fof',            HTTPStampedByGroup)
         cls.addNestedProperty('all',            HTTPStampedByGroup)
 
     def importStampedBy(self, stampedBy):
         if stampedBy.friends is not None:
-            self.friends    = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
-
-        if stampedBy.fof is not None:
-            self.fof        = HTTPStampedByGroup().importStampedByGroup(stampedBy.fof)
+            self.friends = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
 
         if stampedBy.all is not None:
-            self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
+            self.all = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
 
         return self
 
@@ -2818,7 +2834,7 @@ class HTTPTodo(Schema):
         #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         #cls.addNestedProperty('stamp',          HTTPStamp)
         cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
-        cls.addNestedProperty('previews',       HTTPStampPreviews)
+        cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addProperty('created',              basestring)
         cls.addProperty('complete',             bool)
 
@@ -2830,7 +2846,7 @@ class HTTPTodo(Schema):
         if todo.stamp is not None:
             self.source.stamp_ids   = [ todo.stamp.stamp_id ]
         if todo.previews is not None and todo.previews.todos is not None:
-            self.previews           = HTTPStampPreviews()
+            self.previews           = HTTPPreviews()
             self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
         self.created                = todo.timestamp.created
         self.complete               = todo.complete
@@ -2909,6 +2925,9 @@ class HTTPActivity(Schema):
             for user in activity.subjects:
                 subjects.append(HTTPUserMini().importUserMini(user))
             self.subjects = subjects
+
+        if not activity.personal:
+            del(self.benefit)
 
         def _addUserObjects():
             if activity.objects is not None and activity.objects.users is not None:
@@ -3167,7 +3186,7 @@ class HTTPActivity(Schema):
                 self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
-            _addStampObjects
+            _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 

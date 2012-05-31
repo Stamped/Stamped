@@ -76,38 +76,36 @@
 .sdetail_body .section-entity .entity-data .entity-data-header p.entity-caption {
   color: #999999;
 }
-.sdetail_body .section-entity .entity-data .entity-actions .action {
-  padding: .5em 24px .5em 12px;
-  border: 1px solid #f2f2f2;
-  border-bottom: 1px solid ##dbdbdb;
+.sdetail_body .section-entity .entity-data .entity-actions {
   background: #f2f2f2;
   background: -webkit-linear-gradient(90deg, #f2f2f2, #ffffff);
   background: -moz-linear-gradient(90deg, #f2f2f2, #ffffff);
   background: -ms-linear-gradient(90deg, #f2f2f2, #ffffff);
   background: -o-linear-gradient(90deg, #f2f2f2, #ffffff);
 }
+.sdetail_body .section-entity .entity-data .entity-actions .action {
+  padding: .5em 24px .5em 12px;
+  border: 1px solid #f2f2f2;
+  border-bottom: 1px solid ##dbdbdb;
+  /*&:hover {
+                        .linear-gradient2(@angle, darken(@c0, 15%), @c1);
+                    }
+                    
+                    &:active {
+                        .linear-gradient2(@angle, darken(@c0, 25%), @c1);
+                    }*/
+
+}
 .sdetail_body .section-entity .entity-data .entity-actions .action:hover,
 .sdetail_body .section-entity .entity-data .entity-actions .action:active {
+  background-color: #999999;
+  color: #fff;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-}
-.sdetail_body .section-entity .entity-data .entity-actions .action:hover {
-  background: #cccccc;
-  background: -webkit-linear-gradient(90deg, #cccccc, #ffffff);
-  background: -moz-linear-gradient(90deg, #cccccc, #ffffff);
-  background: -ms-linear-gradient(90deg, #cccccc, #ffffff);
-  background: -o-linear-gradient(90deg, #cccccc, #ffffff);
-}
-.sdetail_body .section-entity .entity-data .entity-actions .action:active {
-  background: #b2b2b2;
-  background: -webkit-linear-gradient(90deg, #b2b2b2, #ffffff);
-  background: -moz-linear-gradient(90deg, #b2b2b2, #ffffff);
-  background: -ms-linear-gradient(90deg, #b2b2b2, #ffffff);
-  background: -o-linear-gradient(90deg, #b2b2b2, #ffffff);
 }
 .sdetail_body .section-entity .entity-data .entity-actions .action .lhs {
   float: left;
@@ -399,7 +397,7 @@
                                 SDETAIL MENU
    ************************************************************************** */
 .entity-menu {
-  max-height: 500px;
+  max-height: 480px;
   overflow-y: scroll;
   text-align: center;
 }

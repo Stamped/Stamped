@@ -166,7 +166,6 @@ static const CGFloat _offscreenCancelPadding = 5;
     [Util reframeView:searchField withDeltas:CGRectMake(5, 2, -10 + 1, 0)]; //compensate for asymetry 
     self.searchFieldFrameNormal = searchField.frame;
     searchField.delegate = self;
-    CGFloat xPadding = 5;
     CGFloat buttonWidth = 60;
     //[Util reframeView:searchField withDeltas:CGRectMake(xPadding, 0, -(xPadding * 3 + buttonWidth), 0)];
     [header addSubview:searchField];

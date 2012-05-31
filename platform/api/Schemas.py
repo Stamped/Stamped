@@ -366,18 +366,18 @@ class TwitterAccountNew(Schema):
 class User(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('name',                 basestring, required=True)
-        cls.addProperty('screen_name',          basestring, required=True)
-        cls.addProperty('color_primary',        basestring)
-        cls.addProperty('color_secondary',      basestring)
-        cls.addProperty('bio',                  basestring)
-        cls.addProperty('website',              basestring)
-        cls.addProperty('location',             basestring)
-        cls.addProperty('privacy',              bool, required=True)
-        cls.addNestedProperty('stats',          UserStatsSchema, required=True)
-        cls.addNestedProperty('timestamp',      UserTimestampSchema, required=True)
-        cls.addProperty('identifier',           basestring)
+        cls.addProperty('user_id',                      basestring)
+        cls.addProperty('name',                         basestring, required=True)
+        cls.addProperty('screen_name',                  basestring, required=True)
+        cls.addProperty('color_primary',                basestring)
+        cls.addProperty('color_secondary',              basestring)
+        cls.addProperty('bio',                          basestring)
+        cls.addProperty('website',                      basestring)
+        cls.addProperty('location',                     basestring)
+        cls.addProperty('privacy',                      bool, required=True)
+        cls.addNestedProperty('stats',                  UserStatsSchema, required=True)
+        cls.addNestedProperty('timestamp',              UserTimestampSchema, required=True)
+        cls.addProperty('identifier',                   basestring)
 
     def __init__(self):
         Schema.__init__(self)
@@ -390,13 +390,14 @@ class User(Schema):
 class UserMini(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring, required=True)
-        cls.addProperty('name',                 basestring)
-        cls.addProperty('screen_name',          basestring)
-        cls.addProperty('color_primary',        basestring)
-        cls.addProperty('color_secondary',      basestring)
-        cls.addProperty('privacy',              bool)
-        cls.addNestedProperty('timestamp',      UserTimestampSchema)
+        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('privacy',                          bool)
+        cls.addNestedProperty('timestamp',                  UserTimestampSchema)
+        # cls.addNestedProperty('accessories',    
 
     def __init__(self):
         Schema.__init__(self)
@@ -405,24 +406,24 @@ class UserMini(Schema):
 class UserTiny(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('screen_name',          basestring)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('screen_name',                      basestring)
 
 class SuggestedUserRequest(Schema):
     @classmethod
     def setSchema(cls):
         # paging
-        cls.addProperty('limit',                int)
-        cls.addProperty('offset',               int)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
 
-        cls.addProperty('personalized',         bool)
-        cls.addProperty('coordinates',          CoordinatesSchema)
+        cls.addProperty('personalized',                     bool)
+        cls.addProperty('coordinates',                      CoordinatesSchema)
 
         # third party keys for optionally augmenting friend suggestions with
         # knowledge from other social networks
-        cls.addProperty('twitter_key',          basestring)
-        cls.addProperty('twitter_secret',       basestring)
-        cls.addProperty('facebook_token',       basestring)
+        cls.addProperty('twitter_key',                      basestring)
+        cls.addProperty('twitter_secret',                   basestring)
+        cls.addProperty('facebook_token',                   basestring)
 
     def __init__(self):
         Schema.__init__(self)
@@ -433,10 +434,35 @@ class SuggestedUserRequest(Schema):
 class Invite(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('invite_id',            basestring)
-        cls.addProperty('recipient_email',      basestring, required=True)
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('created',              datetime)
+        cls.addProperty('invite_id',                        basestring)
+        cls.addProperty('recipient_email',                  basestring, required=True)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('created',                          datetime)
+
+
+
+# ######## #
+# Comments #
+# ######## #
+
+class MentionSchema(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('user_id',                          basestring)
+        cls.addPropertyList('indices',                      int)
+
+class Comment(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('comment_id',                       basestring)
+        cls.addNestedProperty('user',                       UserMini, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addProperty('restamp_id',                       basestring)
+        cls.addProperty('blurb',                            basestring, required=True)
+        cls.addProperty('blurb_formatted',                  basestring)
+        cls.addNestedPropertyList('mentions',               MentionSchema)
+        cls.addNestedProperty('timestamp',                  TimestampSchema)
 
 
 # ########### #
@@ -446,9 +472,29 @@ class Invite(Schema):
 class Friendship(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring, required=True)
-        cls.addProperty('friend_id',            basestring, required=True)
-        cls.addNestedProperty('timestamp',      TimestampSchema)
+        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('friend_id',                        basestring, required=True)
+        cls.addNestedProperty('timestamp',                  TimestampSchema)
+
+
+# ######## #
+# Previews #
+# ######## #
+
+class StampPreview(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addNestedProperty('user',                       UserMini)
+
+class Previews(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('stamps',                 StampPreview)
+        cls.addNestedPropertyList('credits',                StampPreview)
+        cls.addNestedPropertyList('todos',                  UserMini)
+        cls.addNestedPropertyList('likes',                  UserMini)
+        cls.addNestedPropertyList('comments',               Comment)
 
 
 # ######## #
@@ -459,12 +505,12 @@ class Friendship(Schema):
 class EntityStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('titlev',                          float)
-        cls.addProperty('subcatv',                         float)
-        cls.addProperty('sourcev',                         float)
-        cls.addProperty('qualityv',                        float)
-        cls.addProperty('distancev',                       float)
-        cls.addProperty('totalv',                          float)
+        cls.addProperty('titlev',                           float)
+        cls.addProperty('subcatv',                          float)
+        cls.addProperty('sourcev',                          float)
+        cls.addProperty('qualityv',                         float)
+        cls.addProperty('distancev',                        float)
+        cls.addProperty('totalv',                           float)
 
 
 class EntitySourcesSchema(Schema):
@@ -488,100 +534,94 @@ class EntitySourcesSchema(Schema):
         Note: The tombstone is a stamped entity that points to a newer, "better" entity.
         """
 
-        cls.addProperty('tombstone_id',                    basestring)
-        cls.addProperty('tombstone_source',                basestring)
-        cls.addProperty('tombstone_timestamp',             datetime)
+        cls.addProperty('tombstone_id',                     basestring)
+        cls.addProperty('tombstone_source',                 basestring)
+        cls.addProperty('tombstone_timestamp',              datetime)
 
-        cls.addProperty('user_generated_id',               basestring)
-        cls.addProperty('user_generated_subtitle',         basestring)
-        cls.addProperty('user_generated_timestamp',        datetime)
+        cls.addProperty('user_generated_id',                basestring)
+        cls.addProperty('user_generated_subtitle',          basestring)
+        cls.addProperty('user_generated_timestamp',         datetime)
 
-        cls.addProperty('spotify_id',                      basestring)
-        cls.addProperty('spotify_url',                     basestring)
-        cls.addProperty('spotify_source',                  basestring)
-        cls.addProperty('spotify_timestamp',               datetime)
+        cls.addProperty('spotify_id',                       basestring)
+        cls.addProperty('spotify_url',                      basestring)
+        cls.addProperty('spotify_source',                   basestring)
+        cls.addProperty('spotify_timestamp',                datetime)
 
-        cls.addProperty('itunes_id',                       basestring)
-        cls.addProperty('itunes_url',                      basestring)
-        cls.addProperty('itunes_source',                   basestring)
-        cls.addProperty('itunes_preview',                  basestring)
-        cls.addProperty('itunes_timestamp',                datetime)
+        cls.addProperty('itunes_id',                        basestring)
+        cls.addProperty('itunes_url',                       basestring)
+        cls.addProperty('itunes_source',                    basestring)
+        cls.addProperty('itunes_preview',                   basestring)
+        cls.addProperty('itunes_timestamp',                 datetime)
 
-        cls.addProperty('rdio_id',                         basestring)
-        cls.addProperty('rdio_url',                        basestring)
-        cls.addProperty('rdio_source',                     basestring)
-        cls.addProperty('rdio_timestamp',                  datetime)
+        cls.addProperty('rdio_id',                          basestring)
+        cls.addProperty('rdio_url',                         basestring)
+        cls.addProperty('rdio_source',                      basestring)
+        cls.addProperty('rdio_timestamp',                   datetime)
 
-        cls.addProperty('amazon_id',                       basestring)
-        cls.addProperty('amazon_url',                      basestring)
-        cls.addProperty('amazon_underlying',               basestring)
-        cls.addProperty('amazon_source',                   basestring)
-        cls.addProperty('amazon_timestamp',                datetime)
+        cls.addProperty('amazon_id',                        basestring)
+        cls.addProperty('amazon_url',                       basestring)
+        cls.addProperty('amazon_underlying',                basestring)
+        cls.addProperty('amazon_source',                    basestring)
+        cls.addProperty('amazon_timestamp',                 datetime)
 
-        cls.addProperty('opentable_id',                    basestring)
-        cls.addProperty('opentable_url',                   basestring)
-        cls.addProperty('opentable_source',                basestring)
-        cls.addProperty('opentable_nickname',              basestring)
-        cls.addProperty('opentable_timestamp',             datetime)
+        cls.addProperty('opentable_id',                     basestring)
+        cls.addProperty('opentable_url',                    basestring)
+        cls.addProperty('opentable_source',                 basestring)
+        cls.addProperty('opentable_nickname',               basestring)
+        cls.addProperty('opentable_timestamp',              datetime)
 
-        cls.addProperty('fandango_id',                     basestring)
-        cls.addProperty('fandango_url',                    basestring)
-        cls.addProperty('fandango_source',                 basestring)
-        cls.addProperty('fandango_timestamp',              datetime)
+        cls.addProperty('fandango_id',                      basestring)
+        cls.addProperty('fandango_url',                     basestring)
+        cls.addProperty('fandango_source',                  basestring)
+        cls.addProperty('fandango_timestamp',               datetime)
 
-        cls.addProperty('netflix_id',                      basestring)
-        cls.addProperty('netflix_url',                     basestring)
-        cls.addProperty('netflix_source',                  basestring)
-        cls.addProperty('netflix_is_instant_available',    bool)
-        cls.addProperty('netflix_instant_available_until', datetime)
-        cls.addProperty('netflix_timestamp',               datetime)
+        cls.addProperty('netflix_id',                       basestring)
+        cls.addProperty('netflix_url',                      basestring)
+        cls.addProperty('netflix_source',                   basestring)
+        cls.addProperty('netflix_is_instant_available',     bool)
+        cls.addProperty('netflix_instant_available_until',  datetime)
+        cls.addProperty('netflix_timestamp',                datetime)
 
-        cls.addProperty('singleplatform_id',               basestring)
-        cls.addProperty('singleplatform_url',              basestring)
-        cls.addProperty('singleplatform_source',           basestring)
-        cls.addProperty('singleplatform_timestamp',        datetime)
+        cls.addProperty('singleplatform_id',                basestring)
+        cls.addProperty('singleplatform_url',               basestring)
+        cls.addProperty('singleplatform_source',            basestring)
+        cls.addProperty('singleplatform_timestamp',         datetime)
 
-        cls.addProperty('foursquare_id',                   basestring)
-        cls.addProperty('foursquare_url',                  basestring)
-        cls.addProperty('foursquare_source',               basestring)
-        cls.addProperty('foursquare_timestamp',            datetime)
+        cls.addProperty('foursquare_id',                    basestring)
+        cls.addProperty('foursquare_url',                   basestring)
+        cls.addProperty('foursquare_source',                basestring)
+        cls.addProperty('foursquare_timestamp',             datetime)
 
-        cls.addProperty('instagram_id',                    basestring)
-        cls.addProperty('instagram_source',                basestring)
-        cls.addProperty('instagram_timestamp',             datetime)
+        cls.addProperty('instagram_id',                     basestring)
+        cls.addProperty('instagram_source',                 basestring)
+        cls.addProperty('instagram_timestamp',              datetime)
 
-        cls.addProperty('factual_id',                      basestring)
-        cls.addProperty('factual_url',                     basestring)
-        cls.addProperty('factual_source',                  basestring)
-        cls.addProperty('factual_crosswalk',               datetime)
-        cls.addProperty('factual_timestamp',               datetime)
+        cls.addProperty('factual_id',                       basestring)
+        cls.addProperty('factual_url',                      basestring)
+        cls.addProperty('factual_source',                   basestring)
+        cls.addProperty('factual_crosswalk',                datetime)
+        cls.addProperty('factual_timestamp',                datetime)
 
-        cls.addProperty('tmdb_id',                         basestring)
-        cls.addProperty('tmdb_url',                        basestring)
-        cls.addProperty('tmdb_source',                     basestring)
-        cls.addProperty('tmdb_timestamp',                  datetime)
+        cls.addProperty('tmdb_id',                          basestring)
+        cls.addProperty('tmdb_url',                         basestring)
+        cls.addProperty('tmdb_source',                      basestring)
+        cls.addProperty('tmdb_timestamp',                   datetime)
 
-        cls.addProperty('thetvdb_id',                      basestring)
-        cls.addProperty('thetvdb_url',                     basestring)
-        cls.addProperty('thetvdb_source',                  basestring)
-        cls.addProperty('thetvdb_timestamp',               datetime)
+        cls.addProperty('thetvdb_id',                       basestring)
+        cls.addProperty('thetvdb_url',                      basestring)
+        cls.addProperty('thetvdb_source',                   basestring)
+        cls.addProperty('thetvdb_timestamp',                datetime)
 
-        cls.addProperty('imdb_id',                         basestring)
-        cls.addProperty('imdb_url',                        basestring)
-        cls.addProperty('imdb_source',                     basestring)
-        cls.addProperty('imdb_timestamp',                  datetime)
+        cls.addProperty('imdb_id',                          basestring)
+        cls.addProperty('imdb_url',                         basestring)
+        cls.addProperty('imdb_source',                      basestring)
+        cls.addProperty('imdb_timestamp',                   datetime)
 
-        cls.addProperty('googleplaces_id',                 basestring)
-        cls.addProperty('googleplaces_reference',          basestring)
-        cls.addProperty('googleplaces_url',                basestring)
-        cls.addProperty('googleplaces_source',             basestring)
-        cls.addProperty('googleplaces_timestamp',          datetime)
-
-class EntityPreviewsSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('stamp_users',            UserMini)
-        cls.addNestedPropertyList('todos',                  UserMini)
+        cls.addProperty('googleplaces_id',                  basestring)
+        cls.addProperty('googleplaces_reference',           basestring)
+        cls.addProperty('googleplaces_url',                 basestring)
+        cls.addProperty('googleplaces_source',              basestring)
+        cls.addProperty('googleplaces_timestamp',           datetime)
 
 class BasicEntityMini(Schema):
     @classmethod
@@ -668,7 +708,7 @@ class BasicEntity(BasicEntityMini):
         cls.addNestedProperty('stats',                      EntityStatsSchema)
         cls.addNestedProperty('timestamp',                  TimestampSchema, required=True)
 
-        cls.addNestedProperty('previews',                   EntityPreviewsSchema)
+        cls.addNestedProperty('previews',                   Previews)
 
         # The last date/time we got some input indicating that this is currently popular.
         cls.addProperty('last_popular',                     datetime)
@@ -681,7 +721,6 @@ class BasicEntity(BasicEntityMini):
         self.schema_version = 0
         self.kind = 'other'
         self.types = []
-        self.images = [] # Temp
         self.sources = EntitySourcesSchema()
         self.timestamp = TimestampSchema()
 
@@ -824,7 +863,7 @@ class PlaceEntity(BasicEntity):
         cls.addProperty('gallery_source',                   basestring)
         cls.addProperty('gallery_timestamp',                datetime)
 
-        cls.addNestedProperty('hours',                      HoursSchema)
+        cls.addNestedProperty('hours',                      TimesSchema)
         cls.addProperty('hours_source',                     basestring)
         cls.addProperty('hours_timestamp',                  datetime)
 
@@ -847,9 +886,6 @@ class PlaceEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'place'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.gallery            = []
-        self.cuisine            = []
 
     def formatAddress(self, extendStreet=False, breakLines=False):
         street      = self.address_street
@@ -957,12 +993,6 @@ class PersonEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'person'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres         = []
-        self.tracks         = []
-        self.albums         = []
-        self.movies         = []
-        self.books          = []
 
     @property
     def subtitle(self):
@@ -1037,15 +1067,6 @@ class BasicMediaEntity(BasicEntity):
 
     def __init__(self):
         BasicEntity.__init__(self)
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres         = []
-        self.artists        = []
-        self.authors        = []
-        self.directors      = []
-        self.cast           = []
-        self.publishers     = []
-        self.studios        = []
-        self.networks       = []
 
 class MediaCollectionEntity(BasicMediaEntity):
 
@@ -1064,13 +1085,13 @@ class MediaCollectionEntity(BasicMediaEntity):
     @property
     def subtitle(self):
         if self.isType('album'):
-            if len(self.artists) > 0:
+            if self.artists is not None and len(self.artists) > 0:
                 return 'Album by %s' % ', '.join(unicode(i.title) for i in self.artists)
 
             return 'Album'
 
         if self.isType('tv'):
-            if len(self.networks) > 0:
+            if self.networks is not None and len(self.networks) > 0:
                 return 'TV Show (%s)' % ', '.join(unicode(i.title) for i in self.networks)
 
             return 'TV Show'
@@ -1114,8 +1135,6 @@ class MediaItemEntity(BasicMediaEntity):
     def __init__(self):
         BasicMediaEntity.__init__(self)
         self.kind = 'media_item'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.albums = []
 
     def minimize(self):
         return BasicEntity.minimize(self, 'length')
@@ -1128,12 +1147,12 @@ class MediaItemEntity(BasicMediaEntity):
             return 'Movie'
 
         if self.isType('track'):
-            if len(self.artists) > 0:
+            if self.artists is not None and len(self.artists) > 0:
                 return 'Song by %s' % ', '.join(unicode(i.title) for i in self.artists)
             return 'Song'
 
         if self.isType('book'):
-            if len(self.authors) > 0:
+            if self.authors is not None and len(self.authors) > 0:
                 return '%s' % ', '.join(unicode(i.title) for i in self.authors)
             return 'Book'
 
@@ -1195,17 +1214,11 @@ class SoftwareEntity(BasicEntity):
     def __init__(self):
         BasicEntity.__init__(self)
         self.kind = 'software'
-        ### TEMP: Set all lists to lists by default (not None)
-        self.genres             = []
-        self.screenshots        = []
-        self.authors            = []
-        self.publishers         = []
-        self.supported_devices  = []
 
     @property
     def subtitle(self):
         if self.isType('app'):
-            if len(self.authors) > 0:
+            if self.authors is not None and len(self.authors) > 0:
                 return 'App (%s)' % ', '.join(unicode(i.title) for i in self.authors)
             return 'App'
 
@@ -1317,31 +1330,6 @@ class MenuSchema(Schema):
         cls.addNestedPropertyList('menus',                  SubmenuSchema)
 
 
-
-# ######## #
-# Comments #
-# ######## #
-
-class MentionSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('user_id',                          basestring)
-        cls.addPropertyList('indices',                      int)
-
-class Comment(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('comment_id',                       basestring)
-        cls.addNestedProperty('user',                       UserMini, required=True)
-        cls.addProperty('stamp_id',                         basestring, required=True)
-        cls.addProperty('restamp_id',                       basestring)
-        cls.addProperty('blurb',                            basestring, required=True)
-        cls.addProperty('blurb_formatted',                  basestring)
-        cls.addNestedPropertyList('mentions',               MentionSchema)
-        cls.addNestedProperty('timestamp',                  TimestampSchema)
-
-
 # ###### #
 # Stamps #
 # ###### #
@@ -1408,14 +1396,6 @@ class StampMini(Schema):
         self.timestamp  = StampTimestampSchema()
         self.stats      = StampStatsSchema()
 
-class StampPreviews(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('likes',              UserMini)
-        cls.addNestedPropertyList('todos',              UserMini)
-        cls.addNestedPropertyList('credits',            StampMini)
-        cls.addNestedPropertyList('comments',           Comment)
-
 class Stamp(Schema):
     @classmethod
     def setSchema(cls):
@@ -1429,7 +1409,7 @@ class Stamp(Schema):
         cls.addNestedProperty('attributes',         StampAttributesSchema)
         cls.addNestedPropertyList('badges',         Badge)
         cls.addProperty('via',                      basestring)
-        cls.addNestedProperty('previews',           StampPreviews)
+        cls.addNestedProperty('previews',           Previews)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1450,13 +1430,12 @@ class StampedByGroup(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('count',                    int)
-        cls.addNestedPropertyList('stamps',         Stamp)
+        cls.addNestedPropertyList('stamps',         StampPreview)
 
 class StampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('friends',            StampedByGroup)
-        cls.addNestedProperty('fof',                StampedByGroup)
         cls.addNestedProperty('all',                StampedByGroup)
 
 
@@ -1500,7 +1479,7 @@ class Todo(Schema):
         cls.addNestedProperty('stamp',              Stamp)
         cls.addNestedProperty('timestamp',          TimestampSchema)
         cls.addProperty('complete',                 bool)
-        cls.addProperty('previews',                 StampPreviews)
+        cls.addProperty('previews',                 Previews)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1735,6 +1714,7 @@ class GuideCacheItem(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('entity_id',                    basestring, required=True)
+        cls.addNestedPropertyList('stamps',             StampPreview)
         cls.addPropertyList('stamp_ids',                basestring)
         cls.addPropertyList('stamp_user_ids',           basestring)
         cls.addPropertyList('todo_user_ids',            basestring)

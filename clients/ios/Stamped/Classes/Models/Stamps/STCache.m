@@ -173,10 +173,18 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     return nil;
 }
 
+- (void)ensureDirExists {
+    NSFileManager* manager = [NSFileManager defaultManager];
+    if (![manager fileExistsAtPath:self.directory.path]) {
+        [manager createDirectoryAtPath:self.directory.path withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+}
+
 - (STCancellation*)saveWithAccelerator:(id<STCacheAccelerator>)accel 
                            andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
     STCancellation* cancellation = [STCancellation cancellation];
     [Util executeAsync:^{
+        [self ensureDirExists];
         BOOL success = NO;
         @synchronized (self) {
             NSURL* file = [self.directory URLByAppendingPathComponent:self.name];
@@ -197,6 +205,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
                         andCallback:(void (^)(NSDate* date, NSError* error, STCancellation* cancellation))block {
     STCancellation* cancellation = [STCancellation cancellation];
     [Util executeAsync:^{
+        [self ensureDirExists];
         BOOL success = NO;
         NSURL* file = [self.directory URLByAppendingPathComponent:self.name];
         NSDate* currentDate = nil;
@@ -272,6 +281,8 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 }
 
 - (void)handleRefreshIndexRequest:(NSInteger)index force:(BOOL)force {
+    if ([Util isOffline])
+        return;
     NSDate* startDate = nil;
     STCachePage* page = nil;
     BOOL stale = NO;

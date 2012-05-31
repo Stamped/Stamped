@@ -77,7 +77,7 @@ class _iTunesObject(object):
                 entity_field = 'song'
                 if self.isType('artist'):
                     entity_field = 'album,song'
-                results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field)['results']
+                results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field, limit=1000)['results']
                 m = {
                     'tracks':[],
                     'albums':[],
@@ -705,7 +705,11 @@ class iTunesSource(GenericSource):
                 except Exception:
                     pass
 
-            data = rawData['results'][0]
+            try:
+                data = rawData['results'][0]
+            except IndexError:
+                logs.warning('iTunes lookup failed(%s)' % itunesId)
+                raise
 
             dataWrapperType     = data['wrapperType'] if 'wrapperType' in data else None
             dataKind            = data['kind'] if 'kind' in data else None
@@ -717,7 +721,7 @@ class iTunesSource(GenericSource):
                     return iTunesMovie(data=data)
                 elif dataKind == 'song':
                     return iTunesTrack(data=data)
-            elif dataWrapperType == 'collection' and dataCollectionType == 'Album':
+            elif dataWrapperType == 'collection' and dataCollectionType in ['Album', 'Compilation']:
                 return iTunesAlbum(data=data)
             elif dataWrapperType == 'artist':
                 if dataArtistType == 'TV Show':

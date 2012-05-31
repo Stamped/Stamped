@@ -1120,12 +1120,13 @@ class StampedAPI(AStampedAPI):
             suggested = {
                 'mariobatali':      1, 
                 'nymag':            2,
-                'UrbanDaddy':       3,
-                'parislemon':       4, 
-                'michaelkors':      5, 
-                'petertravers':     6,
-                'rebeccaminkoff':   7, 
-                'austinchronicle':  8,
+                'TIME':             3,
+                'UrbanDaddy':       4,
+                'parislemon':       5, 
+                'michaelkors':      6, 
+                'petertravers':     7,
+                'rebeccaminkoff':   8, 
+                'austinchronicle':  9,
             }
             
             users = self.getUsers(None, suggested.keys(), authUserId)
@@ -1422,7 +1423,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        if self.__version > 0 and entity.isType('artist'):
+        if entity.isType('artist') and entity.albums is not None:
             albumIds = {}
             for album in entity.albums:
                 if album.entity_id is not None:
@@ -1625,39 +1626,59 @@ class StampedAPI(AStampedAPI):
         except StampedUnavailableError:
             stats = self.updateEntityStatsAsync(entityId)
 
+        userIds = {}
+
+        # Get popular stamp data
         popularUserIds = map(str, stats.popular_users[:limit])
         popularStamps = self._stampDB.getStampsFromUsersForEntity(popularUserIds, entityId)
         popularStamps.sort(key=lambda x: popularUserIds.index(x.user.user_id))
 
+        # Get friend stamp data
+        if authUserId is not None:
+            friendUserIds = self._friendshipDB.getFriends(authUserId)
+            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
+
+        # Build user list
+        for stamp in popularStamps:
+            userIds[stamp.user.user_id] = None
+        if authUserId is not None:
+            for stamp in friendStamps:
+                userIds[stamp.user.user_id] = None 
+
+        users = self._userDB.lookupUsers(userIds.keys())
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Populate popular stamps
         stampedby = StampedBy()
 
+        stampPreviewList = []
+        for stamp in popularStamps:
+            preview = StampPreview()
+            preview.stamp_id = stamp.stamp_id 
+            preview.user = userIds[stamp.user.user_id]
+            stampPreviewList.append(preview)
+
         allUsers            = StampedByGroup()
-        allUsers.stamps     = self._enrichStampObjects(popularStamps)
+        allUsers.stamps     = stampPreviewList
         allUsers.count      = stats.num_stamps
         stampedby.all       = allUsers
 
-        if authUserId is None:
-            return stampedby
+        # Populate friend stamps
+        if authUserId is not None:
+            stampPreviewList = []
+            for stamp in friendStamps:
+                preview = StampPreview()
+                preview.stamp_id = stamp.stamp_id 
+                preview.user = userIds[stamp.user.user_id]
+                stampPreviewList.append(preview)
 
-        friendUserIds       = self._friendshipDB.getFriends(authUserId)
-        friendStamps        = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
-
-        friendUsers         = StampedByGroup()
-        friendUsers.stamps  = self._enrichStampObjects(friendStamps[:limit])
-        friendUsers.count   = len(friendStamps)
-        stampedby.friends   = friendUsers 
-
-        fofUserIds          = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
-        fofOverlap          = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
-        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap[:limit], entityId)
-
-        fofUsers            = StampedByGroup()
-        fofUsers.stamps     = self._enrichStampObjects(fofStamps[:limit])
-        fofUsers.count      = len(fofStamps)
-        stampedby.fof       = fofUsers
+            friendUsers         = StampedByGroup()
+            friendUsers.stamps  = stampPreviewList
+            friendUsers.count   = min(len(friendStamps), 99)
+            stampedby.friends   = friendUsers
 
         return stampedby
-
 
     def updateEntityStatsAsync(self, entityId):
         numStamps = self._stampDB.countStampsForEntity(entityId)
@@ -1945,7 +1966,7 @@ class StampedAPI(AStampedAPI):
                     stamp.credit = credits
 
                 # Previews
-                previews = StampPreviews()
+                previews = Previews()
                 for stat in stats:
                     if str(stat.stamp_id) == str(stamp.stamp_id):
                         break 
@@ -2001,13 +2022,14 @@ class StampedAPI(AStampedAPI):
                         for i in stat.preview_credits[:previewLength]:
                             try:
                                 credit = underlyingStampIds[str(i)]
-                                credit.user = userIds[str(credit.user.user_id)]
-                                credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                creditPreviews.append(credit.minimize())
+                                stampPreview = StampPreview()
+                                stampPreview.user = userIds[str(credit.user.user_id)]
+                                stampPreview.stamp_id = i
+                                creditPreviews.append(stampPreview)
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
-                                logs.debug("Stamp: %s" % stamp)
+                                logs.debug("Stamp preview: %s" % stampPreview)
                                 continue
                     previews.credits = creditPreviews
 
@@ -3293,7 +3315,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             if stamp.stamp_id in commentPreviews:
                 if stamp.previews is None:
-                    stamp.previews = StampPreviews()
+                    stamp.previews = Previews()
                 stamp.previews.comments = commentPreviews[stamp.stamp_id]
             
             stamps.append(stamp)
@@ -3477,9 +3499,9 @@ class StampedAPI(AStampedAPI):
 
                 items.append(item)
                 entityIds[item.entity_id] = None
-                if item.stamp_user_ids is not None:
-                    for userId in item.stamp_user_ids:
-                        userIds[userId] = None 
+                if item.stamps is not None:
+                    for stampPreview in item.stamps:
+                        userIds[stampPreview.user.user_id] = None 
                 if item.todo_user_ids is not None:
                     for userId in item.todo_user_ids:
                         userIds[userId] = None
@@ -3512,12 +3534,16 @@ class StampedAPI(AStampedAPI):
         result = []
         for item in items:
             entity = entityIds[item.entity_id]
-            previews = EntityPreviewsSchema()
-            if item.stamp_user_ids is not None:
-                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
+            previews = Previews()
+            if item.stamps is not None:
+                stamps = []
+                for stampPreview in item.stamps:
+                    stampPreview.user = userIds[stampPreview.user.user_id]
+                    stamps.append(stampPreview)
+                previews.stamps = stamps
             if item.todo_user_ids is not None:
                 previews.todos = [ userIds[x] for x in item.todo_user_ids ]
-            if previews.stamp_users is not None or previews.todos is not None:
+            if previews.stamps is not None or previews.todos is not None:
                 entity.previews = previews 
             result.append(entity)
 
@@ -3637,8 +3663,16 @@ class StampedAPI(AStampedAPI):
                 item.entity_id = result[0]
                 item.tags = result[2]
                 if len(stampMap[result[0]]) > 0:
-                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
-                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
+                    preview = []
+                    for stamp in stampMap[result[0]]:
+                        stampPreview = StampPreview()
+                        stampPreview.stamp_id = stamp.stamp_id 
+                        userPreview = UserMini()
+                        userPreview.user_id = stamp.user.user_id
+                        stampPreview.user = userPreview
+                        preview.append(stampPreview)
+                    if len(preview) > 0:
+                        item.stamps = preview
                 cache.append(item)
             setattr(guide, section, cache)
 
@@ -3682,7 +3716,7 @@ class StampedAPI(AStampedAPI):
 
         previews = None
         if friendIds is not None:
-            previews = StampPreviews()
+            previews = Previews()
 
             # TODO: We may want to optimize how we pull in followers' todos by adding a new ref collection as we do
             #  for likes on stamps.
@@ -4270,7 +4304,10 @@ class StampedAPI(AStampedAPI):
             successor_id = tombstoneId
             successor    = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
-            
+
+            # TODO: Because we create a new FullResolveContainer() here instead of using self.__full_resolve, we are not
+            # reading from or writing to  the joint history about what sources have failed recently and are still
+            # cooling down.
             merger = FullResolveContainer.FullResolveContainer()
             merger.addSource(EntitySource(entity, merger.groups))
             successor_decorations = {}
@@ -4318,6 +4355,17 @@ class StampedAPI(AStampedAPI):
     def _resolveEntityLinks(self, entity):
         
         def _resolveStub(stub, sources):
+            """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
+
+            Tries to fast resolve Stamped DB using existing third-party source IDs.
+            Failing that (for one source at a time, not for all sources) tries to use standard resolution against
+                StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
+                falling back?)
+            Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
+                if there were any.
+            If none of this works, throws a KeyError.
+            """
+
             source          = None
             source_id       = None
             entity_id       = None
@@ -4375,6 +4423,10 @@ class StampedAPI(AStampedAPI):
         def _resolveTracks(entity):
             trackList = []
             tracksModified = False
+
+            if entity.tracks is None:
+                return tracksModified 
+
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
@@ -4413,6 +4465,10 @@ class StampedAPI(AStampedAPI):
         def _resolveAlbums(entity):
             albumList = []
             albumsModified = False
+
+            if entity.albums is None:
+                return albumsModified 
+
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
@@ -4451,6 +4507,10 @@ class StampedAPI(AStampedAPI):
         def _resolveArtists(entity):
             artistList = []
             artistsModified = False
+
+            if entity.artists is None:
+                return albumsModified 
+
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
@@ -4489,16 +4549,17 @@ class StampedAPI(AStampedAPI):
 
         if entity.isType('artist') or entity.isType('track'):
             # Enrich albums instead
-            for albumItem in entity.albums:
-                try:
-                    albumItem, albumModified = _resolveStub(albumItem, musicSources)
-                    if albumItem.entity_id is not None:
-                        if albumItem.isType('album'):
-                            self.mergeEntityId(albumItem.entity_id)
-                    else:
-                        self.mergeEntity(albumItem)
-                except Exception as e:
-                    logs.warning('Failed to enrich album: %s' % e)
+            if entity.albums is not None:
+                for albumItem in entity.albums:
+                    try:
+                        albumItem, albumModified = _resolveStub(albumItem, musicSources)
+                        if albumItem.entity_id is not None:
+                            if albumItem.isType('album'):
+                                self.mergeEntityId(albumItem.entity_id)
+                        else:
+                            self.mergeEntity(albumItem)
+                    except Exception as e:
+                        logs.warning('Failed to enrich album: %s' % e)
 
         return modified
 

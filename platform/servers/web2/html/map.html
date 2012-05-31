@@ -9,12 +9,18 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
 {% endblock head %}
 
+{% block profile-header %}
+{% endblock profile-header %}
+
+{% block stamp_category_nav_bar %}
+{% endblock stamp_category_nav_bar %}
+
 {% block pre_profile_main_content %}
-    <div id="main-content" class="fixedwidth">
+    <div id="main-content" class="fullwidth">
 {% endblock pre_profile_main_content %}
 
 {% block profile_main_content %}
-    {% mustache_template "stamp-map" %}
+    {% handlebars_template "stamp-map" %}
 {% endblock profile_main_content %}
 
 {% block scripts %}

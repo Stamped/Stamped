@@ -169,10 +169,6 @@
                                                     <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
         />
                                                 {% endif %}
-                                                
-                                                {% if source.link %}
-                                                    <div class="link" title="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}" href="{{source.link}}" style="display: none;"></div>
-                                                {% endif %}
                                             </div>
                                         {% endfor %}
                                     </div>

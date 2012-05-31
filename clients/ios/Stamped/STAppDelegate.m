@@ -38,10 +38,9 @@
 #import "STImageCache.h"
 #import "STStampedAPI.h"
 #import "DDMenuController.h"
-#import "STWelcomeViewController.h"
+#import "STMenuController.h"
 #import "STIWantToViewController.h"
 #import "STSharedCaches.h"
-#import "EntityViewController.h"
 
 #import "STCreateStampViewController.h"
 
@@ -112,7 +111,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:inboxController];
     _navigationController = [navController retain];
-    DDMenuController *menuController = [[DDMenuController alloc] initWithRootViewController:navController];
+    STMenuController *menuController = [[STMenuController alloc] initWithRootViewController:navController];
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
     self.menuController = menuController;
@@ -126,18 +125,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
 
-    /*
-    EntityViewController *entity = [[EntityViewController alloc] init];
-    [menuController setRootController:entity animated:NO];
-    [entity release];
-    */
-     
-    /*
-     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
-     [menuController.view addSubview:welcomeController.view];
-     welcomeController.view.frame = menuController.view.bounds;
-     [welcomeController animateIn];
-     */
     //[[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
     
     
@@ -145,6 +132,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     grid_.hidden = YES;
     [self.window addSubview:grid_];
     STLog(@"Finished Loading application");
+    [Util executeAsync:^{
+        [Util removeOldCacheDirectories];
+    }];
     return YES;
 }
 
@@ -422,9 +412,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Light" size:35] forKey:@"UIFont.stampedTitleLightFont" inSection:@"UIFont"];
     
     CGFloat fontSize = 12;
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
     
     //UIColor
     

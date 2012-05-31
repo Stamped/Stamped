@@ -182,8 +182,7 @@
         
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
         label.textColor = [UIColor colorWithRed:0.204f green:0.447f blue:0.863f alpha:1.0f];
-        //label.font = [UIFont fontWithName:@"" size:12];
-        label.font = [UIFont boldSystemFontOfSize:11];
+        label.font = [UIFont italicSystemFontOfSize:11];
         label.backgroundColor = [UIColor whiteColor];
         label.text = @"Swipe to continue";
         [self addSubview:label];

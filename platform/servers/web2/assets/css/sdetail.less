@@ -89,29 +89,32 @@
             }
             
             .entity-actions {
+                
+                @angle: 90deg;
+                @c0: #f2f2f2;
+                @c1: #fff;
+                
+                .linear-gradient2(@angle, @c0, @c1);
+                
                 .action {
                     .entity-padding();
                     
                     border: 1px solid #f2f2f2;
                     border-bottom: 1px solid ##dbdbdb;
                     
-                    @angle: 90deg;
-                    @c0: #f2f2f2;
-                    @c1: #fff;
-                    
-                    .linear-gradient2(@angle, @c0, @c1);
-                    
                     &:hover, &:active {
+                        background-color: @text1;
+                        color: #fff;
                         .rounded(4px);
                     }
                     
-                    &:hover {
+                    /*&:hover {
                         .linear-gradient2(@angle, darken(@c0, 15%), @c1);
                     }
                     
                     &:active {
                         .linear-gradient2(@angle, darken(@c0, 25%), @c1);
-                    }
+                    }*/
                     
                     .lhs {
                         float: left;
@@ -468,7 +471,7 @@
 
 
 .entity-menu {
-    max-height: 500px;
+    max-height: 480px;
     overflow-y: scroll;
     text-align: center;
     

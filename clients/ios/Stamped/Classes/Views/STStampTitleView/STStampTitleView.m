@@ -74,7 +74,7 @@
     
     [self clearLayout];
     
-    CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 35, NULL);
+    //CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 35, NULL);
 
     NSAttributedString *string = [[NSAttributedString alloc] initWithString:_title];
     _framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);
