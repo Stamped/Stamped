@@ -44,7 +44,7 @@
         
         UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 50.0f, self.bounds.size.width, self.bounds.size.height - 50.0f)];
         [self addSubview:container];
-        [container release];
+
         
         UIImage *image = [UIImage imageNamed:@"stamp_color_slider_hud_bg.png"];
         UIImageView *hud = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
