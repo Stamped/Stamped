@@ -1626,6 +1626,9 @@ class StampedAPI(AStampedAPI):
 
         stampedby = StampedBy()
 
+        ### TEMP
+        return stampedBy
+
         allUsers            = StampedByGroup()
         allUsers.stamps     = self._enrichStampObjects(popularStamps)
         allUsers.count      = stats.num_stamps
