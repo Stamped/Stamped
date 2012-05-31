@@ -869,18 +869,19 @@ class HTTPEndpointResponse(Schema):
 
 def _addImages(dest, images):
     newImages = []
-    for image in images:
-        if len(image.sizes) == 0:
-            continue
-        newimg = HTTPImageSchema()
-        sizes = []
-        for size in image.sizes:
-            if size.url is not None:
-                newsize = HTTPImageSizeSchema()
-                newsize.url = _cleanImageURL(size.url)
-                sizes.append(newsize)
-        newimg.sizes = sizes
-        newImages.append(newimg)
+    if images is not None:
+        for image in images:
+            if len(image.sizes) == 0:
+                continue
+            newimg = HTTPImageSchema()
+            sizes = []
+            for size in image.sizes:
+                if size.url is not None:
+                    newsize = HTTPImageSizeSchema()
+                    newsize.url = _cleanImageURL(size.url)
+                    sizes.append(newsize)
+            newimg.sizes = sizes
+            newImages.append(newimg)
 
     dest.images = newImages
 
