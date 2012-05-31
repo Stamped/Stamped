@@ -93,10 +93,10 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     
     @lazyProperty
     def cast(self):
-        if self.data.cast is not None:
-            return map(lambda x: { 'name' : x.title }, self.data.cast)
-        return []
-    
+        if self.data.cast is None:
+            return []
+        return map(lambda x: { 'name' : x.title }, self.data.cast)
+
     @lazyProperty
     def directors(self):
         return []
@@ -111,6 +111,8 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     
     @lazyProperty
     def networks(self):
+        if self.data.networks is None:
+            return []
         return map(lambda x: { 'name' : x.title }, self.data.networks)
     
     @lazyProperty 
