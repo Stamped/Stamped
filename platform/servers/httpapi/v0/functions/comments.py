@@ -27,7 +27,7 @@ def remove(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPCommentSlice, conversion=HTTPCommentSlice.exportCommentSlice)
 @require_http_methods(["GET"])
-def show(request, authUserId, schema, **kwargs):
+def list(request, authUserId, schema, **kwargs):
     comments = stampedAPI.getComments(schema, authUserId)
     results  = []
     
