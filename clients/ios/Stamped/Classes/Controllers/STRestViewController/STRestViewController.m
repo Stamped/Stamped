@@ -61,12 +61,20 @@
     }
     
     if (!_headerRefreshView) {
+        
+        UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0.0f, -300.0f, self.view.bounds.size.width, 241.0f)];
+        header.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        header.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
+        [self.tableView addSubview:header];
+        [header release];
+        
         EGORefreshTableHeaderView *view = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, -60.0f, self.tableView.bounds.size.width, 60.0f)];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         view.delegate = (id<EGORefreshTableHeaderDelegate>)self;
         [self.tableView addSubview:view];
         _headerRefreshView = view;
         [view release];
+        
     }
     
     if (!_footerRefreshView && _restFlags.dataSourceHasMoreData) {
@@ -225,18 +233,32 @@
 - (void)setShowsSearchBar:(BOOL)showsSearchBar {
     _showsSearchBar = showsSearchBar;
     
-    if (!_searchView) {
+    if (_showsSearchBar) {
         
-        STSearchView *view = [[STSearchView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 52)];
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        view.delegate = (id<STSearchViewDelegate>)self;
-        self.tableView.tableHeaderView = view;
-        _searchView = view;
-        [view release];
-
-        self.tableView.contentOffset = CGPointMake(0.0f, -140.0f);
-
+        if (!_searchView) {
+            
+            STSearchView *view = [[STSearchView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 52)];
+            view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+            view.delegate = (id<STSearchViewDelegate>)self;
+            self.tableView.tableHeaderView = view;
+            _searchView = view;
+            [view release];
+            
+            self.tableView.contentOffset = CGPointMake(0.0f, -140.0f);
+            
+        }
+        
+    } else {
+        
+        if (_searchView) {
+            _searchView = nil;
+            self.tableView.tableHeaderView = nil;
+        }
+        
     }
+    
+    
+    _headerRefreshView.showingSearch = _showsSearchBar;
     
 }
 

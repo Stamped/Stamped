@@ -21,7 +21,7 @@
 
 - (id)initWithColors:(NSArray*)colors {
     if ((self = [super init])) {
-        
+        _colors = [colors retain];
     }
     return self;
 }
@@ -101,7 +101,7 @@
 - (void)done:(id)sender {
     
     if ([(id)delegate respondsToSelector:@selector(stampCustomizeViewController:doneWithColors:)]) {
-        [self.delegate stampCustomizeViewController:self doneWithColors:nil];
+        [self.delegate stampCustomizeViewController:self doneWithColors:_colors];
     }
     
 }

@@ -10,12 +10,13 @@
 
 @class STAvatarView;
 @interface SocialSignupHeaderView : UIView {
-    STAvatarView *_userImageView;
     UIImageView *_stampView;
-    UILabel *_nameLabel;
-    UILabel *_locationLabel;
-    UILabel *_bioLabel;
 }
+
+@property(nonatomic,retain,readonly) STAvatarView *imageView;
+@property(nonatomic,retain,readonly) UILabel *titleLabel;
+@property(nonatomic,retain,readonly) UILabel *subTitleLabel;
+@property(nonatomic,retain,readonly) UILabel *detailLabel;
 
 - (void)setStampColors:(NSArray*)colors;
 

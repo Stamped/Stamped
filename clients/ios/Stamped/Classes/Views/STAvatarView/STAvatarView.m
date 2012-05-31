@@ -50,7 +50,7 @@
     if (_imageURL && [_imageURL isEqual:imageURL]) return;
     [_imageURL release], _imageURL=nil;
     _imageURL = [imageURL retain];
-    
+        
     self.imageView.image = nil;
     [[ImageLoader sharedLoader] imageForURL:_imageURL completion:^(UIImage *image, NSURL *url) {
         if ([_imageURL isEqual:url]) {

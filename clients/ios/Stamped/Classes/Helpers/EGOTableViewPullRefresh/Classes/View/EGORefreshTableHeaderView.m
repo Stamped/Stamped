@@ -25,94 +25,9 @@
 //
 
 #import "EGORefreshTableHeaderView.h"
-//#import "GiftureRefreshPatternView.h"
 
-#define TEXT_COLOR	 [UIColor colorWithRed:87.0/255.0 green:108.0/255.0 blue:137.0/255.0 alpha:1.0]
-#define FLIP_ANIMATION_DURATION 0.18f
+#define kFlipAnimationDuration 0.18f
 #define kPullRefreshOffset 50.0f
-
-@interface EGORefreshShadowView : UIView
-@end
-@implementation EGORefreshShadowView
-
-- (id)initWithFrame:(CGRect)frame {
-    if ((self = [super initWithFrame:frame])) {
-        self.backgroundColor = [UIColor clearColor];
-    }
-    return self;
-}
-
-- (void)drawRect:(CGRect)rect {
-    
-    [[UIColor grayColor] setStroke];
-    
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    CGContextMoveToPoint(ctx, 0.0f, -3.0f);
-    CGContextAddQuadCurveToPoint(ctx, self.bounds.size.width/2, self.bounds.size.height-1.0f, self.bounds.size.width, -3.0f);
-    
-    CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 2.0f, [UIColor grayColor].CGColor);
-    CGContextStrokePath(ctx);
-    
-    CGContextSetShadow(ctx, CGSizeMake(0.0f, 0.0f), 0.0f);
-    [[UIColor colorWithWhite:0.7f alpha:0.6] setStroke];
-    CGContextMoveToPoint(ctx, 0.0f, 0.0f);
-    CGContextAddLineToPoint(ctx, rect.size.width, 0.0f);
-    CGContextStrokePath(ctx);
-
-}
-
-@end
-
-
-@interface EGORefreshArrowView : UIView {
-@private
-    CALayer  *_pullArrow;
-}
-@property(nonatomic,assign,getter=isShowing) BOOL showing;
-@end
-
-@implementation EGORefreshArrowView
-
-@synthesize showing=showing;
-
-- (id)initWithFrame:(CGRect)frame {
-    if ((self = [super initWithFrame:frame])) {
-                
-        self.clipsToBounds = YES;
-
-        
-        UIImage *image = [UIImage imageNamed:@"ft_pull_arrow.png"];
-        CALayer *layer = [CALayer layer];
-        layer.contentsGravity = kCAGravityCenter;
-        layer.contentsScale = [[UIScreen mainScreen] scale];
-        layer.contents = (id)image.CGImage;
-        layer.frame = CGRectMake(floorf((self.bounds.size.width/2) - (100/2)), 0.0f, 100, self.bounds.size.height);
-        [self.layer addSublayer:layer];
-        _pullArrow = layer;
-
-    }
-    
-    return self;
-}
-
-- (void)show:(BOOL)show animated:(BOOL)animated {
-        
-    [CATransaction begin];
-    [CATransaction setAnimationDuration:0.2f];
-    
-    _pullArrow.contents = show ? (id)[UIImage imageNamed:@"ft_release_arrow.png"].CGImage : (id)[UIImage imageNamed:@"ft_pull_arrow.png"].CGImage;
-    if (show) {
-        _pullArrow.transform =  CATransform3DMakeRotation((M_PI/180) * 179.99999f, 0, 0, 1);
-    } else {
-        _pullArrow.transform = CATransform3DIdentity;
-    }
-    
-    [CATransaction commit];
-    
-}
-
-@end
-
 
 @interface EGORefreshTableHeaderView (Private)
 - (void)setState:(EGOPullRefreshState)aState;
@@ -122,37 +37,57 @@
 
 @synthesize delegate=_delegate;
 @synthesize tableInset=_tableInset;
+@synthesize showingSearch=_showingSearch;
 
 - (id)initWithFrame:(CGRect)frame {
     
     if (self = [super initWithFrame:frame]) {
         
-        _patternView = [[UIView alloc] initWithFrame:self.bounds];
-        [self addSubview:_patternView];
-        
         self.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        self.tableInset = UIEdgeInsetsZero;
+
+        UIImage *image = [UIImage imageNamed:@"shelf_background.png"];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self addSubview:imageView];
+        [imageView release];
+        _shelftView = imageView;
+
+        CGRect frame = imageView.frame;
+        frame.origin.y = (self.bounds.size.height - frame.size.height);
+        frame.size.width = self.bounds.size.width;
+        imageView.frame = frame;
         
         UIFont *font = [UIFont boldSystemFontOfSize:12];
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake((self.bounds.size.width/2), ((self.bounds.size.height-font.lineHeight)/2), 0.0f, 0.0f)];
         label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-        label.backgroundColor = self.backgroundColor;
-        label.textColor = [UIColor colorWithRed:0.449f green:0.449f blue:0.449f alpha:1.0f];
+        label.backgroundColor = [UIColor clearColor];
+        label.textColor = [UIColor colorWithRed:0.600f green:0.600f blue:0.600f alpha:1.0f];
         label.shadowOffset = CGSizeMake(0.0f, 1.0f);
         label.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.6f];
         label.font = font;
-        [_patternView insertSubview:label atIndex:1];
+        [self addSubview:label];
         _titleLabel = label;
         [label release];
 		
-		self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         activityView.frame = CGRectMake(floorf((self.bounds.size.width/2) - 7.0f), floorf((self.bounds.size.height/2) - 7.0f), 14.0f, 14.0f);
         activityView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 		[self addSubview:activityView];
 		_activityView = activityView;
         [activityView release];
-		
-        self.tableInset = UIEdgeInsetsZero;
+        
+        imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow.png"]];
+        [self addSubview:imageView];
+        _arrowView = imageView;
+        
+        frame = imageView.frame;
+        frame.origin.y = 6.0f;
+        frame.origin.x = 60.0f;
+        imageView.frame = frame;
+        [imageView release];
+
         _triggerOffset = -(kPullRefreshOffset+5);
 		[self setState:EGOOPullRefreshNormal];
                 
@@ -161,20 +96,16 @@
     return self;	
 }
 
+- (void)dealloc {
+	
+	_delegate=nil;
+	_activityView = nil;
+	_arrowView = nil;
+    [super dealloc];
+}
+
 
 #pragma mark - Setters
-
-- (void)setWhiteStyle {
-    
-    //[_patternView setStyle:GiftureRefreshBumpStyleWhite];
-    
-}
-
-- (void)setBlackStyle {
-    
-    //[_patternView setStyle:GiftureRefreshBumpStyleBlack];
-    
-}
 
 - (void)setTableInset:(UIEdgeInsets)tableInset {
     _tableInset = tableInset;
@@ -183,7 +114,8 @@
 
 - (void)showActivity:(BOOL)show {
     
-    return;
+    _arrowView.hidden = show;
+
     if (show) {
         
         if (![_activityView isAnimating]) {
@@ -214,31 +146,44 @@
 
 - (void)setState:(EGOPullRefreshState)aState {
 	        
+    
+    
 	switch (aState) {
-		case EGOOPullRefreshPulling:
+		case EGOOPullRefreshPulling: {
+            
+            CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+            animation.fromValue = [_arrowView.layer valueForKeyPath:@"transform.rotation.z"];
+            animation.toValue = [NSNumber numberWithFloat:(M_PI / 180.0) * 180.0f];
+            animation.duration = kFlipAnimationDuration;
+            [_arrowView.layer addAnimation:animation forKey:nil];
+            [_arrowView.layer setValue:[NSNumber numberWithFloat:(M_PI / 180.0) * 180.0f] forKeyPath:@"transform.rotation.z"];
 
             [_titleLabel setText:NSLocalizedString(@"Release to refresh...", nil)];
-            //[_patternView setLoading:NO];
 
-			break;
+        } break;
 		case EGOOPullRefreshNormal:
+            
+            if (_state == EGOOPullRefreshPulling) {
+                
+                CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+                animation.fromValue = [_arrowView.layer valueForKeyPath:@"transform.rotation.z"];
+                animation.toValue = [NSNumber numberWithFloat:0.0f];
+                animation.duration = kFlipAnimationDuration;
+                [_arrowView.layer addAnimation:animation forKey:nil];
+                [_arrowView.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"transform.rotation.z"];
+                
+            }
 			
              [_titleLabel setText:NSLocalizedString(@"Pull down to refresh...", nil)];
             _titleLabel.hidden = NO;
             [self showActivity:NO];
-           // [_patternView setLoading:NO];	
             
 			break;
 		case EGOOPullRefreshLoading:
 			
             [_titleLabel setText:NSLocalizedString(@"Refreshing...", nil)];
-           // [_patternView setLoading:YES];
-
-            /*
+            _titleLabel.hidden = YES;
             [self showActivity:YES];
-            if (!_titleLabel.hidden) {
-                _titleLabel.hidden = YES;
-            }*/
 			
 			break;
 		default:
@@ -249,7 +194,6 @@
     CGRect frame = _titleLabel.frame;
     frame.origin.x = (self.bounds.size.width-frame.size.width)/2;
     _titleLabel.frame = frame;
-    //_titleLabel.frame = CGRectMake((self.bounds.size.width-_titleLabel.frame.size.width)/2, self.bounds.size.height-32.0f, _titleLabel.frame.size.width, _titleLabel.frame.size.height);
 	_state = aState;
     
 }
@@ -258,48 +202,43 @@
     
     _delegate = delegate;
     
-    _delegateRefreshTableHeaderDidTriggerRefresh = [(id)_delegate respondsToSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)];
-    _delegateRefreshTableHeaderDidTriggerRefresh = [(id)_delegate respondsToSelector:@selector(egoRefreshTableHeaderDataSourceIsLoading:)];
-    _delegateDataSourceIsEmpty = [(id)_delegate respondsToSelector:@selector(dataSourceIsEmpty)];
+    _refreshFlags.delegateRefreshTableHeaderDidTriggerRefresh = [(id)_delegate respondsToSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)];
+    _refreshFlags.delegateRefreshTableHeaderDidTriggerRefresh = [(id)_delegate respondsToSelector:@selector(egoRefreshTableHeaderDataSourceIsLoading:)];
+    _refreshFlags.delegateDataSourceIsEmpty = [(id)_delegate respondsToSelector:@selector(dataSourceIsEmpty)];
+    
+}
+
+- (void)setShowingSearch:(BOOL)showingSearch {
+    _showingSearch=showingSearch;
+    
+    
+    UIImage *image = [UIImage imageNamed:_showingSearch ? @"shelf_search_bg.png" : @"shelf_background.png"];
+    _shelftView.image = [image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0];
+    
+    CGRect frame = _shelftView.frame;
+    frame.origin.y = (self.bounds.size.height-frame.size.height);
+    frame.size.width = self.bounds.size.width;
+    _shelftView.frame = frame;
     
 }
 
 
 #pragma mark - ScrollView Methods
 
-- (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView {	
-
-    /*
-    if (_backgroundView) {
-        CGRect frame = _backgroundView.frame;
-        
-        if (scrollView.contentOffset.y < 0 && (scrollView.contentOffset.y*-1 > self.bounds.size.height)) {
-            frame.origin.y = (self.bounds.size.height-(scrollView.contentOffset.y*-1));
-        } else {
-            frame.origin.y = 0.0f;
-        }
-        
-        _backgroundView.frame = frame;
-    }
-     */
-    
+- (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView {
     
 	if (_state == EGOOPullRefreshLoading) {
 		
 		CGFloat offset = MAX(scrollView.contentOffset.y * -1, 0);
 		offset = MIN(offset, _tableInset.top + kPullRefreshOffset);
 		scrollView.contentInset = UIEdgeInsetsMake(offset, 0.0f, 0.0f, 0.0f);
-        
-        CGRect frame = _patternView.frame;
-        frame.size.height = MAX(10, ceilf((scrollView.contentOffset.y*-1)));
-        frame.origin.y = ceilf(self.bounds.size.height - frame.size.height);
-        _patternView.frame = frame;
+
         _titleLabel.alpha = (((scrollView.contentOffset.y*-1)-16)/30);
 		
 	} else if (scrollView.isDragging) {
 		
 		BOOL _loading = NO;
-        if (_delegateRefreshTableHeaderDataSourceIsLoading) {
+        if (_refreshFlags.delegateRefreshTableHeaderDataSourceIsLoading) {
             _loading = [_delegate egoRefreshTableHeaderDataSourceIsLoading:self];
         }
 		
@@ -317,10 +256,6 @@
     
     if ((scrollView.contentOffset.y < 0.0f && [scrollView isDragging]) || [scrollView isDecelerating]) {
 
-        CGRect frame = _patternView.frame;
-        frame.size.height = MAX(10, ceilf((scrollView.contentOffset.y*-1)));
-        frame.origin.y = ceilf(self.bounds.size.height - frame.size.height);
-        _patternView.frame = frame;
         _titleLabel.alpha = (((scrollView.contentOffset.y*-1)-16)/30);
 
     }
@@ -330,13 +265,13 @@
 - (void)egoRefreshScrollViewDidEndDragging:(UIScrollView *)scrollView {
     
 	BOOL _loading = NO;
-    if (_delegateRefreshTableHeaderDataSourceIsLoading) {
+    if (_refreshFlags.delegateRefreshTableHeaderDataSourceIsLoading) {
         _loading = [_delegate egoRefreshTableHeaderDataSourceIsLoading:self];
     }
     
 	if (scrollView.contentOffset.y <= _triggerOffset && !_loading) {
 		
-        if (_delegateRefreshTableHeaderDidTriggerRefresh) {
+        if (_refreshFlags.delegateRefreshTableHeaderDidTriggerRefresh) {
             [_delegate egoRefreshTableHeaderDidTriggerRefresh:self];
         }
 		
@@ -363,30 +298,19 @@
     BOOL _empty = NO;
 	BOOL _loading = NO;
     
-    if (_delegateRefreshTableHeaderDataSourceIsLoading) {
+    if (_refreshFlags.delegateRefreshTableHeaderDataSourceIsLoading) {
         _loading = [_delegate egoRefreshTableHeaderDataSourceIsLoading:self];
     }
-    if (_delegateDataSourceIsEmpty) {
+    if (_refreshFlags.delegateDataSourceIsEmpty) {
         _empty = [_delegate dataSourceIsEmpty];
     }
     
     if (_loading && (_state != EGOOPullRefreshLoading) && !_empty) {
         [self setState:EGOOPullRefreshLoading];
-    } else if ((_state != EGOOPullRefreshNormal) && !_loading) {// && (scrollView.contentOffset.y >= 0.0f)) {
+    } else if ((_state != EGOOPullRefreshNormal) && !_loading) {
         [self setState:EGOOPullRefreshNormal];
     }
 	
-}
-
-
-#pragma mark - Dealloc
-
-- (void)dealloc {
-	
-	_delegate=nil;
-	_activityView = nil;
-	_arrowView = nil;
-    [super dealloc];
 }
 
 

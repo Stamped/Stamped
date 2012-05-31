@@ -41,6 +41,8 @@
 #import "STMenuController.h"
 #import "STIWantToViewController.h"
 #import "STSharedCaches.h"
+#import "STTwitter.h"
+#import "STFacebook.h"
 
 #import "STCreateStampViewController.h"
 
@@ -148,7 +150,14 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    return NO;
+    
+    if ([[url host] isEqualToString:@"twitter"] && [url query].length > 0) {
+        [[STTwitter sharedInstance] handleOpenURL:url];
+	}  else if ([[url description] hasPrefix:@"fb297022226980395"]) {
+        [[[STFacebook sharedInstance] facebook] handleOpenURL:url];
+	}
+    
+    return YES;
 }
 
 - (void)application:(UIApplication *)application willChangeStatusBarFrame:(CGRect)newStatusBarFrame {

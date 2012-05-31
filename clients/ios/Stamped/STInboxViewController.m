@@ -111,15 +111,8 @@
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self.tableView reloadData];
-    
-    
-    UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0.0f, -300.0f, self.view.bounds.size.width, 241.0f)];
-    header.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    header.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-    [self.tableView addSubview:header];
-    [header release];
-
     [self updateCache];
+    
 }
 
 - (void)viewDidUnload {
