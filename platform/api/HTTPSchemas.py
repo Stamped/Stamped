@@ -867,8 +867,9 @@ class HTTPStampPreview(Schema):
         cls.addNestedProperty('user',                       HTTPUserMini)
 
     def importStampPreview(self, stampPreview):
-        self.stamp_id = stampPreview.stamp_id 
-        self.user = HTTPUser().importUserMini(stampPreview.user)
+        logs.info("STAMP PREVIEW: %s" % stampPreview)
+        self.stamp_id = stampPreview.stamp_id
+        self.user = HTTPUserMini().importUserMini(stampPreview.user)
         return self 
 
 class HTTPPreviews(Schema):
