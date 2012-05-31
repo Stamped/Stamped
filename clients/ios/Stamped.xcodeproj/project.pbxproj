@@ -1523,10 +1523,14 @@
 		630426AE1566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
 		630426AF1566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
 		630426B01566CB07006907E5 /* STHybridCacheSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 630426AD1566CB07006907E5 /* STHybridCacheSource.m */; };
-		63145D4C156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
-		63145D4D156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
-		63145D4E156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
-		63145D4F156AEACF0027EC92 /* STStampMini.m in Sources */ = {isa = PBXBuildFile; fileRef = 63145D4B156AEACE0027EC92 /* STStampMini.m */; };
+		631563EF1577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F01577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F11577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F21577F03D00849CB2 /* STActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563EE1577F03D00849CB2 /* STActionView.m */; };
+		631563F61577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
+		631563F71577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
+		631563F81577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
+		631563F91577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
 		63159A861544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A871544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A8A1544E95A008E75DD /* STRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A891544E959008E75DD /* STRightMenuViewController.m */; };
@@ -4663,8 +4667,11 @@
 		630426A81566A5EA006907E5 /* STPersistentCacheSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPersistentCacheSource.m; sourceTree = "<group>"; };
 		630426AC1566CB06006907E5 /* STHybridCacheSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHybridCacheSource.h; sourceTree = "<group>"; };
 		630426AD1566CB07006907E5 /* STHybridCacheSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHybridCacheSource.m; sourceTree = "<group>"; };
-		63145D4A156AEACE0027EC92 /* STStampMini.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampMini.h; sourceTree = "<group>"; };
-		63145D4B156AEACE0027EC92 /* STStampMini.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampMini.m; sourceTree = "<group>"; };
+		631563ED1577F03D00849CB2 /* STActionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionView.h; sourceTree = "<group>"; };
+		631563EE1577F03D00849CB2 /* STActionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActionView.m; sourceTree = "<group>"; };
+		631563F31577F22100849CB2 /* STStampPreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampPreview.h; sourceTree = "<group>"; };
+		631563F41577F27D00849CB2 /* STSimpleStampPreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleStampPreview.h; sourceTree = "<group>"; };
+		631563F51577F27D00849CB2 /* STSimpleStampPreview.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleStampPreview.m; sourceTree = "<group>"; };
 		63159A841544A9A5008E75DD /* STActivityCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityCell.h; sourceTree = "<group>"; };
 		63159A851544A9A5008E75DD /* STActivityCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActivityCell.m; sourceTree = "<group>"; };
 		63159A881544E959008E75DD /* STRightMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRightMenuViewController.h; sourceTree = "<group>"; };
@@ -6703,6 +6710,8 @@
 				6323F10515250C8000BE408C /* STMenuPopUp.m */,
 				6323F1151526261400BE408C /* STPlayerPopUp.h */,
 				6323F1161526261A00BE408C /* STPlayerPopUp.m */,
+				631563ED1577F03D00849CB2 /* STActionView.h */,
+				631563EE1577F03D00849CB2 /* STActionView.m */,
 			);
 			name = "New Entity Detail";
 			sourceTree = "<group>";
@@ -6761,6 +6770,7 @@
 				63313531156C268C00BF9B8D /* STLoginResponse.h */,
 				633FB589156FEEA700D7D776 /* STEntityAutoCompleteResult.h */,
 				633FB6161571928C00D7D776 /* STDatum.h */,
+				631563F31577F22100849CB2 /* STStampPreview.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -6861,12 +6871,12 @@
 				637A183015595F7400148C0B /* STSimpleActivityCount.m */,
 				636273E6155AB0D7006AF7B8 /* STSimpleImageList.h */,
 				636273E7155AB0D7006AF7B8 /* STSimpleImageList.m */,
-				63145D4A156AEACE0027EC92 /* STStampMini.h */,
-				63145D4B156AEACE0027EC92 /* STStampMini.m */,
 				6331352B156C1DD300BF9B8D /* STSimpleTodoSource.h */,
 				6331352C156C1DD300BF9B8D /* STSimpleTodoSource.m */,
 				633FB58A156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.h */,
 				633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */,
+				631563F41577F27D00849CB2 /* STSimpleStampPreview.h */,
+				631563F51577F27D00849CB2 /* STSimpleStampPreview.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -12119,7 +12129,6 @@
 				030137AB15668DBE00B55B47 /* STTextPopoverView.m in Sources */,
 				030137B91566BD9200B55B47 /* WelcomePopoverView.m in Sources */,
 				030137BF1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
-				63145D4F156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A6156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CE156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E4156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -12155,6 +12164,8 @@
 				03E005F21576B6AA00CDFEFF /* STAvatarView.m in Sources */,
 				03E005FA1576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
 				03E006011576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
+				631563F21577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F91577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12433,7 +12444,6 @@
 				030137BE1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
 				630426AB1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
 				630426B01566CB07006907E5 /* STHybridCacheSource.m in Sources */,
-				63145D4E156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A5156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CD156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E3156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -12469,6 +12479,8 @@
 				03E005F11576B6AA00CDFEFF /* STAvatarView.m in Sources */,
 				03E005F91576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
 				03E006001576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
+				631563F11577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F81577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12746,7 +12758,6 @@
 				030137BD1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
 				630426AA1566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
 				630426AF1566CB07006907E5 /* STHybridCacheSource.m in Sources */,
-				63145D4D156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A4156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CC156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E2156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -12782,6 +12793,8 @@
 				03E005F01576B6AA00CDFEFF /* STAvatarView.m in Sources */,
 				03E005F81576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
 				03E005FF1576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
+				631563F01577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F71577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13071,7 +13084,6 @@
 				030137BC1566C1E800B55B47 /* STWelcomeViewController.m in Sources */,
 				630426A91566A5EB006907E5 /* STPersistentCacheSource.m in Sources */,
 				630426AE1566CB07006907E5 /* STHybridCacheSource.m in Sources */,
-				63145D4C156AEACF0027EC92 /* STStampMini.m in Sources */,
 				031527A3156AC353000C856F /* STNavigationButton.m in Sources */,
 				031527CB156AD13E000C856F /* STNavigationItem.m in Sources */,
 				031527E1156AD48A000C856F /* LeftMenuTableCell.m in Sources */,
@@ -13107,6 +13119,8 @@
 				03E005EF1576B6AA00CDFEFF /* STAvatarView.m in Sources */,
 				03E005F71576E2DC00CDFEFF /* StampCustomizeViewController.m in Sources */,
 				03E005FE1576E6D100CDFEFF /* StampColorPickerSliderView.m in Sources */,
+				631563EF1577F03D00849CB2 /* STActionView.m in Sources */,
+				631563F61577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

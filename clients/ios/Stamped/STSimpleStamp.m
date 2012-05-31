@@ -69,7 +69,16 @@
             
             _entity = [[decoder decodeObjectForKey:@"entity"] retain];
             _user = [[decoder decodeObjectForKey:@"user"] retain];
-            previews_ = [[decoder decodeObjectForKey:@"previews"] retain];
+            id<STPreviews> cachedPreviews = [[STStampedAPI sharedInstance] cachedPreviewsForStampID:stampID];
+            if (cachedPreviews) {
+                previews_ = [cachedPreviews retain];
+            }
+            else {
+                previews_ = [[decoder decodeObjectForKey:@"previews"] retain];
+                if (previews_) {
+                    [[STStampedAPI sharedInstance] cachePreviews:previews_ forStampID:stampID];
+                }
+            }
             _mentions = [[decoder decodeObjectForKey:@"mentions"] retain];
             _credits = [[decoder decodeObjectForKey:@"credits"] retain];
             _badges = [[decoder decodeObjectForKey:@"badges"] retain];
