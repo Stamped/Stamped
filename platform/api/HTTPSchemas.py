@@ -492,52 +492,58 @@ class HTTPAccountCheck(Schema):
     def setSchema(cls):
         cls.addProperty('login',              basestring, required=True)
 
+class HTTPRemoveLinkedAccountForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',             basestring, required=True)
+
+class HTTPLinkedAccount(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',             basestring, required=True)
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('screen_name',         basestring)
+        cls.addProperty('name',                basestring)
+        cls.addProperty('token',               basestring)
+        cls.addProperty('secret',              basestring)
+        cls.addProperty('token_expiration',    datetime)
+
+    def importLinkedAccount(self, linked):
+        self.dataImport(linked.dataExport(), overflow=True)
+        return self
+
+    def exportLinkedAccount(self):
+        linkedAccount = LinkedAccount().dataImport(self.dataExport(), overflow=True)
+        return linkedAccount
+
+
 class HTTPLinkedAccounts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('twitter_id',               basestring)
-        cls.addProperty('twitter_screen_name',      basestring)
-        cls.addProperty('twitter_key',              basestring)
-        cls.addProperty('twitter_secret',           basestring)
-        cls.addProperty('facebook_id',              basestring)
-        cls.addProperty('facebook_name',            basestring)
-        cls.addProperty('facebook_screen_name',     basestring)
-        cls.addProperty('facebook_token',           basestring)
-        cls.addProperty('netflix_user_id',          basestring)
-        cls.addProperty('netflix_token',            basestring)
-        cls.addProperty('netflix_secret',           basestring)
+        cls.addNestedProperty('twitter',            HTTPLinkedAccount)
+        cls.addNestedProperty('facebook',           HTTPLinkedAccount)
+        cls.addNestedProperty('netflix',            HTTPLinkedAccount)
+
+    def importLinkedAccounts(self, linked):
+        if linked.twitter is not None:
+            self.twitter = HTTPLinkedAccount().importLinkedAccount(linked.twitter)
+        if linked.facebook is not None:
+            self.facebook = HTTPLinkedAccount().importLinkedAccount(linked.facebook)
+        if linked.netflix is not None:
+            self.netflix = HTTPLinkedAccount().importLinkedAccount(linked.netflix)
+        return self
 
     def exportLinkedAccounts(self):
         schema = LinkedAccounts()
 
-        data = self.dataExport()
-
-        twitter = TwitterAccountSchema()
-        twitter.dataImport(data, overflow=True)
-
-        facebook = FacebookAccountSchema()
-        facebook.dataImport(data, overflow=True)
-
-        schema.dataImport(self.dataExport(), overflow=True)
-        schema.twitter = twitter 
-        schema.facebook = facebook
+        if self.twitter is not None:
+            schema.twitter = LinkedAccount().dataImport(self.twitter.dataExport(), overflow=True)
+        if self.facebook is not None:
+            schema.facebook = LinkedAccount().dataImport(self.facebook.dataExport(), overflow=True)
+        if self.twitter is not None:
+            schema.netflix = LinkedAccount().dataImport(self.netflix.dataExport(), overflow=True)
 
         return schema 
-
-    def exportTwitterAuthSchema(self):
-        schema = TwitterAuthSchema()
-        schema.dataImport(self.dataExport(), overflow=True)
-        return schema 
-
-    def exportFacebookAuthSchema(self):
-        schema = FacebookAuthSchema()
-        schema.dataImport(self.dataExport(), overflow=True)
-        return schema 
-
-    def exportNetflixAuthSchema(self):
-        schema = NetflixAuthSchema()
-        schema.dataImport(self.dataExport(), overflow=True)
-        return schema
 
 
 class HTTPAvailableLinkedAccounts(Schema):
@@ -867,7 +873,6 @@ class HTTPStampPreview(Schema):
         cls.addNestedProperty('user',                       HTTPUserMini)
 
     def importStampPreview(self, stampPreview):
-        logs.info("STAMP PREVIEW: %s" % stampPreview)
         self.stamp_id = stampPreview.stamp_id
         self.user = HTTPUserMini().importUserMini(stampPreview.user)
         return self 
@@ -984,12 +989,6 @@ class HTTPEntityPlaylist(Schema):
         cls.addNestedPropertyList('data',       HTTPEntityPlaylistItem, required=True)
         cls.addProperty('name',                 basestring)
 
-class HTTPEntityPreviewsSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addNestedPropertyList('stamp_users',            HTTPUserMini)
-        cls.addNestedPropertyList('todos',                  HTTPUserMini)
-
 class HTTPEntityStampedBy(Schema):
     @classmethod
     def setSchema(cls):
@@ -1042,7 +1041,7 @@ class HTTPEntity(Schema):
         cls.addProperty('caption',                      basestring)
         cls.addNestedPropertyList('images',             HTTPImageSchema)
         cls.addProperty('last_modified',                basestring)
-        cls.addNestedProperty('previews',               HTTPEntityPreviewsSchema)
+        cls.addNestedProperty('previews',               HTTPPreviews)
 
         # Location
         cls.addProperty('address',                      basestring)
@@ -1890,7 +1889,7 @@ class HTTPEntity(Schema):
         # Previews
 
         if entity.previews is not None:
-            previews = HTTPEntityPreviewsSchema()
+            previews = HTTPPreviews()
 
             if entity.previews.todos is not None:
                 users = []
@@ -1898,11 +1897,11 @@ class HTTPEntity(Schema):
                     users.append(HTTPUserMini().importUserMini(user))
                 previews.todos = users
             
-            if entity.previews.stamp_users is not None:
-                users = []
-                for user in entity.previews.stamp_users:
-                    users.append(HTTPUserMini().importUserMini(user))
-                previews.stamp_users = users 
+            if entity.previews.stamps is not None:
+                stampPreviews = []
+                for item in entity.previews.stamps:
+                    stampPreviews.append(HTTPStampPreview().importStampPreview(item))
+                previews.stamps = stampPreviews
 
             self.previews = previews 
 
@@ -2556,12 +2555,12 @@ class HTTPStampMini(Schema):
         cls.addProperty('num_credits',          int)
 
         cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_fav',               bool)
+        cls.addProperty('is_todo',               bool)
 
     def __init__(self):
         Schema.__init__(self)
         self.is_liked           = False
-        self.is_fav             = False
+        self.is_todo            = False
 
 class HTTPStamp(Schema):
     @classmethod
@@ -2585,12 +2584,12 @@ class HTTPStamp(Schema):
         cls.addProperty('num_credits',          int)
 
         cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_fav',               bool)
+        cls.addProperty('is_todo',               bool)
 
     def __init__(self):
         Schema.__init__(self)
         self.is_liked           = False
-        self.is_fav             = False
+        self.is_todo            = False
 
     def importStampMini(self, stamp):
         entity                  = stamp.entity
@@ -2665,7 +2664,7 @@ class HTTPStamp(Schema):
 
         if stamp.attributes is not None:
             self.is_liked   = getattr(stamp.attributes, 'is_liked', False)
-            self.is_fav     = getattr(stamp.attributes, 'is_fav', False)
+            self.is_todo    = getattr(stamp.attributes, 'is_todo', False)
 
         return self
 
@@ -2781,18 +2780,14 @@ class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('friends',        HTTPStampedByGroup)
-        cls.addNestedProperty('fof',            HTTPStampedByGroup)
         cls.addNestedProperty('all',            HTTPStampedByGroup)
 
     def importStampedBy(self, stampedBy):
         if stampedBy.friends is not None:
-            self.friends    = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
-
-        if stampedBy.fof is not None:
-            self.fof        = HTTPStampedByGroup().importStampedByGroup(stampedBy.fof)
+            self.friends = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
 
         if stampedBy.all is not None:
-            self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
+            self.all = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
 
         return self
 

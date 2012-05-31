@@ -34,8 +34,54 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
            document['screen_name_lower'] = str(document['screen_name']).lower()
         if 'name' in document:
            document['name_lower'] = unicode(document['name']).lower()
-        
+
         return document
+
+
+    def _upgradeLinkedAccounts(self, document):
+        linkedAccounts = document.pop('linked_accounts', None)
+        if linkedAccounts is None:
+            return
+
+        if 'linked' in document:
+            logs.error("Account contains both 'linked' and 'linked_account' fields.  Should only have one")
+            return document
+
+        document['linked'] = {}
+        if 'twitter' in linkedAccounts:
+            twitterAcct = {
+                'service_name'      : 'twitter',
+                'user_id'           : linkedAccounts.pop('twitter_id', None),
+                'name'              : linkedAccounts.pop('twitter_name', None),
+                'screen_name'       : linkedAccounts.pop('twitter_screen_name', None),
+                'alerts_sent'       : linkedAccounts.pop('twitter_alerts_sent', None),
+            }
+            twitterAcctSparse = {}.update((k, v) for k, v in twitterAcct.iteritems() if v is not None)
+            document['linked']['twitter'] = twitterAcctSparse
+
+        if 'facebook' in linkedAccounts:
+            facebookAcct = {
+                'service_name'      : 'facebook',
+                'user_id'           : linkedAccounts.pop('facebook_id', None),
+                'name'              : linkedAccounts.pop('facebook_name', None),
+                'screen_name'       : linkedAccounts.pop('facebook_screen_name', None),
+                'alerts_sent'       : linkedAccounts.pop('facebook_alerts_sent', None),
+                }
+            facebookAcctSparse = {}.update((k, v) for k, v in facebookAcct.iteritems() if v is not None)
+            document['linked']['facebook'] = facebookAcctSparse
+
+        if 'netflix' in linkedAccounts:
+            netflixAcct = {
+                'service_name'      : 'netflix',
+                'user_id'           : linkedAccounts.pop('netflix_user_id', None),
+                'token'             : linkedAccounts.pop('netflix_token', None),
+                'secret'            : linkedAccounts.pop('netflix_secret', None),
+                }
+            netflixAcctSparse = {}.update((k, v) for k, v in netflixAcct.iteritems() if v is not None)
+            document['linked']['netflix'] = netflixAcctSparse
+        del(document['linked_accounts'])
+        from pprint import pformat
+        logs.info('### document: %s' % pformat(document))
 
     def _convertFromMongo(self, document):
         if document is None:
@@ -59,6 +105,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             document['stats']['num_todos'] = document['stats']['num_faves']
             del(document['stats']['num_faves'])
 
+        self._upgradeLinkedAccounts(document)
+
         if self._obj is not None:
             return self._obj().dataImport(document, overflow=self._overflow)
         else:
@@ -69,6 +117,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     @lazyProperty
     def alert_apns_collection(self):
         return MongoAlertAPNSCollection()
+
+    @lazyProperty
+    def user_linked_alerts_history_collection(self):
+        return MongoUserLinkedAlertsHistoryCollection()
     
     def addAccount(self, user):
         return self._addObject(user)
@@ -122,93 +174,131 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     def getAccountsByFacebookId(self, facebookId):
         documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
-        return [self._convertFromMongo(doc) for doc in documents]
+        accounts = [self._convertFromMongo(doc) for doc in documents]
+        documents = self._collection.find({"linked.facebook.user_id" : facebookId })
+        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        return accounts
 
     def getAccountsByTwitterId(self, twitterId):
         documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
-        return [self._convertFromMongo(doc) for doc in documents]
+        accounts = [self._convertFromMongo(doc) for doc in documents]
+        documents = self._collection.find({"linked.twitter.user_id" : twitterId })
+        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        return accounts
 
-    def updateLinkedAccounts(self, userId, twitter=None, facebook=None, netflix=None):
+    def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
+        return user_linked_alerts_history_collection.addLinkedAlert(userId, serviceName, serviceId)
 
-        ### TODO: Derive valid_twitter/facebook from schema
+    def checkLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
+        result = user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
+        if result:
+            return result
+        # Check for deprecated alerts sent flag and update database if exists
+        account = self.getAccount(userId)
+        documentId = self._getObjectIdFromString(userId)
+        document = self._getMongoDocumentFromId(documentId)
+        if 'linked_accounts' in document:
+            for k, v in document['linked_accounts'].iteritems():
+                if k == 'facebook':
+                    self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['facebook_id'])
+                elif k == 'twitter':
+                    self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['twitter_id'])
+                elif k == 'netflix':
+                    self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['netflix_user_id'])
 
-        valid_twitter = [
-            'twitter_id',
-            'twitter_screen_name',
-            'twitter_token',
-            'twitter_alerts_sent',
-        ]
+    def removeLinkedAccountAlertHistory(self, userId):
+        return user_linked_alerts_history_collection.removeLinkedAlerts(userId)
 
-        valid_facebook = [
-            'facebook_id',
-            'facebook_name',
-            'facebook_screen_name',
-            'facebook_token',
-            'facebook_expire',
-            'facebook_alerts_sent',
-        ]
+    def addLinkedAccount(self, userId, linkedAccount):
 
-        valid_netflix = [
-            'netflix_user_id',
-            'netflix_token',
-            'netflix_secret',
-        ]
+        # Verify that the linked account service does not already exist in the account
+        #documents = self._collection.find({'linked_accounts.service_name' : linkedAccount.service_name })
+        document = self._collection.find_one({ "linked.service_name" : linkedAccount.service_name })
+        logs.info('### documents: %s' % document)
+        if document is not None:
+            raise StampedDuplicationError("Linked '%s' account already exists for user." % linkedAccount.service_name)
+        #documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
+
+
+        # create a dict of all twitter fields and bools for required fields
+        valid_twitter = {
+            'service_name'      : True,
+            'user_id'           : True,
+            'screen_name'       : True,
+            'token'             : True,
+            'secret'            : True,
+        }
+
+        valid_facebook = {
+            'service_name'      : True,
+            'user_id'           : True,
+            'name'              : True,
+            'screen_name'       : False,
+            'token'             : True,
+            'token_expire'      : True,
+        }
+
+        valid_netflix = {
+            'service_name'      : True,
+            'user_id'           : True,
+            'token'             : True,
+            'secret'            : True,
+        }
         
         fields = {}
+        valid = True
+        linkedDict = linkedAccount.dataExport()
+        if linkedAccount.service_name == 'twitter':
+            valid_fields = valid_twitter
+        elif linkedAccount.service_name == 'facebook':
+            valid_fields = valid_facebook
+        elif linkedAccount.service_name == 'netflix':
+            valid_fields = valid_netflix
+        else:
+            raise StampedInputError("Attempting to add unknown linked account type: '%s'" % linkedAccount.service_name)
 
-        # Twitter
-        if twitter is not None:
-            for k, v in twitter.dataExport().iteritems():
-                if k in valid_twitter and v is not None:
-                    fields['linked_accounts.twitter.%s' % k] = v
-            
-        # Facebook
-        if facebook is not None:
-            for k, v in facebook.dataExport().iteritems():
-                if k in valid_facebook and v is not None:
-                    fields['linked_accounts.facebook.%s' % k] = v
+        # Check for all required fields
+        missing_fields = []
+        valid = True
+        for k, v in valid_twitter.iteritems():
+            if v == True and k not in linkedDict or linkedDict[k] is None:
+                valid = False
+                missing_fields.append(k)
 
-        # Netflix
-        if netflix is not None:
-            for k, v in netflix.dataExport().iteritems():
-                if k in valid_netflix and v is not None:
-                    fields['linked_accounts.netflix.%s' % k] = v
-            
-        if len(fields) > 0:
-            self._collection.update(
-                {'_id': self._getObjectIdFromString(userId)},
-                {'$set': fields}
-            )
+        if valid == False:
+            raise StampedInputError("Missing required linked account fields for %s: %s" % (linkedAccount.service_name, missing_fields))
 
-    def removeLinkedAccount(self, userId, linkedAccount):
-        fields = {}
+        # Construct a new LinkedAccount object which contains only valid fields
+        newLinkedAccount = LinkedAccount()
+        for k, v in linkedDict.iteritems():
+            if k in valid_fields and k is not None:
+                setattr(newLinkedAccount, k, v)
 
-        if linkedAccount == 'facebook':
-            fields = {
-                'linked_accounts.facebook.facebook_id': 1,
-                'linked_accounts.facebook.facebook_name': 1,
-                'linked_accounts.facebook.facebook_screen_name': 1,
-                'linked_accounts.facebook.facebook_token': 1,
-                'linked_accounts.facebook.facebook_expire': 1,
-            }
-
-        if linkedAccount == 'twitter':
-            fields = {
-                'linked_accounts.twitter.twitter_id': 1,
-                'linked_accounts.twitter.twitter_screen_name': 1,
-                'linked_accounts.twitter.twitter_token': 1,
-            }
-
-        if linkedAccount == 'netflix':
-            fields = {
-                'linked_accounts.netflix.netflix_user_id': 1,
-                'linked_accounts.netflix.netflix_token': 1,
-                'linked_accounts.netflix.netflix_secret': 1,
-            }
+        logs.info('### newLinkedAccount: %s' % newLinkedAccount)
 
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
-            {'$unset': fields}
+            {'$set': { 'linked.%s' % newLinkedAccount.service_name : newLinkedAccount.dataExport() } }
+        )
+
+        return True
+
+    def removeLinkedAccount(self, userId, linkedAccount):
+        fields = {}
+        validFields = ['twitter', 'facebook', 'netflix' ]
+        if linkedAccount not in ['twitter', 'facebook', 'netflix'] :
+            raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
+
+        # update old format accounts
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)},
+            {'$unset': { 'linked_accounts.%s' % linkedAccount : 1 } }
+        )
+
+        # update new format accounts
+        self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)},
+                {'$unset': { 'linked.%s' % linkedAccount : 1 } }
         )
 
     def updatePassword(self, userId, password):
