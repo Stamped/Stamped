@@ -1417,7 +1417,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         
-        if self.__version > 0 and entity.isType('artist'):
+        if entity.isType('artist') and entity.albums is not None:
             albumIds = {}
             for album in entity.albums:
                 if album.entity_id is not None:
@@ -4384,6 +4384,10 @@ class StampedAPI(AStampedAPI):
         def _resolveTracks(entity):
             trackList = []
             tracksModified = False
+
+            if entity.tracks is None:
+                return tracksModified 
+
             for stub in entity.tracks:
                 trackId = stub.entity_id
                 track = _resolveTrack(stub)
@@ -4422,6 +4426,10 @@ class StampedAPI(AStampedAPI):
         def _resolveAlbums(entity):
             albumList = []
             albumsModified = False
+
+            if entity.albums is None:
+                return albumsModified 
+
             for stub in entity.albums:
                 albumId = stub.entity_id
                 album = _resolveAlbum(stub)
@@ -4460,6 +4468,10 @@ class StampedAPI(AStampedAPI):
         def _resolveArtists(entity):
             artistList = []
             artistsModified = False
+
+            if entity.artists is None:
+                return albumsModified 
+
             for stub in entity.artists:
                 artistId = stub.entity_id
                 artist = _resolveArtist(stub)
@@ -4498,16 +4510,17 @@ class StampedAPI(AStampedAPI):
 
         if entity.isType('artist') or entity.isType('track'):
             # Enrich albums instead
-            for albumItem in entity.albums:
-                try:
-                    albumItem, albumModified = _resolveStub(albumItem, musicSources)
-                    if albumItem.entity_id is not None:
-                        if albumItem.isType('album'):
-                            self.mergeEntityId(albumItem.entity_id)
-                    else:
-                        self.mergeEntity(albumItem)
-                except Exception as e:
-                    logs.warning('Failed to enrich album: %s' % e)
+            if entity.albums is not None:
+                for albumItem in entity.albums:
+                    try:
+                        albumItem, albumModified = _resolveStub(albumItem, musicSources)
+                        if albumItem.entity_id is not None:
+                            if albumItem.isType('album'):
+                                self.mergeEntityId(albumItem.entity_id)
+                        else:
+                            self.mergeEntity(albumItem)
+                    except Exception as e:
+                        logs.warning('Failed to enrich album: %s' % e)
 
         return modified
 

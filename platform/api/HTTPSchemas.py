@@ -1059,6 +1059,14 @@ class HTTPEntity(Schema):
 
             self.metadata = metadata
 
+    def _formatMetadataList(self, data, attribute=None):
+        if data is None or len(data) == 0:
+            return None
+        if attribute is not None:
+            return ', '.join(unicode(getattr(i, attribute)) for i in data)
+        else:
+            return ', '.join(unicode(i) for i in data)
+
     def _formatReleaseDate(self, date):
         try:
             return date.strftime("%h %d, %Y")
@@ -1106,7 +1114,7 @@ class HTTPEntity(Schema):
 
             # Metadata
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_place', client=client))
-            self._addMetadata('Cuisine', ', '.join(unicode(i) for i in entity.cuisine))
+            self._addMetadata('Cuisine', self._formatMetadataList(entity.cuisine))
             self._addMetadata('Price', entity.price_range * '$' if entity.price_range is not None else None)
             self._addMetadata('Site', _formatURL(entity.site), link=entity.site)
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
@@ -1212,14 +1220,14 @@ class HTTPEntity(Schema):
         elif entity.kind == 'media_item' and entity.isType('book'):
 
             if len(entity.authors) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
+                self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_book', client=client))
             self._addMetadata('Publish Date', self._formatReleaseDate(entity.release_date))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
-            self._addMetadata('Publisher', ', '.join(unicode(i.title) for i in entity.publishers))
+            self._addMetadata('Publisher', self._formatMetadataList(entity.publishers, 'title'))
 
             # Actions: Buy
 
@@ -1248,14 +1256,14 @@ class HTTPEntity(Schema):
         elif entity.kind == 'media_collection' and entity.isType('tv'):
 
             if len(entity.networks) > 0:
-                self.caption = ', '.join(unicode(i.title) for i in entity.networks)
+                self.caption = self._formatMetadataList(entity.networks, 'title')
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            self._addMetadata('Cast', self._formatMetadataList(entity.cast, 'title'), extended=True, optional=True)
+            self._addMetadata('Director', self._formatMetadataList(entity.directors, 'title'), optional=True)
+            self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             
             if entity.subcategory == 'movie':
                 self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
@@ -1339,9 +1347,9 @@ class HTTPEntity(Schema):
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_film', client=client))
             self._addMetadata('Overview', entity.desc, key='desc', extended=True)
             self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
-            self._addMetadata('Cast', ', '.join(unicode(i.title) for i in entity.cast), extended=True, optional=True)
-            self._addMetadata('Director', ', '.join(unicode(i.title) for i in entity.directors), optional=True)
-            self._addMetadata('Genres', ', '.join(unicode(i) for i in entity.genres), optional=True)
+            self._addMetadata('Cast', self._formatMetadataList(entity.cast, 'title'), extended=True, optional=True)
+            self._addMetadata('Director', self._formatMetadataList(entity.directors, 'title'), optional=True)
+            self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
             # Actions: Watch Now
@@ -1456,17 +1464,17 @@ class HTTPEntity(Schema):
                 self.caption = 'Artist'
 
             elif entity.isType('album') and len(entity.artists) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
+                self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
             elif entity.isType('track') and len(entity.artists) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.artists)
+                self.caption = 'by %s' % self._formatMetadataList(entity.artists, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_music', client=client))
             if entity.isType('artist'):
                 self._addMetadata('Biography', entity.desc, key='desc')
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres), optional=True)
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres), optional=True)
 
             elif entity.isType('album'):
                 if len(entity.artists) > 0:
@@ -1481,7 +1489,7 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
 
@@ -1498,7 +1506,7 @@ class HTTPEntity(Schema):
                         action.name         = 'View Artist'
                         action.sources      = [source]
                         self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
-                self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+                self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
 
@@ -1755,12 +1763,12 @@ class HTTPEntity(Schema):
         elif entity.kind == 'software' and entity.isType('app'):
 
             if len(entity.authors) > 0:
-                self.caption = 'by %s' % ', '.join(unicode(i.title) for i in entity.authors)
+                self.caption = 'by %s' % self._formatMetadataList(entity.authors, 'title')
 
             # Metadata
 
             self._addMetadata('Category', subcategory, icon=_getIconURL('cat_app', client=client))
-            self._addMetadata('Genre', ', '.join(unicode(i) for i in entity.genres))
+            self._addMetadata('Genre', self._formatMetadataList(entity.genres))
             self._addMetadata('Description', entity.desc, key='desc', extended=True)
 
             # Actions: Download
