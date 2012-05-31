@@ -1620,30 +1620,57 @@ class StampedAPI(AStampedAPI):
         except StampedUnavailableError:
             stats = self.updateEntityStatsAsync(entityId)
 
+        userIds = {}
+
+        # Get popular stamp data
         popularUserIds = map(str, stats.popular_users[:limit])
         popularStamps = self._stampDB.getStampsFromUsersForEntity(popularUserIds, entityId)
         popularStamps.sort(key=lambda x: popularUserIds.index(x.user.user_id))
 
+        # Get friend stamp data
+        if authUserId is not None:
+            friendUserIds = self._friendshipDB.getFriends(authUserId)
+            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
+
+        # Build user list
+        for stamp in popularStamps:
+            userIds[stamp.user.user_id] = None
+        if authUserId is not None:
+            for stamp in friendStamps:
+                userIds[stamp.user.user_id] = None 
+
+        users = self._userDB.lookupUsers(userIds.keys())
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Populate popular stamps
         stampedby = StampedBy()
 
-        ### TEMP
-        return stampedBy
+        stampPreviewList = []
+        for stamp in popularStamps:
+            preview = StampPreview()
+            preview.stamp_id = stamp.stamp_id 
+            preview.user = userIds[stamp.user.user_id]
+            stampPreviewList.append(preview)
 
         allUsers            = StampedByGroup()
-        allUsers.stamps     = self._enrichStampObjects(popularStamps)
+        allUsers.stamps     = stampPreviewList
         allUsers.count      = stats.num_stamps
         stampedby.all       = allUsers
 
-        if authUserId is None:
-            return stampedby
+        # Populate friend stamps
+        if authUserId is not None:
+            stampPreviewList = []
+            for stamp in friendStamps:
+                preview = StampPreview()
+                preview.stamp_id = stamp.stamp_id 
+                preview.user = userIds[stamp.user.user_id]
+                stampPreviewList.append(preview)
 
-        friendUserIds       = self._friendshipDB.getFriends(authUserId)
-        friendStamps        = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
-
-        friendUsers         = StampedByGroup()
-        friendUsers.stamps  = self._enrichStampObjects(friendStamps[:limit])
-        friendUsers.count   = len(friendStamps)
-        stampedby.friends   = friendUsers 
+            friendUsers         = StampedByGroup()
+            friendUsers.stamps  = stampPreviewList
+            friendUsers.count   = min(len(friendStamps), 99)
+            stampedby.friends   = friendUsers
 
         return stampedby
 
