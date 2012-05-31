@@ -18,7 +18,7 @@
 @property (nonatomic, readonly, retain) NSArray* allergens;
 @property (nonatomic, readonly, retain) NSArray* allergenFree;
 @property (nonatomic, readonly, retain) NSArray* restrictions;
-@property (nonatomic, readonly, assign) NSInteger spicy;
+@property (nonatomic, readonly, retain) NSNumber* spicy;
 @property (nonatomic, readonly, retain) NSArray<STMenuPrice>* prices;
 
 @end

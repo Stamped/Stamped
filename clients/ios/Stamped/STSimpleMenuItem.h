@@ -19,7 +19,7 @@
 @property (nonatomic, readwrite, retain) NSArray* allergens;
 @property (nonatomic, readwrite, retain) NSArray* allergenFree;
 @property (nonatomic, readwrite, retain) NSArray* restrictions;
-@property (nonatomic, readwrite, assign) NSInteger spicy;
+@property (nonatomic, readwrite, retain) NSNumber* spicy;
 @property (nonatomic, readwrite, retain) NSArray<STMenuPrice>* prices;
 
 + (RKObjectMapping*)mapping;
