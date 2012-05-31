@@ -156,17 +156,17 @@ class StampedAuth(AStampedAuth):
             raise StampedIllegalActionError("More than one account exists using facebook_id: %s" % fb_user['id'])
         account = accounts[0]
 
-        if account.auth_service != 'facebook':
-            msg = "Attempting to do a facebook login for an account that doesn't use facebook auth'"
-            logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+#        if account.auth_service != 'facebook':
+#            msg = "Attempting to do a facebook login for an account that doesn't use facebook auth'"
+#            logs.warning(msg)
+#            raise StampedHTTPError("invalid_credentials", 401, msg)
 
-        if account.linked_accounts.facebook is None or account.linked_accounts.facebook.facebook_id is None:
+        if account.linked.facebook is None or account.linked.facebook.user_id is None:
             msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
-        if fb_user['id'] != account.linked_accounts.facebook.facebook_id:
+        if fb_user['id'] != account.linked.facebook.user_id:
             msg = "Invalid credentials: Facebook id does not match Stamped user"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
@@ -212,12 +212,12 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
-        if account.linked_accounts.twitter is None or account.linked_accounts.twitter.twitter_id is None:
+        if account.linked.twitter is None or account.linked.twitter.user_id is None:
             msg = "Invalid credentials: Attempting to login via twitter with an account that has no twitter linked account"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
-        if tw_user['id'] != account.linked_accounts.twitter.twitter_id:
+        if tw_user['id'] != account.linked.twitter.user_id:
             msg = "Invalid credentials: twitter id does not match Stamped user"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)

@@ -493,52 +493,58 @@ class HTTPAccountCheck(Schema):
     def setSchema(cls):
         cls.addProperty('login',              basestring, required=True)
 
+class HTTPRemoveLinkedAccountForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',             basestring, required=True)
+
+class HTTPLinkedAccount(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',             basestring, required=True)
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('screen_name',         basestring)
+        cls.addProperty('name',                basestring)
+        cls.addProperty('token',               basestring)
+        cls.addProperty('secret',              basestring)
+        cls.addProperty('token_expiration',    datetime)
+
+    def importLinkedAccount(self, linked):
+        self.dataImport(linked.dataExport(), overflow=True)
+        return self
+
+    def exportLinkedAccount(self):
+        linkedAccount = LinkedAccount().dataImport(self.dataExport(), overflow=True)
+        return linkedAccount
+
+
 class HTTPLinkedAccounts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('twitter_id',               basestring)
-        cls.addProperty('twitter_screen_name',      basestring)
-        cls.addProperty('twitter_key',              basestring)
-        cls.addProperty('twitter_secret',           basestring)
-        cls.addProperty('facebook_id',              basestring)
-        cls.addProperty('facebook_name',            basestring)
-        cls.addProperty('facebook_screen_name',     basestring)
-        cls.addProperty('facebook_token',           basestring)
-        cls.addProperty('netflix_user_id',          basestring)
-        cls.addProperty('netflix_token',            basestring)
-        cls.addProperty('netflix_secret',           basestring)
+        cls.addNestedProperty('twitter',            HTTPLinkedAccount)
+        cls.addNestedProperty('facebook',           HTTPLinkedAccount)
+        cls.addNestedProperty('netflix',            HTTPLinkedAccount)
+
+    def importLinkedAccounts(self, linked):
+        if linked.twitter is not None:
+            self.twitter = HTTPLinkedAccount().importLinkedAccount(linked.twitter)
+        if linked.facebook is not None:
+            self.facebook = HTTPLinkedAccount().importLinkedAccount(linked.facebook)
+        if linked.netflix is not None:
+            self.netflix = HTTPLinkedAccount().importLinkedAccount(linked.netflix)
+        return self
 
     def exportLinkedAccounts(self):
         schema = LinkedAccounts()
 
-        data = self.dataExport()
-
-        twitter = TwitterAccountSchema()
-        twitter.dataImport(data, overflow=True)
-
-        facebook = FacebookAccountSchema()
-        facebook.dataImport(data, overflow=True)
-
-        schema.dataImport(self.dataExport(), overflow=True)
-        schema.twitter = twitter 
-        schema.facebook = facebook
+        if self.twitter is not None:
+            schema.twitter = LinkedAccount().dataImport(self.twitter.dataExport(), overflow=True)
+        if self.facebook is not None:
+            schema.facebook = LinkedAccount().dataImport(self.facebook.dataExport(), overflow=True)
+        if self.twitter is not None:
+            schema.netflix = LinkedAccount().dataImport(self.netflix.dataExport(), overflow=True)
 
         return schema 
-
-    def exportTwitterAuthSchema(self):
-        schema = TwitterAuthSchema()
-        schema.dataImport(self.dataExport(), overflow=True)
-        return schema 
-
-    def exportFacebookAuthSchema(self):
-        schema = FacebookAuthSchema()
-        schema.dataImport(self.dataExport(), overflow=True)
-        return schema 
-
-    def exportNetflixAuthSchema(self):
-        schema = NetflixAuthSchema()
-        schema.dataImport(self.dataExport(), overflow=True)
-        return schema
 
 
 class HTTPAvailableLinkedAccounts(Schema):
@@ -2521,12 +2527,12 @@ class HTTPStampMini(Schema):
         cls.addProperty('num_credits',          int)
 
         cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_fav',               bool)
+        cls.addProperty('is_todo',               bool)
 
     def __init__(self):
         Schema.__init__(self)
         self.is_liked           = False
-        self.is_fav             = False
+        self.is_todo            = False
 
 class HTTPStampPreviews(Schema):
     @classmethod
@@ -2558,12 +2564,12 @@ class HTTPStamp(Schema):
         cls.addProperty('num_credits',          int)
 
         cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_fav',               bool)
+        cls.addProperty('is_todo',               bool)
 
     def __init__(self):
         Schema.__init__(self)
         self.is_liked           = False
-        self.is_fav             = False
+        self.is_todo            = False
 
     def importStampMini(self, stamp):
         entity                  = stamp.entity
@@ -2638,7 +2644,7 @@ class HTTPStamp(Schema):
 
         if stamp.attributes is not None:
             self.is_liked   = getattr(stamp.attributes, 'is_liked', False)
-            self.is_fav     = getattr(stamp.attributes, 'is_fav', False)
+            self.is_todo    = getattr(stamp.attributes, 'is_todo', False)
 
         return self
 

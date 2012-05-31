@@ -59,8 +59,8 @@ if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
 def handleHTTPRequest(requires_auth=True, 
-                      requires_client=False, 
-                      http_schema=None, 
+                      requires_client=False,
+                      http_schema=None,
                       conversion=None,
                       upload=None, 
                       parse_request_kwargs=None, 
@@ -159,7 +159,7 @@ def handleHTTPRequest(requires_auth=True,
                         raise
                     
                     params['client_id'] = None
-                
+
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or {}
                     

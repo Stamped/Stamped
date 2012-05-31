@@ -32,24 +32,6 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
-#@handleHTTPRequest(requires_auth=False,
-#                   requires_client=True,
-#                   http_schema=HTTPAccountNew,
-#                   conversion=HTTPAccountNew.convertToAccount,
-#                   upload='profile_image')
-#@require_http_methods(["POST"])
-#def upgradeAccount(request, client_id, http_schema, schema, **kwargs):
-#    logs.info('account schema passed in: %s' % schema)
-#    schema = stampedAPI.addAccount(schema, http_schema.profile_image)
-#
-#    user   = HTTPUser().importAccount(schema)
-#    logs.user(user.user_id)
-#
-#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
-#    output = { 'user': user.dataExport(), 'token': token }
-#
-#    return transformOutput(output)
-
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPFacebookAccountNew,
@@ -93,6 +75,36 @@ def remove(request, authUserId, **kwargs):
     return transformOutput(account.dataExport())
 
 
+@handleHTTPRequest(parse_request=False)
+@require_http_methods(["GET"])
+def show(request, authUserId, **kwargs):
+    account = stampedAPI.getAccount(authUserId)
+    account = HTTPAccount().importAccount(account)
+
+    return transformOutput(account.dataExport())
+
+@handleHTTPRequest(parse_request=False)
+@require_http_methods(["POST"])
+def update(request, authUserId, **kwargs):
+    ### TODO: Carve out password changes, require original password sent again?
+
+    ### TEMP: Generate list of changes. Need to do something better eventually..
+    schema = parseRequest(HTTPAccountSettings(), request)
+    data   = schema.dataExport()
+
+    for k, v in data.iteritems():
+        if v == '':
+            data[k] = None
+
+    ### TODO: Verify email is valid
+    account = stampedAPI.updateAccountSettings(authUserId, data)
+
+    account     = HTTPAccount().importAccount(account)
+
+    return transformOutput(account.dataExport())
+
+
+# TODO: Remove the 'settings' endpoint.  It has been replaced with 'get' and 'update'
 @handleHTTPRequest(parse_request=False)
 @require_http_methods(["POST", "GET"])
 def settings(request, authUserId, **kwargs):
@@ -149,7 +161,6 @@ def customize_stamp(request, authUserId, data, **kwargs):
     
     return transformOutput(user.dataExport())
 
-
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
                    http_schema=HTTPAccountCheck)
@@ -175,171 +186,6 @@ def check(request, client_id, http_schema, **kwargs):
         response = HttpResponse("invalid_request")
         response.status_code = 400
         return response
-
-
-@handleHTTPRequest(http_schema=HTTPLinkedAccounts)
-@require_http_methods(["POST"])
-def linked_accounts(request, authUserId, http_schema, **kwargs):
-    linked          = http_schema.exportLinkedAccounts()
-    twitterAuth     = http_schema.exportTwitterAuthSchema()
-    facebookAuth    = http_schema.exportFacebookAuthSchema()
-    netflixAuth     = http_schema.exportNetflixAuthSchema()
-
-    data = {
-        'twitter'       : linked.twitter, 
-        'facebook'      : linked.facebook, 
-        'twitterAuth'   : twitterAuth, 
-        'facebookAuth'  : facebookAuth,
-        'netflixAuth'   : netflixAuth,
-    }
-    stampedAPI.updateLinkedAccounts(authUserId, **data)
-    
-    return transformOutput(True)
-
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeTwitter(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-    
-    return transformOutput(True)
-
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeFacebook(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
-    
-    return transformOutput(True)
-
-
-@handleHTTPRequest(http_schema=HTTPFindUser, 
-                   parse_request_kwargs={'obfuscate':['q']})
-@require_http_methods(["POST"])
-def alertFollowersFromTwitter(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.split(',')
-    twitterIds = []
-
-    for item in q:
-        try:
-            number = int(item)
-            twitterIds.append(item)
-        except:
-            msg = 'Invalid twitter id: %s' % item
-            logs.warning(msg)
-
-    result = stampedAPI.alertFollowersFromTwitter(authUserId, twitterIds)
-    
-    return transformOutput(result)
-
-
-@handleHTTPRequest(http_schema=HTTPFindUser, 
-                   parse_request_kwargs={'obfuscate':['q']})
-@require_http_methods(["POST"])
-def alertFollowersFromFacebook(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.split(',')
-    facebookIds = []
-
-    for item in q:
-        try:
-            number = int(item)
-            facebookIds.append(item)
-        except:
-            msg = 'Invalid facebook id: %s' % item
-            logs.warning(msg)
-
-    result = stampedAPI.alertFollowersFromFacebook(authUserId, facebookIds)
-    
-    return transformOutput(result)
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeTwitter(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-
-    return transformOutput(True)
-
-def createNetflixLoginResponse(authUserId):
-    netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(authUserId)
-
-    response                = HTTPEndpointResponse()
-    source                  = HTTPActionSource()
-    source.source           = 'netflix'
-    source.link             = url
-    #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
-    response.setAction('netflix_login', 'Login to Netflix', [source])
-
-    return transformOutput(response.dataExport())
-
-@handleHTTPRequest()
-@require_http_methods(["GET"])
-def netflixLogin(request, authUserId, http_schema, **kwargs):
-    return createNetflixLoginResponse(authUserId)
-
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
-                   parse_request_kwargs={'allow_oauth_token': True})
-@require_http_methods(["GET"])
-def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
-    netflix = globalNetflix()
-
-    result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
-
-    netflixAuth = NetflixAuthSchema()
-    netflixAuth.netflix_token       = result['oauth_token']
-    netflixAuth.netflix_secret      = result['oauth_token_secret']
-    netflixAuth.netflix_user_id     = result['user_id']
-
-    stampedAPI.updateLinkedAccounts(http_schema.stamped_oauth_token, netflixAuth=netflixAuth)
-
-    return createNetflixLoginResponse(authUserId)
-
-
-
-
-@handleHTTPRequest(http_schema=HTTPNetflixId)
-@require_http_methods(["POST"])
-def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
-    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
-    try:
-        result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            return createNetflixLoginResponse(authUserId)
-            # return login endpoint action
-        else:
-            raise e
-    if result == None:
-        return createNetflixLoginResponse(authUserId)
-
-    response = HTTPEndpointResponse()
-
-    source                  = HTTPActionSource()
-    source.source           = 'stamped_confirm'
-    source.source_data      = 'The item is now added to your Netflix Queue.'
-    #source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/login_callback.json'
-    response.setAction('netflix_login', 'Login to Netflix', [source])
-    #TODO throw status codes on error
-    #TODO return an HTTPAction
-    return transformOutput(response.dataExport())
-
-@handleHTTPRequest(http_schema=HTTPNetflixId)
-@require_http_methods(["POST"])
-def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
-    try:
-        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            #redirect to sign in
-            raise e
-        else:
-            raise e
-    #TODO throw status codes on error
-    #TODO return an HTTPAction
-    return transformOutput(True)
-
-
-
 
 
 @handleHTTPRequest(http_schema=HTTPAccountChangePassword, 

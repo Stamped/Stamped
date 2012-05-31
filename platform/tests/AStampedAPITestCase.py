@@ -242,6 +242,32 @@ class AStampedAPITestCase(AStampedTestCase):
 
         return user, token
 
+    def addLinkedAccount(self, user_token, **kwargs):
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "account/linked/add.json"
+        data = {
+            "client_id"         : c_id,
+            "client_secret"     : c_secret,
+            "oauth_token"       : user_token['access_token'],
+            }
+        data.update(kwargs)
+        return self.handlePOST(path, data)
+
+    def removeLinkedAccount(self, token, service_name, **kwargs):
+        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
+        c_secret    = CLIENT_SECRETS[c_id]
+
+        path = "account/linked/remove.json"
+        data = {
+            "client_id"         : c_id,
+            "client_secret"     : c_secret,
+            "oauth_token"       : token['access_token'],
+            "service_name"      : service_name
+            }
+        return self.handlePOST(path, data)
+
     def loginWithFacebook(self, fb_user_token, **kwargs):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
@@ -294,16 +320,30 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
+#
+#    def addLinkedAccount(self, token, data=None):
+#        """
+#        params should include properties to fill HTTPLinkedAccounts object
+#        """
+#        path = "account/linked_accounts.json"
+#        if "oauth_token" not in data:
+#            data['oauth_token'] = token['access_token']
+#        return self.handlePOST(path, data)
+#
+    def showAccount(self, token):
+        path = "account/show.json"
+        data = {
+            'oauth_token'       : token['access_token'],
+        }
+        return self.handleGET(path, data)
 
-    def addLinkedAccount(self, token, data=None):
-        """
-        params should include properties to fill HTTPLinkedAccounts object
-        """
-        path = "account/linked_accounts.json"
-        if "oauth_token" not in data:
-            data['oauth_token'] = token['access_token']
-        return self.handlePOST(path, data)
-    
+    def showLinkedAccounts(self, token):
+        path = "account/linked/show.json"
+        data = {
+            'oauth_token'       : token['access_token'],
+            }
+        return self.handleGET(path, data)
+
     def createEntity(self, token, data=None):
         path = "entities/create.json"
         if data == None:

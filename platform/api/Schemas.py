@@ -286,13 +286,23 @@ class AccountAlerts(Schema):
         cls.addProperty('email_alert_reply',        bool)
         cls.addProperty('email_alert_follow',       bool)
 
+class LinkedAccount(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',             basestring, required=True)
+        cls.addProperty('user_id',                  basestring)
+        cls.addProperty('screen_name',              basestring)
+        cls.addProperty('name',                     basestring)
+        cls.addProperty('token',                    basestring)
+        cls.addProperty('secret',                   basestring)
+        cls.addProperty('token_expiration',         datetime)
+
 class LinkedAccounts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('itunes',                   basestring)
-        cls.addNestedProperty('twitter',            TwitterAccountSchema)
-        cls.addNestedProperty('facebook',           FacebookAccountSchema)
-        cls.addNestedProperty('netflix',            NetflixAuthSchema)       # netflix is the first where we keep auth tokens in db
+        cls.addNestedProperty('twitter',            LinkedAccount)
+        cls.addNestedProperty('facebook',           LinkedAccount)
+        cls.addNestedProperty('netflix',            LinkedAccount)
 
 class Account(Schema):
     @classmethod
@@ -313,7 +323,8 @@ class Account(Schema):
         cls.addProperty('website',                  basestring)
         cls.addProperty('location',                 basestring)
         cls.addProperty('privacy',                  bool, required=True)
-        cls.addNestedProperty('linked_accounts',    LinkedAccounts)
+        #cls.addNestedProperty('linked_accounts',    LinkedAccounts)
+        cls.addNestedProperty('linked',             LinkedAccounts)
         cls.addNestedProperty('devices',            DevicesSchema)
         cls.addNestedProperty('stats',              UserStatsSchema, required=True)
         cls.addNestedProperty('timestamp',          UserTimestampSchema, required=True)

@@ -40,7 +40,6 @@ class Facebook(object):
                 msg = e.message
                 result = json.load(e)
                 if 'error' in result:
-                    logs.info('ERROR IN E')
                     if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                         # OAuth exception
                         msg = result['error']['message']

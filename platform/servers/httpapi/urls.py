@@ -49,6 +49,8 @@ urlpatterns = patterns('',
     (r'v0/account/upgrade.json',                    'v0.functions.account.upgrade'),
     (r'v0/account/remove.json',                     'v0.functions.account.remove'),
     (r'v0/account/settings.json',                   'v0.functions.account.settings'),
+    (r'v0/account/update.json',                     'v0.functions.account.update'),
+    (r'v0/account/show.json',                       'v0.functions.account.show'),
     (r'v0/account/update_profile.json',             'v0.functions.account.update_profile'),
     (r'v0/account/update_profile_image.json',       'v0.functions.account.update_profile_image'),
     (r'v0/account/customize_stamp.json',            'v0.functions.account.customize_stamp'),
@@ -60,7 +62,14 @@ urlpatterns = patterns('',
     (r'v0/account/alerts/update.json',              'v0.functions.account.update_alerts'),
     (r'v0/account/alerts/ios/update.json',          'v0.functions.account.update_apns'),
     (r'v0/account/alerts/ios/remove.json',          'v0.functions.account.remove_apns'),
-    
+
+    (r'v0/account/linked/show.json',                'v0.functions.linked.show'),
+    (r'v0/account/linked/add.json',                 'v0.functions.linked.add'),
+    (r'v0/account/linked/remove.json',              'v0.functions.linked.remove'),
+    (r'v0/account/linked/twitter/add.json',         'v0.functions.linked.add'),
+    (r'v0/account/linked/facebook/add.json',        'v0.functions.linked.add'),
+    (r'v0/account/linked/netflix/add.json',         'v0.functions.linked.add'),
+
     # TODO: REMOVE FROM PROD
     (r'v0/account/linked_accounts.json',            'v0.functions.account.linked_accounts'),
     
