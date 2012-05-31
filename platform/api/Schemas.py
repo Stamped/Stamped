@@ -1688,6 +1688,22 @@ class RelevanceSlice(Schema):
         cls.addProperty('user_id',                      basestring)
         cls.addProperty('scope',                        basestring) # me, friends, fof, popular
 
+class CommentSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('before',                       datetime)
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
+
+        # Scope
+        cls.addProperty('stamp_id',                     basestring, required=True)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.limit = 20
+        self.offset = 0
+
 
 class GuideRequest(Schema):
     @classmethod

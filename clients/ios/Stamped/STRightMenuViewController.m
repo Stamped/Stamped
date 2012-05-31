@@ -121,9 +121,9 @@
 }
 
 - (void)viewDidUnload {
-    [super viewDidUnload];
     [_buttons removeAllObjects];
     self.scrollView = nil;
+    [super viewDidUnload];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -249,7 +249,7 @@
 
 - (void)close:(id)sender  {
 
-    DDMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller showRootController:YES];
     
 }
@@ -265,7 +265,7 @@
     //Map to BE category strings
     category = [self.categoryMapping objectForKey:category];
     STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [menuController pushViewController:controller animated:YES];
     
     /*

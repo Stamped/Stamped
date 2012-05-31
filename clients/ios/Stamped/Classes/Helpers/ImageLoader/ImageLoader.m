@@ -14,6 +14,7 @@ static NSMutableDictionary *_connections;
 
 @implementation ImageLoader
 
+
 + (id)sharedLoader {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -210,6 +211,7 @@ static NSMutableDictionary *_connections;
             }
             
             [_connections removeObjectForKey:path];
+            
         });
         
     }

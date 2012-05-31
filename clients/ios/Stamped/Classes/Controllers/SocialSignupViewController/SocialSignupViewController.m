@@ -17,58 +17,48 @@
 @end
 
 @implementation SocialSignupViewController
-@synthesize tableView=_tableView;
 
 - (id)init {
-    if ((self = [super init])) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification  object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    if ((self = [super initWithStyle:UITableViewStyleGrouped])) {
     }
     return self;
 }
 
 - (void)dealloc {
-    self.tableView = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!_tableView) {
-        
-        UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
-        tableView.showsVerticalScrollIndicator = NO;
-        tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        tableView.allowsSelection = NO;
-        tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        tableView.delegate = (id<UITableViewDelegate>)self;
-        tableView.dataSource = (id<UITableViewDataSource>)self;
-        [self.view addSubview:tableView];
-        self.tableView = tableView;
-        [tableView release];
-        
+    self.tableView.showsVerticalScrollIndicator = NO;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.allowsSelection = NO;
+    
+    if (!self.tableView.tableHeaderView) {
         SocialSignupHeaderView *header = [[SocialSignupHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 104.0f)];
         header.backgroundColor = [UIColor clearColor];
-        tableView.tableHeaderView = header;
+        self.tableView.tableHeaderView = header;
         [header release];
-        
+    }
+    
+    if (!self.tableView.tableFooterView) {
         StampColorPickerView *view = [[StampColorPickerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 220.0f)];
         view.backgroundColor = [UIColor clearColor];
         view.delegate = (id<StampColorPickerDelegate>)self;
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        tableView.tableFooterView = view;
+        self.tableView.tableFooterView = view;
         [view release];
-        
-        STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
+    }
+    
+    if (!self.tableView.backgroundView) {
+        STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
             drawGradient([UIColor colorWithRed:0.961f green:0.961f blue:0.957f alpha:1.0f].CGColor, [UIColor colorWithRed:0.898f green:0.898f blue:0.898f alpha:1.0f].CGColor, ctx);
         }];
-        tableView.backgroundView = background;
+        self.tableView.backgroundView = background;
         [background release];
-        
     }
     
     if (!self.navigationItem.rightBarButtonItem) {
@@ -83,7 +73,6 @@
 }
 
 - (void)viewDidUnload {
-    self.tableView = nil;
     [super viewDidUnload];
 }
 
@@ -207,7 +196,7 @@
 
 - (void)stampColorPickerViewSelectedCustomize:(StampColorPickerView*)view {
     
-    StampCustomizeViewController *controller = [[StampCustomizeViewController alloc] init];
+    StampCustomizeViewController *controller = [[StampCustomizeViewController alloc] initWithColors:[view colors]];
     controller.delegate = (id<StampCustomizeViewControllerDelegate>)self;
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     [self presentModalViewController:navController animated:YES];
@@ -221,26 +210,6 @@
     if ([self.tableView.tableHeaderView respondsToSelector:@selector(setStampColors:)]) {
         [(SocialSignupHeaderView*)self.tableView.tableHeaderView setStampColors:colors];
     }
-    
-}
-
-
-#pragma mark - UIKeyboard Notfications
-
-- (void)keyboardWillShow:(NSNotification*)notification {    
-    
-    CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-        self.tableView.contentInset = UIEdgeInsetsMake(0, 0, keyboardFrame.size.height, 0);
-    } completion:^(BOOL finished){}];
-    
-}
-
-- (void)keyboardWillHide:(NSNotification*)notification {
-    
-    [UIView animateWithDuration:0.3 animations:^{
-        self.tableView.contentInset = UIEdgeInsetsZero;
-    }];
     
 }
 
