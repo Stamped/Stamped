@@ -2576,10 +2576,10 @@ class StampedAPI(AStampedAPI):
         
         # Remove comments
         ### TODO: Make this more efficient?
-        comments = self._commentDB.getCommentsForStamp(stampId)
-        for comment in comments:
+        commentIds = self._commentDB.getCommentIds(stampId)
+        for commentId in commentIds:
             # Remove comment
-            self._commentDB.removeComment(comment.comment_id)
+            self._commentDB.removeComment(commentId)
         
         # Remove activity
         self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -2866,10 +2866,8 @@ class StampedAPI(AStampedAPI):
         return comment
     
     @API_CALL
-    def getComments(self, stampId, authUserId, **kwargs): 
-        stamp = self._stampDB.getStamp(stampId)
-        
-        ### TODO: Add slicing (before, since, limit, quality)
+    def getComments(self, commentSlice, authUserId): 
+        stamp = self._stampDB.getStamp(commentSlice.stamp_id)
         
         # Check privacy of stamp
         if stamp.user.privacy == True:
@@ -2880,7 +2878,10 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedPermissionsError("Insufficient privileges to view stamp")
               
-        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id, 
+                                                            limit=commentSlice.limit, 
+                                                            before=commentSlice.before,
+                                                            offset=commentSlice.offset)
         
         # Get user objects
         userIds = {}
@@ -2902,15 +2903,9 @@ class StampedAPI(AStampedAPI):
                 comment.user = userIds[comment.user.user_id]
                 comments.append(comment)
         
-        comments = sorted(comments, key=lambda k: k.timestamp.created)
-        
-        tasks.invoke(tasks.APITasks.getComments, args=[authUserId, stampId])
+        # comments = sorted(comments, key=lambda k: k.timestamp.created)
         
         return comments
-    
-    @API_CALL
-    def getCommentsAsync(self, authUserId, stampId):
-        self._stampDB.addView(authUserId, stampId)
     
     
     """

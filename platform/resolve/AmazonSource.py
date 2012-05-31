@@ -612,7 +612,7 @@ class AmazonSource(GenericSource):
             if kind == 'video games':
                 return AmazonVideoGame(key)
             
-            raise Exception("unsupported amazon product type")
+            raise Exception("unsupported amazon product type: %s" % kind)
         except KeyError:
             pass
         return None

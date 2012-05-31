@@ -2304,6 +2304,29 @@ class HTTPRelevanceSlice(Schema):
 
         return slc
 
+class HTTPCommentSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('before',               int)
+        cls.addProperty('limit',                int)
+        cls.addProperty('offset',               int)
+
+        # Scope
+        cls.addProperty('stamp_id',             basestring)
+
+    def exportCommentSlice(self):
+        data                = self.dataExport()
+        beforeData          = data.pop('before', None)
+
+        slc                 = CommentSlice()
+        slc.dataImport(data)
+
+        if self.before is not None:
+            slc.before = datetime.utcfromtimestamp(int(self.before))
+
+        return slc
+
 
 
 class HTTPGenericSlice(Schema):
@@ -2808,11 +2831,6 @@ class HTTPDeletedStamp(Schema):
         self.dataImport(delStamp.dataExport(), overflow=True)
         self.modified = delStamp.timestamp.modified
         return self
-
-class HTTPCommentSlice(HTTPGenericSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
 
 
 # #### #
