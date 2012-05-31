@@ -1427,7 +1427,6 @@ class StampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('friends',            StampedByGroup)
-        cls.addNestedProperty('fof',                StampedByGroup)
         cls.addNestedProperty('all',                StampedByGroup)
 
 

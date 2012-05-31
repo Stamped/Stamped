@@ -1674,7 +1674,6 @@ class StampedAPI(AStampedAPI):
 
         return stampedby
 
-
     def updateEntityStatsAsync(self, entityId):
         numStamps = self._stampDB.countStampsForEntity(entityId)
         popularUserIds = self._stampDB.getPopularityForEntity(entityId)

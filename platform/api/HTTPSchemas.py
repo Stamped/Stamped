@@ -1897,11 +1897,11 @@ class HTTPEntity(Schema):
                     users.append(HTTPUserMini().importUserMini(user))
                 previews.todos = users
             
-            if entity.previews.stamp_users is not None:
-                users = []
-                for user in entity.previews.stamp_users:
-                    users.append(HTTPUserMini().importUserMini(user))
-                previews.stamp_users = users 
+            if entity.previews.stamps is not None:
+                stampPreviews = []
+                for item in entity.previews.stamps:
+                    stampPreviews.append(HTTPStampPreview().importStampPreview(item))
+                previews.stamp_users = stampPreviews
 
             self.previews = previews 
 
@@ -2780,18 +2780,14 @@ class HTTPStampedBy(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('friends',        HTTPStampedByGroup)
-        cls.addNestedProperty('fof',            HTTPStampedByGroup)
         cls.addNestedProperty('all',            HTTPStampedByGroup)
 
     def importStampedBy(self, stampedBy):
         if stampedBy.friends is not None:
-            self.friends    = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
-
-        if stampedBy.fof is not None:
-            self.fof        = HTTPStampedByGroup().importStampedByGroup(stampedBy.fof)
+            self.friends = HTTPStampedByGroup().importStampedByGroup(stampedBy.friends)
 
         if stampedBy.all is not None:
-            self.all        = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
+            self.all = HTTPStampedByGroup().importStampedByGroup(stampedBy.all)
 
         return self
 
