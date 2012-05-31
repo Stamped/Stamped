@@ -1642,15 +1642,6 @@ class StampedAPI(AStampedAPI):
         friendUsers.count   = len(friendStamps)
         stampedby.friends   = friendUsers 
 
-        fofUserIds          = self._friendshipDB.getFriendsOfFriends(authUserId, distance=2, inclusive=False)
-        fofOverlap          = list(set(fofUserIds).intersection(map(str, stats.popular_users)))
-        fofStamps           = self._stampDB.getStampsFromUsersForEntity(fofOverlap[:limit], entityId)
-
-        fofUsers            = StampedByGroup()
-        fofUsers.stamps     = self._enrichStampObjects(fofStamps[:limit])
-        fofUsers.count      = len(fofStamps)
-        stampedby.fof       = fofUsers
-
         return stampedby
 
 
@@ -1940,7 +1931,7 @@ class StampedAPI(AStampedAPI):
                     stamp.credit = credits
 
                 # Previews
-                previews = StampPreviews()
+                previews = Previews()
                 for stat in stats:
                     if str(stat.stamp_id) == str(stamp.stamp_id):
                         break 
@@ -1996,13 +1987,14 @@ class StampedAPI(AStampedAPI):
                         for i in stat.preview_credits[:previewLength]:
                             try:
                                 credit = underlyingStampIds[str(i)]
-                                credit.user = userIds[str(credit.user.user_id)]
-                                credit.entity = entityIds[str(stamp.entity.entity_id)]
-                                creditPreviews.append(credit.minimize())
+                                stampPreview = StampPreview()
+                                stampPreview.user = userIds[str(credit.user.user_id)]
+                                stampPreview.stamp_id = i
+                                creditPreviews.append(stampPreview)
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
-                                logs.debug("Stamp: %s" % stamp)
+                                logs.debug("Stamp preview: %s" % stampPreview)
                                 continue
                     previews.credits = creditPreviews
 
@@ -3288,7 +3280,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             if stamp.stamp_id in commentPreviews:
                 if stamp.previews is None:
-                    stamp.previews = StampPreviews()
+                    stamp.previews = Previews()
                 stamp.previews.comments = commentPreviews[stamp.stamp_id]
             
             stamps.append(stamp)
@@ -3472,9 +3464,9 @@ class StampedAPI(AStampedAPI):
 
                 items.append(item)
                 entityIds[item.entity_id] = None
-                if item.stamp_user_ids is not None:
-                    for userId in item.stamp_user_ids:
-                        userIds[userId] = None 
+                if item.stamps is not None:
+                    for stampPreview in item.stamps:
+                        userIds[stampPreview.user.user_id] = None 
                 if item.todo_user_ids is not None:
                     for userId in item.todo_user_ids:
                         userIds[userId] = None
@@ -3508,11 +3500,15 @@ class StampedAPI(AStampedAPI):
         for item in items:
             entity = entityIds[item.entity_id]
             previews = EntityPreviewsSchema()
-            if item.stamp_user_ids is not None:
-                previews.stamp_users = [ userIds[x] for x in item.stamp_user_ids ]
+            if item.stamps is not None:
+                stamps = []
+                for stampPreview in item.stamps:
+                    stampPreview.user = userIds[stampPreview.user.user_id]
+                    stamps.append(stampPreview)
+                previews.stamps = stamps
             if item.todo_user_ids is not None:
                 previews.todos = [ userIds[x] for x in item.todo_user_ids ]
-            if previews.stamp_users is not None or previews.todos is not None:
+            if previews.stamps is not None or previews.todos is not None:
                 entity.previews = previews 
             result.append(entity)
 
@@ -3632,8 +3628,16 @@ class StampedAPI(AStampedAPI):
                 item.entity_id = result[0]
                 item.tags = result[2]
                 if len(stampMap[result[0]]) > 0:
-                    item.stamp_ids = map(lambda x: x.stamp_id, stampMap[result[0]])
-                    item.stamp_user_ids = map(lambda x: x.user.user_id, stampMap[result[0]])
+                    preview = []
+                    for stamp in stampMap[result[0]]:
+                        stampPreview = StampPreview()
+                        stampPreview.stamp_id = stamp.stamp_id 
+                        userPreview = UserMini()
+                        userPreview.user_id = stamp.user.user_id
+                        stampPreview.user = userPreview
+                        preview.append(stampPreview)
+                    if len(preview) > 0:
+                        item.stamps = preview
                 cache.append(item)
             setattr(guide, section, cache)
 
@@ -3677,7 +3681,7 @@ class StampedAPI(AStampedAPI):
 
         previews = None
         if friendIds is not None:
-            previews = StampPreviews()
+            previews = Previews()
 
             # TODO: We may want to optimize how we pull in followers' todos by adding a new ref collection as we do
             #  for likes on stamps.

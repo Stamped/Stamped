@@ -3172,7 +3172,7 @@ class HTTPActivity(Schema):
                 self.action = _buildUserAction(self.objects.users[0])
 
         elif self.verb == 'restamp':
-            _addStampObjects
+            _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
