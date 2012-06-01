@@ -1512,31 +1512,6 @@ class StampedAPI(AStampedAPI):
         return results
 
     @API_CALL
-    def searchNearby(self,
-                     coords=None,
-                     authUserId=None,
-                     category=None,
-                     subcategory=None,
-                     prefix=False,
-                     full=True,
-                     page=0,
-                     limit=10):
-        results = self._entitySearcher.getSearchResults(query='',
-                                                        coords=coords,
-                                                        category_filter=category,
-                                                        subcategory_filter=subcategory,
-                                                        full=full,
-                                                        prefix=prefix,
-                                                        local=True,
-                                                        user=authUserId,
-                                                        limit=((page + 1) * limit))
-        offset  = limit * page
-        results = results[offset : offset + limit]
-
-        return results
-
-
-    @API_CALL
     def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
         if autosuggestForm.category == 'film':
             return self._netflix.autocomplete(autosuggestForm.query)
@@ -3382,31 +3357,6 @@ class StampedAPI(AStampedAPI):
     def getSuggestedStamps(self, authUserId, genericCollectionSlice):
         return self._getStampCollection_DEPRECATED(authUserId, None, genericCollectionSlice)
 
-    @API_CALL
-    def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
-        count = None
-
-        # Use relationships
-        if authUserId is not None and genericCollectionSlice.__class__.__name__ == 'FriendsSlice':
-            distance = genericCollectionSlice.distance
-            userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
-            if showCount == True:
-                count = self._stampDB.countStampsForEntity(entityId, userIds=userIds)
-                if count == 0:
-                    return [], 0
-            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
-
-        # Use popular
-        else:
-            if showCount == True:
-                count = self._stampDB.countStampsForEntity(entityId)
-                if count <= 0:
-                    return [], 0
-            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
-
-        stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId=authUserId)
-
-        return stamps, count
 
     """
 
@@ -3422,7 +3372,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
 
-        # Hack to return kevin's guide for popular
+        # Hack to return kevin's guide for popular (until we build formula for popular)
         if guideRequest != 'inbox':
             user = self._userDB.getUserByScreenName('kevin')
             authUserId = user.user_id
@@ -3451,19 +3401,52 @@ class StampedAPI(AStampedAPI):
         userIds = {}
         items = []
 
+        if guideRequest.viewport is not None:
+            latA = guideRequest.viewport.lowerRight.lat 
+            latB = guideRequest.viewport.upperLeft.lat 
+            lngA = guideRequest.viewport.upperLeft.lng
+            lngB = guideRequest.viewport.lowerRight.lng 
+
         i = 0
         for item in allItems:
-            if guideRequest.subsection is None or guideRequest.subsection in item.tags:
+            # Filter tags
+            if guideRequest.subsection is not None and guideRequest.subsection not in item.tags:
+                continue
 
-                items.append(item)
-                entityIds[item.entity_id] = None
-                if item.stamps is not None:
-                    for stampPreview in item.stamps:
-                        userIds[stampPreview.user.user_id] = None
-                if item.todo_user_ids is not None:
-                    for userId in item.todo_user_ids:
-                        userIds[userId] = None
-                i += 1
+            # Filter coordinates
+            if guideRequest.viewport is not None:
+                if item.coordinates is None:
+                    continue
+
+                latCheck = False 
+                lngCheck = False
+
+                if latA < latB:
+                    if latA <= item.coordinates.lat and item.coordinates.lat <= latB:
+                        latCheck = True 
+                elif latA > latB:
+                    if latA <= item.coordinates.lat or item.coordinates.lat <= latB:
+                        latCheck = True
+
+                if lngA < lngB:
+                    if lngA <= item.coordinates.lng and item.coordinates.lng <= lngB:
+                        lngCheck = True 
+                elif lngA > lngB:
+                    if lngA <= item.coordinates.lng or item.coordinates.lng <= lngB:
+                        lngCheck = True 
+
+                if not latCheck or not lngCheck:
+                    continue 
+
+            items.append(item)
+            entityIds[item.entity_id] = None
+            if item.stamps is not None:
+                for stampPreview in item.stamps:
+                    userIds[stampPreview.user.user_id] = None
+            if item.todo_user_ids is not None:
+                for userId in item.todo_user_ids:
+                    userIds[userId] = None
+            i += 1
 
             if i >= limit + offset:
                 break
@@ -3612,7 +3595,10 @@ class StampedAPI(AStampedAPI):
                     elif stamp.timestamp.created is not None:
                         created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
                 score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
-                r.append((entity.entity_id, score, entity.types))
+                coordinates = None 
+                if hasattr(entity, coordinates):
+                    coordinates = entity.coordinates
+                r.append((entity.entity_id, score, entity.types, coordinates))
             r.sort(key=itemgetter(1))
             r.reverse()
             cache = []
@@ -3620,6 +3606,8 @@ class StampedAPI(AStampedAPI):
                 item = GuideCacheItem()
                 item.entity_id = result[0]
                 item.tags = result[2]
+                if result[3] is not None:
+                    item.coordinates = result[3]
                 if len(stampMap[result[0]]) > 0:
                     preview = []
                     for stamp in stampMap[result[0]]:
