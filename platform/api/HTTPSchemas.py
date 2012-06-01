@@ -817,6 +817,16 @@ class HTTPSuggestedUserRequest(Schema):
 
         return SuggestedUserRequest().dataImport(data)
 
+class HTTPUserImages(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('images',                 HTTPImageSchema)
+
+    def importUser(user):
+        sizes = [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]
+        self.images = _buildProfileImage(user.screen_name, cache=user.timestamp.image_cache, sizes=sizes)
+        return self
+
 
 # ####### #
 # Invites #
