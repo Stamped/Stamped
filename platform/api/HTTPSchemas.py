@@ -396,7 +396,7 @@ class HTTPAccount(Schema):
         cls.addProperty('email',                        basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('privacy',                      bool, required=True)
-        cls.addProperty('phone',                        int)
+        cls.addProperty('phone',                        basestring)
 
     def importAccount(self, account):
         self.dataImport(account.dataExport(), overflow=True)
@@ -568,14 +568,14 @@ class HTTPAccountAlerts(Schema):
     def setSchema(cls):
         cls.addProperty('ios_alert_credit',       bool)
         cls.addProperty('ios_alert_like',         bool)
-        cls.addProperty('ios_alert_fav',          bool)
+        cls.addProperty('ios_alert_todo',          bool)
         cls.addProperty('ios_alert_mention',      bool)
         cls.addProperty('ios_alert_comment',      bool)
         cls.addProperty('ios_alert_reply',        bool)
         cls.addProperty('ios_alert_follow',       bool)
         cls.addProperty('email_alert_credit',     bool)
         cls.addProperty('email_alert_like',       bool)
-        cls.addProperty('email_alert_fav',        bool)
+        cls.addProperty('email_alert_todo',        bool)
         cls.addProperty('email_alert_mention',    bool)
         cls.addProperty('email_alert_comment',    bool)
         cls.addProperty('email_alert_reply',      bool)
@@ -585,14 +585,14 @@ class HTTPAccountAlerts(Schema):
         Schema.__init__(self)
         self.ios_alert_credit           = False
         self.ios_alert_like             = False
-        self.ios_alert_fav              = False
+        self.ios_alert_todo             = False
         self.ios_alert_mention          = False
         self.ios_alert_comment          = False
         self.ios_alert_reply            = False
         self.ios_alert_follow           = False
         self.email_alert_credit         = False
         self.email_alert_like           = False
-        self.email_alert_fav            = False
+        self.email_alert_todo           = False
         self.email_alert_mention        = False
         self.email_alert_comment        = False
         self.email_alert_reply          = False

@@ -45,11 +45,8 @@ class StampedAPIFacebookTest(AStampedAPITestCase):
         self.fb = globalFacebook()
         (self.fb_user_token_a, self.fb_user_id_a)   = self._createFacebookTestAccount(name='fbusera')
         (self.fb_user_token_b, self.fb_user_id_b)   = self._createFacebookTestAccount(name='fbuserb')
-        logs.info('### creating facebook stamped account a')
         (self.fUserA, self.fUserTokenA)             = self.createFacebookAccount(self.fb_user_token_a, name='fUserA')
-        logs.info('### creating facebook stamped account b')
         (self.fUserB, self.fUserTokenB)             = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
-        logs.info('### creating stamped account')
         (self.sUser, self.sUserToken)               = self.createAccount(name='sUser')
 
         self.fb.createTestUserFriendship(self.fb_user_id_a, self.fb_user_token_a, self.fb_user_id_b, self.fb_user_token_b)

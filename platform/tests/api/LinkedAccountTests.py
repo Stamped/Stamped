@@ -17,8 +17,10 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # ####### #
 
 #TODO: Replace these tokens with a test account!!
-TEST_USER_TOKEN      = '558345111-gsOAXPBGrvjOaWNmTyCtivPcEoH6yHVh627IynHU'
-TEST_USER_SECRET     = 'NpWLdSOrvHrtTpy2SALH4Ty1T5QUWdMZQhAMcW6Jp4'
+TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
+TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
+TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
+TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
 
 class StampedAPILinkedAccountTest(AStampedAPITestCase):
     def setUp(self):
@@ -29,6 +31,30 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
 
 class StampedAPILinkeAccountAdd(StampedAPILinkedAccountTest):
     def test_add_twitter_account(self):
+        # add the linked account
+        data = {
+            'service_name'   : 'twitter',
+            'user_id'        : 'test_user_a',
+            'screen_name'    : 'test_user_a',
+            'token'          : TWITTER_USER_A0_TOKEN,  #'test_twitter_token',
+            'secret'         : TWITTER_USER_A0_SECRET, #'test_twitter_secret',
+        }
+        self.addLinkedAccount(self.token, **data)
+
+        # verify that the linked account was properly added
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 1)
+        self.assertEqual(linkedAccounts['twitter']['service_name'], 'twitter')
+
+        # remove the linked account and verify that it has been removed
+        self.removeLinkedAccount(self.token, 'twitter')
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 0)
+
+
+class StampedAPILinkeAccountAdd(StampedAPILinkedAccountTest):
+    def test_add_twitter_account(self):
+        # add the linked account
         data = {
             'service_name'        : 'twitter',
             'user_id'             : 'test_user_a',
@@ -36,11 +62,14 @@ class StampedAPILinkeAccountAdd(StampedAPILinkedAccountTest):
             'token'          : TEST_USER_TOKEN,  #'test_twitter_token',
             'secret'         : TEST_USER_SECRET, #'test_twitter_secret',
         }
-        import pprint
         self.addLinkedAccount(self.token, **data)
+
+        # verify that the linked account was properly added
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 1)
         self.assertEqual(linkedAccounts['twitter']['service_name'], 'twitter')
+
+        # remove the linked account and verify that it has been removed
         self.removeLinkedAccount(self.token, 'twitter')
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 0)

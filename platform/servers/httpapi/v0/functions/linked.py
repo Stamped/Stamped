@@ -19,7 +19,6 @@ from Facebook           import *
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
-    logs.info('### linkedAccounts %s' % linkedAccounts)
     if linkedAccounts is None:
         result = None
     else:
@@ -30,13 +29,6 @@ def show(request, authUserId, **kwargs):
 @handleHTTPRequest(http_schema=HTTPLinkedAccount)
 @require_http_methods(["POST"])
 def add(request, authUserId, http_schema, **kwargs):
-    if http_schema.service_name == 'facebook':
-        pass
-    elif http_schema.service_name == 'twitter':
-        pass
-    elif http_schema.service_name == 'netflix':
-        pass
-
     linkedAccount = http_schema.exportLinkedAccount()
     logs.info('### linkedAccount: %s' % linkedAccount)
     result = stampedAPI.addLinkedAccount(authUserId, linkedAccount)

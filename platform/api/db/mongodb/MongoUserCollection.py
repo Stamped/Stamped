@@ -327,12 +327,11 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return result
 
     def findUsersByPhone(self, phone, limit=0):
-        queryPhone = []
-        for number in phone:
-            queryPhone.append(int(number))
+        queryPhone = [int(num) for num in phone]
+        queryPhone.extend( [str(num) for num in phone] )
         
         ### TODO: Add Index
-        data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
+        data = self._collection.find( {"phone": {"$in": queryPhone}} ).limit(limit)
         
         result = []
         for item in data:
