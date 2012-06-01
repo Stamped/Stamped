@@ -645,14 +645,13 @@ class HTTPFindUser(Schema):
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_token',                  basestring)
-        cls.addProperty('user_secret',               basestring)
+        cls.addProperty('user_token',                   basestring)
+        cls.addProperty('user_secret',                  basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                            basestring) # Comma delimited
-        cls.addProperty('facebook_token',               basestring)
+        cls.addProperty('user_token',                   basestring)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod

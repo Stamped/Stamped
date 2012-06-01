@@ -77,29 +77,11 @@ class StampedAPITwitterCreate(StampedAPITwitterTest):
 
 class StampedAPITwitterFind(StampedAPITwitterTest):
     def test_find_by_twitter(self):
-        ids = ['11131112','26424187']
-        import pprint
-        pprint.pprint(self.twUser)
-        data = {
-            "service_name"      : 'twitter',
-            "screen_name"       : 'TestUserA',
-            "screen_name"       : 'user_a',
-            }
-        self.addLinkedAccount(self.twUserToken, **data)
-
-        path = "account/linked/twitter/update.json"
-        data = {
-            "oauth_token": self.tokenB['access_token'],
-            "twitter_id": ids[1],
-            "twitter_screen_name": 'user_b',
-            }
-        self.addLinkedAccount(self.tokenB, **data)
-
         path = "users/find/twitter.json"
         data = {
-            "oauth_token": self.tokenC['access_token'],
-            "user_token": TEST_USER_TOKEN,
-            "user_secret" : TEST_USER_SECRET,
+            "oauth_token"   : self.twUserToken['access_token'],
+            "user_token"    : TEST_USER_TOKEN,
+            "user_secret"   : TEST_USER_SECRET,
         }
         result = self.handlePOST(path, data)
 
