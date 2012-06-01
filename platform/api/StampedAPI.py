@@ -3085,8 +3085,13 @@ class StampedAPI(AStampedAPI):
         not logged in or to user stamps; otherwise, raise exception.
         """
 
-        if userId is not None and scope == 'credit':
-            return self._collectionDB.getUserCreditStampIds(userId)
+        if scope == 'credit':
+            if userId is not None:
+                return self._collectionDB.getUserCreditStampIds(userId)
+            elif authUserId is not None:
+                return self._collectionDB.getUserCreditStampIds(authUserId)
+            else:
+                raise StampedInputError("User id required")
 
         if userId is not None and scope is not None:
             raise StampedInputError("Invalid scope combination")
