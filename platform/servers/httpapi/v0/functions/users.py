@@ -152,28 +152,8 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token' ]})
 @require_http_methods(["POST"])
 def findFacebook(request, authUserId, http_schema, **kwargs):
-    users = []
-    
-    if http_schema.facebook_token is not None:
-        users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=http_schema.facebook_token)
-    elif http_schema.q is not None:
-        q = http_schema.q.split(',')
-        facebookIds = []
-        
-        for item in q:
-            try:
-                number = int(item)
-                facebookIds.append(item)
-            except:
-                msg = 'Invalid facebook id: %s' % item
-                logs.warning(msg)
-        
-        users = stampedAPI.findUsersByFacebook(authUserId, facebookIds)
-    
-    output = []
-    for user in users:
-        if user.user_id != authUserId:
-            output.append(HTTPUser().importUser(user).dataExport())
-    
+    users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=http_schema.facebook_token)
+
+    output = [HTTPUser().importUser(user).dataExport() for user in users if user.user_id != authUserId]
     return transformOutput(output)
 
