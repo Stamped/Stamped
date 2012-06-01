@@ -2514,7 +2514,7 @@ class HTTPGuideRequest(Schema):
         cls.addProperty('scope',                        basestring)
 
     def exportGuideRequest(self):
-        return GuideRequest().dataImport(self.dataExport(), overflow=True)
+        # return GuideRequest().dataImport(self.dataExport(), overflow=True)
 
         data = self.dataExport()
         if 'viewport' in data:
