@@ -148,6 +148,7 @@ def handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
             pprint(entity)
         else:
             stampedAPI.mergeEntity(entity)
+            print "Stored music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
 
 def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     name = feed['name']
@@ -177,6 +178,7 @@ def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
             pprint(entity)
         else:
             stampedAPI.mergeEntity(entity)
+            print "Stored app", entity.title, "with iTunes ID", entity.sources.itunes_id
 
 if __name__ == '__main__':
     main()
