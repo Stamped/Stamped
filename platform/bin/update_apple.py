@@ -54,7 +54,6 @@ def main():
     stampedAPI = MongoStampedAPI()
     appleRSS = AppleRSS()
 
-    pool = Pool(8)
     itunes_ids = set()
     
     # music feed popularity prioritized by genre
@@ -116,9 +115,9 @@ def main():
         utils.log("processing %d app feeds" % (3 * len(app_feeds), ))
         
         for feed in app_feeds:
-            pool.spawn(handle_app_feed, feed, stampedAPI, appleRSS, itunes_ids, options)
-    
-    pool.join()
+            # Handle feeds synchronously, there's already plenty of parallelism within the handling of each feed.
+            handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options)
+
 
 def handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     name = feed['name']
@@ -134,11 +133,11 @@ def handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     
     albums.extend(songs)
     entities = albums
-    
-    for entity in entities:
+
+    def import_entity(entity):
         itunes_id = int(entity.sources.itunes_id)
         if itunes_id in itunes_ids:
-            continue
+            return
         
         itunes_ids.add(itunes_id)
         utils.log("(%s) %s (%s)" % (entity.subcategory, entity.title, entity.sources.itunes_id))
@@ -147,8 +146,13 @@ def handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
         if options.noop:
             pprint(entity)
         else:
+            print "About to merge music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
             stampedAPI.mergeEntity(entity)
             print "Stored music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
+
+    pool = Pool(16)
+    for entity in entities:
+        pool.spawn(import_entity, entity)
 
 def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     name = feed['name']
@@ -161,10 +165,10 @@ def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     apps2 = appleRSS.get_top_paid_apps(**feed); apps.extend(apps2)
     apps2 = appleRSS.get_top_grossing_apps(**feed); apps.extend(apps2)
     
-    for entity in apps:
+    def import_entity(entity):
         itunes_id = int(entity.sources.itunes_id)
         if itunes_id in itunes_ids:
-            continue
+            return
         
         itunes_ids.add(itunes_id)
         
@@ -177,8 +181,13 @@ def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
         if options.noop:
             pprint(entity)
         else:
+            print "About to merge app entity", entity.title, "with iTunes ID", entity.sources.itunes_id
             stampedAPI.mergeEntity(entity)
             print "Stored app", entity.title, "with iTunes ID", entity.sources.itunes_id
+
+    pool = Pool(16)
+    for entity in apps:
+        pool.spawn(import_entity, entity)
 
 if __name__ == '__main__':
     main()
