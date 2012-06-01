@@ -122,7 +122,7 @@ class AppleRSS(object):
 
                 if 'id' in entry and 'label' in entry['id']:
                     if '/preorder/' in entry['id']['label']:
-                        print 'Skipping preorder!'
+                        logs.info('Skipping preorder!')
                         return
                 else:
                     logs.info('WARNING: Missing id.label!')

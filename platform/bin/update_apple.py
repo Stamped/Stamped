@@ -14,6 +14,7 @@ from MongoStampedAPI        import MongoStampedAPI
 from optparse               import OptionParser
 from pprint                 import pprint
 from datetime               import datetime
+from libs.iTunes            import globaliTunes
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -34,6 +35,9 @@ def parseCommandLine():
     
     parser.add_option("-a", "--appsonly", default=False, action="store_true", 
         help="only parse app feeds")
+
+    parser.add_option("-q", "--qps", default=2, type="int", dest="max_qps",
+        action="store", help="max QPS sent to iTunes")
     
     (options, args) = parser.parse_args()
     
@@ -44,7 +48,9 @@ def parseCommandLine():
 
 def main():
     options, args = parseCommandLine()
-    
+
+    globaliTunes().setMaxQps(options.max_qps)
+
     stampedAPI = MongoStampedAPI()
     appleRSS = AppleRSS()
 
