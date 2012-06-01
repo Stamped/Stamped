@@ -34,8 +34,8 @@ except:
 
 class iTunes(object):
 
-    def __init__(self):
-        self.__limiter = RateLimiter(cps=10)
+    def __init__(self, max_qps=10):
+        self.__limiter = RateLimiter(cps=max_qps)
         pass
     
     # note: these decorators add tiered caching to this function, such that 
