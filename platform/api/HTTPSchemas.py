@@ -2463,20 +2463,6 @@ class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
         data = self._convertData(self.dataExport())
         return ConsumptionSlice().dataImport(data)
 
-class HTTPStampedBySlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('entity_id',        basestring, required=True)
-        cls.addProperty('group',            basestring)
-
-    def exportFriendsSlice(self):
-        data = self._convertData(self.dataExport())
-        return FriendsSlice().dataImport(data, overflow=True)
-
-    def exportGenericCollectionSlice(self):
-        data = self._convertData(self.dataExport())
-        return GenericCollectionSlice().dataImport(data, overflow=True)
-
 
 class HTTPGuideRequest(Schema):
     @classmethod

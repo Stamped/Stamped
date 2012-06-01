@@ -1605,7 +1605,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def entityStampedBy(self, entityId, authUserId=None, limit=10):
+    def entityStampedBy(self, entityId, authUserId=None, limit=100):
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
         except StampedUnavailableError:
@@ -1660,7 +1660,7 @@ class StampedAPI(AStampedAPI):
 
             friendUsers         = StampedByGroup()
             friendUsers.stamps  = stampPreviewList
-            friendUsers.count   = min(len(friendStamps), 99)
+            friendUsers.count   = len(friendStamps)
             stampedby.friends   = friendUsers
 
         return stampedby
