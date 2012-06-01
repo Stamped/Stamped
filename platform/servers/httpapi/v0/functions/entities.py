@@ -133,49 +133,11 @@ def menu(request, authUserId, http_schema, **kwargs):
     return transformOutput(http_menu.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampedBySlice)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityId)
 @require_http_methods(["GET"])
 def stampedBy(request, authUserId, http_schema, **kwargs):
-    showCount   = True if http_schema.group is None else False
-    
-    result      = HTTPStampedBy()
-
-    if http_schema.group is None:
-        stampedby = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
-        result.importStampedBy(stampedby)
-
-    elif http_schema.group == 'friends' and authUserId is not None:
-        requestSlice = http_schema.exportFriendsSlice()
-        requestSlice.distance = 1
-
-        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
-
-        result.friends          = HTTPStampedByGroup()
-        result.friends.stamps   = [HTTPStamp().importStamp(s) for s in stamps]
-        if count is not None:
-            result.friends.count = count
-
-    elif http_schema.group == 'fof' and authUserId is not None:
-        requestSlice = http_schema.exportFriendsSlice()
-        requestSlice.distance = 2
-        requestSlice.inclusive = False
-
-        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
-
-        result.fof          = HTTPStampedByGroup()
-        result.fof.stamps   = [HTTPStamp().importStamp(s) for s in stamps]
-        if count is not None:
-            result.fof.count = count
-
-    elif http_schema.group == 'all':
-        requestSlice  = http_schema.exportGenericCollectionSlice()
-        stamps, count = stampedAPI.getEntityStamps(http_schema.entity_id, authUserId, requestSlice, showCount)
-
-        result.all          = HTTPStampedByGroup()
-        result.all.stamps   = [HTTPStamp().importStamp(s) for s in stamps]
-        if count is not None:
-            result.all.count = count
-    
+    result = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
+    result = HTTPStampedBy().importStampedBy(result)
     return transformOutput(result.dataExport())
 
 
