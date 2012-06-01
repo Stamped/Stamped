@@ -3099,6 +3099,9 @@ class StampedAPI(AStampedAPI):
         if userId is not None and scope == 'credit':
             return self._collectionDB.getUserCreditStampIds(userId)
 
+        if userId is not None and scope is not None:
+            raise StampedInputError("Invalid scope combination")
+
         if userId is not None:
             self._collectionDB.getUserStampIds(userId)
 
