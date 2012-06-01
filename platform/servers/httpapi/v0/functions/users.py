@@ -137,9 +137,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
 @require_http_methods(["POST"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.findUsersByTwitter(authUserId,
-                                          twitterKey=http_schema.user_token,
-                                          twitterSecret=http_schema.user_secret)
+    users = stampedAPI.findUsersByTwitter(authUserId, http_schema.user_token, http_schema.user_secret)
     output = []
     for user in users:
         if user.user_id != authUserId:
@@ -152,7 +150,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token' ]})
 @require_http_methods(["POST"])
 def findFacebook(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.findUsersByFacebook(authUserId, facebookToken=http_schema.facebook_token)
+    users = stampedAPI.findUsersByFacebook(authUserId, http_schema.facebook_token)
 
     output = [HTTPUser().importUser(user).dataExport() for user in users if user.user_id != authUserId]
     return transformOutput(output)
