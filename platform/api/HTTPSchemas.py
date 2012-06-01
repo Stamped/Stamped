@@ -824,11 +824,10 @@ class HTTPSuggestedUserRequest(Schema):
 class HTTPUserImages(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('images',                     HTTPImageSchema)
+        cls.addNestedPropertyList('sizes',                  HTTPImageSizeSchema)
 
     def importUser(self, user):
         sizes = [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]
-        images = HTTPImageSchema()
         imageSizes = []
 
         for size in sizes:
@@ -838,8 +837,7 @@ class HTTPUserImages(Schema):
             image.height    = size
             imageSizes.append(image)
 
-        images.sizes = imageSizes
-        self.images = images
+        self.sizes = imageSizes
 
         return self
 
