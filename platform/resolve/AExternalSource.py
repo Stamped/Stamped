@@ -49,9 +49,9 @@ class AExternalSource(object):
         """
         Writes the given data to the field identified by path.
 
-        Entity may be any indexable object, such that path is identifies a valid nesting.
+        Entity may be any object with attributes such that path identifies a valid nesting.
 
-        Path may contain any objects suitable for indexing into the entity but it may not be empty.
+        Path must contains strings.
         """
         if len(path) == 0:
             raise RuntimeError('empty path')

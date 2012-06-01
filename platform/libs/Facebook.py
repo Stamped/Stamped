@@ -1,6 +1,6 @@
 
 import time
-import urllib, urllib2, json
+import urllib, urllib2, json, urlparse
 import logs
 import re
 from errors import *
@@ -27,9 +27,13 @@ class Facebook(object):
 
         while True:
             try:
-                baseurl = 'https://graph.facebook.com/'
-                encoded_params  = urllib.urlencode(params)
-                url     = "%s%s?%s" % (baseurl, path, encoded_params)
+                baseurl = ''
+                if path[:8] != 'https://':
+                    baseurl = 'https://graph.facebook.com/'
+                url     = "%s%s" % (baseurl, path)
+                if params != {}:
+                    encoded_params  = urllib.urlencode(params)
+                    url += "?%s" % encoded_params
                 logs.info('url: %s' % url)
                 if parse_json:
                     result  = json.load(urllib2.urlopen(url))
@@ -70,10 +74,23 @@ class Facebook(object):
         return self._get(
             access_token,
             path,
-#            params= {
-#                'access_token'            : access_token
-#            }
         )
+
+    def getFriendIds(self, access_token):
+        path = 'me/friends?access_token=%s' % access_token
+        friends = []
+        while True:
+            print path
+            result = self._get(None, path)
+            friends.extend([ d['id'] for d in result['data']] )
+            if 'paging' in result and 'next' in result['paging']:
+                path = result['paging']['next']
+                url = urlparse.urlparse(result['paging']['next'])
+                params = dict([part.split('=') for part in url[4].split('&')])
+                if 'offset' in params and int(params['offset']) == len(friends):
+                    continue
+            break
+        return friends
 
     # see: http://developers.facebook.com/docs/opengraph/using-app-tokens/
     def getAppAccessToken(self, client_id=APP_ID, client_secret=APP_SECRET):
@@ -100,7 +117,6 @@ class Facebook(object):
               'locale'              : locale,
               'permissions'         : permissions,
               'method'              : method,
-#              'access_token'        : access_token,
             }
         )
 
@@ -112,7 +128,6 @@ class Facebook(object):
             access_token,
             path,
             { 'method'          : 'delete',
-#              'access_token'    : access_token,
             },
             parse_json=False,
         )
@@ -130,6 +145,7 @@ def globalFacebook():
 
 USER_ID = '100003940534060'
 ACCESS_TOKEN = 'AAACEdEose0cBAFWCTyFkxAdiLCPBHMTmFZArw1sKUY3ji564jZB3aN46JQxtpiF80mUnwvrU4ZCZBOTPjcB2tgfRijBZBpgBc0t1OBi8tTqGOG58qzWba'
+#ACCESS_TOKEN = 'AAACEdEose0cBAKDAU1Wuupi7IZA3c4nAQWQkf315HnxHB6aWUj6tG9Lt6iU2hW0arXFO9b2xkkN275ezc6jyci1ZCqhCK9WdH5a3YJpHqWxQTDmlAD'
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
@@ -137,11 +153,12 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
+    if 'getFriendIds' in methods:             pprint(facebook.getFriendIds(access_token))
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'getFriendIds'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

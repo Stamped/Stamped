@@ -67,23 +67,12 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
                    lambda x: self.assertTrue(x[0]['contents'][-1]['blurb'] == self.stampA['contents'][-1]['blurb']), 
         ])
     
-    def test_credit_user_screen_name(self):
-        path = "collections/credit.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "screen_name": self.userB['screen_name']
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 1), 
-                   lambda x: self.assertTrue(x[0]['contents'][-1]['blurb'] == self.stampC['contents'][-1]['blurb']), 
-        ])
-    
     def test_credit_user_id(self):
-        path = "collections/credit.json"
+        path = "stamps/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
-            "user_id": self.userB['user_id']
+            "user_id": self.userB['user_id'],
+            "scope" : "credit",
         }
         
         self.async(lambda: self.handleGET(path, data), [ 

@@ -645,15 +645,13 @@ class HTTPFindUser(Schema):
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                            basestring) # Comma delimited
-        cls.addProperty('twitter_key',                  basestring)
-        cls.addProperty('twitter_secret',               basestring)
+        cls.addProperty('user_token',                   basestring)
+        cls.addProperty('user_secret',                  basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                            basestring) # Comma delimited
-        cls.addProperty('facebook_token',               basestring)
+        cls.addProperty('user_token',                   basestring)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod
@@ -818,6 +816,16 @@ class HTTPSuggestedUserRequest(Schema):
             data['coordinates'] = _coordinatesFlatToDict(coordinates)
 
         return SuggestedUserRequest().dataImport(data)
+
+class HTTPUserImages(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('images',                 HTTPImageSchema)
+
+    def importUser(self, user):
+        sizes = [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]
+        self.images = _buildProfileImage(user.screen_name, cache=user.timestamp.image_cache, sizes=sizes)
+        return self
 
 
 # ####### #
@@ -2463,20 +2471,6 @@ class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
     def exportConsumptionSlice(self):
         data = self._convertData(self.dataExport())
         return ConsumptionSlice().dataImport(data)
-
-class HTTPStampedBySlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('entity_id',        basestring, required=True)
-        cls.addProperty('group',            basestring)
-
-    def exportFriendsSlice(self):
-        data = self._convertData(self.dataExport())
-        return FriendsSlice().dataImport(data, overflow=True)
-
-    def exportGenericCollectionSlice(self):
-        data = self._convertData(self.dataExport())
-        return GenericCollectionSlice().dataImport(data, overflow=True)
 
 
 class HTTPGuideRequest(Schema):

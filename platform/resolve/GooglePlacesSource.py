@@ -111,7 +111,7 @@ class GooglePlacesPlace(ResolverPlace):
             return None
     
     @lazyProperty
-    def formatted_address(self):
+    def address_string(self):
         if 'address_string' in self.data:
             return self.data['address_string']
         return None
@@ -220,10 +220,11 @@ class GooglePlacesSource(GenericSource):
         GenericSource.__init__(self, 'googleplaces',
             groups=[
                 'address',
+                'formatted_address',
                 'phone',
                 'site',
                 'neighborhood',
-                # 'coordinates',
+                'coordinates',
             ],
             kinds=[
                 'place',
