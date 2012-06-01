@@ -88,6 +88,7 @@ urlpatterns = patterns('',
     ### USERS
     (r'v0/users/show.json',                                 'v0.functions.users.show'),
     (r'v0/users/lookup.json',                               'v0.functions.users.lookup'),
+    (r'v0/users/images.json',                               'v0.functions.users.images'),
     (r'v0/users/search.json',                               'v0.functions.users.search'),
     (r'v0/users/suggested.json',                            'v0.functions.users.suggested'),
     (r'v0/users/privacy.json',                              'v0.functions.users.privacy'),

@@ -62,7 +62,7 @@ except Exception:
     raise
 
 CREDIT_BENEFIT  = 1 # Per credit
-LIKE_BENEFIT    = 1 # Per 3 stamps
+LIKE_BENEFIT    = 1 # Per like
 
 # TODO (travis): refactor API function calling conventions to place optional last 
 # instead of first.

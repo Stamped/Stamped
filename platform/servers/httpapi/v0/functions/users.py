@@ -7,8 +7,7 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest(requires_auth=False, 
-                   http_schema=HTTPUserId)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
@@ -17,8 +16,7 @@ def show(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, 
-                   http_schema=HTTPUserIds)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserIds)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
     if http_schema.user_ids is not None:
@@ -33,6 +31,13 @@ def lookup(request, authUserId, http_schema, **kwargs):
         output.append(HTTPUser().importUser(user).dataExport())
     
     return transformOutput(output)
+
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId)
+@require_http_methods(["GET"])
+def images(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.getUser(http_schema, authUserId)
+    images = HTTPUserImages().importUser(user)
+    return transformOutput(images.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPUserSearch)

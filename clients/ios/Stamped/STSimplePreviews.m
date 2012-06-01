@@ -56,7 +56,7 @@
     [mapping mapRelationship:@"likes" withMapping:[STSimpleUser mapping]];
     [mapping mapRelationship:@"todos" withMapping:[STSimpleUser mapping]];
     [mapping mapRelationship:@"credits" withMapping:[STSimpleStampPreview mapping]];
-    [mapping mapRelationship:@"stamp" withMapping:[STSimpleStampPreview mapping]];
+    [mapping mapRelationship:@"stamps" withMapping:[STSimpleStampPreview mapping]];
     
     return mapping;
 }
