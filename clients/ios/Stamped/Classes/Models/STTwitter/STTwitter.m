@@ -20,6 +20,7 @@ static id __instance;
 @implementation STTwitter
 @synthesize access=_access;
 @synthesize twitterUser;
+@synthesize accountStore = _accountStore;
 
 + (id)sharedInstance {
     

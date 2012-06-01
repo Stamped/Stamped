@@ -49,4 +49,9 @@ static NSString* const kClientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 @property (nonatomic, assign) id<AccountManagerDelegate> delegate;
 @property (nonatomic, readonly) BOOL authenticated;
 
+
+- (void)createAccountWithFacebook:(NSString*)name
+                       screenname:(NSString*)screenname
+                        userToken:(NSString*)userToken 
+                            email:(NSString*)email;
 @end

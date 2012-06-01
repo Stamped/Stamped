@@ -15,6 +15,7 @@
 #import "STAuth.h"
 #import "STFacebook.h"
 #import "STAvatarView.h"
+#import "AccountManager.h"
 
 @interface SignupWelcomeViewController ()
 
@@ -165,8 +166,11 @@
         } else {
             [params setObject:cell.textField.text forKey:@"name"];
         }
-        
-        [[STAuth sharedInstance] facebookSignupWithParams:params];
+        [[AccountManager sharedManager] createAccountWithFacebook:@"John Doe"
+                                                       screenname:[params objectForKey:@"username"]
+                                                        userToken:[params objectForKey:@"user_token"]
+                                                            email:@"test3@stamped.com"];
+        //[[STAuth sharedInstance] facebookSignupWithParams:params];
         NSLog(@"facebook signing up with params %@", params);
 
     } else if (_signupType == SignupWelcomeTypeEmail) {
