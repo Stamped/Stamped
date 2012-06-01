@@ -746,14 +746,14 @@ class StampedAPI(AStampedAPI):
         if user_token is None or user_secret is None:
             raise StampedIllegalActionError("Connecting to Twitter requires a valid key / secret")
 
-        self._twitter.getFollowerIds(user_token, user_secret)
+        twitterIds = self._twitter.getFollowerIds(user_token, user_secret)
         return self._userDB.findUsersByTwitter(twitterIds)
 
     def _getTwitterFriends(self, user_token, user_secret):
         if user_token is None or user_secret is None:
             raise StampedIllegalActionError("Connecting to Twitter requires a valid key / secret")
 
-        self._twitter.getFriendIds(user_token, user_secret)
+        twitterIds = self._twitter.getFriendIds(user_token, user_secret)
         return self._userDB.findUsersByTwitter(twitterIds)
 
     def _getFacebookFriends(self, user_token):
