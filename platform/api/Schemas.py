@@ -1731,10 +1731,9 @@ class GuideCacheItem(Schema):
     def setSchema(cls):
         cls.addProperty('entity_id',                    basestring, required=True)
         cls.addNestedPropertyList('stamps',             StampPreview)
-        cls.addPropertyList('stamp_ids',                basestring)
-        cls.addPropertyList('stamp_user_ids',           basestring)
         cls.addPropertyList('todo_user_ids',            basestring)
         cls.addPropertyList('tags',                     basestring)
+        cls.addNestedProperty('coordinates',            CoordinatesSchema)
 
 class GuideCache(Schema):
     @classmethod

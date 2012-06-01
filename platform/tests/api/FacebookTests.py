@@ -43,17 +43,23 @@ class StampedAPIFacebookTest(AStampedAPITestCase):
         # Create a Facebook test user registered with our app, then use that test user to create a new Stamped account
         # Also create a user with standard stamped auth
         self.fb = globalFacebook()
-        (self.fb_user_token, self.fb_user_id)   = self._createFacebookTestAccount(name='fbusera')
-        (self.fUser, self.fUserToken)           = self.createFacebookAccount(self.fb_user_token, name='fUser')
+        (self.fb_user_token_a, self.fb_user_id_a)   = self._createFacebookTestAccount(name='fbusera')
+        (self.fb_user_token_b, self.fb_user_id_b)   = self._createFacebookTestAccount(name='fbuserb')
+        (self.fUserA, self.fUserTokenA)         = self.createFacebookAccount(self.fb_user_token_a, name='fUserA')
+        (self.fUserB, self.fUserTokenB)         = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
         (self.sUser, self.sUserToken)           = self.createAccount(name='sUser')
+
+        self.fb.createTestUserFriendship(self.fb_user_id_a, self.fb_user_token_a, self.fb_user_id_b, self.fb_user_token_b)
 
         self.privacy = False
 
 
     def tearDown(self):
         self.deleteAccount(self.sUserToken)
-        self.deleteAccount(self.fUserToken)
-        self.assertTrue(self._deleteFacebookTestAccount(self.fb_user_token, self.fb_user_id))
+        self.deleteAccount(self.fUserTokenB)
+        self.deleteAccount(self.fUserTokenA)
+        self.assertTrue(self._deleteFacebookTestAccount(self.fb_user_token_b, self.fb_user_id_b))
+        self.assertTrue(self._deleteFacebookTestAccount(self.fb_user_token_a, self.fb_user_id_a))
 
 ## create two stamped accounts, give them both linked facebook id, and try to create a facebook account
 ## create one stamped account, link it to facebook account, try to create new stamped facebook account
@@ -68,7 +74,7 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
     def test_create_duplicate_facebook_auth_account(self):
         with expected_exception():
-            self.createFacebookAccount(self.fb_user_token, name='fUser2')
+            self.createFacebookAccount(self.fb_user_token_a, name='fUser2')
 
     def test_linked_account_with_used_facebook_id(self):
 #        self.addLinkedAccount(
@@ -87,10 +93,10 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
     def test_valid_login(self):
         # login with facebook user account
-        result = self.loginWithFacebook(self.fb_user_token)
+        result = self.loginWithFacebook(self.fb_user_token_a)
 
         # verify that the stamped user token and user_id are correct
-        self.assertEqual(result['user']['user_id'], self.fUser['user_id'])
+        self.assertEqual(result['user']['user_id'], self.fUserA['user_id'])
 
 ### TESTS TO ADD:
 # Change bio from string to None

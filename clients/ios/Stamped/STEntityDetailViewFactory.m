@@ -100,6 +100,9 @@
     BOOL loadedSomething = NO;
     STViewContainer* view = [[[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 0)] autorelease];
     NSArray* keys = [NSArray arrayWithObjects:@"header", @"actions", @"metadata", @"playlist", nil];
+    if (self.context.stamp) {
+        keys = [NSArray arrayWithObjects:@"actions", @"header", nil];
+    }
     for (NSString* key in keys) {
         @synchronized(self.components) {
             STViewCreator creator = [self.components objectForKey:key];
