@@ -44,7 +44,7 @@
 TODO:
     * align stamp-gallery with profile header
     * prep test for anthony w/ and w/out opacity applied to user's custom colors
-    * fix link colors throughout (including visited states)
+    * check out how clipboard.com's lightbox handles scrolling!
     
     * sDetail:
         * BETA - "Anatomy of eDetail section" spec
@@ -52,10 +52,22 @@ TODO:
         * DONE - Opening / closing animations
         * BETA - Comment collapsing ala Google Plus
         * Move like / todo / comment counters to their own section
-    * BETA - First cut at map view integration
+    * Map view
+        * Map layout matches spec
+        * Collapsable stamp list
+        * Autocentering based on user's location
+        * Custom stamp popup
+        * sdetail overlay
+        * Share this map button?
     * Profile Page:
-        * BETA - Header functionality w/ temp header images
-        * DONE- Sort stamps by popularity
+        * header:
+            * BETA - Header functionality w/ temp header images
+            * dynamic, category-dependent header titles
+            * view histogram
+            * view bio / friends
+            * share this collection
+        * gallery:
+            * ALPHA (DEBUG) - Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
     
@@ -144,4 +156,8 @@ OLD:
     * scrollbars are now properly hidden / disabled during sdetail popup
     * ESC key now closes all lightboxes and the sdetail popup
     * text highlight color is no longer hot pink; instead, it inherits the browser's default as usual
+    * fix link colors throughout (including visited/hover/active states)
+
+ChangeList:
+    * sDetail overlay now deals properly with scrollbars hiding / reappearing
 

@@ -1,5 +1,3 @@
-@import "libs/h5bp.min.css";
-
 @import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
 /* profile.less
  * 
@@ -902,6 +900,7 @@ ul.user-category-distribution li .bargraph .value {
   width: 100%;
   height: 100%;
   position: fixed;
+  overflow: scroll;
   top: 15%;
   z-index: 100;
 }
@@ -911,11 +910,16 @@ body.sdetail_popup .post-header {
 }
 body.sdetail_popup_animation #main-page-content-body,
 body.sdetail_popup #main-page-content-body {
+  display: block;
   visibility: visible !important;
 }
 body.sdetail_popup_animation #main-page-content-body #stamp-category-nav-bar,
 body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
   opacity: 0;
+}
+body.sdetail_popup_animation #main-page-content-body #main-content,
+body.sdetail_popup #main-page-content-body #main-content {
+  display: block;
 }
 body.sdetail_popup {
   /* hide scrollbars when displaying sdetail */
@@ -923,11 +927,10 @@ body.sdetail_popup {
   /* TODO: find a way of doing this that does not result in the scroll 
      * position jumping */
 
-  /*overflow: hidden;*/
-
+  overflow-y: hidden;
 }
 body.sdetail_popup #main-page-content-body {
-  visibility: hidden !important;
+  display: none;
   /*#stamp-category-nav-bar {
             visibility: hidden !important;
             opacity: 0;
@@ -935,5 +938,5 @@ body.sdetail_popup #main-page-content-body {
 
 }
 body.sdetail_popup #main-page-content-body #main-content {
-  visibility: hidden !important;
+  display: none;
 }

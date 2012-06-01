@@ -908,6 +908,9 @@ ul.user-category-distribution {
     height: 100%;
     
     position: fixed;
+    overflow: scroll;
+    //position: absolute;
+    
     top: 15%;
     z-index: 100;
 }
@@ -919,10 +922,15 @@ body.sdetail_popup_animation, body.sdetail_popup {
     }
     
     #main-page-content-body {
+        display: block;
         visibility: visible !important;
         
         #stamp-category-nav-bar {
             opacity: 0;
+        }
+        
+        #main-content {
+            display: block;
         }
     }
 }
@@ -931,17 +939,19 @@ body.sdetail_popup {
     /* hide scrollbars when displaying sdetail */
     /* TODO: find a way of doing this that does not result in the scroll 
      * position jumping */
-    /*overflow: hidden;*/
+    overflow-y: hidden;
     
     #main-page-content-body {
-        visibility: hidden !important;
+        display: none;
+        //visibility: hidden !important;
         
         /*#stamp-category-nav-bar {
             visibility: hidden !important;
             opacity: 0;
         }*/
         #main-content {
-            visibility: hidden !important;
+            display: none;
+            //visibility: hidden !important;
         }
     }
 }

@@ -241,6 +241,9 @@
             
             .stamp-contents {
                 .stamp-contents-upper {
+                    position: relative;
+                    z-index: 501;
+                    
                     .user-header {
                         .name {
                             float: left;
@@ -313,10 +316,20 @@
                 
                 .comments {
                     //border: 1px solid green;
+                    overflow-y: hidden;
+                    position: relative;
+                    z-index: 496;
+                    
+                    display: block;
+                    height:  auto;
                     
                     .comments-nav {
                         border-bottom: 1px dashed #bbb;
                         text-align: center;
+                        
+                        position: relative;
+                        z-index: 498;
+                        background: #fff;
                         
                         margin:  0 24px;
                         padding: .5em 0;
@@ -330,10 +343,9 @@
                         }
                     }
                     
-                    display: block;
-                    height: auto;
-                    
-                    ol.comment-list {
+                    ol.comments-list {
+                        position: relative;
+                        
                         text-decoration: none;
                         list-style: none;
                         text-indent: 0;
@@ -344,22 +356,7 @@
                             display: block;
                             border-bottom: 1px solid #bbb;
                             padding: 1em @space 0;
-                            //border: 1px solid red;
-                            
-                            -webkit-transition-property: -webkit-transform, opacity;
-                               -moz-transition-property:    -moz-transform, opacity;
-                                -ms-transition-property:     -ms-transform, opacity;
-                                 -o-transition-property:         top, left, opacity;
-                                    transition-property:         transform, opacity;
-                            
-                            -webkit-transition-duration: 0.5s;
-                               -moz-transition-duration: 0.5s;
-                                -ms-transition-duration: 0.5s;
-                                 -o-transition-duration: 0.5s;
-                                    transition-duration: 0.5s;
-                            
                             opacity: 1;
-                            .transform(scale(1.0));
                             
                             .profile-image-small {
                                 float: left;
@@ -401,8 +398,10 @@
                     }
                 }
                 
-                .collapsed {
+                .collapsed, .collapsing {
                     .comments-nav {
+                        position: relative;
+                        
                         .show {
                             display: block;
                         }
@@ -411,29 +410,16 @@
                             display: none;
                         }
                     }
-                    
-                    ol.comment-list {
+                }
+                
+                .collapsed {
+                    ol.comments-list {
                         li.comment {
                             display: none;
-                            /*.transform(scale(0.001));
-                            
-                            line-height: 0;
-                            opacity: 0;
-                            height:  0;
-                            
-                            margin:  0;
-                            padding: 0;*/
                         }
                         
                         li.comment:nth-last-child(-n+2) {
                             display: block;
-                            /*.transform(scale(1));
-                            
-                            line-height: normal;
-                            height: auto;
-                            opacity: 1;
-                            
-                            padding: 1em @space 0;*/
                         }
                     }
                 }

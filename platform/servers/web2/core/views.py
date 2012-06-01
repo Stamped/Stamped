@@ -89,7 +89,7 @@ def profile(request, schema, **kwargs):
         friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
         followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
+    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
         # useful debugging utility -- circumvent dev server to speed up reloads
         user        = travis_test.user
         user_id     = user['user_id']
