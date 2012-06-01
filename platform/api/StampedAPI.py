@@ -3596,7 +3596,7 @@ class StampedAPI(AStampedAPI):
                         created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
                 score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
                 coordinates = None 
-                if hasattr(entity, coordinates):
+                if hasattr(entity, 'coordinates'):
                     coordinates = entity.coordinates
                 r.append((entity.entity_id, score, entity.types, coordinates))
             r.sort(key=itemgetter(1))
