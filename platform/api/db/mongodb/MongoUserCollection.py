@@ -381,7 +381,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-                {"linked.twitter.user_id": {"$in": twitterIds}}
+                {"linked.facebook.user_id": {"$in": facebookIds}}
         ).limit(limit)
 
         for item in data:

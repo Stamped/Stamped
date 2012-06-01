@@ -246,7 +246,7 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
 
         # Validate email address
-        if account.email is not None:
+        if account.email is not None and account.auth_service == 'stamped':
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
                 raise StampedInputError("Invalid format for email address")
@@ -327,12 +327,17 @@ class StampedAPI(AStampedAPI):
         user = self._verifyFacebookAccount(new_fb_account.user_token)
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
 
+        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
+        #  and require uniqueness
+        if account.email is None:
+            account.email = 'fb_%s' % user['id']
+
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
         fb_acct.service_name                = 'facebook'
         fb_acct.user_id                     = user['id']
-        fb_acct.name                   = user['name']
-        fb_acct.screen_name            = user.pop('username', None)
+        fb_acct.name                        = user['name']
+        fb_acct.screen_name                 = user.pop('username', None)
         account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
@@ -351,6 +356,11 @@ class StampedAPI(AStampedAPI):
         # First, get user information from Twitter using the passed in token
         user = self._verifyTwitterAccount(new_tw_account.user_token, new_tw_account.user_secret)
         account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
+
+        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
+        #  and require uniqueness
+        if account.email is None:
+            account.email = 'tw_%s' % user['id']
 
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
@@ -757,7 +767,7 @@ class StampedAPI(AStampedAPI):
         return self._userDB.findUsersByTwitter(twitterIds)
 
     def _getFacebookFriends(self, user_token):
-        if token is None:
+        if user_token is None:
             raise StampedIllegalActionError("Connecting to Facebook requires a valid token")
 
         facebookIds = self._facebook.getFriendIds(user_token)

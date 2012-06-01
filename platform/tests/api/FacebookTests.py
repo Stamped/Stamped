@@ -45,9 +45,12 @@ class StampedAPIFacebookTest(AStampedAPITestCase):
         self.fb = globalFacebook()
         (self.fb_user_token_a, self.fb_user_id_a)   = self._createFacebookTestAccount(name='fbusera')
         (self.fb_user_token_b, self.fb_user_id_b)   = self._createFacebookTestAccount(name='fbuserb')
-        (self.fUserA, self.fUserTokenA)         = self.createFacebookAccount(self.fb_user_token_a, name='fUserA')
-        (self.fUserB, self.fUserTokenB)         = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
-        (self.sUser, self.sUserToken)           = self.createAccount(name='sUser')
+        logs.info('### creating facebook stamped account a')
+        (self.fUserA, self.fUserTokenA)             = self.createFacebookAccount(self.fb_user_token_a, name='fUserA')
+        logs.info('### creating facebook stamped account b')
+        (self.fUserB, self.fUserTokenB)             = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
+        logs.info('### creating stamped account')
+        (self.sUser, self.sUserToken)               = self.createAccount(name='sUser')
 
         self.fb.createTestUserFriendship(self.fb_user_id_a, self.fb_user_token_a, self.fb_user_id_b, self.fb_user_token_b)
 
@@ -97,6 +100,19 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
         # verify that the stamped user token and user_id are correct
         self.assertEqual(result['user']['user_id'], self.fUserA['user_id'])
+
+
+class StampedAPIFacebookFind(StampedAPIFacebookTest):
+    def test_find_by_facebook(self):
+        path = "users/find/facebook.json"
+        data = {
+            "oauth_token"   : self.fUserTokenA['access_token'],
+            "user_token"    : self.fb_user_token_a,
+            }
+        result = self.handlePOST(path, data)
+
+        self.assertLength(result, 1)
+        self.assertEqual(result[0]['user_id'], self.fUserB['user_id'])
 
 ### TESTS TO ADD:
 # Change bio from string to None
