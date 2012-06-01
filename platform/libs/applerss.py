@@ -115,6 +115,17 @@ class AppleRSS(object):
         
         def _parse_entry(entities, entry):
             try:
+                # We skip pre-orders because we can't actually look them up by ID. This is actually a pretty fatal
+                # error because right now we don't even use the data in the feed itself; we immediately re-crawl based
+                # on the iTunes ID. Anyway, there doesn't seem to be any big advantage to having preorders, so this is
+                # hardly the most pressing problem.
+
+                if 'id' in entry and 'label' in entry['id']:
+                    if '/preorder/' in entry['id']['label']:
+                        logs.info('Skipping preorder!')
+                        return
+                else:
+                    logs.info('WARNING: Missing id.label!')
                 entity = self._parse_entity(entry)
                 if entity is not None:
                     entities.append(entity)

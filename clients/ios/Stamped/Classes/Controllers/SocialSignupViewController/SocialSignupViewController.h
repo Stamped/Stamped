@@ -8,8 +8,5 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SocialSignupViewController : UIViewController
-
-@property(nonatomic,strong) UITableView *tableView;
-
+@interface SocialSignupViewController : UITableViewController
 @end

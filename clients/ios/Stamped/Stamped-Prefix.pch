@@ -17,9 +17,11 @@
     #import "UIFont+Stamped.h"
     #import "UIColor+Stamped.h"
     #import "STNavigationItem.h"
+    #import "STRootViewController.h"
     #import "STStampedAPI.h"
     #import "Util.h"
     #import "QuartzUtils.h"
+    #import "STEvents.h"
 #endif
 
 #define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)

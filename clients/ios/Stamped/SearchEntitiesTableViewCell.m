@@ -12,6 +12,7 @@
 #import "SearchResult.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
+#import "UIFont+Stamped.h"
 
 @interface SearchEntitiesTableViewCell ()
 @property (nonatomic, readonly) UIImageView* categoryImageView;

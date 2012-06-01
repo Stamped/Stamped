@@ -11,7 +11,11 @@
 #import "STWelcomeViewController.h"
 #import "LoginViewController.h"
 #import "TwitterAccountsViewController.h"
+#import "STSocialAuthViewController.h"
 #import "STRootViewController.h"
+#import "SignupViewController.h"
+#import "STFacebook.h"
+#import "STTwitter.h"
 
 @interface STMenuController ()
 - (void)showWelcome;
@@ -19,19 +23,14 @@
 
 @implementation STMenuController
 
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    
-    if (!LOGGED_IN) {
+    if (!LOGGED_IN || YES) {
         [self showWelcome];
     }
     
-    
 }
-
-
 
 
 #pragma mark - Welcome
@@ -69,17 +68,52 @@
     
     } else if (option == STWelcomeViewControllerOptionTwitter) {
         
-        TwitterAccountsViewController *controller = [[TwitterAccountsViewController alloc] init];
-        controller.delegate = (id<TwitterAccountsViewControllerDelegate>)self;
+        if (NO && NSClassFromString(@"TWTweetComposeViewController")) {
+            
+            TwitterAccountsViewController *controller = [[TwitterAccountsViewController alloc] init];
+            controller.delegate = (id<TwitterAccountsViewControllerDelegate>)self;
+            STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+            [self presentModalViewController:navController animated:YES];
+            [controller release];
+            [navController release];
+            
+        } else {
+            
+            STSocialAuthViewController *controller = [[STSocialAuthViewController alloc] initWithAuthType:SocialAuthTypeTwitter];
+            STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+            [self presentModalViewController:navController animated:YES];
+            [controller release];
+            [navController release];
+            
+        }
+
+    
+    } else if (option == STWelcomeViewControllerOptionSignup) {
+        
+        SignupViewController *controller = [[SignupViewController alloc] init];
+        controller.delegate = (id<SignupViewControllerDelegate>)self;
         STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
         [self presentModalViewController:navController animated:YES];
         [controller release];
         [navController release];
-         
         
+    } else if (option == STWelcomeViewControllerOptionFacebook) {
+        
+        STSocialAuthViewController *controller = [[STSocialAuthViewController alloc] initWithAuthType:SocialAuthTypeFacebook];
+        STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+        [self presentModalViewController:navController animated:YES];
+        [controller release];
+        [navController release];
     }
  
     
+}
+
+
+#pragma mark - SignupViewControllerDelegate
+
+- (void)signupViewControllerCancelled:(SignupViewController*)controller {
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 

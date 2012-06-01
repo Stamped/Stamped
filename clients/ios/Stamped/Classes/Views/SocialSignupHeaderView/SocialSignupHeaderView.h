@@ -8,6 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SocialSignupHeaderView : UIView
+@class STAvatarView;
+@interface SocialSignupHeaderView : UIView {
+    UIImageView *_stampView;
+}
+
+@property(nonatomic,retain,readonly) STAvatarView *imageView;
+@property(nonatomic,retain,readonly) UILabel *titleLabel;
+@property(nonatomic,retain,readonly) UILabel *subTitleLabel;
+@property(nonatomic,retain,readonly) UILabel *detailLabel;
+
+- (void)setStampColors:(NSArray*)colors;
 
 @end

@@ -9,7 +9,7 @@
 #import "STSimplePreviews.h"
 #import "STSimpleUser.h"
 #import "STSimpleComment.h"
-#import "STSimpleStamp.h"
+#import "STSimpleStampPreview.h"
 
 @implementation STSimplePreviews
 
@@ -17,7 +17,7 @@
 @synthesize likes = likes_;
 @synthesize todos = todos_;
 @synthesize credits = credits_;
-@synthesize stampUsers = _stampUsers;
+@synthesize stamps = stamps_;
 
 - (id)initWithCoder:(NSCoder *)decoder {
     self = [super init];
@@ -26,7 +26,7 @@
         likes_ = [[decoder decodeObjectForKey:@"likes"] retain];
         todos_ = [[decoder decodeObjectForKey:@"todos"] retain];
         credits_ = [[decoder decodeObjectForKey:@"credits"] retain];
-        _stampUsers = [[decoder decodeObjectForKey:@"stampUsers"] retain];
+        stamps_ = [[decoder decodeObjectForKey:@"stamps"] retain];
     }
     return self;
 }
@@ -37,7 +37,7 @@
     [likes_ release];
     [todos_ release];
     [credits_ release];
-    [_stampUsers release];
+    [stamps_ release];
     [super dealloc];
 }
 
@@ -46,7 +46,7 @@
     [encoder encodeObject:self.likes forKey:@"likes"];
     [encoder encodeObject:self.todos forKey:@"todos"];
     [encoder encodeObject:self.credits forKey:@"credits"];
-    [encoder encodeObject:self.stampUsers forKey:@"stampUsers"];
+    [encoder encodeObject:self.stamps forKey:@"stamps"];
 }
 
 + (RKObjectMapping*)mapping {
@@ -55,8 +55,8 @@
     [mapping mapRelationship:@"comments" withMapping:[STSimpleComment mapping]];
     [mapping mapRelationship:@"likes" withMapping:[STSimpleUser mapping]];
     [mapping mapRelationship:@"todos" withMapping:[STSimpleUser mapping]];
-    [mapping mapRelationship:@"credits" withMapping:[STSimpleStamp mappingWithoutPreview]];
-    [mapping mapKeyPath:@"stamp_users" toRelationship:@"stampUsers" withMapping:[STSimpleUser mapping]];
+    [mapping mapRelationship:@"credits" withMapping:[STSimpleStampPreview mapping]];
+    [mapping mapRelationship:@"stamps" withMapping:[STSimpleStampPreview mapping]];
     
     return mapping;
 }
@@ -67,7 +67,7 @@
     copy.likes = previews.likes;
     copy.todos = previews.todos;
     copy.credits = previews.credits;
-    copy.stampUsers = previews.stampUsers;
+    copy.stamps = previews.stamps;
     return copy;
 }
 

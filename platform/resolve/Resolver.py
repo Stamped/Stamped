@@ -990,21 +990,33 @@ class Resolver(object):
         return set( [ self.trackSimplify(track['name'], artist) for track in entity.tracks ] )
     
     def albumsSet(self, entity):
+        if entity.albums is None:
+            return set()
         return set( [ self.albumSimplify(album['name']) for album in entity.albums ] )
     
     def castSet(self, entity):
+        if entity.cast is None:
+            return set()
         return set( [ self.actorSimplify(actor['name']) for actor in entity.cast ] )
     
     def artistsSet(self, entity):
+        if entity.artists is None:
+            return set()
         return set( [ self.artistSimplify(i['name']) for i in entity.artists ] )
     
     def directorsSet(self, entity):
+        if entity.directors is None:
+            return set()
         return set( [ self.simplify(i['name']) for i in entity.directors ] )
     
     def authorsSet(self, entity):
+        if entity.authors is None:
+            return set()
         return set( [ self.simplify(i['name']) for i in entity.authors ] )
     
     def publishersSet(self, entity):
+        if entity.publishers is None:
+            return set()
         return set( [ self.simplify(i['name']) for i in entity.publishers ] )
 
     def albumsComparison(self, query, match, options):

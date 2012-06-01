@@ -41,6 +41,8 @@
 #import "STMenuController.h"
 #import "STIWantToViewController.h"
 #import "STSharedCaches.h"
+#import "STTwitter.h"
+#import "STFacebook.h"
 
 #import "STCreateStampViewController.h"
 
@@ -132,6 +134,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     grid_.hidden = YES;
     [self.window addSubview:grid_];
     STLog(@"Finished Loading application");
+    [Util executeAsync:^{
+        [Util removeOldCacheDirectories];
+    }];
     return YES;
 }
 
@@ -148,7 +153,14 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    return NO;
+    
+    if ([[url host] isEqualToString:@"twitter"] && [url query].length > 0) {
+        [[STTwitter sharedInstance] handleOpenURL:url];
+	}  else if ([[url description] hasPrefix:@"fb297022226980395"]) {
+        [[[STFacebook sharedInstance] facebook] handleOpenURL:url];
+	}
+    
+    return YES;
 }
 
 - (void)application:(UIApplication *)application willChangeStatusBarFrame:(CGRect)newStatusBarFrame {
@@ -409,9 +421,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addFont:[UIFont fontWithName:@"TitlingGothicFBComp-Light" size:35] forKey:@"UIFont.stampedTitleLightFont" inSection:@"UIFont"];
     
     CGFloat fontSize = 12;
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
-    [STConfiguration addFont:[UIFont fontWithName:@"Helvetica" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue" size:fontSize] forKey:@"UIFont.stampedFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue-Bold" size:fontSize] forKey:@"UIFont.stampedBoldFont" inSection:@"UIFont"];
+    [STConfiguration addFont:[UIFont fontWithName:@"HelveticaNeue" size:fontSize] forKey:@"UIFont.stampedSubtitleFont" inSection:@"UIFont"];
     
     //UIColor
     
