@@ -645,9 +645,8 @@ class HTTPFindUser(Schema):
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                            basestring) # Comma delimited
-        cls.addProperty('twitter_key',                  basestring)
-        cls.addProperty('twitter_secret',               basestring)
+        cls.addProperty('user_token',                  basestring)
+        cls.addProperty('user_secret',               basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod

@@ -75,6 +75,51 @@ class StampedAPITwitterCreate(StampedAPITwitterTest):
         # verify that the stamped user token and user_id are correct
         self.assertEqual(result['user']['user_id'], self.twUser['user_id'])
 
+class StampedAPITwitterFind(StampedAPITwitterTest):
+    def test_find_by_twitter(self):
+        ids = ['11131112','26424187']
+        import pprint
+        pprint.pprint(self.twUser)
+        data = {
+            "service_name"      : 'twitter',
+            "screen_name"       : 'TestUserA',
+            "screen_name"       : 'user_a',
+            }
+        self.addLinkedAccount(self.twUserToken, **data)
+
+        path = "account/linked/twitter/update.json"
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "twitter_id": ids[1],
+            "twitter_screen_name": 'user_b',
+            }
+        self.addLinkedAccount(self.tokenB, **data)
+
+        path = "users/find/twitter.json"
+        data = {
+            "oauth_token": self.tokenC['access_token'],
+            "user_token": TEST_USER_TOKEN,
+            "user_secret" : TEST_USER_SECRET,
+        }
+        result = self.handlePOST(path, data)
+
+        self.assertLength(result, 2)
+#        for user in result:
+#            self.assertIn(user['screen_name'], self.screen_names)
+#            self.assertIn(user['identifier'], ids)
+#
+#        path = "users/find/twitter.json"
+#        data = {
+#            "oauth_token": self.tokenC['access_token'],
+#            "twitter_key": TWITTER_KEY,
+#            "twitter_secret": TWITTER_SECRET,
+#            }
+#        result = self.handlePOST(path, data)
+#        self.assertTrue(len(result) >= 2)
+#        for user in result:
+#            self.assertIn(user['screen_name'], self.screen_names)
+#            self.assertIn(user['identifier'], ids)
+
 ### TESTS TO ADD:
 # Change bio from string to None
 # Upload image data for avatar

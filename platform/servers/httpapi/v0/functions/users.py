@@ -134,29 +134,12 @@ def findPhone(request, authUserId, http_schema, **kwargs):
 
 
 @handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
-                   parse_request_kwargs={'obfuscate':['q', 'twitter_key', 'twitter_secret' ]})
+                   parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
 @require_http_methods(["POST"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
-    users = []
-
-    if http_schema.twitter_key is not None and http_schema.twitter_secret is not None:
-        users = stampedAPI.findUsersByTwitter(authUserId, 
-                                              twitterKey=http_schema.twitter_key, 
-                                              twitterSecret=http_schema.twitter_secret)
-    elif http_schema.q is not None:
-        q = http_schema.q.split(',')
-        twitterIds = []
-        
-        for item in q:
-            try:
-                number = int(item)
-                twitterIds.append(item)
-            except:
-                msg = 'Invalid twitter id: %s' % item
-                logs.warning(msg)
-        
-        users = stampedAPI.findUsersByTwitter(authUserId, twitterIds)
-    
+    users = stampedAPI.findUsersByTwitter(authUserId,
+                                          twitterKey=http_schema.twitter_key,
+                                          twitterSecret=http_schema.twitter_secret)
     output = []
     for user in users:
         if user.user_id != authUserId:
