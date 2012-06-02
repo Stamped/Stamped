@@ -10,16 +10,6 @@
                 
                 <div class="stamp-contents">
                     <div class="stamp-contents-upper{% if stamp.previews.comments|length > 0 %} shadowed{% endif %}">
-                        <div class="user-header user-header-0 clearfix">
-                            <div class="name">
-                                {% handlebars_template "screen-name" stamp.user %}
-                            </div>
-                            
-                            {% if stamp.modified %}
-                                <div class="timestamp_raw">{{stamp.modified}}</div>
-                            {% endif %}
-                        </div>
-                        
                         <div class="stamp-inner-content clearfix">
                             <div class="stamp-card-header clearfix">
                                 {% handlebars_template "profile-image-large-ish" stamp.user %}
@@ -41,15 +31,37 @@
                                 </div>
                             </div>
                             
-                            {% if stamp.contents.0.images.0.sizes.0.url %}
-                                {% handlebars_template "stamp-card-image" stamp %}
-                            {% endif %}
+                            <div class="user-header clearfix">
+                                <div class="name">
+                                    {% handlebars_template "screen-name" stamp.user %}
+                                    
+                                    {% if stamp.contents.0.blurb and stamp.contents.0.blurb|length > 0 %}
+                                    said:
+                                    {% else %}
+                                    stamped a 
+                                        {% if entity.subcategory %}
+                                            {{entity.subcategory}}
+                                        {% else %}
+                                            {{entity.category}}
+                                        {% endif %}
+                                        .
+                                    {% endif %}
+                                </div>
+                                
+                                {% if stamp.modified %}
+                                    <div class="timestamp_raw">{{stamp.modified}}</div>
+                                {% endif %}
+                            </div>
                             
                             {% for content in stamp.contents %}
                                 {% if content.blurb and content.blurb|length > 0 %}
                                     <p class="normal_blurb">{{content.blurb}}</p>
                                 {% endif %}
                             {% endfor %}
+                            
+                            {% if stamp.contents.0.images.0.sizes.0.url %}
+                                {% handlebars_template "stamp-card-image" stamp %}
+                            {% endif %}
                             
                             {% handlebars_template "social-feedback" stamp %}
                         </div>
@@ -147,28 +159,35 @@
             <div class="entity-actions">
                 {% for a in entity.actions %}
                     {% with action=a.action %}
-                        <a class='action-link' href="#">
+                        {% if action.sources.0.link and action.sources|length == 1 %}
+                            <a class='action-link' href="{{action.sources.0.link}}">
+                        {% else %}
+                            <a class='action-link' href="">
+                        {% endif %}
+                        
                             <div class="action action-{{action.type}} clearfix">
                                 <div class='entity-title' style="display: none;">
                                     {{stamp.entity.title}}
                                 </div>
                                 
                                 <div class='lhs'>
-                                    {% if a.icon %}
-                                        <img class='action-icon' src="{{a.icon}}" />
-                                    {% endif %}
+                                    <div class='action-icon action-icon-{{action.type}}'></div>
                                     
-                                    {{a.name}}
+                                    <!--{% if a.icon %}
+                                        <img class='action-icon' src="{{a.icon}}" />
+                                    {% endif %}-->
+                                    
+                                    <div class='action-name'>{{a.name}}</div>
                                 </div>
                                 
                                 {% if action.sources.0 %}
                                     <div class="rhs">
                                         {% for source in action.sources %}
                                             <div class="source source-{{source.source}}">
-                                                {% if source.icon %}
+                                                <!--{% if source.icon %}
                                                     <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
         />
-                                                {% endif %}
+                                                {% endif %}-->
                                             </div>
                                         {% endfor %}
                                     </div>
@@ -212,7 +231,7 @@
                                 {% endif %}
                                 
                                 {% if item.icon %}
-                                    <img src="{{item.icon}}" alt="{{item.value}}" />
+                                    <img class='metadata-icon' src="{{item.icon}}" alt="{{item.value}}" />
                                 {% endif %}
                                 
                                 {{item.value}}

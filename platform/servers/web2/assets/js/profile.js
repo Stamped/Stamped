@@ -356,16 +356,15 @@ var g_update_stamps = null;
                             return;
                         }
                         
-                        init_sdetail($target);
-                        
                         // TODO: disable infinite scroll for sdetail popup
-                        //destroy_infinite_scroll();
+                        destroy_infinite_scroll();
                         
                         $(sdetail_wrapper_sel).hide().remove();
                         $target.insertAfter($('#main-page-content-body').get(0));
-                        update_dynamic_header();
-                        
                         $target = $(sdetail_wrapper_sel);
+                        
+                        init_sdetail($target);
+                        update_dynamic_header();
                         
                         var scroll_top = $window.scrollTop();
                         
@@ -379,6 +378,7 @@ var g_update_stamps = null;
                             
                             update_gallery_layout(false, function() {
                                 $window.scrollTop(scroll_top);
+                                init_infinite_scroll();
                                 
                                 resize_sdetail_wrapper($target, 'closing', function() {
                                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -1471,14 +1471,23 @@ var g_update_stamps = null;
                 if ($value.length === 1) {
                     $item.removeClass(metadata_item_expanded);
                     var h0 = $value.height();
-                    //$item.addClass(metadata_item_expanded);
-                    var h1 = h0 + 1;//$value.height();
+                    $item.addClass(metadata_item_expanded);
+                    var h1 = $value.height();
                     
                     if (h1 <= h0) {
                         // no expansion necessary
                         $elem.hide();
                     } else {
                         $item.removeClass(metadata_item_expanded);
+                        /*var params = "max-height .4s easeOutExpo";
+                        
+                        $value.css({
+                            "-webkit-transition"    : params, 
+                            "-moz-transition"       : params, 
+                            "-ms-transition"        : params, 
+                            "-o-transition"         : params, 
+                            "transition"            : params
+                        });*/
                         
                         $elem.click(function(event) {
                             event.preventDefault();

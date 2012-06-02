@@ -47,10 +47,12 @@ TODO:
     * check out how clipboard.com's lightbox handles scrolling!
     
     * sDetail:
-        * BETA - "Anatomy of eDetail section" spec
-        * Polish social sharing buttons
+        * DONE - "Anatomy of eDetail section" spec
+        * DONE - Polish social sharing buttons
         * DONE - Opening / closing animations
-        * BETA - Comment collapsing ala Google Plus
+        * DONE - Comment collapsing ala Google Plus
+        * CLOSE - Relayout according to sdetail spec
+        * Transformed entity image
         * Move like / todo / comment counters to their own section
     * Map view
         * Map layout matches spec
@@ -62,12 +64,12 @@ TODO:
     * Profile Page:
         * header:
             * BETA - Header functionality w/ temp header images
-            * dynamic, category-dependent header titles
-            * view histogram
-            * view bio / friends
-            * share this collection
+            * Dynamic, category-dependent header titles
+            * View histogram
+            * View bio / friends
+            * Share this collection
         * gallery:
-            * ALPHA (DEBUG) - Sort stamps by popularity
+            * BETA - Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
     
