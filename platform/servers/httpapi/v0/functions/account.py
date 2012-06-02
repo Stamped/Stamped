@@ -103,33 +103,6 @@ def update(request, authUserId, **kwargs):
 
     return transformOutput(account.dataExport())
 
-
-# TODO: Remove the 'settings' endpoint.  It has been replaced with 'get' and 'update'
-@handleHTTPRequest(parse_request=False)
-@require_http_methods(["POST", "GET"])
-def settings(request, authUserId, **kwargs):
-    if request.method == 'POST':
-        ### TODO: Carve out password changes, require original password sent again?
-        
-        ### TEMP: Generate list of changes. Need to do something better eventually..
-        schema = parseRequest(HTTPAccountSettings(), request)
-        data   = schema.dataExport()
-        
-        for k, v in data.iteritems():
-            if v == '':
-                data[k] = None
-        
-        ### TODO: Verify email is valid
-        account = stampedAPI.updateAccountSettings(authUserId, data)
-    else:
-        schema  = parseRequest(None, request)
-        account = stampedAPI.getAccount(authUserId)
-    
-    account     = HTTPAccount().importAccount(account)
-    
-    return transformOutput(account.dataExport())
-
-
 @handleHTTPRequest(http_schema=HTTPAccountProfile)
 @require_http_methods(["POST"])
 def update_profile(request, authUserId, data, **kwargs):

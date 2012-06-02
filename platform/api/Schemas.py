@@ -318,7 +318,7 @@ class Account(Schema):
         cls.addProperty('screen_name_lower',        basestring)
         cls.addProperty('color_primary',            basestring)
         cls.addProperty('color_secondary',          basestring)
-        cls.addProperty('phone',                    int)
+        cls.addProperty('phone',                    basestring)
         cls.addProperty('bio',                      basestring)
         cls.addProperty('website',                  basestring)
         cls.addProperty('location',                 basestring)

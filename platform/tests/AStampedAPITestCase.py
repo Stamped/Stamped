@@ -194,7 +194,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "client_secret"     : c_secret,
             "name"              : name,
             "screen_name"       : name,
-            "user_token"    : fb_user_token,
+            "user_token"        : fb_user_token,
         }
         response = self.handlePOST(path, data)
         self.assertIn('user', response)

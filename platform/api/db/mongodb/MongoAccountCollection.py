@@ -31,9 +31,11 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         document = AMongoCollection._convertToMongo(self, account)
         
         if 'screen_name' in document:
-           document['screen_name_lower'] = str(document['screen_name']).lower()
+            document['screen_name_lower'] = str(document['screen_name']).lower()
         if 'name' in document:
-           document['name_lower'] = unicode(document['name']).lower()
+            document['name_lower'] = unicode(document['name']).lower()
+        if 'phone' in document:
+            document['phone'] = str(document['phone'])
 
         return document
 
@@ -79,9 +81,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 }
             netflixAcctSparse = {}.update((k, v) for k, v in netflixAcct.iteritems() if v is not None)
             document['linked']['netflix'] = netflixAcctSparse
-        del(document['linked_accounts'])
-        from pprint import pformat
-        logs.info('### document: %s' % pformat(document))
 
     def _convertFromMongo(self, document):
         if document is None:

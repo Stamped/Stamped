@@ -65,7 +65,7 @@ def createUser(baseurl, userData):
         raise Exception
         
         
-    path = "account/settings.json"
+    path = "account/update.json"
     data = {
         "oauth_token": token['access_token'],
         "privacy": userData['privacy'],

@@ -26,7 +26,7 @@ class StampedAPIAccountTest(AStampedAPITestCase):
 
 class StampedAPIAccountSettings(StampedAPIAccountTest):
     def test_post(self):
-        path = "account/settings.json"
+        path = "account/update.json"
         data = {
             "oauth_token": self.token['access_token'],
             "screen_name": "UserA2",
@@ -38,7 +38,7 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
         self.privacy = result['privacy']
     
     def test_get(self):
-        path = "account/settings.json"
+        path = "account/show.json"
         data = {
             "oauth_token": self.token['access_token'],
         }
