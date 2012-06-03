@@ -340,23 +340,23 @@ class Account(Schema):
 class FacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('name',                     basestring, required=True)
+        cls.addProperty('email',                    basestring)#, required=True)
+        cls.addProperty('screen_name',              basestring, required=True)
+        cls.addProperty('phone',                    int)
+        cls.addProperty('profile_image',            basestring) ### TODO: normalize=False ?
         cls.addProperty('user_token',               basestring, required=True)
 
 class TwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('user_token',                   basestring, required=True)
-        cls.addProperty('user_secret',                  basestring, required=True)
+        cls.addProperty('name',                     basestring, required=True)
+        cls.addProperty('email',                    basestring)#, required=True)
+        cls.addProperty('screen_name',              basestring, required=True)
+        cls.addProperty('phone',                    int)
+        cls.addProperty('profile_image',            basestring) ### TODO: normalize=False ?
+        cls.addProperty('user_token',               basestring, required=True)
+        cls.addProperty('user_secret',              basestring, required=True)
 
 
 # ##### #
