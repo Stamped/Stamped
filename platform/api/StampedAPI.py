@@ -278,13 +278,11 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
-    def verifyLinkedAccount(self, user_token):
+    def verifyLinkedAccount(self, linkedAccount):
         if linkedAccount.service_name == 'facebook':
             self._verifyFacebookAccount(linkedAccount.token)
         elif linkedAccount.service_name == 'twitter':
             self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
-        elif linkedAccount.service_name == 'netflix':
-            pass
         return True
 
     def _verifyFacebookAccount(self, user_token):
@@ -314,7 +312,6 @@ class StampedAPI(AStampedAPI):
             raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
 
         return user
-
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account):
@@ -613,6 +610,15 @@ class StampedAPI(AStampedAPI):
         return accounts[0]
 
     @API_CALL
+    def getAccountByNetflixId(self, netflixId):
+        accounts = self._accountDB.getAccountsByNetflixId(netflixId)
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
+        elif len(accounts) > 1:
+            raise StampedIllegalActionError("More than one account exists using netflix_id: %s" % netflixId)
+        return accounts[0]
+
+    @API_CALL
     def updateProfile(self, authUserId, data):
         ### TODO: Reexamine how updates are done
 
@@ -792,30 +798,6 @@ class StampedAPI(AStampedAPI):
         self.verifyLinkedAccount(linkedAccount)
         self.removeLinkedAccount(authUserId, linkedAccount.service_name)
         return self.addLinkedAccount(authUserId, linkedAccount)
-
-
-
-    @API_CALL
-    def updateLinkedAccounts(self, authUserId, **kwargs):
-        twitter         = kwargs.pop('twitter', None)
-        twitterAuth     = kwargs.pop('twitterAuth', None)
-        facebook        = kwargs.pop('facebook', None)
-        facebookAuth    = kwargs.pop('facebookAuth', None)
-        netflixAuth     = kwargs.pop('netflixAuth', None)
-
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook, netflix=netflixAuth)
-
-        # Alert Facebook asynchronously
-        if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
-            kwargs = {'facebookToken': facebookAuth.facebook_token}
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId], kwargs=kwargs)
-
-        # Alert Twitter asynchronously
-        if isinstance(twitterAuth, Schema) and twitterAuth.twitter_key is not None:
-            kwargs = {'twitterKey': twitterAuth.twitter_key, 'twitterSecret': twitterAuth.twitter_secret}
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId], kwargs=kwargs)
-
-        return True
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
