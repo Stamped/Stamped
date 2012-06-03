@@ -673,9 +673,10 @@ a.lightbox {
 
 
 .active() {
+    background-position: -194px -6px;
     opacity: 1;
-    .transition(all, 0s, linear);
-    .transform(scale(1, 1));
+    
+    .transition(opacity, 0s, linear);
 }
 
 #main-content {
@@ -691,10 +692,10 @@ a.lightbox {
     .transition(opacity, 0.4s, ease-out);
     
     visibility: hidden;
-    
-    background: #262626;
-    .rounded(8px);
-    .box-shadow(0, 0, 4px, 0, @shadow);
+    background: #666;
+    @radius: 4px;
+    .rounded(@radius);
+    .box-shadow(0, 2px, 8px, -2px, @shadow);
     
     top:   50%;
     right: 40px;
@@ -709,25 +710,31 @@ a.lightbox {
     margin: -180px 0 0;
     padding: 0;
     
+    .stamp-category-nav-bar-pre {
+        background: #4a4a4a url(/assets/img/sidenav_top_ribbon.png) repeat-x;
+        border-top: 2px solid #5e5e5e;
+        width:  100%;
+        height: 16px;
+        .border-radius(@radius, 0, 0, @radius);
+    }
+    
+    .stamp-category-nav-bar-post {
+        background: #4a4a4a url(/assets/img/sidenav_bottom_ribbon.png) repeat-x;
+        border-bottom: 2px solid #5e5e5e;
+        width:  100%;
+        height: 16px;
+        .border-radius(0, @radius, @radius, 0);
+    }
+    
     ol {
         li {
-            position: relative;
-            
             a {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat -192px 0;
-                
-                text-align: center;
-                display: block;
-                width:  60px;
-                height: 60px;
-                margin: 6px 0;
-                
                 position: relative;
-                z-index: 1000;
-                
-                opacity: 0;
-                .transform(scale(.8, .8));
-                .transition(all, 0.3s, ease-out);
+                display: block;
+                width:  56px;
+                height: 56px;
+                overflow: visible;
+                text-overflow: visible;
                 
                 /*@params: 0.3s ease-out;
                 @args: opacity @params, transform @params;
@@ -735,69 +742,128 @@ a.lightbox {
                 -webkit-transition: @args;
                 -moz-transition: @args;
                 transition: @args;*/
-            }
-            
-            div {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat;
-                position: absolute;
-                left: 15px;
-                top:  17px;
                 
-                display: block;
-                width:  30px;
-                height: 30px;
+                .selection {
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat -194px -6px;
+                    position: absolute;
+                    width:  100%;
+                    height: 100%;
+                    
+                    opacity: 0;
+                    .transition(opacity, 0.3s, ease-out);
+                }
                 
-                z-index: 999;
+                .icon {
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat;
+                    position: absolute;
+                    left: 13px;
+                    top:  13px;
+                    
+                    .transform(scale(.8, .8));
+                    .transition(-webkit-transform, 0.3s, ease-out);
+                    
+                    display: block;
+                    width:  30px;
+                    height: 30px;
+                }
+                
+                .desc {
+                    position: absolute;
+                    top:   50%;
+                    left: 72px;
+                    margin-top: -6px;
+                    text-indent: 0;
+                    
+                    font-size: 13px;
+                    color: #262626;
+                    width: 100px;
+                }
+                
+                &:hover, &:active {
+                    .icon {
+                        .transform(scale(1.0, 1.0));
+                        .transition(-webkit-transform, 0s, linear);
+                        // TODO
+                    }
+                    
+                    .desc {
+                        font-weight: 700;
+                    }
+                }
+                
+                &:hover {
+                    .selection {
+                        .active();
+                        
+                        background-position: -255px -6px;
+                    }
+                }
+                
+                &:active {
+                    .selection {
+                        .active();
+                    }
+                }
             }
         }
         
-        a:hover {
-            .active();
-            /*background-position: -252px 0;*/
-        }
-        a:active {
-            .active();
-        }
-        
-        li.default div {
+        li.default .icon {
             background-position: 0 0;
         }
-        li.default a:hover + div, li.default a:active + div {
+        li.default a:hover .icon {
+            background-position: 0 -64px;
+        }
+        li.default a:active .icon {
             background-position: 0 -32px;
         }
         
-        li.place div {
+        li.place .icon {
             background-position: -32px 0;
         }
-        li.place a:hover + div, li.place a:active + div {
+        li.place a:hover .icon {
+            background-position: -32px -64px;
+        }
+        li.place a:active .icon {
             background-position: -32px -32px;
         }
         
-        li.music div {
+        li.music .icon {
             background-position: -64px 0;
         }
-        li.music a:hover + div, li.music a:active + div {
+        li.music a:hover .icon {
+            background-position: -64px -64px;
+        }
+        li.music a:active .icon {
             background-position: -64px -32px;
         }
         
-        li.book div {
+        li.book .icon {
             background-position: -96px 0;
         }
-        li.book a:hover + div, li.book a:active + div {
+        li.book a:hover .icon {
+            background-position: -96px -64px;
+        }
+        li.book a:active .icon {
             background-position: -96px -32px;
         }
         
-        li.film div {
+        li.film .icon {
             background-position: -128px 0;
         }
-        li.film a:hover + div, li.film a:active + div {
+        li.film a:hover .icon {
+            background-position: -128px -64px;
+        }
+        li.film a:active .icon {
             background-position: -128px -32px;
         }
         
-        li.other div {
+        li.other .icon {
             background-position: -160px 0;
         }
-        li.other a:hover + div, .other a:active + div {
+        li.other a:hover .icon {
+            background-position: -160px -64px;
+        }
+        li.other a:active .icon {
             background-position: -160px -32px;
         }
     }
@@ -834,7 +900,17 @@ body.book       #stamp-category-nav-bar ol li.book,
 body.film       #stamp-category-nav-bar ol li.film, 
 body.other      #stamp-category-nav-bar ol li.other {
     a, a:hover {
-        .active();
+        .icon {
+            .transform(scale(1.0, 1.0));
+        }
+        
+        .selection {
+            .active();
+        }
+        
+        .desc {
+            font-weight: 700;
+        }
         
         pointer-events: none;
         cursor: default;

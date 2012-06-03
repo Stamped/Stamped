@@ -66,32 +66,54 @@
     
     {% block stamp_category_nav_bar %}
     <nav id="stamp-category-nav-bar" style="display: block;">
+        <div class='stamp-category-nav-bar-pre'></div>
+        
         <ol>
             <li class="default">
-                <a class="replaced" href="/{{user.screen_name}}"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}">
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                    <div class='desc'>All Stamps</div>
+                </a>
             </li>
             <li class="place">
-                <a class="replaced" href="/{{user.screen_name}}?category=place"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=place">
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                    <div class='desc'>Places</div>
+                </a>
             </li>
             <li class="music">
-                <a class="replaced" href="/{{user.screen_name}}?category=music"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=music">
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                    <div class='desc'>Music</div>
+                </a>
             </li>
             <li class="book">
-                <a class="replaced" href="/{{user.screen_name}}?category=book"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=book">
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                    <div class='desc'>Books</div>
+                </a>
             </li>
             <li class="film">
-                <a class="replaced" href="/{{user.screen_name}}?category=film"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=film">
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                    <div class='desc'>Film & TV</div>
+                </a>
             </li>
             <li class="other">
-                <a class="replaced" href="/{{user.screen_name}}?category=other"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=other">
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                    <div class='desc'>Apps & Other</div>
+                </a>
             </li>
         </ol>
+        
+        <div class='stamp-category-nav-bar-post'></div>
     </nav>
     {% endblock stamp_category_nav_bar %}
     

@@ -54,7 +54,7 @@ TODO:
         * CLOSE - Relayout according to sdetail spec
         * Transformed entity image
         * Move like / todo / comment counters to their own section
-    * Map view
+    * Map view:
         * Map layout matches spec
         * Collapsable stamp list
         * Autocentering based on user's location
