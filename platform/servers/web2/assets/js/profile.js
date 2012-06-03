@@ -913,19 +913,19 @@ var g_update_stamps = null;
                 });
                 
                 // resize user's stamp logo
-                var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width  / 4.0);
-                var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_height / 4.0);
+                var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width - 166);
+                var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_width - 166);
                 var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_height + 'px';
-                var cur_logo_top    = user_logo_top  + (user_logo_width  - cur_logo_height) / 2.0;
-                var cur_logo_left   = user_logo_left + (user_logo_height - cur_logo_width)  / 2.0;
+                //var cur_logo_top    = user_logo_top  + (user_logo_width  - cur_logo_height) / 2.0;
+                //var cur_logo_left   = user_logo_left + (user_logo_height - cur_logo_width)  / 2.0;
                 
                 $user_logo.css({
                     width               : cur_logo_width, 
                     height              : cur_logo_height, 
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size, 
-                    top                 : cur_logo_top, 
-                    left                : cur_logo_left
+                    //top                 : cur_logo_top, 
+                    //left                : cur_logo_left
                 });
                 
                 //console.debug("DYNAMIC HEADER: ratio=" + cur_ratio);

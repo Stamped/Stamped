@@ -179,6 +179,7 @@ header .header-body p.join a.button:active {
 }
 header .header-body p.sign-in {
   z-index: 26;
+  margin-bottom: 1em;
 }
 header .header-body p.sign-in span.desc {
   color: #bbb;
@@ -246,10 +247,10 @@ header .header-body a.button {
 .user-logo-large {
   position: absolute;
   display: block;
-  top: -78px;
-  left: -125px;
-  width: 195px;
-  height: 195px;
+  top: -60px;
+  left: -110px;
+  width: 210px;
+  height: 210px;
   z-index: 101;
 }
 .user-logo-small {
