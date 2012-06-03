@@ -44,17 +44,32 @@
 TODO:
     * align stamp-gallery with profile header
     * prep test for anthony w/ and w/out opacity applied to user's custom colors
+    * check out how clipboard.com's lightbox handles scrolling!
     
     * sDetail:
-        * CLOSE - "Anatomy of eDetail section" spec
-        * Polish social sharing buttons
+        * DONE - "Anatomy of eDetail section" spec
+        * DONE - Polish social sharing buttons
         * DONE - Opening / closing animations
-        * CLOSE - Comment collapsing ala Google Plus
+        * DONE - Comment collapsing ala Google Plus
+        * CLOSE - Relayout according to sdetail spec
+        * Transformed entity image
         * Move like / todo / comment counters to their own section
-    * CLOSE - First cut at map view integration
+    * Map view
+        * Map layout matches spec
+        * Collapsable stamp list
+        * Autocentering based on user's location
+        * Custom stamp popup
+        * sdetail overlay
+        * Share this map button?
     * Profile Page:
-        * CLOSE - Header functionality w/ temp header images
-        * DONE- Sort stamps by popularity
+        * header:
+            * BETA - Header functionality w/ temp header images
+            * Dynamic, category-dependent header titles
+            * View histogram
+            * View bio / friends
+            * Share this collection
+        * gallery:
+            * BETA - Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
     
@@ -85,7 +100,6 @@ TODO:
     * use a Backbone model to hold StampedClient state s.t. you could bind log-in / log-out to body-level CSS tags?
     * experiment with making innerbg fixed for parallax
     * experiment with static map styling
-    * is it possible to use the n in nth-child?
     
     * experiment with the idea of having no stamped-specific likes at all -- just FB likes?
     
@@ -137,17 +151,15 @@ OLD:
     * figure out how to install less on Ubuntu and have it actually work..
         * http://htmlrockstars.com/blog/installing-less-css-on-ubuntu/
     * change moment.js to only be relative after a month
-
-
-NOTES:
-    * no feedback icons in case of no feedback looks inconsistent
-
-
-CHANGELIST:
+    * no feedback icons if no feedback exists looks inconsistent
     * temporary category-specific header covers
     * basic header text now matches mocks
     * profile scrolls to top after category selection change
     * scrollbars are now properly hidden / disabled during sdetail popup
     * ESC key now closes all lightboxes and the sdetail popup
     * text highlight color is no longer hot pink; instead, it inherits the browser's default as usual
+    * fix link colors throughout (including visited/hover/active states)
+
+ChangeList:
+    * sDetail overlay now deals properly with scrollbars hiding / reappearing
 

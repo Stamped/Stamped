@@ -1,5 +1,3 @@
-@import "libs/h5bp.min.css";
-
 @import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
 /* profile.less
  * 
@@ -213,7 +211,12 @@ body.other .innerbg {
 }
 .stamp-gallery-header .stamp-gallery-sort .item {
   display: none;
-  position: absolute;
+  text-decoration: none;
+  padding: .25em 1em;
+}
+.stamp-gallery-header .stamp-gallery-sort .item:hover,
+.stamp-gallery-header .stamp-gallery-sort .item:active {
+  text-decoration: none;
 }
 .stamp-gallery-header .stamp-gallery-sort .item .arrow {
   display: none;
@@ -231,6 +234,13 @@ body.other .innerbg {
 }
 .stamp-gallery-header .expanded {
   background: #fff;
+  position: absolute;
+  -webkit-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  border: 1px solid rgba(50, 50, 50, 0.35);
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -241,11 +251,27 @@ body.other .innerbg {
 .stamp-gallery-header .expanded .item,
 .stamp-gallery-header .expanded .selected {
   display: block;
-  position: absolute;
 }
 .stamp-gallery-header .expanded .item .arrow,
 .stamp-gallery-header .expanded .selected .arrow {
   display: none;
+}
+.stamp-gallery-header .expanded .item {
+  border-bottom: 1px solid rgba(50, 50, 50, 0.35);
+}
+.stamp-gallery-header .expanded .item:hover,
+.stamp-gallery-header .expanded .item:active {
+  color: #fff;
+  cursor: pointer;
+}
+.stamp-gallery-header .expanded .item:hover {
+  background: rgba(50, 50, 50, 0.35);
+}
+.stamp-gallery-header .expanded .item:active {
+  background: rgba(12, 12, 12, 0.35);
+}
+.stamp-gallery-header .expanded .item:last-child {
+  border: 0 none;
 }
 .stamp-gallery-header .expanded .item:first-child {
   position: relative;
@@ -258,8 +284,9 @@ body.other .innerbg {
   width: 75%;
   clear: both;
   text-align: center;
-  padding: 1.5em;
+  padding: 1.5em 0;
   margin: 0;
+  left: -24px;
 }
 .stamp-gallery .top-wave {
   background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -545,7 +572,7 @@ a.lightbox .zoom {
 .subtitle-line {
   position: relative;
   display: block;
-  margin: -0.5em 0 0;
+  margin: -0.25em 0 0;
 }
 .subtitle-line p {
   margin: 0;
@@ -901,6 +928,7 @@ ul.user-category-distribution li .bargraph .value {
   width: 100%;
   height: 100%;
   position: fixed;
+  overflow: scroll;
   top: 15%;
   z-index: 100;
 }
@@ -910,11 +938,16 @@ body.sdetail_popup .post-header {
 }
 body.sdetail_popup_animation #main-page-content-body,
 body.sdetail_popup #main-page-content-body {
+  display: block;
   visibility: visible !important;
 }
 body.sdetail_popup_animation #main-page-content-body #stamp-category-nav-bar,
 body.sdetail_popup #main-page-content-body #stamp-category-nav-bar {
   opacity: 0;
+}
+body.sdetail_popup_animation #main-page-content-body #main-content,
+body.sdetail_popup #main-page-content-body #main-content {
+  display: block;
 }
 body.sdetail_popup {
   /* hide scrollbars when displaying sdetail */
@@ -922,11 +955,10 @@ body.sdetail_popup {
   /* TODO: find a way of doing this that does not result in the scroll 
      * position jumping */
 
-  /*overflow: hidden;*/
-
+  overflow-y: hidden;
 }
 body.sdetail_popup #main-page-content-body {
-  visibility: hidden !important;
+  display: none;
   /*#stamp-category-nav-bar {
             visibility: hidden !important;
             opacity: 0;
@@ -934,5 +966,5 @@ body.sdetail_popup #main-page-content-body {
 
 }
 body.sdetail_popup #main-page-content-body #main-content {
-  visibility: hidden !important;
+  display: none;
 }

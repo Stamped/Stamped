@@ -173,7 +173,12 @@ body.other .innerbg {
         
         .item {
             display: none;
-            position: absolute;
+            text-decoration: none;
+            padding: .25em 1em;
+            
+            &:hover, &:active {
+                text-decoration: none;
+            }
             
             .arrow {
                 display: none;
@@ -197,15 +202,38 @@ body.other .innerbg {
     
     .expanded {
         background: #fff;
+        position: absolute;
+        
+        .box-shadow(0, 0, 8px, 0, @shadow);
+        border: 1px solid @shadow;
         .rounded(4px);
         
         .item, .selected {
             display: block;
-            position: absolute;
             
             .arrow {
                 display: none;
             }
+        }
+        
+        .item {
+            border-bottom: 1px solid @shadow;
+            
+            &:hover, &:active {
+                color: #fff;
+                cursor: pointer;
+            }
+            
+            &:hover {
+                background: @shadow;
+            }
+            &:active {
+                background: darken(@shadow, 15%);
+            }
+        }
+        
+        .item:last-child {
+            border: 0 none;
         }
         
         .item:first-child {
@@ -228,8 +256,9 @@ body.other .innerbg {
     clear: both;
     text-align: center;
     
-    padding: 1.5em;
+    padding: 1.5em 0;
     margin:  0;
+    left: -24px;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -541,10 +570,10 @@ a.lightbox {
 .subtitle-line {
     position: relative;
     display: block;
-    margin: -0.5em 0 0;
+    margin: -0.25em 0 0;
     
     p {
-        margin: 0;
+        margin:  0;
         padding: 0;
     }
     
@@ -907,6 +936,9 @@ ul.user-category-distribution {
     height: 100%;
     
     position: fixed;
+    overflow: scroll;
+    //position: absolute;
+    
     top: 15%;
     z-index: 100;
 }
@@ -918,10 +950,15 @@ body.sdetail_popup_animation, body.sdetail_popup {
     }
     
     #main-page-content-body {
+        display: block;
         visibility: visible !important;
         
         #stamp-category-nav-bar {
             opacity: 0;
+        }
+        
+        #main-content {
+            display: block;
         }
     }
 }
@@ -930,17 +967,19 @@ body.sdetail_popup {
     /* hide scrollbars when displaying sdetail */
     /* TODO: find a way of doing this that does not result in the scroll 
      * position jumping */
-    /*overflow: hidden;*/
+    overflow-y: hidden;
     
     #main-page-content-body {
-        visibility: hidden !important;
+        display: none;
+        //visibility: hidden !important;
         
         /*#stamp-category-nav-bar {
             visibility: hidden !important;
             opacity: 0;
         }*/
         #main-content {
-            visibility: hidden !important;
+            display: none;
+            //visibility: hidden !important;
         }
     }
 }

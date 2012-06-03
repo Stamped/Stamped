@@ -12,6 +12,7 @@
    ************************************************************************** */
 
 
+@import "libs/h5bp.min.css";
 @import "common.less";
 
 
@@ -90,9 +91,6 @@ header {
             }
         }
         
-        /* TODO: use slight background gradient instead of flat color */
-        @base: #3b84eb;
-        
         p.join {
             z-index: 27;
             span.desc {
@@ -102,13 +100,13 @@ header {
             a.button {
                 /*background: url(/assets/img/join_sign_up_buttons_sprite.png) no-repeat;*/
                 color: #fff;
-                background: @base;
-                .box-shadow(0, 0, 4px, 0, @base);
+                background: @stamped-base-color;
+                .box-shadow(0, 0, 4px, 0, @stamped-base-color);
                 .rounded(2px);
                 
                 &:hover {
-                    @c0: lighten(@base, 10%);
-                    @c1: darken(@base,  10%);
+                    @c0: lighten(@stamped-base-color, 10%);
+                    @c1: darken(@stamped-base-color,  10%);
                     
                     text-decoration: none;
                     background: @c0;
@@ -116,8 +114,8 @@ header {
                 }
                 
                 &:active {
-                    @c0: lighten(@base, 5%);
-                    @c1: darken(@base,  25%);
+                    @c0: lighten(@stamped-base-color, 5%);
+                    @c1: darken(@stamped-base-color,  25%);
                     
                     text-decoration: none;
                     background: @c1;
@@ -141,8 +139,8 @@ header {
                 color: #666;
                 
                 &:hover {
-                    @c0: lighten(@base, 10%);
-                    @c1: darken(@base,  10%);
+                    @c0: lighten(@stamped-base-color, 10%);
+                    @c1: darken(@stamped-base-color,  10%);
                     
                     color: #fff;
                     border-color: @c0;
@@ -153,8 +151,8 @@ header {
                 }
                 
                 &:active {
-                    @c0: lighten(@base, 5%);
-                    @c1: darken(@base,  25%);
+                    @c0: lighten(@stamped-base-color, 5%);
+                    @c1: darken(@stamped-base-color,  25%);
                     color: #fff;
                     border-color: @c1;
                     
@@ -299,8 +297,7 @@ header {
         }
         
         /*&:hover {
-            @base: #3b84eb;
-            background: lighten(@base, 10%);
+            background: lighten(@stamped-base-color, 10%);
         }*/
     }
     

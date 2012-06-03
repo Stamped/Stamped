@@ -25,6 +25,10 @@ var g_update_stamps = null;
         var sdetail_wrapper         = 'sdetail_wrapper';
         var sdetail_wrapper_sel     = '.' + sdetail_wrapper;
         var collapsed_header        = 'collapsed-header';
+        var metadata_item_expanded  = 'metadata-item-expanded';
+        var collapsed               = 'collapsed';
+        var collapsing              = 'collapsing';
+        
         var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
         var update_navbar_layout    = null;
         var close_sdetail_func      = null;
@@ -169,7 +173,7 @@ var g_update_stamps = null;
         // called several times, it will attempt to only update the layout once
         // to avoid doing extra, unnecessary work / rendering that could result 
         // in a choppier end-user experience.
-        var update_gallery_layout = function(force) {
+        var update_gallery_layout = function(force, callback) {
             update_gallery(function() {
                 update_navbar_layout(false);
                 last_layout = new Date().getTime();
@@ -180,6 +184,10 @@ var g_update_stamps = null;
                 
                 $('#main-content').css(style);
                 $('#stamp-category-nav-bar').css(style);
+                
+                if (_.isFunction(callback)) {
+                    callback();
+                }
             });
             return;
 
@@ -348,38 +356,45 @@ var g_update_stamps = null;
                             return;
                         }
                         
-                        init_sdetail($target);
-                        
                         // TODO: disable infinite scroll for sdetail popup
-                        //destroy_infinite_scroll();
+                        destroy_infinite_scroll();
                         
                         $(sdetail_wrapper_sel).hide().remove();
                         $target.insertAfter($('#main-page-content-body').get(0));
+                        $target = $(sdetail_wrapper_sel);
+                        
+                        init_sdetail($target);
                         update_dynamic_header();
                         
-                        $target = $(sdetail_wrapper_sel);
+                        var scroll_top = $window.scrollTop();
                         
                         resize_sdetail_wrapper($target, 'opening', function() {
                             $target.removeClass('animating');
                         });
                         
                         close_sdetail_func = function() {
-                            resize_sdetail_wrapper($target, 'closing', function() {
-                                $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
-                                update_dynamic_header();
-                                
-                                //update_gallery_layout(true);
-                                //init_infinite_scroll();
-                            });
-                            
                             close_sdetail_func = null;
+                            $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
+                            
+                            update_gallery_layout(false, function() {
+                                $window.scrollTop(scroll_top);
+                                init_infinite_scroll();
+                                
+                                resize_sdetail_wrapper($target, 'closing', function() {
+                                    $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
+                                    update_dynamic_header();
+                                    
+                                    //update_gallery_layout(true);
+                                    //init_infinite_scroll();
+                                });
+                            });
                         };
                         
                         // initialize sDetail close button logic
                         $target.find('.close-button a').click(function(event) {
                             event.preventDefault();
                             
-                            if (close_sdetail_func !== null) {
+                            if (!!close_sdetail_func) {
                                 close_sdetail_func();
                             }
                             
@@ -456,6 +471,9 @@ var g_update_stamps = null;
                 var offset = (cur_header_height + 16) + "px";
                 var hidden = window.innerHeight + "px";
                 
+                //var offset = $window.scrollTop()  + "px";
+                //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 16));
+                
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     
@@ -473,6 +491,10 @@ var g_update_stamps = null;
                                 top : 'easeInOutCubic'
                             }, 
                             complete : function() {
+                                /*$sdetail_wrapper.css({
+                                    'top' : 0, 
+                                });*/
+                                
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
                                 
                                 if (_.isFunction(anim_callback)) {
@@ -481,7 +503,6 @@ var g_update_stamps = null;
                             }
                         });
                 } else if (sdetail_status == 'closing') {
-                    $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     //$body.removeClass('sdetail_popup_animation sdetail_popup');
                     
                     $sdetail_wrapper
@@ -593,6 +614,8 @@ var g_update_stamps = null;
                     var params = get_custom_params({
                         sort : sort
                     });
+                    
+                    console.debug("SORT: " + sort);
                     
                     if (History && History.enabled) {
                         var params_str = get_custom_params_string(params);
@@ -835,7 +858,10 @@ var g_update_stamps = null;
             // nearest value s.t. it's either at maximum size or minimum size
             var cur_ratio = Math.round(last_ratio);
             
-            if (!($body.hasClass(sdetail_popup) || $body.hasClass(collapsed_header))) {
+            if (!($body.hasClass(sdetail_popup) || 
+                $body.hasClass('sdetail_popup_animation') || 
+                $body.hasClass(collapsed_header)))
+            {
                 // if we're not in sdetail, set the dynamic header's size ratio to be 
                 // proportional to the window's current vertical scroll offset
                 cur_ratio = (header_height - $window.scrollTop()) / header_height;
@@ -926,9 +952,16 @@ var g_update_stamps = null;
             History.Adapter.bind(window, 'statechange', function() {
                 var State    = History.getState();
                 var category = 'default';
+                var custom_params = {}
                 
-                if (typeof(State.data['category']) !== 'undefined') {
-                    category = State.data['category'];
+                for (var key in State.data) {
+                    if (State.data.hasOwnProperty(key)) {
+                        custom_params[key] = State.data[key];
+                    }
+                }
+                
+                if (typeof(custom_params['category']) !== 'undefined') {
+                    category = custom_params['category'];
                 }
                 
                 //console.debug("NEW CATEGORY: " + category);
@@ -938,12 +971,10 @@ var g_update_stamps = null;
                 
                 if (category === 'default') {
                     category = null;
+                    custom_params['category'] = null;
                 }
                 
-                var params    = get_custom_params({
-                    category : category
-                });
-                
+                var params    = get_custom_params(custom_params);
                 var url       = get_custom_url(params);
                 var $items    = $('.stamp-gallery-item');
                 
@@ -999,7 +1030,6 @@ var g_update_stamps = null;
                     $(infinite_scroll_next_selector).attr('href', href);
                     
                     destroy_infinite_scroll();
-                    init_infinite_scroll();
                     
                     $gallery.append($elements);
                     update_stamps();
@@ -1010,6 +1040,8 @@ var g_update_stamps = null;
                     
                     $gallery.isotope('appended', $elements, function() {
                     });
+                    
+                    init_infinite_scroll();
                     
                     $gallery.stop(true, false).css({
                         visibility : 'visible'
@@ -1258,18 +1290,104 @@ var g_update_stamps = null;
             
             var $comments_div   = $sdetail.find('.comments');
             var $comments_nav   = $comments_div.find('.comments-nav');
+            var $comments_list  = $comments_div.find('.comments-list');
             var $comments       = $comments_div.find('.comment');
-            var collapsed       = 'collapsed';
+            var comments_len    = $comments.length;
             
             // initialize comment collapsing
-            if ($comments.length >= 3) {
+            if (comments_len > 2) {
+                var last_visible_pos = $($comments.get(comments_len - 2)).position();
+                var comments_height  = $comments_div.height();
+                var comments_initted = false;
+                
                 $comments_nav.find('a').click(function(event) {
                     event.preventDefault();
                     
-                    $comments_div.toggleClass(collapsed);
-                    resize_sdetail_wrapper();
+                    $comments.show();
+                    /*$comments.each(function (i, comment) {
+                        console.debug("COMMENT " + i + ") " + $(comment).position().top);
+                    });*/
                     
+                    var init_comment_defaults = function() {
+                        if (comments_initted) {
+                            return;
+                        }
+                        
+                        if (comments_height <= 0 || $comments_div.css('max-height') === 'none') {
+                            last_visible_pos = $($comments.get(comments_len - 2)).position();
+                            comments_height  = $comments_div.height();
+                            comments_initted = true;
+                        }
+                    };
+                    
+                    if ($comments_div.hasClass(collapsed) || $comments_div.hasClass(collapsing)) {
+                        $comments_list.stop(true, false);
+                        $comments_div.removeClass(collapsing + " " + collapsed);
+                        
+                        init_comment_defaults();
+                        
+                        // expand comments
+                        $comments_list.css({
+                            top : -last_visible_pos.top
+                        }).animate({
+                            top : 0
+                        }, {
+                            duration : 1000, 
+                            specialEasing : { 
+                                top : 'easeOutExpo'
+                            }, 
+                            step : function(now, fx) {
+                                $comments_div.css('max-height', comments_height + now + "px");
+                            }, 
+                            complete : function() {
+                                $comments_div.css('max-height', 'none');
+                                resize_sdetail_wrapper();
+                            }
+                        });
+                    } else {
+                        init_comment_defaults();
+                        
+                        $comments_list.stop(true, false);
+                        $comments_div.addClass(collapsing);
+                        
+                        // collapse comments
+                        $comments_list.animate({
+                            top : -last_visible_pos.top
+                        }, {
+                            duration : 1000, 
+                            specialEasing : { 
+                                top : 'easeOutExpo'
+                            }, 
+                            step : function(now, fx) {
+                                $comments_div.css('max-height', comments_height + now + "px");
+                            }, 
+                            complete : function() {
+                                $comments_div.removeClass(collapsing).addClass(collapsed);
+                                resize_sdetail_wrapper();
+                            }
+                        });
+                    }
+                    
+                    //$comments_div.toggleClass(collapsed);
                     return false;
+                });
+                
+                $comments.each(function (i, comment) {
+                    //console.debug("COMMENT " + i + ") " + $(comment).position().top);
+                    /*var $comment = $(comment);
+                    
+                    if (i < comments_len - 2) {
+                        var comment_pos = $comment.position();
+                        
+                        // TODO: z-indexing
+                        $comment.css({
+                            position : 'absolute', 
+                            top      : 0, //-comment_pos.top, 
+                            left     : comment_pos.left, 
+                            border   : '1px solid red'
+                            //, opacity : 0
+                        });
+                    }*/
                 });
             }
             
@@ -1330,7 +1448,6 @@ var g_update_stamps = null;
                             }, 
                             
                             afterShow : function() {
-                                // TODO: custom scroll bars
                                 $('.entity-menu').jScrollPane();
                             }
                         };
@@ -1345,13 +1462,41 @@ var g_update_stamps = null;
                 }
             }
             
-            $sdetail.find('a.nav').click(function(event) {
-                event.preventDefault();
-                var $this = $(this);
+            // initialize expanding / collapsing links for long, overflowed metadata items
+            $sdetail.find('a.nav').each(function(i, elem) {
+                var $elem  = $(elem);
+                var $item  = $elem.parents('.metadata-item');
+                var $value = $item.find('p.resizable');
                 
-                $this.parents('.metadata-item').toggleClass('metadata-item-expanded');
-                
-                return false;
+                if ($value.length === 1) {
+                    $item.removeClass(metadata_item_expanded);
+                    var h0 = $value.height();
+                    $item.addClass(metadata_item_expanded);
+                    var h1 = $value.height();
+                    
+                    if (h1 <= h0) {
+                        // no expansion necessary
+                        $elem.hide();
+                    } else {
+                        $item.removeClass(metadata_item_expanded);
+                        /*var params = "max-height .4s easeOutExpo";
+                        
+                        $value.css({
+                            "-webkit-transition"    : params, 
+                            "-moz-transition"       : params, 
+                            "-ms-transition"        : params, 
+                            "-o-transition"         : params, 
+                            "transition"            : params
+                        });*/
+                        
+                        $elem.click(function(event) {
+                            event.preventDefault();
+                            
+                            $item.toggleClass(metadata_item_expanded);
+                            return false;
+                        });
+                    }
+                }
             });
             
             update_stamps($sdetail);
@@ -1373,7 +1518,7 @@ var g_update_stamps = null;
         $(document).bind('keydown', function(e) {
             // close all lightboxes and sDetail if the user presses ESC
             if (e.which == 27) { // ESC
-                if (close_sdetail_func !== null) {
+                if (!!close_sdetail_func) {
                     close_sdetail_func();
                 }
             }
@@ -1399,6 +1544,7 @@ var g_update_stamps = null;
             
             stampsP.done(function (stamps) {
                 $("#data2").hide();
+                
                 var stamps_view = new client.StampsGalleryView({
                     model : stamps, 
                     el : $("#data2")
@@ -1406,6 +1552,7 @@ var g_update_stamps = null;
                 
                 $("#data").hide('slow', function() {
                     stamps_view.render();
+                    
                     $("#data2").show('slow');
                 });
             });
