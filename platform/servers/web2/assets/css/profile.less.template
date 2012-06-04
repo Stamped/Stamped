@@ -24,6 +24,7 @@
 @user_secondary: #{{color_secondary}}; /* #0057d1 */
 {{/user}}
 
+/*
 @l0: hue(hsl(lightness(@user_primary), 0, 0));
 @l1: hue(hsl(lightness(@user_secondary), 0, 0));
 
@@ -32,11 +33,9 @@
 
 @primary:   fade(lighten(@user_light, 25%), 80%);
 @secondary: fade(darken( @user_dark,  10%), 80%);
-
-/*
-@primary:   @user_primary;
-@secondary: @user_primary;
 */
+@primary:   @user_primary;
+@secondary: @user_secondary;
 
 
 /* **************************************************************************
