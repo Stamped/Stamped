@@ -43,7 +43,7 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
             "user_id_b": self.userA['user_id'],
         }
         result = self.handleGET(path, data)
-        self.assertFalse(result)
+        self.assertFalse(result['result'])
     
     def test_check_friendship_count(self):
         path = "users/show.json"
