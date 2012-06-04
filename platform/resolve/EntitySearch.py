@@ -86,6 +86,15 @@ class QuerySearchAll(ResolverSearchAll):
         self.__kinds        = kinds
         self.__types        = types
         self.__local        = local
+
+    def __str__(self):
+        return str({
+            'query_string'  : self.__query_string,
+            'coordinates'   : self.__coordinates,
+            'kinds'         : self.__kinds,
+            'types'         : self.__types,
+            'local'         : self.__local,
+        })
     
     @property
     def query_string(self):
@@ -329,8 +338,8 @@ def _convertCategorySubcategory(category, subcategory):
         kinds = mapCategoryToKinds(category)
         types = mapCategoryToTypes(category)
 
-    logs.debug('KINDS: %s' % kinds)
-    logs.debug('TYPES: %s' % types)
+    logs.info('KINDS: %s' % kinds)
+    logs.info('TYPES: %s' % types)
 
     return kinds, types
 

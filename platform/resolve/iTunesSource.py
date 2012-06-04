@@ -626,6 +626,7 @@ class iTunesSource(GenericSource):
                 'person',
                 'media_collection',
                 'media_item',
+                'software',
             ],
             types=[
                 'artist',

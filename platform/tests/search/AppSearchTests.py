@@ -26,39 +26,39 @@ class AppSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'Stamped', }, [ 
+            ({ 'query' : 'Stamped', 'category': 'app', }, [ 
                 SearchResultConstraint(title='stamped', types='app', 
                                        index=0, itunes_id=467924760), 
             ]), 
-            ({ 'query' : 'Instagram', }, [ 
+            ({ 'query' : 'Instagram', 'category': 'app', }, [ 
                 SearchResultConstraint(title='Instagram', types='app', 
                                        index=0, itunes_id=389801252), 
             ]), 
-            ({ 'query' : 'doodle jump', }, [ 
+            ({ 'query' : 'doodle jump', 'category': 'app', }, [ 
                 SearchResultConstraint(title='doodle jump', types='app', 
                                        index=0, itunes_id=307727765), 
             ]), 
-            ({ 'query' : 'tiny wings', }, [ 
+            ({ 'query' : 'tiny wings', 'category': 'app', }, [ 
                 SearchResultConstraint(title='tiny wings', types='app', 
                                        itunes_id=417817520), 
             ]), 
-            ({ 'query' : 'flipboard', }, [ 
+            ({ 'query' : 'flipboard', 'category': 'app', }, [ 
                 SearchResultConstraint(title='flipboard', types='app', 
                                        index=0, itunes_id=358801284, match='prefix'), 
             ]), 
-            ({ 'query' : 'facebook app', }, [ 
+            ({ 'query' : 'facebook app', 'category': 'app', }, [ 
                 SearchResultConstraint(title='facebook', types='app', 
                                        index=0, itunes_id=284882215), 
             ]), 
-            ({ 'query' : 'facebook', }, [ 
+            ({ 'query' : 'facebook','category': 'app',  }, [ 
                 SearchResultConstraint(title='facebook', types='app', 
                                        index=0, itunes_id=284882215), 
             ]), 
-            ({ 'query' : 'temple run', }, [ 
+            ({ 'query' : 'temple run', 'category': 'app', }, [ 
                 SearchResultConstraint(title='temple run', types='app', 
                                        index=0, itunes_id=420009108), 
             ]), 
-            ({ 'query' : 'pandora radio', }, [ 
+            ({ 'query' : 'pandora radio', 'category': 'app', }, [ 
                 SearchResultConstraint(title='pandora radio', types='app', 
                                        index=0, itunes_id=284035177), 
             ]), 
@@ -110,7 +110,7 @@ class AppSearchTests(ASearchTestSuite):
                 # don't test apps whose names contain weird unicode strings
                 continue
             
-            tests.append(({ 'query' : name, }, [ 
+            tests.append(({ 'query' : name, 'category': 'app', }, [ 
                 SearchResultConstraint(title=name, types='app'), 
             ]))
         
