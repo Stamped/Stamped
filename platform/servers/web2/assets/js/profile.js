@@ -94,6 +94,15 @@ var g_update_stamps = null;
             $(this).attr('href', href);
         });
         
+        $(".share-widget").click(function(event) {
+            event.preventDefault();
+            
+            var $this = $(this);
+            $this.toggleClass('share-widget-expanded');
+            
+            return false;
+        });
+        
         // TODO: may not be recursive
         //$(document).emoji();
         //$container.emoji();
@@ -945,6 +954,8 @@ var g_update_stamps = null;
             $body.removeClass(categories).addClass(category);
         };
         
+        var g_category = null;
+        
         // TODO: if history is disabled but JS is enabled, user will be unable 
         // to navigate categories
         
@@ -964,10 +975,10 @@ var g_update_stamps = null;
                     category = custom_params['category'];
                 }
                 
-                //console.debug("NEW CATEGORY: " + category);
+                console.debug("NEW CATEGORY: " + category);
                 
                 History.log(State.data, State.title, State.url);
-                set_body_class(category);
+                var orig_category = category;
                 
                 if (category === 'default') {
                     category = null;
@@ -995,6 +1006,31 @@ var g_update_stamps = null;
                     
                     $(this).attr('href', url);
                 });
+                
+                if (category !== g_category) {
+                    var sel = '.header-category-' + category;
+                    var $elem = $(sel);
+                    
+                    if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
+                        $elem.addClass('header-animating').stop(true, false).css({
+                            top : "-100%", 
+                        }).animate({
+                            top : 0, 
+                        }, {
+                            duration : 600, 
+                            specialEasing : { 
+                                top : 'easeOutCubic'
+                            }, 
+                            complete : function() {
+                                $('.header-selected').removeClass('header-animating header-selected');
+                                $elem.removeClass('header-animating').addClass('header-selected');
+                                
+                                g_category = category;
+                                set_body_class(orig_category);
+                            }
+                        });
+                    }
+                }
                 
                 $('body,html').stop(true, false).animate({
                     scrollTop: 0

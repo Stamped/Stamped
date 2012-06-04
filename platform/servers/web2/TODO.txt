@@ -60,36 +60,18 @@ TODO:
         * Autocentering based on user's location
         * Custom stamp popup
         * sdetail overlay
-        * Share this map button?
+        * Share this map button
     * Profile Page:
         * header:
             * BETA - Header functionality w/ temp header images
-            * Dynamic, category-dependent header titles
-            * View histogram
-            * View bio / friends
-            * Share this collection
+            * DONE - Dynamic, category-dependent header titles
+            * BLOCKED - View histogram
+            * BLOCKED - View bio / friends
+            * BETA - Share this collection
         * gallery:
             * BETA - Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
-    
-    * SDETAIL
-        * layout and initialize social buttons correctly
-        * slide-in animation vs lightbox
-            * remove header user-gradient
-        
-        * section-stamp
-            * test different #credits
-            * test different #comments
-            * comment collapsing
-                * TODO: how to scroll comments?
-        
-        * section-entity
-            * perspective entity image transform
-                * how to achieve fake depth of field effect?
-            * add address and/or desc
-            * use entity action sprite sheet
-            * TODO: style menu and/or embed external SinglePlatform menu page
     
     * fix entity title cutoff
     * fix infinite scroll after returning to default category
@@ -159,6 +141,23 @@ OLD:
     * ESC key now closes all lightboxes and the sdetail popup
     * text highlight color is no longer hot pink; instead, it inherits the browser's default as usual
     * fix link colors throughout (including visited/hover/active states)
+    * SDETAIL
+        * layout and initialize social buttons correctly
+        * slide-in animation vs lightbox
+            * remove header user-gradient
+        
+        * section-stamp
+            * test different #credits
+            * test different #comments
+            * comment collapsing
+                * TODO: how to scroll comments?
+        
+        * section-entity
+            * perspective entity image transform
+                * how to achieve fake depth of field effect?
+            * add address and/or desc
+            * use entity action sprite sheet
+            * TODO: style menu and/or embed external SinglePlatform menu page
 
 ChangeList:
     * sDetail overlay now deals properly with scrollbars hiding / reappearing

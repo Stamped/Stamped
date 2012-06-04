@@ -31,16 +31,13 @@
     <div class="profile-header-wrapper">
         <div class="profile-header">
             <div class="profile-content-page">
-                <div class="profile-header-body">
-                    <div class="innerbg"></div>
+                
+                <!-- DEFAULT HEADER -->
+                <div class="profile-header-body header-category-default">
                     <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        
-                        <!-- TODO: must include profile image in profile-section
-                             because profile image size shrinks for non-default sections -->
-                        
                         {% handlebars_template "profile-image-large" user %}
                         
-                        <div class="floatleft profile-section profile-section-default">
+                        <div class="lhs">
                             <p class='profile-title'>
                                 {{user.name}}
                             </p>
@@ -48,6 +45,95 @@
                             <p>
                                 <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PLACE HEADER -->
+                <div class="profile-header-body header-category-place">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Place Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MUSIC HEADER -->
+                <div class="profile-header-body header-category-music">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Music Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- BOOK HEADER -->
+                <div class="profile-header-body header-category-book">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Book Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FILM & TV HEADER -->
+                <div class="profile-header-body header-category-film">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Film &amp; TV Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- OTHER HEADER -->
+                <div class="profile-header-body header-category-other">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Other Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
                         </div>
                     </div>
                 </div>
