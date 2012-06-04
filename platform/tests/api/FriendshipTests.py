@@ -33,7 +33,7 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
             "user_id_b": self.userB['user_id'],
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result)
+        self.assertTrue(result['result'])
     
     def test_check_friendship_fail(self):
         path = "friendships/check.json"

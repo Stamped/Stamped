@@ -33,7 +33,6 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
         AStampedAPITestCase.__init__(self, methodName)
         self.fb = globalFacebook()
         self.fb_app_access_token = self.fb.getAppAccessToken()
-        self.twitter = globalTwitter()
 
     def _createFacebookTestUser(self, name='TestUser'):
         # Create the test user on the Facebook API (see: http://developers.facebook.com/docs/test_users/)
@@ -293,11 +292,13 @@ class StampedAPIFacebookFind(StampedAPIFacebookTest):
 class StampedAPITwitterTest(AStampedAPITestCase):
 
     def setUp(self):
+        self.twitter = globalTwitter()
+
         # Create a new Stamped user with Twitter auth, also create a standard auth Stamped user
-        self.tw_user_a_token            = TEST_USER_A0_TOKEN
-        self.tw_user_a_secret           = TEST_USER_A0_SECRET
-        self.tw_user_b_token            = TEST_USER_B0_TOKEN
-        self.tw_user_b_secret           = TEST_USER_B0_SECRET
+        self.tw_user_a_token            = TWITTER_USER_A0_TOKEN
+        self.tw_user_a_secret           = TWITTER_USER_A0_SECRET
+        self.tw_user_b_token            = TWITTER_USER_B0_TOKEN
+        self.tw_user_b_secret           = TWITTER_USER_B0_SECRET
 
         (self.twUserA, self.twUserAToken) = self.createTwitterAccount(self.tw_user_a_token, self.tw_user_a_secret, name='twUserA')
         (self.twUserB, self.twUserBToken) = self.createTwitterAccount(self.tw_user_b_token, self.tw_user_b_secret, name='twUserB')
@@ -355,8 +356,8 @@ class StampedAPITwitterFind(StampedAPITwitterTest):
         path = "users/find/twitter.json"
         data = {
             "oauth_token"   : self.twUserAToken['access_token'],
-            "user_token"    : TEST_USER_A0_TOKEN,
-            "user_secret"   : TEST_USER_A0_SECRET,
+            "user_token"    : TWITTER_USER_A0_TOKEN,
+            "user_secret"   : TWITTER_USER_A0_SECRET,
             }
         result = self.handlePOST(path, data)
 
