@@ -185,6 +185,8 @@ footer,
   color: #333;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget .share-buttons {
+  /* TODO: top and opacity */
+
   -webkit-transition: all 0.3s ease-out;
   -moz-transition: all 0.3s ease-out;
   -ms-transition: all 0.3s ease-out;

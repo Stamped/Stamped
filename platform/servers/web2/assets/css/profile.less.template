@@ -34,9 +34,8 @@
 @primary:   fade(lighten(@user_light, 25%), 80%);
 @secondary: fade(darken( @user_dark,  10%), 80%);
 */
-
 @primary:   @user_primary;
-@secondary: @user_primary;
+@secondary: @user_secondary;
 
 
 /* **************************************************************************

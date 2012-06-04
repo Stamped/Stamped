@@ -25,86 +25,86 @@ class TVSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'game of thrones', }, [ 
+            ({ 'query' : 'game of thrones', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='game of thrones', types='tv'), 
             ]), 
-            ({ 'query' : 'dexter', }, [ 
+            ({ 'query' : 'dexter', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='dexter', types='tv'), 
             ]), 
-            ({ 'query' : 'family guy', }, [ 
+            ({ 'query' : 'family guy', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='family guy', types='tv'), 
             ]), 
-            ({ 'query' : 'american idol', }, [ 
+            ({ 'query' : 'american idol', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='american idol', types='tv'), 
             ]), 
-            ({ 'query' : 'spongebob squarepants', }, [ 
+            ({ 'query' : 'spongebob squarepants', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='spongebob squarepants', types='tv'), 
             ]), 
-            ({ 'query' : 'spongebob', }, [ 
+            ({ 'query' : 'spongebob', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='spongebob squarepants', types='tv'), 
             ]), 
-            ({ 'query' : 'trailer park boys', }, [ 
+            ({ 'query' : 'trailer park boys', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='trailer park boys', types='tv'), 
                 SearchResultConstraint(title='trailer park boys', types='movie'), 
             ]), 
-            ({ 'query' : 'new girl', }, [ 
+            ({ 'query' : 'new girl', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='new girl', types='tv'), 
             ]), 
-            ({ 'query' : 'up all night', }, [ 
+            ({ 'query' : 'up all night', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='up all night', types='tv'), 
             ]), 
-            ({ 'query' : 'breaking bad', }, [ 
+            ({ 'query' : 'breaking bad', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='breaking bad', types='tv'), 
             ]), 
-            ({ 'query' : 'LOST', }, [ 
+            ({ 'query' : 'LOST', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='LOST', types='tv'), 
             ]), 
-            ({ 'query' : 'the sopranos', }, [ 
+            ({ 'query' : 'the sopranos', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='the sopranos', types='tv'), 
             ]), 
-            ({ 'query' : 'the simpsons', }, [ 
+            ({ 'query' : 'the simpsons', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='the simpsons', types='tv'), 
             ]), 
-            ({ 'query' : 'south park', }, [ 
+            ({ 'query' : 'south park', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='south park', types='tv'), 
             ]), 
-            ({ 'query' : 'saturday night live', }, [ 
+            ({ 'query' : 'saturday night live', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='saturday night live', types='tv'), 
             ]), 
-            ({ 'query' : 'dark angel', }, [ 
+            ({ 'query' : 'dark angel', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='dark angel', types='tv'), 
             ]), 
-            ({ 'query' : 'misfits', }, [ 
+            ({ 'query' : 'misfits', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='misfits', types='tv'), 
             ]), 
-            ({ 'query' : 'arrested development', }, [ 
+            ({ 'query' : 'arrested development', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='arrested development', types='tv'), 
             ]), 
-            ({ 'query' : 'big bang theory', }, [
+            ({ 'query' : 'big bang theory', 'category' : 'film', }, [
                 SearchResultConstraint(title='the big bang theory', types='tv'), 
             ]), 
-            ({ 'query' : 'how i met your mother', }, [
+            ({ 'query' : 'how i met your mother', 'category' : 'film', }, [
                 SearchResultConstraint(title='how i met your mother', types='tv'), 
             ]), 
             # TODO (travis): fails because of invalid location hint
-            #({ 'query' : 'it\'s always sunny in philadelphia', }, [
+            #({ 'query' : 'it\'s always sunny in philadelphia', 'category' : 'film', }, [
             #    SearchResultConstraint(title='it\'s always sunny in philadelphia', types='tv'), 
             #]), 
-            ({ 'query' : 'the walking dead', }, [
+            ({ 'query' : 'the walking dead', 'category' : 'film', }, [
                 SearchResultConstraint(title='the walking dead', types='tv'), 
                 SearchResultConstraint(title='the walking dead', types='movie'), 
             ]), 
-            ({ 'query' : 'friends', }, [
+            ({ 'query' : 'friends', 'category' : 'film', }, [
                 SearchResultConstraint(title='friends', types='tv'), 
             ]), 
-            ({ 'query' : 'firefly', }, [
+            ({ 'query' : 'firefly', 'category' : 'film', }, [
                 SearchResultConstraint(title='firefly', types='tv'), 
                 SearchResultConstraint(title='serenity', types='movie'), 
             ]), 
-            ({ 'query' : 'futurama', }, [
+            ({ 'query' : 'futurama', 'category' : 'film', }, [
                 SearchResultConstraint(title='futurama', types='tv'), 
             ]), 
-            ({ 'query' : '90210', }, [
+            ({ 'query' : '90210', 'category' : 'film', }, [
                 SearchResultConstraint(title='90210', types='tv'), 
             ]), 
         ]
@@ -124,16 +124,16 @@ class TVSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'footballer\'s wives', }, [    # popular U.K. TV show (2002)
+            ({ 'query' : 'footballer\'s wives', 'category' : 'film', }, [    # popular U.K. TV show (2002)
                 SearchResultConstraint(title='footballer\'s wives', types='tv'), 
             ]), 
-            ({ 'query' : 'hotel babylon', }, [          # popular U.K. TV show (2006)
+            ({ 'query' : 'hotel babylon', 'category' : 'film', }, [          # popular U.K. TV show (2006)
                 SearchResultConstraint(title='hotel babylon', types='tv'), 
             ]), 
-            ({ 'query' : 'jeeves and wooster', }, [     # popular U.K. TV show (1990)
+            ({ 'query' : 'jeeves and wooster', 'category' : 'film', }, [     # popular U.K. TV show (1990)
                 SearchResultConstraint(title='jeeves and wooster', types='tv'), 
             ]), 
-            ({ 'query' : 'coupling', }, [               # popular U.K. TV show (2000-2004)
+            ({ 'query' : 'coupling', 'category' : 'film', }, [               # popular U.K. TV show (2000-2004)
                 SearchResultConstraint(title='coupling', types='tv'), 
             ]), 
             

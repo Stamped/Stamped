@@ -4,7 +4,7 @@
  */
 
 /*jslint plusplus: true */
-/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, Backbone, Handlebars, Persist, moment */
+/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, moment */
 
 var g_update_stamps = null;
 
@@ -532,7 +532,6 @@ var g_update_stamps = null;
                                 }
                             }
                         });
-
                 } else if (!$sdetail_wrapper.hasClass('animating')) {
                     $sdetail_wrapper.css({
                         'top' : offset, 
@@ -814,7 +813,7 @@ var g_update_stamps = null;
         var $header             = $('header .header-body');
         var $content            = $('#main-page-content');
         var header_height       = $header.height();
-        var cur_header_height   = header_height;
+        var cur_header_height   = header_height || 0;
         var min_height_ratio    = 0.5;
         var min_header_height   = header_height * min_height_ratio;
         
@@ -1181,7 +1180,10 @@ var g_update_stamps = null;
                     
                     History.pushState(params, title, params_str);
                 } else {
-                    alert("TODO: support navigation when browser history is disabled");
+                    var next_url = get_custom_url(params);
+                    
+                    //alert("TODO: support navigation when browser history is disabled");
+                    window.location = next_url;
                 }
                 
                 return false;

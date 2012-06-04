@@ -3060,6 +3060,11 @@ class StampedAPI(AStampedAPI):
             else:
                 raise StampedInputError("User id required")
 
+        if scope == 'user':
+            if userId is not None:
+                return self._collectionDB.getUserStampIds(userId)
+            raise StampedInputError("User id required")
+
         if userId is not None and scope is not None:
             raise StampedInputError("Invalid scope combination")
 

@@ -52,15 +52,15 @@ class Fandango(object):
         ts        = datetime.utcnow()
         
         def _set_entity(entity, key, value):
-            entity[key] = value
+            setattr(entity, key, value)
             try:
-                entity["%s_source" % key] = source
-            except KeyError:
+                setattr(entity, "%s_source" % key, source)
+            except AttributeError:
                 pass
             
             try:
-                entity["%s_timestamp" % key] = ts
-            except KeyError:
+                setattr(entity, "%s_timestamp" % key, ts)
+            except AttributeError:
                 pass
         
         for entry in data.entries:
@@ -100,7 +100,7 @@ class Fandango(object):
             
             f_url = "%s" % entry.link
             f_url = f_url.replace('%26m%3d', '%3fpid=5348839%26m%3d')
-            _set_entity(entity, "fandango_url", f_url)
+            _set_entity(entity.sources, "fandango_url", f_url)
             
             # attempt to scrape some extra details from fandango's movie page
             url = "http://www.fandango.com/%s_%s/movieoverview" % \
