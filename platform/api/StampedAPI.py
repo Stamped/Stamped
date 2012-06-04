@@ -1153,7 +1153,7 @@ class StampedAPI(AStampedAPI):
             self._addFollowActivity(authUserId, userId)
 
             # Remove 'friend' activity item
-            self._activityDB.removeActivity('friend', authUserId, friendId=userId)
+            self._activityDB.removeFriendActivity('friend', authUserId, userId)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
@@ -1193,7 +1193,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
 
         # Remove activity
-        self._activityDB.removeActivity('follow', authUserId, friendId=userId)
+        self._activityDB.removeFollowActivity(authUserId, userId)
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -2764,7 +2764,7 @@ class StampedAPI(AStampedAPI):
         self._commentDB.removeComment(comment.comment_id)
 
         # Remove activity?
-        self._activityDB.removeActivity('comment', authUserId, commentId=comment.comment_id)
+        self._activityDB.removeCommentActivity(authUserId, comment.comment_id)
 
         # Increment comment count on stamp
         self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
@@ -3940,12 +3940,9 @@ class StampedAPI(AStampedAPI):
                            groupRange=None,
                            sendAlert=True,
                            unique=False):
-    #def _addActivity(self, verb, userId, **kwargs):
         # Verify that activity is enabled
         if not self._activity:
             return
-
-        logs.info('\n### ADDING ACTIVITY verb: %s   userId: %s' % (verb, userId))
 
         if len(recipientIds) == 0 and objects.user_ids is not None and len(objects.user_ids) != 0:
             recipientIds = objects.user_ids
@@ -3957,7 +3954,6 @@ class StampedAPI(AStampedAPI):
             raise Exception("Missing recipient")
 
         # Save activity
-        logs.info('\n### SAVING ACTIVITY')
         self._activityDB.addActivity(verb           = verb,
                                      subject        = userId,
                                      objects        = objects,

@@ -9,6 +9,9 @@ APP_ID          = '297022226980395'
 APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
+USER_ID = '100003940534060'
+ACCESS_TOKEN = 'AAACEdEose0cBAMrAKxyZC1UPZCikkVixO6tFlFeODQVgyrucTBtMmbFfn75tXZAIsGcUQCnJbh1B2EAmX0fnj5HRqXfqgqTZATHxuZCHlJPD4xNlFG0Un'
+
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
         self.app_id         = app_id
@@ -165,8 +168,6 @@ def globalFacebook():
     return __globalFacebook
 
 
-USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAACEdEose0cBAAwpCHiCyAAmXU3A9eMxnw0LJjFO4Gz9dFPsfkVtTJceu3IQRxOq76q7iV3jRWLeZBFZCte3DjMrjA0CAupc8JQaMIYpC0RZCf7SJAf'
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
