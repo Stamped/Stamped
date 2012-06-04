@@ -26,75 +26,75 @@ class AlbumSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'Deep Cuts', }, [ 
+            ({ 'query' : 'Deep Cuts', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='deep cuts', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'S.C.I.E.N.C.E.', }, [ 
+            ({ 'query' : 'S.C.I.E.N.C.E.', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='s.c.i.e.n.c.e.', 
                                        types='album', 
                                        index=0), 
             ]), 
-            ({ 'query' : 'hail to the thief', }, [ 
+            ({ 'query' : 'hail to the thief', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='hail to the thief', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'eyelid movies', }, [ 
+            ({ 'query' : 'eyelid movies', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='eyelid movies', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'musique automatique', }, [ 
+            ({ 'query' : 'musique automatique', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='musique automatique', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'oracular spectacular', }, [ 
+            ({ 'query' : 'oracular spectacular', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='oracular spectacular', 
                                        types='album', 
                                        index=0), 
             ]), 
-            ({ 'query' : 'wolfgang amadeus phoenix', }, [ 
+            ({ 'query' : 'wolfgang amadeus phoenix', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='wolfgang amadeus phoenix', 
                                        types='album', 
                                        index=0), 
             ]), 
-            ({ 'query' : 'the young machines', }, [ 
+            ({ 'query' : 'the young machines', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='the young machines', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'without a sound', }, [ 
+            ({ 'query' : 'without a sound', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='without a sound', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'viva wisconsin', }, [ 
+            ({ 'query' : 'viva wisconsin', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='viva wisconsin', 
                                        types='album', 
                                        index=0), 
             ]), 
-            ({ 'query' : 'play the b-sides', }, [ 
+            ({ 'query' : 'play the b-sides', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='play: the b-sides', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'astro lounge', }, [ 
+            ({ 'query' : 'astro lounge', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='astro lounge', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'toxicity', }, [ 
+            ({ 'query' : 'toxicity', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='toxicity', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'enema of the state', }, [ 
+            ({ 'query' : 'enema of the state', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='enema of the state', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'I-Empire', }, [ 
+            ({ 'query' : 'I-Empire', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='i-empire', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'it\'s never been like that', }, [ 
+            ({ 'query' : 'it\'s never been like that', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='it\'s never been like that', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'it won\'t snow where you\'re going', }, [ 
+            ({ 'query' : 'it won\'t snow where you\'re going', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='it won\'t snow where you\'re going', 
                                        types='album'), 
             ]), 
@@ -115,44 +115,44 @@ class AlbumSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'Kimi Ni Saku Hana', }, [ 
+            ({ 'query' : 'Kimi Ni Saku Hana', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='kimi ni saku hana', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'bis ans ende der welt', }, [ 
+            ({ 'query' : 'bis ans ende der welt', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='bis ans ende der welt', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'Befehl von ganz unten album', }, [ 
+            ({ 'query' : 'Befehl von ganz unten album', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='befehl von ganz unten', 
                                        types='album', 
                                        match='prefix'), 
             ]), 
-            ({ 'query' : 'Tuskegee Lionel Richie', }, [ 
+            ({ 'query' : 'Tuskegee Lionel Richie', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='tuskegee', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'Tuskegee by Lionel Richie', }, [ 
+            ({ 'query' : 'Tuskegee by Lionel Richie', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='tuskegee', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'Sorry for Party Rocking', }, [ 
+            ({ 'query' : 'Sorry for Party Rocking', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='sorry for party rocking', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'LMFAO Sorry for Party Rocking', }, [ 
+            ({ 'query' : 'LMFAO Sorry for Party Rocking', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='sorry for party rocking', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'Sorry for Party Rocking LMFAO', }, [ 
+            ({ 'query' : 'Sorry for Party Rocking LMFAO', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='sorry for party rocking', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'bangarang skrillex', }, [ 
+            ({ 'query' : 'bangarang skrillex', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='bangarang', 
                                        types='album'), 
             ]), 
-            ({ 'query' : 'nothing but the beat david guetta', }, [ 
+            ({ 'query' : 'nothing but the beat david guetta', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='nothing but the beat', 
                                        types='album'), 
             ]), 
@@ -188,7 +188,7 @@ class AlbumSearchTests(ASearchTestSuite):
             if name != name2:
                 continue
             
-            tests.append(({ 'query' : name, }, [ 
+            tests.append(({ 'query' : name, 'category' : 'music', }, [ 
                 SearchResultConstraint(title=name, types='album', match='contains'), 
             ]))
         
