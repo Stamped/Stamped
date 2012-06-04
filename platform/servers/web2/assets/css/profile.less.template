@@ -57,14 +57,14 @@
 
 
 .post-header, .stamp-card-pre {
-    .user-gradient(135deg);
+    .user-gradient(135deg, 40%);
     
     width:  100%;
     margin: 0;
 }
 
 .profile-header-post, .stamp-card-post {
-    .user-gradient(135deg);
+    .user-gradient(135deg, 20%);
     
     width:  100%;
     margin: 0;
@@ -76,7 +76,7 @@
 
 .profile-header-wrapper {
     .profile-header {
-        .user-gradient(135deg);
+        .user-gradient(135deg, 100%);
     }
 }
 

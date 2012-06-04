@@ -220,6 +220,51 @@ var g_update_stamps = null;
             }
         };
         
+        var get_fancybox_options = function(options) {
+            var default_options = {
+                openEffect      : 'elastic', 
+                openEasing      : 'easeOutBack', 
+                openSpeed       : 300, 
+                
+                closeEffect     : 'elastic', 
+                closeEasing     : 'easeInBack', 
+                closeSpeed      : 300, 
+                
+                helpers         : {
+                    overlay     : {
+                        speedIn  : 150, 
+                        speedOut : 300, 
+                        opacity  : 0.8, 
+                        
+                        css      : {
+                            cursor             : 'pointer', 
+                            'background-color' : '#fff'
+                        }, 
+                        
+                        closeClick  : true
+                    }
+                }
+            };
+            
+            var output = {};
+            
+            for (var key in default_options) {
+                if (default_options.hasOwnProperty(key)) {
+                    output[key] = default_options[key];
+                }
+            }
+            
+            if (!!options) {
+                for (var key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        output[key] = options[key];
+                    }
+                }
+            }
+            
+            return options;
+        };
+        
         // post-processing of newly added stamps, including:
         //   1) using moment.js to make the stamp's timestamp human-readable and 
         //      relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
@@ -433,33 +478,9 @@ var g_update_stamps = null;
                 });
             });*/
             
-            $scope.find("a.lightbox").fancybox({
-                openEffect      : 'elastic', 
-                openEasing      : 'easeOutBack', 
-                openSpeed       : 300, 
-                
-                closeEffect     : 'elastic', 
-                closeEasing     : 'easeInBack', 
-                closeSpeed      : 300, 
-                
-                closeClick      : true, 
-                //maxWidth        : (2 * window.innerWidth) / 3, 
-                
-                helpers         : {
-                    overlay     : {
-                        speedIn  : 150, 
-                        speedOut : 300, 
-                        opacity  : 0.8, 
-                        
-                        css      : {
-                            cursor             : 'pointer', 
-                            'background-color' : '#fff'
-                        }, 
-                        
-                        closeClick  : true
-                    }
-                }
-            });
+            $scope.find("a.lightbox").fancybox(get_fancybox_options({
+                closeClick : true
+            }));
             
             /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
                 var $this = $(this);
@@ -1006,28 +1027,35 @@ var g_update_stamps = null;
                     $(this).attr('href', url);
                 });
                 
+                // animated transition between category-specific headers
                 if (category !== g_category) {
-                    var sel = '.header-category-' + category;
+                    var sel = '.header-category-' + orig_category;
                     var $elem = $(sel);
                     
                     if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
-                        $elem.addClass('header-animating').stop(true, false).css({
-                            top : "-100%", 
-                        }).animate({
-                            top : 0, 
-                        }, {
-                            duration : 600, 
-                            specialEasing : { 
-                                top : 'easeOutCubic'
-                            }, 
-                            complete : function() {
-                                $('.header-selected').removeClass('header-animating header-selected');
-                                $elem.removeClass('header-animating').addClass('header-selected');
-                                
-                                g_category = category;
-                                set_body_class(orig_category);
-                            }
-                        });
+                        var completion_func = function() {
+                            $('.header-selected').removeClass('header-animating header-selected');
+                            $elem.removeClass('header-animating').addClass('header-selected');
+                            
+                            g_category = category;
+                            set_body_class(orig_category);
+                        };
+                        
+                        if (category === null) {
+                            completion_func();
+                        } else {
+                            $elem.addClass('header-animating').stop(true, false).css({
+                                top : "-100%", 
+                            }).animate({
+                                top : 0, 
+                            }, {
+                                duration : 600, 
+                                specialEasing : { 
+                                    top : 'easeOutCubic'
+                                }, 
+                                complete : completion_func
+                            });
+                        }
                     }
                 }
                 
@@ -1434,69 +1462,82 @@ var g_update_stamps = null;
             
             if ($action_menu.length == 1) {
                 var $temp = $action_menu.parents('.entity-id');
-                var $link = $action_menu.parents('a.action-link');
+                var $link = $action_menu.parent('a.action-link');
                 
                 if ($temp.length == 1 && $link.length == 1) {
-                    var entity_id    = extract_data($temp, 'entity-id-', null);
-                    var entity_title = $.trim($action_menu.find('.entity-title').text());
-                    
-                    if (entity_id !== null) {
+                    $link.each(function(i, link) {
+                        var $link        = $(link);
+                        var entity_id    = extract_data($temp, 'entity-id-', null);
+                        var entity_title = $.trim($action_menu.find('.entity-title').text());
+                        
+                        if (entity_id !== null) {
+                            if (entity_title === null) {
+                                entity_title = "Menu";
+                            } else {
+                                entity_title = "Menu for " + entity_title;
+                            }
+                            
+                            var link_type = 'ajax';
+                            var link_href = '/entities/menu?entity_id=' + entity_id;
+                            
+                            // TODO: possibly embed singleplatform page directly if one exists!
+                            //link_type = 'iframe';
+                            //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
+                            
+                            var popup_options = get_fancybox_options({
+                                href            : link_href, 
+                                type            : link_type, 
+                                title           : entity_title, 
+                                maxWidth        : 480, //Math.min((2 * window.innerWidth) / 3, 480), 
+                                
+                                afterShow       : function() {
+                                    $('.entity-menu').jScrollPane();
+                                }
+                            });
+                            
+                            $link.attr('href', link_href).click(function(event) {
+                                event.preventDefault();
+                                
+                                $.fancybox.open(popup_options);
+                                return false;
+                            }).fancybox(popup_options);
+                        }
+                    });
+                }
+            }
+            
+            // initialize reserve action
+            var $action_reserve = $sdetail.find('.action-reserve');
+            
+            if ($action_reserve.length == 1) {
+                var $link = $action_reserve.parent('a.action-link');
+                
+                if ($link.length == 1) {
+                    $link.each(function(i, link) {
+                        var $link        = $(link);
+                        var entity_title = $.trim($action_reserve.find('.entity-title').text());
+                        
                         if (entity_title === null) {
-                            entity_title = "Menu";
+                            entity_title = "Reservations";
                         } else {
-                            entity_title = "Menu for " + entity_title;
+                            entity_title = entity_title + " Reservations";
                         }
                         
-                        var link_type = 'ajax';
-                        var link_href = '/entities/menu?entity_id=' + entity_id;
+                        var link_href = $link.attr('href');
                         
-                        // TODO: possibly embed singleplatform page directly if one exists!
-                        //link_type = 'iframe';
-                        //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
-                        
-                        var popup_options = {
+                        var popup_options = get_fancybox_options({
                             href            : link_href, 
-                            type            : link_type, 
-                            title           : entity_title, 
-                            maxWidth        : 480, //Math.min((2 * window.innerWidth) / 3, 480), 
-                            
-                            openEffect      : 'elastic', 
-                            openEasing      : 'easeOutBack', 
-                            openSpeed       : 300, 
-                            
-                            closeEffect     : 'elastic', 
-                            closeEasing     : 'easeInBack', 
-                            closeSpeed      : 300, 
-                            
-                            closeClick      : true, 
-                            
-                            helpers         : {
-                                overlay     : {
-                                    speedIn  : 150, 
-                                    speedOut : 300, 
-                                    opacity  : 0.8, 
-                                    
-                                    css      : {
-                                        cursor             : 'pointer', 
-                                        'background-color' : '#fff'
-                                    }, 
-                                    
-                                    closeClick  : true
-                                }
-                            }, 
-                            
-                            afterShow : function() {
-                                $('.entity-menu').jScrollPane();
-                            }
-                        };
+                            type            : 'iframe', 
+                            title           : entity_title
+                        });
                         
-                        $link.attr('href', link_href).click(function(event) {
+                        $link.attr('href', '#').click(function(event) {
                             event.preventDefault();
                             
                             $.fancybox.open(popup_options);
                             return false;
                         }).fancybox(popup_options);
-                    }
+                    });
                 }
             }
             

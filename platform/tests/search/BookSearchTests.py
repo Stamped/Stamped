@@ -60,25 +60,21 @@ class BookSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'the girl who kicked the hornet\'s nest', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='the girl who kicked the hornet\'s nest', types='book'), 
-                SearchResultConstraint(title='the girl who kicked the hornet\'s nest', types='movie'), 
             ]), 
             ({ 'query' : 'the boy who harnessed the wind', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='the boy who harnessed the wind', types='book'), 
             ]), 
             ({ 'query' : 'the girl who played with fire', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='the girl who played with fire', types='book'), 
-                SearchResultConstraint(title='the girl who played with fire', types='movie'), 
             ]), 
             ({ 'query' : 'the help', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='the help', types='book'), 
-                SearchResultConstraint(title='the help', types='movie'), 
             ]), 
             ({ 'query' : 'the fault in our stars', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='the fault in our stars', types='book'), 
             ]), 
             ({ 'query' : 'lord of the flies', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='lord of the flies', types='book'), 
-                SearchResultConstraint(title='lord of the flies', types='movie'), 
             ]), 
             ({ 'query' : 'amrar', 'category' : 'book', }, [ 
                 SearchResultConstraint(title='amrar va lukhar', types='book'), 

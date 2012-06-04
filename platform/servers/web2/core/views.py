@@ -82,13 +82,6 @@ def profile(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     
-    if ENABLE_TRAVIS_TEST:
-        friends     = travis_test.friends
-        followers   = travis_test.followers
-    else:
-        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
-        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
-    
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
         # useful debugging utility -- circumvent dev server to speed up reloads
         user        = travis_test.user
@@ -109,6 +102,13 @@ def profile(request, schema, **kwargs):
         
         #utils.log(pprint.pformat(schema.dataExport()))
         stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
+    
+    if ENABLE_TRAVIS_TEST:
+        friends     = travis_test.friends
+        followers   = travis_test.followers
+    else:
+        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
+        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
     
     main_cluster    = { }
     
