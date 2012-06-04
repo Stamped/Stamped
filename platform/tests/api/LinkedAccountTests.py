@@ -34,7 +34,6 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
         self.fb = globalFacebook()
         self.fb_app_access_token = self.fb.getAppAccessToken()
 
-
     def _createFacebookTestUser(self, name='TestUser'):
         # Create the test user on the Facebook API (see: http://developers.facebook.com/docs/test_users/)
 
@@ -288,6 +287,83 @@ class StampedAPIFacebookFind(StampedAPIFacebookTest):
         self.assertEqual(result[0]['user_id'], self.fUserB['user_id'])
 
 
+
+
+class StampedAPITwitterTest(AStampedAPITestCase):
+
+    def setUp(self):
+        self.twitter = globalTwitter()
+
+        # Create a new Stamped user with Twitter auth, also create a standard auth Stamped user
+        self.tw_user_a_token            = TWITTER_USER_A0_TOKEN
+        self.tw_user_a_secret           = TWITTER_USER_A0_SECRET
+        self.tw_user_b_token            = TWITTER_USER_B0_TOKEN
+        self.tw_user_b_secret           = TWITTER_USER_B0_SECRET
+
+        (self.twUserA, self.twUserAToken) = self.createTwitterAccount(self.tw_user_a_token, self.tw_user_a_secret, name='twUserA')
+        (self.twUserB, self.twUserBToken) = self.createTwitterAccount(self.tw_user_b_token, self.tw_user_b_secret, name='twUserB')
+        (self.sUser, self.sUserToken) = self.createAccount(name='sUser')
+
+        self.twitter.createFriendship(self.tw_user_a_token, self.tw_user_a_secret, 'TestUserB0')
+
+    def tearDown(self):
+        self.twitter.destroyFriendship(self.tw_user_a_token, self.tw_user_a_secret, 'TestUserB0')
+
+        self.deleteAccount(self.sUserToken)
+        self.deleteAccount(self.twUserAToken)
+        self.deleteAccount(self.twUserBToken)
+
+
+## create two stamped accounts, give them both linked twitter id, and try to create a twitter account
+## create one stamped account, link it to twitter account, try to create new stamped twitter account
+#
+
+class StampedAPITwitterCreate(StampedAPITwitterTest):
+
+    def test_invalid_twitter_token_login(self):
+        # attempt login with invalid twitter token
+        with expected_exception():
+            self.loginWithTwitter(self.tw_user_a_token, "BLAAARRGH!!")
+
+    def test_create_duplicate_twitter_auth_account(self):
+        with expected_exception():
+            self.createTwitterAccount(self.tw_user_a_token, self.tw_user_a_secret, name='twUser2')
+
+    def test_linked_account_with_used_twitter_id(self):
+    #        self.addLinkedAccount(
+    #            self.sUserToken,
+    #                { 'facebook_id'         : self.fb_user_id,
+    #                  'facebook_name'       : 'facebook_user',
+    #                  'facebook_token'      : self.fb_user_token,
+    #                  }
+    #        )
+        pass
+
+    def test_attempt_linked_account_change_for_twitter_auth_user(self):
+        pass
+
+
+
+    def test_valid_login(self):
+        # login with twitter user account
+        result = self.loginWithTwitter(self.tw_user_a_token, self.tw_user_a_secret)
+
+        # verify that the stamped user token and user_id are correct
+        self.assertEqual(result['user']['user_id'], self.twUserA['user_id'])
+
+class StampedAPITwitterFind(StampedAPITwitterTest):
+    def test_find_by_twitter(self):
+        path = "users/find/twitter.json"
+        data = {
+            "oauth_token"   : self.twUserAToken['access_token'],
+            "user_token"    : TWITTER_USER_A0_TOKEN,
+            "user_secret"   : TWITTER_USER_A0_SECRET,
+            }
+        result = self.handlePOST(path, data)
+
+        print(result)
+        self.assertLength(result, 1)
+        self.assertEqual(result[0]['user_id'], self.twUserB['user_id'])
 
 
 

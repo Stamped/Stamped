@@ -321,7 +321,7 @@ class Netflix(object):
             token_info['oauth_token'].encode('ascii'),
             token_info['oauth_token_secret'].encode('ascii'),
         )
-        token.set_callback('https://dev.stamped.com/v0/account/linked/netflix/login_callback.json?secret=%s&stamped_oauth_token=%s'
+        token.set_callback(utils.getDomain() + 'account/linked/netflix/login_callback.json?secret=%s&stamped_oauth_token=%s'
                 % (token_info['oauth_token_secret'].encode('ascii'), authUserId))
 
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,

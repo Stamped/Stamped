@@ -24,10 +24,7 @@ from datetime           import datetime, date, timedelta
 # PRIVATE #
 # ####### #
 
-if libs.ec2_utils.is_prod_stack():
-    COMPLETION_ENDPOINT = 'https://api.stamped.com/v0/actions/complete.json'
-else:
-    COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
+COMPLETION_ENDPOINT = 'actions/complete.json'
 
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
@@ -1386,7 +1383,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -1504,7 +1501,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(

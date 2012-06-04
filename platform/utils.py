@@ -12,6 +12,7 @@ __license__   = "TODO"
 import datetime, gzip, httplib, json, logging, os, pickle, re, string, sys
 import htmlentitydefs, threading, time, traceback, urllib, urllib2
 import keys.aws, logs, math, random, boto, bson
+import libs.ec2_utils
 
 from errors              import *
 from boto.ec2.connection import EC2Connection
@@ -549,6 +550,14 @@ def getInstance(name):
                         return instance
     
     return None
+
+def getDomain():
+    if self.is_ec2():
+        if libs.ec2_utils.is_prod_stack():
+            return "https://api.stamped.com/v0/"
+        return "https://dev.stamped.com/v0/"
+    return "localhost:18000/v0/"
+
 
 def is_ec2():
     """ returns whether or not this python program is running on EC2 """
