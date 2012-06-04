@@ -250,16 +250,31 @@
     }
 }
 
-body.default .header-category-default, .header-category-default {
-    .header-selection();
+.stamp-count {
+    display: none;
+}
+
+body.default {
+    .header-category-default {
+        .header-selection();
+    }
+    
+    .stamp-count-default {
+        display: block !important;
+    }
 }
 
 body.place {
     .header-category-default {
         .header-hidden();
     }
+    
     .header-category-place {
         .header-selection();
+    }
+    
+    .stamp-count-place {
+        display: block !important;
     }
 }
 
@@ -267,8 +282,13 @@ body.music {
     .header-category-default {
         .header-hidden();
     }
+    
     .header-category-music {
         .header-selection();
+    }
+    
+    .stamp-count-music {
+        display: block !important;
     }
 }
 
@@ -276,8 +296,13 @@ body.book {
     .header-category-default {
         .header-hidden();
     }
+    
     .header-category-book {
         .header-selection();
+    }
+    
+    .stamp-count-book {
+        display: block !important;
     }
 }
 
@@ -285,8 +310,13 @@ body.film {
     .header-category-default {
         .header-hidden();
     }
+    
     .header-category-film {
         .header-selection();
+    }
+    
+    .stamp-count-film {
+        display: block !important;
     }
 }
 
@@ -294,8 +324,13 @@ body.other {
     .header-category-default {
         .header-hidden();
     }
+    
     .header-category-other {
         .header-selection();
+    }
+    
+    .stamp-count-other {
+        display: block !important;
     }
 }
 
@@ -310,17 +345,21 @@ body.other {
 }
 
 .stamp-gallery-header {
-    margin: 1em 5% 0;
+    margin: 1em 0 0;
     
     .stamp-gallery-sort {
         position: relative;
         z-index: 80;
+        left: -24px;
         float: left;
+        
+        border: 1px none;
+        .rounded(4px);
         
         .item {
             display: none;
             text-decoration: none;
-            padding: .25em 1em;
+            padding: .25em 24px;
             
             &:hover, &:active {
                 text-decoration: none;
@@ -347,12 +386,11 @@ body.other {
     }
     
     .expanded {
-        background: #fff;
         position: absolute;
+        background: #fff;
         
-        .box-shadow(0, 0, 8px, 0, @shadow);
         border: 1px solid @shadow;
-        .rounded(4px);
+        .box-shadow(0, 0, 8px, 0, @shadow);
         
         .item, .selected {
             display: block;
@@ -829,6 +867,12 @@ a.lightbox {
     visibility: hidden;
 }
 
+.expanded-desc() {
+    opacity: 1;
+    font-weight: 700;
+    .transform(translatex(0));
+}
+
 #stamp-category-nav-bar {
     position: fixed;
     display:  block;
@@ -839,6 +883,7 @@ a.lightbox {
     
     visibility: hidden;
     background: #666;
+    
     @radius: 4px;
     .rounded(@radius);
     .box-shadow(0, 2px, 8px, -2px, @shadow);
@@ -881,6 +926,7 @@ a.lightbox {
                 height: 56px;
                 overflow: visible;
                 text-overflow: visible;
+                cursor: pointer;
                 
                 /*@params: 0.3s ease-out;
                 @args: opacity @params, transform @params;
@@ -913,6 +959,14 @@ a.lightbox {
                     height: 30px;
                 }
                 
+                .desc-overlay {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    background: #666;
+                    cursor: pointer;
+                }
+                
                 .desc {
                     position: absolute;
                     top:   50%;
@@ -923,6 +977,10 @@ a.lightbox {
                     font-size: 13px;
                     color: #262626;
                     width: 120px;
+                    
+                    opacity: 0;
+                    .transform(translatex(-72px));
+                    .transition-transform2(.3s, ease-out, opacity, .3s, ease-out);
                 }
                 
                 &:hover, &:active {
@@ -933,7 +991,7 @@ a.lightbox {
                     }
                     
                     .desc {
-                        font-weight: 700;
+                        .expanded-desc();
                     }
                 }
                 
@@ -1055,7 +1113,7 @@ body.other      #stamp-category-nav-bar ol li.other {
         }
         
         .desc {
-            font-weight: 700;
+            .expanded-desc();
         }
         
         pointer-events: none;
