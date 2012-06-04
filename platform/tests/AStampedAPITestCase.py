@@ -179,26 +179,6 @@ class AStampedAPITestCase(AStampedTestCase):
         
         return user, token
 
-
-    def createFacebookTestUser(self, name='TestUser'):
-        # Create the test user on the Facebook API (see: http://developers.facebook.com/docs/test_users/)
-
-
-        # Next generate the test user for our app on Facebook
-        fb_test_user            = self.fb.createTestUser(name, self.fb_app_access_token, permissions='email')
-
-        fb_user_id              = fb_test_user['id']
-        fb_user_token           = fb_test_user['access_token']
-        fb_user_login_url       = fb_test_user['login_url']
-        fb_user_email           = fb_test_user['email']
-        fb_user_password        = fb_test_user['password']
-
-        return fb_user_token, fb_user_id
-
-    def deleteFacebookTestUser(self, fb_user_token, fb_user_id):
-        return self.fb.deleteTestUser(fb_user_token, fb_user_id)
-
-
     #TODO: Consoldiate the facebook and twitter account creation methods? Consolidate all creation methods?
 
     def createFacebookAccount(self, fb_user_token, name='TestUser', **kwargs):

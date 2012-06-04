@@ -70,6 +70,8 @@ def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
 @require_http_methods(["POST"])
 def remove(request, authUserId, **kwargs):
     account = stampedAPI.removeAccount(authUserId)
+    if account is None:
+        raise StampedIllegalActionError('Could not find account for provided authUserId')
     account = HTTPAccount().importAccount(account)
     
     return transformOutput(account.dataExport())
@@ -79,6 +81,10 @@ def remove(request, authUserId, **kwargs):
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     account = stampedAPI.getAccount(authUserId)
+    import pprint
+    print(account)
+    if account is None:
+        raise StampedIllegalActionError('Could not find account for provided authUserId')
     account = HTTPAccount().importAccount(account)
 
     return transformOutput(account.dataExport())

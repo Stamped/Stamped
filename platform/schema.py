@@ -217,7 +217,10 @@ class Schema(object):
             if t == _propertyKey:
                 properties[k] = copy.deepcopy(v)
             elif t == _nestedPropertyKey:
-                properties[k] = v.dataExport()
+                if v is not None:
+                    properties[k] = v.dataExport()
+                else:
+                    properties[k] = None
             elif t == _propertyListKey:
                 if v is None:
                     properties[k] = None

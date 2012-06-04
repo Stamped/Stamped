@@ -287,6 +287,13 @@ class Netflix(object):
             token                   = token,
         )
 
+    def getUserInfo(self, user_id, user_token, user_secret):
+        token = oauth.OAuthToken(user_token, user_secret)
+        return self.__get(
+            'users/%s' % user_id,
+            token = token,
+        )
+
     def getUserRatings(self, user_id, user_token, user_secret, netflix_ids=None):
         # Returns a list of tuples (netflix_id, rating), where rating is an int value
         # netflix_ids should be a comma delimited list of titles to get the user ratings of (if they exist)
@@ -349,9 +356,9 @@ def globalNetflix():
     
     return __globalNetflix
 
-USER_ID = 'BQAJAAEDEOSopz8_plL6unZkMNWPF0swuckE11EpXgKKIiGokw4c7bE5zMk2-HgDEBW6XUAs9ULWh3MSZJfAPT0tby6iNSqb'
-OAUTH_TOKEN = 'BQAJAAEDEEA_ABseWJmlwCbPcFoxztwwARmaMLeLXt1TYXxQ_F-zSETr2voXtq6DNeSIqjLtt2fax66UyvP5IPs-gxET3CUX'
-OAUTH_TOKEN_SECRET = 'K28wcUY4YjAM'
+USER_ID = 'T1OACpnytwsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-'
+OAUTH_TOKEN = 'BQAJAAEDEHC_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0'
+OAUTH_TOKEN_SECRET = '8wZ4kQGSZGkj'
 
 GHOSTBUSTERS2_ID = 'http://api.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api.netflix.com/catalog/titles/movies/1181532'
@@ -369,6 +376,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'autocomplete' in methods:         pprint( netflix.autocomplete(title) )
     if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
     if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
+    if 'getUserInfo' in methods:          pprint( netflix.getUserInfo(user_id, user_token, user_secret) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
     if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
     if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
@@ -377,7 +385,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'autocomplete'
+    methods = 'getUserInfo'
     params['title'] = 'ghostbuts'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
