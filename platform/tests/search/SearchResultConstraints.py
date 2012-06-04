@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, logs
 
 from pprint                 import pprint, pformat
 from abc                    import ABCMeta, abstractmethod
@@ -118,7 +118,7 @@ class SearchResultConstraint(ASearchResultConstraint):
                 
                 utils.log("VALIDATE %s/%s | %s vs %s (%s vs %s)" % 
                           (i, self.index, self.title, result.title, t0, t1))
-                utils.log(pformat(utils.normalize(result.dataExport(), strict=True)))
+                logs.debug(pformat(utils.normalize(result.dataExport(), strict=True)))
             
             # optionally verify the validity of this result's title
             if self.title  is not None and not self._eq(self.title, result.title):
