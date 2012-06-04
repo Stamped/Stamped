@@ -82,25 +82,33 @@ class Fandango(object):
                 title = title_match_groups[1]
             
             entity = MediaItemEntity()
+
+            setattr(entity.sources, "fandango_id", fid)
+            setattr(entity.sources, "fandango_source", source)
+            setattr(entity.sources, "fandango_timestamp", ts)
+
+            setattr(entity, "title", title)
             
             _set_entity(entity, "types", [ "movie", ])
-            _set_entity(entity, "title", title)
             _set_entity(entity, "desc", entry.summary)
-            _set_entity(entity, "fandango_id", fid)
             
             for link in entry.links:
                 if 'image' in link.type:
                     # fandango gives us low resolution 69x103 versions of the image, so hackily up the 
                     # resolution before saving the entity :)
-                    image  = link.href.replace('69/103', '375/375').replace('69x103', '375x375')
-                    images = [ ImageSchema({ 'sizes': [ImageSizeSchema({'url' : image }),] }) ]
+                    url  = link.href.replace('69/103', '375/375').replace('69x103', '375x375')
+                    size = ImageSizeSchema()
+                    size.url = url 
+                    image = ImageSchema()
+                    image.sizes = [ size ]
+                    images = [ image ]
                     
                     _set_entity(entity, "images", images)
                     break
             
             f_url = "%s" % entry.link
             f_url = f_url.replace('%26m%3d', '%3fpid=5348839%26m%3d')
-            _set_entity(entity.sources, "fandango_url", f_url)
+            setattr(entity.sources, "fandango_url", f_url)
             
             # attempt to scrape some extra details from fandango's movie page
             url = "http://www.fandango.com/%s_%s/movieoverview" % \
@@ -152,14 +160,14 @@ class Fandango(object):
                 cast = filter(lambda d: 'Cast:' in d.getText(), details)
                 if 1 == len(cast):
                     cast = map(lambda a: a.getText(), cast[0].findAll('a'))
-                    cast = map(lambda p: PersonEntityMini({ 'title' : p, }), cast)
+                    cast = map(lambda p: PersonEntityMini().dataImport({ 'title' : p, }), cast)
                     
                     _set_entity(entity, "cast", cast)
                 
                 director = filter(lambda d: 'Director:' in d.getText(), details)
                 if 1 == len(director):
                     directors = map(lambda a: a.getText(), director[0].findAll('a'))
-                    directors = map(lambda p: PersonEntityMini({ 'title' : p, }), directors)
+                    directors = map(lambda p: PersonEntityMini().dataImport({ 'title' : p, }), directors)
                     
                     _set_entity(entity, "directors", directors)
                 

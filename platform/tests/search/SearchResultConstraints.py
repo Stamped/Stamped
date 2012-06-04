@@ -52,7 +52,6 @@ class ASearchResultConstraint(object):
             
             if match == 'contains':
                 return a in b
-        
         return a == b
     
     def __str__(self):
@@ -116,7 +115,7 @@ class SearchResultConstraint(ASearchResultConstraint):
                 if len(t0) == 1: t0 = t0[0]
                 if len(t1) == 1: t1 = t1[0]
                 
-                utils.log("VALIDATE %s/%s | %s vs %s (%s vs %s)" % 
+                utils.log('VALIDATE %s/%s | "%s" vs "%s" (%s vs %s)' % 
                           (i, self.index, self.title, result.title, t0, t1))
                 logs.debug(pformat(utils.normalize(result.dataExport(), strict=True)))
             
@@ -160,6 +159,7 @@ class SearchResultConstraint(ASearchResultConstraint):
                 for key, value in self.extras.iteritems():
                     if not hasattr(result.sources, key) or not self._eq(value, getattr(result.sources, key)):
                         match = False
+                        logs.warning("Extras test failed: %s (%s v %s)" % (key, value, getattr(result.sources, key, None)))
                         break
                 
                 if not match:
@@ -189,6 +189,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         if self.id is not None:     options['id']       = self.id
         if self.types is not None:  options['types']    = self.types
         if self.index is not None:  options['index']    = self.index
+        if len(self.extras) > 0:    options['extras']   = self.extras
         
         return "%s(%s)" % (self.__class__.__name__, str(options))
 
