@@ -7,10 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STUserDetail.h"
 
 @protocol STLoginResponse <NSObject>
 
-@property (nonatomic, readonly, copy) NSString* userID;
+@property (nonatomic, readonly, retain) id<STUserDetail> user;
 @property (nonatomic, readonly, copy) NSString* token;
 
 @end

@@ -2988,6 +2988,10 @@
 		63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
+		63F890DC1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
+		63F890DD1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
+		63F890DE1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
+		63F890DF1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
 		7E05100414B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */; };
 		7E05100514B658BC0011FAD4 /* STLoadingMoreTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */; };
 		7E0596431520E6B7009D691E /* STStampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0596411520E6B7009D691E /* STStampDetailViewController.m */; };
@@ -5200,6 +5204,9 @@
 		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
 		63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAEntityDetailComponentFactory.h; sourceTree = "<group>"; };
 		63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAEntityDetailComponentFactory.m; sourceTree = "<group>"; };
+		63F890D91579481900ECD501 /* STOAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthToken.h; sourceTree = "<group>"; };
+		63F890DA1579484E00ECD501 /* STSimpleOAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleOAuthToken.h; sourceTree = "<group>"; };
+		63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleOAuthToken.m; sourceTree = "<group>"; };
 		7E0398BF14816A0B000D5EBA /* StampedModel 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 15.xcdatamodel"; sourceTree = "<group>"; };
 		7E05100214B658BC0011FAD4 /* STLoadingMoreTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoadingMoreTableViewCell.h; sourceTree = "<group>"; };
 		7E05100314B658BC0011FAD4 /* STLoadingMoreTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLoadingMoreTableViewCell.m; sourceTree = "<group>"; };
@@ -6926,6 +6933,7 @@
 				633FB589156FEEA700D7D776 /* STEntityAutoCompleteResult.h */,
 				633FB6161571928C00D7D776 /* STDatum.h */,
 				631563F31577F22100849CB2 /* STStampPreview.h */,
+				63F890D91579481900ECD501 /* STOAuthToken.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -7032,6 +7040,8 @@
 				633FB58B156FEF2400D7D776 /* STSimpleEntityAutoCompleteResult.m */,
 				631563F41577F27D00849CB2 /* STSimpleStampPreview.h */,
 				631563F51577F27D00849CB2 /* STSimpleStampPreview.m */,
+				63F890DA1579484E00ECD501 /* STSimpleOAuthToken.h */,
+				63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -12350,6 +12360,7 @@
 				03E006951577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
 				631563F21577F03D00849CB2 /* STActionView.m in Sources */,
 				631563F91577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
+				63F890DF1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12675,6 +12686,7 @@
 				03E006941577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
 				631563F11577F03D00849CB2 /* STActionView.m in Sources */,
 				631563F81577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
+				63F890DE1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12999,6 +13011,7 @@
 				03E006931577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
 				631563F01577F03D00849CB2 /* STActionView.m in Sources */,
 				631563F71577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
+				63F890DD1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13335,6 +13348,7 @@
 				03E006921577EAAC00CDFEFF /* STSocialAuthViewController.m in Sources */,
 				631563EF1577F03D00849CB2 /* STActionView.m in Sources */,
 				631563F61577F27D00849CB2 /* STSimpleStampPreview.m in Sources */,
+				63F890DC1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13463,8 +13477,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -13492,8 +13506,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -13514,8 +13528,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -13538,8 +13552,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -13561,8 +13575,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -13585,8 +13599,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				PROVISIONING_PROFILE = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31AB1339-9584-4D04-9E9D-DCD7AE6F387C";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

@@ -193,4 +193,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (BOOL)isOffline;
 
++ (void)launchFirstRun;
+
 @end

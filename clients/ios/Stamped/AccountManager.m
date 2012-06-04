@@ -373,6 +373,20 @@ willCreateUserWithName:(NSString*)name
                        screenname:(NSString*)screenname
                         userToken:(NSString*)userToken 
                             email:(NSString*)email {
+    [self createAccountWithFacebook:name
+                         screenname:screenname
+                          userToken:userToken
+                              email:email
+                              phone:nil
+                       profileImage:nil];
+}
+
+- (void)createAccountWithFacebook:(NSString*)name
+                       screenname:(NSString*)screenname
+                        userToken:(NSString*)userToken 
+                            email:(NSString*)email 
+                            phone:(NSString*)phone 
+                     profileImage:(NSString*)profileImage {
     [passwordKeychainItem_ setObject:screenname forKey:(id)kSecAttrAccount];
     [passwordKeychainItem_ setObject:@"password" forKey:(id)kSecValueData];
     
@@ -391,6 +405,9 @@ willCreateUserWithName:(NSString*)name
                          kClientID, @"client_id",
                          kClientSecret, @"client_secret",
                          nil]];
+    if (phone) {
+        [params setValue:phone forParam:@"phone"];
+    }
     loader.params = params;
     
     [oAuthRequestQueue_ addRequest:loader];

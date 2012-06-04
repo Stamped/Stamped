@@ -12,7 +12,7 @@
 
 @interface STSimpleLoginResponse : NSObject <STLoginResponse, NSCoding>
 
-@property (nonatomic, readwrite, copy) NSString* userID;
+@property (nonatomic, readwrite, retain) id<STUserDetail> user;
 @property (nonatomic, readwrite, copy) NSString* token;
 
 + (RKObjectMapping*)mapping;

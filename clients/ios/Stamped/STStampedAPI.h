@@ -205,6 +205,14 @@ typedef enum {
 
 - (STCancellation*)unreadCountWithCallback:(void(^)(id<STActivityCount> count, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
+                                           screenName:(NSString*)screenName
+                                                 name:(NSString*)name
+                                                email:(NSString*)email
+                                                phone:(NSString*)phone
+                                         profileImage:(NSString*)profileImage 
+                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;

@@ -7,16 +7,17 @@
 //
 
 #import "STSimpleLoginResponse.h"
+#import "STSimpleUserDetail.h"
 
 @implementation STSimpleLoginResponse
 
-@synthesize userID = _userID;
+@synthesize user = _user;
 @synthesize token = _token;
 
 - (id)initWithCoder:(NSCoder *)decoder {
     self = [super init];
     if (self) {
-        _userID = [[decoder decodeObjectForKey:@"userID"] retain];
+        _user = [[decoder decodeObjectForKey:@"user"] retain];
         _token = [[decoder decodeObjectForKey:@"token"] retain];
     }
     return self;
@@ -24,26 +25,24 @@
 
 - (void)dealloc
 {
-    [_userID release];
+    [_user release];
     [_token release];
     [super dealloc];
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-    [encoder encodeObject:self.userID forKey:@"userID"];
+    [encoder encodeObject:self.user forKey:@"user"];
     [encoder encodeObject:self.token forKey:@"token"];
 }
 
 + (RKObjectMapping *)mapping {
     RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleLoginResponse class]];
     
-    [mapping mapKeyPathsToAttributes:
-     @"user_id", @"userID",
-     nil];
-    
     [mapping mapAttributes:
      @"token",
      nil];
+    
+    [mapping mapRelationship:@"user" withMapping:[STSimpleUserDetail mapping]];
     
     return mapping;
 }

@@ -1134,6 +1134,10 @@ static Rdio* _rdio;
     return client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable;
 }
 
++ (void)launchFirstRun {
+    //TODO
+}
+
 @end
 
 @implementation STPopUpView
