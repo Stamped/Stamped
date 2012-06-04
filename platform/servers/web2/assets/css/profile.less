@@ -19,6 +19,20 @@
    ************************************************************************** */
 
 
+.header-selection() {
+    position: relative !important;
+    display: block !important;
+    top: 0 !important;
+    z-index: 51 !important;
+}
+
+.header-hidden() {
+    position: absolute !important;
+    display: none !important;
+    top: -100% !important;
+    z-index: 50 !important;
+}
+
 .profile-header-wrapper {
     .fullwidth;
     
@@ -42,30 +56,37 @@
             left: 0;
             
             .profile-header-body {
-                position: relative;
-                top:  0;
+                position: absolute;
+                top:  -100%;
                 left: 0;
+                display: none;
+                
+                background: url(/assets/img/covers/default_cover_temp.png) repeat;
+                width:   100%;
+                height:  100%;
+                
+                /*.transition(top, 0.5s, linear);*/
                 
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .profile-image-large {
-                        .floatleft;
+                    .profile-image-large, .profile-image-medium {
+                        float: left;
                     }
                     
-                    .floatleft, .profile-image-large {
+                    .floatleft, .profile-image-large, .profile-image-medium {
                         margin: 0 24px 0 0;
                     }
                     
-                    p {
-                        margin: 0;
-                    }
-                    
-                    .profile-section-default {
-                        .floatleft;
+                    .lhs {
+                        float: left;
                         
                         a.screen-name {
                             color: #000;
+                        }
+                        
+                        p {
+                            margin: 0;
                         }
                         
                         p.profile-title {
@@ -81,11 +102,117 @@
                             margin:  0;
                             padding: 0;
                         }
+                        
+                        p.name {
+                            font-weight: 700;
+                            color: #333;
+                        }
+                        
+                        p.title {
+                            .stamped-font();
+                            
+                            line-height: 100%;
+                            font-size: 7em;
+                            letter-spacing: .05em;
+                            color: #000;
+                            
+                            display: block;
+                            padding: 0;
+                        }
+                    }
+                    
+                    .rhs {
+                        float: right;
+                        
+                        .share-widget {
+                            background-color: #fff;
+                            padding: 0.25em 0.5em;
+                            
+                            .rounded(8px);
+                            .box-shadow(0, 0, 18px, 0, @shadow);
+                            
+                            .desc {
+                                font-size: 80%;
+                                font-weight: 700;
+                                color: #333;
+                            }
+                            
+                            .share-buttons {
+                                .transition(all, 0.3s, ease-out);
+                                margin:  0;
+                                height:  0;
+                                opacity: 0;
+                                
+                                .share-button {
+                                    //display: inline-block;
+                                }
+                            }
+                            
+                            &:hover, &:active {
+                                cursor: pointer;
+                                
+                                background-color: #666;
+                                
+                                .desc {
+                                    color: #fff;
+                                }
+                            }
+                        }
+                        
+                        .share-widget-expanded {
+                            .share-buttons {
+                                height:  auto;
+                                margin-top: 1em;
+                                opacity: 1;
+                            }
+                        }
                     }
                 }
             }
             
+            .header-category-default {
+            }
+            
+            .header-category-place {
+                background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-music {
+                background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-book {
+                background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-film {
+                background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-other {
+                background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-animating {
+                position: absolute;
+                display: block;
+                top: -100%;
+                
+                z-index: 52;
+            }
+            
+            .header-selected {
+                .header-selection();
+            }
+            
             .profile-header-post {
+                position: relative;
+                z-index: 54;
                 .box-shadow(0, -3px, 3px, 0, @shadow);
                 
                 height: 16px;
@@ -98,7 +225,7 @@
                     
                     width: 167px;
                     min-height: 75px;
-                    z-index: 52;
+                    z-index: 55;
                     
                     margin: 0 auto;
                     padding: 18px 20px 0;
@@ -121,36 +248,53 @@
     }
 }
 
-.innerbg {
-    background: url(/assets/img/covers/default_cover_temp.png) repeat;
-    position: absolute;
-    width:   100%;
-    height:  100%;
+body.default .header-category-default, .header-category-default {
+    .header-selection();
 }
 
-body.place .innerbg {
-    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.place {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-place {
+        .header-selection();
+    }
 }
 
-body.music .innerbg {
-    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.music {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-music {
+        .header-selection();
+    }
 }
 
-body.book .innerbg {
-    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.book {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-book {
+        .header-selection();
+    }
 }
 
-body.film .innerbg {
-    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.film {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-film {
+        .header-selection();
+    }
 }
 
-body.other .innerbg {
-    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.other {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-other {
+        .header-selection();
+    }
 }
 
 
@@ -173,7 +317,12 @@ body.other .innerbg {
         
         .item {
             display: none;
-            position: absolute;
+            text-decoration: none;
+            padding: .25em 1em;
+            
+            &:hover, &:active {
+                text-decoration: none;
+            }
             
             .arrow {
                 display: none;
@@ -197,15 +346,38 @@ body.other .innerbg {
     
     .expanded {
         background: #fff;
+        position: absolute;
+        
+        .box-shadow(0, 0, 8px, 0, @shadow);
+        border: 1px solid @shadow;
         .rounded(4px);
         
         .item, .selected {
             display: block;
-            position: absolute;
             
             .arrow {
                 display: none;
             }
+        }
+        
+        .item {
+            border-bottom: 1px solid @shadow;
+            
+            &:hover, &:active {
+                color: #fff;
+                cursor: pointer;
+            }
+            
+            &:hover {
+                background: @shadow;
+            }
+            &:active {
+                background: darken(@shadow, 15%);
+            }
+        }
+        
+        .item:last-child {
+            border: 0 none;
         }
         
         .item:first-child {
@@ -228,8 +400,9 @@ body.other .innerbg {
     clear: both;
     text-align: center;
     
-    padding: 1.5em;
+    padding: 1.5em 0;
     margin:  0;
+    left: -24px;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -541,10 +714,10 @@ a.lightbox {
 .subtitle-line {
     position: relative;
     display: block;
-    margin: -0.5em 0 0;
+    margin: -0.25em 0 0;
     
     p {
-        margin: 0;
+        margin:  0;
         padding: 0;
     }
     
@@ -644,9 +817,10 @@ a.lightbox {
 
 
 .active() {
+    background-position: -194px -6px;
     opacity: 1;
-    .transition(all, 0s, linear);
-    .transform(scale(1, 1));
+    
+    .transition(opacity, 0s, linear);
 }
 
 #main-content {
@@ -662,10 +836,10 @@ a.lightbox {
     .transition(opacity, 0.4s, ease-out);
     
     visibility: hidden;
-    
-    background: #262626;
-    .rounded(8px);
-    .box-shadow(0, 0, 4px, 0, @shadow);
+    background: #666;
+    @radius: 4px;
+    .rounded(@radius);
+    .box-shadow(0, 2px, 8px, -2px, @shadow);
     
     top:   50%;
     right: 40px;
@@ -680,25 +854,31 @@ a.lightbox {
     margin: -180px 0 0;
     padding: 0;
     
+    .stamp-category-nav-bar-pre {
+        background: #4a4a4a url(/assets/img/sidenav_top_ribbon.png) repeat-x;
+        border-top: 2px solid #5e5e5e;
+        width:  100%;
+        height: 16px;
+        .border-radius(@radius, 0, 0, @radius);
+    }
+    
+    .stamp-category-nav-bar-post {
+        background: #4a4a4a url(/assets/img/sidenav_bottom_ribbon.png) repeat-x;
+        border-bottom: 2px solid #5e5e5e;
+        width:  100%;
+        height: 16px;
+        .border-radius(0, @radius, @radius, 0);
+    }
+    
     ol {
         li {
-            position: relative;
-            
             a {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat -192px 0;
-                
-                text-align: center;
-                display: block;
-                width:  60px;
-                height: 60px;
-                margin: 6px 0;
-                
                 position: relative;
-                z-index: 1000;
-                
-                opacity: 0;
-                .transform(scale(.8, .8));
-                .transition(all, 0.3s, ease-out);
+                display: block;
+                width:  56px;
+                height: 56px;
+                overflow: visible;
+                text-overflow: visible;
                 
                 /*@params: 0.3s ease-out;
                 @args: opacity @params, transform @params;
@@ -706,69 +886,128 @@ a.lightbox {
                 -webkit-transition: @args;
                 -moz-transition: @args;
                 transition: @args;*/
-            }
-            
-            div {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat;
-                position: absolute;
-                left: 15px;
-                top:  17px;
                 
-                display: block;
-                width:  30px;
-                height: 30px;
+                .selection {
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat -194px -6px;
+                    position: absolute;
+                    width:  100%;
+                    height: 100%;
+                    
+                    opacity: 0;
+                    .transition(opacity, 0.3s, ease-out);
+                }
                 
-                z-index: 999;
+                .icon {
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat;
+                    position: absolute;
+                    left: 13px;
+                    top:  13px;
+                    
+                    .transform(scale(.8, .8));
+                    .transition(-webkit-transform, 0.3s, ease-out);
+                    
+                    display: block;
+                    width:  30px;
+                    height: 30px;
+                }
+                
+                .desc {
+                    position: absolute;
+                    top:   50%;
+                    left: 72px;
+                    margin-top: -6px;
+                    text-indent: 0;
+                    
+                    font-size: 13px;
+                    color: #262626;
+                    width: 120px;
+                }
+                
+                &:hover, &:active {
+                    .icon {
+                        .transform(scale(1.0, 1.0));
+                        .transition(-webkit-transform, 0s, linear);
+                        // TODO
+                    }
+                    
+                    .desc {
+                        font-weight: 700;
+                    }
+                }
+                
+                &:hover {
+                    .selection {
+                        .active();
+                        
+                        background-position: -255px -6px;
+                    }
+                }
+                
+                &:active {
+                    .selection {
+                        .active();
+                    }
+                }
             }
         }
         
-        a:hover {
-            .active();
-            /*background-position: -252px 0;*/
-        }
-        a:active {
-            .active();
-        }
-        
-        li.default div {
+        li.default .icon {
             background-position: 0 0;
         }
-        li.default a:hover + div, li.default a:active + div {
+        li.default a:hover .icon {
+            background-position: 0 -64px;
+        }
+        li.default a:active .icon {
             background-position: 0 -32px;
         }
         
-        li.place div {
+        li.place .icon {
             background-position: -32px 0;
         }
-        li.place a:hover + div, li.place a:active + div {
+        li.place a:hover .icon {
+            background-position: -32px -64px;
+        }
+        li.place a:active .icon {
             background-position: -32px -32px;
         }
         
-        li.music div {
+        li.music .icon {
             background-position: -64px 0;
         }
-        li.music a:hover + div, li.music a:active + div {
+        li.music a:hover .icon {
+            background-position: -64px -64px;
+        }
+        li.music a:active .icon {
             background-position: -64px -32px;
         }
         
-        li.book div {
+        li.book .icon {
             background-position: -96px 0;
         }
-        li.book a:hover + div, li.book a:active + div {
+        li.book a:hover .icon {
+            background-position: -96px -64px;
+        }
+        li.book a:active .icon {
             background-position: -96px -32px;
         }
         
-        li.film div {
+        li.film .icon {
             background-position: -128px 0;
         }
-        li.film a:hover + div, li.film a:active + div {
+        li.film a:hover .icon {
+            background-position: -128px -64px;
+        }
+        li.film a:active .icon {
             background-position: -128px -32px;
         }
         
-        li.other div {
+        li.other .icon {
             background-position: -160px 0;
         }
-        li.other a:hover + div, .other a:active + div {
+        li.other a:hover .icon {
+            background-position: -160px -64px;
+        }
+        li.other a:active .icon {
             background-position: -160px -32px;
         }
     }
@@ -805,7 +1044,17 @@ body.book       #stamp-category-nav-bar ol li.book,
 body.film       #stamp-category-nav-bar ol li.film, 
 body.other      #stamp-category-nav-bar ol li.other {
     a, a:hover {
-        .active();
+        .icon {
+            .transform(scale(1.0, 1.0));
+        }
+        
+        .selection {
+            .active();
+        }
+        
+        .desc {
+            font-weight: 700;
+        }
         
         pointer-events: none;
         cursor: default;
@@ -907,6 +1156,9 @@ ul.user-category-distribution {
     height: 100%;
     
     position: fixed;
+    overflow: scroll;
+    //position: absolute;
+    
     top: 15%;
     z-index: 100;
 }
@@ -918,10 +1170,15 @@ body.sdetail_popup_animation, body.sdetail_popup {
     }
     
     #main-page-content-body {
+        display: block;
         visibility: visible !important;
         
         #stamp-category-nav-bar {
             opacity: 0;
+        }
+        
+        #main-content {
+            display: block;
         }
     }
 }
@@ -930,17 +1187,19 @@ body.sdetail_popup {
     /* hide scrollbars when displaying sdetail */
     /* TODO: find a way of doing this that does not result in the scroll 
      * position jumping */
-    /*overflow: hidden;*/
+    overflow-y: hidden;
     
     #main-page-content-body {
-        visibility: hidden !important;
+        display: none;
+        //visibility: hidden !important;
         
         /*#stamp-category-nav-bar {
             visibility: hidden !important;
             opacity: 0;
         }*/
         #main-content {
-            visibility: hidden !important;
+            display: none;
+            //visibility: hidden !important;
         }
     }
 }

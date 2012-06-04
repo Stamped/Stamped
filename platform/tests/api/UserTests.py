@@ -145,7 +145,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
     def test_find_by_phone(self):
         # Set phone number
         numbers = ['1235551111','1235551112']
-        path = "account/settings.json"
+        path = "account/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "phone": numbers[0],
@@ -171,7 +171,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
     def test_find_by_phone_twofer(self):
         # Set phone number
         number = '1235551111'
-        path = "account/settings.json"
+        path = "account/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "phone": number,
@@ -197,7 +197,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
     def test_fail_find_by_phone(self):
         # Set phone number
         numbers = ['3335551111','2123343774\u200e']
-        path = "account/settings.json"
+        path = "account/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "phone": numbers[0],
@@ -215,45 +215,6 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         user = result[0]
         self.assertIn(user['screen_name'], self.screen_names)
         self.assertIn(user['identifier'], numbers)
-
-
-
-class StampedAPIUsersFindFacebook(StampedAPIUserTest):
-    def test_find_by_facebook(self):
-        ids = ['100003002012425','2400157'] # andybons, robbystein
-        path = "account/linked/facebook/update.json"
-        data = {
-            "oauth_token": self.tokenA['access_token'],
-            "facebook_id": ids[0],
-        }
-        result = self.handlePOST(path, data)
-        data = {
-            "oauth_token": self.tokenB['access_token'],
-            "facebook_id": ids[1],
-        }
-        result = self.handlePOST(path, data)
-
-        path = "users/find/facebook.json"
-        data = { 
-            "oauth_token": self.tokenC['access_token'],
-            "q": ','.join(ids)
-        }
-        result = self.handlePOST(path, data)
-        self.assertLength(result, 2)
-        for user in result:
-            self.assertIn(user['screen_name'], self.screen_names)
-            self.assertIn(user['identifier'], ids)
-
-        path = "users/find/facebook.json"
-        data = { 
-            "oauth_token": self.tokenC['access_token'],
-            "facebook_token": FB_TOKEN,
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(len(result) >= 2)
-        for user in result:
-            self.assertIn(user['screen_name'], self.screen_names)
-            self.assertIn(user['identifier'], ids)
 
 class StampedAPISuggested(StampedAPIUserTest):
     def test_suggested(self):

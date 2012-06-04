@@ -318,7 +318,7 @@ class Account(Schema):
         cls.addProperty('screen_name_lower',        basestring)
         cls.addProperty('color_primary',            basestring)
         cls.addProperty('color_secondary',          basestring)
-        cls.addProperty('phone',                    int)
+        cls.addProperty('phone',                    basestring)
         cls.addProperty('bio',                      basestring)
         cls.addProperty('website',                  basestring)
         cls.addProperty('location',                 basestring)
@@ -340,23 +340,23 @@ class Account(Schema):
 class FacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('name',                     basestring, required=True)
+        cls.addProperty('email',                    basestring)#, required=True)
+        cls.addProperty('screen_name',              basestring, required=True)
+        cls.addProperty('phone',                    int)
+        cls.addProperty('profile_image',            basestring) ### TODO: normalize=False ?
         cls.addProperty('user_token',               basestring, required=True)
 
 class TwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('user_token',                   basestring, required=True)
-        cls.addProperty('user_secret',                  basestring, required=True)
+        cls.addProperty('name',                     basestring, required=True)
+        cls.addProperty('email',                    basestring)#, required=True)
+        cls.addProperty('screen_name',              basestring, required=True)
+        cls.addProperty('phone',                    int)
+        cls.addProperty('profile_image',            basestring) ### TODO: normalize=False ?
+        cls.addProperty('user_token',               basestring, required=True)
+        cls.addProperty('user_secret',              basestring, required=True)
 
 
 # ##### #
@@ -1731,10 +1731,9 @@ class GuideCacheItem(Schema):
     def setSchema(cls):
         cls.addProperty('entity_id',                    basestring, required=True)
         cls.addNestedPropertyList('stamps',             StampPreview)
-        cls.addPropertyList('stamp_ids',                basestring)
-        cls.addPropertyList('stamp_user_ids',           basestring)
         cls.addPropertyList('todo_user_ids',            basestring)
         cls.addPropertyList('tags',                     basestring)
+        cls.addNestedProperty('coordinates',            CoordinatesSchema)
 
 class GuideCache(Schema):
     @classmethod

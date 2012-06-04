@@ -53,7 +53,6 @@ class StampedAPITodosComplete(StampedAPITodoTest):
             "oauth_token": self.tokenB['access_token'],
             }
         result = self.handleGET(path, data)
-        print(result)
         self.assertEqual(result[0]['complete'], True)
 
     def test_uncomplete(self):

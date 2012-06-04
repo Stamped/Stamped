@@ -5,8 +5,8 @@
  * results of which are normal LESS CSS text. This LESS CSS text is then converted 
  * to standard CSS via the lessc compiler.
  * 
- * Within Stamped, the resulting CSS is embedded inline on a templated Django page 
- * via a Stamped-specific Django template extension. This extension essentially 
+ * Within Stamped, the resulting CSS is embedded inline into a templated Django 
+ * page via a Stamped-specific Django template extension. This extension essentially 
  * renders this template using pystache (python Mustache interpreter) w.r.t. the 
  * current Django templating context, and then converts the resulting LESS CSS 
  * into standard CSS.
@@ -19,12 +19,12 @@
                          CUSTOM COLOR SCHEME SETUP
    ************************************************************************** */
 
-
 {{#user}}
 @user_primary:   #{{color_primary}};   /* #004ab2 */
 @user_secondary: #{{color_secondary}}; /* #0057d1 */
 {{/user}}
 
+/*
 @l0: hue(hsl(lightness(@user_primary), 0, 0));
 @l1: hue(hsl(lightness(@user_secondary), 0, 0));
 
@@ -33,9 +33,10 @@
 
 @primary:   fade(lighten(@user_light, 25%), 80%);
 @secondary: fade(darken( @user_dark,  10%), 80%);
+*/
 
-/*@primary:   fade(@user_primary,   80%);
-@secondary: fade(@user_secondary, 80%);*/
+@primary:   @user_primary;
+@secondary: @user_primary;
 
 
 /* **************************************************************************
@@ -70,7 +71,7 @@
     margin: 0;
     
     .stamp-count {
-        color: @user_dark;
+        color: @user_primary;
     }
 }
 
@@ -82,23 +83,23 @@
 
 #stamp-category-nav-bar {
     ol {
-        li.default a:hover + div, li.default a:active + div, 
-        li.place a:hover + div, li.place a:active + div, 
-        li.music a:hover + div, li.music a:active + div, 
-        li.book a:hover + div, li.book a:active + div, 
-        li.film a:hover + div, li.film a:active + div, 
-        .other a:hover + div, .other a:active + div {
+        li.default a:active .icon, 
+        li.place a:active .icon, 
+        li.music a:active .icon, 
+        li.book a:active .icon, 
+        li.film a:active .icon, 
+        li.other a:active .icon {
             background-color: fade(@secondary, 100%);
         }
     }
 }
 
-body.default    #stamp-category-nav-bar ol li.default div, 
-body.place      #stamp-category-nav-bar ol li.place div, 
-body.music      #stamp-category-nav-bar ol li.music div, 
-body.book       #stamp-category-nav-bar ol li.book div, 
-body.film       #stamp-category-nav-bar ol li.film div, 
-body.other      #stamp-category-nav-bar ol li.other div {
+body.default    #stamp-category-nav-bar ol li.default .icon, 
+body.place      #stamp-category-nav-bar ol li.place .icon, 
+body.music      #stamp-category-nav-bar ol li.music .icon, 
+body.book       #stamp-category-nav-bar ol li.book .icon, 
+body.film       #stamp-category-nav-bar ol li.film .icon, 
+body.other      #stamp-category-nav-bar ol li.other .icon {
     background-color: fade(@secondary, 100%);
 }
 

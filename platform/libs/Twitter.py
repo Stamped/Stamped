@@ -44,8 +44,6 @@ class Twitter(object):
 
         # Send the http request
         response, content = self.__httpObj.request(url, method=verb, body=body, headers=headers)
-
-        print content
         result = json.loads(content)
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
@@ -98,6 +96,12 @@ class Twitter(object):
 
     def getFollowerIds(self, user_token, user_secret):
         return self._getUserIds(user_token, user_secret, 'followers')
+
+    def createFriendship(self, user_token, user_secret, friend_screen_name):
+        return self.__post('1/friendships/create.json', user_token, user_secret, screen_name = friend_screen_name)
+
+    def destroyFriendship(self, user_token, user_secret, friend_screen_name):
+        return self.__post('1/friendships/destroy.json', user_token, user_secret, screen_name = friend_screen_name)
 
 
 __globalTwitter = None

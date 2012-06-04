@@ -246,7 +246,7 @@ class StampedAPI(AStampedAPI):
             raise StampedInputError("Blacklisted screen name")
 
         # Validate email address
-        if account.email is not None:
+        if account.email is not None and account.auth_service == 'stamped':
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
                 raise StampedInputError("Invalid format for email address")
@@ -278,13 +278,11 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
-    def verifyLinkedAccount(self, user_token):
+    def verifyLinkedAccount(self, linkedAccount):
         if linkedAccount.service_name == 'facebook':
             self._verifyFacebookAccount(linkedAccount.token)
         elif linkedAccount.service_name == 'twitter':
             self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
-        elif linkedAccount.service_name == 'netflix':
-            pass
         return True
 
     def _verifyFacebookAccount(self, user_token):
@@ -315,7 +313,6 @@ class StampedAPI(AStampedAPI):
 
         return user
 
-
     @API_CALL
     def addFacebookAccount(self, new_fb_account):
         """
@@ -327,12 +324,17 @@ class StampedAPI(AStampedAPI):
         user = self._verifyFacebookAccount(new_fb_account.user_token)
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
 
+        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
+        #  and require uniqueness
+        if account.email is None:
+            account.email = 'fb_%s' % user['id']
+
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
         fb_acct.service_name                = 'facebook'
         fb_acct.user_id                     = user['id']
-        fb_acct.name                   = user['name']
-        fb_acct.screen_name            = user.pop('username', None)
+        fb_acct.name                        = user['name']
+        fb_acct.screen_name                 = user.pop('username', None)
         account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
@@ -351,6 +353,11 @@ class StampedAPI(AStampedAPI):
         # First, get user information from Twitter using the passed in token
         user = self._verifyTwitterAccount(new_tw_account.user_token, new_tw_account.user_secret)
         account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
+
+        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
+        #  and require uniqueness
+        if account.email is None:
+            account.email = 'tw_%s' % user['id']
 
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
@@ -603,6 +610,15 @@ class StampedAPI(AStampedAPI):
         return accounts[0]
 
     @API_CALL
+    def getAccountByNetflixId(self, netflixId):
+        accounts = self._accountDB.getAccountsByNetflixId(netflixId)
+        if len(accounts) == 0:
+            raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
+        elif len(accounts) > 1:
+            raise StampedIllegalActionError("More than one account exists using netflix_id: %s" % netflixId)
+        return accounts[0]
+
+    @API_CALL
     def updateProfile(self, authUserId, data):
         ### TODO: Reexamine how updates are done
 
@@ -757,7 +773,7 @@ class StampedAPI(AStampedAPI):
         return self._userDB.findUsersByTwitter(twitterIds)
 
     def _getFacebookFriends(self, user_token):
-        if token is None:
+        if user_token is None:
             raise StampedIllegalActionError("Connecting to Facebook requires a valid token")
 
         facebookIds = self._facebook.getFriendIds(user_token)
@@ -782,30 +798,6 @@ class StampedAPI(AStampedAPI):
         self.verifyLinkedAccount(linkedAccount)
         self.removeLinkedAccount(authUserId, linkedAccount.service_name)
         return self.addLinkedAccount(authUserId, linkedAccount)
-
-
-
-    @API_CALL
-    def updateLinkedAccounts(self, authUserId, **kwargs):
-        twitter         = kwargs.pop('twitter', None)
-        twitterAuth     = kwargs.pop('twitterAuth', None)
-        facebook        = kwargs.pop('facebook', None)
-        facebookAuth    = kwargs.pop('facebookAuth', None)
-        netflixAuth     = kwargs.pop('netflixAuth', None)
-
-        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter, facebook=facebook, netflix=netflixAuth)
-
-        # Alert Facebook asynchronously
-        if isinstance(facebookAuth, Schema) and facebookAuth.facebook_token is not None:
-            kwargs = {'facebookToken': facebookAuth.facebook_token}
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId], kwargs=kwargs)
-
-        # Alert Twitter asynchronously
-        if isinstance(twitterAuth, Schema) and twitterAuth.twitter_key is not None:
-            kwargs = {'twitterKey': twitterAuth.twitter_key, 'twitterSecret': twitterAuth.twitter_secret}
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId], kwargs=kwargs)
-
-        return True
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
@@ -1510,31 +1502,6 @@ class StampedAPI(AStampedAPI):
                 pass
 
         return results
-
-    @API_CALL
-    def searchNearby(self,
-                     coords=None,
-                     authUserId=None,
-                     category=None,
-                     subcategory=None,
-                     prefix=False,
-                     full=True,
-                     page=0,
-                     limit=10):
-        results = self._entitySearcher.getSearchResults(query='',
-                                                        coords=coords,
-                                                        category_filter=category,
-                                                        subcategory_filter=subcategory,
-                                                        full=full,
-                                                        prefix=prefix,
-                                                        local=True,
-                                                        user=authUserId,
-                                                        limit=((page + 1) * limit))
-        offset  = limit * page
-        results = results[offset : offset + limit]
-
-        return results
-
 
     @API_CALL
     def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
@@ -3382,31 +3349,6 @@ class StampedAPI(AStampedAPI):
     def getSuggestedStamps(self, authUserId, genericCollectionSlice):
         return self._getStampCollection_DEPRECATED(authUserId, None, genericCollectionSlice)
 
-    @API_CALL
-    def getEntityStamps(self, entityId, authUserId, genericCollectionSlice, showCount=False):
-        count = None
-
-        # Use relationships
-        if authUserId is not None and genericCollectionSlice.__class__.__name__ == 'FriendsSlice':
-            distance = genericCollectionSlice.distance
-            userIds = self._friendshipDB.getFriendsOfFriends(authUserId, distance=distance, inclusive=False)
-            if showCount == True:
-                count = self._stampDB.countStampsForEntity(entityId, userIds=userIds)
-                if count == 0:
-                    return [], 0
-            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice, userIds=userIds)
-
-        # Use popular
-        else:
-            if showCount == True:
-                count = self._stampDB.countStampsForEntity(entityId)
-                if count <= 0:
-                    return [], 0
-            stampData = self._stampDB.getStampsSliceForEntity(entityId, genericCollectionSlice)
-
-        stamps = self._enrichStampCollection_DEPRECATED(stampData, genericCollectionSlice, authUserId=authUserId)
-
-        return stamps, count
 
     """
 
@@ -3422,7 +3364,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
 
-        # Hack to return kevin's guide for popular
+        # Hack to return kevin's guide for popular (until we build formula for popular)
         if guideRequest != 'inbox':
             user = self._userDB.getUserByScreenName('kevin')
             authUserId = user.user_id
@@ -3451,19 +3393,52 @@ class StampedAPI(AStampedAPI):
         userIds = {}
         items = []
 
+        if guideRequest.viewport is not None:
+            latA = guideRequest.viewport.lowerRight.lat 
+            latB = guideRequest.viewport.upperLeft.lat 
+            lngA = guideRequest.viewport.upperLeft.lng
+            lngB = guideRequest.viewport.lowerRight.lng 
+
         i = 0
         for item in allItems:
-            if guideRequest.subsection is None or guideRequest.subsection in item.tags:
+            # Filter tags
+            if guideRequest.subsection is not None and guideRequest.subsection not in item.tags:
+                continue
 
-                items.append(item)
-                entityIds[item.entity_id] = None
-                if item.stamps is not None:
-                    for stampPreview in item.stamps:
-                        userIds[stampPreview.user.user_id] = None
-                if item.todo_user_ids is not None:
-                    for userId in item.todo_user_ids:
-                        userIds[userId] = None
-                i += 1
+            # Filter coordinates
+            if guideRequest.viewport is not None:
+                if item.coordinates is None:
+                    continue
+
+                latCheck = False 
+                lngCheck = False
+
+                if latA < latB:
+                    if latA <= item.coordinates.lat and item.coordinates.lat <= latB:
+                        latCheck = True 
+                elif latA > latB:
+                    if latA <= item.coordinates.lat or item.coordinates.lat <= latB:
+                        latCheck = True
+
+                if lngA < lngB:
+                    if lngA <= item.coordinates.lng and item.coordinates.lng <= lngB:
+                        lngCheck = True 
+                elif lngA > lngB:
+                    if lngA <= item.coordinates.lng or item.coordinates.lng <= lngB:
+                        lngCheck = True 
+
+                if not latCheck or not lngCheck:
+                    continue 
+
+            items.append(item)
+            entityIds[item.entity_id] = None
+            if item.stamps is not None:
+                for stampPreview in item.stamps:
+                    userIds[stampPreview.user.user_id] = None
+            if item.todo_user_ids is not None:
+                for userId in item.todo_user_ids:
+                    userIds[userId] = None
+            i += 1
 
             if i >= limit + offset:
                 break
@@ -3612,7 +3587,10 @@ class StampedAPI(AStampedAPI):
                     elif stamp.timestamp.created is not None:
                         created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
                 score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
-                r.append((entity.entity_id, score, entity.types))
+                coordinates = None 
+                if hasattr(entity, 'coordinates'):
+                    coordinates = entity.coordinates
+                r.append((entity.entity_id, score, entity.types, coordinates))
             r.sort(key=itemgetter(1))
             r.reverse()
             cache = []
@@ -3620,6 +3598,8 @@ class StampedAPI(AStampedAPI):
                 item = GuideCacheItem()
                 item.entity_id = result[0]
                 item.tags = result[2]
+                if result[3] is not None:
+                    item.coordinates = result[3]
                 if len(stampMap[result[0]]) > 0:
                     preview = []
                     for stamp in stampMap[result[0]]:
