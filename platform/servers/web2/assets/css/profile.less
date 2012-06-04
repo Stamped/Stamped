@@ -19,6 +19,20 @@
    ************************************************************************** */
 
 
+.header-selection() {
+    position: relative !important;
+    display: block !important;
+    top: 0 !important;
+    z-index: 51 !important;
+}
+
+.header-hidden() {
+    position: absolute !important;
+    display: none !important;
+    top: -100% !important;
+    z-index: 50 !important;
+}
+
 .profile-header-wrapper {
     .fullwidth;
     
@@ -42,30 +56,37 @@
             left: 0;
             
             .profile-header-body {
-                position: relative;
-                top:  0;
+                position: absolute;
+                top:  -100%;
                 left: 0;
+                display: none;
+                
+                background: url(/assets/img/covers/default_cover_temp.png) repeat;
+                width:   100%;
+                height:  100%;
+                
+                /*.transition(top, 0.5s, linear);*/
                 
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .profile-image-large {
-                        .floatleft;
+                    .profile-image-large, .profile-image-medium {
+                        float: left;
                     }
                     
-                    .floatleft, .profile-image-large {
+                    .floatleft, .profile-image-large, .profile-image-medium {
                         margin: 0 24px 0 0;
                     }
                     
-                    p {
-                        margin: 0;
-                    }
-                    
-                    .profile-section-default {
-                        .floatleft;
+                    .lhs {
+                        float: left;
                         
                         a.screen-name {
                             color: #000;
+                        }
+                        
+                        p {
+                            margin: 0;
                         }
                         
                         p.profile-title {
@@ -81,11 +102,117 @@
                             margin:  0;
                             padding: 0;
                         }
+                        
+                        p.name {
+                            font-weight: 700;
+                            color: #333;
+                        }
+                        
+                        p.title {
+                            .stamped-font();
+                            
+                            line-height: 100%;
+                            font-size: 7em;
+                            letter-spacing: .05em;
+                            color: #000;
+                            
+                            display: block;
+                            padding: 0;
+                        }
+                    }
+                    
+                    .rhs {
+                        float: right;
+                        
+                        .share-widget {
+                            background-color: #fff;
+                            padding: 0.25em 0.5em;
+                            
+                            .rounded(8px);
+                            .box-shadow(0, 0, 18px, 0, @shadow);
+                            
+                            .desc {
+                                font-size: 80%;
+                                font-weight: 700;
+                                color: #333;
+                            }
+                            
+                            .share-buttons {
+                                .transition(all, 0.3s, ease-out);
+                                margin:  0;
+                                height:  0;
+                                opacity: 0;
+                                
+                                .share-button {
+                                    //display: inline-block;
+                                }
+                            }
+                            
+                            &:hover, &:active {
+                                cursor: pointer;
+                                
+                                background-color: #666;
+                                
+                                .desc {
+                                    color: #fff;
+                                }
+                            }
+                        }
+                        
+                        .share-widget-expanded {
+                            .share-buttons {
+                                height:  auto;
+                                margin-top: 1em;
+                                opacity: 1;
+                            }
+                        }
                     }
                 }
             }
             
+            .header-category-default {
+            }
+            
+            .header-category-place {
+                background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-music {
+                background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-book {
+                background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-film {
+                background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-other {
+                background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-animating {
+                position: absolute;
+                display: block;
+                top: -100%;
+                
+                z-index: 52;
+            }
+            
+            .header-selected {
+                .header-selection();
+            }
+            
             .profile-header-post {
+                position: relative;
+                z-index: 54;
                 .box-shadow(0, -3px, 3px, 0, @shadow);
                 
                 height: 16px;
@@ -98,7 +225,7 @@
                     
                     width: 167px;
                     min-height: 75px;
-                    z-index: 52;
+                    z-index: 55;
                     
                     margin: 0 auto;
                     padding: 18px 20px 0;
@@ -121,36 +248,53 @@
     }
 }
 
-.innerbg {
-    background: url(/assets/img/covers/default_cover_temp.png) repeat;
-    position: absolute;
-    width:   100%;
-    height:  100%;
+body.default .header-category-default, .header-category-default {
+    .header-selection();
 }
 
-body.place .innerbg {
-    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.place {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-place {
+        .header-selection();
+    }
 }
 
-body.music .innerbg {
-    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.music {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-music {
+        .header-selection();
+    }
 }
 
-body.book .innerbg {
-    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.book {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-book {
+        .header-selection();
+    }
 }
 
-body.film .innerbg {
-    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.film {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-film {
+        .header-selection();
+    }
 }
 
-body.other .innerbg {
-    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.other {
+    .header-category-default {
+        .header-hidden();
+    }
+    .header-category-other {
+        .header-selection();
+    }
 }
 
 
@@ -776,7 +920,7 @@ a.lightbox {
                     
                     font-size: 13px;
                     color: #262626;
-                    width: 100px;
+                    width: 120px;
                 }
                 
                 &:hover, &:active {
