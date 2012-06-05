@@ -473,7 +473,7 @@ static STRestKitLoader* _sharedInstance;
     NSString* path = @"/oauth2/login.json";
     return [self _loginWithPath:path
                          params:[NSDictionary dictionaryWithObjectsAndKeys:
-                                 screenName, @"screen_name",
+                                 screenName, @"login",
                                  password, @"password",
                                  nil]
                storeCredentials:^(id<STLoginResponse> response) {
@@ -628,6 +628,7 @@ static STRestKitLoader* _sharedInstance;
 
 - (void)logout {
     [self clearAuthState];
+    self.currentUser = nil;
 }
 
 #pragma mark - RKRequestQueueDelegate methods.

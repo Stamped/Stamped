@@ -18,7 +18,6 @@
 #import "STTwitter.h"
 
 @interface STMenuController ()
-- (void)showWelcome;
 @end
 
 @implementation STMenuController

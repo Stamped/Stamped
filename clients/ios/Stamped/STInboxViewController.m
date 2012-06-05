@@ -82,6 +82,10 @@
     [super dealloc];
 }
 
+- (void)login:(id)notImportant {
+    [Util launchFirstRun];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
   
