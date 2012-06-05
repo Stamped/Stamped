@@ -1515,6 +1515,8 @@ class StampedAPI(AStampedAPI):
             completions = []
             for place in results:
                 completions.append( { 'completion' : place['terms'][0]['value'] } )
+            #remove duplicate entries, limit to 10
+            completions = list(set(completions))[:10]
             return completions
         return []
 
