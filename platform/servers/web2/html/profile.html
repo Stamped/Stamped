@@ -141,7 +141,12 @@
                 <div class="profile-header-post">
                     <div class="ribbon-bottom"></div>
                     <div class="inset-stamp">
-                        <div class="stamp-count">{{user.num_stamps}}</div>
+                        <div class="stamp-count stamp-count-default">{{user.num_stamps}}</div>
+                        
+                        {% for distro in user.distribution %}
+                            <div class="stamp-count stamp-count-{{distro.category}}">{{distro.count}}</div>
+                        {% endfor %}
+                        
                         <p>STAMPS</p>
                     </div>
                 </div>
@@ -157,44 +162,50 @@
         <ol>
             <li class="default">
                 <a class="replaced" href="/{{user.screen_name}}">
+                    <div class='desc'>All Stamps</div>
+                    <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
-                    <div class='desc'>All Stamps</div>
                 </a>
             </li>
             <li class="place">
                 <a class="replaced" href="/{{user.screen_name}}?category=place">
+                    <div class='desc'>Places</div>
+                    <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
-                    <div class='desc'>Places</div>
                 </a>
             </li>
             <li class="music">
                 <a class="replaced" href="/{{user.screen_name}}?category=music">
+                    <div class='desc'>Music</div>
+                    <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
-                    <div class='desc'>Music</div>
                 </a>
             </li>
             <li class="book">
                 <a class="replaced" href="/{{user.screen_name}}?category=book">
+                    <div class='desc'>Books</div>
+                    <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
-                    <div class='desc'>Books</div>
                 </a>
             </li>
             <li class="film">
                 <a class="replaced" href="/{{user.screen_name}}?category=film">
+                    <div class='desc'>Film & TV</div>
+                    <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
-                    <div class='desc'>Film & TV</div>
                 </a>
             </li>
             <li class="other">
                 <a class="replaced" href="/{{user.screen_name}}?category=other">
+                    <div class='desc'>Apps & Other</div>
+                    <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
-                    <div class='desc'>Apps & Other</div>
                 </a>
             </li>
         </ol>

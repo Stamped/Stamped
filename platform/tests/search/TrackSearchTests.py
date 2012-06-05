@@ -26,47 +26,47 @@ class TrackSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'Simple As...', }, [ 
+            ({ 'query' : 'Simple As...', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='simple as...', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'What\'s wrong is everyhere', }, [ 
+            ({ 'query' : 'What\'s wrong is everyhere', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='what\'s wrong is everywhere', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'midnight city', }, [ 
+            ({ 'query' : 'midnight city', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='midnight city', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'lux aeterna', }, [ 
+            ({ 'query' : 'lux aeterna', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='lux aeterna', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'mouthful of diamonds', }, [ 
+            ({ 'query' : 'mouthful of diamonds', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='mouthful of diamonds', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'damn it feels good to be a gangsta', }, [ 
+            ({ 'query' : 'damn it feels good to be a gangsta', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='damn it feels good to be a gangsta', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'good morning chamillionaire', }, [ 
+            ({ 'query' : 'good morning chamillionaire', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='good morning',        types='track'), 
                 SearchResultConstraint(title='chamillionaire',      types='artist'), 
             ]), 
-            ({ 'query' : 'let it (edit remix) machinedrum', }, [ 
+            ({ 'query' : 'let it (edit remix) machinedrum', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='let it (edit remix)', types='track'), 
                 SearchResultConstraint(title='machinedrum',         types='artist'), 
             ]), 
-            ({ 'query' : 'young blood lynx', }, [ 
+            ({ 'query' : 'young blood lynx', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='young blood',         types='track'), 
                 SearchResultConstraint(title='lynx',                types='artist'), 
             ]), 
-            ({ 'query' : 'A.D.H.D. kendrick lamar', }, [ 
+            ({ 'query' : 'A.D.H.D. kendrick lamar', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='A.D.H.D',             types='track', match='prefix'), 
                 SearchResultConstraint(title='kendrick lamar',      types='artist'), 
             ]), 
-            ({ 'query' : 'born this way', }, [ 
+            ({ 'query' : 'born this way', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='born this way', 
                                        types='track'), 
             ]), 
@@ -87,78 +87,78 @@ class TrackSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'to look like you john butler trio april uprising', }, [ 
+            ({ 'query' : 'to look like you john butler trio april uprising', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='to look like you',    types='track', 
                                        index=0), 
                 SearchResultConstraint(title='april uprising',      types='album'), 
                 SearchResultConstraint(title='john butler trio',    types='artist'), 
             ]), 
-            ({ 'query' : 'john butler to look like you', }, [ 
+            ({ 'query' : 'john butler to look like you', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='to look like you',    types='track', 
                                        index=0), 
                 SearchResultConstraint(title='april uprising',      types='album'), 
                 SearchResultConstraint(title='john butler trio',    types='artist'), 
             ]), 
-            ({ 'query' : 'april uprising to look like you', }, [ 
+            ({ 'query' : 'april uprising to look like you', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='to look like you',    types='track'), 
                 SearchResultConstraint(title='april uprising',      types='album'), 
                 SearchResultConstraint(title='john butler trio',    types='artist'), 
             ]), 
-            ({ 'query' : 'american music by the violent femmes', }, [ 
+            ({ 'query' : 'american music by the violent femmes', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='american music',      types='track', 
                                        match='prefix', index=0), 
                 SearchResultConstraint(title='violent femmes',      types='artist'), 
                 #SearchResultConstraint(title='viva wisconsin',      types='album'), 
             ]), 
-            ({ 'query' : 'parte stroke 9', }, [ 
+            ({ 'query' : 'parte stroke 9', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='parte', types='track', match='prefix'), 
                 SearchResultConstraint(title='stroke 9',            types='artist'), 
                 SearchResultConstraint(title='all in',              types='album'), 
             ]), 
-            ({ 'query' : '1980 rehab graffiti the world', }, [ 
+            ({ 'query' : '1980 rehab graffiti the world', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='1980',                types='track'), 
                 SearchResultConstraint(title='rehab',               types='artist'), 
                 SearchResultConstraint(title='graffiti the world',  types='album'), 
             ]), 
-            ({ 'query' : '1980 rehab', }, [ 
+            ({ 'query' : '1980 rehab', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='1980',                types='track'), 
                 SearchResultConstraint(title='rehab',               types='artist'), 
                 SearchResultConstraint(title='graffiti the world',  types='album'), 
             ]), 
-            ({ 'query' : 'graffiti the world 1980', }, [ 
+            ({ 'query' : 'graffiti the world 1980', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='1980',                types='track'), 
                 SearchResultConstraint(title='rehab',               types='artist'), 
                 SearchResultConstraint(title='graffiti the world',  types='album'), 
             ]), 
-            ({ 'query' : 'montanita ratatat', }, [ 
+            ({ 'query' : 'montanita ratatat', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='montanita',           types='track'), 
                 SearchResultConstraint(title='ratatat',             types='artist'), 
                 SearchResultConstraint(title='classics',            types='album'), 
             ]), 
-            ({ 'query' : 'ratatat classics montanita', }, [ 
+            ({ 'query' : 'ratatat classics montanita', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='montanita',           types='track'), 
                 SearchResultConstraint(title='ratatat',             types='artist'), 
                 SearchResultConstraint(title='classics',            types='album'), 
             ]), 
-            ({ 'query' : 'starry eyed surprise bunkka', }, [ 
+            ({ 'query' : 'starry eyed surprise bunkka', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='starry eyed surprise',types='track'), 
                 SearchResultConstraint(title='oakenfold',           types='artist', match='contains'), 
                 SearchResultConstraint(title='bunkka',              types='album'), 
             ]), 
-            ({ 'query' : 'afternoon youth lagoon hibernation', }, [ 
+            ({ 'query' : 'afternoon youth lagoon hibernation', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='afternoon',               types='track'), 
                 SearchResultConstraint(title='youth lagoon',            types='artist'), 
                 SearchResultConstraint(title='the year of hibernation', types='album'), 
             ]), 
-            ({ 'query' : 'above & beyond bassnectar divergent spectrum', }, [ 
+            ({ 'query' : 'above & beyond bassnectar divergent spectrum', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='above and beyond', types='track'), 
             ]), 
-            ({ 'query' : 'kanye power', }, [ 
+            ({ 'query' : 'kanye power', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='power',               types='track'), 
                 SearchResultConstraint(title='kanye west',          types='artist'), 
                 SearchResultConstraint(title='my beautiful dark twisted fantasy', types='album', match='prefix'), 
             ]), 
-            ({ 'query' : 'm83 intro', }, [ 
+            ({ 'query' : 'm83 intro', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='intro',               types='track'), 
                 SearchResultConstraint(title='M83',                 types='artist'), 
                 SearchResultConstraint(title='hurry up, we\'re dreaming', types='album', match='prefix'), 
@@ -180,40 +180,40 @@ class TrackSearchTests(ASearchTestSuite):
         }
         
         tests = [
-            ({ 'query' : 'katy perry part of me', }, [ 
+            ({ 'query' : 'katy perry part of me', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='part of me', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'somebody that i used to know', }, [ 
+            ({ 'query' : 'somebody that i used to know', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='somebody that i used to know', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'Ai Se Eu Te Pego', }, [ 
+            ({ 'query' : 'Ai Se Eu Te Pego', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='Ai Se Eu Te Pego', 
                                        types='track'), 
             ]), 
-            ({ 'query' : '21 adele', }, [ 
+            ({ 'query' : '21 adele', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='21', 
                                        types='track'), 
             ]), 
-            ({ 'query' : 'i follow rivers lykke li', }, [ 
+            ({ 'query' : 'i follow rivers lykke li', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='i follow rivers',     types='track'), 
                 SearchResultConstraint(title='i follow rivers',     types='album'), 
                 SearchResultConstraint(title='lykke li',            types='artist'), 
             ]), 
-            ({ 'query' : 'my name is stain shaka', }, [ 
+            ({ 'query' : 'my name is stain shaka', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='my name is stain',    types='track'), 
                 SearchResultConstraint(title='shaka ponk',          types='artist'), 
                 SearchResultConstraint(title='sex, plugs and vidiot\'ape',  types='album'), 
             ]), 
-            ({ 'query' : 'leider geil deichkind', }, [ 
+            ({ 'query' : 'leider geil deichkind', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='leider geil',         types='track', match='prefix'), 
             ]), 
-            ({ 'query' : 'rising sun exile', }, [ 
+            ({ 'query' : 'rising sun exile', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='rising sun',          types='track'), 
                 SearchResultConstraint(title='rising sun',          types='album'), 
             ]), 
-            ({ 'query' : 'we belong together mariah carey', }, [ 
+            ({ 'query' : 'we belong together mariah carey', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='we belong together',  types='track'), 
             ]), 
         ]
@@ -266,7 +266,7 @@ class TrackSearchTests(ASearchTestSuite):
                 # don't test tracks whose names contain weird unicode strings
                 continue
             
-            tests.append(({ 'query' : name, }, [ 
+            tests.append(({ 'query' : name, 'category' : 'music', }, [ 
                 SearchResultConstraint(title=name, types='track', match='contains'), 
             ]))
             
@@ -277,7 +277,7 @@ class TrackSearchTests(ASearchTestSuite):
                 query  = "%s %s" % (name, artist)
                 
                 # ensure that track_name+artist_name yields both the track and artist in results
-                tests.append(({ 'query' : query, }, [ 
+                tests.append(({ 'query' : query, 'category' : 'music', }, [ 
                     SearchResultConstraint(title=name,   types='track',  match='contains'), 
                     SearchResultConstraint(title=artist, types='artist'), 
                 ]))

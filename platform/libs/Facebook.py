@@ -9,6 +9,9 @@ APP_ID          = '297022226980395'
 APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
+USER_ID = '100003940534060'
+ACCESS_TOKEN = 'AAACEdEose0cBAMrAKxyZC1UPZCikkVixO6tFlFeODQVgyrucTBtMmbFfn75tXZAIsGcUQCnJbh1B2EAmX0fnj5HRqXfqgqTZATHxuZCHlJPD4xNlFG0Un'
+
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
         self.app_id         = app_id
@@ -27,6 +30,7 @@ class Facebook(object):
         if method != 'get':
             params['method'] = method
 
+        data = None
         while True:
             try:
                 baseurl = ''
@@ -35,10 +39,13 @@ class Facebook(object):
                 url     = "%s%s" % (baseurl, path)
                 if params != {}:
                     encoded_params  = urllib.urlencode(params)
-                    url += "?%s" % encoded_params
+                    if method == 'get':
+                        url += "?%s" % encoded_params
+                    else:
+                        data = encoded_params
                 logs.info('url: %s' % url)
                 if parse_json:
-                    result  = json.load(urllib2.urlopen(url))
+                    result  = json.load(urllib2.urlopen(url, data))
                 else:
                     result = urllib2.urlopen(url).read()
                 return result
@@ -141,6 +148,15 @@ class Facebook(object):
         path = test_user_id
         return self._delete(access_token, path)
 
+    def postToNewsFeed(self, user_id, access_token, message, picture=None):
+        path = '%s/feed' % user_id
+        self._post(
+            access_token,
+            path,
+            message = message,
+            picture = picture,
+        )
+
 __globalFacebook = None
 
 def globalFacebook():
@@ -152,8 +168,6 @@ def globalFacebook():
     return __globalFacebook
 
 
-USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAACEdEose0cBALCE1UQXlYzCtn7eYrthChTYhySgmi5E0ZA3d61ElzIZCSAtsxHzHQceouOyOBcGV3LKA7ZA8Ipq1BXFXiFUZAK4gHYvHslTk1iO7dqL'
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
@@ -162,10 +176,14 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
     if 'getFriendIds' in methods:           pprint(facebook.getFriendIds(access_token))
+    if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
+                                                   message="Test news feed item.",
+                                                   picture="http://static.stamped.com/users/ml.jpg"))
+
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'postToNewsFeed'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

@@ -136,7 +136,7 @@ class ASearchTestSuite(AStampedTestCase):
                         utils.log("-" * 80)
                         utils.log("[%s] SEARCH ERROR query '%s'" % (self, args['query'], ))
                         for r in results:
-                            utils.log(r.value)
+                            utils.log(r)
                         utils.log("-" * 80)
                         utils.log("")
                         
