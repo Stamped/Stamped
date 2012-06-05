@@ -220,7 +220,14 @@ class StampedAPI(AStampedAPI):
         account.stats.num_stamps_total = 0
 
         # Set default stamp colors
-        if account.color_primary is None or account.color_secondary is None:
+        if account.color_primary is not None or account.color_secondary is not None:
+            primary, secondary = self._validateStampColors(account.color_primary, account.color_secondary)
+            account.color_primary = primary
+            account.color_secondary = secondary
+
+            # Asynchronously generate stamp file
+            tasks.invoke(tasks.APITasks.customizeStamp, args=[primary, secondary])
+        else:
             account.color_primary   = '004AB2'
             account.color_secondary = '0057D1'
 
@@ -633,21 +640,23 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateAccount(account)
         return account
 
-    @API_CALL
-    def customizeStamp(self, authUserId, data):
-        ### TODO: Reexamine how updates are done
+    def _validateStampColors(self, primary, secondary):
+        primary = primary.upper()
+        secondary = secondary.upper()
 
-        primary   = data['color_primary'].upper()
-        secondary = data['color_secondary'].upper()
-
-        # Validate inputs
         if not utils.validate_hex_color(primary) or not utils.validate_hex_color(secondary):
             raise StampedInputError("Invalid format for colors")
+
+        return primary, secondary
+
+    @API_CALL
+    def customizeStamp(self, authUserId, data):
+        primary, secondary = self._validateStampColors(data['color_primary'], data['color_secondary'])
 
         account = self._accountDB.getAccount(authUserId)
 
         # Import each item
-        account.color_primary   = primary
+        account.color_primary = primary
         account.color_secondary = secondary
 
         self._accountDB.updateAccount(account)
