@@ -156,6 +156,7 @@ urlpatterns = patterns('',
     ### TODOS
     (r'v0/todos/create.json',                               'v0.functions.todos.create'),
     (r'v0/todos/complete.json',                             'v0.functions.todos.complete'),
+    (r'v0/favorites/remove.json',                           'v0.functions.todos.complete'),
     (r'v0/todos/remove.json',                               'v0.functions.todos.remove'),
     (r'v0/todos/show.json',                                 'v0.functions.todos.show'),
     
