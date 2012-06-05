@@ -164,10 +164,6 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block;
 
-- (STCancellation*)loginWithFacebookID:(NSString*)userID 
-                                 token:(NSString*)token
-                           andCallback:(void(^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
-
 - (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
                                          coordinates:(NSString*)coordinates
                                             category:(NSString*)category

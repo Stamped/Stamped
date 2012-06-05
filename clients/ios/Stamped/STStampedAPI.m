@@ -854,21 +854,6 @@ static STStampedAPI* _sharedInstance;
     }
 }
 
-- (STCancellation*)loginWithFacebookID:(NSString*)userID 
-                                 token:(NSString*)token
-                           andCallback:(void(^)(id<STLoginResponse>, NSError*, STCancellation*))block {
-    NSString* path = @"/account/create_using_facebook.json";
-    NSDictionary* params = nil;
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
-                                                        post:YES
-                                               authenticated:YES
-                                                      params:params
-                                                     mapping:[STSimpleLoginResponse mapping]
-                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                     block(result, error, cancellation); 
-                                                 }];
-}
-
 - (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
                                          coordinates:(NSString*)coordinates
                                             category:(NSString*)category
@@ -992,6 +977,22 @@ static STStampedAPI* _sharedInstance;
     }];
 }
 
+- (STCancellation *)createAccountWithPassword:(NSString *)password 
+                                   screenName:(NSString *)screenName 
+                                         name:(NSString *)name 
+                                        email:(NSString *)email 
+                                        phone:(NSString *)phone 
+                                 profileImage:(NSString *)profileImage 
+                                  andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] createAccountWithPassword:password
+                                                            screenName:screenName
+                                                                  name:name
+                                                                 email:email
+                                                                 phone:phone
+                                                          profileImage:profileImage
+                                                           andCallback:block];
+}
+
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
                                            screenName:(NSString*)screenName
                                                  name:(NSString*)name
@@ -999,7 +1000,31 @@ static STStampedAPI* _sharedInstance;
                                                 phone:(NSString*)phone
                                          profileImage:(NSString*)profileImage 
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    
+    return [[STRestKitLoader sharedInstance] createAccountWithFacebookUserToken:userToken
+                                                                     screenName:screenName
+                                                                           name:name
+                                                                          email:email
+                                                                          phone:phone
+                                                                   profileImage:profileImage
+                                                                    andCallback:block];
+}
+
+- (STCancellation *)createAccountWithTwitterUserToken:(NSString *)userToken 
+                                           userSecret:(NSString *)userSecret 
+                                           screenName:(NSString *)screenName 
+                                                 name:(NSString *)name 
+                                                email:(NSString *)email 
+                                                phone:(NSString *)phone 
+                                         profileImage:(NSString *)profileImage 
+                                          andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] createAccountWithTwitterUserToken:userToken
+                                                                    userSecret:userSecret
+                                                                    screenName:screenName
+                                                                          name:name
+                                                                         email:email
+                                                                         phone:phone
+                                                                  profileImage:profileImage
+                                                                   andCallback:block];
 }
 
 
@@ -1008,6 +1033,20 @@ static STStampedAPI* _sharedInstance;
                            andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
     return [[STRestKitLoader sharedInstance] loginWithScreenName:screenName password:password andCallback:block];
 }
+
+- (STCancellation *)loginWithFacebookUserToken:(NSString *)userToken
+                                   andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] loginWithFacebookUserToken:userToken andCallback:block];
+}
+
+- (STCancellation *)loginWithTwitterUserToken:(NSString *)userToken
+                                   userSecret:(NSString *)userSecret
+                                  andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] loginWithTwitterUserToken:userToken
+                                                            userSecret:userSecret
+                                                           andCallback:block];
+}
+
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];
