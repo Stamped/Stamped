@@ -1199,6 +1199,7 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity
         self._activityDB.removeFollowActivity(authUserId, userId)
+        self._activityDB.remo
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -1507,8 +1508,12 @@ class StampedAPI(AStampedAPI):
         if autosuggestForm.category == 'film':
             return self._netflix.autocomplete(autosuggestForm.query)
         elif autosuggestForm.category == 'place':
+            if autosuggestForm.coordinates is None:
+                latLng = None
+            else:
+                latLng = autosuggestForm.coordinates.split(',')
             results = self._googlePlaces.getAutocompleteResults(
-                autosuggestForm.coordinates.split(','),
+                latLng,
                 autosuggestForm.query,
                 {'radius': 500, 'types' : 'establishment'})
             logs.info(results)
@@ -3704,6 +3709,11 @@ class StampedAPI(AStampedAPI):
         # User
         user = self._userDB.getUser(authUserId).minimize()
 
+        #stamp
+        if stampId is not None:
+            stamp = self._stampDB.getStamp(stampId)
+            stamp_owner = stamp.user.user_id
+
         friendIds = self._friendshipDB.getFriends(user.user_id)
 
         # Enrich todo
@@ -3717,6 +3727,11 @@ class StampedAPI(AStampedAPI):
         recipientIds = [stamp.user.user_id for stamp in friendStamps]
         if authUserId in recipientIds:
             recipientIds.remove(authUserId)
+
+        if stampId is not None:
+            recipientIds.append(stamp_owner)
+        # get rid of duplicate entries
+        recipientIds = list(set(recipientIds))
 
         ### TODO: Verify user isn't being blocked
         if not previouslyTodoed and len(recipientIds) > 0:
