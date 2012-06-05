@@ -1510,7 +1510,7 @@ class StampedAPI(AStampedAPI):
             results = self._googlePlaces.getAutocompleteResults(
                 autosuggestForm.coordinates.split(','),
                 autosuggestForm.query,
-                {'radius': 500, 'types' : 'establishement'})
+                {'radius': 500, 'types' : 'establishment'})
             logs.info(results)
             completions = []
             for place in results:
