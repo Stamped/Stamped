@@ -3773,16 +3773,9 @@ class StampedAPI(AStampedAPI):
         # Enrich todo
         todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
-        friendIds = self._friendshipDB.getFriends(authUserId)
-
-        # Remove your todo from all of your friends' stamp previews
-        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
         ### TODO: Verify user isn't being blocked
-        if friendStamps is not None:
-            for stamp in friendStamps:
-                if stamp.user.user_id != authUserId:
-                    # Update stamp stats
-                    tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+        if todo.stamp is not None and todo.stamp.stamp_id is not None:
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         return todo
 
