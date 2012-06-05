@@ -372,14 +372,6 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
         self._assertBody(result, 'UserB listened to Call Your Girlfriend - Single.')
 
         # Repeat the same action, make sure it doesn't get added to the activity feed again
-        path = 'actions/complete.json'
-        data = {
-            "oauth_token": self.tokenB['access_token'],
-            'action' : 'listen',
-            'source' : 'rdio',
-            'source_id': 'a1213511',
-            'stamp_id' : stampNew['stamp_id'],
-            }
         self.handlePOST(path, data)
 
         result = self.showActivity(self.tokenA)
@@ -387,20 +379,21 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
 
         # Test that if User A listens to his own stamped song, it doesn't show up on his feed
         # Repeat the same action, make sure it doesn't get added to the activity feed again
-        path = 'actions/complete.json'
-        data = {
-            "oauth_token": self.tokenA['access_token'],
-            'action' : 'listen',
-            'source' : 'rdio',
-            'source_id': 'a1213511',
-            'stamp_id' : stampNew['stamp_id'],
-            }
+        data['oauth_token'] =  self.tokenA['access_token']
         self.handlePOST(path, data)
-
         result = self.showActivity(self.tokenA)
 
         self.assertEqual(len(result), 3)
         self._assertBody(result, 'UserB listened to Call Your Girlfriend - Single.')
+
+        # Have UserC listen to the album and test that activity notifications are grouped
+        data['oauth_token'] =  self.tokenC['access_token'],
+        self.handlePOST(path, data)
+        result = self.showActivity(self.tokenA)
+
+        from pprint import pprint
+        pprint(result)
+        self.assertEqual(len(result), 3)
 
         # cleanup
         self.deleteStamp(self.tokenA, stampNew['stamp_id'])
