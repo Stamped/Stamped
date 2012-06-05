@@ -22,8 +22,6 @@
 
 - (id)initWithEntityID:(NSString*)entityID;
 - (id)initWithSearchID:(NSString*)searchID;
-- (id)initWithEntityObject:(Entity*)entity;
-- (id)initWithSearchResult:(SearchResult*)searchResult;
 
 @property (nonatomic, retain) Stamp* referringStamp;
 @property (nonatomic, retain) STSynchronousWrapper* synchronousWrapper;

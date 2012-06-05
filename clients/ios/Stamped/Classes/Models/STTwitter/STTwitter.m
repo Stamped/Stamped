@@ -22,7 +22,7 @@ static id __instance;
 @synthesize twitterUser;
 @synthesize accountStore = _accountStore;
 
-+ (id)sharedInstance {
++ (STTwitter*)sharedInstance {
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{

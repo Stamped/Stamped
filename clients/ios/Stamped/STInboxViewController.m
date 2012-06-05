@@ -31,7 +31,6 @@
 
 #import "EntityDetailViewController.h"
 #import "STStampCell.h"
-#import "AccountManager.h"
 #import "DDMenuController.h"
 #import "STActionManager.h"
 
@@ -81,6 +80,10 @@
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)login:(id)notImportant {
+    [Util launchFirstRun];
 }
 
 - (void)viewDidLoad {
@@ -511,7 +514,7 @@
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    DDMenuController *menuController = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     return ![[menuController tap] isEnabled];
     
 }

@@ -170,12 +170,10 @@ class Netflix(object):
             service         = 'catalog/titles/autocomplete',
             term            = term,
         )
-        print (results)
         autocomplete = results.pop('autocomplete', None)
         if autocomplete is None or 'autocomplete_item' not in self.__asList(autocomplete)[0]:
             return []
 
-        print autocomplete
         completions = []
         for title in self.__asList(self.__asList(autocomplete)[0]['autocomplete_item']):
             completions.append( { 'completion' : title['title']['short'] } )

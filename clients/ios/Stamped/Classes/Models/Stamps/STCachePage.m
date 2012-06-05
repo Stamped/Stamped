@@ -237,7 +237,9 @@
     }
     else {
         //Create new page pointing to this as next
-        return [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
+        STCachePage* finalResult = [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
+        NSAssert2(finalResult.count >= page.count, @"Count should have been at least %d was %d", page.count, finalResult.count);
+        return finalResult;
     }
 }
 

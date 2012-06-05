@@ -10,7 +10,6 @@
 #import "STFriendsSlice.h"
 #import "STStampedAPI.h"
 #import "STUserCollectionSlice.h"
-#import "AccountManager.h"
 #import "Util.h"
 
 @implementation STUserSource

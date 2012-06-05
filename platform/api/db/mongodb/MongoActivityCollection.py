@@ -102,10 +102,7 @@ class MongoActivityCollection(AActivityDB):
         alerts          = []
         sentTo          = set()
 
-        try:
-            objects = objects.dataExport()
-        except Exception:
-            pass
+        objects = objects.dataExport()
 
         activityId      = None
 
@@ -193,15 +190,26 @@ class MongoActivityCollection(AActivityDB):
         if len(alerts): 
             self.alerts_collection.addAlerts(alerts)
 
-    def _removeActivityIds(self, activityIds):
-        self.activity_links_collection.removeActivityLinks(activityIds)
-        self.activity_items_collection.removeActivityItems(activityIds)
-
     def _removeSubject(self, activityIds, subjectId):
         toRemove = self.activity_items_collection.removeSubjectFromActivityItems(activityIds, subjectId)
         self._removeActivityIds(toRemove)
 
-    def removeActivity(self, verb, userId, **kwargs):
+    def removeLikeActivity(self, userId, stampId):
+        return self._removeActivity('like', userId, stampId=stampId)
+
+    def removeTodoActivity(self, userId, entityId):
+        return self._removeActivity('todo', userId, entityId=entityId)
+
+    def removeFollowActivity(self, userId, friendId):
+        return self._removeActivity('follow', userId, friendId=friendId)
+
+    def removeFriendActivity(self, userId, friendId):
+        return self._removeActivity('friend', userId, friendId=friendId)
+
+    def removeCommentActivity(self, userId, commentId):
+        return self._removeActivity('friend', userId, commentId=commentId)
+
+    def _removeActivity(self, verb, userId, **kwargs):
         entityId    = kwargs.pop('entityId', None)
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
@@ -228,7 +236,12 @@ class MongoActivityCollection(AActivityDB):
             objects = { 'comment_ids' : [ commentId ] }
             activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
             self._removeSubject(activityIds, userId)
-    
+
+    def _removeActivityIds(self, activityIds):
+        self.activity_links_collection.removeActivityLinks(activityIds)
+        self.activity_items_collection.removeActivityItems(activityIds)
+
+
     def removeActivityForStamp(self, stampId):
         objects     = { 'stamp_ids' : [ stampId ] }
         activityIds = self.activity_items_collection.getActivityIds(objects=objects)

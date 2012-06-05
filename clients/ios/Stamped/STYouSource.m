@@ -7,10 +7,10 @@
 //
 
 #import "STYouSource.h"
-#import "AccountManager.h"
 #import "STSimpleUser.h"
 #import "STEntitySearchController.h"
 #import "Util.h"
+#import "STStampedAPI.h"
 
 @implementation STYouSource
 
@@ -44,7 +44,7 @@
 }
 
 - (NSString*)userID {
-  return [AccountManager sharedManager].currentUser.userID;
+  return STStampedAPI.sharedInstance.currentUser.userID;
 }
 
 @end

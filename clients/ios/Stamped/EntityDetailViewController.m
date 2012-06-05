@@ -11,15 +11,8 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 
-#import "AccountManager.h"
-#import "DetailedEntity.h"
-#import "Entity.h"
-#import "Stamp.h"
-#import "SearchResult.h"
 #import "UIColor+Stamped.h"
 #import "Notifications.h"
-#import "Favorite.h"
-#import "User.h"
 #import "Alerts.h"
 #import "STToolbar.h"
 #import "STSimpleEntityDetail.h"
@@ -73,23 +66,6 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
   self = [super init];
   if (self) {
     [self commonInitWithEntityID:nil andSearchID:searchID];
-  }
-  return self;
-}
-
-
-- (id)initWithEntityObject:(Entity*)entity {
-  self = [super init];
-  if (self) {
-    [self commonInitWithEntityID:entity.entityID andSearchID:nil];
-  }
-  return self;
-}
-
-- (id)initWithSearchResult:(SearchResult*)searchResult {
-  self = [super init];
-  if (self) {
-    [self commonInitWithEntityID:nil andSearchID:searchResult.searchID];
   }
   return self;
 }

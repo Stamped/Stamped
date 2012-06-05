@@ -18,7 +18,7 @@ typedef void(^TwitterRequestHandler)(id, NSError*);
     NSDictionary *_twitterUserAuth;
 }
 
-+ (id)sharedInstance;
++ (STTwitter*)sharedInstance;
 
 - (void)auth;
 - (void)handleOpenURL:(NSURL*)url;

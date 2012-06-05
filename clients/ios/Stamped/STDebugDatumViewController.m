@@ -10,8 +10,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import "Util.h"
 #import <MessageUI/MFMailComposeViewController.h>
-#import "AccountManager.h"
 #import "UIFont+Stamped.h"
+#import "STStampedAPI.h"
 
 @interface STDebugDatumViewController () <UITextViewDelegate, MFMailComposeViewControllerDelegate>
 
@@ -115,8 +115,8 @@
   controller.mailComposeDelegate = self;
   [controller setToRecipients:[NSArray arrayWithObject:@"dev@stamped.com"]];
   [controller setSubject:[NSString stringWithFormat:@"Report from %@ (%@)", 
-                          [AccountManager sharedManager].currentUser.name,
-                          [AccountManager sharedManager].currentUser.screenName]];
+                          STStampedAPI.sharedInstance.currentUser.name,
+                          STStampedAPI.sharedInstance.currentUser.screenName]];
   [controller setMessageBody:self.textView.text isHTML:NO]; 
   if (controller) [self presentModalViewController:controller animated:YES];
   [controller release];
