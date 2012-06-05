@@ -418,6 +418,14 @@ class SKUNumberGroup(ABookGroup):
         ABookGroup.__init__(self, 'sku_number')
         self.addNameField()
 
+
+"""
+Add all defined groups to the 'allGroups' list. This is necessary for EntityProxySource to enrich all possible groups.
+
+Note that this only works if no abstract classes exist within this module (EntityGroups.py). All abstract classes should
+be defined in AEntityGroups.py.
+"""
+
 allGroups = []
 allGroupObjects = inspect.getmembers(sys.modules[__name__], lambda x: inspect.isclass(x) and x.__module__ == __name__)
 for groupObject in allGroupObjects:
