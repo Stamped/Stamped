@@ -205,7 +205,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     @HandleRollback
-    def addAccount(self, account, imageData=None):
+    def addAccount(self, account, tempImageUrl=None):
         ### TODO: Check if email already exists?
         now = datetime.utcnow()
 
@@ -220,8 +220,9 @@ class StampedAPI(AStampedAPI):
         account.stats.num_stamps_total = 0
 
         # Set default stamp colors
-        account.color_primary   = '004AB2'
-        account.color_secondary = '0057D1'
+        if account.color_primary is None or account.color_secondary is None:
+            account.color_primary   = '004AB2'
+            account.color_secondary = '0057D1'
 
         # Set default alerts
         alerts                          = AccountAlerts()
@@ -257,7 +258,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Invalid format for email address")
 
         # Add image timestamp if exists
-        if imageData:
+        if tempImageUrl is not None:
             account.image_cache = now
 
         # Create account
@@ -269,12 +270,8 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.new_accounts')
 
         # Add profile image
-        if imageData:
-            try:
-                self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
-            except IOError:
-                #if there was a problem with the image format, just ignore the image
-                account.image_cache = None
+        if tempImageUrl is not None:
+            tasks.invoke(tasks.APITasks.updateProfileImage, args=[account.screen_name, tempImageUrl])
 
         # Asynchronously send welcome email and add activity items
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
@@ -319,7 +316,7 @@ class StampedAPI(AStampedAPI):
         return user
 
     @API_CALL
-    def addFacebookAccount(self, new_fb_account):
+    def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
         """
         For adding a Facebook auth account, first pull the user info from Facebook, verify that the user_id is not already
          linked to another user, populate the linked account information and then chain to the standard addAccount() method
@@ -346,10 +343,10 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
-        return self.addAccount(account, new_fb_account.profile_image)
+        return self.addAccount(account, tempImageUrl=tempImageUrl)
 
     @API_CALL
-    def addTwitterAccount(self, new_tw_account):
+    def addTwitterAccount(self, new_tw_account, tempImageUrl=None):
         """
         For adding a Twitter auth account, first pull the user info from Twitter, verify that the user_id is not already
          linked to another user, populate the linked account information and then chain to the standard addAccount() method
@@ -376,7 +373,7 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = user['profile_background_image_url']
 
-        return self.addAccount(account, new_tw_account.profile_image)
+        return self.addAccount(account, tempImageUrl=tempImageUrl)
 
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -961,6 +958,30 @@ class StampedAPI(AStampedAPI):
 
         return result
 
+    def _enrichUserObjects(self, users, authUserId=None, **kwargs):
+
+        singleUser = False
+        if not isinstance(users, list):
+            singleUser  = True
+            users       = [users]
+
+        # Only enrich "following" field for now
+        if authUserId is not None:
+            friends = self._friendshipDB.getFriends(authUserId)
+            result = []
+            for user in users:
+                if user.user_id in friends:
+                    user.following = True
+                else:
+                    user.following = False 
+                result.append(user)
+            users = result 
+        
+        if singleUser:
+            return users[0]
+
+        return users
+
 
     ### PUBLIC
 
@@ -986,7 +1007,7 @@ class StampedAPI(AStampedAPI):
                 ### TEMP: This should be async
                 self._userDB.updateDistribution(user.user_id, distribution)
 
-        return user
+        return self._enrichUserObjects(user, authUserId=authUserId)
 
     @API_CALL
     def getUsers(self, userIds, screenNames, authUserId):
@@ -1021,7 +1042,7 @@ class StampedAPI(AStampedAPI):
         if len(result) != len(users):
             result = users
 
-        return result
+        return self._enrichUserObjects(result, authUserId=authUserId)
 
     @API_CALL
     def getPrivacy(self, userRequest):
@@ -1034,13 +1055,15 @@ class StampedAPI(AStampedAPI):
         ### TODO: Condense with the other "findUsersBy" functions
         ### TODO: Add check for privacy settings?
 
-        return self._userDB.findUsersByEmail(emails, limit=100)
+        users = self._userDB.findUsersByEmail(emails, limit=100)
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def findUsersByPhone(self, authUserId, phone):
         ### TODO: Add check for privacy settings?
 
-        return self._userDB.findUsersByPhone(phone, limit=100)
+        users = self._userDB.findUsersByPhone(phone, limit=100)
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def findUsersByTwitter(self, authUserId, user_token, user_secret):
@@ -1049,7 +1072,7 @@ class StampedAPI(AStampedAPI):
 
         # Grab friend list from Facebook API
         users = self._getTwitterFriends(user_token, user_secret)
-        return users
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def findUsersByFacebook(self, authUserId, user_token=None):
@@ -1058,7 +1081,7 @@ class StampedAPI(AStampedAPI):
 
         # Grab friend list from Facebook API
         users = self._getFacebookFriends(user_token)
-        return users
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):
@@ -1066,23 +1089,22 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Add check for privacy settings
 
-        return self._userDB.searchUsers(authUserId, query, limit, relationship)
+        users = self._userDB.searchUsers(authUserId, query, limit, relationship)
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def getSuggestedUsers(self, authUserId, request):
         if request.personalized:
             suggestions = self._friendshipDB.getSuggestedUserIds(authUserId, request)
-            output      = []
+            users       = []
 
             for suggestion in suggestions:
                 user_id      = suggestion[0]
-                explanations = suggestion[1]
+                explanations = suggestion[1] # Not being used currently!
                 user         = self._userDB.getUser(user_id)
+                users.append(user)
 
-                # TODO: use user's bio if no explanations are available
-                output.append([ user, explanations ])
-
-            return output
+            return self._enrichUserObjects(users, authUserId=authUserId)
         else:
             suggested = {
                 'mariobatali':      1,
@@ -1097,7 +1119,8 @@ class StampedAPI(AStampedAPI):
             }
 
             users = self.getUsers(None, suggested.keys(), authUserId)
-            return sorted(users, key=lambda k: suggested[getattr(k, 'screen_name')])
+            users = sorted(users, key=lambda k: suggested[getattr(k, 'screen_name')])
+            return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def ignoreSuggestedUsers(self, authUserId, user_ids):
@@ -1567,7 +1590,7 @@ class StampedAPI(AStampedAPI):
         # For now, only complete the action if it's associated with an entity and a stamp
         if stampId is not None:
             stamp   = self._stampDB.getStamp(stampId)
-            user    = self._userDB.getUser(stamp.user.user_id)
+            # user    = self._userDB.getUser(stamp.user.user_id)
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
             if action in actions and authUserId != stamp.user.user_id:

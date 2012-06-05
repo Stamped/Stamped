@@ -22,7 +22,7 @@ from Facebook           import *
 @require_http_methods(["POST"])
 def create(request, client_id, http_schema, schema, **kwargs):
     logs.info('account schema passed in: %s' % schema)
-    schema = stampedAPI.addAccount(schema, http_schema.profile_image)
+    schema = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
     user   = HTTPUser().importAccount(schema)
     logs.user(user.user_id)
@@ -39,7 +39,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
                    upload='profile_image')
 @require_http_methods(["POST"])
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addFacebookAccount(schema)
+    account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -56,7 +56,7 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     upload='profile_image')
 @require_http_methods(["POST"])
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addTwitterAccount(schema)
+    account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
