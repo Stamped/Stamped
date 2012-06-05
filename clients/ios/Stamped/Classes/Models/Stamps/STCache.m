@@ -327,6 +327,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         [self handleRefreshIndexRequest:indexNumber.integerValue force:NO];
     }
 }
+
 - (void)refreshAtIndex:(NSInteger)index force:(BOOL)force {
     NSNumber* numberIndex = [NSNumber numberWithInteger:index];
     [self.refreshStack removeObject:numberIndex];
