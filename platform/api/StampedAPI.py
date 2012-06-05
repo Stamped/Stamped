@@ -1512,6 +1512,7 @@ class StampedAPI(AStampedAPI):
                     'radius': 500,
                     'name': autosuggestForm.query
                 })
+            logs.info(results)
             completions = []
             for place in results:
                 completions.append( { 'completion' : place['name'] } )
