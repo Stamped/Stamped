@@ -1514,7 +1514,7 @@ class StampedAPI(AStampedAPI):
             logs.info(results)
             completions = []
             for place in results:
-                completions.append( { 'completion' : place['name'] } )
+                completions.append( { 'completion' : place['terms'][0]['value'] } )
             return completions
         return []
 

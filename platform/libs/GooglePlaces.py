@@ -588,15 +588,22 @@ def main():
     if options.types:
         params['types'] = options.types
 
-    if options.detail:
-        results = places.getPlaceDetails(options.input, params)
-    elif options.suggest:
-        results = places.getAutocompleteResults(options.latLng, options.input, params)
-    elif options.address:
-        results = places.getSearchResultsByAddress(options.latLng, params)
-    else:
-        results = places.getSearchResultsByLatLng(options.latLng, params)
+    import pprint
+    pprint.pprint(options)
+    print('options.latLng: %s    params: %s' % (options.latLng, params))
 
+    params = { 'radius' : 500 }
+    pprint.pprint( places.getAutocompleteResults(['40.781174','-73.951820'], 'Roma', params))
+
+#    if options.detail:
+#        results = places.getPlaceDetails(options.input, params)
+#    elif options.suggest:
+#        results = places.getAutocompleteResults(options.latLng, options.input, params)
+#    elif options.address:
+#        results = places.getSearchResultsByAddress(options.latLng, params)
+#    else:
+#        results = places.getSearchResultsByLatLng(options.latLng, params)
+#
     if results is None:
         print "Failed to return results for '%s'" % (options.latLng, )
     else:
