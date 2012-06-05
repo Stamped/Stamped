@@ -8,7 +8,8 @@
 
 #import "STLeftMenuViewController.h"
 #import "Util.h"
-#import "DDMenuController.h"
+#import "STMenuController.h"
+#import "STProfileViewController.h"
 #import "SettingsViewController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
@@ -22,10 +23,13 @@
 #import "QuartzUtils.h"
 #import "STNavigationItem.h"
 #import "STStampedAPI.h"
+#import "STUser.h"
 
 static NSString* const _inboxNameKey = @"Root.inboxName";
 static NSString* const _iWantToNameKey = @"Root.iWantToName";
 static NSString* const _newsNameKey = @"Root.newsName";
+static NSString* const _addFriendsNameKey = @"Root.addFriendsName";
+static NSString* const _userNameKey = @"Root.userName";
 static NSString* const _debugNameKey = @"Root.debugName";
 static NSString* const _todoNameKey = @"Root.todoName";
 static NSString* const _settingsNameKey = @"Root.settingsName";
@@ -45,9 +49,11 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
                                     @"Root.inbox", _inboxNameKey,
                                     @"Root.iWantTo", _iWantToNameKey,
                                     @"Root.news", _newsNameKey,
+                                    @"Root.findFriends", _addFriendsNameKey,
+                                    @"Root.user", _userNameKey,
                                     @"Root.debug", _debugNameKey,
                                     nil];
-        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _newsNameKey, _debugNameKey, nil] retain];
+        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _newsNameKey, _addFriendsNameKey, _userNameKey, _debugNameKey, nil] retain];
         _controllerStore = [navigators retain];
         
         _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", _todoNameKey, @"Root.settings", _settingsNameKey,
@@ -83,6 +89,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
         tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         tableView.rowHeight = 48.0f;
+        tableView.scrollEnabled = NO;
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         tableView.delegate = (id<UITableViewDelegate>)self;
         tableView.dataSource = (id<UITableViewDataSource>)self;
@@ -129,8 +136,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         frame.origin.y = (self.view.bounds.size.height - frame.size.height);
         
         UITableView *tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
-        tableView.scrollEnabled = NO;
         tableView.backgroundColor = [UIColor clearColor];
+        tableView.scrollEnabled = NO;
         tableView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         tableView.rowHeight = 48.0f;
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -150,7 +157,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         frame.origin.y = (tableView.frame.origin.y - frame.size.height);
         shadow.frame = frame;
 
-        
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         view.contentMode = UIViewContentModeRedraw;
@@ -167,10 +173,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
-}
-
-- (void)configurationChanged:(id)notImportant {
-    [self.tableView reloadData];
 }
 
 - (void)viewDidUnload {
@@ -195,6 +197,52 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 }
 
 
+#pragma mark - Icon Helper
+
+- (NSString*)iconTitleForTableView:(UITableView*)tableView atIndex:(NSInteger)index {
+    
+    if (tableView == _tableView) {
+        
+        switch (index) {
+            case 0:
+                return @"left_menu_icon_stamps.png";
+                break;
+            case 1:
+                return @"left_menu_icon_iwantto.png";
+                break;
+            case 2:
+                return @"left_menu_icon_news.png";
+                break;
+            case 3:
+                return @"left_menu_icon_friends.png";
+                break;
+            case 4:
+                return @"left_menu_icon_stamps.png";
+                break;
+            default:
+                break;
+        }
+        
+    } else {
+        
+        switch (index) {
+            case 0:
+                return @"left_menu_icon_to-do.png";
+                break;
+            case 1:
+                return @"left_menu_icon_settings.png";
+                break;                
+            default:
+                break;
+        }
+        
+    }
+    
+    return nil;
+    
+}
+
+
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
@@ -215,15 +263,12 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         }
         
         cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
-        cell.border = YES;
+        cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
+        [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
         
         if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
             [cell setBadgeCount:_unreadCount];
-        } else {
-            [cell setBadgeCount:0];
-        }
-        
-        cell.icon = [UIImage imageNamed:[NSString stringWithFormat:@"left_menu_icon_%@.png", [cell.titleLabel.text lowercaseString]]];
+        } 
         
         if ([indexPath isEqual:_selectedIndexPath]) {
             cell.selected = YES;
@@ -233,17 +278,17 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     
-    static NSString *CellIdentifier = @"AnchorCellIdentifier";
+    static NSString *AnchorCellIdentifier = @"AnchorCellIdentifier";
     
-    LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:AnchorCellIdentifier];
     if (cell == nil) {
-        cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:AnchorCellIdentifier] autorelease];
     }
     
     cell.titleLabel.textColor = [UIColor colorWithRed:0.4f green:0.4f blue:0.4f alpha:1.0f];
-    cell.topBorder = (indexPath.row==1);
+    [cell setTop:(indexPath.row!=0) bottom:YES];
     cell.titleLabel.text = [STConfiguration value:[_anchorDataSource objectAtIndex:indexPath.row]];
-    cell.icon = [UIImage imageNamed:[NSString stringWithFormat:@"left_menu_icon_%@.png", [cell.titleLabel.text lowercaseString]]];
+    cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
 
     return cell;
     
@@ -258,7 +303,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     if (self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
         
         // controller is already root, lets just pop it to root like a tab bar
-        DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
         UINavigationController *navController = (UINavigationController*)[menuController rootViewController];
         if (navController && [navController isKindOfClass:[UINavigationController class]]) {
             [menuController showRootController:YES];
@@ -272,13 +317,26 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     NSString *key = (tableView == self.tableView) ? [_dataSource objectAtIndex:indexPath.row] : [_anchorDataSource objectAtIndex:indexPath.row];
     NSString *value = (tableView == self.tableView) ? [_controllerStore objectForKey:key] : [_anchorControllerStore objectForKey:key];
     
-    UIViewController *controller = [[[STConfiguration value:value] alloc] init];
+    UIViewController *controller = nil;
+
+    if ([[STConfiguration value:value] isEqual:[STProfileViewController class]]) {
+        
+        id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
+        controller = [[STProfileViewController alloc] initWithUserID:[user userID]];
+        
+    } else {
+        
+        controller = [[[STConfiguration value:value] alloc] init];
+        
+    }
+    
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
 
     if (self.tableView == tableView || YES) {
         
         [menuController setRootController:navController animated:YES];
+        [Util addHomeButtonToController:controller withBadge:[controller isKindOfClass:[STInboxViewController class]]];
         
     } else {
         
@@ -303,6 +361,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         _selectedIndexPath = [indexPath retain];
         
     }
+    
 }
 
 
@@ -326,7 +385,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (void)done:(id)sender {
     
-    UIViewController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller dismissModalViewControllerAnimated:YES];
     
 }
@@ -338,10 +397,17 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [STConfiguration addString:@"The Feed" forKey:_inboxNameKey];
     [STConfiguration addString:@"The Guide" forKey:_iWantToNameKey];
     [STConfiguration addString:@"Activity" forKey:_newsNameKey];
-    [STConfiguration addString:@"People" forKey:_debugNameKey];
+    [STConfiguration addString:@"Debug" forKey:_debugNameKey];
     [STConfiguration addString:@"To-Do" forKey:_todoNameKey];
     [STConfiguration addString:@"Settings" forKey:_settingsNameKey];
+    [STConfiguration addString:@"Add friends" forKey:_addFriendsNameKey];
+    [STConfiguration addString:@"User" forKey:_userNameKey];
 }
+
+- (void)configurationChanged:(id)notImportant {
+    [self.tableView reloadData];
+}
+
 
 
 @end

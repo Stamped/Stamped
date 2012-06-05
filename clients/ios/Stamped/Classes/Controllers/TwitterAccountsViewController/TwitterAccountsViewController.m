@@ -26,13 +26,15 @@
 
 - (id)init {
     if ((self = [super init])) {
-        
+        [STEvents addObserver:self selector:@selector(twitterAuthFinished:) event:EventTypeTwitterAuthFinished];
+        [STEvents addObserver:self selector:@selector(twitterAuthFailed:) event:EventTypeTwitterAuthFailed];
     }
     return self;
 }
 
 - (void)dealloc {
     self.tableView = nil;
+    [STEvents removeObserver:self];
     [super dealloc];
 }
 
@@ -132,6 +134,36 @@
 }
 
 
+#pragma mark - Notifications 
+
+- (void)twitterAuthFinished:(NSNotification*)notification {
+    
+    [[STTwitter sharedInstance] getTwitterUser:^(id user, NSError *error) {
+        
+        if (user && !error) {
+            [[STTwitter sharedInstance] setTwitterUser:user];
+            SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeTwitter];
+            controller.navigationItem.hidesBackButton = YES;
+            double delayInSeconds = 0.1f;
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+            dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                [self.navigationController pushViewController:controller animated:YES];
+                [controller release];
+            });
+        }
+        
+    }];
+    
+}
+
+- (void)twitterAuthFailed:(NSNotification*)notification {
+    
+    
+    NSLog(@"twitter auth failed");
+    
+}
+
+
 #pragma mark - UITableViewDataSource
 
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -165,10 +197,9 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeTwitter];
-    [self.navigationController pushViewController:controller animated:YES];
-    [controller release];
-    
+    ACAccount *account = [[STTwitter sharedInstance] accountAtIndex:indexPath.row];
+    [[STTwitter sharedInstance] reverseAuthWithAccount:account];
+        
 }
 
 

@@ -11,6 +11,12 @@
 #define kButton @"nav_button.png"
 #define kButtonHi @"nav_button_hi.png"
 
+#define kGreenButton @"nav_button_green.png"
+#define kGreenButtonHi @"nav_button_green_hi.png"
+
+#define kWhiteButton @"nav_button_white.png"
+#define kWhiteButtonHi @"nav_button_white_hi.png"
+
 #define kBackButton @"nav_back_button.png"
 #define kBackButtonHi @"nav_back_button_hi.png"
 
@@ -66,6 +72,26 @@
 	
 	return button;
 	
+}
+
++ (id)buttonWithTitle:(NSString*)aTitle stButtonStyle:(STNavigationItemStyle)style {
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+	[button setTitle:aTitle forState:UIControlStateNormal];
+	[button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
+	[button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
+	[button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
+	
+    UIImage *image = [[UIImage imageNamed:(style == STNavigationItemStyleWhite) ? kWhiteButton : kGreenButton] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f];
+    UIImage *imageHI = [[UIImage imageNamed:(style == STNavigationItemStyleWhite) ? kWhiteButtonHi : kGreenButtonHi] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f];
+	
+    CGSize size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
+	button.frame = CGRectMake(0.0f, 0.0f, floorf(size.width + BUTTON_BUFFER), image.size.height);
+	[button setBackgroundImage:image forState:UIControlStateNormal];
+    [button setBackgroundImage:imageHI forState:UIControlStateHighlighted];
+	
+	return button;
+    
 }
 
 + (id)buttonWithTitle:(NSString *)aTitle {

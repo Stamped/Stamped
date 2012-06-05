@@ -20,12 +20,15 @@
     STAvatarView *_userImageView;
     UIImageView *_footerImageView;
     UILabel *_dateLabel;    
-    UIImage *_stampImage;
     UIImage *_categoryImage;
     
     BOOL _hasMedia;
     STDetailTextCallout *_callout;
     STCancellation *_cancellation;
+    
+    UIColor *_primaryColor;
+    UIColor *_secondarayColor;
+    
     
 }
 @property(nonatomic,readonly) NSString *username;

@@ -146,6 +146,42 @@
 }
 
 
+#pragma mark - Cell Animation
+
+- (void)animateCell:(UITableViewCell*)cell withDelay:(float)delay {
+    
+    cell.layer.opacity = 0.0f;
+    
+    CAAnimationGroup *animation = [CAAnimationGroup animation];
+    animation.duration = 0.3f;
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+    animation.beginTime = [cell.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
+    animation.removedOnCompletion = NO;
+    animation.fillMode = kCAFillModeForwards;
+    
+    CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
+    position.fromValue = [NSValue valueWithCGPoint:CGPointMake(cell.layer.position.x, cell.layer.position.y + self.tableView.frame.size.height)];
+
+    CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
+    opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
+    
+    [animation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
+    [cell.layer addAnimation:animation forKey:nil];
+    
+}
+
+- (void)animateIn {
+    
+    float delay = 0.0f;
+    for (UITableViewCell *cell in self.tableView.visibleCells) {        
+        [self animateCell:cell withDelay:delay];
+        delay += 0.15f;
+    }
+    
+}
+
+
 #pragma mark - TableView Layout
 
 - (void)layoutTableView {
@@ -333,7 +369,7 @@
     if (_searching) {
         [self updateSearchState];
     }
-
+    
 }
 
 
@@ -443,6 +479,7 @@
     _searching = searching;
     
     [self.navigationController setNavigationBarHidden:_searching animated:YES];
+    self.tableView.contentOffset = CGPointZero;
     self.tableView.scrollEnabled = !_searching;
     
     if (_searching) {
@@ -457,12 +494,7 @@
             [self.view addSubview:tableView];
             _searchResultsTableView = tableView;
             [tableView release];
-            
-            CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-            animation.fromValue = [NSNumber numberWithFloat:0.0f];
-            animation.duration = 0.3f;
-            animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-            [_searchResultsTableView.layer addAnimation:animation forKey:nil];
+            _searchResultsTableView.hidden = YES;
             
         }
         
@@ -526,7 +558,7 @@
 }
 
 
-#pragma mark STSearchViewDelegate
+#pragma mark - STSearchViewDelegate
 
 - (void)stSearchViewDidCancel:(STSearchView*)view {
      
@@ -549,6 +581,7 @@
     
     if (_searchOverlay) {
         _searchOverlay.hidden = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0;
+        _searchResultsTableView.hidden = !_searchOverlay.hidden;
     }
     [self updateSearchState];
     

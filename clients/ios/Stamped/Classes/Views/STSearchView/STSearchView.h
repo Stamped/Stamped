@@ -29,7 +29,7 @@
 - (void)stSearchViewDidCancel:(STSearchView*)view;
 - (void)stSearchViewDidBeginSearching:(STSearchView*)view;
 - (void)stSearchViewDidEndSearching:(STSearchView*)view;
-- (void)stSearchViewHitSearch:(STSearchView*)view withText:(NSString*)text;
 @optional
+- (void)stSearchViewHitSearch:(STSearchView*)view withText:(NSString*)text;
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text;
 @end

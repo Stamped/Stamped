@@ -33,7 +33,6 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
  
-    [Util addHomeButtonToController:self withBadge:YES];
     [Util addCreateStampButtonToController:self];
     
     self.view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];

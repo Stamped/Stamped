@@ -214,7 +214,9 @@
         LoginTextField *textField = [[LoginTextField alloc] initWithFrame:CGRectMake(10.0f, (self.bounds.size.height-height)/2, 120.0f, height)];
         textField.placeholder = @"Username";
         textField.keyboardAppearance = UIKeyboardAppearanceAlert;
-        textField.returnKeyType = UIReturnKeyDone;
+        textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+        textField.autocorrectionType = UITextAutocorrectionTypeNo;
+        textField.returnKeyType = UIReturnKeyNext;
         [textField setBackground:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
         [self addSubview:textField];
         [textField release];
@@ -222,6 +224,11 @@
         
         textField = [[LoginTextField alloc] initWithFrame:CGRectMake(CGRectGetMaxX(textField.frame) + 10.0f, (self.bounds.size.height-height)/2, 120.0f, height)];
         textField.placeholder = @"Password";
+        textField.keyboardAppearance = UIKeyboardAppearanceAlert;
+        textField.secureTextEntry = YES;
+        textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+        textField.autocorrectionType = UITextAutocorrectionTypeNo;
+        textField.returnKeyType = UIReturnKeyDone;
         [textField setBackground:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
         [self addSubview:textField];
         [textField release];

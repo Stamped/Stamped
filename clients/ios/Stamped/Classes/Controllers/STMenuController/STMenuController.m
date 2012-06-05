@@ -32,6 +32,8 @@
     
 }
 
+- (void)resetNavButtons {} // overide showing nav buttons, already handled by app
+
 
 #pragma mark - Welcome
 
@@ -68,7 +70,7 @@
     
     } else if (option == STWelcomeViewControllerOptionTwitter) {
         
-        if (NO && NSClassFromString(@"TWTweetComposeViewController")) {
+        if (NSClassFromString(@"TWTweetComposeViewController")) {
             
             TwitterAccountsViewController *controller = [[TwitterAccountsViewController alloc] init];
             controller.delegate = (id<TwitterAccountsViewControllerDelegate>)self;

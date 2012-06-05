@@ -99,9 +99,7 @@
         [Util addCreateStampButtonToController:self];
 
     }
-    
-    [Util addHomeButtonToController:self withBadge:YES];
-    
+        
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;

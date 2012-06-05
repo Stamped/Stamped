@@ -22,6 +22,9 @@ enum EventType {
     
     // signup
     EventTypeSignupFinished,
+    
+    // friend finding
+    EventTypeFriendsFinished,
 
 	
 }; typedef int EventType;

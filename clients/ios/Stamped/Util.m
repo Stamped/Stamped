@@ -396,8 +396,7 @@ static Rdio* _rdio;
     label.font = font;
     label.textColor = color;
     label.backgroundColor = [UIColor clearColor];
-    [label autorelease];
-    return label;
+    return [label autorelease];
 }
 
 + (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
@@ -877,15 +876,11 @@ static Rdio* _rdio;
 }
 
 + (CGRect)fullscreenFrame {
-    if (![UIApplication sharedApplication].keyWindow) return CGRectMake(0, 0, 320, 480);
-    return [UIApplication sharedApplication].keyWindow.frame;
+    return [[UIScreen mainScreen] bounds];
 }
 
 + (CGRect)fullscreenFrameAdjustedForStatusBar {
-    CGRect fullscreen = [Util fullscreenFrame];
-    fullscreen.size.height -= [UIApplication sharedApplication].statusBarFrame.size.height;
-    fullscreen.origin.y += [UIApplication sharedApplication].statusBarFrame.size.height;
-    return fullscreen;
+    return [[UIScreen mainScreen] applicationFrame];
 }
 
 + (CGRect)navigatedViewFrame {
@@ -955,7 +950,7 @@ static Rdio* _rdio;
 }
 
 + (CGFloat)lineHeightForFont:(UIFont*)font {
-    return [@"Tp" sizeWithFont:font].height;
+    return font.lineHeight;
 }
 
 + (void)textInputWithDefault:(NSString*)string andCallback:(void (^)(NSString* value))block {
@@ -995,21 +990,27 @@ static Rdio* _rdio;
         [Util addUnreadBadgeToView:button.customView origin:CGPointMake(10, 10)];
         
     }
+    [button release];
     
 }
 
 + (STCancellation*)addUnreadBadgeToView:(UIView*)view origin:(CGPoint)origin {
     return [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
         if (count && count.numberUnread.integerValue >0) {
-            UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)] autorelease];
-            UIView* label = [Util viewWithText:[NSString stringWithFormat:@"%d", count.numberUnread.integerValue]
-                                          font:[UIFont boldSystemFontOfSize:12]
-                                         color:[UIColor whiteColor]
-                                          mode:UILineBreakModeTailTruncation
-                                    andMaxSize:countView.frame.size];
-            label.frame = [Util centeredAndBounded:label.frame.size inFrame:countView.frame];
+            UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 19, 19)] autorelease];
+            countView.userInteractionEnabled = NO;
+            UILabel* label = [Util viewWithText:[NSString stringWithFormat:@"%d", 2]
+                                           font:[UIFont boldSystemFontOfSize:10]
+                                          color:[UIColor whiteColor]
+                                           mode:UILineBreakModeTailTruncation
+                                     andMaxSize:countView.frame.size];
+            label.frame = CGRectMake(ceilf((countView.bounds.size.width-label.bounds.size.width)/2), floorf((countView.bounds.size.height-label.bounds.size.height)/2), label.bounds.size.width, label.bounds.size.height);
+            label.userInteractionEnabled = NO;
+            label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+            label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.2f];
+            
             [countView addSubview:label];
-            [Util reframeView:countView withDeltas:CGRectMake(origin.x, origin.y, 0, 0)];
+            [Util reframeView:countView withDeltas:CGRectMake(26, -5, 0, 0)];
             countView.layer.borderWidth = 1;
             countView.layer.borderColor = [UIColor whiteColor].CGColor;
             countView.layer.cornerRadius = countView.frame.size.width / 2;
@@ -1018,12 +1019,15 @@ static Rdio* _rdio;
             countView.layer.shadowRadius = 2.0f;
             countView.layer.shadowOpacity = 0.4f;
             
-            [Util addGradientToLayer:countView.layer
-                          withColors:[NSArray arrayWithObjects:
-                                      [UIColor colorWithRed:226/255.0 green:92/255.0 blue:65/255.0 alpha:1],
-                                      [UIColor colorWithRed:182/255.0 green:48/255.0 blue:22/255.0 alpha:1],
-                                      nil]
-                            vertical:YES];
+            CAGradientLayer *layer = [Util addGradientToLayer:countView.layer
+                                                   withColors:[NSArray arrayWithObjects:
+                                                               [UIColor colorWithRed:0.890f green:0.364f blue:0.2588f alpha:1.0f],
+                                                               [UIColor colorWithRed:0.717f green:0.207f blue:0.1019f alpha:1.0f],
+                                                               nil]
+                                                     vertical:YES];
+            CGRect frame = layer.frame;
+            frame = CGRectInset(frame, .5, .5);
+            layer.frame = frame;
             
             [view addSubview:countView];
         }

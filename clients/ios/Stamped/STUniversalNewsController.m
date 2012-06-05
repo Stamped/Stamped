@@ -57,7 +57,6 @@
                               [UIColor colorWithWhite:.85 alpha:1],
                               nil]
                     vertical:YES];
-    [Util addHomeButtonToController:self withBadge:NO];
     [self updateRightButton];
     [self reloadDataSource];
 }

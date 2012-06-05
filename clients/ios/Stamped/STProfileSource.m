@@ -64,7 +64,8 @@ const static NSInteger _histogramHeight = 100;
       histogram.layer.shadowOpacity = .1;
       histogram.layer.shadowRadius = 2;
       histogram.layer.shadowOffset = CGSizeMake(0, 2);
-      
+      histogram.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:histogram.bounds cornerRadius:3].CGPath;
+
       CAGradientLayer* gradient = [CAGradientLayer layer];
       gradient.anchorPoint = CGPointMake(0, 0);
       gradient.position = CGPointMake(0, 0);
@@ -207,6 +208,7 @@ const static NSInteger _histogramHeight = 100;
         view.layer.shadowOpacity = .6;
         view.layer.shadowOffset = CGSizeMake(0, 1);
         view.layer.shadowRadius = 1;
+        view.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:view.bounds cornerRadius:2].CGPath;
         [Util addGradientToLayer:view.layer withColors:colors vertical:YES];
         views[k] = view;
       }

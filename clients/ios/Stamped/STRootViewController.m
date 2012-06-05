@@ -72,6 +72,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
         
     }
     
+    [self.navigationBar setNeedsDisplay];
+    
 }
 
 - (void)pop:(id)sender {
