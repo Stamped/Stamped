@@ -99,7 +99,6 @@ class StampedAPITwitterFind(StampedAPITwitterTest):
         }
         result = self.handlePOST(path, data)
 
-        print(result)
         self.assertLength(result, 1)
         self.assertEqual(result[0]['user_id'], self.twUserB['user_id'])
 
