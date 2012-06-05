@@ -40,7 +40,7 @@ class Twitter(object):
         headers = oauthRequest.to_header()
 #        body = oauthRequest.to_postdata() if verb == 'POST' else None
         body = None
-        logs.info(url)
+        logs.debug(url)
 
         # Send the http request
         response, content = self.__httpObj.request(url, method=verb, body=body, headers=headers)
