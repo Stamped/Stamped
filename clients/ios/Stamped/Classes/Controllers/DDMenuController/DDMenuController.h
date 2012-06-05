@@ -47,6 +47,7 @@ typedef enum {
     CGPoint _panVelocity;
     DDMenuPanDirection _panDirection;
     UIView *_shadowView;
+    UIView *_tapView;
 
     struct {
         unsigned int respondsToWillShowViewController:1;

@@ -13,7 +13,8 @@
 #import "JSON.h"
 
 #define kTwitterConsumer @"kn1DLi7xqC6mb5PPwyXw"
-#define kTwitterSecret @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU&"
+#define kTwitterSecretApersand @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU&"
+#define kTwitterSecret @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU"
 
 static id __instance;
 
@@ -111,13 +112,6 @@ static id __instance;
     
 }
 
-- (void)loginWithToken:(NSString*)token {
-    
-    NSString *string = [NSString stringWithFormat:@"http://api.twitter.com/oauth/authorize?oauth_token=%@", token];
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:string]];
-    
-}
-
 - (void)accessWithToken:(NSString*)token verifier:(NSString*)verifier {
     
     __block EGOHTTPRequest *_request = [[EGOHTTPRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"] completion:^(id request, NSError *error) {
@@ -126,7 +120,7 @@ static id __instance;
             
             NSDictionary *params = [self paramsForString:[_request responseString]];
             //[[GiftureSettings sharedSettings] setTwitterUserInfo:params];
-            _twitterUserAuth = [params retain];            
+            _twitterUserAuth = [params retain];
             [STEvents postEvent:EventTypeTwitterAuthFinished object:_twitterUserAuth];
             
         } else {
@@ -151,12 +145,13 @@ static id __instance;
     __block EGOHTTPRequest *_request = [[EGOHTTPRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"] completion:^(id request, NSError *error) {
         
         NSDictionary *params = [self paramsForString:[request responseString]];
-        [self loginWithToken:[params objectForKey:@"oauth_token"]];
-        
+        NSString *string = [NSString stringWithFormat:@"http://api.twitter.com/oauth/authorize?oauth_token=%@", [params objectForKey:@"oauth_token"]];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:string]];
+
     }];
     
     [_request setRequestMethod:@"POST"];
-    [self signRequest:_request params:[NSArray arrayWithObject:[NSDictionary dictionaryWithObject:@"stamped://twitter" forKey:@"oauth_callback"]] token:kTwitterSecret];      
+    [self signRequest:_request params:[NSArray arrayWithObject:[NSDictionary dictionaryWithObject:@"stamped://twitter" forKey:@"oauth_callback"]] token:kTwitterSecretApersand];      
     [_request startAsynchronous];
     
 }
@@ -185,7 +180,9 @@ static id __instance;
     NSMutableArray *array = [[NSMutableArray alloc] init];
     [array addObject:[NSDictionary dictionaryWithObject:[self twitterToken] forKey:@"oauth_token"]];
     [self signRequest:_request params:array token:[self twitterTokenSecret]];
+    [array release];
     [_request startAsynchronous];
+    [_request release];
     
 }
 
@@ -225,6 +222,12 @@ static id __instance;
 
 
 #pragma mark - Getters
+
+- (BOOL)isSessionValid {
+    
+    return (_twitterUserAuth!=nil);
+    
+}
 
 - (NSDictionary*)userInfo {
     return _twitterUserAuth;
@@ -307,54 +310,59 @@ static id __instance;
 
 #pragma mark - Requests
 
-- (void)requestToken {
+- (void)reverseAuthWithAccount:(ACAccount*)account {
     
-    //  Assume that we stored the result of Step 1 into a var 'resultOfStep1'
-    NSString *S = @"";
-    NSDictionary *step2Params = [[NSMutableDictionary alloc] init];
-    [step2Params setValue:@"JP3PyvG67rXRsnayOJOcQ" forKey:@"x_reverse_auth_target"];
-    [step2Params setValue:S forKey:@"x_reverse_auth_parameters"];            
-    
-    NSURL *url2 = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
-    TWRequest *stepTwoRequest = [[TWRequest alloc] initWithURL:url2 parameters:step2Params requestMethod:TWRequestMethodPOST];
-    
-    //  You *MUST* keep the ACAccountStore alive for as long as you need an ACAccount instance
-    //  See WWDC 2011 Session 124 for more info.
-    self.accountStore = [[ACAccountStore alloc] init];
-    
-    //  We only want to receive Twitter accounts
-    ACAccountType *twitterType = [self.accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
-    
-    //  Obtain the user's permission to access the store
-    [self.accountStore requestAccessToAccountsWithType:twitterType withCompletionHandler:^(BOOL granted, NSError *error) {
+    __block EGOHTTPRequest *_request = [[EGOHTTPRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"] completion:^(id request, NSError *error) {
         
-        if (!granted) {
-            // handle this scenario gracefully
+        if (error == nil && [request responseStatusCode] == 200) {
             
-        } else {
+            NSDictionary *params = [[NSMutableDictionary alloc] init];
+            [params setValue:kTwitterConsumerKey forKey:@"x_reverse_auth_target"];
+            [params setValue:[request responseString] forKey:@"x_reverse_auth_parameters"];
             
-            // obtain all the local account instances
-            
-            NSArray *accounts = [self.accountStore accountsWithAccountType:twitterType];
-            
-            // for simplicity, we will choose the first account returned - in your app,
-            // you should ensure that the user chooses the correct Twitter account
-            // to use with your application.  DO NOT FORGET THIS STEP.
-            [stepTwoRequest setAccount:[accounts objectAtIndex:0]];
-            
-            // execute the request
-            [stepTwoRequest performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
+            NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"];
+            TWRequest *twRequest = [[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST];
+            [twRequest setAccount:account];
+            [twRequest performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
                 
                 NSString *responseStr = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                
-                // see below for an example response
-                NSLog(@"The user's info for your server:\n%@", responseStr);
+                NSDictionary *params = [self paramsForString:responseStr];
+                _twitterUserAuth = [params retain];
+                [STEvents postEvent:EventTypeTwitterAuthFinished object:_twitterUserAuth];
+                [responseStr release];
+
+                NSLog(@"login info %@", _twitterUserAuth);
                 
             }];
+            
+            [params release];
+            [twRequest release];
+
+        } else {
+            
+            NSLog(@"revers oauth failed");
+            [STEvents postEvent:EventTypeTwitterAuthFailed object:_twitterUserAuth];
             
         }
         
     }];
+    
+    [_request setRequestMethod:@"POST"];
+    NSArray *array = [[NSArray alloc] initWithObjects:[NSDictionary dictionaryWithObject:@"reverse_auth" forKey:@"x_auth_mode"], nil];
+    [self signRequest:_request params:array token:[NSString stringWithFormat:@"%@&", kTwitterSecret]];
+    [array release];
+    
+    NSString *authBody = [@"x_auth_mode=reverse_auth" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    [_request setRequestBody:[authBody dataUsingEncoding:NSUTF8StringEncoding]]; 
+
+    [_request startAsynchronous];
+    [_request release];
+    
+}
+
+- (void)requestToken {
+    
+   
     
 }
 
@@ -374,6 +382,14 @@ static id __instance;
     ACAccountType *accountType = [_accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     NSArray *accounts = [_accountStore accountsWithAccountType:accountType];
     return [accounts objectAtIndex:index];
+
+}
+
+- (NSArray*)accounts {
+    
+    ACAccountType *accountType = [_accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    NSArray *accounts = [_accountStore accountsWithAccountType:accountType];
+    return accounts;
 
 }
 

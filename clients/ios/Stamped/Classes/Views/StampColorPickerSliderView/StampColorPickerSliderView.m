@@ -44,7 +44,6 @@
         
         UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 50.0f, self.bounds.size.width, self.bounds.size.height - 50.0f)];
         [self addSubview:container];
-
         
         UIImage *image = [UIImage imageNamed:@"stamp_color_slider_hud_bg.png"];
         UIImageView *hud = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
@@ -84,6 +83,8 @@
         [slider release];
         _brightnessSlider = slider;
         
+        [container release];
+        
     }
     return self;
 }
@@ -114,11 +115,11 @@
     CGRect rect = CGContextGetClipBoundingBox(ctx);
     
     UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(rect, 0.5, 1) cornerRadius:5];
-
+    
     CGContextAddPath(ctx, path.CGPath);
     CGContextSetFillColorWithColor(ctx, [UIColor whiteColor].CGColor);
     CGContextFillPath(ctx);
-
+    
     CGContextSaveGState(ctx);
     CGContextAddPath(ctx, path.CGPath);
     CGContextClip(ctx);
@@ -128,12 +129,12 @@
     CGContextRestoreGState(ctx);
     
     [image drawInRect:rect];
+    
     UIImage *brightnessImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    
     [_brightnessSlider setMinimumTrackImage:brightnessImage forState:UIControlStateNormal];
     [_brightnessSlider setMaximumTrackImage:brightnessImage forState:UIControlStateNormal];
-    
+
 }
 
 - (void)convertToString {
@@ -186,6 +187,9 @@
 
 - (void)hueChanged:(UISlider*)slider {
     
+    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(resetBrightnessSlider) object:nil];
+    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(colorChanged) object:nil];
+
     if (_firstColorView.selected) {
         _firstColorView.hue = slider.value;
     } else if (_secondColorView.selected) {
@@ -199,14 +203,16 @@
     StampColorPickerColorView *selectedView = _firstColorView.selected ? _firstColorView : _secondColorView;
     UIColor *result = [UIColor colorWithHue:slider.value saturation:1.0 brightness:selectedView.brightness alpha:alpha];
     selectedView.color = result;
+        
+    [self performSelector:@selector(resetBrightnessSlider) withObject:nil afterDelay:0.05f];
+    [self performSelector:@selector(colorChanged) withObject:nil afterDelay:0.05f];
     
-    [self resetBrightnessSlider];
-    [self colorChanged];
-
 }
 
 - (void)brightnessChanged:(UISlider*)slider {
     
+    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(colorChanged) object:nil];
+
     CGFloat value = slider.value;
     CGFloat brightness = 1.0;
     CGFloat alpha = 1.0;
@@ -226,7 +232,7 @@
         _secondColorView.color = result;
     }
     
-    [self colorChanged];
+    [self performSelector:@selector(colorChanged) withObject:nil afterDelay:0.05f];
     
 }
 

@@ -16,6 +16,7 @@
 #import "STButton.h"
 #import "STActionPair.h"
 #import "ImageLoader.h"
+#import "UserStampView.h"
 
 #define kPreviewCellWidth 33.0f
 #define kPreviewCellHeight 33.0f
@@ -23,9 +24,12 @@
 @interface STPreviewView : UIControl {
     UIImageView *_imageView;
     UIView *highlightView;
+    UserStampView *_stampView;
 }
 @property (nonatomic, retain) UIImageView *iconImageView;
 @property (nonatomic, retain) NSURL *imageURL;
+- (void)removeTargets;
+- (void)setupWithUser:(id<STUser>)user;
 @end
 
 
@@ -78,17 +82,8 @@ static const NSInteger _cellsPerRow = 7;
 - (STPreviewView*)dequeuePreviewViewAtIndex:(NSInteger)index {
     
     if (index < [self.views count]) {
-
         STPreviewView *view = [[self.views objectAtIndex:index] retain];
-        if (view.allTargets) {
-            for (id target in [[view allTargets] allObjects]) {
-                if (target && ![target isEqual:[NSNull null]]) {
-                    [view removeTarget:target action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
-                    [target release];
-                }
-            }
-        }
-      
+        [view removeTargets];
         return view;
     }
     
@@ -118,12 +113,11 @@ static const NSInteger _cellsPerRow = 7;
         for (id<STStampPreview> credit in previews.credits) {
             if (index >= limit) break;
             
-            UIImage *image = [Util stampImageForUser:credit.user withSize:STStampImageSize12];
             STActionContext *context = [STActionContext context];
             id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
-            view.iconImageView.image = image;
+            [view setupWithUser:credit.user];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
             index++;
             
@@ -132,13 +126,12 @@ static const NSInteger _cellsPerRow = 7;
             id<STUser> user = preview.user;
             if (index >= limit) break;
             
-            UIImage *image = [Util stampImageForUser:user withSize:STStampImageSize12];
             STActionContext *context = [STActionContext context];
             context.user = user;
             id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
-            view.iconImageView.image = image;
+            [view setupWithUser:user];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
             index++;
             
@@ -154,6 +147,7 @@ static const NSInteger _cellsPerRow = 7;
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
             view.iconImageView.image = likeIcon;
+            [view setupWithUser:nil];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
             index++;
             
@@ -169,6 +163,7 @@ static const NSInteger _cellsPerRow = 7;
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
             view.iconImageView.image = todoIcon;
+            [view setupWithUser:nil];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
             index++;
             
@@ -325,14 +320,59 @@ static const NSInteger _cellsPerRow = 7;
         self.iconImageView = imageView;
         [imageView release];
         
+        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectInset(self.iconImageView.frame, 2, 2)];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
+        stampView.size = STStampImageSize12;
+        stampView.userInteractionEnabled = NO;
+        stampView.hidden = YES;
+        [self addSubview:stampView];
+        _stampView = stampView;
+        [stampView release];
+        
     }
     return self;
     
 }
 
 - (void)dealloc {
+    _stampView=nil;
+    _imageView=nil;
     self.iconImageView = nil;
     [super dealloc];
+}
+
+- (void)removeTargets {
+    
+    if (self.allTargets) {
+        for (id target in [[self allTargets] allObjects]) {
+            if (target && ![target isEqual:[NSNull null]]) {
+                [self removeTarget:target action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+                [target release];
+            }
+        }
+    }
+    
+}
+
+
+#pragma mark - Setters
+
+- (void)setupWithUser:(id<STUser>)user {
+    
+    if (user) {
+
+        _stampView.hidden = NO;
+        [_stampView setupWithUser:user];
+        self.iconImageView.hidden = YES;
+        self.iconImageView.image = nil;
+        
+    } else {
+        
+        _stampView.hidden = YES;
+        self.iconImageView.hidden = NO;
+
+    }
+    
 }
 
 - (void)setImageURL:(NSURL *)imageURL {
@@ -358,6 +398,10 @@ static const NSInteger _cellsPerRow = 7;
 }
 
 - (void)adjustHighlight:(BOOL)highlighted {
+    
+    if (_stampView) {
+        [_stampView setHighlighted:highlighted];
+    }
     
     if (highlighted) {
         

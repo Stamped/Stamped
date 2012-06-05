@@ -28,23 +28,39 @@
         self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = YES;
         
-        UIView *container = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, 7, 16)];
-        container.clipsToBounds = YES;
+        UIScrollView *container = [[UIScrollView alloc] initWithFrame:CGRectInset(self.bounds, 7, 16)];
+        container.pagingEnabled = YES;
+        container.delegate = (id<UIScrollViewDelegate>)self;
+        container.showsHorizontalScrollIndicator = NO;
         [self addSubview:container];
         [container release];
         _container = container;
+        container.contentSize = CGSizeMake(container.frame.size.width*2, container.frame.size.height);
                 
         WelcomePopoverWelcomeView *view = [[WelcomePopoverWelcomeView alloc] initWithFrame:_container.bounds];
         [_container addSubview:view];
         _welcomeView = view;
         [view release];
                 
+        if (!_optionsView) {
+            
+            CGRect frame = _container.bounds;
+            frame.origin.x = frame.size.width;
+            WelcomePopoverOptionsView *view = [[WelcomePopoverOptionsView alloc] initWithFrame:frame delegate:self];
+            [_container addSubview:view];
+            [view release];
+            _optionsView = view;
+            
+         
+        }
+        /*
         UISwipeGestureRecognizer *gesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swiped:)];
         gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         gesture.direction = UISwipeGestureRecognizerDirectionLeft;
         [_welcomeView addGestureRecognizer:gesture];
         _swipe = gesture;
         [gesture release];
+         */
 
     }
     return self;
@@ -149,6 +165,25 @@
 }
 
 
+#pragma mark - UIScrollViewDelegate 
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+    
+    if (!_closeButton && scrollView.contentOffset.x >= scrollView.frame.size.width/2) {
+        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [closeButton addTarget:self action:@selector(close:) forControlEvents:UIControlEventTouchUpInside];
+        [closeButton setImage:[UIImage imageNamed:@"welcome_popover_close.png"] forState:UIControlStateNormal];
+        
+        CGRect frame = CGRectMake(-12.0f, -16.0f, 44.0f, 44.0f);
+        frame = [self convertRect:frame toView:self.superview];
+        closeButton.frame = frame;
+        [self.superview addSubview:closeButton];
+        _closeButton = closeButton;
+    }
+    
+}
+
+
 @end
 
 
@@ -185,6 +220,7 @@
         label.font = [UIFont italicSystemFontOfSize:11];
         label.backgroundColor = [UIColor whiteColor];
         label.text = @"Swipe to continue";
+        label.userInteractionEnabled = NO;
         [self addSubview:label];
         [label release];
         [label sizeToFit];
@@ -216,6 +252,7 @@
             CGContextFillPath(ctx);
             
         }];
+        dots.userInteractionEnabled = NO;
         [dots release];
 
         
@@ -227,7 +264,6 @@
 
 
 #pragma mark - WelcomePopoverOptionsView
-
 
 @implementation WelcomePopoverOptionsView
 
@@ -333,7 +369,7 @@
 
 - (CATextLayer*)addTitle:(NSString*)title toButton:(UIButton*)button boldText:(NSString*)boldText {
     
-    CTFontRef ctFont = CTFontCreateWithName([[UIScreen mainScreen] scale] == 2.0 ? (CFStringRef)@"Helvetica Neue" : (CFStringRef)@"Helvetica", 11, NULL);
+    CTFontRef ctFont = CTFontCreateWithName([[UIScreen mainScreen] scale] == 2.0 ? (CFStringRef)@"Helvetica Neue" : (CFStringRef)@"Helvetica", 12, NULL);
     CTFontRef boldFont = CTFontCreateCopyWithSymbolicTraits(ctFont, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait);
     NSMutableDictionary *boldStyle = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(NSString*)boldFont, kCTFontAttributeName, (id)[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor, kCTForegroundColorAttributeName, nil];
     
@@ -349,10 +385,11 @@
     
     CATextLayer *layer = [CATextLayer layer];
     layer.contentsScale = [[UIScreen mainScreen] scale];
-    layer.frame = CGRectMake(0.0f, floorf((button.bounds.size.height - 14)/2), button.bounds.size.width, 14);
+    layer.frame = CGRectMake(floorf((button.bounds.size.width-140.0f)/2), floorf((button.bounds.size.height - 14)/2), 140.0f, 14);
     layer.backgroundColor = [UIColor clearColor].CGColor;
     layer.alignmentMode = @"center";
     layer.string = string;
+    [string release];
     [button.layer addSublayer:layer];
     return layer;
     

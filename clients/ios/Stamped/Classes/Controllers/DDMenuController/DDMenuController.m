@@ -93,16 +93,6 @@
         [root release];
     }
     
-    ; // reset root
-    
-    if (!_tap) {
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
-        tap.delegate = (id<UIGestureRecognizerDelegate>)self;
-        [self.view addGestureRecognizer:tap];
-        [tap setEnabled:NO];
-        _tap = tap;
-    }
-    
 }
 
 - (void)viewDidUnload {
@@ -362,7 +352,6 @@
 
 - (void)tap:(UITapGestureRecognizer*)gesture {
     
-    [gesture setEnabled:NO];
     [self showRootController:YES];
     
 }
@@ -401,15 +390,6 @@
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     
-    if (gestureRecognizer==_tap) {
-        
-        if (otherGestureRecognizer!=_pan && (_menuFlags.showingLeftView || _menuFlags.showingRightView)) {
-            [otherGestureRecognizer setEnabled:NO];
-            [otherGestureRecognizer setEnabled:YES];
-        }
-        
-        return (otherGestureRecognizer==_pan);
-    }
     if (gestureRecognizer==_pan) {
         
         if (_menuFlags.showingLeftView || _menuFlags.showingRightView) {
@@ -438,7 +418,7 @@
 
 - (void)resetNavButtons {
     if (!_root) return;
-    
+        
     UIViewController *topController = nil;
     if ([_root isKindOfClass:[UINavigationController class]]) {
         
@@ -459,7 +439,7 @@
     }
     
     if (_menuFlags.canShowLeft) {
-        UIBarButtonItem *button = [[barButtonItemClass alloc] initWithImage:[UIImage imageNamed:@"nav_menu_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(showLeft:)];
+        UIBarButtonItem *button = [[barButtonItemClass alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(showLeft:)];
         topController.navigationItem.leftBarButtonItem = button;
     } else {
 		if(topController.navigationItem.leftBarButtonItem.target == self) {
@@ -468,7 +448,7 @@
     }
     
     if (_menuFlags.canShowRight) {
-        UIBarButtonItem *button = [[barButtonItemClass alloc] initWithImage:[UIImage imageNamed:@"nav_menu_icon.png"] style:UIBarButtonItemStyleBordered  target:self action:@selector(showRight:)];
+        UIBarButtonItem *button = [[barButtonItemClass alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered  target:self action:@selector(showRight:)];
         topController.navigationItem.rightBarButtonItem = button;
     } else {
 		if(topController.navigationItem.rightBarButtonItem.target == self) {
@@ -510,9 +490,38 @@
     
 }
 
+- (void)addTapView:(BOOL)add {
+    if (!_root) return;
+    
+    if (add) {
+        
+        if (!_tapView) {
+            
+            UIView *view = [[UIView alloc] initWithFrame:_root.view.bounds];
+            view.backgroundColor = [UIColor clearColor];
+            [_root.view addSubview:view];
+            [view release];
+            _tapView = view;
+            
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+            [view addGestureRecognizer:tap];
+            [tap release];
+            
+        }
+        
+    } else {
+        
+        if (_tapView) {
+            [_tapView removeFromSuperview], _tapView=nil;
+        }
+        
+    }
+    
+}
+
 - (void)showRootController:(BOOL)animated {
     
-    [_tap setEnabled:NO];
+    [self addTapView:NO];
     _root.view.userInteractionEnabled = YES;
 
     CGRect frame = _root.view.frame;
@@ -582,7 +591,7 @@
     [UIView animateWithDuration:.3 animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {
-        [_tap setEnabled:YES];
+        [self addTapView:YES];
     }];
     
     if (!animated) {
@@ -623,7 +632,7 @@
     [UIView animateWithDuration:.3 animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {
-        [_tap setEnabled:YES];
+        [self addTapView:YES];
     }];
     
     if (!animated) {
@@ -657,6 +666,7 @@
 - (void)setRootViewController:(UIViewController *)rootViewController {
     
     [self showShadow:NO];
+    [self addTapView:NO];
     UIViewController *tempRoot = [_root retain];
     [_root release], _root = nil;
     _root = [rootViewController retain];

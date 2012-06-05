@@ -13,4 +13,6 @@
 
 @property(nonatomic,strong) UIImageView *imageView;
 
+- (void)setupWithTitle:(NSString*)title detailTitle:(NSString*)detailTitle; // setup helper
+
 @end

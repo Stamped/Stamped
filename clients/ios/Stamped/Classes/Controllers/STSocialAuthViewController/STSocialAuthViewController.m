@@ -51,6 +51,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.navigationItem.hidesBackButton = YES;
+    
     STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.view.bounds];
     background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
