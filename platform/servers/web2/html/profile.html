@@ -43,7 +43,7 @@
                             </p>
                             
                             <p>
-                                <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
+                                <a class='screen-name' href="/{{user.screen_name}}">{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
                         </div>
                         
@@ -141,10 +141,14 @@
                 <div class="profile-header-post">
                     <div class="ribbon-bottom"></div>
                     <div class="inset-stamp">
-                        <div class="stamp-count stamp-count-default">{{user.num_stamps}}</div>
+                        <div class="stamp-count user-primary stamp-count-default">
+                            {{user.num_stamps}}
+                        </div>
                         
                         {% for distro in user.distribution %}
-                            <div class="stamp-count stamp-count-{{distro.category}}">{{distro.count}}</div>
+                            <div class="stamp-count user-primary stamp-count-{{distro.category}}">
+                                {{distro.count}}
+                            </div>
                         {% endfor %}
                         
                         <p>STAMPS</p>

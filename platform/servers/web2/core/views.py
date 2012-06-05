@@ -95,7 +95,7 @@ def profile(request, schema, **kwargs):
         if schema.subcategory is not None:
             stamps  = filter(lambda s: s['entity']['subcategory'] == schema.subcategory, stamps)
         
-        stamps      = stamps[schema.offset : schema.offset + schema.limit]
+        stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
     else:
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
@@ -232,7 +232,8 @@ def map(request, schema, **kwargs):
     # TODO: enforce stricter validity checking on offset and limit
     
     schema.offset = schema.offset or 0
-    schema.limit  = schema.limit  or 25
+    schema.limit  = None
+    #schema.limit  or 25
     
     if ENABLE_TRAVIS_TEST:
         friends     = travis_test.friends
@@ -247,7 +248,7 @@ def map(request, schema, **kwargs):
         user_id     = user['user_id']
         
         stamps      = filter(lambda s: s['entity'].get('coordinates', None) is not None, travis_test.stamps)
-        stamps      = stamps[schema.offset : schema.offset + schema.limit]
+        stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
     else:
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
