@@ -61,19 +61,24 @@ def lru_cache(maxsize=100):
 
             if key == '':
                 raise Exception("Key not set! (%s)" % user_function)
-            
-            # record recent use of this key
-            queue_append(key)
-            refcount[key] += 1
 
             # get cache entry or compute if not found
             try:
                 result = cache[key]
+                # Record recent use of this key.
+                queue_append(key)
+                refcount[key] += 1
+
                 wrapper.hits += 1
 
             except KeyError:
                 result = user_function(*args, **kwds)
                 cache[key] = result
+                # Record recent use of this key. If we do this before the call to user_function, we can get in
+                # trouble where, while we're waiting on I/O, someone else encounters the cache in an inconsistent
+                # state where an element is in the queue and the refcount dict but not the cache dict itself.
+                queue_append(key)
+                refcount[key] += 1
                 wrapper.misses += 1
                 
                 # purge least recently used cache entry
@@ -83,7 +88,8 @@ def lru_cache(maxsize=100):
                     while refcount[key]:
                         key = queue_popleft()
                         refcount[key] -= 1
-                    del cache[key], refcount[key]
+                    del cache[key]
+                    del refcount[key]
             
             # periodically compact the queue by eliminating duplicate keys
             # while preserving order of most recent access

@@ -13,7 +13,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STConsumptionViewController.h"
 #import "STButton.h"
-#import "STLegacyMapViewController.h"
 #import "STConfiguration.h"
 #import "STConsumptionMapViewController.h"
 

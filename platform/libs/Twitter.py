@@ -44,8 +44,6 @@ class Twitter(object):
 
         # Send the http request
         response, content = self.__httpObj.request(url, method=verb, body=body, headers=headers)
-
-        print content
         result = json.loads(content)
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
@@ -67,6 +65,44 @@ class Twitter(object):
         # id is returned as an int, but we'll use it as a string for consistency
         result['id'] = str(result['id'])
         return result
+
+    def _getUserIds(self, user_token, user_secret, relationship):
+        if relationship == 'friends':
+            baseurl = '1/friends/ids.json'
+        elif relationship == 'followers':
+            baseurl = '1/followers/ids.json'
+        else:
+            raise StampedInputError("Invalid relationship parameter to getUserIds.  Must be 'friends' or 'followers'.")
+        if user_token is None or user_secret is None:
+            raise StampedInputError("Connecting to Twitter requires a valid key / secret")
+
+        twitterIds = []
+        cursor = -1
+
+        while True:
+            result = self.__get(baseurl, user_token, user_secret, cursor=cursor)
+            if 'ids' in result:
+                twitterIds = twitterIds + result['ids']
+
+            # Break if no cursor
+            if 'next_cursor' not in result or result['next_cursor'] == 0:
+                break
+            cursor = result['next_cursor']
+        return twitterIds
+
+
+    def getFriendIds(self, user_token, user_secret):
+        return self._getUserIds(user_token, user_secret, 'friends')
+
+    def getFollowerIds(self, user_token, user_secret):
+        return self._getUserIds(user_token, user_secret, 'followers')
+
+    def createFriendship(self, user_token, user_secret, friend_screen_name):
+        return self.__post('1/friendships/create.json', user_token, user_secret, screen_name = friend_screen_name)
+
+    def destroyFriendship(self, user_token, user_secret, friend_screen_name):
+        return self.__post('1/friendships/destroy.json', user_token, user_secret, screen_name = friend_screen_name)
+
 
 __globalTwitter = None
 
@@ -97,11 +133,13 @@ def demo(method, user_token=TEST_OAUTH_TOKEN, user_secret=TEST_OAUTH_TOKEN_SECRE
 
     #headers = utils.getTwitter('https://api.twitter.com/account/verify_credentials.json', user_token, user_secret)
     if 'verifyCredentials' in methods:      pprint(twitter.verifyCredentials(user_token, user_secret))
+    if 'getFriendIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
+    if 'getFollowerIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'verifyCredentials'
+    methods = 'getFollowerIds'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

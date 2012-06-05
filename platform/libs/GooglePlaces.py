@@ -234,9 +234,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             apiKey = self._getAPIKey(offset, count)
             if apiKey is None:
                 return None
-            
+            print apiKey
             response = self._getAutocompleteResponse(latLng, query, apiKey, params)
-            
+
             if response is None:
                 return None
             
@@ -380,7 +380,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         if latLng is not None:
             params['location'] = self._geocoder.getEncodedLatLng(latLng)
-        
+
         self._handleParams(params, optionalParams)
         
         # example URL:
@@ -436,6 +436,17 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             return "establishment"
         else:
             return "other"
+
+__globalGooglePlaces = None
+
+def globalGooglePlaces():
+    global __globalGooglePlaces
+
+    if __globalGooglePlaces is None:
+        __globalGooglePlaces = GooglePlaces()
+
+    return __globalGooglePlaces
+
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] address|latLng"
@@ -576,22 +587,29 @@ def main():
         params['radius'] = options.radius
     if options.types:
         params['types'] = options.types
-    
-    if options.detail:
-        results = places.getPlaceDetails(options.input, params)
-    elif options.suggest:
-        results = places.getAutocompleteResults(options.latLng, options.input, params)
-    elif options.address:
-        results = places.getSearchResultsByAddress(options.latLng, params)
-    else:
-        results = places.getSearchResultsByLatLng(options.latLng, params)
-    
+
+    import pprint
+    pprint.pprint(options)
+    print('options.latLng: %s    params: %s' % (options.latLng, params))
+
+    params = { 'radius' : 500 }
+    pprint.pprint( places.getAutocompleteResults(['40.781174','-73.951820'], 'Roma', params))
+
+#    if options.detail:
+#        results = places.getPlaceDetails(options.input, params)
+#    elif options.suggest:
+#        results = places.getAutocompleteResults(options.latLng, options.input, params)
+#    elif options.address:
+#        results = places.getSearchResultsByAddress(options.latLng, params)
+#    else:
+#        results = places.getSearchResultsByLatLng(options.latLng, params)
+#
     if results is None:
         print "Failed to return results for '%s'" % (options.latLng, )
     else:
         if options.limit:
             results = results[0:min(options.limit, len(results))]
-        
+
         # print the prettified, formatted results
         print json.dumps(results, sort_keys=True, indent=2)
 

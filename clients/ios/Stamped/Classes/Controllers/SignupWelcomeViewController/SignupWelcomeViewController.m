@@ -173,8 +173,8 @@
         } else {
             [params setObject:cell.textField.text forKey:@"name"];
         }
-        
-        [[STAuth sharedInstance] facebookSignupWithParams:params];
+        //TODO Fix
+        //[[STAuth sharedInstance] facebookSignupWithParams:params];
         NSLog(@"facebook signing up with params %@", params);
 
     } else if (_signupType == SignupWelcomeTypeEmail) {

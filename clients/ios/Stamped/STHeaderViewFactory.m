@@ -10,7 +10,6 @@
 #import <CoreText/CoreText.h>
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
-#import "STPlaceAnnotation.h"
 #import "STActionManager.h"
 #import "STSimpleAction.h"
 #import "STPhotoViewController.h"
@@ -177,8 +176,11 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
       frame.size.height = CGRectGetMaxY(mapView.frame);
       view.frame = frame;
       [mapView setRegion:region animated:YES];
+        /*
+         TODO FIX
       STPlaceAnnotation* annotation = [[[STPlaceAnnotation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
       [mapView addAnnotation:annotation];
+         */
       NSString* encodedTitle = [entity.title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
       NSString* url = [NSString stringWithFormat:@"http://www.google.com/maps?q=%@@%@", encodedTitle, entity.coordinates];
       UIView* tapView = [Util tapViewWithFrame:mapView.frame andCallback:^{

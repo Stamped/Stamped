@@ -7,7 +7,6 @@
 //
 
 #import "EntityHeaderView.h"
-#import "STPlaceAnnotation.h"
 
 #define kLatLongSpan 600.0f / 111000.0f
 
@@ -140,8 +139,10 @@
             frame.size.height = CGRectGetMaxY(mapView.frame);
             view.frame = frame;
             [mapView setRegion:region animated:YES];
-            STPlaceAnnotation* annotation = [[[STPlaceAnnotation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
-            [mapView addAnnotation:annotation];
+            
+            // TODO FIX
+            //STPlaceAnnotation* annotation = [[[STPlaceAnnotation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
+            //[mapView addAnnotation:annotation];
             //NSString* encodedTitle = [entity.title stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
             //NSString* url = [NSString stringWithFormat:@"http://www.google.com/maps?q=%@@%@", encodedTitle, entity.coordinates];
             

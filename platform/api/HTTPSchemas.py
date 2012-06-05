@@ -24,10 +24,7 @@ from datetime           import datetime, date, timedelta
 # PRIVATE #
 # ####### #
 
-if libs.ec2_utils.is_prod_stack():
-    COMPLETION_ENDPOINT = 'https://api.stamped.com/v0/actions/complete.json'
-else:
-    COMPLETION_ENDPOINT = 'https://dev.stamped.com/v0/actions/complete.json'
+COMPLETION_ENDPOINT = 'actions/complete.json'
 
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
@@ -62,15 +59,19 @@ def _coordinatesFlatToDict(coordinates):
     except Exception:
         return None
 
-def _profileImageURL(screenName, cache=None):
+def _profileImageURL(screenName, cache=None, size=None):
+    image = "%s.jpg" % (str(screenName).lower())
+    if size is not None:
+        image = "%s-%dx%d.jpg" % (str(screenName).lower(), size, size)
+
     if not cache:
         url = 'http://static.stamped.com/users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():
-        url = 'http://static.stamped.com/users/%s.jpg?%s' % \
-              (str(screenName).lower(), int(time.mktime(cache.timetuple())))
+        url = 'http://static.stamped.com/users/%s?%s' % \
+              (image, int(time.mktime(cache.timetuple())))
     else:
-        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg?%s' % \
-              (str(screenName).lower(), int(time.mktime(cache.timetuple())))
+        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s?%s' % \
+              (image, int(time.mktime(cache.timetuple())))
     
     return url
 
@@ -392,7 +393,7 @@ class HTTPAccount(Schema):
         cls.addProperty('email',                        basestring, required=True)
         cls.addProperty('screen_name',                  basestring, required=True)
         cls.addProperty('privacy',                      bool, required=True)
-        cls.addProperty('phone',                        int)
+        cls.addProperty('phone',                        basestring)
 
     def importAccount(self, account):
         self.dataImport(account.dataExport(), overflow=True)
@@ -564,14 +565,14 @@ class HTTPAccountAlerts(Schema):
     def setSchema(cls):
         cls.addProperty('ios_alert_credit',       bool)
         cls.addProperty('ios_alert_like',         bool)
-        cls.addProperty('ios_alert_fav',          bool)
+        cls.addProperty('ios_alert_todo',          bool)
         cls.addProperty('ios_alert_mention',      bool)
         cls.addProperty('ios_alert_comment',      bool)
         cls.addProperty('ios_alert_reply',        bool)
         cls.addProperty('ios_alert_follow',       bool)
         cls.addProperty('email_alert_credit',     bool)
         cls.addProperty('email_alert_like',       bool)
-        cls.addProperty('email_alert_fav',        bool)
+        cls.addProperty('email_alert_todo',        bool)
         cls.addProperty('email_alert_mention',    bool)
         cls.addProperty('email_alert_comment',    bool)
         cls.addProperty('email_alert_reply',      bool)
@@ -581,14 +582,14 @@ class HTTPAccountAlerts(Schema):
         Schema.__init__(self)
         self.ios_alert_credit           = False
         self.ios_alert_like             = False
-        self.ios_alert_fav              = False
+        self.ios_alert_todo             = False
         self.ios_alert_mention          = False
         self.ios_alert_comment          = False
         self.ios_alert_reply            = False
         self.ios_alert_follow           = False
         self.email_alert_credit         = False
         self.email_alert_like           = False
-        self.email_alert_fav            = False
+        self.email_alert_todo           = False
         self.email_alert_mention        = False
         self.email_alert_comment        = False
         self.email_alert_reply          = False
@@ -645,15 +646,13 @@ class HTTPFindUser(Schema):
 class HTTPFindTwitterUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                            basestring) # Comma delimited
-        cls.addProperty('twitter_key',                  basestring)
-        cls.addProperty('twitter_secret',               basestring)
+        cls.addProperty('user_token',                   basestring)
+        cls.addProperty('user_secret',                  basestring)
 
 class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('q',                            basestring) # Comma delimited
-        cls.addProperty('facebook_token',               basestring)
+        cls.addProperty('user_token',                   basestring)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod
@@ -818,6 +817,26 @@ class HTTPSuggestedUserRequest(Schema):
             data['coordinates'] = _coordinatesFlatToDict(coordinates)
 
         return SuggestedUserRequest().dataImport(data)
+
+class HTTPUserImages(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addNestedPropertyList('sizes',                  HTTPImageSizeSchema)
+
+    def importUser(self, user):
+        sizes = [144, 110, 92, 74, 72, 62, 55, 46, 37, 31]
+        imageSizes = []
+
+        for size in sizes:
+            image           = HTTPImageSizeSchema()
+            image.url       = _profileImageURL(user.screen_name, cache=user.timestamp.image_cache, size=size)
+            image.width     = size 
+            image.height    = size
+            imageSizes.append(image)
+
+        self.sizes = imageSizes
+
+        return self
 
 
 # ####### #
@@ -1364,7 +1383,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -1482,7 +1501,7 @@ class HTTPEntity(Schema):
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
                 source.source_id        = entity.sources.netflix_id
-                source.endpoint         = 'https://dev.stamped.com/v0/account/linked/netflix/add_instant.json'
+                source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
                 source.icon             = _getIconURL('src_itunes', client=client)
                 source.setCompletion(
@@ -2464,20 +2483,6 @@ class HTTPConsumptionSlice(HTTPGenericCollectionSlice):
         data = self._convertData(self.dataExport())
         return ConsumptionSlice().dataImport(data)
 
-class HTTPStampedBySlice(HTTPGenericCollectionSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('entity_id',        basestring, required=True)
-        cls.addProperty('group',            basestring)
-
-    def exportFriendsSlice(self):
-        data = self._convertData(self.dataExport())
-        return FriendsSlice().dataImport(data, overflow=True)
-
-    def exportGenericCollectionSlice(self):
-        data = self._convertData(self.dataExport())
-        return GenericCollectionSlice().dataImport(data, overflow=True)
-
 
 class HTTPGuideRequest(Schema):
     @classmethod
@@ -2506,7 +2511,7 @@ class HTTPGuideRequest(Schema):
         cls.addProperty('scope',                        basestring)
 
     def exportGuideRequest(self):
-        return GuideRequest().dataImport(self.dataExport(), overflow=True)
+        # return GuideRequest().dataImport(self.dataExport(), overflow=True)
 
         data = self.dataExport()
         if 'viewport' in data:

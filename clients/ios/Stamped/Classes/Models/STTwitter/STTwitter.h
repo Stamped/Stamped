@@ -18,7 +18,7 @@ typedef void(^TwitterRequestHandler)(id, NSError*);
     NSDictionary *_twitterUserAuth;
 }
 
-+ (id)sharedInstance;
++ (STTwitter*)sharedInstance;
 
 @property(nonatomic,assign) BOOL access;
 @property(nonatomic,retain) ACAccountStore *accountStore;

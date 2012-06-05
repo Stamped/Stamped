@@ -19,9 +19,6 @@
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
 
-static int _reused = 0;
-static int _not = 0;
-
 - (id)initWithCoder:(NSCoder *)decoder {
     NSString* userID = [decoder decodeObjectForKey:@"userID"];
     NSAssert1(userID, @"UserID should not be none for %@", self);
@@ -85,20 +82,6 @@ static int _not = 0;
      nil];
     
     return mapping;
-}
-
-+ (STSimpleUser*)userFromLegacyUser:(User*)legacyUser {
-    if (legacyUser == nil) {
-        return nil;
-    }
-    STSimpleUser* user = [[[STSimpleUser alloc] init] autorelease];
-    user.name = legacyUser.name;
-    user.userID = legacyUser.userID;
-    user.screenName = legacyUser.screenName;
-    user.primaryColor = legacyUser.primaryColor;
-    user.secondaryColor = legacyUser.secondaryColor;
-    user.imageURL = legacyUser.imageURL;
-    return user;
 }
 
 

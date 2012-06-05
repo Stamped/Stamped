@@ -10,11 +10,7 @@
 
 #import <Twitter/Twitter.h>
 
-#import "AccountManager.h"
-#import "Entity.h"
 #import "EntityDetailViewController.h"
-#import "Stamp.h"
-#import "User.h"
 #import "Util.h"
 #import "STSynchronousWrapper.h"
 #import "STEntityDetailFactory.h"
@@ -263,7 +259,7 @@
                                                              andDelegate:self.scrollView];
         [self.scrollView appendChildView:_commentsView];
     }
-    if ([AccountManager.sharedManager.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
+    if ([STStampedAPI.sharedInstance.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
         UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:@"Delete"
                                                                          style:UIBarButtonItemStylePlain
                                                                         target:self

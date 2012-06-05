@@ -35,13 +35,16 @@ except:
 class iTunes(object):
 
     def __init__(self):
-        self.__limiter = RateLimiter(cps=10)
+        self.setMaxQps(10)
         pass
+
+    def setMaxQps(self, max_qps):
+        self.__limiter = RateLimiter(cps=max_qps)
     
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached remotely via memcached with a TTL of 7 days
-    @lru_cache(maxsize=64)
+    # @lru_cache(maxsize=64)
     @memcached_function(time=7*24*60*60)
     def method(self, method, **params):
         try:
@@ -65,7 +68,7 @@ def globaliTunes():
     
     if __globaliTunes is None:
         __globaliTunes = iTunes()
-    
+
     return __globaliTunes
 
 def demo(method, **params):

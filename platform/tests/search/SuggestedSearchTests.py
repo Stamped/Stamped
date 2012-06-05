@@ -20,6 +20,8 @@ from collections                        import defaultdict
 class SuggestedSearchTests(ASearchTestSuite):
     
     def _test_suggestions(self, **kwargs):
+        raise NotImplementedError()
+        
         """ Test basic suggested entity searches """
         
         suggestedEntities = MongoSuggestedEntities()

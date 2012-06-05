@@ -11,6 +11,7 @@
 #import "STMenuController.h"
 #import "STProfileViewController.h"
 #import "SettingsViewController.h"
+#import "DDMenuController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
@@ -332,7 +333,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-
+    
     if (self.tableView == tableView || YES) {
         
         [menuController setRootController:navController animated:YES];
@@ -385,7 +386,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (void)done:(id)sender {
     
-    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    UIViewController *controller = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller dismissModalViewControllerAnimated:YES];
     
 }

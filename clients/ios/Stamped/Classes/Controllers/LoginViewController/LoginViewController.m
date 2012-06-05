@@ -7,6 +7,7 @@
 //
 
 #import "LoginViewController.h"
+#import "STStampedAPI.h"
 
 @interface LoginKeyboardButton : UIButton
 @end
@@ -19,7 +20,12 @@
     UITextField *_password;
 }
 - (void)setEditing:(BOOL)editing;
+
+- (NSString*)_tempScreenName;
+- (NSString*)_tempPassword;
+
 @property (nonatomic, assign) id delegate;
+
 @end
 
 @interface LoginViewController ()
@@ -110,6 +116,14 @@
     
 }
 
+- (void)loginButtonClicked:(id)notImportant {
+    NSString* login = _textView._tempScreenName;
+    NSString* password = _textView._tempPassword;
+    [[STStampedAPI sharedInstance] loginWithScreenName:login password:password andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+        [_textView setEditing:NO];
+        [self dismissModalViewControllerAnimated:YES];
+    }];
+}
 
 #pragma mark - Keyboard Notifications
 
@@ -138,6 +152,7 @@
         button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
         [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f] forState:UIControlStateNormal];
         [button setTitle:@"Login" forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(loginButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
         [window addSubview:button];
         _loginButton = button;
 
@@ -157,7 +172,6 @@
         [_loginButton removeFromSuperview];
         _loginButton=nil;
     }
-    
     [UIView animateWithDuration:0.25f animations:^{
         _textView.layer.transform = CATransform3DIdentity;
     }];;
@@ -168,7 +182,6 @@
 #pragma mark - LoginTextView Actions
 
 - (void)cancel:(LoginTextView*)view {
-    
     [view setEditing:NO];
     [self dismissModalViewControllerAnimated:YES];
     
@@ -269,6 +282,14 @@
 
 - (NSString*)password {
     return _password.text;
+}
+
+- (NSString *)_tempScreenName {
+    return [self username];
+}
+
+- (NSString *)_tempPassword {
+    return [self password];
 }
 
 

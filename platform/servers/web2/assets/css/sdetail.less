@@ -101,11 +101,12 @@
                     
                     border: 1px solid #f2f2f2;
                     border-bottom: 1px solid ##dbdbdb;
+                    line-height: 125%;
                     
                     &:hover, &:active {
                         background-color: @text1;
                         color: #fff;
-                        .rounded(4px);
+                        //.rounded(4px);
                     }
                     
                     /*&:hover {
@@ -116,22 +117,150 @@
                         .linear-gradient2(@angle, darken(@c0, 25%), @c1);
                     }*/
                     
+                    .action-icon {
+                        background: url(/assets/img/edetail-sprite.png) no-repeat;
+                        display: none;
+                        
+                        width:  18px;
+                        height: 18px;
+                        
+                        margin: 2px 12px 0 0;
+                    }
+                    
+                    .action-icon-image(@x) {
+                        background-position: -@x 0;
+                        display: inline-block;
+                    }
+                    
+                    .action-icon-image-hover(@x) {
+                        background-position: -@x -20px;
+                    }
+                    
+                    .action-icon-reserve {
+                        .action-icon-image(0);
+                    }
+                    
+                    .action-icon-menu {
+                        .action-icon-image(20px);
+                    }
+                    
+                    .action-icon-buy {
+                        .action-icon-image(40px);
+                    }
+                    
+                    .action-icon-add_to_instant_queue {
+                        .action-icon-image(60px);
+                    }
+                    
+                    /* TODO: fandango: 80px */
+                    /* e.g., http://localhost:8000/mwsladek/stamps/10/Harry-Potter-and-the-Deathly-Hallows-Part-2 */
+                    
+                    .action-icon-listen {
+                        .action-icon-image(100px);
+                    }
+                    
+                    /* TODO: what is the other 'play' icon at 120px? */
+                    
+                    .action-icon-download {
+                        .action-icon-image(140px);
+                    }
+                    
+                    .action-icon-playlist {
+                        .action-icon-image(160px);
+                    }
+                    
+                    &:hover {
+                        .action-icon-reserve {
+                            .action-icon-image-hover(0);
+                        }
+                        
+                        .action-icon-menu {
+                            .action-icon-image-hover(20px);
+                        }
+                        
+                        .action-icon-buy {
+                            .action-icon-image-hover(40px);
+                        }
+                        
+                        .action-icon-add_to_instant_queue {
+                            .action-icon-image-hover(60px);
+                        }
+                        
+                        .action-icon-listen {
+                            .action-icon-image-hover(100px);
+                        }
+                        
+                        .action-icon-download {
+                            .action-icon-image-hover(140px);
+                        }
+                        
+                        .action-icon-playlist {
+                            .action-icon-image-hover(160px);
+                        }
+                    }
+                    
                     .lhs {
                         float: left;
                         background: transparent;
+                        
+                        .action-name {
+                            display: inline-block;
+                            position: relative;
+                            top: -4px;
+                        }
                     }
                     
                     .rhs {
                         float: right;
                         
                         .source {
-                            display: inline-block;
+                            background: url(/assets/img/edetail-sprite.png) no-repeat;
+                            display: none;
+                            
+                            width:  18px;
+                            height: 18px;
+                            
+                            margin: 2px 0 0;
                             
                             .link {
                                 display: none;
                             }
                         }
+                        
+                        .source-image(@x) {
+                            background-position: -@x -39px;
+                            display: inline-block;
+                        }
+                        
+                        .source-opentable {
+                            .source-image(0);
+                        }
+                        
+                        .source-amazon {
+                            .source-image(20px);
+                        }
+                        
+                        .source-fandango {
+                            .source-image(40px);
+                        }
+                        
+                        .source-rdio {
+                            .source-image(60px);
+                        }
+                        
+                        .source-spotify {
+                            .source-image(80px);
+                        }
+                        
+                        .source-itunes {
+                            .source-image(100px);
+                        }
                     }
+                }
+                
+                /* TODO: MOBILE enable phone action */
+                .action-phone {
+                    display: none;
                 }
             }
             
@@ -145,6 +274,12 @@
                         color: @text0;
                         text-align: left;
                         float: left;
+                    }
+                    
+                    .metadata-icon {
+                        max-width: 14px;
+                        margin-right: 2px;
+                        height: auto;
                     }
                     
                     .rhs-value {
@@ -221,16 +356,22 @@
     
     .section-stamp {
         float: left;
-        width: 50%;
+        width: 516px;
         //border: 2px solid green;
         margin: 0;
+        
+        .timestamp, .timestamp_raw {
+            text-align: right;
+            font-size: 80%;
+            color: #999999;
+        }
         
         .stamp-card {
             @round: 4px;
             .box-shadow(0, 0, 16px, 0, @shadow);
             .rounded(@round);
             
-            @space: 1.5em;
+            @space: 48px;
             
             .stamp-card-pre, .stamp-card-post {
                 display: block;
@@ -241,27 +382,11 @@
             
             .stamp-contents {
                 .stamp-contents-upper {
-                    .user-header {
-                        .name {
-                            float: left;
-                        }
-                        
-                        .timestamp {
-                            float: right;
-                        }
-                    }
-                    
-                    .timestamp, .timestamp_raw {
-                        text-align: right;
-                        font-size: 80%;
-                    }
-                    
-                    .user-header-0 {
-                        margin: .5em @space .5em;
-                    }
+                    position: relative;
+                    z-index: 501;
                     
                     .stamp-inner-content {
-                        margin: 0 @space 0;
+                        margin: (@space - 8px) @space 0;
                         
                         .entity-header {
                             max-width: 50%;
@@ -273,9 +398,45 @@
                             float: left;
                         }
                         
+                        .user-header {
+                            margin: .5em 0 .5em;
+                            clear: both;
+                            
+                            .name {
+                                float: left;
+                                
+                                font-size: 80%;
+                                color: #999999;
+                            }
+                            
+                            .timestamp {
+                                float: right;
+                            }
+                        }
+                        
                         .stamp-preview {
-                            float: right;
-                            margin: 0 0 24px 24px;
+                            clear: both;
+                            margin: @space / 2 0;
+                            
+                            @width:  420px;
+                            @height: 2 * @width / 3;
+                            
+                            max-width: @width   !important;
+                            max-height: @height !important;
+                            width:  auto !important;
+                            height: auto !important;
+                            
+                            .preview-image, img {
+                                max-width: (@width - 8px) !important;
+                                max-height: @height       !important;
+                                width:  auto !important;
+                                height: auto !important;
+                                margin: 0 auto;
+                            }
+                            
+                            img {
+                                .box-shadow(0, 4px, 12px, -4px, rgba(30,30,30,0.85));
+                            }
                         }
                         
                         .normal_blurb {
@@ -313,10 +474,20 @@
                 
                 .comments {
                     //border: 1px solid green;
+                    overflow-y: hidden;
+                    position: relative;
+                    z-index: 496;
+                    
+                    display: block;
+                    height:  auto;
                     
                     .comments-nav {
                         border-bottom: 1px dashed #bbb;
                         text-align: center;
+                        
+                        position: relative;
+                        z-index: 498;
+                        background: #fff;
                         
                         margin:  0 24px;
                         padding: .5em 0;
@@ -330,10 +501,9 @@
                         }
                     }
                     
-                    display: block;
-                    height: auto;
-                    
-                    ol.comment-list {
+                    ol.comments-list {
+                        position: relative;
+                        
                         text-decoration: none;
                         list-style: none;
                         text-indent: 0;
@@ -344,22 +514,7 @@
                             display: block;
                             border-bottom: 1px solid #bbb;
                             padding: 1em @space 0;
-                            //border: 1px solid red;
-                            
-                            -webkit-transition-property: -webkit-transform, opacity;
-                               -moz-transition-property:    -moz-transform, opacity;
-                                -ms-transition-property:     -ms-transform, opacity;
-                                 -o-transition-property:         top, left, opacity;
-                                    transition-property:         transform, opacity;
-                            
-                            -webkit-transition-duration: 0.5s;
-                               -moz-transition-duration: 0.5s;
-                                -ms-transition-duration: 0.5s;
-                                 -o-transition-duration: 0.5s;
-                                    transition-duration: 0.5s;
-                            
                             opacity: 1;
-                            .transform(scale(1.0));
                             
                             .profile-image-small {
                                 float: left;
@@ -381,10 +536,9 @@
                                         text-align: left;
                                     }
                                     .timestamp {
-                                        text-align: right;
                                         position: absolute;
                                         font-size: 80%;
-                                        top: 0;
+                                        top:   0;
                                         right: 0;
                                     }
                                 }
@@ -401,8 +555,10 @@
                     }
                 }
                 
-                .collapsed {
+                .collapsed, .collapsing {
                     .comments-nav {
+                        position: relative;
+                        
                         .show {
                             display: block;
                         }
@@ -411,29 +567,16 @@
                             display: none;
                         }
                     }
-                    
-                    ol.comment-list {
+                }
+                
+                .collapsed {
+                    ol.comments-list {
                         li.comment {
                             display: none;
-                            /*.transform(scale(0.001));
-                            
-                            line-height: 0;
-                            opacity: 0;
-                            height:  0;
-                            
-                            margin:  0;
-                            padding: 0;*/
                         }
                         
                         li.comment:nth-last-child(-n+2) {
                             display: block;
-                            /*.transform(scale(1));
-                            
-                            line-height: normal;
-                            height: auto;
-                            opacity: 1;
-                            
-                            padding: 1em @space 0;*/
                         }
                     }
                 }
@@ -451,13 +594,14 @@
         //border: 2px solid blue;
         float: left;
         width: 50%;
-        margin: .5em .5em 0;
+        margin: .5em .5em 1em;
         
         p.share {
             font-size: 80%;
         }
         
         .share-button {
+            width: auto !important;
             display: block;
             float: left;
         }

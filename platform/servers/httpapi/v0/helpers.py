@@ -140,7 +140,7 @@ def handleHTTPRequest(requires_auth=True,
                 logs.info("%s %s" % (request.method, request.path))
                 
                 if not valid_origin:
-                    logs.warn("INVALID ORIGIN: %s" % origin)
+                    logs.warning("INVALID ORIGIN: %s" % origin)
                 
                 params = {}
                 
@@ -272,14 +272,14 @@ def checkClient(request):
     try:
         logs.client(client_id)
         if not stampedAuth.verifyClientCredentials(client_id, client_secret):
-            raise
+            raise 
 
         client = stampedAuth.getClientDetails(client_id)
         stampedAPI.setVersion(client.api_version)
         
         return client_id
     except Exception, e:
-        logs.info(e)
+        logs.warning("Invalid client credentials (%s)" % e)
         raise StampedAuthError("access_denied", "Invalid client credentials")
 
 def optionalOAuth(request):
@@ -307,8 +307,8 @@ def checkOAuth(request):
     ### Validate OAuth Access Token
     try:
         authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)
-        if authenticated_user_id == None:
-            raise
+        if authenticated_user_id is None:
+            raise StampedAuthError("invalid_request", "User not found")
         
         logs.user(authenticated_user_id)
         logs.client(client_id)
@@ -433,6 +433,9 @@ def transformOutput(value, **kwargs):
     """
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
+
+    if isinstance(value, bool):
+        value = { 'result' : value }
     
     output_json = json.dumps(value, sort_keys=not IS_PROD)
     output      = HttpResponse(output_json, **kwargs)

@@ -13,8 +13,6 @@
 #import <CoreText/CoreText.h>
 
 #import "STStamp.h"
-#import "Entity.h"
-#import "User.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
 #import "UIFont+Stamped.h"

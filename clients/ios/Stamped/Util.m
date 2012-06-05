@@ -8,9 +8,6 @@
 
 #import "Util.h"
 
-#import "User.h"
-#import "Entity.h"
-#import "SearchResult.h"
 #import "EntityDetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STActionMenuFactory.h"
@@ -193,9 +190,6 @@ static Rdio* _rdio;
     return maskedImage;
 }
 
-+ (UIImage*)stampImageForUser:(User*)user {
-    return [Util stampImageWithPrimaryColor:user.primaryColor secondary:user.secondaryColor];
-}
 
 + (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary {
     return [Util gradientImage:[UIImage imageNamed:@"stamp_46pt_texture"]
@@ -295,18 +289,6 @@ static Rdio* _rdio;
 
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date {
     return [Util userReadableTimeSinceDate:date shortened:NO];
-}
-
-+ (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject {
-    UIViewController* detailViewController = nil;
-    detailViewController = [[EntityDetailViewController alloc] initWithEntityObject:entityObject];
-    return [detailViewController autorelease];
-}
-
-+ (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult {
-    UIViewController* detailViewController = nil;    
-    detailViewController = [[EntityDetailViewController alloc] initWithSearchResult:searchResult];
-    return [detailViewController autorelease];
 }
 
 + (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum {
@@ -1136,6 +1118,12 @@ static Rdio* _rdio;
 + (BOOL)isOffline {
     RKClient* client = [RKClient sharedClient];
     return client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable;
+}
+
++ (void)launchFirstRun {
+    //TODO
+    STAppDelegate* appDelegate = (id)[UIApplication sharedApplication].delegate;
+    [appDelegate.menuController showWelcome];
 }
 
 @end

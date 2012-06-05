@@ -52,15 +52,11 @@ extern NSString* const kKeychainTwitterToken;
              secondaryRed:(CGFloat)sRed
            secondaryGreen:(CGFloat)sGreen
             secondaryBlue:(CGFloat)sBlue;
-+ (UIImage*)stampImageForUser:(User*)user;
 + (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 
 + (NSString*)shortUserReadableTimeSinceDate:(NSDate*)date;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
-
-+ (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject;
-+ (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult;
 
 + (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum;
 + (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
@@ -192,5 +188,7 @@ extern NSString* const kKeychainTwitterToken;
 + (NSURL*)cacheDirectory;
 
 + (BOOL)isOffline;
+
++ (void)launchFirstRun;
 
 @end

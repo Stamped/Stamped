@@ -18,7 +18,6 @@
 #import "STTwitter.h"
 
 @interface STMenuController ()
-- (void)showWelcome;
 @end
 
 @implementation STMenuController
@@ -26,7 +25,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!LOGGED_IN || YES) {
+    if (!LOGGED_IN) {
         [self showWelcome];
     }
     

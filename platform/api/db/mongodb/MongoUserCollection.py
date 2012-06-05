@@ -327,12 +327,11 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return result
 
     def findUsersByPhone(self, phone, limit=0):
-        queryPhone = []
-        for number in phone:
-            queryPhone.append(int(number))
+        queryPhone = [int(num) for num in phone]
+        queryPhone.extend( [str(num) for num in phone] )
         
         ### TODO: Add Index
-        data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
+        data = self._collection.find( {"phone": {"$in": queryPhone}} ).limit(limit)
         
         result = []
         for item in data:
@@ -349,16 +348,20 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             {"linked_accounts.twitter.twitter_id": {"$in": twitterIds}}
         ).limit(limit)
 
-        result = [self._convertFromMongo(doc) for doc in data]
+        result = []
+        for item in data:
+            user                = self._convertFromMongo(item)
+            user.identifier     = item['linked_accounts']['twitter']['twitter_id']
+            result.append(user)
+
         # new format find
         data = self._collection.find(
             {"linked.twitter.user_id": {"$in": twitterIds}}
         ).limit(limit)
-        result.extend( [self._convertFromMongo(doc) for doc in data] )
 
-        result = []
         for item in data:
-            user.identifier = item['linked_accounts']['twitter']['twitter_id']
+            user                = self._convertFromMongo(item)
+            user.identifier     = item['linked']['twitter']['user_id']
             result.append(user)
         return result
 
@@ -368,11 +371,21 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         data = self._collection.find(
             {"linked_accounts.facebook.facebook_id": {"$in": facebookIds}}
         ).limit(limit)
-        
+
         result = []
         for item in data:
             user = self._convertFromMongo(item)
             user.identifier = item['linked_accounts']['facebook']['facebook_id']
+            result.append(user)
+
+        # new format find
+        data = self._collection.find(
+                {"linked.facebook.user_id": {"$in": facebookIds}}
+        ).limit(limit)
+
+        for item in data:
+            user = self._convertFromMongo(item)
+            user.identifier = item['linked']['facebook']['user_id']
             result.append(user)
         
         return result

@@ -9,11 +9,12 @@ import Globals
 import re, time, utils
 
 from gevent.pool            import Pool
-from match.EntityMatcher    import EntityMatcher
 from libs.applerss          import AppleRSS
 from MongoStampedAPI        import MongoStampedAPI
 from optparse               import OptionParser
 from pprint                 import pprint
+from datetime               import datetime
+from libs.iTunes            import globaliTunes
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -34,6 +35,9 @@ def parseCommandLine():
     
     parser.add_option("-a", "--appsonly", default=False, action="store_true", 
         help="only parse app feeds")
+
+    parser.add_option("-q", "--qps", default=2, type="int", dest="max_qps",
+        action="store", help="max QPS sent to iTunes")
     
     (options, args) = parser.parse_args()
     
@@ -44,13 +48,13 @@ def parseCommandLine():
 
 def main():
     options, args = parseCommandLine()
-    
+
+    globaliTunes().setMaxQps(options.max_qps)
+
     stampedAPI = MongoStampedAPI()
-    matcher    = EntityMatcher(stampedAPI, options)
-    appleRSS   = AppleRSS()
-    
-    pool = Pool(8)
-    aids = set()
+    appleRSS = AppleRSS()
+
+    itunes_ids = set()
     
     # music feed popularity prioritized by genre
     music_feeds = [
@@ -81,7 +85,7 @@ def main():
         utils.log("processing %d music feeds" % (2 * len(music_feeds), ))
         
         for feed in music_feeds:
-            pool.spawn(handle_music_feed, feed, matcher, appleRSS, aids, options)
+            pool.spawn(handle_music_feed, feed, stampedAPI, appleRSS, itunes_ids, options)
     
     app_feeds = [
         { 'limit' : 150,                    'name' : 'overall' }, 
@@ -111,11 +115,11 @@ def main():
         utils.log("processing %d app feeds" % (3 * len(app_feeds), ))
         
         for feed in app_feeds:
-            pool.spawn(handle_app_feed, feed, matcher, appleRSS, aids, options)
-    
-    pool.join()
+            # Handle feeds synchronously, there's already plenty of parallelism within the handling of each feed.
+            handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options)
 
-def handle_music_feed(feed, matcher, appleRSS, aids, options):
+
+def handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     name = feed['name']
     del feed['name']
     
@@ -129,51 +133,28 @@ def handle_music_feed(feed, matcher, appleRSS, aids, options):
     
     albums.extend(songs)
     entities = albums
-    
-    for entity in entities:
-        aid = int(entity.aid)
-        if aid in aids:
-            continue
+
+    def import_entity(entity):
+        itunes_id = int(entity.sources.itunes_id)
+        if itunes_id in itunes_ids:
+            return
         
-        aids.add(aid)
-        utils.log("(%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
-        entity.a_popular = True
-        
-        if entity.subcategory == 'album':
-            results = appleRSS._apple.lookup(id=entity.aid, media='music', entity='song', transform=True)
-            results = filter(lambda r: r.entity.subcategory == 'song', results)
-            entity.tracks = list(result.entity.title for result in results)
-        
+        itunes_ids.add(itunes_id)
+        utils.log("(%s) %s (%s)" % (entity.subcategory, entity.title, entity.sources.itunes_id))
+        entity.last_popular = datetime.now()
+
         if options.noop:
             pprint(entity)
         else:
-            matcher.addOne(entity)
-        
-        # attempt to lookup artist for this entity
-        if entity.artist_id is not None:
-            artist_id = int(entity.artist_id)
-            if artist_id in aids:
-                continue
-            
-            results = appleRSS._apple.lookup(id=str(artist_id), media='music', entity='allArtist', transform=True)
-            artists = filter(lambda r: r.entity.subcategory == 'artist', results)
-            
-            for artist in artists:
-                artist = artist.entity
-                
-                artist_id = int(artist.aid)
-                if artist_id in aids:
-                    continue
-                
-                aids.add(artist_id)
-                appleRSS.parse_artist(artist)
-                
-                utils.log("%s) %s (%s)" % (artist.subcategory, artist.title, artist.aid))
-                artist.a_popular = True
-                if not options.noop:
-                    matcher.addOne(artist)
+            print "About to merge music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
+            stampedAPI.mergeEntity(entity)
+            print "Stored music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
 
-def handle_app_feed(feed, matcher, appleRSS, aids, options):
+    pool = Pool(16)
+    for entity in entities:
+        pool.spawn(import_entity, entity)
+
+def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     name = feed['name']
     del feed['name']
     
@@ -184,20 +165,29 @@ def handle_app_feed(feed, matcher, appleRSS, aids, options):
     apps2 = appleRSS.get_top_paid_apps(**feed); apps.extend(apps2)
     apps2 = appleRSS.get_top_grossing_apps(**feed); apps.extend(apps2)
     
-    for entity in apps:
-        aid = int(entity.aid)
-        if aid in aids:
-            continue
+    def import_entity(entity):
+        itunes_id = int(entity.sources.itunes_id)
+        if itunes_id in itunes_ids:
+            return
         
-        aids.add(aid)
+        itunes_ids.add(itunes_id)
         
-        utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
-        entity.a_popular = True
+        utils.log("(%s) %s (%s)" % (entity.subcategory, entity.title, entity.sources.itunes_id))
+
+        # TODO: In order to be used, this actually needs to be exposed in the ResolverObject interface
+        # and used by enrichEntityWithProxy implementations!
+        entity.last_popular = datetime.now()
         
         if options.noop:
             pprint(entity)
         else:
-            matcher.addOne(entity)
+            print "About to merge app entity", entity.title, "with iTunes ID", entity.sources.itunes_id
+            stampedAPI.mergeEntity(entity)
+            print "Stored app", entity.title, "with iTunes ID", entity.sources.itunes_id
+
+    pool = Pool(16)
+    for entity in apps:
+        pool.spawn(import_entity, entity)
 
 if __name__ == '__main__':
     main()

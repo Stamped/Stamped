@@ -8,7 +8,6 @@
 
 #import "STProfileViewController.h"
 #import "STStampedAPI.h"
-#import "STLegacyStampCell.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
 #import "STUserSource.h"
