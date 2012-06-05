@@ -57,6 +57,7 @@ try:
     from Netflix                import *
     from Facebook               import *
     from Twitter                import *
+    from GooglePlaces           import *
 except Exception:
     report()
     raise
@@ -84,6 +85,10 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def _twitter(self):
         return globalTwitter()
+
+    @lazyProperty
+    def _googlePlaces(self):
+        return globalGooglePlaces()
 
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
@@ -1501,6 +1506,20 @@ class StampedAPI(AStampedAPI):
     def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
         if autosuggestForm.category == 'film':
             return self._netflix.autocomplete(autosuggestForm.query)
+        elif autosuggestForm.category == 'place':
+            results = self._googlePlaces.getAutocompleteResults(
+                autosuggestForm.coordinates.split(','),
+                autosuggestForm.query,
+                {'radius': 500, 'types' : 'establishment'})
+            logs.info(results)
+            #make list of names from results, remove duplicate entries, limit to 10
+            names = list(set([place['terms'][0]['value'] for place in results]))[:10]
+            completions = []
+            for name in names:
+                completions.append( { 'completion' : name } )
+
+
+            return completions
         return []
 
     @API_CALL
