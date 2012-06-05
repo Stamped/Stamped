@@ -248,6 +248,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         BOOL updated = newPage != self.page;
         self.page = newPage;
         if (updated) {
+            NSLog(@"Old count %d, new count %d", count, self.page.count);
             [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidChangeNotification object:self];
             if (self.autoSaveAge) {
                 

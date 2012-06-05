@@ -25,7 +25,8 @@ static STMenuFactory* _sharedInstance;
 - (void)menuWithEntityId:(NSString*)anEntityID andCallbackBlock:(void (^)(id<STMenu>))aBlock {
   NSDictionary* params = [NSDictionary dictionaryWithObject:anEntityID forKey: @"entity_id"];
   [[STRestKitLoader sharedInstance] loadWithPath:kMenuLookupPath 
-                                            post:NO 
+                                            post:NO
+                                   authenticated:YES
                                           params:params 
                                          mapping:[STSimpleMenu mapping] 
                                      andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {

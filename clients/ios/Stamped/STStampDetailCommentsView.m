@@ -8,7 +8,6 @@
 
 #import "STStampDetailCommentsView.h"
 #import "UserImageView.h"
-#import "User.h"
 #import "STActionManager.h"
 #import "STStampedActions.h"
 #import <QuartzCore/QuartzCore.h>
@@ -17,7 +16,6 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "STSimpleUser.h"
-#import "AccountManager.h"
 #import "STStampedAPI.h"
 #import "STRippleBar.h"
 #import "STProfileViewController.h"
@@ -199,7 +197,7 @@ andProfileImageSize:(STProfileImageSize)size {
 
 - (id)initWithStamp:(id<STStamp>)stamp preview:(BOOL)hasPreview andIndex:(NSInteger)index {
     id<STContentItem> item = [stamp.contents objectAtIndex:index];
-    self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:ProfileImageSize46];
+    self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:STProfileImageSize46];
     if (self) {
         if (item.images) {
             id<STImageList> imageList = [item.images objectAtIndex:0];

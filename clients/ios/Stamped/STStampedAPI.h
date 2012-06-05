@@ -49,6 +49,10 @@ typedef enum {
     STStampedAPIErrorUnavailable,
 } STStampedAPIError;
 
+extern NSString* const STStampedAPILoginNotification;
+extern NSString* const STStampedAPILogoutNotification;
+extern NSString* const STStampedAPIUserUpdatedNotification;
+
 @interface STStampedAPI : NSObject
 
 //TODO modifify calls to returns cancellable NSOperations that have already been disbatched and autoreleased
@@ -205,13 +209,41 @@ typedef enum {
 
 - (STCancellation*)unreadCountWithCallback:(void(^)(id<STActivityCount> count, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)loginWithScreenName:(NSString*)screenName 
+                              password:(NSString*)password 
+                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loginWithFacebookUserToken:(NSString*)userToken
+                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loginWithTwitterUserToken:(NSString*)userToken 
+                                  userSecret:(NSString*)userSecret
+                                 andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)createAccountWithPassword:(NSString*)password
+                                  screenName:(NSString*)screenName
+                                        name:(NSString*)name
+                                       email:(NSString*)email
+                                       phone:(NSString*)phone //optional
+                                profileImage:(NSString*)profileImage //optional
+                                 andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
                                            screenName:(NSString*)screenName
                                                  name:(NSString*)name
-                                                email:(NSString*)email
-                                                phone:(NSString*)phone
-                                         profileImage:(NSString*)profileImage 
+                                                email:(NSString*)email //optional
+                                                phone:(NSString*)phone //optional
+                                         profileImage:(NSString*)profileImage //optional
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
+                                          userSecret:(NSString*)userSecret
+                                          screenName:(NSString*)screenName
+                                                name:(NSString*)name
+                                               email:(NSString*)email //optional
+                                               phone:(NSString*)phone //optional
+                                        profileImage:(NSString*)profileImage //optional
+                                         andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 

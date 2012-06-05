@@ -10,7 +10,6 @@
 #import "STTextPopoverView.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
-#import "AccountManager.h"
 #import "STImageCache.h"
 
 @interface STSliderScopeView (Internal)
@@ -93,10 +92,10 @@
         _userImageView.hidden = YES;
         [imageView release];
 
-        User *user = [AccountManager sharedManager].currentUser;
+        id<STUser> user = STStampedAPI.sharedInstance.currentUser;
         if (user) {
             
-            UIImage *image = [[STImageCache sharedInstance] cachedUserImageForUser:(id<STUser>)user size:STProfileImageSize46];
+            UIImage *image = [[STImageCache sharedInstance] cachedUserImageForUser:user size:STProfileImageSize46];
             if (image) {
                 
                 [self setUserImageViewImage:image];

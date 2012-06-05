@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
 #import "STUser.h"
-#import "User.h"
 
 @interface STSimpleUser : NSObject <STUser, NSCoding>
 
@@ -22,7 +21,5 @@
 @property (nonatomic, readwrite, copy) NSString* imageURL;
 
 + (RKObjectMapping*)mapping;
-
-+ (STSimpleUser*)userFromLegacyUser:(User*)legacyUser;
 
 @end

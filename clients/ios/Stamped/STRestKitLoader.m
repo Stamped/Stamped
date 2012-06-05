@@ -76,7 +76,7 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-    //NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
+    NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
     if ([self.cancellation finish]) {
         [Util executeOnMainThread:^{
             self.callback(objects, nil, self.cancellation);
@@ -89,13 +89,15 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 
 @interface STRestKitLoader() <RKRequestQueueDelegate>
 
-@property (nonatomic, readwrite, retain) id<STUserDetail> currentUser;
 @property (nonatomic, readwrite, retain) STSimpleOAuthToken* authToken;
 
 @property (nonatomic, readonly, retain) RKObjectManager* objectManager;
 
 @property (nonatomic, readonly, retain) RKRequestQueue* authRequestQueue;
 @property (nonatomic, readonly, retain) KeychainItemWrapper* passwordKeychainItem;
+@property (nonatomic, readonly, retain) KeychainItemWrapper* twitterUserTokenKeychainItem;
+@property (nonatomic, readonly, retain) KeychainItemWrapper* twitterUserSecretKeychainItem;
+@property (nonatomic, readonly, retain) KeychainItemWrapper* facebookUserTokenKeychainItem;
 @property (nonatomic, readonly, retain) KeychainItemWrapper* accessTokenKeychainItem;
 @property (nonatomic, readonly, retain) KeychainItemWrapper* refreshTokenKeychainItem;
 
@@ -115,6 +117,9 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 
 @synthesize authRequestQueue = _authRequestQueue;
 @synthesize passwordKeychainItem = _passwordKeychainItem;
+@synthesize twitterUserTokenKeychainItem = _twitterUserTokenKeychainItem;
+@synthesize twitterUserSecretKeychainItem = _twitterUserSecretKeychainItem;
+@synthesize facebookUserTokenKeychainItem = _facebookUserTokenKeychainItem;
 @synthesize accessTokenKeychainItem = _accessTokenKeychainItem;
 @synthesize refreshTokenKeychainItem = _refreshTokenKeychainItem;
 
@@ -125,6 +130,9 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 
 
 static NSString* const _passwordKeychainItemID = @"Password";
+static NSString* const _twitterUserTokenKeychainItemID = @"TwitterUserToken";
+static NSString* const _twitterUserSecretKeychainItemID = @"TwitterUserSecret";
+static NSString* const _facebookUserTokenKeychainItemID = @"FacebookUserToken";
 static NSString* const _accessTokenKeychainItemID = @"AccessToken";
 static NSString* const _refreshTokenKeychainItemID = @"RefreshToken";
 static NSString* const _loginTypeUserDefaultsKey = @"LoginType";
@@ -157,6 +165,7 @@ static STRestKitLoader* _sharedInstance;
         _objectManager.requestQueue.delegate = self;
         _objectManager.requestQueue.requestTimeout = 30;
         _objectManager.requestQueue.concurrentRequestsLimit = 1;
+        [_objectManager.requestQueue start];
         
         _authRequestQueue = [[RKRequestQueue alloc] init];
         _authRequestQueue.requestTimeout = 30;
@@ -164,7 +173,15 @@ static STRestKitLoader* _sharedInstance;
         _authRequestQueue.concurrentRequestsLimit = 1;
         [_authRequestQueue start];
         
+        NSAssert1(_authRequestQueue != _objectManager.requestQueue, @"Auth queue should not be equal to normal queue %@", _authRequestQueue);
+        
+        [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
+        [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss" inTimeZone:nil];
+        
         _passwordKeychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_passwordKeychainItemID];
+        _twitterUserTokenKeychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_twitterUserTokenKeychainItemID];
+        _twitterUserSecretKeychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_twitterUserSecretKeychainItemID];
+        _facebookUserTokenKeychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_facebookUserTokenKeychainItemID];
         _accessTokenKeychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_accessTokenKeychainItemID];
         _refreshTokenKeychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_refreshTokenKeychainItemID];
         
@@ -185,6 +202,9 @@ static STRestKitLoader* _sharedInstance;
     [_authRequestQueue release];
     
     [_passwordKeychainItem release];
+    [_twitterUserTokenKeychainItem release];
+    [_twitterUserSecretKeychainItem release];
+    [_facebookUserTokenKeychainItem release];
     [_accessTokenKeychainItem release];
     [_refreshTokenKeychainItem release];
     
@@ -201,7 +221,10 @@ static STRestKitLoader* _sharedInstance;
     NSAssert1(path, @"Path must not be nil %@", params);
     NSAssert1(params, @"Params must not be nil %@", path);
     NSAssert1(mapping, @"Mapping must not be nil %@", mapping);
-    if (self.objectManager.isOnline) {
+    NSLog(@"%@ %@", path, params);
+    RKClient* client = [RKClient sharedClient];
+    if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
+        NSLog(@"Offline");
         STCancellation* cancellation = [STCancellation cancellation];
         [Util executeOnMainThread:^{
             if (!cancellation.cancelled) {
@@ -227,13 +250,16 @@ static STRestKitLoader* _sharedInstance;
         if (authenticated) {
             NSString* accessToken = self.authToken.accessToken;
             if (accessToken) {
-                [paramsCopy setObject:self.authToken.accessToken forKey:@"oauth_token"];
+                [paramsCopy setObject:accessToken forKey:@"oauth_token"];
+            }
+            else {
+                NSLog(@"Couldn't get auth token");
             }
         }
         
         objectLoader.objectMapping = mapping;
         
-        objectLoader.params = [[params copy] autorelease];
+        objectLoader.params = paramsCopy;
         
         // NSLog(@"RestKit:%@-%@",path, params);
         
@@ -278,10 +304,15 @@ static STRestKitLoader* _sharedInstance;
         self.authToken.refreshToken = token.refreshToken;
     }
     
-    [_refreshTokenKeychainItem setObject:_accessTokenKeychainItemID forKey:(id)kSecAttrAccount];
-    [_accessTokenKeychainItem setObject:token.accessToken forKey:(id)kSecValueData];
-    
-    [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifespanInSeconds.floatValue] forKey:_tokenExpirationUserDefaultsKey];
+    if (token.accessToken) {
+        [_accessTokenKeychainItem setObject:_accessTokenKeychainItemID forKey:(id)kSecAttrAccount];
+        [_accessTokenKeychainItem setObject:token.accessToken forKey:(id)kSecValueData];
+        self.authToken.accessToken = token.accessToken;
+    }
+    if (token.lifespanInSeconds) {
+        NSLog(@"Setting expiration");
+        [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifespanInSeconds.floatValue] forKey:_tokenExpirationUserDefaultsKey];
+    }
     [[NSUserDefaults standardUserDefaults] synchronize];
     if (self.refreshTimer) {
         [self.refreshTimer invalidate];
@@ -293,13 +324,25 @@ static STRestKitLoader* _sharedInstance;
                                                         repeats:YES];
 }
 
-- (void)updateUser:(id<STUserDetail>)userDetail {
-    self.currentUser = userDetail;
+- (void)setCurrentUser:(id<STUserDetail>)userDetail {
+    [_currentUser release];
+    _currentUser = [userDetail retain];
+    if (userDetail) {
+        NSData* data = [NSKeyedArchiver archivedDataWithRootObject:userDetail];
+        [[NSUserDefaults standardUserDefaults] setObject:data forKey:_userDataUserDefaultsKey];
+    }
+    else {
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:_userDataUserDefaultsKey];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)clearAuthState {
-    [_accessTokenKeychainItem resetKeychainItem];
     [_passwordKeychainItem resetKeychainItem];
+    [_twitterUserTokenKeychainItem resetKeychainItem];
+    [_twitterUserSecretKeychainItem resetKeychainItem];
+    [_facebookUserTokenKeychainItem resetKeychainItem];
+    [_accessTokenKeychainItem resetKeychainItem];
     [_refreshTokenKeychainItem resetKeychainItem];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:_tokenExpirationUserDefaultsKey];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:_loginTypeUserDefaultsKey];
@@ -374,12 +417,164 @@ static STRestKitLoader* _sharedInstance;
     }
 }
 
-- (void)loginWithStoredCredentials {
+- (void)storeStampedScreenName:(NSString*)screenName andPassword:(NSString*)password {
+    [_passwordKeychainItem setObject:screenName forKey:kSecAttrAccount];
+    [_passwordKeychainItem setObject:password forKey:kSecValueData];
+    [[NSUserDefaults standardUserDefaults] setObject:_loginTypeStamped forKey:_loginTypeUserDefaultsKey];
+}
+
+- (void)storeFacebookUserToken:(NSString*)userToken {
+    [_facebookUserTokenKeychainItem setObject:_facebookUserTokenKeychainItemID forKey:kSecAttrAccount];
+    [_facebookUserTokenKeychainItem setObject:userToken forKey:kSecValueData];
+    [[NSUserDefaults standardUserDefaults] setObject:_loginTypeFacebook forKey:_loginTypeUserDefaultsKey];
+}
+
+- (void)storeTwitterUserToken:(NSString*)userToken andUserSecret:(NSString*)userSecret {
+    [_twitterUserTokenKeychainItem setObject:_twitterUserTokenKeychainItemID forKey:kSecAttrAccount];
+    [_twitterUserTokenKeychainItem setObject:userToken forKey:kSecValueData];
+    [_twitterUserSecretKeychainItem setObject:_twitterUserSecretKeychainItemID forKey:kSecAttrAccount];
+    [_twitterUserSecretKeychainItem setObject:userSecret forKey:kSecValueData];
+    [[NSUserDefaults standardUserDefaults] setObject:_loginTypeTwitter forKey:_loginTypeUserDefaultsKey];
+}
+
+- (NSMutableDictionary*)_clientParams {
+    return [NSMutableDictionary dictionaryWithObjectsAndKeys:
+            _clientID, @"client_id",
+            _clientSecret, @"client_secret",
+            nil];
+}
+
+- (STCancellation*)_loginWithPath:(NSString*)path 
+                           params:(NSDictionary*)params
+                 storeCredentials:(void (^)(id<STLoginResponse> response))store 
+                      andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSMutableDictionary* paramCopy = [NSMutableDictionary dictionaryWithDictionary:params];
+    [paramCopy setObject:_clientID forKey:@"client_id"];
+    [paramCopy setObject:_clientSecret forKey:@"client_secret"];
+    return [self loadOneWithPath:path
+                            post:YES
+                   authenticated:NO
+                          params:paramCopy
+                         mapping:[STSimpleLoginResponse mapping]
+                     andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                         id<STLoginResponse> response = result;
+                         if (response) {
+                             store(response);
+                             [self storeOAuthToken:response.token];
+                             self.currentUser = response.user;
+                         }
+                         block(result, error, cancellation);
+                     }];
+}
+
+- (STCancellation*)loginWithScreenName:(NSString*)screenName 
+                              password:(NSString*)password 
+                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/oauth2/login.json";
+    return [self _loginWithPath:path
+                         params:[NSDictionary dictionaryWithObjectsAndKeys:
+                                 screenName, @"screen_name",
+                                 password, @"password",
+                                 nil]
+               storeCredentials:^(id<STLoginResponse> response) {
+                   [self storeStampedScreenName:screenName andPassword:password];
+               } andCallback:block];
+}
+
+- (STCancellation*)loginWithFacebookUserToken:(NSString*)userToken
+                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/oauth2/login/facebook.json";
+    return [self _loginWithPath:path
+                         params:[NSDictionary dictionaryWithObject:userToken forKey:@"user_token"]
+               storeCredentials:^(id<STLoginResponse> response) {
+                   [self storeFacebookUserToken:userToken];
+               } andCallback:block];
+}
+
+- (STCancellation*)loginWithTwitterUserToken:(NSString*)userToken 
+                                  userSecret:(NSString*)userSecret
+                                 andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/oauth2/login/twitter.json";
+    return [self _loginWithPath:path
+                         params:[NSDictionary dictionaryWithObjectsAndKeys:
+                                 userToken, @"user_token",
+                                 userSecret, @"user_secret",
+                                 nil]
+               storeCredentials:^(id<STLoginResponse> response) {
+                   [self storeTwitterUserToken:userToken andUserSecret:userSecret];
+               } andCallback:block];
     
 }
 
+- (NSMutableDictionary*)_commonCreateScreenName:(NSString*)screenName 
+                                           name:(NSString*)name
+                                          email:(NSString*)email
+                                          phone:(NSString*)phone 
+                                   profileImage:(NSString*)profileImage {
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    [params setObject:screenName forKey:@"screen_name"];
+    [params setObject:name forKey:@"name"];
+    [params setObject:email forKey:@"email"];
+    if (phone) {
+        [params setObject:phone forKey:@"phone"];
+    }
+    if (profileImage) {
+        [params setObject:profileImage forKey:@"profile_image"];
+    }
+    return params;
+}
+
+- (STCancellation*)createAccountWithPassword:(NSString*)password
+                                  screenName:(NSString*)screenName
+                                        name:(NSString*)name
+                                       email:(NSString*)email
+                                       phone:(NSString*)phone //optional
+                                profileImage:(NSString*)profileImage //optional
+                                 andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    [params setObject:password forKey:@"password"];
+    return [self _loginWithPath:@"/account/create.json"
+                         params:params
+               storeCredentials:^(id<STLoginResponse> response) {
+                   [self storeStampedScreenName:screenName andPassword:password];
+               } andCallback:block];
+}
+
+- (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
+                                           screenName:(NSString*)screenName
+                                                 name:(NSString*)name
+                                                email:(NSString*)email //optional
+                                                phone:(NSString*)phone //optional
+                                         profileImage:(NSString*)profileImage //optional
+                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    [params setObject:userToken forKey:@"user_token"];
+    return [self _loginWithPath:@"/account/create/facebook.json"
+                         params:params
+               storeCredentials:^(id<STLoginResponse> response) {
+                   [self storeFacebookUserToken:userToken];
+               } andCallback:block];
+}
+
+- (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
+                                          userSecret:(NSString*)userSecret
+                                          screenName:(NSString*)screenName
+                                                name:(NSString*)name
+                                               email:(NSString*)email //optional
+                                               phone:(NSString*)phone //optional
+                                        profileImage:(NSString*)profileImage //optional
+                                         andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    [params setObject:userToken forKey:@"user_token"];
+    [params setObject:userSecret forKey:@"user_secret"];
+    return [self _loginWithPath:@"/account/create/twitter.json"
+                         params:params
+               storeCredentials:^(id<STLoginResponse> response) {
+                   [self storeTwitterUserToken:userToken andUserSecret:userSecret];
+               } andCallback:block];
+}
+
 - (void)authenticate {
-    
     NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:_tokenExpirationUserDefaultsKey];
     // Fresh install.
     if (!tokenExpirationDate) {
@@ -410,7 +605,7 @@ static STRestKitLoader* _sharedInstance;
                 [self refreshToken];
             }
         } else {
-            NSLog(@"user and refresh token not found");
+            NSLog(@"user and refresh token not found: %@, %@", userData, refreshToken);
             [self clearAuthState];
             [Util launchFirstRun];
         }
@@ -420,9 +615,9 @@ static STRestKitLoader* _sharedInstance;
 - (void)refreshToken {
     if (!self.refreshTokenCancellation) {
         STCancellation* cancellation = [self sendTokenRefreshRequestWithCallback:^(id<STOAuthToken> token, NSError *error, STCancellation *cancellation) {
+            self.refreshTokenCancellation = nil;
             if (token) {
                 self.authToken.accessToken = token.accessToken;
-                
             }
         }];
         if (cancellation) {
@@ -431,13 +626,19 @@ static STRestKitLoader* _sharedInstance;
     }
 }
 
+- (void)logout {
+    [self clearAuthState];
+}
+
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     if (queue == _authRequestQueue) {
+        NSLog(@"Suspend request queue %@", request.URL);
         [RKClient sharedClient].requestQueue.suspended = YES;
     } else if (queue == [RKClient sharedClient].requestQueue) {
+        NSLog(@"Other queue");
         if (!self.authToken.accessToken) {
             [self refreshToken];
             return;
@@ -452,6 +653,9 @@ static STRestKitLoader* _sharedInstance;
             request.resourcePath = [request.resourcePath appendQueryParams:params];
             request.params = nil;
         }
+    }
+    else {
+        NSAssert1(NO, @"Unknown queue %@", queue);
     }
 }
 

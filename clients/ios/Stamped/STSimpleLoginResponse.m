@@ -8,6 +8,7 @@
 
 #import "STSimpleLoginResponse.h"
 #import "STSimpleUserDetail.h"
+#import "STSimpleOAuthToken.h"
 
 @implementation STSimpleLoginResponse
 
@@ -38,10 +39,7 @@
 + (RKObjectMapping *)mapping {
     RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleLoginResponse class]];
     
-    [mapping mapAttributes:
-     @"token",
-     nil];
-    
+    [mapping mapRelationship:@"token" withMapping:[STSimpleOAuthToken mapping]];
     [mapping mapRelationship:@"user" withMapping:[STSimpleUserDetail mapping]];
     
     return mapping;

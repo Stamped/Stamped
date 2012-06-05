@@ -7,7 +7,6 @@
 //
 
 #import "STStampsViewSource.h"
-#import "STLegacyStampCell.h"
 #import "STStampedAPI.h"
 #import "Util.h"
 #import "STStampedActions.h"

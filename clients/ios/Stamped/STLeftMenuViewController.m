@@ -9,7 +9,6 @@
 #import "STLeftMenuViewController.h"
 #import "Util.h"
 #import "DDMenuController.h"
-#import "SettingsViewController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
 #import "STDebugViewController.h"
@@ -258,7 +257,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     if (self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
         
         // controller is already root, lets just pop it to root like a tab bar
-        DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        DDMenuController *menuController = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
         UINavigationController *navController = (UINavigationController*)[menuController rootViewController];
         if (navController && [navController isKindOfClass:[UINavigationController class]]) {
             [menuController showRootController:YES];
@@ -274,7 +273,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     
     UIViewController *controller = [[[STConfiguration value:value] alloc] init];
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    DDMenuController *menuController = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
 
     if (self.tableView == tableView || YES) {
         
@@ -326,7 +325,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (void)done:(id)sender {
     
-    UIViewController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    UIViewController *controller = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller dismissModalViewControllerAnimated:YES];
     
 }

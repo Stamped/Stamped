@@ -7,6 +7,7 @@
 //
 
 #import "LoginViewController.h"
+#import "STStampedAPI.h"
 
 @interface LoginKeyboardButton : UIButton
 @end
@@ -157,7 +158,6 @@
         [_loginButton removeFromSuperview];
         _loginButton=nil;
     }
-    
     [UIView animateWithDuration:0.25f animations:^{
         _textView.layer.transform = CATransform3DIdentity;
     }];;

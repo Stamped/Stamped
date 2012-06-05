@@ -10,15 +10,6 @@
 #import "STRootViewController.h"
 #import "BWQuincyManager.h"
 #import <RestKit/RestKit.h>
-#import "OAuthToken.h"
-#import "DetailedEntity.h"
-#import "User.h"
-#import "Entity.h"
-#import "Comment.h"
-#import "Favorite.h"
-#import "Event.h"
-#import "AccountManager.h"
-#import "SearchResult.h"
 #import "STNavigationBar.h"
 #import "STDebug.h"
 #import "Util.h"
@@ -57,7 +48,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 @interface STAppDelegate ()
 
-- (void)performRestKitMappings;
 - (void)addConfigurations;
 
 @end
@@ -215,43 +205,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     
-}
-
-
-- (void)performRestKitMappings {
-    RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
-    objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
-    [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
-    [RKClient sharedClient].requestQueue.requestTimeout = 30;
-    [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 3;
-    
-    RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
-    [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
-     @"name", @"name",
-     @"color_primary", @"primaryColor",
-     @"color_secondary", @"secondaryColor",
-     @"screen_name", @"screenName",
-     @"num_credits", @"numCredits",
-     @"num_followers", @"numFollowers",
-     @"num_friends", @"numFriends",
-     @"num_stamps", @"numStamps",
-     @"num_stamps_left", @"numStampsLeft",
-     @"image_url", @"imageURL", nil];
-    userMapping.primaryKeyAttribute = @"userID";
-    [userMapping mapAttributes:@"bio", @"website", @"location", @"identifier", nil];
-    
-    RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
-    [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",
-     @"refresh_token", @"refreshToken",
-     @"expires_in", @"lifetimeSecs", nil];
-    
-    RKObjectMapping* userAndTokenMapping = [RKObjectMapping serializationMapping];
-    [userAndTokenMapping mapRelationship:@"user" withMapping:userMapping];
-    [userAndTokenMapping mapRelationship:@"token" withMapping:oauthMapping];
-    
-    [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"User"];
-    [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
-    [objectManager.mappingProvider setMapping:userAndTokenMapping forKeyPath:@"UserAndToken"];
 }
 
 

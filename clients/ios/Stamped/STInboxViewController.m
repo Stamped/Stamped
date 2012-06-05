@@ -31,7 +31,6 @@
 
 #import "EntityDetailViewController.h"
 #import "STStampCell.h"
-#import "AccountManager.h"
 #import "DDMenuController.h"
 #import "STActionManager.h"
 
@@ -511,7 +510,7 @@
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    DDMenuController *menuController = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     return ![[menuController tap] isEnabled];
     
 }
