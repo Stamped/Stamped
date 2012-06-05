@@ -1514,7 +1514,7 @@ class StampedAPI(AStampedAPI):
             logs.info(results)
             #make list of names from results, remove duplicate entries, limit to 10
             names = list(set([place['terms'][0]['value'] for place in results]))[:10]
-            completions = {}
+            completions = []
             for name in names:
                 completions.append( { 'completion' : name } )
 
