@@ -1512,11 +1512,12 @@ class StampedAPI(AStampedAPI):
                 autosuggestForm.query,
                 {'radius': 500, 'types' : 'establishment'})
             logs.info(results)
-            completions = []
-            for place in results:
-                completions.append( { 'completion' : place['terms'][0]['value'] } )
-            #remove duplicate entries, limit to 10
-            completions = list(set(completions))[:10]
+            #make list of names from results, remove duplicate entries, limit to 10
+            names = list(set([place['terms'][0]['value'] for place in results]))[:10]
+            for name in names:
+                completions.append( { 'completion' : name } )
+
+
             return completions
         return []
 
