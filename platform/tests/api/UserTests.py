@@ -106,7 +106,7 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
             "user_id": self.userB['user_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result == False)
+        self.assertTrue(result['result'] == False)
     
     def test_privacy_screen_name(self):
         path = "users/privacy.json"
@@ -115,7 +115,7 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
             "screen_name": self.userB['screen_name']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result == False)
+        self.assertTrue(result['result'] == False)
     
     def test_privacy_not_found(self):
         path = "users/privacy.json"
@@ -140,7 +140,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
-            self.assertIn(user['identifier'], [x.lower() for x in emails])
+            self.assertIn(user['search_identifier'], [x.lower() for x in emails])
 
     def test_find_by_phone(self):
         # Set phone number
@@ -166,7 +166,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
-            self.assertIn(user['identifier'], numbers)
+            self.assertIn(user['search_identifier'], numbers)
 
     def test_find_by_phone_twofer(self):
         # Set phone number
@@ -192,7 +192,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
-            self.assertTrue(user['identifier'] == number)
+            self.assertTrue(user['search_identifier'] == number)
 
     def test_fail_find_by_phone(self):
         # Set phone number
@@ -214,7 +214,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         self.assertLength(result, 1)
         user = result[0]
         self.assertIn(user['screen_name'], self.screen_names)
-        self.assertIn(user['identifier'], numbers)
+        self.assertIn(user['search_identifier'], numbers)
 
 class StampedAPISuggested(StampedAPIUserTest):
     def test_suggested(self):

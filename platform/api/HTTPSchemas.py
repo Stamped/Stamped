@@ -701,8 +701,10 @@ class HTTPUser(Schema):
         cls.addProperty('privacy',                      bool, required=True)
         cls.addNestedProperty('image',                  HTTPImageSchema)
         cls.addProperty('image_url',                    basestring)
+        cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
         
-        cls.addProperty('identifier',                   basestring)
+        cls.addProperty('following',                    bool)
+
         cls.addProperty('num_stamps',                   int)
         cls.addProperty('num_stamps_left',              int)
         cls.addProperty('num_friends',                  int)
@@ -712,7 +714,6 @@ class HTTPUser(Schema):
         cls.addProperty('num_credits_given',            int)
         cls.addProperty('num_likes',                    int)
         cls.addProperty('num_likes_given',              int)
-        cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
 
     def importAccount(self, account, client=None):
         return self.importUser(account, client)
@@ -764,7 +765,15 @@ class HTTPUser(Schema):
 class HTTPSuggestedUser(HTTPUser):
     @classmethod
     def setSchema(cls):
-        cls.addPropertyList('explanations', basestring)
+        cls.addProperty('search_identifier',                basestring)
+        cls.addProperty('explain_relationship',             basestring)
+
+    def __init__(self):
+        HTTPUser.__init__(self)
+
+    def importUser(self, user, client=None):
+        HTTPUser.importUser(self, user, client)
+        return self
 
 class HTTPUserMini(Schema):
     @classmethod

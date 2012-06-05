@@ -366,18 +366,18 @@ class TwitterAccountNew(Schema):
 class User(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('color_primary',                basestring)
-        cls.addProperty('color_secondary',              basestring)
-        cls.addProperty('bio',                          basestring)
-        cls.addProperty('website',                      basestring)
-        cls.addProperty('location',                     basestring)
-        cls.addProperty('privacy',                      bool, required=True)
-        cls.addNestedProperty('stats',                  UserStatsSchema, required=True)
-        cls.addNestedProperty('timestamp',              UserTimestampSchema, required=True)
-        cls.addProperty('identifier',                   basestring)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('privacy',                          bool, required=True)
+        cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
+        cls.addNestedProperty('timestamp',                  UserTimestampSchema, required=True)
+        cls.addProperty('following',                        bool)
 
     def __init__(self):
         Schema.__init__(self)
@@ -396,18 +396,37 @@ class UserMini(Schema):
         cls.addProperty('color_primary',                    basestring)
         cls.addProperty('color_secondary',                  basestring)
         cls.addProperty('privacy',                          bool)
-        cls.addNestedProperty('timestamp',                  UserTimestampSchema)
-        # cls.addNestedProperty('accessories',    
+        cls.addNestedProperty('timestamp',                  UserTimestampSchema) 
 
     def __init__(self):
         Schema.__init__(self)
-        # self.timestamp = UserTimestampSchema()
 
 class UserTiny(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring)
         cls.addProperty('screen_name',                      basestring)
+
+class SuggestedUser(User):
+    """
+    This class is used for results within Friend Finder (e.g. fine by email, via Facebook, etc.).
+
+    It includes three additional fields: 
+    - search_identifier: The identifier used for the search query (if applicable), e.g. the facebook_id
+    - explanation: An explanation for why the user is being returned
+    """
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('search_identifier',                basestring)
+        cls.addProperty('explain_relationship',             basestring)
+
+    def __init__(self):
+        User.__init__(self)
+
+    def importUser(self, user):
+        self.dataImport(user.dataExport())
+        return self
+
 
 class SuggestedUserRequest(Schema):
     @classmethod
