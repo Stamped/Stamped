@@ -45,4 +45,11 @@
     
     return mapping;
 }
+
++ (STSimpleStampPreview*)stampPreviewFromStamp:(id<STStamp>)stamp {
+    STSimpleStampPreview* preview = [[[STSimpleStampPreview alloc] init] autorelease];
+    preview.stampID = stamp.stampID;
+    preview.user = stamp.user;
+}
+
 @end

@@ -13,7 +13,7 @@
 @interface STSimpleStampedByGroup : NSObject <STStampedByGroup, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSNumber* count;
-@property (nonatomic, readwrite, retain) NSArray<STStamp>* stamps;
+@property (nonatomic, readonly, retain) NSArray<STStampPreview>* stampPreviews;
 
 + (RKObjectMapping*)mapping;
 

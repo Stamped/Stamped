@@ -369,7 +369,6 @@
 		034BE0541562F6980008F160 /* STSimpleDistributionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26D91538DCD100391F15 /* STSimpleDistributionItem.m */; };
 		034BE0551562F6980008F160 /* STFriendsSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26E3153928BC00391F15 /* STFriendsSource.m */; };
 		034BE0561562F6980008F160 /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
-		034BE0571562F6980008F160 /* STStampedBySource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E27F153DBACC00D84915 /* STStampedBySource.m */; };
 		034BE0581562F6980008F160 /* STEntitySearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E28A153DE32B00D84915 /* STEntitySearchController.m */; };
 		034BE0591562F6980008F160 /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E291153DE43600D84915 /* STTableViewController.m */; };
 		034BE05A1562F6980008F160 /* CALayer+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B595153F078D00BB8C82 /* CALayer+Stamped.m */; };
@@ -1897,8 +1896,6 @@
 		639DAC031572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */; };
 		63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
 		63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
-		63A6E280153DBACC00D84915 /* STStampedBySource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E27F153DBACC00D84915 /* STStampedBySource.m */; };
-		63A6E281153DBACC00D84915 /* STStampedBySource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E27F153DBACC00D84915 /* STStampedBySource.m */; };
 		63A6E28B153DE32B00D84915 /* STEntitySearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E28A153DE32B00D84915 /* STEntitySearchController.m */; };
 		63A6E28C153DE32B00D84915 /* STEntitySearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E28A153DE32B00D84915 /* STEntitySearchController.m */; };
 		63A6E292153DE43600D84915 /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E291153DE43600D84915 /* STTableViewController.m */; };
@@ -2077,7 +2074,6 @@
 		63BA77731545F69400EE95DA /* STSimpleDistributionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26D91538DCD100391F15 /* STSimpleDistributionItem.m */; };
 		63BA77741545F69400EE95DA /* STFriendsSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26E3153928BC00391F15 /* STFriendsSource.m */; };
 		63BA77751545F69400EE95DA /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
-		63BA77761545F69400EE95DA /* STStampedBySource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E27F153DBACC00D84915 /* STStampedBySource.m */; };
 		63BA77771545F69400EE95DA /* STEntitySearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E28A153DE32B00D84915 /* STEntitySearchController.m */; };
 		63BA77781545F69400EE95DA /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E291153DE43600D84915 /* STTableViewController.m */; };
 		63BA77791545F69400EE95DA /* CALayer+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B595153F078D00BB8C82 /* CALayer+Stamped.m */; };
@@ -4907,8 +4903,6 @@
 		639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGenericCacheConfiguration.m; sourceTree = "<group>"; };
 		63A649881532668E001D9314 /* STPlaylistViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistViewFactory.h; sourceTree = "<group>"; };
 		63A649891532668E001D9314 /* STPlaylistViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistViewFactory.m; sourceTree = "<group>"; };
-		63A6E27E153DBACC00D84915 /* STStampedBySource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedBySource.h; sourceTree = "<group>"; };
-		63A6E27F153DBACC00D84915 /* STStampedBySource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedBySource.m; sourceTree = "<group>"; };
 		63A6E289153DE32B00D84915 /* STEntitySearchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearchController.h; sourceTree = "<group>"; };
 		63A6E28A153DE32B00D84915 /* STEntitySearchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntitySearchController.m; sourceTree = "<group>"; };
 		63A6E290153DE43600D84915 /* STTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTableViewController.h; sourceTree = "<group>"; };
@@ -6566,8 +6560,6 @@
 				633CEF2A1535E5DC009E1C06 /* STUserSource.m */,
 				6380679B1541A72300423E98 /* STYouSource.h */,
 				6380679C1541A72300423E98 /* STYouSource.m */,
-				63A6E27E153DBACC00D84915 /* STStampedBySource.h */,
-				63A6E27F153DBACC00D84915 /* STStampedBySource.m */,
 				63C983F1154C914A000180DC /* STTableDelegator.h */,
 				63C983F2154C914A000180DC /* STTableDelegator.m */,
 				63C983F8154C991A000180DC /* STGenericTableDelegate.h */,
@@ -11849,7 +11841,6 @@
 				034BE0541562F6980008F160 /* STSimpleDistributionItem.m in Sources */,
 				034BE0551562F6980008F160 /* STFriendsSource.m in Sources */,
 				034BE0561562F6980008F160 /* STStampedByView.m in Sources */,
-				034BE0571562F6980008F160 /* STStampedBySource.m in Sources */,
 				034BE0581562F6980008F160 /* STEntitySearchController.m in Sources */,
 				034BE0591562F6980008F160 /* STTableViewController.m in Sources */,
 				034BE05A1562F6980008F160 /* CALayer+Stamped.m in Sources */,
@@ -12145,7 +12136,6 @@
 				63BA77731545F69400EE95DA /* STSimpleDistributionItem.m in Sources */,
 				63BA77741545F69400EE95DA /* STFriendsSource.m in Sources */,
 				63BA77751545F69400EE95DA /* STStampedByView.m in Sources */,
-				63BA77761545F69400EE95DA /* STStampedBySource.m in Sources */,
 				63BA77771545F69400EE95DA /* STEntitySearchController.m in Sources */,
 				63BA77781545F69400EE95DA /* STTableViewController.m in Sources */,
 				63BA77791545F69400EE95DA /* CALayer+Stamped.m in Sources */,
@@ -12443,7 +12433,6 @@
 				633F26DB1538DCD200391F15 /* STSimpleDistributionItem.m in Sources */,
 				633F26E5153928BC00391F15 /* STFriendsSource.m in Sources */,
 				634BA4BA153CA8BE003F96AB /* STStampedByView.m in Sources */,
-				63A6E281153DBACC00D84915 /* STStampedBySource.m in Sources */,
 				63A6E28C153DE32B00D84915 /* STEntitySearchController.m in Sources */,
 				63A6E293153DE43600D84915 /* STTableViewController.m in Sources */,
 				6360B597153F078D00BB8C82 /* CALayer+Stamped.m in Sources */,
@@ -12740,7 +12729,6 @@
 				633F26DA1538DCD200391F15 /* STSimpleDistributionItem.m in Sources */,
 				633F26E4153928BC00391F15 /* STFriendsSource.m in Sources */,
 				634BA4B9153CA8BE003F96AB /* STStampedByView.m in Sources */,
-				63A6E280153DBACC00D84915 /* STStampedBySource.m in Sources */,
 				63A6E28B153DE32B00D84915 /* STEntitySearchController.m in Sources */,
 				63A6E292153DE43600D84915 /* STTableViewController.m in Sources */,
 				6360B596153F078D00BB8C82 /* CALayer+Stamped.m in Sources */,
