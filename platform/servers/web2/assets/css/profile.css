@@ -194,7 +194,7 @@ footer,
   transition: all 0.3s ease-out;
   margin: 0;
   height: 0;
-  opacity: 0;
+  display: none;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget:hover,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget:active {
@@ -208,7 +208,7 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget-expanded .share-buttons {
   height: auto;
   margin-top: 1em;
-  opacity: 1;
+  display: block;
 }
 .profile-header-wrapper .profile-header .profile-content-page .header-category-place {
   background: url(/assets/img/covers/place_cover_temp.png) no-repeat;

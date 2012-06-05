@@ -42,6 +42,7 @@
 
 
 TODO:
+    * fix opacity of lower profile header ribbon
     * align stamp-gallery with profile header
     
     * sDetail:
