@@ -3735,9 +3735,7 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Verify user isn't being blocked
         if not previouslyTodoed and len(recipientIds) > 0:
-            #for stamp in friendStamps:
-            #if stamp.user.user_id != authUserId:
-            self._addTodoActivity(authUserId, recipientIds, entity.entity_id, stampId)
+            self._addTodoActivity(authUserId, recipientIds, entity.entity_id)
 
             # Update stamp stats
             if stampId is not None:
@@ -3893,10 +3891,8 @@ class StampedAPI(AStampedAPI):
                                           groupRange = timedelta(days=1),
                                           benefit = benefit)
 
-    def _addTodoActivity(self, userId, recipientIds, entityId, stampId=None):
+    def _addTodoActivity(self, userId, recipientIds, entityId):
         objects = ActivityObjectIds()
-        if stampId is not None:
-            objects.stamp_ids = [ stampId ]
         objects.entity_ids = [ entityId ]
         self._addActivity('todo', userId, objects,
                                           recipientIds = recipientIds,
@@ -3961,6 +3957,8 @@ class StampedAPI(AStampedAPI):
         objects.stamp_ids       = [ stampId ]
         self._addActivity('action_%s' % action_name, userId, objects,
                                                              body = body,
+                                                             group = True,
+                                                             groupRange = timedelta(days=1),
                                                              unique = True)
 
     def _addActivity(self, verb,

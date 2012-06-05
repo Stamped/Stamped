@@ -53,6 +53,11 @@ class StampedAPIActivityTest(AStampedAPITestCase):
                 benefit = i['benefit']
         self.assertTrue(benefit is not None)
 
+    def _assertVerbExists(self, result, verb):
+        verbs = [i['verb'] for i in result]
+        exists = verb in verbs
+        self.assertTrue(exists)
+
     def _assertFollowSubjects(self, result, numSubjects):
         exists = False
         for i in result:
@@ -284,6 +289,7 @@ class StampedAPIActivityTodos(StampedAPIActivityTest):
             lambda x: self.assertEqual(len(x[0]['objects']['entities']), 1),
             ])
 
+        # User D friends User A and Todo's his stamped entity, we expect this to show up as a grouped activity item
         self.createFriendship(self.tokenD, self.userA)
         self.createTodo(self.tokenD, self.entityA['entity_id'])
 
@@ -292,19 +298,22 @@ class StampedAPIActivityTodos(StampedAPIActivityTest):
         self._assertBody(result, 'UserB and UserD added %s as a to-do.' % self.entityA['title'])
 
         self.deleteFriendship(self.tokenD, self.userA)
-
         self.deleteTodo(self.tokenB, self.entityA['entity_id'])
+        self.deleteTodo(self.tokenD, self.entityA['entity_id'])
 
-        # Assert nothing happens to the activity feed when User E removes the todo
+        # Assert nothing happens to the activity feed when User B and D removes the todo
         self.async(lambda: self.handleGET(path, data), [
             lambda x: self.assertEqual(len(x), 3),
             lambda x: self._assertBody(x, 'UserB and UserD added %s as a to-do.' % self.entityA['title']),
             ])
 
-        # Assert adding a todo from a non-friend on User A's stamp shows up on User A's activity feed as a separate item
-        self.createTodo(self.tokenC, self.entityA['entity_id'], self.stampB['stamp_id'])
+        # Assert adding a todo from a non-friend on User A's stamp shows up in the aggregate item
+        self.createTodo(self.tokenC, self.entityA['entity_id'], self.stampA['stamp_id'])
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, 'UserB and 2 others added %s as a to-do.' % self.entityA['title'])
+
+        self.deleteTodo(self.tokenC, self.entityA['entity_id'])
 
     def test_delete_account_show(self):
         (self.userE, self.tokenE) = self.createAccount('UserE')
@@ -348,16 +357,54 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
 
         path = 'actions/complete.json'
         data = {
+            "oauth_token": self.tokenB['access_token'],
             'action' : 'listen',
             'source' : 'rdio',
             'source_id': 'a1213511',
             'stamp_id' : stampNew['stamp_id'],
             }
         self.handlePOST(path, data)
-        result = self.showActivity(self.tokenB)
 
-        import pprint
-        pprint.pprint(result)
+        # Make sure the complete action was added to User A's activity feed
+        result = self.showActivity(self.tokenA)
+        self._assertVerbExists(result, 'action_listen')
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, 'UserB listened to Call Your Girlfriend - Single.')
+
+        # Repeat the same action, make sure it doesn't get added to the activity feed again
+        path = 'actions/complete.json'
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            'action' : 'listen',
+            'source' : 'rdio',
+            'source_id': 'a1213511',
+            'stamp_id' : stampNew['stamp_id'],
+            }
+        self.handlePOST(path, data)
+
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 3)
+
+        # Test that if User A listens to his own stamped song, it doesn't show up on his feed
+        # Repeat the same action, make sure it doesn't get added to the activity feed again
+        path = 'actions/complete.json'
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            'action' : 'listen',
+            'source' : 'rdio',
+            'source_id': 'a1213511',
+            'stamp_id' : stampNew['stamp_id'],
+            }
+        self.handlePOST(path, data)
+
+        result = self.showActivity(self.tokenA)
+
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, 'UserB listened to Call Your Girlfriend - Single.')
+
+        # cleanup
+        self.deleteStamp(self.tokenA, stampNew['stamp_id'])
+        self.deleteEntity(self.tokenA, entityNew['entity_id'])
 
 
 if __name__ == '__main__':
