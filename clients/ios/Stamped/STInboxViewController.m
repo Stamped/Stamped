@@ -82,10 +82,6 @@
     [super dealloc];
 }
 
-- (void)login:(id)notImportant {
-    [Util launchFirstRun];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
   
@@ -102,9 +98,7 @@
         [Util addCreateStampButtonToController:self];
 
     }
-    
-    [Util addHomeButtonToController:self withBadge:YES];
-    
+        
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;
@@ -130,6 +124,13 @@
 - (void)viewDidDisappear:(BOOL)animated {
     //Todo cancel pending cache ops
     [super viewDidDisappear:animated];
+}
+
+
+#pragma mark - Actions
+
+- (void)login:(id)sender {
+    [Util launchFirstRun];
 }
 
 
@@ -510,7 +511,7 @@
 }
 
 
-#pragma mark - UIGestureRecognizerDelegate 
+#pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     

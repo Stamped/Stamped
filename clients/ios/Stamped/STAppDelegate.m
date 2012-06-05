@@ -37,6 +37,8 @@
 #import "STRestKitLoader.h"
 
 #import "STCreateStampViewController.h"
+#import "FindFriendsViewController.h"
+#import "STProfileViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -59,8 +61,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @synthesize navigationController = _navigationController;
 @synthesize grid = grid_;
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_window release];
     [_navigationController release];
     [grid_ release];
@@ -92,11 +93,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     RKLogSetAppLoggingLevel(RKLogLevelError);
     [self addConfigurations];
     [self customizeAppearance];
-    //[self performRestKitMappings];
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];
-    //[[AccountManager sharedManager] authenticate];
     [[STRestKitLoader sharedInstance] authenticate];
     
     STInboxViewController *inboxController = [[STInboxViewController alloc] init];
@@ -110,6 +109,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     menuController.rightViewController = rightController;
     self.menuController = menuController;
     
+    [Util addHomeButtonToController:inboxController withBadge:YES];
+    
     [inboxController release];
     [leftController release];
     [rightController release];
@@ -118,9 +119,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
-
-    //[[Util sharedNavigationController] pushViewController:[[[STIWantToViewController alloc] init] autorelease] animated:NO];
-    
     
     grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
     grid_.hidden = YES;
@@ -209,6 +207,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 
 - (void)customizeAppearance {
+    return;
     if (![UIBarButtonItem conformsToProtocol:@protocol(UIAppearance)])
         return;
     
@@ -273,6 +272,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addChoices:inboxChoices originalKey:@"New Inbox" forKey:@"Root.inbox"];
     [STConfiguration addValue:[STIWantToViewController class] forKey:@"Root.iWantTo"];
     [STConfiguration addValue:[STUniversalNewsController class] forKey:@"Root.news"];
+    [STConfiguration addValue:[FindFriendsViewController class] forKey:@"Root.findFriends"];
+    [STConfiguration addValue:[STProfileViewController class] forKey:@"Root.user"];
     [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];
     [STConfiguration addValue:[STDebugViewController class] forKey:@"Root.debug"];
     [STConfiguration addValue:[STSettingsViewController class] forKey:@"Root.settings"];

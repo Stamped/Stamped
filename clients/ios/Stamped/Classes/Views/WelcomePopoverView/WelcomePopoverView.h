@@ -14,6 +14,7 @@
     UIView *_welcomeView;
     UIView *_optionsView;
     UIView *_container;
+    UIButton *_closeButton;
 }
 
 @property(nonatomic,assign) id <WelcomePopoverViewDelegate> delegate;

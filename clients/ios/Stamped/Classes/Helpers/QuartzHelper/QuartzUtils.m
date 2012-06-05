@@ -237,8 +237,8 @@ void drawStampGradient(CGColorRef topColor, CGColorRef bottomColor, CGContextRef
     CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
     CGColorSpaceRelease(_rgb);
     
-    CGPoint start = CGPointMake(0.0f, rect.size.height);
-    CGPoint end = CGPointMake(rect.size.width, 0.0f);
+    CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height);
+    CGPoint end = CGPointMake(rect.origin.x + rect.size.width, rect.origin.y);
     
     CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
     CGGradientRelease(gradient);

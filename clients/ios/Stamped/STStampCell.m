@@ -124,30 +124,33 @@
 
                   truncate = (x > rect.size.width - 26.0f);
                  
+                  // draw stamp
                   if (!_drawn && (truncate || i == _title.length-1)) {
                       _drawn = YES;
-                      // draw stamp
-                      if (_stampImage) {
+                      
+                      CGRect imageRect = CGRectMake(MIN(floorf(x - 7), rect.size.width-14.0f), 17.0f, 14.0f, 14.0f);
+                      imageRect.origin.y = floorf(rect.size.height - (17.0f+14.0f));
+                      CGContextSaveGState(ctx);
+                      CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
+                      CGContextScaleCTM(ctx, 1.0f, -1.0f);
+                      CGContextClipToMask(ctx, imageRect, [UIImage imageNamed:@"stamp_14pt_texture.png"].CGImage);
+                      
+                      if (self.highlighted) {
                           
-                          CGRect imageRect = CGRectMake(MIN(floorf(x - 7), rect.size.width-_stampImage.size.width), 17.0f, _stampImage.size.width, _stampImage.size.height);
-                          if (self.highlighted) {
-                              
-                              CGContextSaveGState(ctx);
-                              imageRect.origin.y = floorf(rect.size.height - (17.0f+_stampImage.size.height));
-                              CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
-                              CGContextScaleCTM(ctx, 1.0, -1.0);
-                              [[UIColor whiteColor] setFill];
-                              CGContextClipToMask(ctx, imageRect, _stampImage.CGImage);
-                              CGContextFillRect(ctx, imageRect);
-                              CGContextRestoreGState(ctx);
-                              
+                          [[UIColor whiteColor] setFill];
+                          CGContextFillRect(ctx, imageRect);
+                          
+                      } else {
+                          
+                          if (_primaryColor && _secondarayColor) {
+                              drawStampGradient([_primaryColor CGColor], [_secondarayColor CGColor], ctx);
                           } else {
-                              
-                              [_stampImage drawInRect:imageRect];
-                              
+                              CGContextFillRect(ctx, rect);
                           }
-                          
+                                                    
                       }
+                      
+                      CGContextRestoreGState(ctx);
                       
                   }
 
@@ -238,8 +241,9 @@
     [_title release], _title = nil;
     [_username release], _username = nil;
     [_subcategory release], _subcategory = nil;
-    [_stampImage release], _stampImage = nil;
-    
+    [_primaryColor release], _primaryColor = nil;
+    [_secondarayColor release], _secondarayColor = nil;
+
     _statsView = nil;
     _dateLabel = nil;
 
@@ -269,9 +273,14 @@
     [_categoryImage release], _categoryImage=nil;
     _categoryImage = [[Util imageForCategory:stamp.entity.category] retain];
     
-    [_stampImage release], _stampImage=nil;
-    _stampImage = [[Util stampImageForUser:stamp.user withSize:STStampImageSize14] retain];
-   
+    float r,g,b;
+    [Util splitHexString:stamp.user.primaryColor toRed:&r green:&g blue:&b];
+    [_primaryColor release], _primaryColor=nil;
+    _primaryColor = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
+    [Util splitHexString:stamp.user.secondaryColor toRed:&r green:&g blue:&b];
+    [_secondarayColor release], _secondarayColor=nil;
+    _secondarayColor = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
+
     _commentCount = [stamp.numComments integerValue];
     for (id obj in stamp.contents) {
         _hasMedia = [[obj images] count] > 0;
@@ -329,7 +338,6 @@
     } else {
         _statsDots.fillColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor;
         _statsDots.strokeColor = [UIColor colorWithRed:0.8509f green:0.8509f blue:0.8509f alpha:1.0f].CGColor;
-        _footerImageView.hidden = _statsView.hidden;
     }
     
 }
@@ -340,7 +348,10 @@
     [self toggleHightlighted:highlighted];
     [_headerView setNeedsDisplay];
     [_commentView setNeedsDisplay];
-    
+    if (!highlighted) {
+        _footerImageView.hidden = _statsView.hidden;
+    }
+
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

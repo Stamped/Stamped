@@ -8,6 +8,7 @@
 
 #import "SignupViewController.h"
 #import "STTextFieldTableCell.h"
+#import "SignupFooterView.h"
 
 @interface SignupViewController ()
 
@@ -40,6 +41,16 @@
         }];
         self.tableView.backgroundView = background;
         [background release];
+    }
+    
+    if (!self.tableView.tableFooterView) {
+        
+        SignupFooterView *view = [[SignupFooterView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 120.0f)];
+        view.backgroundColor = [UIColor clearColor];
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        self.tableView.tableFooterView = view;
+        [view release];
+        
     }
     
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -99,6 +110,26 @@
     
     
     return YES;
+}
+
+
+#pragma mark - SignupFooterViewDelegate
+
+- (void)signupFooterViewCreate:(SignupFooterView*)view {
+    
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
+    
+    
+    [params release];
+    
+}
+
+- (void)signupFooterViewTermsOfUse:(SignupFooterView *)view {
+    
+}
+
+- (void)signupFooterViewPrivacy:(SignupFooterView *)view {
+    
 }
 
 @end

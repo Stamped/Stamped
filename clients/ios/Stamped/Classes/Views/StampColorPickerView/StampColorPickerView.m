@@ -58,6 +58,7 @@
         }
         
         StampPickerButton *button = [[StampPickerButton alloc] initWithFrame:CGRectMake(10.0f, self.bounds.size.height - 48.0f, (self.bounds.size.width-30.0f)/2, 45.0f)];
+        button.imageView.image = [UIImage imageNamed:@"stamp_customize_icon.png"];
         button.titleLabel.text = @"Customize";
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
         [button addTarget:self action:@selector(customize:) forControlEvents:UIControlEventTouchUpInside];
@@ -66,6 +67,7 @@
         
         button = [[StampPickerButton alloc] initWithFrame:CGRectMake(20.0f + (self.bounds.size.width-30.0f)/2, self.bounds.size.height - 48.0f, (self.bounds.size.width-30.0f)/2, 45.0f)];
         button.titleLabel.text = @"Randomize";
+        button.imageView.image = [UIImage imageNamed:@"stamp_randomize_icon.png"];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
         [button addTarget:self action:@selector(randomize:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:button];
@@ -430,7 +432,9 @@
     frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
     self.titleLabel.frame = frame;
     
+    [self.imageView sizeToFit];
     frame = self.imageView.frame;
+    frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
     frame.origin.x = (CGRectGetMinX(self.titleLabel.frame) - self.imageView.bounds.size.width);
     self.imageView.frame = frame;
     

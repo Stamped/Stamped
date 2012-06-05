@@ -190,9 +190,18 @@ class MongoActivityCollection(AActivityDB):
         if len(alerts): 
             self.alerts_collection.addAlerts(alerts)
 
+    def _removeActivityIds(self, activityIds):
+        self.activity_links_collection.removeActivityLinks(activityIds)
+        self.activity_items_collection.removeActivityItems(activityIds)
+
     def _removeSubject(self, activityIds, subjectId):
         toRemove = self.activity_items_collection.removeSubjectFromActivityItems(activityIds, subjectId)
         self._removeActivityIds(toRemove)
+
+    def _removeActivity(self, verb, userId, objects):
+        subjects    = [ userId ]
+        activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
+        self._removeSubject(activityIds, userId)
 
     def removeLikeActivity(self, userId, stampId):
         objects = { 'stamp_ids' : [ stampId ] }
@@ -213,15 +222,6 @@ class MongoActivityCollection(AActivityDB):
     def removeCommentActivity(self, userId, commentId):
         objects = { 'comment_ids' : [ commentId ] }
         return self._removeActivity('comment', userId, objects)
-
-    def _removeActivity(self, verb, userId, objects):
-        subjects    = [ userId ]
-        activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
-        self._removeSubject(activityIds, userId)
-
-    def _removeActivityIds(self, activityIds):
-        self.activity_links_collection.removeActivityLinks(activityIds)
-        self.activity_items_collection.removeActivityItems(activityIds)
 
     def removeActivityForStamp(self, stampId):
         objects     = { 'stamp_ids' : [ stampId ] }

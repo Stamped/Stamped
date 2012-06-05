@@ -16,7 +16,6 @@
 @synthesize titleLabel=_titleLabel;
 @synthesize icon=_icon;
 @synthesize border=_border;
-@synthesize topBorder=_topBorder;
 @synthesize delegate;
 
 
@@ -48,7 +47,7 @@
                 CGContextTranslateCTM(ctx, 0, rect.size.height);
                 CGContextScaleCTM(ctx, 1.0, -1.0);
                 
-                CGRect fillRect = CGRectMake(rect.origin.x + ((rect.size.width-_icon.size.width)/2), rect.origin.y + ((rect.size.height-_icon.size.height)/2), _icon.size.width, _icon.size.height);
+                CGRect fillRect = CGRectMake(ceilf(rect.origin.x + ((rect.size.width-_icon.size.width)/2)), ceilf(rect.origin.y + ((rect.size.height-_icon.size.height)/2)), _icon.size.width, _icon.size.height);
 
                 // draw shadow
                 CGContextSaveGState(ctx);
@@ -57,12 +56,11 @@
                 CGContextClipToMask(ctx, fillRect, _icon.CGImage);
                 CGContextFillRect(ctx, fillRect);
                 CGContextRestoreGState(ctx);
-                
-                
+                 
                 if (self.highlighted || self.selected) {
                     [[UIColor whiteColor] setFill];
                 } else {
-                    [[self.titleLabel textColor] setFill];
+                    [[UIColor colorWithRed:0.498f green:0.498f blue:0.498f alpha:1.0f] setFill];
                 }
                 
                 // draw icon
@@ -133,7 +131,7 @@
     
     self.titleLabel.highlighted = show;
     self.layer.zPosition = show ? 10 : 0;
-    [self.layer setValue:[NSNumber numberWithFloat:show ? -2.0f : 0.0f] forKeyPath:@"sublayerTransform.translation.y"];
+   // [self.layer setValue:[NSNumber numberWithFloat:show ? -2.0f : 0.0f] forKeyPath:@"sublayerTransform.translation.y"];
     
     if ([(id)delegate respondsToSelector:@selector(leftMenuTableCellHighlighted:)]) {
         [self.delegate leftMenuTableCellHighlighted:self];
@@ -146,7 +144,7 @@
             UIImageView *imageView = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
             
             CGRect frame = imageView.frame;
-            frame.origin.y = - 6.0f;
+            frame.origin.y = - 5.0f;
             frame.size.width = self.bounds.size.width;
             [self insertSubview:imageView belowSubview:self.titleLabel];
             imageView.frame = frame;
@@ -256,7 +254,7 @@
         [view release];
         
         view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height - 1.0f, self.bounds.size.width, 1.0f)];
-        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.06f];
+        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.05f];
         view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
         [self insertSubview:view atIndex:0];
         [view release];
@@ -265,7 +263,7 @@
     
     
 }
-
+/*
 - (void)setTopBorder:(BOOL)border {
     _topBorder = border;
     
@@ -278,10 +276,53 @@
         [view release];
         
         view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 1.0f, self.bounds.size.width, 1.0f)];
-        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.06f];
+        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.05f];
         view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
         [self insertSubview:view atIndex:0];
         [view release];
+        
+    }
+    
+    
+}
+*/
+- (void)setTop:(BOOL)top bottom:(BOOL)bottom {
+    
+    if (top) {
+        
+        if (!_topBorder) {
+            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.bounds.size.width, 1.0f)];
+            view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.05f];
+            view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+            [self insertSubview:view atIndex:0];
+            [view release];
+            _topBorder = view;
+        }
+        
+    } else {
+        
+        if (_topBorder) {
+            [_topBorder removeFromSuperview], _topBorder=nil;
+        }
+        
+    }
+    
+    if (bottom) {
+        
+        if (!_bottomBorder) {
+            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height-1.0f, self.bounds.size.width, 1.0f)];
+            view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.1f];
+            view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+            [self insertSubview:view atIndex:0];
+            [view release];
+            _bottomBorder = view;
+        }
+        
+    } else {
+        
+        if (_bottomBorder) {
+            [_bottomBorder removeFromSuperview], _bottomBorder = nil;
+        }
         
     }
     
