@@ -3714,14 +3714,19 @@ class StampedAPI(AStampedAPI):
 
         # Add activity to all of your friends who stamped the entity
         friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entity.entity_id)
-        ### TODO: Verify user isn't being blocked
-        if not previouslyTodoed and friendStamps is not None:
-            for stamp in friendStamps:
-                if stamp.user.user_id != authUserId:
-                    self._addTodoActivity(authUserId, entity.entity_id, stamp.stamp_id, stamp.user.user_id)
+        recipientIds = [stamp.user.user_id for stamp in friendStamps]
+        if authUserId in recipientIds:
+            recipientIds.remove(authUserId)
 
-                    # Update stamp stats
-                    tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+        ### TODO: Verify user isn't being blocked
+        if not previouslyTodoed and len(recipientIds) > 0:
+            #for stamp in friendStamps:
+            #if stamp.user.user_id != authUserId:
+            self._addTodoActivity(authUserId, recipientIds, entity.entity_id, stampId)
+
+            # Update stamp stats
+            if stampId is not None:
+                tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
 
         return todo
 
@@ -3880,12 +3885,14 @@ class StampedAPI(AStampedAPI):
                                           groupRange = timedelta(days=1),
                                           benefit = benefit)
 
-    def _addTodoActivity(self, userId, entityId, stampId=None, friendId=None):
+    def _addTodoActivity(self, userId, recipientIds, entityId, stampId=None):
         objects = ActivityObjectIds()
-        objects.user_ids = [ friendId ]
-        objects.stamp_ids = [ stampId ]
+        if stampId is not None:
+            objects.stamp_ids = [ stampId ]
         objects.entity_ids = [ entityId ]
         self._addActivity('todo', userId, objects,
+                                          recipientIds = recipientIds,
+                                          requireRecipient = True,
                                           group=True)
 
     def _addCommentActivity(self, userId, recipientIds, stampId, commentId):
