@@ -1507,11 +1507,10 @@ class StampedAPI(AStampedAPI):
         if autosuggestForm.category == 'film':
             return self._netflix.autocomplete(autosuggestForm.query)
         elif autosuggestForm.category == 'place':
-            results = self._googlePlaces.getAutocompleteResults(autosuggestForm.coordinates, autosuggestForm.query,
-                {
-                    'radius': 500,
-                    'name': autosuggestForm.query
-                })
+            results = self._googlePlaces.getAutocompleteResults(
+                autosuggestForm.coordinates.split(','),
+                autosuggestForm.query,
+                {'radius': 500, 'types' : 'establishement'})
             logs.info(results)
             completions = []
             for place in results:

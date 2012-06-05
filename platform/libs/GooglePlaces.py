@@ -234,9 +234,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             apiKey = self._getAPIKey(offset, count)
             if apiKey is None:
                 return None
-            
+            print apiKey
             response = self._getAutocompleteResponse(latLng, query, apiKey, params)
-            
+
             if response is None:
                 return None
             
@@ -380,7 +380,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         if latLng is not None:
             params['location'] = self._geocoder.getEncodedLatLng(latLng)
-        
+
         self._handleParams(params, optionalParams)
         
         # example URL:
@@ -587,7 +587,7 @@ def main():
         params['radius'] = options.radius
     if options.types:
         params['types'] = options.types
-    
+
     if options.detail:
         results = places.getPlaceDetails(options.input, params)
     elif options.suggest:
@@ -596,13 +596,13 @@ def main():
         results = places.getSearchResultsByAddress(options.latLng, params)
     else:
         results = places.getSearchResultsByLatLng(options.latLng, params)
-    
+
     if results is None:
         print "Failed to return results for '%s'" % (options.latLng, )
     else:
         if options.limit:
             results = results[0:min(options.limit, len(results))]
-        
+
         # print the prettified, formatted results
         print json.dumps(results, sort_keys=True, indent=2)
 
