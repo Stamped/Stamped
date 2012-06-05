@@ -437,6 +437,17 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         else:
             return "other"
 
+__globalGooglePlaces = None
+
+def globalGooglePlaces():
+    global __globalGooglePlaces
+
+    if __globalGooglePlaces is None:
+        __globalGooglePlaces = GooglePlaces()
+
+    return __globalGooglePlaces
+
+
 def parseCommandLine():
     usage   = "Usage: %prog [options] address|latLng"
     version = "%prog " + __version__
