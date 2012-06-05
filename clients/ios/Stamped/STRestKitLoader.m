@@ -462,6 +462,8 @@ static STRestKitLoader* _sharedInstance;
                              store(response);
                              [self storeOAuthToken:response.token];
                              self.currentUser = response.user;
+                             [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILoginNotification object:nil];
+                             [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
                          }
                          block(result, error, cancellation);
                      }];
@@ -629,6 +631,8 @@ static STRestKitLoader* _sharedInstance;
 - (void)logout {
     [self clearAuthState];
     self.currentUser = nil;
+    [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILogoutNotification object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
 }
 
 #pragma mark - RKRequestQueueDelegate methods.

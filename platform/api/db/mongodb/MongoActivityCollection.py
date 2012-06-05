@@ -190,57 +190,38 @@ class MongoActivityCollection(AActivityDB):
         if len(alerts): 
             self.alerts_collection.addAlerts(alerts)
 
-    def _removeSubject(self, activityIds, subjectId):
-        toRemove = self.activity_items_collection.removeSubjectFromActivityItems(activityIds, subjectId)
-        self._removeActivityIds(toRemove)
-
-    def removeLikeActivity(self, userId, stampId):
-        return self._removeActivity('like', userId, stampId=stampId)
-
-    def removeTodoActivity(self, userId, entityId):
-        return self._removeActivity('todo', userId, entityId=entityId)
-
-    def removeFollowActivity(self, userId, friendId):
-        return self._removeActivity('follow', userId, friendId=friendId)
-
-    def removeFriendActivity(self, userId, friendId):
-        return self._removeActivity('friend', userId, friendId=friendId)
-
-    def removeCommentActivity(self, userId, commentId):
-        return self._removeActivity('friend', userId, commentId=commentId)
-
-    def _removeActivity(self, verb, userId, **kwargs):
-        entityId    = kwargs.pop('entityId', None)
-        stampId     = kwargs.pop('stampId', None)
-        commentId   = kwargs.pop('commentId', None)
-        friendId    = kwargs.pop('friendId', None)
-
-        subjects    = [ userId ]
-
-        if verb == 'like' and stampId is not None:
-            objects = { 'stamp_ids' : [ stampId ] }
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
-            self._removeSubject(activityIds, userId)
-
-        if verb == 'todo' and entityId is not None:
-            objects = { 'entity_ids' : [ entityId ] }
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
-            self._removeSubject(activityIds, userId)
-
-        if verb in ['follow', 'friend'] and friendId is not None:
-            objects = { 'user_ids' : [ friendId ] }
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
-            self._removeSubject(activityIds, userId)
-
-        if verb in ['comment'] and commentId is not None:
-            objects = { 'comment_ids' : [ commentId ] }
-            activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
-            self._removeSubject(activityIds, userId)
-
     def _removeActivityIds(self, activityIds):
         self.activity_links_collection.removeActivityLinks(activityIds)
         self.activity_items_collection.removeActivityItems(activityIds)
 
+    def _removeSubject(self, activityIds, subjectId):
+        toRemove = self.activity_items_collection.removeSubjectFromActivityItems(activityIds, subjectId)
+        self._removeActivityIds(toRemove)
+
+    def _removeActivity(self, verb, userId, objects):
+        subjects    = [ userId ]
+        activityIds = self.activity_items_collection.getActivityIds(verb=verb, subjects=subjects, objects=objects)
+        self._removeSubject(activityIds, userId)
+
+    def removeLikeActivity(self, userId, stampId):
+        objects = { 'stamp_ids' : [ stampId ] }
+        return self._removeActivity('like', userId, objects)
+
+    def removeTodoActivity(self, userId, entityId):
+        objects = { 'entity_ids' : [ entityId ] }
+        return self._removeActivity('todo', userId, objects)
+
+    def removeFollowActivity(self, userId, friendId):
+        objects = { 'user_ids' : [ friendId ] }
+        return self._removeActivity('follow', userId, objects)
+
+    def removeFriendActivity(self, userId, friendId):
+        objects = { 'user_ids' : [ friendId ] }
+        return self._removeActivity('friend', userId, objects)
+
+    def removeCommentActivity(self, userId, commentId):
+        objects = { 'comment_ids' : [ commentId ] }
+        return self._removeActivity('comment', userId, objects)
 
     def removeActivityForStamp(self, stampId):
         objects     = { 'stamp_ids' : [ stampId ] }
