@@ -418,7 +418,7 @@ class SuggestedUser(User):
     @classmethod
     def setSchema(cls):
         cls.addProperty('search_identifier',                basestring)
-        cls.addProperty('explain_relationship',             basestring)
+        cls.addProperty('relationship_explanation',         basestring)
 
     def __init__(self):
         User.__init__(self)
