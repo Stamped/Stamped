@@ -295,7 +295,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     else if (index >= self.page.count) {
         page = [self.page pageForIndex:self.page.count-1];
         startDate = [NSDate dateWithTimeIntervalSince1970:page.end.timeIntervalSince1970 - 1];
-        if (page.localCount == self.minimumPageSize) { 
+        if (page.localCount >= self.minimumPageSize) { 
             stale = YES;
         }
         else {
