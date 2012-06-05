@@ -9,6 +9,12 @@
 #import "LoginViewController.h"
 #import "STStampedAPI.h"
 
+@interface LoginLoadingView : UIView {
+    UIActivityIndicatorView *_activityView;
+}
+@property(nonatomic,retain) UILabel *titleLabel;
+@end
+
 @interface LoginKeyboardButton : UIButton
 @end
 
@@ -19,12 +25,12 @@
     UITextField *_username;
     UITextField *_password;
 }
-- (void)setEditing:(BOOL)editing;
-
-- (NSString*)_tempScreenName;
-- (NSString*)_tempPassword;
-
 @property (nonatomic, assign) id delegate;
+
+- (void)setEditing:(BOOL)editing;
+- (NSString*)username;
+- (NSString*)password;
+
 
 @end
 
@@ -34,6 +40,7 @@
 
 @implementation LoginViewController
 @synthesize loading=_loading;
+@synthesize delegate;
 
 - (id)init {
     
@@ -55,18 +62,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = [UIColor clearColor];
     
     if (!_stampedImageView) {
         
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"stamped_login_blue.png"]];
         [self.view addSubview:imageView];
         [imageView release];
         _stampedImageView = imageView;
-        
-        CGRect frame = imageView.frame;
-        frame.origin.y = -200.0f;
-        imageView.frame = frame;
         
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
         [self.view addSubview:corner];
@@ -76,14 +79,14 @@
         [self.view addSubview:corner];
         [corner release];
         
-        frame = corner.frame;
+        CGRect frame = corner.frame;
         frame.origin.x = (self.view.bounds.size.width - corner.frame.size.width);
         corner.frame = frame;
         
     }
 
     if (!_textView) {
-        LoginTextView *view = [[LoginTextView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height - 44.0f, self.view.bounds.size.width, 44.0f)];
+        LoginTextView *view = [[LoginTextView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height, self.view.bounds.size.width, 44.0f)];
         view.delegate = self;
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:view];
@@ -91,7 +94,6 @@
         _textView = view;
     }
     
-    [_textView setEditing:YES];
 
 }
 
@@ -101,8 +103,92 @@
     [super viewDidUnload];
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];    
+
+#pragma mark - Animations
+
+- (void)animateIn {
+    
+    _stampedImageView.layer.shadowOpacity = 0.7f;
+    _stampedImageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+    _stampedImageView.layer.shadowRadius = 10;
+    _stampedImageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_stampedImageView.bounds].CGPath;
+
+    [CATransaction begin];
+    [CATransaction setAnimationDuration:0.4f];
+    [CATransaction setCompletionBlock:^{
+        
+        self.view.backgroundColor = [UIColor whiteColor];
+        _stampedImageView.layer.shadowOpacity = 0.0f;
+        
+        [UIView animateWithDuration:0.3f animations:^{
+            CGRect frame = _textView.frame;
+            frame.origin.y = self.view.bounds.size.height - 44.0f;
+            _textView.frame = frame;
+        }];
+        
+    }];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    animation.fromValue = [NSValue valueWithCGPoint:CGPointMake(_stampedImageView.layer.position.x, -_stampedImageView.bounds.size.height/2)];
+    [_stampedImageView.layer addAnimation:animation forKey:nil];
+    
+    [CATransaction commit];
+    
+}
+
+- (void)animateOut {
+    
+    _stampedImageView.layer.shadowOpacity = 0.0f;
+    _stampedImageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+    _stampedImageView.layer.shadowRadius = 10.0f;
+    _stampedImageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_stampedImageView.bounds].CGPath;
+    
+    [CATransaction begin];
+    [CATransaction setAnimationDuration:0.4f];
+    [CATransaction setCompletionBlock:^{
+        
+        if ([(id)delegate respondsToSelector:@selector(loginViewControllerDidDismiss:)]) {
+            [self.delegate loginViewControllerDidDismiss:self];
+        }
+        
+    }];
+    
+    CGPoint toPos = CGPointMake(_stampedImageView.layer.position.x, -_stampedImageView.bounds.size.height/2);
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    animation.fromValue = [NSValue valueWithCGPoint:_stampedImageView.layer.position];
+    animation.toValue = [NSValue valueWithCGPoint:toPos];
+    [_stampedImageView.layer addAnimation:animation forKey:nil];
+    _stampedImageView.layer.position = toPos;
+    [CATransaction commit];
+    
+
+}
+
+
+#pragma mark - Login Methods
+
+- (void)login {
+    
+    NSString* login = [_textView username];
+    NSString* password = [_textView password];
+    [[STStampedAPI sharedInstance] loginWithScreenName:login password:password andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+
+        if (error) {
+
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Couldn't Log In" message:@"The username and password do not match." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Reset password" otherButtonTitles:@"      OK      ", nil];
+            [alertView show];
+            [alertView release];
+            
+        } else {
+            
+            [self animateOut];
+            
+        }
+        
+    }];
+    
 }
 
 
@@ -110,20 +196,29 @@
 
 - (void)setLoading:(BOOL)loading {
     _loading = loading;
-    
-    
-    
+
+    if (_loading) {
+        
+        if (!_loadingView) {
+
+            LoginLoadingView *view = [[LoginLoadingView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height-82.0f, self.view.bounds.size.width, 60.0f)];
+            [self.view addSubview:view];
+            [view release];
+            _loadingView = view;
+            _loadingView.titleLabel.text = [NSString stringWithFormat:@"@%@", [_textView username]];
+            
+        }
+        
+    } else {
+        
+        if (_loadingView) {
+            [_loadingView removeFromSuperview], _loadingView=nil;
+        }
+        
+    }
     
 }
 
-- (void)loginButtonClicked:(id)notImportant {
-    NSString* login = _textView._tempScreenName;
-    NSString* password = _textView._tempPassword;
-    [[STStampedAPI sharedInstance] loginWithScreenName:login password:password andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
-        [_textView setEditing:NO];
-        [self dismissModalViewControllerAnimated:YES];
-    }];
-}
 
 #pragma mark - Keyboard Notifications
 
@@ -152,7 +247,7 @@
         button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
         [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f] forState:UIControlStateNormal];
         [button setTitle:@"Login" forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(loginButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [button addTarget:self action:@selector(loginButtonHit:) forControlEvents:UIControlEventTouchUpInside];
         [window addSubview:button];
         _loginButton = button;
 
@@ -162,6 +257,7 @@
     CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     [UIView animateWithDuration:duration animations:^{
         _textView.layer.transform = CATransform3DMakeTranslation(0.0f, -keyboardFrame.size.height, 0);
+        _stampedImageView.layer.transform = CATransform3DMakeTranslation(0.0f, -keyboardFrame.size.height, 0);
     }];
 
 }
@@ -173,7 +269,8 @@
         _loginButton=nil;
     }
     [UIView animateWithDuration:0.25f animations:^{
-        _textView.layer.transform = CATransform3DIdentity;
+        _textView.layer.transform = CATransform3DMakeTranslation(0.0f, _textView.bounds.size.height, 0);;
+        _stampedImageView.layer.transform = CATransform3DIdentity;        
     }];;
     
 }
@@ -181,9 +278,40 @@
 
 #pragma mark - LoginTextView Actions
 
+- (void)loginButtonHit:(id)sender {
+    
+    [_textView setEditing:NO];
+    [self setLoading:YES];
+    
+    double delayInSeconds = 0.6f;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [self login];
+    });
+    
+    
+}
+
 - (void)cancel:(LoginTextView*)view {
     [view setEditing:NO];
-    [self dismissModalViewControllerAnimated:YES];
+    [self animateOut];
+}
+
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    
+    if (alertView.cancelButtonIndex == buttonIndex) {
+        
+        // reset password
+        
+        
+    } else {
+        
+        [_textView setEditing:YES];
+        
+    }
     
 }
 
@@ -217,14 +345,17 @@
         
         frame = button.frame;
         frame.size = image.size;
-        frame.origin.y = (self.bounds.size.height - frame.size.height) / 2;
-        frame.origin.x = (self.bounds.size.width - (frame.size.width+10.0f));
+        frame.origin.y = ((self.bounds.size.height - frame.size.height) / 2) + 1.5f;
+        frame.origin.x = (self.bounds.size.width - (frame.size.width+4.0f));
         button.frame = frame;
         
         image = [UIImage imageNamed:@"login_text_gutter.png"];
         CGFloat height = image.size.height;
         
-        LoginTextField *textField = [[LoginTextField alloc] initWithFrame:CGRectMake(10.0f, (self.bounds.size.height-height)/2, 120.0f, height)];
+        LoginTextField *textField = [[LoginTextField alloc] initWithFrame:CGRectMake(4.0f, floorf((self.bounds.size.height-height)/2)+1.0f, 133.0f, height)];
+        textField.delegate = (id<UITextFieldDelegate>)self;
+        textField.textColor = [UIColor colorWithWhite:0.149f alpha:1.0f];
+        textField.font = [UIFont systemFontOfSize:14];
         textField.placeholder = @"Username";
         textField.keyboardAppearance = UIKeyboardAppearanceAlert;
         textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
@@ -235,7 +366,9 @@
         [textField release];
         _username = textField;
         
-        textField = [[LoginTextField alloc] initWithFrame:CGRectMake(CGRectGetMaxX(textField.frame) + 10.0f, (self.bounds.size.height-height)/2, 120.0f, height)];
+        textField = [[LoginTextField alloc] initWithFrame:CGRectMake(floorf(CGRectGetMaxX(textField.frame) + 6.0f), floorf((self.bounds.size.height-height)/2)+1.0f, 133.0f, height)];
+        textField.delegate = (id<UITextFieldDelegate>)self;
+        textField.textColor = [UIColor colorWithWhite:0.149f alpha:1.0f];
         textField.placeholder = @"Password";
         textField.keyboardAppearance = UIKeyboardAppearanceAlert;
         textField.secureTextEntry = YES;
@@ -262,12 +395,7 @@
         
     } else {
         
-        if ([_username isFirstResponder]) {
-            [_username resignFirstResponder];
-        }
-        if ([_password isFirstResponder]) {
-            [_password resignFirstResponder];
-        }
+        [self endEditing:YES];
         
     }
     
@@ -282,14 +410,6 @@
 
 - (NSString*)password {
     return _password.text;
-}
-
-- (NSString *)_tempScreenName {
-    return [self username];
-}
-
-- (NSString *)_tempPassword {
-    return [self password];
 }
 
 
@@ -310,19 +430,22 @@
 
 - (CGRect)textRectForBounds:(CGRect)bounds {
     bounds.origin.y += 8.0f;
-    bounds.origin.x += 4.0f;
+    bounds.origin.x += 8.0f;
+    bounds.size.width -= 16.0f;
     return bounds;
 }
 
 - (CGRect)placeholderRectForBounds:(CGRect)bounds {
     bounds.origin.y += 8.0f;
-    bounds.origin.x += 4.0f;
+    bounds.origin.x += 8.0f;
+    bounds.size.width -= 16.0f;
     return bounds;
 }
 
 - (CGRect)editingRectForBounds:(CGRect)bounds {
     bounds.origin.y += 8.0f;
-    bounds.origin.x += 4.0f;
+    bounds.origin.x += 8.0f;
+    bounds.size.width -= 16.0f;
     return bounds;
 }
 
@@ -337,6 +460,7 @@
     [self.placeholder drawInRect:rect withFont:[UIFont systemFontOfSize:13]];
     
 }
+
 
 @end
 
@@ -362,3 +486,48 @@
 }
 
 @end
+
+
+#pragma mark - LoginLoadingView
+
+@implementation LoginLoadingView
+
+- (id)initWithFrame:(CGRect)frame {
+    
+    if ((self = [super initWithFrame:frame])) {
+        
+        self.backgroundColor = [UIColor clearColor];
+        
+        UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        view.frame = CGRectMake((self.bounds.size.width-18.0f)/2, (self.bounds.size.height-18.0f)/2, 18.0f, 18.0f);
+        view.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+        [self addSubview:view];
+        [view release];
+        _activityView = view;
+        [_activityView startAnimating];
+        
+        UIFont *font = [UIFont boldSystemFontOfSize:12];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height-font.lineHeight, self.bounds.size.width, font.lineHeight)];
+        label.backgroundColor = [UIColor clearColor];
+        label.font = font;
+        label.textAlignment = UITextAlignmentCenter;
+        label.textColor = [UIColor colorWithWhite:0.749f alpha:1.0f];
+        label.shadowColor = [UIColor colorWithWhite:1.0f alpha:0.6f];
+        label.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self addSubview:label];
+        [label release];
+        self.titleLabel = label;
+        
+    }
+    return self;
+    
+}
+
+- (void)dealloc {
+    self.titleLabel = nil;
+    [super dealloc];
+}
+
+@end
+

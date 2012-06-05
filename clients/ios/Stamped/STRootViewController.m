@@ -64,7 +64,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
     
     NSInteger index = [self.viewControllers indexOfObject:viewController];
-    if (index > 0 && viewController.navigationItem.leftBarButtonItem == nil) {        
+    if (index!=NSNotFound && index > 0 && viewController.navigationItem.leftBarButtonItem == nil) {
         
         UIViewController *prevController = [self.viewControllers objectAtIndex:index-1];
         STNavigationItem *button = [[STNavigationItem alloc] initWithBackButtonTitle:prevController.title style:UIBarButtonItemStyleBordered target:self action:@selector(pop:)];

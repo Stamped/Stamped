@@ -93,7 +93,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     RKLogSetAppLoggingLevel(RKLogLevelError);
     [self addConfigurations];
     [self customizeAppearance];
-    [self performRestKitMappings];
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];

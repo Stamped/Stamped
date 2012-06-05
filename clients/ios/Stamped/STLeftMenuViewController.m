@@ -10,7 +10,6 @@
 #import "Util.h"
 #import "STMenuController.h"
 #import "STProfileViewController.h"
-#import "SettingsViewController.h"
 #import "DDMenuController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
@@ -66,13 +65,13 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 }
 
 - (void)dealloc {
-    [super dealloc];
     self.tableView = nil;
     [_selectedIndexPath release], _selectedIndexPath=nil;
     [_dataSource release], _dataSource=nil;;
     [_controllerStore release], _controllerStore=nil;
     [_anchorDataSource release], _anchorDataSource=nil;
     [_anchorControllerStore release], _anchorControllerStore=nil;
+    [super dealloc];
 }
 
 - (void)viewDidLoad {
@@ -177,10 +176,10 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 }
 
 - (void)viewDidUnload {
-    [super viewDidUnload];
     self.tableView = nil;
     self.anchorTableView = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super viewDidUnload];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -191,10 +190,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         [self.tableView selectRowAtIndexPath:_selectedIndexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
     }
     
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 

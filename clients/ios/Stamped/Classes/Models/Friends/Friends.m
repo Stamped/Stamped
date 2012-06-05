@@ -72,8 +72,8 @@
 - (void)loadWithPath:(NSString*)path params:(NSDictionary*)params {
     
     NSLog(@"%@", params);
-            
-    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleUser mapping] andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
+    
+    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:YES params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping] andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
 
         _moreData = NO;
         if (users) {

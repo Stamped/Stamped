@@ -8,6 +8,11 @@
 
 #import "FriendTableCell.h"
 #import "STAvatarView.h"
+#import "FriendStatusButton.h"
+#import "UserStampView.h"
+
+@interface FriendTableCell ()
+@end
 
 @implementation FriendTableCell
 
@@ -43,51 +48,16 @@
         [label release];
         _detailTitleLabel = label;
         
-        STBlockUIView *stampView = [[STBlockUIView alloc] initWithFrame:CGRectMake(44.0f, 2.0f, 18.0f, 18.0f)];
-        stampView.backgroundColor = [UIColor clearColor];
+        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectMake(44.0f, 2.0f, 18.0f, 18.0f)];
+        stampView.size = STStampImageSize18;
         [self addSubview:stampView];
-        [stampView setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
-          
-            if (!_primaryColor || !_secondaryColor) return;
-            
-            CGContextSaveGState(ctx);
-            CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
-            CGContextScaleCTM(ctx, 1.0f, -1.0f);
-            CGContextClipToMask(ctx, rect, [UIImage imageNamed:@"stamp_18pt_texture.png"].CGImage);
-            
-            if (self.highlighted || self.selected) {
-                
-                [[UIColor whiteColor] setFill];
-                CGContextFillRect(ctx, rect);
-                
-            } else {
-                
-                if (_primaryColor && _secondaryColor) {
-                    drawStampGradient([_primaryColor CGColor], [_secondaryColor CGColor], ctx);
-                } else {
-                    CGContextFillRect(ctx, rect);
-                }
-                
-            }
-            
-            CGContextRestoreGState(ctx);
-
-            
-        }];
         [stampView release];
         _stampView = stampView;
         
-        UIImage *image = [UIImage imageNamed:@"nav_button_green.png"];
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        FriendStatusButton *button = [[FriendStatusButton alloc] initWithFrame:CGRectMake(self.bounds.size.width - 64.0f, 10.0f, 54.0f, 30.0f)];
+        [button addTarget:self action:@selector(action:) forControlEvents:UIControlEventTouchUpInside];
+        button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         button.backgroundColor = [UIColor whiteColor];
-        [button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.2f] forState:UIControlStateNormal];
-        [button setTitle:@"Follow" forState:UIControlStateNormal];
-        button.frame = CGRectMake(self.bounds.size.width - 70.0f, 10.0f, 60.0f, image.size.height);
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f] forState:UIControlStateNormal];
-        [button setBackgroundImage:[[UIImage imageNamed:@"nav_button_green_hi.png"] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f] forState:UIControlStateHighlighted];
         [self addSubview:button];
         _actionButton = button;
         
@@ -96,8 +66,6 @@
 }
 
 - (void)dealloc {
-    [_primaryColor release], _primaryColor=nil;
-    [_secondaryColor release], _secondaryColor=nil;
     [super dealloc];
 }
 
@@ -118,16 +86,10 @@
     _titleLabel.text = user.name;
     _detailTitleLabel.text = [NSString stringWithFormat:@"@%@", user.screenName];
 
-    float r,g,b;
-    [Util splitHexString:user.primaryColor toRed:&r green:&g blue:&b];
-    [_primaryColor release], _primaryColor=nil;
-    _primaryColor = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
-    [Util splitHexString:user.secondaryColor toRed:&r green:&g blue:&b];
-    [_secondaryColor release], _secondaryColor=nil;
-    _secondaryColor = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
+    [_stampView setupWithUser:user];
 
-    [_stampView setNeedsDisplay];
-    
+    [_actionButton setLoading:NO];
+    [_actionButton setStatus:FriendStatusNotFollowing];
     
 }
 
@@ -146,6 +108,15 @@
 
 - (void)action:(id)sender {
     
+    [_actionButton setLoading:YES];
+    
+    double delayInSeconds = 2.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [_actionButton setLoading:NO];
+        [_actionButton setStatus:FriendStatusFollowing];
+    });
+
 }
 
 @end

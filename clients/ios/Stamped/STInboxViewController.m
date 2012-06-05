@@ -82,10 +82,6 @@
     [super dealloc];
 }
 
-- (void)login:(id)notImportant {
-    [Util launchFirstRun];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
   
@@ -128,6 +124,13 @@
 - (void)viewDidDisappear:(BOOL)animated {
     //Todo cancel pending cache ops
     [super viewDidDisappear:animated];
+}
+
+
+#pragma mark - Actions
+
+- (void)login:(id)sender {
+    [Util launchFirstRun];
 }
 
 
@@ -508,7 +511,7 @@
 }
 
 
-#pragma mark - UIGestureRecognizerDelegate 
+#pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     

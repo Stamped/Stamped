@@ -18,6 +18,7 @@
 #import "STTwitter.h"
 
 @interface STMenuController ()
+@property(nonatomic,retain) LoginViewController *loginController;
 @end
 
 @implementation STMenuController
@@ -25,7 +26,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!LOGGED_IN) {
+    if (!LOGGED_IN || YES) {
         [self showWelcome];
     }
     
@@ -58,14 +59,23 @@
 
 - (void)stWelcomeViewController:(STWelcomeViewController*)controller selectedOption:(STWelcomeViewControllerOption)option {
     
-    [controller.view removeFromSuperview];
-    [controller release];
+    double delayInSeconds = 1.0f;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [controller.view removeFromSuperview];
+        [controller release];
+    });
     
     if (option == STWelcomeViewControllerOptionLogin) {
     
         LoginViewController *controller = [[LoginViewController alloc] init];
-        [self presentModalViewController:controller animated:YES];
+        controller.delegate = (id<LoginViewControllerDelegate>)self;
+        [self.view addSubview:controller.view];
+        controller.view.frame = self.view.bounds;
+        self.loginController = controller;
         [controller release];
+        
+        [self.loginController animateIn];
     
     } else if (option == STWelcomeViewControllerOptionTwitter) {
         
@@ -124,6 +134,14 @@
     
     [self dismissModalViewControllerAnimated:YES];
     
+}
+
+
+#pragma mark - LoginViewControllerDelegate
+
+- (void)loginViewControllerDidDismiss:(LoginViewController*)controller {
+    [controller.view removeFromSuperview];
+    self.loginController = nil;
 }
 
 

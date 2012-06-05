@@ -139,4 +139,19 @@
 
 }
 
+
+#pragma mark - STRestController Overrides
+
+- (void)setupNoDataView:(NoDataView*)view {
+
+    CGRect frame = view.frame;
+    CGFloat height = [self.tableView rectForSection:0].size.height + self.tableView.tableHeaderView.bounds.size.height;
+    frame.origin.y = height;
+    frame.size.height -= height;
+    view.frame = frame;
+    [super setupNoDataView:view];
+    
+}
+
+
 @end
