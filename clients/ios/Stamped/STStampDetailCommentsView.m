@@ -18,7 +18,7 @@
 #import "STSimpleUser.h"
 #import "STStampedAPI.h"
 #import "STRippleBar.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 #import "STPreviewsView.h"
 
 static const CGFloat _totalWidth = 310;
@@ -75,7 +75,7 @@ static const CGFloat _imagePaddingY = _imagePaddingX;
 }
 
 - (void)userImageClicked:(id<STUser>)user {
-    STProfileViewController* controller = [[[STProfileViewController alloc] initWithUserID:user.userID] autorelease];
+    STUserViewController* controller = [[[STUserViewController alloc] initWithUser:user] autorelease];
     [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
