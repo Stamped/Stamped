@@ -28,6 +28,11 @@ static id _sharedInstance;
     cell.user = data;
     return cell;
   }
+    if ([[data class] conformsToProtocol:@protocol(STStampPreview)]) {
+        STUserCell* cell = [[[STUserCell alloc] initWithReuseIdentifier:@"TODO"] autorelease];
+        cell.user = (id)[data user];
+        return cell;
+    }
   else {
     return [[STErrorCellFactory sharedInstance] cellForTableView:tableView data:data andStyle:style];
   }

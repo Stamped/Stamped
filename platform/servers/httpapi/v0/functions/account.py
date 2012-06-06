@@ -153,8 +153,8 @@ def check(request, client_id, http_schema, **kwargs):
         try:
             if str(http_schema.login).lower() == str(user.screen_name).lower():
                 user.screen_name = str(http_schema.login)
-        except:
-            pass
+        except Exception as e:
+            logs.warning("Exception: %s" % e)
         
         return transformOutput(user.dataExport())
     except KeyError:

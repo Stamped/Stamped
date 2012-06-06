@@ -97,7 +97,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];
     [[STRestKitLoader sharedInstance] authenticate];
-    
+    NSLog(@"USer:%@", [STStampedAPI sharedInstance].currentUser);
     STInboxViewController *inboxController = [[STInboxViewController alloc] init];
     STLeftMenuViewController *leftController = [[STLeftMenuViewController alloc] init];
     STRightMenuViewController *rightController = [[STRightMenuViewController alloc] init];

@@ -171,8 +171,8 @@ class AMongoCollectionView(AMongoCollection):
             user_query = searchSlice.query.lower().strip()
             try:
                 user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
-            except:
-                pass
+            except Exception:
+                logs.warning("Unable to normalize query to ascii: %s" % user_query)
             
             ### TODO: check multiple blurbs
             add_or_query([ { "blurb"            : { "$regex" : user_query, "$options" : 'i', } }, 
@@ -327,8 +327,8 @@ class AMongoCollectionView(AMongoCollection):
             user_query = user_query.lower().strip()
             try:
                 user_query = unicodedata.normalize('NFKD', user_query).encode('ascii','ignore')
-            except:
-                pass
+            except Exception:
+                logs.warning("Unable to normalize query to ascii: %s" % user_query)
             
             # process 'in' or 'near' location hint
             result = libs.worldcities.try_get_region(user_query)
@@ -646,7 +646,7 @@ class AMongoCollectionView(AMongoCollection):
                     data = [value]
                 
                 assert(isinstance(data, list))
-            except:
+            except Exception:
                 logs.debug(utils.getFormattedException())
                 return []
             
@@ -700,7 +700,7 @@ class AMongoCollectionView(AMongoCollection):
                         continue
                     
                     seen.add(entity_id)
-                except:
+                except Exception:
                     logs.warn(utils.getFormattedException())
                 
                 ret.append(result)

@@ -49,6 +49,12 @@
                         
                         <div class="rhs">
                             {% handlebars_template "share-widget" %}
+                            
+                            <div class="subnav">
+                                <div class="subnav_button subnav_button0"></div>
+                                <div class="subnav_button subnav_button1"></div>
+                                <div class="subnav_button subnav_button2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -139,7 +145,10 @@
                 </div>
                 
                 <div class="profile-header-post">
-                    <div class="ribbon-bottom"></div>
+                    <div class="user-gradient">
+                        <div class="ribbon-bottom"></div>
+                    </div>
+                    
                     <div class="inset-stamp">
                         <div class="stamp-count user-primary stamp-count-default">
                             {{user.num_stamps}}
@@ -233,7 +242,7 @@
             </div>
             
             <div class='stamp-gallery-view-map'>
-                <a href="#">View Map</a>
+                <a href="#"></a>
             </div>
         </div>
         

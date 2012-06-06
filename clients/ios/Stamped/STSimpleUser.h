@@ -19,6 +19,7 @@
 @property (nonatomic, readwrite, copy) NSString* secondaryColor;
 @property (nonatomic, readwrite, copy) NSNumber* privacy;
 @property (nonatomic, readwrite, copy) NSString* imageURL;
+@property (nonatomic, readwrite, copy) NSNumber* following;
 
 + (RKObjectMapping*)mapping;
 

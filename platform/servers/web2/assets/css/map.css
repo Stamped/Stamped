@@ -160,7 +160,7 @@ footer {
   position: absolute;
   top: 0;
   left: 50%;
-  margin-left: -500px;
+  margin-left: -532px;
   width: 360px;
   height: 100%;
 }
@@ -174,7 +174,7 @@ footer {
   box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
 }
 .stamp-map .fixedwidth .stamp-map-nav .nav-header {
-  padding: 32px 32px 8px;
+  padding: 32px 6px 0 32px;
 }
 .stamp-map .fixedwidth .stamp-map-nav .nav-header .profile-image-small {
   float: left;
@@ -184,6 +184,7 @@ footer {
 }
 .stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .name {
   color: #333;
+  margin-right: 24px;
 }
 .stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .stamp-map-title {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
@@ -195,6 +196,33 @@ footer {
   display: block;
   margin: 0;
   padding: 0;
+  margin-right: 24px;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav {
+  clear: both;
+  text-align: right;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a {
+  margin: 0;
+  padding: 0;
+  line-height: 80%;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a .up-arrow {
+  display: block;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a .down-arrow {
+  display: none;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:hover,
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:active {
+  cursor: pointer;
+  color: #fff;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:hover {
+  background-color: #999;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:active {
+  background-color: #666;
 }
 .stamp-map .fixedwidth .stamp-map-nav .top-user-gradient {
   -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -214,10 +242,23 @@ footer {
   overflow-y: scroll;
   padding: 8px 32px;
   margin: 8px 0;
+  -webkit-transition: height 0.5s easeOutCubic;
+  -moz-transition: height 0.5s easeOutCubic;
+  -ms-transition: height 0.5s easeOutCubic;
+  -o-transition: height 0.5s easeOutCubic;
+  transition: height 0.5s easeOutCubic;
   width: 288px;
   height: 70%;
 }
 .stamp-map .fixedwidth .stamp-map-nav .nav-footer {
-  padding: 32px;
-  height: 5%;
+  padding: 16px 32px;
+}
+.stamp-map .fixedwidth .stamp-map-nav-collapsed .nav-header .rhs .list-view-nav a .up-arrow {
+  display: none;
+}
+.stamp-map .fixedwidth .stamp-map-nav-collapsed .nav-header .rhs .list-view-nav a .down-arrow {
+  display: block;
+}
+.stamp-map .fixedwidth .stamp-map-nav-collapsed .stamp-list-view {
+  height: 0;
 }

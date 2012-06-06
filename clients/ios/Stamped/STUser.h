@@ -17,5 +17,6 @@
 @property (nonatomic, readonly, copy) NSString* secondaryColor;
 @property (nonatomic, readonly, copy) NSNumber* privacy;
 @property (nonatomic, readonly, copy) NSString* imageURL;
+@property (nonatomic, readonly, copy) NSNumber* following;
 
 @end

@@ -16,7 +16,6 @@
 #import "STStampedActions.h"
 #import "STTableViewController.h"
 #import "STStampsViewSource.h"
-#import "STStampedBySource.h"
 
 @interface STStampedByViewCell : STViewContainer
 
@@ -41,10 +40,9 @@
 @synthesize scope = scope_;
 @synthesize entityID = entityID_;
 
-- (void)userImageClicked:(id<STStamp>)stamp {
+- (void)userImageClicked:(id<STStampPreview>)stampPreview {
   STActionContext* context = [STActionContext contextInView:self];
-  id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
-  context.stamp = stamp;
+  id<STAction> action = [STStampedActions actionViewStamp:stampPreview.stampID withOutputContext:context];
   [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
@@ -66,10 +64,6 @@
     if (scope == STStampedAPIScopeFriends) {
       formatString = @"%@ friends";
       imagePath = @"scope_drag_inner_friends";
-    }
-    else if (scope == STStampedAPIScopeFriendsOfFriends) {
-      formatString = @"%@ friends of friends";
-      imagePath = @"scope_drag_inner_fof";
     }
     else if (scope == STStampedAPIScopeEveryone) {
       formatString = @"%@ users on Stamped";
@@ -93,22 +87,22 @@
     
     UIView* viewAllButton = [Util tapViewWithFrame:self.frame target:self selector:@selector(viewAllClicked:) andMessage:nil];
     [self addSubview:viewAllButton];
-    if (group.stamps.count > 0 && imagesEnabled) {
+    if (group.stampPreviews.count > 0 && imagesEnabled) {
       NSInteger limit = 7;
       UIView* images = [[[UIView alloc] initWithFrame:CGRectMake(xOffset, 0, self.frame.size.width - (2 * xOffset), 40)] autorelease];
       NSInteger i = 0;
       BOOL hasImages = NO;
-      for (id<STStamp> stamp in group.stamps) {
-        if (![blacklist containsObject:stamp.user.userID]) {
+      for (id<STStampPreview> stampPreview in group.stampPreviews) {
+        if (![blacklist containsObject:stampPreview.user.userID]) {
           if (i >= limit) break;
           if (i == limit - 1) {
             
           }
           else {
-            UIView* userImage = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize37];
+            UIView* userImage = [Util profileImageViewForUser:stampPreview.user withSize:STProfileImageSize37];
             [Util reframeView:userImage withDeltas:CGRectMake(i*40, 0, 0, 0)];
             [images addSubview:userImage];
-            UIView* buttonView = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stamp];
+            UIView* buttonView = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stampPreview];
             [images addSubview:buttonView];
             hasImages = YES;
           }
@@ -132,26 +126,6 @@
 }
 
 - (void)viewAllClicked:(id)nothing {
-  STTableViewController* controller = [[[STTableViewController alloc] initWithHeaderHeight:0] autorelease];
-  [controller view];
-  STStampedBySource* source = [[[STStampedBySource alloc] init] autorelease];
-  STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
-  if (self.scope == STStampedAPIScopeFriends) {
-    slice.group = @"friends";
-  }
-  else if (self.scope == STStampedAPIScopeFriendsOfFriends) {
-    slice.group = @"fof";
-  }
-  else if (self.scope == STStampedAPIScopeEveryone) {
-    slice.group = @"all";
-  }
-  slice.offset = [NSNumber numberWithInteger:0];
-  slice.limit = [NSNumber numberWithInteger:1000];
-  slice.entityID = self.entityID;
-  source.slice = slice;
-  source.table = controller.tableView;
-  [controller retainObject:source];
-  [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
                                      
 @end
@@ -174,17 +148,6 @@
                                                                     andDelegate:self] autorelease];
       [array addObject:child];
       hasImages = hasImages | child.hasImages;
-    }
-    if (stampedBy.friendsOfFriends.count.integerValue) {
-      STStampedByViewCell* child = [[[STStampedByViewCell alloc] initWithStampedByGroup:stampedBy.friendsOfFriends
-                                                          imagesEnabled:!hasImages
-                                                                  scope:STStampedAPIScopeFriendsOfFriends
-                                                                      blacklist:blacklist
-                                                                       entityID:entityID
-                                                                    andDelegate:self] autorelease];
-      [array addObject:child];
-      hasImages = hasImages | child.hasImages;
-
     }
     if (stampedBy.everyone.count.integerValue) {
       STStampedByViewCell* child = [[[STStampedByViewCell alloc] initWithStampedByGroup:stampedBy.everyone

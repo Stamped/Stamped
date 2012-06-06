@@ -23,6 +23,8 @@
 
 @implementation STMenuController
 
+@synthesize loginController = _loginController;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
