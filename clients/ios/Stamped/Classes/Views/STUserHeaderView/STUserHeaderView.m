@@ -203,6 +203,8 @@
 
 @implementation UserHeaderTabView
 
+@synthesize delegate = _delegate;
+
 - (id)initWithFrame:(CGRect)frame {
     
     if ((self = [super initWithFrame:frame])) {

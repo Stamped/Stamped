@@ -347,10 +347,11 @@ andProfileImageSize:(STProfileImageSize)size {
     if (header) {
         UIFont* headerFont = [UIFont stampedFontWithSize:10];
         UIView* headerView = [Util viewWithText:header 
-                                         font:headerFont
-                                        color:[UIColor stampedLightGrayColor]
-                                         mode:UILineBreakModeTailTruncation
-                                   andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+                                           font:headerFont
+                                          color:[UIColor stampedLightGrayColor]
+                                     lineHeight:12
+                                           mode:UILineBreakModeTailTruncation
+                                     andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
         [Util reframeView:headerView withDeltas:CGRectMake(CGRectGetMaxX(userView.frame),
                                                            0,
                                                            0,

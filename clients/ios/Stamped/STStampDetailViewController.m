@@ -58,6 +58,7 @@
 @property (nonatomic, readonly, retain) UIView* addCommentView;
 @property (nonatomic, readonly, retain) UITextView* commentTextView;
 @property (nonatomic, readonly, retain) UIActivityIndicatorView* commentActivityView;
+@property (nonatomic, readonly, retain) UIView* addCommentShading;
 
 @end
 
@@ -109,7 +110,7 @@
                      [[[STTodoButton alloc] initWithStamp:stamp] autorelease],
                      [[[STShareButton alloc] initWithCallback:^{
             [Util executeOnMainThread:^{
-                [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
+                [Util warnWithMessage:@"No leaking Stamped 2.0!" andBlock:nil];
             }];
         }] autorelease],
                      nil] retain];
@@ -183,6 +184,7 @@
 @synthesize addCommentView = addCommentView_;
 @synthesize commentTextView = commentTextView_;
 @synthesize commentActivityView = commentActivityView_;
+@synthesize addCommentShading = _addCommentShading;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stamp.stampID];
@@ -205,11 +207,19 @@
     [entityDetailCancellation_ release];
     [addCommentView_ release];
     [commentTextView_ release];
+    [_addCommentShading release];
     [super dealloc];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    _addCommentShading = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, self.view.frame.size.height)];
+    _addCommentShading.backgroundColor = [UIColor colorWithWhite:0 alpha:.3];
+    [_addCommentShading addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitComment:)] autorelease]];
+    _addCommentShading.userInteractionEnabled = NO;
+    _addCommentShading.alpha = 0;
+    [self.view addSubview:_addCommentShading];
     
     CGFloat addCommentBorderWidth = 1;
     addCommentView_ = [[UIView alloc] initWithFrame:CGRectMake(-addCommentBorderWidth, -300, self.scrollView.frame.size.width + 2 * addCommentBorderWidth, 0)];
@@ -294,6 +304,12 @@
     NSLog(@"viewWillAppear");
 }
 
+- (void)exitComment:(id)notImportant {
+    if ([self.commentTextView isFirstResponder]) {
+        [self.commentTextView resignFirstResponder];
+    }
+}
+
 - (void)changeFirstResponder {
     //[self.dummyTextField.inputAccessoryView becomeFirstResponder];
 }
@@ -309,17 +325,28 @@
     frame.size.height = 0;
     self.addCommentView.frame = frame;
     self.addCommentView.hidden = NO;
+    self.addCommentView.alpha = 1;
     [UIView animateWithDuration:.25 animations:^{
         [Util reframeView:self.addCommentView withDeltas:CGRectMake(0, -height, 0, height)];
+        _addCommentShading.alpha = 1;
+        _addCommentShading.userInteractionEnabled = YES;
     }];
 }
 
 - (void)keyboardWasHidden:(NSNotification *)notification
 {
+    _addCommentShading.userInteractionEnabled = NO;
     CGRect frame = self.addCommentView.frame;
-    frame.origin.y = -300;
-    self.addCommentView.frame = frame;
-    self.addCommentView.hidden = YES;
+    frame.origin.y = self.view.frame.size.height;
+    [UIView animateWithDuration:.3
+                     animations:^{
+                         self.addCommentView.frame = frame;
+                         self.addCommentView.alpha = 0;
+                         _addCommentShading.alpha = 0;
+                     } completion:^(BOOL finished) {
+                         
+                         self.addCommentView.hidden = YES;
+                     }];
 }
 
 - (void)viewDidAppear:(BOOL)animated {

@@ -23,5 +23,7 @@
 
 @property (nonatomic, readwrite, assign) BOOL enabled;
 @property (nonatomic, readwrite, retain) id message;
+@property (nonatomic, readwrite, assign) id target;
+@property (nonatomic, readwrite, assign) SEL action;
 
 @end

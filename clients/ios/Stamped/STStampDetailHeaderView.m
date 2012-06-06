@@ -55,7 +55,7 @@
             stampImage = [Util invertedStampImageForUser:self.stamp.user withSize:STStampImageSize42];
             titleColor = [UIColor whiteColor];
             subtitleColor = [UIColor whiteColor];
-            view.backgroundColor = [UIColor blueColor];
+            [Util addGradientToLayer:view.layer withColors:[UIColor stampedBlueGradient] vertical:YES];
         }
         
         UIFont* titleFont = [UIFont stampedTitleFontWithSize:32];

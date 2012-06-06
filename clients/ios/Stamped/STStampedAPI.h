@@ -106,9 +106,6 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 - (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
                                  andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
-                                  andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
-
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
                                andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
 
