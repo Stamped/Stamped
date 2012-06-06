@@ -35,6 +35,7 @@
 #import "STActionManager.h"
 #import "FindFriendsViewController.h"
 #import "STMenuController.h"
+#import "STUserViewController.h"
 
 @interface STInboxViewController ()
 
@@ -269,7 +270,11 @@
     UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
     NSIndexPath *indexPath = [tableview indexPathForCell:cell];
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
-    [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
+    STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
+    [self.navigationController pushViewController:controller animated:YES];
+
+    
+    //[[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
 

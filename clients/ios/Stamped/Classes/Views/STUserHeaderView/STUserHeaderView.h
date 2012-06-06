@@ -14,23 +14,34 @@ typedef enum {
     STUserHeaderTabInfo,
 } STUserHeaderTab;
 
-@protocol STUserHeaderViewDelegate;
-@class UserStampView, STAvatarView, UserHeaderTabView;
+typedef enum {
+    STUserHeaderStatCredit = 4,
+    STUserHeaderStatFollowers,
+    STUserHeaderStatFollowing,
+} STUserHeaderStat;
+
+@protocol STUserHeaderViewDelegate, STSimpleUserDetail;
+@class UserStampView, STAvatarView, UserHeaderTabView, STUserStatsView;
 @interface STUserHeaderView : UIView {
     UserHeaderTabView *_tabView;
     STAvatarView *_avatarView;
     UserStampView *_stampView;
     UILabel *_titleLabel;
     UILabel *_detailTitleLabel;
+    STUserStatsView *_statsView;
 }
 
-- (void)setupWithUser:(id<STUser>)user;
++ (CGFloat)heightWithStats:(BOOL)stats;
+
+- (void)setupWithUser:(id)user;
 @property(nonatomic,assign) STUserHeaderTab selectedTab;
 @property(nonatomic,assign) id <STUserHeaderViewDelegate> delegate;
-@property(nonatomic,assign) BOOL showStats;
+@property(nonatomic,readonly,getter = isShowingStats) BOOL showingStats;
 
 @end
 @protocol STUserHeaderViewDelegate
 - (void)stUserHeaderView:(STUserHeaderView*)view selectedTab:(STUserHeaderTab)tab;
-- (void)stUserHeaderViewHeightChanged:(STUserHeaderView *)view;
+- (void)stUserHeaderView:(STUserHeaderView*)view selectedStat:(STUserHeaderStat)stat;
+- (void)stUserHeaderViewHeightChanged:(STUserHeaderView*)view;
+- (void)stUserHeaderViewAvatarTapped:(STUserHeaderView*)view;
 @end

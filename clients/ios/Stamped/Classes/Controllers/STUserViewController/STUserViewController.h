@@ -13,7 +13,7 @@
 @interface STUserViewController : STRestViewController;
 
 - (id)initWithUserIdentifier:(NSString*)identifier;
-- (id)initWithUser:(STSimpleUserDetail*)user;
+- (id)initWithUser:(id)user;
 
 
 @end
