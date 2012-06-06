@@ -13,12 +13,8 @@
 #import "STImageCache.h"
 #import "STTextCalloutView.h"
 
-#define kSliderTrackGap 62
+#define kSliderTrackGap 76
 #define kSliderTwoTrackGap 50
-
-#define kSliderTrackLeft [UIImage imageNamed:@"slider_track_left.png"]
-#define kSliderTrackRight [UIImage imageNamed:@"slider_track_right.png"]
-#define kSliderTrackMid [UIImage imageNamed:@"slider_track_mid.png"]
 
 @interface STSliderScopeView (Internal)
 - (UIImageView*)imageViewForScope:(STStampedAPIScope)scope;

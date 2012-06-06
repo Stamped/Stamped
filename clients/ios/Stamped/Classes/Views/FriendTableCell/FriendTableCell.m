@@ -58,6 +58,7 @@
         [button addTarget:self action:@selector(action:) forControlEvents:UIControlEventTouchUpInside];
         button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         button.backgroundColor = [UIColor whiteColor];
+        button.showCheck = YES;
         [self addSubview:button];
         _actionButton = button;
         
@@ -89,8 +90,8 @@
     [_stampView setupWithUser:user];
 
     [_actionButton setLoading:NO];
-    [_actionButton setStatus:FriendStatusNotFollowing];
-    
+    NSNumber *following = [user following];
+    [_actionButton setStatus:(following!=nil && [following boolValue]) ? FriendStatusFollowing : FriendStatusNotFollowing];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

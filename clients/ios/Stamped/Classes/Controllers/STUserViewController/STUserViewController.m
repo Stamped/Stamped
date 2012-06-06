@@ -364,7 +364,6 @@
     id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
-   // [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
 
