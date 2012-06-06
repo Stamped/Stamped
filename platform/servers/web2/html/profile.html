@@ -43,12 +43,18 @@
                             </p>
                             
                             <p>
-                                <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
+                                <a class='screen-name' href="/{{user.screen_name}}">{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
                         </div>
                         
                         <div class="rhs">
                             {% handlebars_template "share-widget" %}
+                            
+                            <div class="subnav">
+                                <div class="subnav_button subnav_button0"></div>
+                                <div class="subnav_button subnav_button1"></div>
+                                <div class="subnav_button subnav_button2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -139,12 +145,19 @@
                 </div>
                 
                 <div class="profile-header-post">
-                    <div class="ribbon-bottom"></div>
+                    <div class="user-gradient">
+                        <div class="ribbon-bottom"></div>
+                    </div>
+                    
                     <div class="inset-stamp">
-                        <div class="stamp-count stamp-count-default">{{user.num_stamps}}</div>
+                        <div class="stamp-count user-primary stamp-count-default">
+                            {{user.num_stamps}}
+                        </div>
                         
                         {% for distro in user.distribution %}
-                            <div class="stamp-count stamp-count-{{distro.category}}">{{distro.count}}</div>
+                            <div class="stamp-count user-primary stamp-count-{{distro.category}}">
+                                {{distro.count}}
+                            </div>
                         {% endfor %}
                         
                         <p>STAMPS</p>
@@ -229,7 +242,7 @@
             </div>
             
             <div class='stamp-gallery-view-map'>
-                <a href="#">View Map</a>
+                <a href="#"></a>
             </div>
         </div>
         

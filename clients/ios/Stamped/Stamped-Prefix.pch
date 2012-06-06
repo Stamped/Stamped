@@ -23,6 +23,8 @@
     #import "QuartzUtils.h"
     #import "STEvents.h"
     #import "STTypes.h"
+    #import "STStampedAPI.h"
 #endif
 
 #define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)
+#define IS_CURRENT_USER(user_id) [[[[STStampedAPI sharedInstance] currentUser] userID] isEqualToString:(user_id)]

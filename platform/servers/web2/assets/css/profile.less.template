@@ -43,40 +43,47 @@
    ************************************************************************** */
 
 
-.user-gradient2(@angle: 135deg, @c0, @c1) {
-    
+.user-gradient-func2(@angle: 135deg, @c0, @c1) {
     background: -webkit-linear-gradient(@angle, @c0, @c1);
     background: -moz-linear-gradient(@angle, @c0, @c1);
     background: -o-linear-gradient(@angle, @c0, @c1);
     background: linear-gradient(@angle, @c0, @c1);
 }
 
-.user-gradient(@angle: 135deg, @a: 50%) {
-    .user-gradient2(@angle, fade(@primary, @a), fade(@secondary, @a));
+.user-gradient-func(@angle: 135deg, @a: 50%) {
+    .user-gradient-func2(@angle, fade(@primary, @a), fade(@secondary, @a));
 }
 
+.user-gradient {
+    .user-gradient-func(135deg, 40%);
+    width: 100%;
+}
 
 .post-header, .stamp-card-pre {
-    .user-gradient(135deg, 40%);
+    .user-gradient-func(135deg, 40%);
     
     width:  100%;
     margin: 0;
 }
 
 .profile-header-post, .stamp-card-post {
-    .user-gradient(135deg, 20%);
+    background: #fff;
     
     width:  100%;
     margin: 0;
-    
-    .stamp-count {
-        color: @user_primary;
-    }
+}
+
+.user-primary {
+    color: @user_primary;
+}
+
+.user-secondary {
+    color: @user_secondary;
 }
 
 .profile-header-wrapper {
     .profile-header {
-        .user-gradient(135deg, 100%);
+        .user-gradient-func(135deg, 100%);
     }
 }
 
@@ -134,10 +141,10 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
                     @c0: #f2f2f2;
                     
                     &:hover {
-                        .user-gradient2(90deg, @c0, fade(@primary, 15%));
+                        .user-gradient-func2(90deg, @c0, fade(@primary, 15%));
                     }
                     &:active {
-                        .user-gradient2(90deg, @c0, fade(@primary, 25%));
+                        .user-gradient-func2(90deg, @c0, fade(@primary, 25%));
                     }
                 }
             }
@@ -154,7 +161,7 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     .user-logo-large {
         background-image: none;
-        .user-gradient(135deg, 80%);
+        .user-gradient-func(135deg, 80%);
         
         @mask-image: url(/assets/img/stamped_logo_mask.png);
         
@@ -167,7 +174,7 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
     
     .user-logo-small {
         background-image: none;
-        .user-gradient(135deg, 80%);
+        .user-gradient-func(135deg, 80%);
         @mask-image: url(/assets/img/stamped_email_mask.png);
         
         -webkit-mask: @mask-image no-repeat;

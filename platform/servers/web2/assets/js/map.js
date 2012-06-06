@@ -161,10 +161,22 @@
             map.setCenter(bounds.getCenter());
         };
         
+        // TODO: put this in a generic page initialization handler
         resize_map();
         setTimeout(resize_map, 150);
         
         window.addEventListener('resize', resize_map, false);
+        
+        $('.stamp-list-view').jScrollPane();
+        
+        $('.list-view-nav a').click(function(event) {
+            event.preventDefault();
+            var $this = $(this);
+            
+            $this.parents('.stamp-map-nav').toggleClass('stamp-map-nav-collapsed');
+            
+            return false;
+        });
     });
 })();
 

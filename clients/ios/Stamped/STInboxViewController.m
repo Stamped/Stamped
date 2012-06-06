@@ -33,6 +33,9 @@
 #import "STStampCell.h"
 #import "DDMenuController.h"
 #import "STActionManager.h"
+#import "FindFriendsViewController.h"
+#import "STMenuController.h"
+#import "STUserViewController.h"
 
 @interface STInboxViewController ()
 
@@ -267,7 +270,11 @@
     UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
     NSIndexPath *indexPath = [tableview indexPathForCell:cell];
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
-    [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
+    STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
+    [self.navigationController pushViewController:controller animated:YES];
+
+    
+    //[[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
 
@@ -456,6 +463,20 @@
 
 - (void)noDataAction:(id)sender {
     
+    if (!LOGGED_IN) {
+        
+        STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        [controller showWelcome];
+        
+    } else {
+        
+        FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
+        STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+        [self presentModalViewController:navController animated:YES];
+        [controller release];
+        [navController release];
+        
+    }
     
 }
 

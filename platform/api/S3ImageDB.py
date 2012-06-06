@@ -77,7 +77,15 @@ class S3ImageDB(AImageDB):
         # referenced throughout the stamped platform are deprecated, but 
         # the available image sizes that we will continue to support has 
         # not changed.
+
+        sizes = [24, 48, 60, 96, 144]
+        result = {}
+        for size in sizes:
+            result['%sx%s' % (size, size)] = (size, size)
+
+        return result
         
+        ### DEPRECATED
         return {
             # shown in user's profile
             '144x144': (144, 144), # 2x
@@ -323,7 +331,6 @@ class S3ImageDB(AImageDB):
             finally:
                 try:
                     if not key.closed:
-                        logs.info('CLOSE KEY!')
                         key.close()
                 except:
                     pass
@@ -355,15 +362,12 @@ class S3ImageDB(AImageDB):
         
         while True:
             try:
-                logs.info('CREATE NEW CONNECTION & ASSIGN BUCKET')
                 conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
                 bucket = conn.lookup(self.bucket_name)
 
                 if not self.bucket.get_key(oldKey):
-                    logs.info('KEY DOES NOT EXIST')
                     return True
                 
-                logs.info('COPY KEY')
                 bucket.copy_key(newKey, self.bucket_name, oldKey, preserve_acl=True)
                 return True
 

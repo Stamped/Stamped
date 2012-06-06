@@ -387,13 +387,13 @@ class HTTPTextReference(Schema):
 class HTTPAccount(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                      basestring, required=True)
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('auth_service',                 basestring, required=True)
-        cls.addProperty('email',                        basestring, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('privacy',                      bool, required=True)
-        cls.addProperty('phone',                        basestring)
+        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('auth_service',                     basestring, required=True)
+        cls.addProperty('email',                            basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('privacy',                          bool, required=True)
+        cls.addProperty('phone',                            basestring)
 
     def importAccount(self, account):
         self.dataImport(account.dataExport(), overflow=True)
@@ -402,39 +402,40 @@ class HTTPAccount(Schema):
 class HTTPAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring, required=True)
-        cls.addProperty('password',                     basestring, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('email',                            basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('phone',                            int)
 
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
 
         # for asynchronous image uploads
-        cls.addProperty('temp_image_url',               basestring)
-        cls.addProperty('temp_image_width',             int)
-        cls.addProperty('temp_image_height',            int)
+        cls.addProperty('temp_image_url',                   basestring)
 
     def convertToAccount(self):
         return Account().dataImport(self.dataExport(), overflow=True)
-        
-    # def exportSchema(self, schema):
-    #     if schema.__class__.__name__ == 'Account':
-    #         schema.importData(self.exportSparse(), overflow=True)
-    #     else:
-    #         raise NotImplementedError(type(schema))
-    #     return schema
 
 class HTTPFacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('user_token',                   basestring, required=True)
-        cls.addProperty('email',                        basestring)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('user_token',                       basestring, required=True)
+        cls.addProperty('email',                            basestring)
+        cls.addProperty('phone',                            int)
 
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+
+        cls.addProperty('temp_image_url',                   basestring)
 
     def convertToFacebookAccountNew(self):
         return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
@@ -442,14 +443,20 @@ class HTTPFacebookAccountNew(Schema):
 class HTTPTwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('user_token',                   basestring, required=True)
-        cls.addProperty('user_secret',                  basestring, required=True)
-        cls.addProperty('email',                        basestring)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('user_token',                       basestring, required=True)
+        cls.addProperty('user_secret',                      basestring, required=True)
+        cls.addProperty('email',                            basestring)
+        cls.addProperty('phone',                            int)
 
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+
+        cls.addProperty('temp_image_url',                   basestring)
 
     def convertToTwitterAccountNew(self):
         return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
@@ -459,55 +466,54 @@ class HTTPTwitterAccountNew(Schema):
 class HTTPAccountSettings(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('email',              basestring)
-        cls.addProperty('password',           basestring)
-        cls.addProperty('screen_name',        basestring)
-        cls.addProperty('privacy',            bool)
-        cls.addProperty('phone',              int)
+        cls.addProperty('email',                            basestring)
+        cls.addProperty('password',                         basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('privacy',                          bool)
+        cls.addProperty('phone',                            int)
 
 class HTTPAccountProfile(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',               basestring)
-        cls.addProperty('color',              basestring)
-        cls.addProperty('bio',                basestring)
-        cls.addProperty('website',            basestring)
-        cls.addProperty('location',           basestring)
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
 
 class HTTPCustomizeStamp(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('color_primary',      basestring, required=True)
-        cls.addProperty('color_secondary',    basestring, required=True)
+        cls.addProperty('color_primary',                    basestring, required=True)
+        cls.addProperty('color_secondary',                  basestring, required=True)
 
 class HTTPAccountProfileImage(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('profile_image',      basestring) ### TODO: normalize=False
+        cls.addProperty('profile_image',                    basestring) ### TODO: normalize=False
         
         # for asynchronous image uploads
-        cls.addProperty('temp_image_url',     basestring)
+        cls.addProperty('temp_image_url',                   basestring)
 
 class HTTPAccountCheck(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('login',              basestring, required=True)
+        cls.addProperty('login',                            basestring, required=True)
 
 class HTTPRemoveLinkedAccountForm(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',             basestring, required=True)
+        cls.addProperty('service_name',                     basestring, required=True)
 
 class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',             basestring, required=True)
-        cls.addProperty('user_id',                  basestring)
-        cls.addProperty('screen_name',         basestring)
-        cls.addProperty('name',                basestring)
-        cls.addProperty('token',               basestring)
-        cls.addProperty('secret',              basestring)
-        cls.addProperty('token_expiration',    datetime)
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('token',                            basestring)
+        cls.addProperty('secret',                           basestring)
+        cls.addProperty('token_expiration',                 datetime)
 
     def importLinkedAccount(self, linked):
         self.dataImport(linked.dataExport(), overflow=True)
@@ -521,9 +527,9 @@ class HTTPLinkedAccount(Schema):
 class HTTPLinkedAccounts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('twitter',            HTTPLinkedAccount)
-        cls.addNestedProperty('facebook',           HTTPLinkedAccount)
-        cls.addNestedProperty('netflix',            HTTPLinkedAccount)
+        cls.addNestedProperty('twitter',                    HTTPLinkedAccount)
+        cls.addNestedProperty('facebook',                   HTTPLinkedAccount)
+        cls.addNestedProperty('netflix',                    HTTPLinkedAccount)
 
     def importLinkedAccounts(self, linked):
         if linked.twitter is not None:
@@ -701,8 +707,10 @@ class HTTPUser(Schema):
         cls.addProperty('privacy',                      bool, required=True)
         cls.addNestedProperty('image',                  HTTPImageSchema)
         cls.addProperty('image_url',                    basestring)
+        cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
         
-        cls.addProperty('identifier',                   basestring)
+        cls.addProperty('following',                    bool)
+
         cls.addProperty('num_stamps',                   int)
         cls.addProperty('num_stamps_left',              int)
         cls.addProperty('num_friends',                  int)
@@ -712,7 +720,6 @@ class HTTPUser(Schema):
         cls.addProperty('num_credits_given',            int)
         cls.addProperty('num_likes',                    int)
         cls.addProperty('num_likes_given',              int)
-        cls.addNestedPropertyList('distribution',       HTTPCategoryDistribution)
 
     def importAccount(self, account, client=None):
         return self.importUser(account, client)
@@ -764,7 +771,15 @@ class HTTPUser(Schema):
 class HTTPSuggestedUser(HTTPUser):
     @classmethod
     def setSchema(cls):
-        cls.addPropertyList('explanations', basestring)
+        cls.addProperty('search_identifier',                basestring)
+        cls.addProperty('relationship_explanation',         basestring)
+
+    def __init__(self):
+        HTTPUser.__init__(self)
+
+    def importUser(self, user, client=None):
+        HTTPUser.importUser(self, user, client)
+        return self
 
 class HTTPUserMini(Schema):
     @classmethod

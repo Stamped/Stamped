@@ -48,7 +48,6 @@
   [super dealloc];
 }
 
-
 - (void)drawRect:(CGRect)rect {
   if (black_) {
     [super drawRect:rect];
@@ -162,6 +161,58 @@
     }
   }
   return textPath;
+}
+
+- (void)showUserStrip:(BOOL)show forUser:(id<STUser>)user {
+    
+    if (show) {
+        
+        float r,g,b;
+        [Util splitHexString:user.primaryColor toRed:&r green:&g blue:&b];
+        
+        float r2,g2,b2;
+        [Util splitHexString:user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+                
+        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height, self.bounds.size.width, 4.0f)];
+        view.backgroundColor = [UIColor whiteColor];
+        [self insertSubview:view atIndex:0];
+        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+            
+            CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
+            size_t _numLocations = 2;
+            CGFloat _locations[2] = { 0.0, 1.0 };
+            CGFloat _colors[8] = { r, g, b, 1.0f, r2, g2, b2, 1.0f };
+            CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
+            CGColorSpaceRelease(_rgb);
+            
+            CGPoint start = CGPointMake(rect.origin.x, CGRectGetMidY(rect));
+            CGPoint end = CGPointMake(rect.size.width, CGRectGetMidY(rect));
+            
+            CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
+            CGGradientRelease(gradient);
+            
+            [[UIColor whiteColor] setStroke];
+            CGContextMoveToPoint(ctx, 0.0f, rect.size.height - 0.5f);
+            CGContextAddLineToPoint(ctx, rect.size.width, rect.size.height - 0.5f);
+            CGContextStrokePath(ctx);
+            
+        }];
+        [view release];
+        view.layer.shadowPath = [UIBezierPath bezierPathWithRect:view.bounds].CGPath;
+        view.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        view.layer.shadowRadius = 4.0f;
+        view.layer.shadowOpacity = 0.15f;
+        _userStrip = view;
+        
+    } else {
+        
+        if (_userStrip) {
+            [_userStrip removeFromSuperview], _userStrip=nil;
+        }
+        
+    }
+    
+    
 }
 
 @end

@@ -344,6 +344,13 @@ class AStampedAPITestCase(AStampedTestCase):
             }
         return self.handleGET(path, data)
 
+    def showActivity(self, token):
+        path = "activity/show.json"
+        data = {
+            'oauth_token'       : token['access_token'],
+            }
+        return self.handleGET(path, data)
+
     def createEntity(self, token, data=None):
         path = "entities/create.json"
         if data == None:

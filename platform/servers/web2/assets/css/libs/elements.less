@@ -149,8 +149,13 @@
     transition:         transform         @duration0 @ease0, @target1 @duration1 @ease1;
 }
 
-
-
+.transition-rounded(@duration0: 0.2s, @ease0: ease-out) {
+    -webkit-transition: -webkit-border-radius @duration0 @ease0;
+    -moz-transition:    -moz-border-radius    @duration0 @ease0;
+    -ms-transition:     -ms-border-radius     @duration0 @ease0;
+    -o-transition:      -o-border-radius      @duration0 @ease0;
+    transition:         border-radius         @duration0 @ease0;
+}
 
 .inner-shadow(@horizontal: 0, @vertical: 1px, @blur: 2px, @alpha: 0.4) {
     -webkit-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);

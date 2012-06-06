@@ -15,6 +15,8 @@
     UIImageView *_stampedImageView;
     LoginKeyboardButton *_loginButton;
     LoginLoadingView *_loadingView;
+    BOOL _didAnimateIn;
+    BOOL _animatingOut;
 }
 @property(nonatomic,assign) id <LoginViewControllerDelegate> delegate;
 @property(nonatomic,assign,getter = isLoading) BOOL loading;

@@ -22,5 +22,6 @@ typedef enum {
 
 @property(nonatomic,assign) FriendStatus status;
 @property(nonatomic,assign) BOOL loading;
+@property(nonatomic,assign) BOOL showCheck; // default YES
 
 @end

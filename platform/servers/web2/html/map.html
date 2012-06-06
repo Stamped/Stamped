@@ -19,7 +19,130 @@
 {% endblock pre_profile_main_content %}
 
 {% block profile_main_content %}
-    {% handlebars_template "stamp-map" %}
+    <div class="stamp-map">
+        <div class="stamp-map-canvas"></div>
+        
+        <div class="fixedwidth">
+            <div class="stamp-map-nav">
+                <div class="nav-header clearfix">
+                    {% handlebars_template "profile-image-medium-ish" user %}
+                    
+                    <div class="rhs">
+                        <div class="name">
+                            {% handlebars_template "screen-name" user %}'s
+                        </div>
+                        
+                        <div class="stamp-map-title user-primary">Stamp Map</div>
+                        
+                        <div class="list-view-nav">
+                            <a href="#">
+                                <span class='arrow up-arrow'>&#x25B2</span>
+                                <span class='arrow down-arrow'>&#x25BC</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="top-user-gradient user-gradient">
+                    <div class="ribbon-top"></div>
+                </div>
+                
+                <div class="stamp-list-view">
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                    <p>TODO</p>
+                </div>
+                
+                <div class="bottom-user-gradient user-gradient">
+                    <div class="ribbon-bottom"></div>
+                </div>
+                
+                <div class="nav-footer">
+                    <a class="back" href="/{{user.screen_name}}">View {{user.screen_name}}'s Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock profile_main_content %}
 
 {% block scripts %}
