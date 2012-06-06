@@ -143,6 +143,7 @@ class AppleRSS(object):
         logs.info(pformat(entry))
         aid = entry['id']['attributes']['im:id']
 
+        # TODO: Why can't we parse the proxies directly from the feed results?
         proxy = self._source.entityProxyFromKey(aid)
         proxy = EntityProxyContainer.EntityProxyContainer(proxy)
         
