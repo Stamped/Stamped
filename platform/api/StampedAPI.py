@@ -4232,7 +4232,7 @@ class StampedAPI(AStampedAPI):
 
     def _mergeEntity(self, entity, link=True):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
-        modified = self._resolveEntity(entity)
+        modified, entity = self._resolveEntity(entity)
         if link:
             modified = self._resolveEntityLinks(entity) | modified
 
@@ -4265,14 +4265,13 @@ class StampedAPI(AStampedAPI):
         try:
             # TEMP: Short circuit if user-generated
             if entity.sources.user_generated_id is not None:
-                return False
+                return entity, False
 
             # Short circuit if entity is already tombstoned
             if entity.sources.tombstone_id is not None:
                 successor, modified_successor = _getSuccessor(entity.sources.tombstone_id)
                 logs.info("Entity (%s) already tombstoned (%s)" % (entity.entity_id, successor.entity_id))
-                entity = successor
-                return modified_successor
+                return successor, modified_successor
 
             # Enrich entity
             decorations = {}
@@ -4286,12 +4285,11 @@ class StampedAPI(AStampedAPI):
                     self._entityDB.updateEntity(entity)
 
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor.entity_id))
-                entity = successor
-                return modified_successor
+                return modified_successor, successor
 
             self.__handleDecorations(entity, decorations)
 
-            return modified
+            return modified, entity
 
         except Exception:
             report()
