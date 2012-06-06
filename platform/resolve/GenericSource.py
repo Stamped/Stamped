@@ -39,7 +39,7 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
         value_set = set()
     def source(start, count):
         total = start + count
-        while total - len(results) > 0:
+        while total > len(results):
             try:
                 value = None
                 if tolerant:
@@ -61,12 +61,7 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
             except StopIteration:
                 break
 
-        if start + count <= len(results):
-            result = results[start:start+count]
-        elif start < len(results):
-            result = results[start:]
-        else:
-            result = []
+        result = results[start:]
         return result
     return source
 
