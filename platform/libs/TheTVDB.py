@@ -60,12 +60,12 @@ class TheTVDB(object):
                 output.append(entity)
         
         return output
-    
+
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
+    @cachedFn()
     def lookup(self, thetvdb_id):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \
                       (self.api_key, thetvdb_id)
