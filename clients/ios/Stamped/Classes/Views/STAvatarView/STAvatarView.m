@@ -49,6 +49,12 @@
     [super dealloc];
 }
 
+- (void)setDefault {
+    
+    self.imageView.image = [UIImage imageNamed:@"st_default_avatar.png"];
+    
+}
+
 - (void)setImageURL:(NSURL *)imageURL {
     if (_imageURL && [_imageURL isEqual:imageURL]) return;
     [_imageURL release], _imageURL=nil;

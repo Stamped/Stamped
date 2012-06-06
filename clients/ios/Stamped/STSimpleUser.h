@@ -21,6 +21,9 @@
 @property (nonatomic, readwrite, copy) NSString* imageURL;
 @property (nonatomic, readwrite, copy) NSNumber* following;
 
+@property(nonatomic,readonly,getter = isLoading) BOOL loading;
+
 + (RKObjectMapping*)mapping;
+- (void)toggleFollowing;
 
 @end

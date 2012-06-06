@@ -13,6 +13,7 @@
 #import "STTwitter.h"
 #import "STFacebook.h"
 #import "STWelcomeViewController.h"
+#import "STSimpleUser.h"
 
 @interface FriendsViewController ()
 @property(nonatomic,retain,readonly) Friends *friends;
@@ -292,6 +293,7 @@
     FriendTableCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[FriendTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell.delegate = (id<FriendTableCellDelegate>)self;
     }
     
     id<STUser> user = [_friends objectAtIndex:indexPath.row];
@@ -365,6 +367,20 @@
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
+    
+}
+
+
+#pragma mark - FriendTableCellDelegate
+
+- (void)friendTableCellToggleFollowing:(FriendTableCell*)cell {
+    
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    
+    if (indexPath) {
+        STSimpleUser *user = [_friends objectAtIndex:indexPath.row];
+        [user toggleFollowing];
+    }
     
 }
 
