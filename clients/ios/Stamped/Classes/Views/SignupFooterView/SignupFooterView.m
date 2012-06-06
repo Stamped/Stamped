@@ -9,6 +9,8 @@
 #import "SignupFooterView.h"
 #import <CoreText/CoreText.h>
 
+#define kCreateButtonTag 201
+
 @interface STSignupTextLayer : CATextLayer
 @property(nonatomic,assign) BOOL highlighted;
 @end
@@ -56,6 +58,7 @@
 
         UIImage *image = [UIImage imageNamed:@"signup_create_btn.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.tag = kCreateButtonTag;
         button.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         button.titleLabel.font = [UIFont boldSystemFontOfSize:14];
         button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
@@ -67,6 +70,7 @@
         [self addSubview:button];
         
         UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
+        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         [self addGestureRecognizer:gesture];
         [gesture release];
         
@@ -93,6 +97,13 @@
 
 
 #pragma mark - Gesture
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
+    UIView *view = [self viewWithTag:kCreateButtonTag];
+    return !CGRectContainsPoint(view.frame, [gestureRecognizer locationInView:self]);
+    
+}
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
     

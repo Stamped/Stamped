@@ -7,6 +7,7 @@
 //
 
 #import "SignupViewController.h"
+#import "SignupWelcomeViewController.h"
 #import "STTextFieldTableCell.h"
 #import "SignupFooterView.h"
 
@@ -19,7 +20,9 @@
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
+        self.title = NSLocalizedString(@"Sign up", @"Sign up");
         _dataSource = [[NSArray arrayWithObjects:@"full name", @"email", @"username", @"password", @"phone number", nil] retain];
+        self.navigationItem.hidesBackButton = YES;
     }
     return self;
 }
@@ -46,6 +49,7 @@
     if (!self.tableView.tableFooterView) {
         
         SignupFooterView *view = [[SignupFooterView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 120.0f)];
+        view.delegate = (id<SignupFooterViewDelegate>)self;
         view.backgroundColor = [UIColor clearColor];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableView.tableFooterView = view;
@@ -119,6 +123,11 @@
     
     NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
     
+    NSLog(@"create");
+    
+    SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeEmail];
+    [self.navigationController pushViewController:controller animated:YES];
+    [controller release];
     
     [params release];
     

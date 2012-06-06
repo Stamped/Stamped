@@ -7,12 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UserStampView.h"
 
 @class STAvatarView;
-@interface SocialSignupHeaderView : UIView {
-    UIImageView *_stampView;
-}
+@interface SocialSignupHeaderView : UIView
 
+@property(nonatomic,retain,readonly) UserStampView *stampView;
 @property(nonatomic,retain,readonly) STAvatarView *imageView;
 @property(nonatomic,retain,readonly) UILabel *titleLabel;
 @property(nonatomic,retain,readonly) UILabel *subTitleLabel;

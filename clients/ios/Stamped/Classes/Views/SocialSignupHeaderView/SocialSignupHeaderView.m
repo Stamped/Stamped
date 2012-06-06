@@ -14,6 +14,7 @@
 @synthesize detailLabel=_detailLabel;
 @synthesize subTitleLabel=_subTitleLabel;
 @synthesize imageView=_imageView;
+@synthesize stampView=_stampView;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -23,11 +24,14 @@
         [self addSubview:imageView];
         _imageView = [imageView retain];
         [imageView release];
+        [_imageView setDefault];
         
-        UIImageView *stampView = [[UIImageView alloc] initWithFrame:CGRectMake(imageView.bounds.size.width-20, -8, 28.0f, 28.0f)];
+        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectMake(imageView.bounds.size.width-20, -8, 28.0f, 28.0f)];
+        stampView.size = STStampImageSize28;
         [imageView addSubview:stampView];
         _stampView = stampView;
         [stampView release];
+        _stampView = [_stampView retain];
         
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
         label.backgroundColor = [UIColor clearColor];
@@ -62,6 +66,7 @@
     [_detailLabel release], _detailLabel=nil;
     [_titleLabel release], _titleLabel=nil;
     [_imageView release], _imageView=nil;
+    [_stampView release], _stampView=nil;
     [super dealloc];
 }
 
@@ -110,22 +115,7 @@
 }
 
 - (void)setStampColors:(NSArray*)colors {
-    if (!colors || [colors count] < 2) return; // invalid colors
-    
-    UIGraphicsBeginImageContextWithOptions(_stampView.bounds.size, NO, 0);
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    CGRect rect = CGContextGetClipBoundingBox(ctx);
-    
-    CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
-    CGContextScaleCTM(ctx, 1.0f, -1.0f);
-    
-    CGContextClipToMask(ctx, rect, [UIImage imageNamed:@"stamp_28pt_texture.png"].CGImage);
-    drawStampGradient([[colors objectAtIndex:0] CGColor], [[colors objectAtIndex:1] CGColor], ctx);
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    _stampView.image = image;
-    
+    [_stampView setupWithColors:colors];
 }
 
 @end

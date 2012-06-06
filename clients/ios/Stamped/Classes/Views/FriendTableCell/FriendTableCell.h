@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol FriendTableCellDelegate;
 @class STAvatarView, FriendStatusButton, UserStampView;
 @interface FriendTableCell : UITableViewCell {
     STAvatarView *_avatarView;
@@ -18,5 +19,9 @@
 }
 
 - (void)setupWithUser:(id<STUser>)user;
+@property(nonatomic,assign) id <FriendTableCellDelegate> delegate;
+@end
 
+@protocol FriendTableCellDelegate
+- (void)friendTableCellToggleFollowing:(FriendTableCell*)cell;
 @end

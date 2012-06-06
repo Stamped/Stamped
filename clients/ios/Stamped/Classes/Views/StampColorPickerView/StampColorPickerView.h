@@ -16,6 +16,7 @@
 @property(nonatomic,assign) id <StampColorPickerDelegate> delegate;
 
 - (NSArray*)colors;
+- (void)setSelectedColors:(NSArray*)colors;
 
 @end
 @protocol StampColorPickerDelegate

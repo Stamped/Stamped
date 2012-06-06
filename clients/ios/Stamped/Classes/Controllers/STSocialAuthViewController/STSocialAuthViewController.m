@@ -109,7 +109,7 @@
             [view release];
             _activityView = view;
             
-            view.frame = CGRectMake((self.view.bounds.size.width-20.0f)/2, (self.view.bounds.size.height-20.0f)/2, 20.0f, 20.0f);
+            view.frame = CGRectMake((self.view.bounds.size.width-20.0f)/2, (self.view.bounds.size.height-30.0f)/2, 20.0f, 20.0f);
             
         }
         
