@@ -152,7 +152,8 @@ class AMongoCollection(object):
         try:
             if result['ok'] == 1 and result['err'] is None:
                 return True
-        except:
+        except Exception as e:
+            logs.warning('Update failed: %s' % e)
             return False
         return False
     
@@ -177,7 +178,7 @@ class AMongoCollection(object):
         
         try:
             document = obj.dataExport()
-        except:
+        except (NameError, AttributeError):
             document = obj
         
         if self._primary_key:

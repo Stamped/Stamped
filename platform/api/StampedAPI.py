@@ -1428,7 +1428,8 @@ class StampedAPI(AStampedAPI):
                     albumIds[album.entity_id] = None
             try:
                 albums = self._entityDB.getEntities(albumIds.keys())
-            except:
+            except Exception:
+                logs.warning("Unable to get albums for keys: %s" % albumIds.keys())
                 albums = []
 
             for album in albums:
