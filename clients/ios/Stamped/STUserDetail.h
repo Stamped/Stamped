@@ -16,7 +16,6 @@
 @property (nonatomic, readonly, copy) NSString* website;
 @property (nonatomic, readonly, copy) NSString* location;
 @property (nonatomic, readonly, copy) NSString* identifier;
-@property (nonatomic, readonly, copy) NSNumber* isFollowing;
 
 @property (nonatomic, readonly, copy) NSNumber* numStamps;
 @property (nonatomic, readonly, copy) NSNumber* numStampsLeft;

@@ -204,7 +204,7 @@ andProfileImageSize:(STProfileImageSize)size {
 @synthesize imageURL = imageURL_;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
-    id<STContentItem> item = [stamp.contents objectAtIndex:index];
+    id<STContentItem> item = [stamp.contents objectAtIndex:0];
     self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:STProfileImageSize46];
     if (self) {
         if (item.images) {

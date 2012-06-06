@@ -381,7 +381,7 @@ static Rdio* _rdio;
     return [label autorelease];
 }
 
-+ (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {a
++ (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size {
     return [text sizeWithFont:font constrainedToSize:size lineBreakMode:mode];
 }
 

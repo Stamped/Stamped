@@ -1902,6 +1902,10 @@
 		634CC954154F42AF000CA620 /* TEMP_noImage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 634CC951154F42AF000CA620 /* TEMP_noImage@2x.png */; };
 		6354EE0D1539D9C4008D1A9D /* badge_1stYou@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6354EE0C1539D9C4008D1A9D /* badge_1stYou@2x.png */; };
 		6354EE0E1539D9C4008D1A9D /* badge_1stYou@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6354EE0C1539D9C4008D1A9D /* badge_1stYou@2x.png */; };
+		6355A753157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
+		6355A754157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
+		6355A755157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
+		6355A756157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
 		635D1C3E1551AE6600103D1A /* STGenericCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C3D1551AE6600103D1A /* STGenericCellFactory.m */; };
 		635D1C3F1551AE6600103D1A /* STGenericCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C3D1551AE6600103D1A /* STGenericCellFactory.m */; };
 		635D1C401551AE6600103D1A /* STGenericCellFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 635D1C3D1551AE6600103D1A /* STGenericCellFactory.m */; };
@@ -5006,6 +5010,8 @@
 		634BA4B8153CA8BD003F96AB /* STStampedByView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedByView.m; sourceTree = "<group>"; };
 		634CC951154F42AF000CA620 /* TEMP_noImage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_noImage@2x.png"; sourceTree = "<group>"; };
 		6354EE0C1539D9C4008D1A9D /* badge_1stYou@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "badge_1stYou@2x.png"; sourceTree = "<group>"; };
+		6355A751157FA4F000FF6B0F /* STAccountParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAccountParameters.h; sourceTree = "<group>"; };
+		6355A752157FA4F000FF6B0F /* STAccountParameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAccountParameters.m; sourceTree = "<group>"; };
 		635D1C3C1551AE6600103D1A /* STGenericCellFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STGenericCellFactory.h; sourceTree = "<group>"; };
 		635D1C3D1551AE6600103D1A /* STGenericCellFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGenericCellFactory.m; sourceTree = "<group>"; };
 		635D1C411551B23700103D1A /* STFriendsStampsList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFriendsStampsList.h; sourceTree = "<group>"; };
@@ -7357,6 +7363,8 @@
 				63B4F6901554628800C52C28 /* STConsumptionSlice.m */,
 				639440791573BD3600234DA6 /* STSharedCaches.h */,
 				6394407A1573BD3600234DA6 /* STSharedCaches.m */,
+				6355A751157FA4F000FF6B0F /* STAccountParameters.h */,
+				6355A752157FA4F000FF6B0F /* STAccountParameters.m */,
 			);
 			name = "Stamped API";
 			sourceTree = "<group>";
@@ -12614,6 +12622,7 @@
 				03A64C87157EED2C00934ABC /* STUserGraphView.m in Sources */,
 				03A64CB6157F075900934ABC /* STUserStamps.m in Sources */,
 				03A64CCC157F1C6400934ABC /* STCalloutView.m in Sources */,
+				6355A756157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12925,6 +12934,7 @@
 				03A64C86157EED2C00934ABC /* STUserGraphView.m in Sources */,
 				03A64CB5157F075900934ABC /* STUserStamps.m in Sources */,
 				03A64CCB157F1C6400934ABC /* STCalloutView.m in Sources */,
+				6355A755157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13235,6 +13245,7 @@
 				03A64C85157EED2C00934ABC /* STUserGraphView.m in Sources */,
 				03A64CB4157F075900934ABC /* STUserStamps.m in Sources */,
 				03A64CCA157F1C6400934ABC /* STCalloutView.m in Sources */,
+				6355A754157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13557,6 +13568,7 @@
 				03A64C84157EED2C00934ABC /* STUserGraphView.m in Sources */,
 				03A64CB3157F075900934ABC /* STUserStamps.m in Sources */,
 				03A64CC9157F1C6400934ABC /* STCalloutView.m in Sources */,
+				6355A753157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

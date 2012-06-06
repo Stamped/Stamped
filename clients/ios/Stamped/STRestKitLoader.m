@@ -506,48 +506,22 @@ static STRestKitLoader* _sharedInstance;
     
 }
 
-- (NSMutableDictionary*)_commonCreateScreenName:(NSString*)screenName 
-                                           name:(NSString*)name
-                                          email:(NSString*)email
-                                          phone:(NSString*)phone 
-                                   profileImage:(NSString*)profileImage {
-    NSMutableDictionary* params = [NSMutableDictionary dictionary];
-    [params setObject:screenName forKey:@"screen_name"];
-    [params setObject:name forKey:@"name"];
-    [params setObject:email forKey:@"email"];
-    if (phone) {
-        [params setObject:phone forKey:@"phone"];
-    }
-    if (profileImage) {
-        [params setObject:profileImage forKey:@"profile_image"];
-    }
-    return params;
-}
-
 - (STCancellation*)createAccountWithPassword:(NSString*)password
-                                  screenName:(NSString*)screenName
-                                        name:(NSString*)name
-                                       email:(NSString*)email
-                                       phone:(NSString*)phone //optional
-                                profileImage:(NSString*)profileImage //optional
+                           accountParameters:(STAccountParameters*)accountParameters
                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    NSMutableDictionary* params = [accountParameters asDictionaryParams];
     [params setObject:password forKey:@"password"];
     return [self _loginWithPath:@"/account/create.json"
                          params:params
                storeCredentials:^(id<STLoginResponse> response) {
-                   [self storeStampedScreenName:screenName andPassword:password];
+                   [self storeStampedScreenName:accountParameters.screenName andPassword:password];
                } andCallback:block];
 }
 
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
-                                           screenName:(NSString*)screenName
-                                                 name:(NSString*)name
-                                                email:(NSString*)email //optional
-                                                phone:(NSString*)phone //optional
-                                         profileImage:(NSString*)profileImage //optional
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    NSMutableDictionary* params = [accountParameters asDictionaryParams];
     [params setObject:userToken forKey:@"user_token"];
     return [self _loginWithPath:@"/account/create/facebook.json"
                          params:params
@@ -558,13 +532,9 @@ static STRestKitLoader* _sharedInstance;
 
 - (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
                                           userSecret:(NSString*)userSecret
-                                          screenName:(NSString*)screenName
-                                                name:(NSString*)name
-                                               email:(NSString*)email //optional
-                                               phone:(NSString*)phone //optional
-                                        profileImage:(NSString*)profileImage //optional
+                                   accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    NSMutableDictionary* params = [accountParameters asDictionaryParams];
     [params setObject:userToken forKey:@"user_token"];
     [params setObject:userSecret forKey:@"user_secret"];
     return [self _loginWithPath:@"/account/create/twitter.json"
