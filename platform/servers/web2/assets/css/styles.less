@@ -72,6 +72,7 @@ ol, ul {
 
 header {
     .fullwidth;
+    
     position: fixed;
     z-index: 150;
     background: #fff;
@@ -80,14 +81,36 @@ header {
         z-index: 25;
         
         p {
+            position: relative;
             float: right;
             clear: both;
-            position: relative;
             
             margin: 0.5em 0.5em 0.25em 0;
             
             .desc {
                 font-size: 90%;
+            }
+            
+            a.button {
+                background: url(/assets/img/join_signup_sprite.png) no-repeat;
+                display: inline-block;
+                width:  82px;
+                height: 27px;
+                margin-left: .5em;
+                position: relative;
+                top: .5em;
+            }
+        }
+        
+        .button(@y: 0) {
+            background-position: 0 @y;
+            
+            &:hover {
+                background-position: -84px  @y;
+            }
+            
+            &:active {
+                background-position: -168px @y;
             }
         }
         
@@ -98,33 +121,11 @@ header {
             }
             
             a.button {
-                /*background: url(/assets/img/join_sign_up_buttons_sprite.png) no-repeat;*/
-                color: #fff;
-                background: @stamped-base-color;
-                .box-shadow(0, 0, 4px, 0, @stamped-base-color);
-                .rounded(2px);
-                
-                &:hover {
-                    @c0: lighten(@stamped-base-color, 10%);
-                    @c1: darken(@stamped-base-color,  10%);
-                    
-                    text-decoration: none;
-                    background: @c0;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
-                
-                &:active {
-                    @c0: lighten(@stamped-base-color, 5%);
-                    @c1: darken(@stamped-base-color,  25%);
-                    
-                    text-decoration: none;
-                    background: @c1;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
+                .button(0);
             }
         }
         
-        p.sign-in {
+        p.login {
             z-index: 26;
             margin-bottom: 1em;
             
@@ -133,46 +134,8 @@ header {
             }
             
             a.button {
-                .rounded(4px);
-                .box-shadow(0, 0, 4px, 0, #eee);
-                border: 1px solid #666;
-                background: #FEFEFE;
-                color: #666;
-                
-                &:hover {
-                    @c0: lighten(@stamped-base-color, 10%);
-                    @c1: darken(@stamped-base-color,  10%);
-                    
-                    color: #fff;
-                    border-color: @c0;
-                    
-                    background: @c0;
-                    text-decoration: none;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
-                
-                &:active {
-                    @c0: lighten(@stamped-base-color, 5%);
-                    @c1: darken(@stamped-base-color,  25%);
-                    color: #fff;
-                    border-color: @c1;
-                    
-                    background: @c1;
-                    text-decoration: none;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
+                .button(-29px);
             }
-        }
-        
-        a.button {
-            .stamped-font();
-            
-            letter-spacing: .1em;
-            text-align: center;
-            
-            margin-left: .5em;
-            display: inline-block;
-            width: 5em;
         }
     }
 }
@@ -261,6 +224,10 @@ header {
 
 .profile-image-large-ish {
     .profile-image(96px,  3px);
+}
+
+.profile-image-medium-ish {
+    .profile-image(72px,  3px);
 }
 
 .profile-image-medium {

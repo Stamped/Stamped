@@ -321,8 +321,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             
         result = []
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['email']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['email']
             result.append(user)
         return result
 
@@ -335,8 +335,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         result = []
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['phone']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['phone']
             result.append(user)
         return result
 
@@ -350,8 +350,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         result = []
         for item in data:
-            user                = self._convertFromMongo(item)
-            user.identifier     = item['linked_accounts']['twitter']['twitter_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked_accounts']['twitter']['twitter_id']
             result.append(user)
 
         # new format find
@@ -360,8 +360,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         ).limit(limit)
 
         for item in data:
-            user                = self._convertFromMongo(item)
-            user.identifier     = item['linked']['twitter']['user_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked']['twitter']['user_id']
             result.append(user)
         return result
 
@@ -374,8 +374,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         result = []
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['linked_accounts']['facebook']['facebook_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked_accounts']['facebook']['facebook_id']
             result.append(user)
 
         # new format find
@@ -384,8 +384,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         ).limit(limit)
 
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['linked']['facebook']['user_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked']['facebook']['user_id']
             result.append(user)
         
         return result

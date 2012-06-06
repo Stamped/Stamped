@@ -205,7 +205,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     @HandleRollback
-    def addAccount(self, account, imageData=None):
+    def addAccount(self, account, tempImageUrl=None):
         ### TODO: Check if email already exists?
         now = datetime.utcnow()
 
@@ -220,8 +220,16 @@ class StampedAPI(AStampedAPI):
         account.stats.num_stamps_total = 0
 
         # Set default stamp colors
-        account.color_primary   = '004AB2'
-        account.color_secondary = '0057D1'
+        if account.color_primary is not None or account.color_secondary is not None:
+            primary, secondary = self._validateStampColors(account.color_primary, account.color_secondary)
+            account.color_primary = primary
+            account.color_secondary = secondary
+
+            # Asynchronously generate stamp file
+            tasks.invoke(tasks.APITasks.customizeStamp, args=[primary, secondary])
+        else:
+            account.color_primary   = '004AB2'
+            account.color_secondary = '0057D1'
 
         # Set default alerts
         alerts                          = AccountAlerts()
@@ -257,7 +265,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Invalid format for email address")
 
         # Add image timestamp if exists
-        if imageData:
+        if tempImageUrl is not None:
             account.image_cache = now
 
         # Create account
@@ -269,12 +277,8 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.new_accounts')
 
         # Add profile image
-        if imageData:
-            try:
-                self._addProfileImage(imageData, user_id=None, screen_name=account.screen_name.lower())
-            except IOError:
-                #if there was a problem with the image format, just ignore the image
-                account.image_cache = None
+        if tempImageUrl is not None:
+            tasks.invoke(tasks.APITasks.updateProfileImage, args=[account.screen_name, tempImageUrl])
 
         # Asynchronously send welcome email and add activity items
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
@@ -319,7 +323,7 @@ class StampedAPI(AStampedAPI):
         return user
 
     @API_CALL
-    def addFacebookAccount(self, new_fb_account):
+    def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
         """
         For adding a Facebook auth account, first pull the user info from Facebook, verify that the user_id is not already
          linked to another user, populate the linked account information and then chain to the standard addAccount() method
@@ -346,10 +350,10 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
-        return self.addAccount(account, new_fb_account.profile_image)
+        return self.addAccount(account, tempImageUrl=tempImageUrl)
 
     @API_CALL
-    def addTwitterAccount(self, new_tw_account):
+    def addTwitterAccount(self, new_tw_account, tempImageUrl=None):
         """
         For adding a Twitter auth account, first pull the user info from Twitter, verify that the user_id is not already
          linked to another user, populate the linked account information and then chain to the standard addAccount() method
@@ -376,7 +380,7 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = user['profile_background_image_url']
 
-        return self.addAccount(account, new_tw_account.profile_image)
+        return self.addAccount(account, tempImageUrl=tempImageUrl)
 
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -636,21 +640,23 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateAccount(account)
         return account
 
-    @API_CALL
-    def customizeStamp(self, authUserId, data):
-        ### TODO: Reexamine how updates are done
+    def _validateStampColors(self, primary, secondary):
+        primary = primary.upper()
+        secondary = secondary.upper()
 
-        primary   = data['color_primary'].upper()
-        secondary = data['color_secondary'].upper()
-
-        # Validate inputs
         if not utils.validate_hex_color(primary) or not utils.validate_hex_color(secondary):
             raise StampedInputError("Invalid format for colors")
+
+        return primary, secondary
+
+    @API_CALL
+    def customizeStamp(self, authUserId, data):
+        primary, secondary = self._validateStampColors(data['color_primary'], data['color_secondary'])
 
         account = self._accountDB.getAccount(authUserId)
 
         # Import each item
-        account.color_primary   = primary
+        account.color_primary = primary
         account.color_secondary = secondary
 
         self._accountDB.updateAccount(account)
@@ -961,6 +967,30 @@ class StampedAPI(AStampedAPI):
 
         return result
 
+    def _enrichUserObjects(self, users, authUserId=None, **kwargs):
+
+        singleUser = False
+        if not isinstance(users, list):
+            singleUser  = True
+            users       = [users]
+
+        # Only enrich "following" field for now
+        if authUserId is not None:
+            friends = self._friendshipDB.getFriends(authUserId)
+            result = []
+            for user in users:
+                if user.user_id in friends:
+                    user.following = True
+                else:
+                    user.following = False 
+                result.append(user)
+            users = result 
+        
+        if singleUser:
+            return users[0]
+
+        return users
+
 
     ### PUBLIC
 
@@ -986,7 +1016,7 @@ class StampedAPI(AStampedAPI):
                 ### TEMP: This should be async
                 self._userDB.updateDistribution(user.user_id, distribution)
 
-        return user
+        return self._enrichUserObjects(user, authUserId=authUserId)
 
     @API_CALL
     def getUsers(self, userIds, screenNames, authUserId):
@@ -1021,7 +1051,7 @@ class StampedAPI(AStampedAPI):
         if len(result) != len(users):
             result = users
 
-        return result
+        return self._enrichUserObjects(result, authUserId=authUserId)
 
     @API_CALL
     def getPrivacy(self, userRequest):
@@ -1034,13 +1064,15 @@ class StampedAPI(AStampedAPI):
         ### TODO: Condense with the other "findUsersBy" functions
         ### TODO: Add check for privacy settings?
 
-        return self._userDB.findUsersByEmail(emails, limit=100)
+        users = self._userDB.findUsersByEmail(emails, limit=100)
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def findUsersByPhone(self, authUserId, phone):
         ### TODO: Add check for privacy settings?
 
-        return self._userDB.findUsersByPhone(phone, limit=100)
+        users = self._userDB.findUsersByPhone(phone, limit=100)
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def findUsersByTwitter(self, authUserId, user_token, user_secret):
@@ -1049,7 +1081,7 @@ class StampedAPI(AStampedAPI):
 
         # Grab friend list from Facebook API
         users = self._getTwitterFriends(user_token, user_secret)
-        return users
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def findUsersByFacebook(self, authUserId, user_token=None):
@@ -1058,7 +1090,7 @@ class StampedAPI(AStampedAPI):
 
         # Grab friend list from Facebook API
         users = self._getFacebookFriends(user_token)
-        return users
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):
@@ -1066,23 +1098,22 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Add check for privacy settings
 
-        return self._userDB.searchUsers(authUserId, query, limit, relationship)
+        users = self._userDB.searchUsers(authUserId, query, limit, relationship)
+        return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def getSuggestedUsers(self, authUserId, request):
         if request.personalized:
             suggestions = self._friendshipDB.getSuggestedUserIds(authUserId, request)
-            output      = []
+            users       = []
 
             for suggestion in suggestions:
                 user_id      = suggestion[0]
-                explanations = suggestion[1]
+                explanations = suggestion[1] # Not being used currently!
                 user         = self._userDB.getUser(user_id)
+                users.append(user)
 
-                # TODO: use user's bio if no explanations are available
-                output.append([ user, explanations ])
-
-            return output
+            return self._enrichUserObjects(users, authUserId=authUserId)
         else:
             suggested = {
                 'mariobatali':      1,
@@ -1097,7 +1128,8 @@ class StampedAPI(AStampedAPI):
             }
 
             users = self.getUsers(None, suggested.keys(), authUserId)
-            return sorted(users, key=lambda k: suggested[getattr(k, 'screen_name')])
+            users = sorted(users, key=lambda k: suggested[getattr(k, 'screen_name')])
+            return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
     def ignoreSuggestedUsers(self, authUserId, user_ids):
@@ -1199,6 +1231,7 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity
         self._activityDB.removeFollowActivity(authUserId, userId)
+        self._activityDB.remo
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -1507,8 +1540,12 @@ class StampedAPI(AStampedAPI):
         if autosuggestForm.category == 'film':
             return self._netflix.autocomplete(autosuggestForm.query)
         elif autosuggestForm.category == 'place':
+            if autosuggestForm.coordinates is None:
+                latLng = None
+            else:
+                latLng = autosuggestForm.coordinates.split(',')
             results = self._googlePlaces.getAutocompleteResults(
-                autosuggestForm.coordinates.split(','),
+                latLng,
                 autosuggestForm.query,
                 {'radius': 500, 'types' : 'establishment'})
             logs.info(results)
@@ -1562,7 +1599,7 @@ class StampedAPI(AStampedAPI):
         # For now, only complete the action if it's associated with an entity and a stamp
         if stampId is not None:
             stamp   = self._stampDB.getStamp(stampId)
-            user    = self._userDB.getUser(stamp.user.user_id)
+            # user    = self._userDB.getUser(stamp.user.user_id)
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
             if action in actions and authUserId != stamp.user.user_id:
@@ -3704,6 +3741,11 @@ class StampedAPI(AStampedAPI):
         # User
         user = self._userDB.getUser(authUserId).minimize()
 
+        #stamp
+        if stampId is not None:
+            stamp = self._stampDB.getStamp(stampId)
+            stamp_owner = stamp.user.user_id
+
         friendIds = self._friendshipDB.getFriends(user.user_id)
 
         # Enrich todo
@@ -3718,11 +3760,14 @@ class StampedAPI(AStampedAPI):
         if authUserId in recipientIds:
             recipientIds.remove(authUserId)
 
+        if stampId is not None:
+            recipientIds.append(stamp_owner)
+        # get rid of duplicate entries
+        recipientIds = list(set(recipientIds))
+
         ### TODO: Verify user isn't being blocked
         if not previouslyTodoed and len(recipientIds) > 0:
-            #for stamp in friendStamps:
-            #if stamp.user.user_id != authUserId:
-            self._addTodoActivity(authUserId, recipientIds, entity.entity_id, stampId)
+            self._addTodoActivity(authUserId, recipientIds, entity.entity_id)
 
             # Update stamp stats
             if stampId is not None:
@@ -3878,10 +3923,8 @@ class StampedAPI(AStampedAPI):
                                           groupRange = timedelta(days=1),
                                           benefit = benefit)
 
-    def _addTodoActivity(self, userId, recipientIds, entityId, stampId=None):
+    def _addTodoActivity(self, userId, recipientIds, entityId):
         objects = ActivityObjectIds()
-        if stampId is not None:
-            objects.stamp_ids = [ stampId ]
         objects.entity_ids = [ entityId ]
         self._addActivity('todo', userId, objects,
                                           recipientIds = recipientIds,
@@ -3946,6 +3989,8 @@ class StampedAPI(AStampedAPI):
         objects.stamp_ids       = [ stampId ]
         self._addActivity('action_%s' % action_name, userId, objects,
                                                              body = body,
+                                                             group = True,
+                                                             groupRange = timedelta(days=1),
                                                              unique = True)
 
     def _addActivity(self, verb,
