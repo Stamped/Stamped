@@ -41,8 +41,8 @@
 typedef enum {
     STStampedAPIScopeYou = 0,
     STStampedAPIScopeFriends,
+    STStampedAPIScopeEveryone,
     STStampedAPIScopeFriendsOfFriends,
-    STStampedAPIScopeEveryone
 } STStampedAPIScope;
 
 typedef enum {

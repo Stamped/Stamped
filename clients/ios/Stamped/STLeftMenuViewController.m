@@ -319,7 +319,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     if ([[STConfiguration value:value] isEqual:[STProfileViewController class]]) {
         
         id user = [[STStampedAPI sharedInstance] currentUser];
-        //controller = [[STProfileViewController alloc] initWithUserID:[user userID]];
         controller = [[STUserViewController alloc] initWithUser:(STSimpleUserDetail*)user];
 
     } else {
