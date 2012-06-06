@@ -8,17 +8,20 @@ __license__   = "TODO"
 import Globals
 import APITasks
 
-import logs, pprint, time, utils
+import atexit, logs, pprint, time, utils
 
 from datetime           import datetime, timedelta
 from celery.task        import task
 from celery.task.base   import BaseTask
+from gevent.pool        import Pool
 
 __broker_status__   = utils.AttributeDict({
     'errors'  : [], 
     'time'    : None, 
     'handler' : None, 
 })
+
+local_worker_pool = None
 
 def invoke(task, args=None, kwargs=None, **options):
     """
@@ -29,7 +32,18 @@ def invoke(task, args=None, kwargs=None, **options):
     
     #msg = "INVOKE: %s" % task
     #logs.debug(msg)
-    
+
+    if not utils.is_ec2():
+        global local_worker_pool
+        if local_worker_pool is None:
+            local_worker_pool = Pool(16)
+            atexit.register(local_worker_pool.join)
+        if args is None:
+            args = ()
+        if kwargs is None:
+            kwargs = {}
+        return local_worker_pool.spawn(task.run, *args, **kwargs)
+
     assert isinstance(task, BaseTask)
     global __broker_status__
     
@@ -40,7 +54,7 @@ def invoke(task, args=None, kwargs=None, **options):
     attempt_async = num_errors < max_errors or \
                     (__broker_status__.time is not None and \
                      datetime.utcnow() - timedelta(minutes=5) >= __broker_status__.time)
-    
+
     if attempt_async:
         error   = None
         retries = 0
@@ -48,7 +62,7 @@ def invoke(task, args=None, kwargs=None, **options):
         while True:
             try:
                 retval = task.apply_async(args, kwargs, **options)
-                
+
                 # clear built-up errors now that we've successfully reestablished 
                 # our connection with the message broker
                 __broker_status__['errors'] = []
@@ -64,9 +78,9 @@ def invoke(task, args=None, kwargs=None, **options):
                 if retries > max_retries:
                     error = e
                     break
-                
+
                 time.sleep(0.1)
-        
+
         if error is not None:
             logs.warn("async failed: (%s) %s" % (type(error), error))
             
