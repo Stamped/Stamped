@@ -51,6 +51,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         for document in documents:
             userIds.append(self._getStringFromObjectId(document['_id']))
         return userIds
+
+    def _getAllScreenNames(self):
+        documents = self._collection.find({}, fields=['screen_name'])
+        screenNames = []
+        for document in documents:
+            screenNames.append(document['screen_name'])
+        return screenNames
     
     ### PUBLIC
     
