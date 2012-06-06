@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "STStamp.h"
+#import "STStampPreview.h"
 
 @protocol STStampedByGroup <NSObject>
 
 @property (nonatomic, readonly, copy) NSNumber* count;
-@property (nonatomic, readonly, retain) NSArray<STStamp>* stamps;
+@property (nonatomic, readonly, retain) NSArray<STStampPreview>* stampPreviews;
 
 @end

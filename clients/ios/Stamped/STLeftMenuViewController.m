@@ -9,7 +9,6 @@
 #import "STLeftMenuViewController.h"
 #import "Util.h"
 #import "STMenuController.h"
-#import "STProfileViewController.h"
 #import "DDMenuController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
@@ -316,10 +315,9 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     
     UIViewController *controller = nil;
 
-    if ([[STConfiguration value:value] isEqual:[STProfileViewController class]]) {
+    if ([[STConfiguration value:value] isEqual:[STUserViewController class]]) {
         
         id user = [[STStampedAPI sharedInstance] currentUser];
-        //controller = [[STProfileViewController alloc] initWithUserID:[user userID]];
         controller = [[STUserViewController alloc] initWithUser:(STSimpleUserDetail*)user];
 
     } else {

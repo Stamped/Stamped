@@ -16,14 +16,16 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "STButton.h"
+#import "STImageCache.h"
+#import "STActionManager.h"
 
-@interface ActionItemView : UIView <STViewDelegateDependent>
+@interface ActionItemView : STButton
 
 - (id)initWithAction:(id<STActionItem>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate;
 - (void)selected:(id)button;
 
 @property (nonatomic, assign) id<STViewDelegate> delegate;
-@property (nonatomic, retain) id<STActionItem> action;
+@property (nonatomic, retain) id<STActionItem> actionItem;
 @property (nonatomic, retain) id<STEntityDetail> entityDetail;
 
 @end
@@ -31,7 +33,7 @@
 @implementation ActionItemView
 
 @synthesize delegate = delegate_;
-@synthesize action = action_;
+@synthesize actionItem = actionItem_;
 @synthesize entityDetail = _entityDetail;
 
 
@@ -41,74 +43,103 @@
  
  */
 - (id)initWithAction:(id<STActionItem>)action andFrame:(CGRect)frame delegate:(id<STViewDelegate>)delegate {
-    self = [super initWithFrame:frame];
-    if (self) {
-        //NSLog(@"loading action: %@",action.name);
-        self.delegate = delegate;
-        [self.delegate registerDependent:self];
-        self.action = action;
-        self.backgroundColor = [UIColor clearColor];
-        CGRect buttonFrame = frame;
-        buttonFrame.origin.x = 0;
-        buttonFrame.origin.y = 0;
-        UIButton* actionView = [[UIButton alloc] initWithFrame:buttonFrame];
-        [actionView addTarget:self action:@selector(selected:) forControlEvents:UIControlEventTouchUpInside];
-        //actionView.backgroundColor = [UIColor blueColor];
-        actionView.backgroundColor = [UIColor clearColor];
+    UIView* views[2];
+    CGRect childFrame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+    for (NSInteger i = 0; i < 2; i++) {
+        UIView* view = [[[UIView alloc] initWithFrame:childFrame] autorelease];
         
-         self.layer.cornerRadius = 2.0;
-         self.layer.borderColor =[UIColor colorWithRed:.8 green:.8 blue:.8 alpha:.4].CGColor;
-         self.layer.borderWidth = 1.0;
-         self.layer.shadowColor = [UIColor blackColor].CGColor;
-         self.layer.shadowOpacity = .05;
-         self.layer.shadowRadius = 1.0;
-         self.layer.shadowOffset = CGSizeMake(0, 1);
-         
-         CAGradientLayer* gradient = [CAGradientLayer layer];
-         gradient.anchorPoint = CGPointMake(0, 0);
-         gradient.position = CGPointMake(0, 0);
-         gradient.bounds = actionView.layer.bounds;
-         gradient.cornerRadius = 2.0;
-         gradient.colors = [NSMutableArray arrayWithObjects:
-         (id)[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:.8].CGColor,
-         (id)[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:.6].CGColor,
-         nil];
-         [self.layer addSublayer:gradient];
+        NSArray* gradient;
+        UIColor* textColor;
+        UIColor* borderColor;
+        //UIColor* shadowColor;
+        
+        NSMutableArray* iconURLs = [NSMutableArray array];
+        
+        if (action.action.sources.count) {
+            for (id<STSource> source in action.action.sources) {
+                if (source.icon) {
+                    [iconURLs addObject:source.icon];
+                }
+            }
+        }
+        
+        if (i == 0) {
+            gradient = [UIColor stampedLightGradient];
+            textColor = [UIColor stampedDarkGrayColor];
+            borderColor = [UIColor colorWithRed:.8 green:.8 blue:.8 alpha:.4];
+        }
+        else {
+            gradient = [UIColor stampedButtonGradient];
+            textColor = [UIColor whiteColor];
+            borderColor = [UIColor whiteColor];
+        }
+        
+        CGFloat iconsMinX = CGRectGetMaxX(childFrame);
+        if (iconURLs.count) {
+            NSInteger index = iconURLs.count - 1;
+            CGFloat offset = childFrame.size.width - 32;
+            while (index >= 0) {
+                CGRect iconFrame = CGRectMake(offset, 14, 16, 16);
+                iconsMinX = offset;
+                UIImageView* iconView = [[[UIImageView alloc] initWithFrame:iconFrame] autorelease];
+                [view addSubview:iconView];
+                [[STImageCache sharedInstance] imageForImageURL:[iconURLs objectAtIndex:index] andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                    if (i == 1 && image) {
+                        //image = [Util whiteMaskedImageUsingImage:image];
+                    }
+                    iconView.image = image;  
+                }];
+                offset -= 20;
+                index--;
+            }
+        }
+        view.layer.cornerRadius = 2.0;
+        view.layer.borderColor = borderColor.CGColor;
+        view.layer.borderWidth = 1.0;
+        view.layer.shadowColor = [UIColor blackColor].CGColor;
+        view.layer.shadowOpacity = .05;
+        view.layer.shadowRadius = 1.0;
+        view.layer.shadowOffset = CGSizeMake(0, 1);
+        view.layer.shadowPath = [UIBezierPath bezierPathWithRect:view.bounds].CGPath;
+        
+        [Util addGradientToLayer:view.layer withColors:gradient vertical:YES];
         
         CGRect labelFrame = frame;
         labelFrame.size.width = 200;
         labelFrame.origin.x = 44;
         labelFrame.origin.y = 0;
         
-        UILabel* label = [[UILabel alloc] initWithFrame:labelFrame];
-        label.text = action.name;
-        CGFloat greyTone = .35;
-        label.textColor = [UIColor colorWithRed:greyTone green:greyTone blue:greyTone alpha:1.0];
-        label.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-        label.backgroundColor = [UIColor clearColor];
-        label.textAlignment = UITextAlignmentLeft;
-        [self addSubview:label];
-        [self addSubview:actionView];
-        [actionView release];
-        [label release];
+        CGFloat labelX = 44;
+        UIFont* labelFont = [UIFont stampedBoldFontWithSize:11];
         
-        CGRect imageFrame = CGRectMake(12, 12, 20, 20);
-        UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:action.icon] andFrame:imageFrame];
-        [self addSubview:imageView];
-        if (action.action.sources) {
-            NSInteger index = [action.action.sources count] - 1;
-            CGFloat offset = frame.size.width - 32;
-            while (index >= 0) {
-                id<STSource> source = [action.action.sources objectAtIndex:index];
-                if (source.icon) {
-                    CGRect iconFrame = CGRectMake(offset, 14, 16, 16);
-                    UIView* iconView = [Util imageViewWithURL:[NSURL URLWithString:source.icon] andFrame:iconFrame];
-                    [self addSubview:iconView];
-                    offset -= 20;
+        UIView* label = [Util viewWithText:action.name
+                                      font:labelFont
+                                     color:textColor
+                                      mode:UILineBreakModeTailTruncation
+                                andMaxSize:CGSizeMake(iconsMinX - labelX, CGFLOAT_MAX)];
+        [Util reframeView:label withDeltas:CGRectMake(labelX,
+                                                      25 - labelFont.ascender,
+                                                      0, 0)];
+        [view addSubview:label];
+        
+        if (action.icon) {
+            CGRect imageFrame = CGRectMake(12, 12, 20, 20);
+            UIImageView* imageView = [[[UIImageView alloc] initWithFrame:imageFrame] autorelease];
+            [[STImageCache sharedInstance] imageForImageURL:action.icon andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                if (i == 1 && image) {
+                    image = [Util whiteMaskedImageUsingImage:image];
                 }
-                index--;
-            }
+                imageView.image = image;
+            }];
+            [view addSubview:imageView];
         }
+        views[i] = view;
+    }
+    self = [super initWithFrame:frame normalView:views[0] activeView:views[1] target:nil andAction:@selector(selected:)];
+    self.target = self;
+    if (self) {
+        self.delegate = delegate;
+        self.actionItem = action;
     }
     return self;
 }
@@ -121,19 +152,9 @@
 }
 
 - (void)selected:(id)button {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseAction:withContext:)]) {
-        STActionContext* context = [STActionContext contextInView:self];
-        context.entityDetail = self.entityDetail;
-        [self.delegate didChooseAction:self.action.action withContext:context];
-    }
-}
-
-- (void)drawRect:(CGRect)rect {
-    [super drawRect:rect];
-}
-
-- (void)detatchFromDelegate {
-    self.delegate = nil;
+    STActionContext* context = [STActionContext contextInView:self];
+    context.entityDetail = self.entityDetail;
+    [[STActionManager sharedActionManager] didChooseAction:self.actionItem.action withContext:context];
 }
 
 @end

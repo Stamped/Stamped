@@ -87,7 +87,6 @@ static const CGFloat kReloadHeight = 60.0;
   [super viewDidLoad];
  
     UIView* toolbar = self.toolbar;
-    NSLog(@"loaded:%@",toolbar);
     CGFloat toolbarHeight = toolbar ? toolbar.bounds.size.height - 1: 0;
     STScrollViewContainer* container = [[[STScrollViewContainer alloc] initWithDelegate:nil andFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height - toolbarHeight)] autorelease];
     container.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;

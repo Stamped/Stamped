@@ -85,7 +85,7 @@ class StampedAuth(AStampedAuth):
                 logs.info("Client approved: iphone8")
                 return True
             raise
-        except:
+        except Exception:
             raise StampedHTTPError('invalid_client', 401, "Invalid client credentials")
     
     def removeClient(self, params):
@@ -134,7 +134,7 @@ class StampedAuth(AStampedAuth):
             logs.info("Token created")
 
             return account, token
-        except:
+        except Exception:
             msg = "Invalid user credentials"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
@@ -253,7 +253,7 @@ class StampedAuth(AStampedAuth):
                 raise
 
             return True
-        except:
+        except Exception:
             msg = "Invalid password"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
@@ -288,7 +288,7 @@ class StampedAuth(AStampedAuth):
                 
                 self._passwordResetDB.addResetToken(resetToken)
                 break
-            except:
+            except Exception:
                 if attempt >= max_attempts:
                     ## Add logging
                     raise 
@@ -307,7 +307,7 @@ class StampedAuth(AStampedAuth):
             base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             path = os.path.join(base, 'alerts', 'templates', 'email_password_forgot.html.j2')
             template = open(path, 'r')
-        except:
+        except Exception:
             ### TODO: Add error logging?
             raise
         
@@ -333,7 +333,7 @@ class StampedAuth(AStampedAuth):
             self._passwordResetDB.removeResetToken(token.token_id)
             raise
 
-        except:
+        except Exception:
             msg = "Invalid reset token"
             logs.warning(msg)
             raise StampedAuthError("invalid_token", msg)
@@ -364,7 +364,7 @@ class StampedAuth(AStampedAuth):
             base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             path = os.path.join(base, 'alerts', 'templates', 'email_password_reset.html.j2')
             template = open(path, 'r')
-        except:
+        except Exception:
             ### TODO: Add error logging?
             raise
         

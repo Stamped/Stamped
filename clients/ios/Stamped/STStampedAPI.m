@@ -252,19 +252,6 @@ static STStampedAPI* _sharedInstance;
     return [self stampsForSlice:slice withPath:@"/collections/consumption.json" andCallback:block];
 }
 
-- (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
-                                  andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/entities/stamped_by.json";
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
-                                                        post:NO 
-                                               authenticated:YES
-                                                      params:[slice asDictionaryParams] 
-                                                     mapping:[STSimpleStampedBy mapping]
-                                                 andCallback:^(id stampedBy, NSError* error, STCancellation* cancellation) {
-                                                     block(stampedBy, block, cancellation);
-                                                 }];
-}
-
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
                                andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block {
     NSString* path = @"/stamps/create.json";
@@ -978,52 +965,28 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (STCancellation *)createAccountWithPassword:(NSString *)password 
-                                   screenName:(NSString *)screenName 
-                                         name:(NSString *)name 
-                                        email:(NSString *)email 
-                                        phone:(NSString *)phone 
-                                 profileImage:(NSString *)profileImage 
+                            accountParameters:(STAccountParameters*)accountParameters
                                   andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
-    return [[STRestKitLoader sharedInstance] createAccountWithPassword:password
-                                                            screenName:screenName
-                                                                  name:name
-                                                                 email:email
-                                                                 phone:phone
-                                                          profileImage:profileImage
+    return [[STRestKitLoader sharedInstance] createAccountWithPassword:password 
+                                                     accountParameters:accountParameters
                                                            andCallback:block];
 }
 
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
-                                           screenName:(NSString*)screenName
-                                                 name:(NSString*)name
-                                                email:(NSString*)email
-                                                phone:(NSString*)phone
-                                         profileImage:(NSString*)profileImage 
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
     return [[STRestKitLoader sharedInstance] createAccountWithFacebookUserToken:userToken
-                                                                     screenName:screenName
-                                                                           name:name
-                                                                          email:email
-                                                                          phone:phone
-                                                                   profileImage:profileImage
+                                                              accountParameters:accountParameters
                                                                     andCallback:block];
 }
 
 - (STCancellation *)createAccountWithTwitterUserToken:(NSString *)userToken 
                                            userSecret:(NSString *)userSecret 
-                                           screenName:(NSString *)screenName 
-                                                 name:(NSString *)name 
-                                                email:(NSString *)email 
-                                                phone:(NSString *)phone 
-                                         profileImage:(NSString *)profileImage 
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
     return [[STRestKitLoader sharedInstance] createAccountWithTwitterUserToken:userToken
                                                                     userSecret:userSecret
-                                                                    screenName:screenName
-                                                                          name:name
-                                                                         email:email
-                                                                         phone:phone
-                                                                  profileImage:profileImage
+                                                             accountParameters:accountParameters
                                                                    andCallback:block];
 }
 

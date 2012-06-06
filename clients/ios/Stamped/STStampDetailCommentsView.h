@@ -9,16 +9,9 @@
 #import "STViewContainer.h"
 #import "STStamp.h"
 
-typedef enum {
-  STStampDetailCommentsViewStyleNormal,
-  STStampDetailCommentsViewStyleBlurbOnly,
-} STStampDetailCommentsViewStyle;
-
 @interface STStampDetailCommentsView : UIView
 
-- (id)initWithStamp:(id<STStamp>)stamp 
-              index:(NSInteger)index 
-              style:(STStampDetailCommentsViewStyle)style 
+- (id)initWithStamp:(id<STStamp>)stamp
         andDelegate:(id<STViewDelegate>)delegate;
 
 @property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;

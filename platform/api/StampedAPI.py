@@ -1190,7 +1190,7 @@ class StampedAPI(AStampedAPI):
             self._addFollowActivity(authUserId, userId)
 
             # Remove 'friend' activity item
-            self._activityDB.removeFriendActivity('friend', authUserId, userId)
+            self._activityDB.removeFriendActivity(authUserId, userId)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
@@ -1428,7 +1428,8 @@ class StampedAPI(AStampedAPI):
                     albumIds[album.entity_id] = None
             try:
                 albums = self._entityDB.getEntities(albumIds.keys())
-            except:
+            except Exception:
+                logs.warning("Unable to get albums for keys: %s" % albumIds.keys())
                 albums = []
 
             for album in albums:
@@ -4059,9 +4060,30 @@ class StampedAPI(AStampedAPI):
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
             params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
+
+            # Get activities where friends are a subject member
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
+            activityItemIds = [item.activity_id for item in dirtyActivityData]
+            # Find activity items for friends that also appear in personal feed
+            personalActivityIds = self._activityDB.getActivityIdsForUser(authUserId, **params)
+            overlappingActivityIds =  list(set(personalActivityIds).intersection(set(activityItemIds)))
+
             for item in dirtyActivityData:
+                # Exclude the item if it is in the user's personal feed, unless it is a 'follow' item.  In that case,
+                #  remove the user as an object and ensure there are still other users targeted by the item
+                isInPersonalFeed = item.activity_id in overlappingActivityIds
+                if isInPersonalFeed and item.verb in ['comment', 'like',  'todo', 'restamp' ]:
+                    continue
+                elif isInPersonalFeed and item.verb in ['follow']:
+                    assert(item.objects is not None and authUserId in item.objects.user_ids)
+                    newUserIds = list(item.objects.user_ids)
+                    newUserIds.remove(authUserId)
+                    item.objects.user_ids = newUserIds
+                    if len(item.objects.user_ids) == 0:
+                        continue
+
                 item.subjects = list(set(item.subjects).intersection(set(friends)))
+                assert(len(item.subjects) > 0)
                 activityData.append(item)
         else:
             personal = True
@@ -4276,7 +4298,7 @@ class StampedAPI(AStampedAPI):
 
     def _mergeEntity(self, entity, link=True):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
-        modified = self._resolveEntity(entity)
+        entity, modified = self._resolveEntity(entity)
         if link:
             modified = self._resolveEntityLinks(entity) | modified
 
@@ -4309,14 +4331,13 @@ class StampedAPI(AStampedAPI):
         try:
             # TEMP: Short circuit if user-generated
             if entity.sources.user_generated_id is not None:
-                return False
+                return entity, False
 
             # Short circuit if entity is already tombstoned
             if entity.sources.tombstone_id is not None:
                 successor, modified_successor = _getSuccessor(entity.sources.tombstone_id)
                 logs.info("Entity (%s) already tombstoned (%s)" % (entity.entity_id, successor.entity_id))
-                entity = successor
-                return modified_successor
+                return successor, modified_successor
 
             # Enrich entity
             decorations = {}
@@ -4330,12 +4351,11 @@ class StampedAPI(AStampedAPI):
                     self._entityDB.updateEntity(entity)
 
                 logs.info("Merged entity (%s) with entity %s" % (entity.entity_id, successor.entity_id))
-                entity = successor
-                return modified_successor
+                return successor, modified_successor
 
             self.__handleDecorations(entity, decorations)
 
-            return modified
+            return entity, modified
 
         except Exception:
             report()

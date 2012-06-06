@@ -18,6 +18,10 @@
 @synthesize secondaryColor = _secondaryColor;
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
+@synthesize following = _following;
+
+@synthesize loading=_loading;
+
 
 - (id)initWithCoder:(NSCoder *)decoder {
     NSString* userID = [decoder decodeObjectForKey:@"userID"];
@@ -37,14 +41,14 @@
             _secondaryColor = [[decoder decodeObjectForKey:@"secondaryColor"] retain];
             _privacy = [[decoder decodeObjectForKey:@"privacy"] retain];
             _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+            _following = [[decoder decodeObjectForKey:@"following"] retain];
             [[STStampedAPI sharedInstance] cacheUser:self];
         }
         return self;
     }
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_name release];
     [_userID release];
     [_screenName release];
@@ -52,6 +56,7 @@
     [_secondaryColor release];
     [_privacy release];
     [_imageURL release];
+    [_following release];
     [super dealloc];
 }
 
@@ -63,6 +68,7 @@
     [encoder encodeObject:self.secondaryColor forKey:@"secondaryColor"];
     [encoder encodeObject:self.privacy forKey:@"privacy"];
     [encoder encodeObject:self.imageURL forKey:@"imageURL"];
+    [encoder encodeObject:self.following forKey:@"following"];
 }
 
 + (RKObjectMapping*)mapping {
@@ -79,9 +85,32 @@
     [mapping mapAttributes:
      @"name",
      @"privacy",
+     @"following",
      nil];
     
     return mapping;
+}
+
+- (void)toggleFollowing {
+    
+    if ([self.following boolValue]) {
+        
+        [[STStampedAPI sharedInstance] removeFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+            self.following = [NSNumber numberWithBool:![self.following boolValue]];
+            [STEvents postEvent:EventTypeUserFollowToggleFinished identifier:self.userID object:self.following];
+            _loading = NO;
+        }];
+        
+    } else {
+        
+        [[STStampedAPI sharedInstance] addFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+            self.following = [NSNumber numberWithBool:![self.following boolValue]];
+            [STEvents postEvent:EventTypeUserFollowToggleFinished identifier:self.userID object:self.following];
+            _loading = NO;
+        }];
+        
+    }
+    
 }
 
 

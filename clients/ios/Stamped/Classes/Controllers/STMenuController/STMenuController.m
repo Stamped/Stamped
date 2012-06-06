@@ -23,6 +23,8 @@
 
 @implementation STMenuController
 
+@synthesize loginController = _loginController;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -75,7 +77,7 @@
     
     } else if (option == STWelcomeViewControllerOptionTwitter) {
         
-        if (NSClassFromString(@"TWTweetComposeViewController")) {
+        if (NSClassFromString(@"TWTweetComposeViewController") && [TWTweetComposeViewController canSendTweet]) {
             
             TwitterAccountsViewController *controller = [[TwitterAccountsViewController alloc] init];
             controller.delegate = (id<TwitterAccountsViewControllerDelegate>)self;

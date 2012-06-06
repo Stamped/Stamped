@@ -70,7 +70,7 @@ class StampedAPIActivityTest(AStampedAPITestCase):
     def _assertBody(self, result, body):
         exists = False
         for i in result:
-            if i['body'] == body:
+            if i['body'] in body:
                 exists = True 
                 break
         self.assertTrue(exists)
@@ -78,67 +78,41 @@ class StampedAPIActivityTest(AStampedAPITestCase):
 
 class StampedAPIActivityShow(StampedAPIActivityTest):
     def test_show(self):
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-        ])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 2)
 
     def test_show_coordinates(self):
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "coordinates": "40.745498,-73.977612",
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-        ])
+        result = self.showActivity(self.tokenA, coordinates="40.745498,-73.977612")
+        self.assertEqual(len(result), 2)
 
 
 class StampedAPIActivityFriendship(StampedAPIActivityTest):
     def test_show_friendship(self):
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-        }
-        
         # Default (1 follower)
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self._assertFollowSubjects(x, 1),
-        ])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 2)
+        self._assertFollowSubjects(result, 1)
 
         # Add friend (2 followers)
         self.createFriendship(self.tokenC, self.userA)
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self._assertFollowSubjects(x, 2),
-        ])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 2)
+        self._assertFollowSubjects(result, 2)
 
         # Remove friend (1 follower)
         self.deleteFriendship(self.tokenC, self.userA)
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self._assertFollowSubjects(x, 1),
-        ])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 2)
+        self._assertFollowSubjects(result, 1)
 
     def test_show_friendship_universal(self):
         self.createFriendship(self.tokenC, self.userB)
-        path = "activity/friends.json"
-        data = { 
-            "oauth_token": self.tokenC['access_token'],
-        }
 
         # Assert "B following A" exists
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self._assertFollowSubjects(x, 1),
-                   lambda x: self._assertBody(x, 'UserB is now following UserA.'),
-        ])
+        result = self.showFriendsActivity(self.tokenC)
+        self.assertEqual(len(result), 2)
+        self._assertFollowSubjects(result, 1)
+        self._assertBody(result, ['UserB is now following UserA.'])
 
         self.deleteFriendship(self.tokenC, self.userB)
 
@@ -153,50 +127,28 @@ class StampedAPIActivityLikes(StampedAPIActivityTest):
         }
         stamp = self.createStamp(self.tokenD, entity['entity_id'], stampData)
 
-        path = "stamps/likes/create.json"
         for token in [self.tokenA, self.tokenB, self.tokenC]:
-            data = { 
-                "oauth_token": token['access_token'],
-                "stamp_id": stamp['stamp_id']
-            }
-            result = self.handlePOST(path, data)
+            self.createLike(token, stamp['stamp_id'])
         
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenD['access_token'],
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertTrue(len(x) == 1),
-                   lambda x: self._assertBenefit(x),
-        ])
+        result = self.showActivity(self.tokenD)
+        self.assertTrue(len(result) == 1)
+        self._assertBenefit(result)
         
         self.deleteStamp(self.tokenD, stamp['stamp_id'])
         self.deleteEntity(self.tokenD, entity['entity_id'])
 
     def test_show_likes_universal(self):
         # Create "like"
-        path = "stamps/likes/create.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "stamp_id": self.stampA['stamp_id'],
-        }
-        result = self.handlePOST(path, data)
+        result = self.createLike(self.tokenB, self.stampA['stamp_id'])
 
         # Add friendship
         self.createFriendship(self.tokenC, self.userB)
 
         # Check activity
-        path = "activity/friends.json"
-        data = { 
-            "oauth_token": self.tokenC['access_token'],
-        }
-
         # Assert "B liked A's stamp" exists
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 3), 
-                   lambda x: self._assertBody(x, 'UserB liked %s.' % self.stampA['entity']['title']),
-        ])
+        result = self.showFriendsActivity(self.tokenC)
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, ['UserB liked %s.' % self.stampA['entity']['title']])
 
         self.deleteFriendship(self.tokenC, self.userB)
 
@@ -215,9 +167,8 @@ class StampedAPIActivityMentions(StampedAPIActivityTest):
             "oauth_token": self.tokenB['access_token'],
         }
         
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-        ])
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 2)
         
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
@@ -234,16 +185,9 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
         
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-        }
-        #utils.log(pprint.pformat(result))
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self._assertBenefit(x),
-        ])
+        result = self.showActivity(self.tokenB)
+        self.assertEqual(len(result), 2)
+        self._assertBenefit(result)
         
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
@@ -259,15 +203,9 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
         
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 2), 
-                   lambda x: self.assertTrue(x[0]['verb'] == 'restamp'), 
-        ])
+        result = self.showActivity(self.tokenB)
+        self.assertEqual(len(result), 2)
+        self.assertTrue(result[0]['verb'] == 'restamp')
         
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
@@ -277,41 +215,34 @@ class StampedAPIActivityTodos(StampedAPIActivityTest):
         #  We will have User B todo entity A and verify that this appears in User A's activity feed
         self.createTodo(self.tokenB, self.entityA['entity_id'])
 
-        path = "activity/show.json"
-        data = {
-            "oauth_token": self.tokenA['access_token'],
-            }
-
         # Assert that the UserE's todo appears in User A's activity feed and that they include the entity and stamp
-        self.async(lambda: self.handleGET(path, data), [
-            lambda x: self.assertEqual(len(x), 3),
-            lambda x: self._assertBody(x, 'UserB added %s as a to-do.' % self.entityA['title']),
-            lambda x: self.assertEqual(len(x[0]['objects']['entities']), 1),
-            ])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, ['UserB added %s as a to-do.' % self.entityA['title']])
+        self.assertEqual(len(result[0]['objects']['entities']), 1)
 
         # User D friends User A and Todo's his stamped entity, we expect this to show up as a grouped activity item
         self.createFriendship(self.tokenD, self.userA)
         self.createTodo(self.tokenD, self.entityA['entity_id'])
 
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3),
-        self._assertBody(result, 'UserB and UserD added %s as a to-do.' % self.entityA['title'])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, ['UserB and UserD added %s as a to-do.' % self.entityA['title']])
 
         self.deleteFriendship(self.tokenD, self.userA)
         self.deleteTodo(self.tokenB, self.entityA['entity_id'])
         self.deleteTodo(self.tokenD, self.entityA['entity_id'])
 
         # Assert nothing happens to the activity feed when User B and D removes the todo
-        self.async(lambda: self.handleGET(path, data), [
-            lambda x: self.assertEqual(len(x), 3),
-            lambda x: self._assertBody(x, 'UserB and UserD added %s as a to-do.' % self.entityA['title']),
-            ])
+        result = self.showActivity(self.tokenA)
+        self.assertEqual(len(result), 3)
+        self._assertBody(result, ['UserB and UserD added %s as a to-do.' % self.entityA['title']])
 
         # Assert adding a todo from a non-friend on User A's stamp shows up in the aggregate item
         self.createTodo(self.tokenC, self.entityA['entity_id'], self.stampA['stamp_id'])
         result = self.showActivity(self.tokenA)
         self.assertEqual(len(result), 3)
-        self._assertBody(result, 'UserB and 2 others added %s as a to-do.' % self.entityA['title'])
+        self._assertBody(result, ['UserB and 2 others added %s as a to-do.' % self.entityA['title']])
 
         self.deleteTodo(self.tokenC, self.entityA['entity_id'])
 
@@ -369,7 +300,7 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
         result = self.showActivity(self.tokenA)
         self._assertVerbExists(result, 'action_listen')
         self.assertEqual(len(result), 3)
-        self._assertBody(result, 'UserB listened to Call Your Girlfriend - Single.')
+        self._assertBody(result, ['UserB listened to Call Your Girlfriend - Single.'])
 
         # Repeat the same action, make sure it doesn't get added to the activity feed again
         self.handlePOST(path, data)
@@ -378,27 +309,117 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
         self.assertEqual(len(result), 3)
 
         # Test that if User A listens to his own stamped song, it doesn't show up on his feed
-        # Repeat the same action, make sure it doesn't get added to the activity feed again
         data['oauth_token'] =  self.tokenA['access_token']
         self.handlePOST(path, data)
         result = self.showActivity(self.tokenA)
 
         self.assertEqual(len(result), 3)
-        self._assertBody(result, 'UserB listened to Call Your Girlfriend - Single.')
 
         # Have UserC listen to the album and test that activity notifications are grouped
-        data['oauth_token'] =  self.tokenC['access_token'],
+        data['oauth_token'] =  self.tokenC['access_token']
         self.handlePOST(path, data)
         result = self.showActivity(self.tokenA)
-
-        from pprint import pprint
-        pprint(result)
         self.assertEqual(len(result), 3)
+        self._assertBody(result, ['UserB and UserC listened to Call Your Girlfriend - Single.'])
 
         # cleanup
         self.deleteStamp(self.tokenA, stampNew['stamp_id'])
         self.deleteEntity(self.tokenA, entityNew['entity_id'])
 
+class StampedAPIActivityUniversal(StampedAPIActivityTest):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
+        (self.userD, self.tokenD) = self.createAccount('UserD')
+
+        # User D friends User A
+        self.createFriendship(self.tokenD, self.userA)
+
+        # User A friends B, C, D
+        self.createFriendship(self.tokenA, self.userB)
+        self.createFriendship(self.tokenA, self.userC)
+        self.createFriendship(self.tokenA, self.userD)
+
+        # Users B, C, D are mutual friends
+        self.createFriendship(self.tokenB, self.userC)
+        self.createFriendship(self.tokenB, self.userD)
+        self.createFriendship(self.tokenC, self.userB)
+        self.createFriendship(self.tokenC, self.userD)
+        self.createFriendship(self.tokenD, self.userC)
+        self.createFriendship(self.tokenD, self.userB)
+
+        self.entity = self.createEntity(self.tokenC)
+        self.stamp = self.createStamp(self.tokenC, self.entity['entity_id'])
+        self.createLike(self.tokenB, self.stamp['stamp_id'])
+
+    def tearDown(self):
+        self.deleteLike(self.tokenB, self.stamp['stamp_id'])
+        self.deleteStamp(self.tokenC, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenC, self.entity['entity_id'])
+
+        self.deleteFriendship(self.tokenD, self.userA)
+
+        self.deleteFriendship(self.tokenA, self.userB)
+        self.deleteFriendship(self.tokenA, self.userC)
+        self.deleteFriendship(self.tokenA, self.userD)
+
+        self.deleteFriendship(self.tokenB, self.userC)
+        self.deleteFriendship(self.tokenB, self.userD)
+        self.deleteFriendship(self.tokenC, self.userB)
+        self.deleteFriendship(self.tokenC, self.userD)
+        self.deleteFriendship(self.tokenD, self.userC)
+        self.deleteFriendship(self.tokenD, self.userB)
+
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
+        self.deleteAccount(self.tokenD)
+
+    def test_follow_activity(self):
+        # There should be 1 personal activity item for User A - User D followed User A:
+        results = self.showActivity(self.tokenA)
+        self.assertEqual(len(results), 1)
+        self._assertBody(results, ['UserD is now following you.'])
+
+    def test_follow_activity_universal(self):
+        # For friends activity, User A should see that UserB liked Kanye West and Users B,C,D are mutual friends
+        results = self.showFriendsActivity(self.tokenA)
+        self.assertEqual(len(results), 4)
+        self._assertBody(results, ['UserB liked Kanye West.'])
+        self._assertBody(results, ['UserC and UserD are now following UserB.', 'UserD and UserC are now following UserB.'])
+        self._assertBody(results, ['UserB and UserD are now following UserC.', 'UserD and UserB are now following UserC.'])
+        self._assertBody(results, ['UserC and UserB are now following UserD.', 'UserB and UserC are now following UserD.'])
+
+    def test_follow_activity_overlap(self):
+        # Now look at UserD's feeds.  We expect to see that User A, B, and C have added him as a follower in his personal feed
+        results = self.showActivity(self.tokenD)
+        self.assertEqual(len(results), 1)
+        self._assertBody(results, ['UserA and 2 others are now following you.', 'UserB and 2 others are now following you.',
+                                                                                'UserC and 2 others are now following you.'])
+    def test_follow_activity_overlap_universal(self):
+        # We should NOT see anyone following UserD.
+        results = self.showFriendsActivity(self.tokenD)
+        self.assertEqual(len(results), 3)
+        self._assertBody(results, ['UserB liked Kanye West.'])
+        self._assertBody(results, ['UserA and UserC are now following UserB.', 'UserC and UserA are now following UserB.'])
+        self._assertBody(results, ['UserA and UserB are now following UserC.', 'UserB and UserA are now following UserC.'])
+
+    def test_like_activity(self):
+        # Test UserC's personal feed.  We expect to see that UserB has liked his stamp, also a grouped item for followers
+        results = self.showActivity(self.tokenC)
+#        from pprint import pprint
+#        pprint([(result['body'], result['activity_id']) for result in results])
+        self.assertEqual(len(results), 2)
+        self._assertBody(results, ['UserB liked Kanye West.'])
+
+    def test_like_activity_universal(self):
+        # Test UserC's friends feed.  We expect that UserB's like is absent.
+        results = self.showFriendsActivity(self.tokenC)
+        self.assertEqual(len(results), 3)
+        self._assertBody(results, ['UserD is now following UserB.'])
+        self._assertBody(results, ['UserB is now following UserD.'])
+        self._assertBody(results, ['UserD is now following UserA.'])
 
 if __name__ == '__main__':
     main()

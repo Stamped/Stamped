@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @protocol SignupFooterViewDelegate;
-@interface SignupFooterView : UIView
+@interface SignupFooterView : UIView 
 
 @property(nonatomic,assign) id <SignupFooterViewDelegate> delegate;
 

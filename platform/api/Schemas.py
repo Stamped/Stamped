@@ -812,10 +812,10 @@ class BasicEntity(BasicEntityMini):
 
         for attribute in attributes:
             try:
-                if self[attribute] is not None:
-                    mini[attribute] = self[attribute]
-            except:
-                pass
+                if getattr(self, attribute) is not None:
+                    setattr(mini, attribute, getattr(self, attribute))
+            except AttributeError:
+                logs.warning('Unable to minimize attribute "%s"' % attribute)
 
         return mini
 
@@ -823,8 +823,8 @@ class BasicEntity(BasicEntityMini):
         try:
             if t in self.types:
                 return True
-        except:
-            pass
+        except Exception as e:
+            logs.warning("isType error (%s): %s" % (self, e))
         return False
 
     # def __str__(self):
