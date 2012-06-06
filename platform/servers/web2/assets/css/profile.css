@@ -222,11 +222,11 @@ footer,
                             */
 
   display: none;
-  -webkit-transition: -webkit-border-radius 0.5s ease-out;
-  -moz-transition: -moz-border-radius 0.5s ease-out;
-  -ms-transition: -ms-border-radius 0.5s ease-out;
-  -o-transition: -o-border-radius 0.5s ease-out;
-  transition: border-radius 0.5s ease-out;
+  -webkit-transition: -webkit-border-radius 0.3s ease-out;
+  -moz-transition: -moz-border-radius 0.3s ease-out;
+  -ms-transition: -ms-border-radius 0.3s ease-out;
+  -o-transition: -o-border-radius 0.3s ease-out;
+  transition: border-radius 0.3s ease-out;
   overflow: hidden;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget .desc {
@@ -244,9 +244,9 @@ footer,
   display: inline-block;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget:hover {
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
@@ -413,7 +413,7 @@ body.other .stamp-count-other {
   position: relative;
 }
 .stamp-gallery-header {
-  margin: 1em 0 0;
+  margin: 1em 24px;
 }
 .stamp-gallery-header .stamp-gallery-sort {
   position: relative;
@@ -559,7 +559,7 @@ body.other .stamp-count-other {
   opacity: 1;
 }
 .stamp-gallery-item .stamp-gallery-item-inner {
-  border-bottom: 1px solid #bbb;
+  border-bottom: 1px solid #c2c2c2;
 }
 .stamp-gallery-item .content {
   position: relative;
@@ -701,14 +701,16 @@ a.lightbox .zoom {
 .entity-header .title .pronounced-title:hover {
   text-overflow: clip;
 }
-.stamp-preview {
+.stamp-preview,
+.stamp-preview-raw {
   display: block;
   background-size: 100% 100%;
   max-width: 148px;
   width: 148px;
   height: auto;
 }
-.stamp-preview .preview-image {
+.stamp-preview .preview-image,
+.stamp-preview-raw .preview-image {
   position: relative;
   display: none;
   display: block;
@@ -717,33 +719,40 @@ a.lightbox .zoom {
   width: 140px;
   height: auto;
 }
-.stamp-preview .stamp-user-image {
+.stamp-preview .stamp-user-image,
+.stamp-preview-raw .stamp-user-image {
   z-index: 25;
 }
-.stamp-preview .stamp-user-image img {
+.stamp-preview .stamp-user-image img,
+.stamp-preview-raw .stamp-user-image img {
   -webkit-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   -moz-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   -ms-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   -o-box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
   box-shadow: 0 4px 8px -4px rgba(30, 30, 30, 0.85);
 }
-.stamp-preview .stamp-map {
+.stamp-preview .stamp-map,
+.stamp-preview-raw .stamp-map {
   z-index: 24;
 }
-.stamp-preview .stamp-entity-image {
+.stamp-preview .stamp-entity-image,
+.stamp-preview-raw .stamp-entity-image {
   z-index: 23;
 }
-.stamp-preview .stamp-entity-image img {
+.stamp-preview .stamp-entity-image img,
+.stamp-preview-raw .stamp-entity-image img {
   -webkit-box-shadow: 0 4px 8px -2px rgba(30, 30, 30, 0.85);
   -moz-box-shadow: 0 4px 8px -2px rgba(30, 30, 30, 0.85);
   -ms-box-shadow: 0 4px 8px -2px rgba(30, 30, 30, 0.85);
   -o-box-shadow: 0 4px 8px -2px rgba(30, 30, 30, 0.85);
   box-shadow: 0 4px 8px -2px rgba(30, 30, 30, 0.85);
 }
-.stamp-preview .stamp-icon {
+.stamp-preview .stamp-icon,
+.stamp-preview-raw .stamp-icon {
   z-index: 22;
 }
-.stamp-preview img {
+.stamp-preview img,
+.stamp-preview-raw img {
   display: block;
   background-size: 100% 100%;
   max-width: 140px;
@@ -757,10 +766,15 @@ a.lightbox .zoom {
   background-clip: padding-box;
 }
 .stamp-preview .stamp-category-book .icon,
+.stamp-preview-raw .stamp-category-book .icon,
 .stamp-preview .stamp-category-film .icon,
+.stamp-preview-raw .stamp-category-film .icon,
 .stamp-preview .stamp-category-food .icon,
+.stamp-preview-raw .stamp-category-food .icon,
 .stamp-preview .stamp-category-music .icon,
-.stamp-preview .stamp-category-other .icon {
+.stamp-preview-raw .stamp-category-music .icon,
+.stamp-preview .stamp-category-other .icon,
+.stamp-preview-raw .stamp-category-other .icon {
   display: block;
   background-size: 100% 100%;
   max-width: 140px;

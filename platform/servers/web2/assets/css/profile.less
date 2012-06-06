@@ -178,7 +178,7 @@
                                 color: #333;
                             }
                             
-                            .transition-rounded(0.5s, ease-out);
+                            .transition-rounded(0.3s, ease-out);
                             overflow: hidden;
                             
                             .share-buttons {
@@ -193,7 +193,7 @@
                             }
                             
                             &:hover {
-                                .rounded(0);
+                                .rounded(4px);
                                 
                                 .share-buttons {
                                     display: block;
@@ -377,7 +377,7 @@ body.other {
 }
 
 .stamp-gallery-header {
-    margin: 1em 0 0;
+    margin: 1em 24px;
     
     .stamp-gallery-sort {
         position: relative;
@@ -536,7 +536,7 @@ body.other {
     }
     
     .stamp-gallery-item-inner {
-        border-bottom: 1px solid #bbb;
+        border-bottom: 1px solid #c2c2c2;
     }
     
     .content {
@@ -722,7 +722,7 @@ a.lightbox {
     height: auto;
 }
 
-.stamp-preview {
+.stamp-preview, .stamp-preview-raw {
     .sized(@preview-wrapper-width);
     
     .preview-image {

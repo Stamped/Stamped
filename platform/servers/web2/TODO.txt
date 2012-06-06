@@ -43,6 +43,7 @@
 
 TODO:
     * align stamp-gallery with profile header
+    * modify update_stamps to be more efficient and only process new stamps!!!
     
     * sDetail:
         * DONE - "Anatomy of eDetail section" spec
