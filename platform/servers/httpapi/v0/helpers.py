@@ -254,8 +254,8 @@ def handleHTTPRequest(requires_auth=True,
             finally:
                 try:
                     logs.save()
-                except:
-                    pass
+                except Exception:
+                    print 'Unable to save logs'
         
         return wrapper
     return decorator
@@ -433,6 +433,9 @@ def transformOutput(value, **kwargs):
     """
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
+
+    if isinstance(value, bool):
+        value = { 'result' : value }
     
     output_json = json.dumps(value, sort_keys=not IS_PROD)
     output      = HttpResponse(output_json, **kwargs)

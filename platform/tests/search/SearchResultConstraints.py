@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, logs
 
 from pprint                 import pprint, pformat
 from abc                    import ABCMeta, abstractmethod
@@ -52,7 +52,6 @@ class ASearchResultConstraint(object):
             
             if match == 'contains':
                 return a in b
-        
         return a == b
     
     def __str__(self):
@@ -116,9 +115,9 @@ class SearchResultConstraint(ASearchResultConstraint):
                 if len(t0) == 1: t0 = t0[0]
                 if len(t1) == 1: t1 = t1[0]
                 
-                utils.log("VALIDATE %s/%s) %s vs %s (%s vs %s)" % 
+                utils.log('VALIDATE %s/%s | "%s" vs "%s" (%s vs %s)' % 
                           (i, self.index, self.title, result.title, t0, t1))
-                utils.log(pformat(utils.normalize(result.dataExport(), strict=True)))
+                logs.debug(pformat(utils.normalize(result.dataExport(), strict=True)))
             
             # optionally verify the validity of this result's title
             if self.title  is not None and not self._eq(self.title, result.title):
@@ -158,8 +157,9 @@ class SearchResultConstraint(ASearchResultConstraint):
             if self.extras is not None:
                 match = True
                 for key, value in self.extras.iteritems():
-                    if key not in result or not self._eq(value, result[key]):
+                    if not hasattr(result.sources, key) or not self._eq(value, getattr(result.sources, key)):
                         match = False
+                        logs.warning("Extras test failed: %s (%s v %s)" % (key, value, getattr(result.sources, key, None)))
                         break
                 
                 if not match:
@@ -189,6 +189,7 @@ class SearchResultConstraint(ASearchResultConstraint):
         if self.id is not None:     options['id']       = self.id
         if self.types is not None:  options['types']    = self.types
         if self.index is not None:  options['index']    = self.index
+        if len(self.extras) > 0:    options['extras']   = self.extras
         
         return "%s(%s)" % (self.__class__.__name__, str(options))
 

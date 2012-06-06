@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "DDMenuController.h"
 
-@interface STMenuController : DDMenuController
+@interface STMenuController : DDMenuController 
+
+- (void)showWelcome;
 
 @end

@@ -204,10 +204,10 @@ class Schema(object):
         return str(self)
 
     def __str__(self):
-        return '[%s %s]' % (self.__class__, self.dataExport())
+        return '<%s %s>' % (self.__class__.__name__, self.dataExport())
 
     def __unicode__(self):
-        return u'[%s %s]' % (self.__class__, self.dataExport())
+        return u'<%s %s>' % (self.__class__.__name__, self.dataExport())
 
     def dataExport(self):
         properties = {}
@@ -217,7 +217,10 @@ class Schema(object):
             if t == _propertyKey:
                 properties[k] = copy.deepcopy(v)
             elif t == _nestedPropertyKey:
-                properties[k] = v.dataExport()
+                if v is not None:
+                    properties[k] = v.dataExport()
+                else:
+                    properties[k] = None
             elif t == _propertyListKey:
                 if v is None:
                     properties[k] = None

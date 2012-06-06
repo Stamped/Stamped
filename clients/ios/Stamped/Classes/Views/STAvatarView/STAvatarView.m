@@ -12,6 +12,7 @@
 @implementation STAvatarView
 @synthesize imageURL=_imageURL;
 @synthesize imageView=_imageView;
+@synthesize backgroundView=_background;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -27,13 +28,14 @@
         background.layer.rasterizationScale = [[UIScreen mainScreen] scale];
         background.layer.shouldRasterize = YES;
         [self addSubview:background];
+        _background = [background retain];
         [background release];
-        
+
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, 3.0f, 3.0f)];
         imageView.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
         imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self addSubview:imageView];
-        self.imageView = imageView;
+        _imageView = [imageView retain];
         [imageView release];
         
     }
@@ -41,6 +43,7 @@
 }
 
 - (void)dealloc {
+    [_background release], _background=nil;
     [_imageView release], _imageView=nil;
     [_imageURL release], _imageURL=nil;
     [super dealloc];
@@ -52,7 +55,15 @@
     _imageURL = [imageURL retain];
         
     self.imageView.image = nil;
-    [[ImageLoader sharedLoader] imageForURL:_imageURL completion:^(UIImage *image, NSURL *url) {
+    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image){
+      
+        UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
+        [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+        UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        return scaledImage;
+        
+    } styleIdentifier:@"st_avatar" completion:^(UIImage *image, NSURL *url) {
         if ([_imageURL isEqual:url]) {
             self.imageView.image = image;
         }

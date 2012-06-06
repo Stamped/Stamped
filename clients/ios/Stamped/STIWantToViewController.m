@@ -13,7 +13,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STConsumptionViewController.h"
 #import "STButton.h"
-#import "STLegacyMapViewController.h"
 #import "STConfiguration.h"
 #import "STConsumptionMapViewController.h"
 
@@ -33,7 +32,6 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
  
-    [Util addHomeButtonToController:self withBadge:YES];
     [Util addCreateStampButtonToController:self];
     
     self.view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];

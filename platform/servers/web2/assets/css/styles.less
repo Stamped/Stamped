@@ -12,6 +12,7 @@
    ************************************************************************** */
 
 
+@import "libs/h5bp.min.css";
 @import "common.less";
 
 
@@ -19,8 +20,6 @@
                             BASIC HIGH-LEVEL SETUP
    ************************************************************************** */
 
-
-@fixed-width: 1000px;
 
 html {
 	overflow-y: scroll;
@@ -71,6 +70,7 @@ ol, ul {
 
 header {
     .fullwidth;
+    
     position: fixed;
     z-index: 150;
     background: #fff;
@@ -79,19 +79,38 @@ header {
         z-index: 25;
         
         p {
+            position: relative;
             float: right;
             clear: both;
-            position: relative;
             
             margin: 0.5em 0.5em 0.25em 0;
             
             .desc {
                 font-size: 90%;
             }
+            
+            a.button {
+                background: url(/assets/img/join_signup_sprite.png) no-repeat;
+                display: inline-block;
+                width:  82px;
+                height: 27px;
+                margin-left: .5em;
+                position: relative;
+                top: .5em;
+            }
         }
         
-        /* TODO: use slight background gradient instead of flat color */
-        @base: #3b84eb;
+        .button(@y: 0) {
+            background-position: 0 @y;
+            
+            &:hover {
+                background-position: -84px  @y;
+            }
+            
+            &:active {
+                background-position: -168px @y;
+            }
+        }
         
         p.join {
             z-index: 27;
@@ -100,80 +119,21 @@ header {
             }
             
             a.button {
-                /*background: url(/assets/img/join_sign_up_buttons_sprite.png) no-repeat;*/
-                color: #fff;
-                background: @base;
-                .box-shadow(0, 0, 4px, 0, @base);
-                .rounded(2px);
-                
-                &:hover {
-                    @c0: lighten(@base, 10%);
-                    @c1: darken(@base,  10%);
-                    
-                    text-decoration: none;
-                    background: @c0;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
-                
-                &:active {
-                    @c0: lighten(@base, 5%);
-                    @c1: darken(@base,  25%);
-                    
-                    text-decoration: none;
-                    background: @c1;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
+                .button(0);
             }
         }
         
-        p.sign-in {
+        p.login {
             z-index: 26;
+            margin-bottom: 1em;
             
             span.desc {
                 color: #bbb;
             }
             
             a.button {
-                .rounded(4px);
-                .box-shadow(0, 0, 4px, 0, #eee);
-                border: 1px solid #666;
-                background: #FEFEFE;
-                color: #666;
-                
-                &:hover {
-                    @c0: lighten(@base, 10%);
-                    @c1: darken(@base,  10%);
-                    
-                    color: #fff;
-                    border-color: @c0;
-                    
-                    background: @c0;
-                    text-decoration: none;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
-                
-                &:active {
-                    @c0: lighten(@base, 5%);
-                    @c1: darken(@base,  25%);
-                    color: #fff;
-                    border-color: @c1;
-                    
-                    background: @c1;
-                    text-decoration: none;
-                    .box-shadow(0, 0, 4px, 0, @c1);
-                }
+                .button(-29px);
             }
-        }
-        
-        a.button {
-            .stamped-font();
-            
-            letter-spacing: .1em;
-            text-align: center;
-            
-            margin-left: .5em;
-            display: inline-block;
-            width: 5em;
         }
     }
 }
@@ -192,11 +152,11 @@ header {
     position: absolute;
     
     display: block;
-    top:  -78px;
-    left: -125px;
+    top:  -60px;
+    left: -110px;
     
-    width:  195px;
-    height: 195px;
+    width:  210px;
+    height: 210px;
     
     z-index: 101;
 }
@@ -264,6 +224,10 @@ header {
     .profile-image(96px,  3px);
 }
 
+.profile-image-medium-ish {
+    .profile-image(72px,  3px);
+}
+
 .profile-image-medium {
     .profile-image(54px,  2px);
 }
@@ -299,8 +263,7 @@ header {
         }
         
         /*&:hover {
-            @base: #3b84eb;
-            background: lighten(@base, 10%);
+            background: lighten(@stamped-base-color, 10%);
         }*/
     }
     

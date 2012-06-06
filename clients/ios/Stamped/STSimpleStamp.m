@@ -267,7 +267,7 @@
         previews.comments = comments;
     }
     if (credit) {
-        NSMutableArray<STStamp>* credits;
+        NSMutableArray<STStampPreview>* credits;
         if (previews.credits) {
             credits = [NSMutableArray arrayWithArray:previews.credits];
         }
@@ -355,7 +355,7 @@
         }
         if (credit) {
             if (previews.credits) {
-                NSMutableArray<STStamp>* credits = [NSMutableArray arrayWithArray:previews.credits];
+                NSMutableArray<STStampPreview>* credits = [NSMutableArray arrayWithArray:previews.credits];
                 id<STStamp> target = nil;
                 for (id<STStamp> cur in credits) {
                     if ([cur.stampID isEqualToString:credit.stampID]) {

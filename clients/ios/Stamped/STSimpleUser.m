@@ -18,9 +18,7 @@
 @synthesize secondaryColor = _secondaryColor;
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
-
-static int _reused = 0;
-static int _not = 0;
+@synthesize following = _following;
 
 - (id)initWithCoder:(NSCoder *)decoder {
     NSString* userID = [decoder decodeObjectForKey:@"userID"];
@@ -40,6 +38,7 @@ static int _not = 0;
             _secondaryColor = [[decoder decodeObjectForKey:@"secondaryColor"] retain];
             _privacy = [[decoder decodeObjectForKey:@"privacy"] retain];
             _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+            _following = [[decoder decodeObjectForKey:@"following"] retain];
             [[STStampedAPI sharedInstance] cacheUser:self];
         }
         return self;
@@ -55,6 +54,7 @@ static int _not = 0;
     [_secondaryColor release];
     [_privacy release];
     [_imageURL release];
+    [_following release];
     [super dealloc];
 }
 
@@ -66,6 +66,7 @@ static int _not = 0;
     [encoder encodeObject:self.secondaryColor forKey:@"secondaryColor"];
     [encoder encodeObject:self.privacy forKey:@"privacy"];
     [encoder encodeObject:self.imageURL forKey:@"imageURL"];
+    [encoder encodeObject:self.following forKey:@"following"];
 }
 
 + (RKObjectMapping*)mapping {
@@ -82,23 +83,10 @@ static int _not = 0;
     [mapping mapAttributes:
      @"name",
      @"privacy",
+     @"following",
      nil];
     
     return mapping;
-}
-
-+ (STSimpleUser*)userFromLegacyUser:(User*)legacyUser {
-    if (legacyUser == nil) {
-        return nil;
-    }
-    STSimpleUser* user = [[[STSimpleUser alloc] init] autorelease];
-    user.name = legacyUser.name;
-    user.userID = legacyUser.userID;
-    user.screenName = legacyUser.screenName;
-    user.primaryColor = legacyUser.primaryColor;
-    user.secondaryColor = legacyUser.secondaryColor;
-    user.imageURL = legacyUser.imageURL;
-    return user;
 }
 
 

@@ -126,17 +126,24 @@ header {
 }
 header .header-body {
   z-index: 25;
-  /* TODO: use slight background gradient instead of flat color */
-
 }
 header .header-body p {
+  position: relative;
   float: right;
   clear: both;
-  position: relative;
   margin: 0.5em 0.5em 0.25em 0;
 }
 header .header-body p .desc {
   font-size: 90%;
+}
+header .header-body p a.button {
+  background: url(/assets/img/join_signup_sprite.png) no-repeat;
+  display: inline-block;
+  width: 82px;
+  height: 27px;
+  margin-left: .5em;
+  position: relative;
+  top: .5em;
 }
 header .header-body p.join {
   z-index: 27;
@@ -145,93 +152,29 @@ header .header-body p.join span.desc {
   color: #438fed;
 }
 header .header-body p.join a.button {
-  /*background: url(/assets/img/join_sign_up_buttons_sprite.png) no-repeat;*/
-
-  color: #fff;
-  background: #3b84eb;
-  -webkit-box-shadow: 0 0 4px 0 #3b84eb;
-  -moz-box-shadow: 0 0 4px 0 #3b84eb;
-  -ms-box-shadow: 0 0 4px 0 #3b84eb;
-  -o-box-shadow: 0 0 4px 0 #3b84eb;
-  box-shadow: 0 0 4px 0 #3b84eb;
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
+  background-position: 0 0;
 }
 header .header-body p.join a.button:hover {
-  text-decoration: none;
-  background: #69a1f0;
-  -webkit-box-shadow: 0 0 4px 0 #1769dc;
-  -moz-box-shadow: 0 0 4px 0 #1769dc;
-  -ms-box-shadow: 0 0 4px 0 #1769dc;
-  -o-box-shadow: 0 0 4px 0 #1769dc;
-  box-shadow: 0 0 4px 0 #1769dc;
+  background-position: -84px 0;
 }
 header .header-body p.join a.button:active {
-  text-decoration: none;
-  background: #0f4897;
-  -webkit-box-shadow: 0 0 4px 0 #0f4897;
-  -moz-box-shadow: 0 0 4px 0 #0f4897;
-  -ms-box-shadow: 0 0 4px 0 #0f4897;
-  -o-box-shadow: 0 0 4px 0 #0f4897;
-  box-shadow: 0 0 4px 0 #0f4897;
+  background-position: -168px 0;
 }
-header .header-body p.sign-in {
+header .header-body p.login {
   z-index: 26;
+  margin-bottom: 1em;
 }
-header .header-body p.sign-in span.desc {
+header .header-body p.login span.desc {
   color: #bbb;
 }
-header .header-body p.sign-in a.button {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  -webkit-box-shadow: 0 0 4px 0 #eeeeee;
-  -moz-box-shadow: 0 0 4px 0 #eeeeee;
-  -ms-box-shadow: 0 0 4px 0 #eeeeee;
-  -o-box-shadow: 0 0 4px 0 #eeeeee;
-  box-shadow: 0 0 4px 0 #eeeeee;
-  border: 1px solid #666;
-  background: #FEFEFE;
-  color: #666;
+header .header-body p.login a.button {
+  background-position: 0 -29px;
 }
-header .header-body p.sign-in a.button:hover {
-  color: #fff;
-  border-color: #69a1f0;
-  background: #69a1f0;
-  text-decoration: none;
-  -webkit-box-shadow: 0 0 4px 0 #1769dc;
-  -moz-box-shadow: 0 0 4px 0 #1769dc;
-  -ms-box-shadow: 0 0 4px 0 #1769dc;
-  -o-box-shadow: 0 0 4px 0 #1769dc;
-  box-shadow: 0 0 4px 0 #1769dc;
+header .header-body p.login a.button:hover {
+  background-position: -84px -29px;
 }
-header .header-body p.sign-in a.button:active {
-  color: #fff;
-  border-color: #0f4897;
-  background: #0f4897;
-  text-decoration: none;
-  -webkit-box-shadow: 0 0 4px 0 #0f4897;
-  -moz-box-shadow: 0 0 4px 0 #0f4897;
-  -ms-box-shadow: 0 0 4px 0 #0f4897;
-  -o-box-shadow: 0 0 4px 0 #0f4897;
-  box-shadow: 0 0 4px 0 #0f4897;
-}
-header .header-body a.button {
-  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
-  font-style: normal;
-  font-weight: normal;
-  letter-spacing: .1em;
-  text-align: center;
-  margin-left: .5em;
-  display: inline-block;
-  width: 5em;
+header .header-body p.login a.button:active {
+  background-position: -168px -29px;
 }
 .post-header {
   position: relative;
@@ -248,10 +191,10 @@ header .header-body a.button {
 .user-logo-large {
   position: absolute;
   display: block;
-  top: -78px;
-  left: -125px;
-  width: 195px;
-  height: 195px;
+  top: -60px;
+  left: -110px;
+  width: 210px;
+  height: 210px;
   z-index: 101;
 }
 .user-logo-small {
@@ -304,6 +247,22 @@ header .header-body a.button {
 .profile-image-large-ish img {
   width: 96px;
   height: 96px;
+  border: 3px solid #ffffff;
+  -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-medium-ish {
+  float: left;
+  display: block;
+  width: 78px;
+  height: 78px;
+}
+.profile-image-medium-ish img {
+  width: 72px;
+  height: 72px;
   border: 3px solid #ffffff;
   -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
@@ -376,8 +335,7 @@ header .header-body a.button {
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   /*&:hover {
-            @base: #3b84eb;
-            background: lighten(@base, 10%);
+            background: lighten(@stamped-base-color, 10%);
         }*/
 
 }

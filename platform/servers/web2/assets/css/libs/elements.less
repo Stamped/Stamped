@@ -125,6 +125,38 @@
     transition:         @target @duration @ease;
 }
 
+.transition2(@target0: all, @duration0: 0.2s, @ease0: ease-out, @target1, @duration1, @ease1) {
+    -webkit-transition: @target0 @duration0 @ease0, @target1 @duration1 @ease1;
+    -moz-transition:    @target0 @duration0 @ease0, @target1 @duration1 @ease1;
+    -ms-transition:     @target0 @duration0 @ease0, @target1 @duration1 @ease1;
+    -o-transition:      @target0 @duration0 @ease0, @target1 @duration1 @ease1;
+    transition:         @target0 @duration0 @ease0, @target1 @duration1 @ease1;
+}
+
+.transition-transform(@duration0: 0.2s, @ease0: ease-out) {
+    -webkit-transition: -webkit-transform @duration0 @ease0;
+    -moz-transition:    -moz-transform    @duration0 @ease0;
+    -ms-transition:     -ms-transform     @duration0 @ease0;
+    -o-transition:      -o-transform      @duration0 @ease0;
+    transition:         transform         @duration0 @ease0;
+}
+
+.transition-transform2(@duration0: 0.2s, @ease0: ease-out, @target1, @duration1, @ease1) {
+    -webkit-transition: -webkit-transform @duration0 @ease0, @target1 @duration1 @ease1;
+    -moz-transition:    -moz-transform    @duration0 @ease0, @target1 @duration1 @ease1;
+    -ms-transition:     -ms-transform     @duration0 @ease0, @target1 @duration1 @ease1;
+    -o-transition:      -o-transform      @duration0 @ease0, @target1 @duration1 @ease1;
+    transition:         transform         @duration0 @ease0, @target1 @duration1 @ease1;
+}
+
+.transition-rounded(@duration0: 0.2s, @ease0: ease-out) {
+    -webkit-transition: -webkit-border-radius @duration0 @ease0;
+    -moz-transition:    -moz-border-radius    @duration0 @ease0;
+    -ms-transition:     -ms-border-radius     @duration0 @ease0;
+    -o-transition:      -o-border-radius      @duration0 @ease0;
+    transition:         border-radius         @duration0 @ease0;
+}
+
 .inner-shadow(@horizontal: 0, @vertical: 1px, @blur: 2px, @alpha: 0.4) {
     -webkit-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
     -moz-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);

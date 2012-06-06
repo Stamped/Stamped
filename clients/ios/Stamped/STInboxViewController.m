@@ -31,9 +31,11 @@
 
 #import "EntityDetailViewController.h"
 #import "STStampCell.h"
-#import "AccountManager.h"
 #import "DDMenuController.h"
 #import "STActionManager.h"
+#import "FindFriendsViewController.h"
+#import "STMenuController.h"
+#import "STUserViewController.h"
 
 @interface STInboxViewController ()
 
@@ -99,9 +101,7 @@
         [Util addCreateStampButtonToController:self];
 
     }
-    
-    [Util addHomeButtonToController:self withBadge:YES];
-    
+        
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;
@@ -127,6 +127,13 @@
 - (void)viewDidDisappear:(BOOL)animated {
     //Todo cancel pending cache ops
     [super viewDidDisappear:animated];
+}
+
+
+#pragma mark - Actions
+
+- (void)login:(id)sender {
+    [Util launchFirstRun];
 }
 
 
@@ -263,7 +270,11 @@
     UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
     NSIndexPath *indexPath = [tableview indexPathForCell:cell];
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
-    [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
+    STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
+    [self.navigationController pushViewController:controller animated:YES];
+
+    
+    //[[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
     
 }
 
@@ -452,6 +463,20 @@
 
 - (void)noDataAction:(id)sender {
     
+    if (!LOGGED_IN) {
+        
+        STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        [controller showWelcome];
+        
+    } else {
+        
+        FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
+        STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+        [self presentModalViewController:navController animated:YES];
+        [controller release];
+        [navController release];
+        
+    }
     
 }
 
@@ -507,11 +532,11 @@
 }
 
 
-#pragma mark - UIGestureRecognizerDelegate 
+#pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     
-    DDMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    DDMenuController *menuController = (id)((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     return ![[menuController tap] isEnabled];
     
 }

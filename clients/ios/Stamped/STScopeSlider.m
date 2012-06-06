@@ -10,10 +10,9 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-#import "AccountManager.h"
-#import "User.h"
 #import "STTooltipView.h"
 #import "STImageView.h"
+#import "STStampedAPI.h"
 
 @interface STScopeSlider ()
 - (void)commonInit;
@@ -64,7 +63,7 @@
 - (void)commonInit {
     
     userImageView_ = [[STImageView alloc] initWithFrame:CGRectMake(0, 0, 26, 26)];
-    userImageView_.imageURL = [[AccountManager sharedManager].currentUser profileImageURLForSize:ProfileImageSize31];
+    userImageView_.imageURL =  [Util profileImageURLForUser:STStampedAPI.sharedInstance.currentUser withSize:STProfileImageSize31];
     userImageView_.layer.shadowOpacity = 0;
     userImageView_.backgroundColor = [UIColor clearColor];
     
@@ -230,7 +229,7 @@
   CGFloat xPos = (background.size.width - inner.size.width) / 2;
   CGFloat yPos = ((background.size.height - inner.size.height) / 2) - 2;  // Account for shadow.
   if (granularity_ == STStampedAPIScopeYou &&
-      ![[AccountManager sharedManager].currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"] &&
+      ![STStampedAPI.sharedInstance.currentUser.imageURL isEqualToString:@"http://static.stamped.com/users/default.jpg"] &&
       userImageView_.image) {
     CGPathRef maskPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(xPos, yPos, 26, 26)].CGPath;
     CGContextRef ctx = UIGraphicsGetCurrentContext();

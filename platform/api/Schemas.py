@@ -232,103 +232,102 @@ class PasswordResetToken(Schema):
 class TwitterAccountSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('twitter_id',               basestring)
-        cls.addProperty('twitter_name',             basestring)
-        cls.addProperty('twitter_screen_name',      basestring)
-        cls.addProperty('twitter_alerts_sent',      bool)
+        cls.addProperty('twitter_id',                       basestring)
+        cls.addProperty('twitter_name',                     basestring)
+        cls.addProperty('twitter_screen_name',              basestring)
+        cls.addProperty('twitter_alerts_sent',              bool)
 
 class TwitterAuthSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('twitter_key',              basestring)
-        cls.addProperty('twitter_secret',           basestring)
+        cls.addProperty('twitter_key',                      basestring)
+        cls.addProperty('twitter_secret',                   basestring)
 
 class FacebookAccountSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('facebook_id',              basestring)
-        cls.addProperty('facebook_name',            basestring)
-        cls.addProperty('facebook_screen_name',     basestring)
-        cls.addProperty('facebook_alerts_sent',     bool)
+        cls.addProperty('facebook_id',                      basestring)
+        cls.addProperty('facebook_name',                    basestring)
+        cls.addProperty('facebook_screen_name',             basestring)
+        cls.addProperty('facebook_alerts_sent',             bool)
 
 class FacebookAuthSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('facebook_token',           basestring)
+        cls.addProperty('facebook_token',                   basestring)
 
 class NetflixAuthSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('netflix_user_id',          basestring)
-        cls.addProperty('netflix_token',            basestring)
-        cls.addProperty('netflix_secret',           basestring)
+        cls.addProperty('netflix_user_id',                  basestring)
+        cls.addProperty('netflix_token',                    basestring)
+        cls.addProperty('netflix_secret',                   basestring)
 
 class DevicesSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addPropertyList('ios_device_tokens',    basestring)
+        cls.addPropertyList('ios_device_tokens',            basestring)
 
 class AccountAlerts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('ios_alert_credit',         bool)
-        cls.addProperty('ios_alert_like',           bool)
-        cls.addProperty('ios_alert_todo',            bool)
-        cls.addProperty('ios_alert_mention',        bool)
-        cls.addProperty('ios_alert_comment',        bool)
-        cls.addProperty('ios_alert_reply',          bool)
-        cls.addProperty('ios_alert_follow',         bool)
-        cls.addProperty('email_alert_credit',       bool)
-        cls.addProperty('email_alert_like',         bool)
-        cls.addProperty('email_alert_todo',          bool)
-        cls.addProperty('email_alert_mention',      bool)
-        cls.addProperty('email_alert_comment',      bool)
-        cls.addProperty('email_alert_reply',        bool)
-        cls.addProperty('email_alert_follow',       bool)
+        cls.addProperty('ios_alert_credit',                 bool)
+        cls.addProperty('ios_alert_like',                   bool)
+        cls.addProperty('ios_alert_todo',                   bool)
+        cls.addProperty('ios_alert_mention',                bool)
+        cls.addProperty('ios_alert_comment',                bool)
+        cls.addProperty('ios_alert_reply',                  bool)
+        cls.addProperty('ios_alert_follow',                 bool)
+        cls.addProperty('email_alert_credit',               bool)
+        cls.addProperty('email_alert_like',                 bool)
+        cls.addProperty('email_alert_todo',                 bool)
+        cls.addProperty('email_alert_mention',              bool)
+        cls.addProperty('email_alert_comment',              bool)
+        cls.addProperty('email_alert_reply',                bool)
+        cls.addProperty('email_alert_follow',               bool)
 
 class LinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',             basestring, required=True)
-        cls.addProperty('user_id',                  basestring)
-        cls.addProperty('screen_name',              basestring)
-        cls.addProperty('name',                     basestring)
-        cls.addProperty('token',                    basestring)
-        cls.addProperty('secret',                   basestring)
-        cls.addProperty('token_expiration',         datetime)
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('token',                            basestring)
+        cls.addProperty('secret',                           basestring)
+        cls.addProperty('token_expiration',                 datetime)
 
 class LinkedAccounts(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('twitter',            LinkedAccount)
-        cls.addNestedProperty('facebook',           LinkedAccount)
-        cls.addNestedProperty('netflix',            LinkedAccount)
+        cls.addNestedProperty('twitter',                    LinkedAccount)
+        cls.addNestedProperty('facebook',                   LinkedAccount)
+        cls.addNestedProperty('netflix',                    LinkedAccount)
 
 class Account(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                  basestring)
-        cls.addProperty('name',                     basestring, required=True)
-        cls.addProperty('auth_service',             basestring, required=True)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('auth_service',                     basestring, required=True)
 
-        cls.addProperty('name_lower',               basestring)
-        cls.addProperty('email',                    basestring)
-        cls.addProperty('password',                 basestring)
-        cls.addProperty('screen_name',              basestring, required=True)
-        cls.addProperty('screen_name_lower',        basestring)
-        cls.addProperty('color_primary',            basestring)
-        cls.addProperty('color_secondary',          basestring)
-        cls.addProperty('phone',                    int)
-        cls.addProperty('bio',                      basestring)
-        cls.addProperty('website',                  basestring)
-        cls.addProperty('location',                 basestring)
-        cls.addProperty('privacy',                  bool, required=True)
-        #cls.addNestedProperty('linked_accounts',    LinkedAccounts)
-        cls.addNestedProperty('linked',             LinkedAccounts)
-        cls.addNestedProperty('devices',            DevicesSchema)
-        cls.addNestedProperty('stats',              UserStatsSchema, required=True)
-        cls.addNestedProperty('timestamp',          UserTimestampSchema, required=True)
-        cls.addNestedProperty('alerts',             AccountAlerts)
+        cls.addProperty('name_lower',                       basestring)
+        cls.addProperty('email',                            basestring)
+        cls.addProperty('password',                         basestring)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name_lower',                basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('phone',                            basestring)
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('privacy',                          bool, required=True)
+        cls.addNestedProperty('linked',                     LinkedAccounts)
+        cls.addNestedProperty('devices',                    DevicesSchema)
+        cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
+        cls.addNestedProperty('timestamp',                  UserTimestampSchema, required=True)
+        cls.addNestedProperty('alerts',                     AccountAlerts)
 
     def __init__(self):
         Schema.__init__(self)
@@ -340,23 +339,35 @@ class Account(Schema):
 class FacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('user_token',               basestring, required=True)
+        cls.addProperty('user_token',                       basestring, required=True)
+
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('email',                            basestring)#, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('phone',                            int)
+
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
 
 class TwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('email',                        basestring)#, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('phone',                        int)
-        cls.addProperty('profile_image',                basestring) ### TODO: normalize=False ?
-        cls.addProperty('user_token',                   basestring, required=True)
-        cls.addProperty('user_secret',                  basestring, required=True)
+        cls.addProperty('user_token',                       basestring, required=True)
+        cls.addProperty('user_secret',                      basestring, required=True)
+
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('email',                            basestring)#, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('phone',                            int)
+
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
 
 
 # ##### #
@@ -366,18 +377,18 @@ class TwitterAccountNew(Schema):
 class User(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('name',                         basestring, required=True)
-        cls.addProperty('screen_name',                  basestring, required=True)
-        cls.addProperty('color_primary',                basestring)
-        cls.addProperty('color_secondary',              basestring)
-        cls.addProperty('bio',                          basestring)
-        cls.addProperty('website',                      basestring)
-        cls.addProperty('location',                     basestring)
-        cls.addProperty('privacy',                      bool, required=True)
-        cls.addNestedProperty('stats',                  UserStatsSchema, required=True)
-        cls.addNestedProperty('timestamp',              UserTimestampSchema, required=True)
-        cls.addProperty('identifier',                   basestring)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('name',                             basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('privacy',                          bool, required=True)
+        cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
+        cls.addNestedProperty('timestamp',                  UserTimestampSchema, required=True)
+        cls.addProperty('following',                        bool)
 
     def __init__(self):
         Schema.__init__(self)
@@ -396,18 +407,37 @@ class UserMini(Schema):
         cls.addProperty('color_primary',                    basestring)
         cls.addProperty('color_secondary',                  basestring)
         cls.addProperty('privacy',                          bool)
-        cls.addNestedProperty('timestamp',                  UserTimestampSchema)
-        # cls.addNestedProperty('accessories',    
+        cls.addNestedProperty('timestamp',                  UserTimestampSchema) 
 
     def __init__(self):
         Schema.__init__(self)
-        # self.timestamp = UserTimestampSchema()
 
 class UserTiny(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring)
         cls.addProperty('screen_name',                      basestring)
+
+class SuggestedUser(User):
+    """
+    This class is used for results within Friend Finder (e.g. fine by email, via Facebook, etc.).
+
+    It includes three additional fields: 
+    - search_identifier: The identifier used for the search query (if applicable), e.g. the facebook_id
+    - explanation: An explanation for why the user is being returned
+    """
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('search_identifier',                basestring)
+        cls.addProperty('relationship_explanation',         basestring)
+
+    def __init__(self):
+        User.__init__(self)
+
+    def importUser(self, user):
+        self.dataImport(user.dataExport())
+        return self
+
 
 class SuggestedUserRequest(Schema):
     @classmethod
@@ -782,10 +812,10 @@ class BasicEntity(BasicEntityMini):
 
         for attribute in attributes:
             try:
-                if self[attribute] is not None:
-                    mini[attribute] = self[attribute]
-            except:
-                pass
+                if getattr(self, attribute) is not None:
+                    setattr(mini, attribute, getattr(self, attribute))
+            except AttributeError:
+                logs.warning('Unable to minimize attribute "%s"' % attribute)
 
         return mini
 
@@ -793,8 +823,8 @@ class BasicEntity(BasicEntityMini):
         try:
             if t in self.types:
                 return True
-        except:
-            pass
+        except Exception as e:
+            logs.warning("isType error (%s): %s" % (self, e))
         return False
 
     # def __str__(self):

@@ -12,6 +12,7 @@
 @interface StampCustomizeViewController ()
 @property(nonatomic,readonly,retain) StampColorPickerSliderView *slider;
 @property(nonatomic,readonly,retain) NSArray *colors;
+- (void)updateStampView:(BOOL)animated;
 @end
 
 @implementation StampCustomizeViewController
@@ -53,26 +54,13 @@
     [button release];
     
     if (!_stampView) {
-        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake((self.view.bounds.size.width-246.0f)/2, 10.0f, 246.0f, 246.0f)];
-        view.backgroundColor = [UIColor clearColor];
-        view.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
-        [self.view addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
-           
-            UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0);            
-            CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
-            CGContextScaleCTM(ctx, 1.0f, -1.0f);
-            
-            CGContextClipToMask(ctx, rect, [UIImage imageNamed:@"stamp_270pt_texture.png"].CGImage);
-            if (_colors) {
-                drawStampGradient([[_colors objectAtIndex:0] CGColor], [[_colors objectAtIndex:1] CGColor], ctx);
-            } else {
-                CGContextFillRect(ctx, rect);
-            }
-            
-        }];
-        [view release];
-        _stampView = view;
+        
+        CALayer *layer = [CALayer layer];
+        layer.contentsScale = [[UIScreen mainScreen] scale];
+        layer.frame = CGRectMake((self.view.bounds.size.width-246.0f)/2, 10.0f, 246.0f, 246.0f);
+        [self.view.layer addSublayer:layer];
+        _stampView = layer;
+        
     }
     
     if (!_sliderView) {
@@ -87,12 +75,38 @@
         
     }
     
+    [self updateStampView:NO];
+    
 }
 
 - (void)viewDidUnload {
     _stampView=nil;
     _sliderView=nil;
     [super viewDidUnload];
+}
+
+- (void)updateStampView:(BOOL)animated {
+    
+    UIGraphicsBeginImageContextWithOptions(_stampView.bounds.size, NO, 0);
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGRect rect = CGContextGetClipBoundingBox(ctx);
+    
+    CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
+    CGContextScaleCTM(ctx, 1.0f, -1.0f);
+    
+    CGContextClipToMask(ctx, rect, [UIImage imageNamed:@"stamp_270pt_texture.png"].CGImage);
+    drawStampGradient([[_colors objectAtIndex:0] CGColor], [[_colors objectAtIndex:1] CGColor], ctx);
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    BOOL disabled = [CATransaction disableActions];
+    [CATransaction setDisableActions:!animated];
+    [CATransaction begin];
+    [CATransaction setAnimationDuration:0.25f];
+    _stampView.contents = (id)image.CGImage;
+    [CATransaction commit];
+    [CATransaction setDisableActions:disabled];
+
 }
 
 
@@ -120,7 +134,7 @@
 - (void)stampColorPickerSliderView:(StampColorPickerSliderView*)view pickedColors:(NSArray*)colors {
     [_colors release], _colors=nil;
     _colors = [colors retain];
-    [_stampView setNeedsDisplay];
+    [self updateStampView:YES];
 }
 
 

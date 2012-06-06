@@ -15,7 +15,7 @@
 #import "STAuth.h"
 #import "STFacebook.h"
 #import "STAvatarView.h"
-#import "AccountManager.h"
+#import "FindFriendsViewController.h"
 
 @interface SignupWelcomeViewController ()
 
@@ -55,19 +55,20 @@
         if (_signupType == SignupWelcomeTypeTwitter) {
             
             NSDictionary *userDic = [[STTwitter sharedInstance] twitterUser];
-
-            NSString *location = [userDic objectForKey:@"location"];
-            if (location != nil && ![location isEqual:[NSNull null]]) {
-                header.subTitleLabel.text = location;
+            if (userDic) {
+                NSString *location = [userDic objectForKey:@"location"];
+                if (location != nil && ![location isEqual:[NSNull null]]) {
+                    header.subTitleLabel.text = location;
+                }
+                NSString *description = [userDic objectForKey:@"description"];
+                if (description != nil && ![location isEqual:[NSNull null]]) {
+                    header.detailLabel.text = description;
+                }
+                
+                header.titleLabel.text = [userDic objectForKey:@"name"];
+                [header.imageView setImageURL:[NSURL URLWithString:[userDic objectForKey:@"profile_image_url"]]];
+                [header setNeedsLayout];
             }
-            NSString *description = [userDic objectForKey:@"description"];
-            if (description != nil && ![location isEqual:[NSNull null]]) {
-                header.detailLabel.text = description;
-            }
-            
-            header.titleLabel.text = [userDic objectForKey:@"name"];
-            [header.imageView setImageURL:[NSURL URLWithString:[userDic objectForKey:@"profile_image_url"]]];
-            [header setNeedsLayout];
 
         } else if (_signupType == SignupWelcomeTypeFacebook) {
             
@@ -134,6 +135,12 @@
 
 - (void)next:(id)sender {
     
+    FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
+    [self.navigationController pushViewController:controller animated:YES];
+    [controller release];
+    
+    return;
+    
     STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
     NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
 
@@ -166,10 +173,7 @@
         } else {
             [params setObject:cell.textField.text forKey:@"name"];
         }
-        [[AccountManager sharedManager] createAccountWithFacebook:@"John Doe"
-                                                       screenname:[params objectForKey:@"username"]
-                                                        userToken:[params objectForKey:@"user_token"]
-                                                            email:@"test3@stamped.com"];
+        //TODO Fix
         //[[STAuth sharedInstance] facebookSignupWithParams:params];
         NSLog(@"facebook signing up with params %@", params);
 

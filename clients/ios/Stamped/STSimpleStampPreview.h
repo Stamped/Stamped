@@ -12,9 +12,11 @@
 
 @interface STSimpleStampPreview : NSObject <STStampPreview, NSCoding>
 
-@property (nonatomic, readonly, copy) NSString* stampID;
-@property (nonatomic, readonly, retain) id<STUser> user;
+@property (nonatomic, readwrite, copy) NSString* stampID;
+@property (nonatomic, readwrite, retain) id<STUser> user;
 
 + (RKObjectMapping*)mapping;
+
++ (STSimpleStampPreview*)stampPreviewFromStamp:(id<STStamp>)stamp;
 
 @end

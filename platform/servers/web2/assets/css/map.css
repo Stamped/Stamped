@@ -1,3 +1,4 @@
+@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
 /* map.less
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
@@ -5,6 +6,19 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+/* common.less - styles shared across multiple stamped stylesheets
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
 /* elements.less
  * 
  * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
@@ -15,6 +29,50 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+/* **************************************************************************
+                              STYLING CONSTANTS
+   ************************************************************************** */
+/* **************************************************************************
+                             REUSABLE COMPONENTS
+   ************************************************************************** */
+.replaced {
+  display: block;
+  text-indent: -9999em;
+  overflow: hidden;
+}
+.fullwidth {
+  position: relative;
+  width: 100%;
+}
+.fullsize {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.floatleft {
+  float: left;
+}
+.floatright {
+  float: right;
+}
+footer,
+.fixedwidth {
+  position: relative;
+  display: block;
+  max-width: 1000px;
+  min-width: 360px;
+  width: 1000px;
+  margin: 0 auto;
+}
+@font-face {
+  font-family: StampedFallbackFont;
+  font-style: normal;
+  font-weight: 400;
+  src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+}
+/* **************************************************************************
+                                   MISC SETUP
+   ************************************************************************** */
 html,
 body {
   overflow-y: hidden;
@@ -22,48 +80,24 @@ body {
 footer {
   display: none;
 }
+#main-content {
+  visibility: visible;
+}
+/* **************************************************************************
+                               CORE STAMP MAP
+   ************************************************************************** */
 .stamp-map {
   position: relative;
-  margin: 0 0 0;
+  padding: 0;
+  margin: 0;
   -webkit-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   -moz-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   -ms-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   -o-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
-  /*.perspective(600px);
-    .transform-style(preserve-3d);
-    .backface-visibility(hidden);
-    
-    .section {
-        position: absolute;
-        display: block;
-        
-        top: 0;
-        
-        width:  25%;
-        height: 100%;
-        z-index: 105;
-        
-        background: rgba(25, 25, 25, 0.25);
-        border: 1px solid black;
-    }
-    
-    .section1 {
-        left: 0;
-        .transform(rotateY(-10deg));
-    }
-    .section2 {
-        left: 25%;
-        .transform(rotateY(10deg));
-    }
-    .section3 {
-        left: 50%;
-        .transform(rotateY(-10deg));
-    }
-    .section4 {
-        left: 75%;
-        .transform(rotateY(10deg));
-    }*/
+  /* **************************************************************************
+                             STAMP MAP NAV COLUMN
+   ************************************************************************** */
 
 }
 .stamp-map .stamp-map-canvas {
@@ -122,6 +156,109 @@ footer {
 .stamp-map .stamp-map-canvas .marker .marker-content p.blurb:hover {
   cursor: text;
 }
-#main-content {
-  visibility: visible;
+.stamp-map .fixedwidth {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -532px;
+  width: 360px;
+  height: 100%;
+}
+.stamp-map .fixedwidth .stamp-map-nav {
+  height: 100%;
+  background: #fff;
+  -webkit-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header {
+  padding: 32px 6px 0 32px;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .profile-image-small {
+  float: left;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs {
+  float: right;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .name {
+  color: #333;
+  margin-right: 24px;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .stamp-map-title {
+  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 4em;
+  letter-spacing: .05em;
+  line-height: 100%;
+  display: block;
+  margin: 0;
+  padding: 0;
+  margin-right: 24px;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav {
+  clear: both;
+  text-align: right;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a {
+  margin: 0;
+  padding: 0;
+  line-height: 80%;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a .up-arrow {
+  display: block;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a .down-arrow {
+  display: none;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:hover,
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:active {
+  cursor: pointer;
+  color: #fff;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:hover {
+  background-color: #999;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-header .rhs .list-view-nav a:active {
+  background-color: #666;
+}
+.stamp-map .fixedwidth .stamp-map-nav .top-user-gradient {
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+}
+.stamp-map .fixedwidth .stamp-map-nav .bottom-user-gradient {
+  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+}
+.stamp-map .fixedwidth .stamp-map-nav .stamp-list-view {
+  overflow-y: scroll;
+  padding: 8px 32px;
+  margin: 8px 0;
+  -webkit-transition: height 0.5s easeOutCubic;
+  -moz-transition: height 0.5s easeOutCubic;
+  -ms-transition: height 0.5s easeOutCubic;
+  -o-transition: height 0.5s easeOutCubic;
+  transition: height 0.5s easeOutCubic;
+  width: 288px;
+  height: 70%;
+}
+.stamp-map .fixedwidth .stamp-map-nav .nav-footer {
+  padding: 16px 32px;
+}
+.stamp-map .fixedwidth .stamp-map-nav-collapsed .nav-header .rhs .list-view-nav a .up-arrow {
+  display: none;
+}
+.stamp-map .fixedwidth .stamp-map-nav-collapsed .nav-header .rhs .list-view-nav a .down-arrow {
+  display: block;
+}
+.stamp-map .fixedwidth .stamp-map-nav-collapsed .stamp-list-view {
+  height: 0;
 }

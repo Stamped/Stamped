@@ -16,7 +16,6 @@
 #import "STSimpleTodo.h"
 #import "STSimpleComment.h"
 #import "STSimpleUser.h"
-#import "AccountManager.h"
 #import "STSimpleUserDetail.h"
 #import "STSimpleStampedBy.h"
 #import "STSimpleEntitySearchResult.h"
@@ -37,6 +36,11 @@
 #import "STHybridCacheSource.h"
 #import "STSimpleLoginResponse.h"
 #import "STSimpleEntityAutoCompleteResult.h"
+#import "STSimpleBooleanResponse.h"
+
+NSString* const STStampedAPILoginNotification = @"STStampedAPILoginNotification";
+NSString* const STStampedAPILogoutNotification = @"STStampedAPILogoutNotification";
+NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedNotification";
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -159,7 +163,7 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (id<STUser>)currentUser {
-    return [STSimpleUser userFromLegacyUser:[AccountManager sharedManager].currentUser];
+    return [[STRestKitLoader sharedInstance] currentUser];
 }
 
 - (id<STStamp>)cachedStampForStampID:(NSString*)stampID {
@@ -215,7 +219,8 @@ static STStampedAPI* _sharedInstance;
         
     };
     return [[STRestKitLoader sharedInstance] loadWithPath:path 
-                                                     post:NO 
+                                                     post:NO
+                                            authenticated:YES
                                                    params:params 
                                                   mapping:[STSimpleStamp mapping] 
                                               andCallback:outerBlock];
@@ -252,6 +257,7 @@ static STStampedAPI* _sharedInstance;
     NSString* path = @"/entities/stamped_by.json";
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:NO 
+                                               authenticated:YES
                                                       params:[slice asDictionaryParams] 
                                                      mapping:[STSimpleStampedBy mapping]
                                                  andCallback:^(id stampedBy, NSError* error, STCancellation* cancellation) {
@@ -264,6 +270,7 @@ static STStampedAPI* _sharedInstance;
     NSString* path = @"/stamps/create.json";
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                         post:YES
+                                               authenticated:YES
                                                       params:stampNew.asDictionaryParams
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
@@ -276,6 +283,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                  post:YES 
+                                        authenticated:YES
                                                params:params 
                                               mapping:[STSimpleStamp mapping]
                                           andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
@@ -293,6 +301,7 @@ static STStampedAPI* _sharedInstance;
     NSString* path = @"/entities/suggested.json";
     return [[STRestKitLoader sharedInstance] loadWithPath:path 
                                                      post:NO 
+                                            authenticated:YES
                                                    params:entitySuggested.asDictionaryParams 
                                                   mapping:[STSimpleEntitySearchSection mapping] 
                                               andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
@@ -305,6 +314,7 @@ static STStampedAPI* _sharedInstance;
     NSString* path = @"/entities/search.json";
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
+                                            authenticated:YES
                                                    params:entitySearch.asDictionaryParams
                                                   mapping:[STSimpleEntitySearchSection mapping]
                                               andCallback:^(NSArray* result, NSError *error, STCancellation *cancellation) {
@@ -317,6 +327,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                  post:NO 
+                                        authenticated:YES
                                                params:params 
                                               mapping:[STSimpleUserDetail mapping]
                                           andCallback:^(id user, NSError* error, STCancellation* cancellation) {
@@ -330,6 +341,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:[userIDs componentsJoinedByString:@","] forKey:@"user_ids"];
     return [[STRestKitLoader sharedInstance] loadWithPath:path 
                                                      post:YES 
+                                            authenticated:YES
                                                    params:params 
                                                   mapping:[STSimpleUserDetail mapping]
                                               andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
@@ -364,6 +376,7 @@ static STStampedAPI* _sharedInstance;
     self.lastCount = nil;
     [[STRestKitLoader sharedInstance] loadWithPath:path 
                                               post:NO
+                                     authenticated:YES
                                             params:slice.asDictionaryParams
                                            mapping:[STSimpleActivity mapping]
                                        andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
@@ -377,6 +390,7 @@ static STStampedAPI* _sharedInstance;
     
     [[STRestKitLoader sharedInstance] loadWithPath:path 
                                               post:NO
+                                     authenticated:YES
                                             params:slice.asDictionaryParams
                                            mapping:[STSimpleActivity mapping]
                                        andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
@@ -427,6 +441,7 @@ static STStampedAPI* _sharedInstance;
                             nil];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
+                                               authenticated:YES
                                                       params:params 
                                                      mapping:[STSimpleComment mapping] 
                                                  andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -446,6 +461,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                         post:YES
+                                               authenticated:YES
                                                       params:params
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -466,6 +482,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                         post:YES
+                                               authenticated:YES
                                                       params:params
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -490,6 +507,7 @@ static STStampedAPI* _sharedInstance;
                             nil];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
+                                               authenticated:YES
                                                       params:params 
                                                      mapping:[STSimpleTodo mapping] 
                                                  andCallback:^(id todo, NSError* error, STCancellation* cancellation) {
@@ -510,6 +528,7 @@ static STStampedAPI* _sharedInstance;
     NSString* path = @"/todos/show.json";
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
+                                            authenticated:YES
                                                    params:slice.asDictionaryParams
                                                   mapping:[STSimpleTodo mapping]
                                               andCallback:^(NSArray* results, NSError* error, STCancellation* cancellation) {
@@ -528,6 +547,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:entityID forKey:@"entity_id"];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
+                                               authenticated:YES
                                                       params:params 
                                                      mapping:[STSimpleTodo mapping] 
                                                  andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -547,6 +567,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                  post:NO
+                                        authenticated:YES
                                                params:params
                                               mapping:[STStampedAPIUserIDs mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -560,6 +581,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                  post:NO
+                                        authenticated:YES
                                                params:params
                                               mapping:[STStampedAPIUserIDs mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -569,17 +591,32 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (void)isFriendForUserID:(NSString*)userID andCallback:(void(^)(BOOL isFriend, NSError* error))block {
-    NSString* path = @"/friendships/check.json";
-    NSDictionary* dictionary = [NSDictionary dictionaryWithObjectsAndKeys:
-                                userID, @"user_id_b", 
-                                [AccountManager sharedManager].currentUser.userID, @"user_id_a",
-                                nil];
-    [[STRestKitLoader sharedInstance] booleanWithPath:path
-                                                 post:NO
-                                               params:dictionary
-                                          andCallback:^(BOOL boolean, NSError *error, STCancellation* cancellation) {
-                                              block(boolean, error);
-                                          }];
+    NSString* currentUserID = self.currentUser.userID;
+    if (currentUserID) {
+        NSString* path = @"/friendships/check.json";
+        NSDictionary* dictionary = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    userID, @"user_id_b", 
+                                    currentUserID, @"user_id_a",
+                                    nil];
+        [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:dictionary 
+                                                  mapping:[STSimpleBooleanResponse mapping]
+                                              andCallback:^(id<STBooleanResponse> response, NSError *error, STCancellation* cancellation) {
+                                                  if (response) {
+                                                      block(response.result.boolValue, nil);
+                                                  }
+                                                  else {
+                                                      block(NO, error);
+                                                  }
+                                              }];
+    }
+    else {
+        [Util executeOnMainThread:^{
+            block(NO, [NSError errorWithDomain:@"StampedAPI" code:0 userInfo:[NSDictionary dictionaryWithObject:@"not logged in" forKey:@"Reason"]]); 
+        }];
+    }
 }
 
 - (void)addFriendForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block {
@@ -587,6 +624,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                  post:YES
+                                        authenticated:YES
                                                params:params 
                                               mapping:[STSimpleUserDetail mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -599,6 +637,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                  post:YES
+                                        authenticated:YES
                                                params:params 
                                               mapping:[STSimpleUserDetail mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -610,6 +649,7 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                  post:YES 
+                                        authenticated:YES
                                                params:params 
                                               mapping:[STSimpleStamp mapping] 
                                           andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
@@ -658,19 +698,14 @@ static STStampedAPI* _sharedInstance;
         if (context.stamp && ![params objectForKey:@"stamp_id"]) {
             [params setObject:context.stamp.stampID forKey:@"stamp_id"];
         }
-        
-        [[STRestKitLoader sharedInstance] booleanWithURL:source.completionEndpoint
-                                                    post:YES
-                                                  params:params
-                                             andCallback:^(BOOL boolean, NSError *error, STCancellation *cancellation) {
-                                                 [STDebug log:[NSString stringWithFormat:@"Callback %@ for endpoint %@.\n%@:%@:%@\n%@",
-                                                               boolean ? @"succeeded" : @"failed",
-                                                               source.completionEndpoint,
-                                                               action,
-                                                               source.source,
-                                                               source.sourceID,
-                                                               params]];
-                                             }];
+        [[STRestKitLoader sharedInstance] loadOneWithPath:[NSString stringWithFormat:@"/%@", source.completionEndpoint]
+                                                     post:YES
+                                            authenticated:YES
+                                                   params:params 
+                                                  mapping:[STSimpleBooleanResponse mapping]
+                                              andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                  
+                                              }];
     }
 }
 
@@ -689,6 +724,7 @@ static STStampedAPI* _sharedInstance;
         NSString* path = @"/activity/unread.json";
         return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                             post:NO
+                                                   authenticated:YES
                                                           params:[NSDictionary dictionary]
                                                          mapping:[STSimpleActivityCount mapping]
                                                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -735,8 +771,9 @@ static STStampedAPI* _sharedInstance;
             if (source.endpointData) {
                 [params addEntriesFromDictionary:source.endpointData];
             }
-            [[STRestKitLoader sharedInstance] loadOneWithURL:source.endpoint
+            [[STRestKitLoader sharedInstance] loadOneWithPath:[NSString stringWithFormat:@"/%@", source.endpoint]
                                                         post:YES
+                                               authenticated:YES
                                                       params:params
                                                      mapping:[STSimpleEndpointResponse mapping]
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -754,11 +791,13 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation *)objectForHybridCache:(STHybridCacheSource *)cache 
                                  withKey:(NSString *)key
                             withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
+    NSAssert1(key, @"Key should not be none for cache %@", cache);
     if (cache == self.stampCache) {
         NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamp_id"];
         NSString* path = @"/stamps/show.json";
         return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                             post:NO 
+                                                   authenticated:YES
                                                           params:params 
                                                          mapping:[STSimpleStamp mapping] 
                                                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -770,6 +809,7 @@ static STStampedAPI* _sharedInstance;
         NSString* path = @"/entities/show.json";
         return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                             post:NO
+                                                   authenticated:YES
                                                           params:params
                                                          mapping:[STSimpleEntityDetail mapping]
                                                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -780,6 +820,7 @@ static STStampedAPI* _sharedInstance;
         NSString* path = @"/entities/stamped_by.json";
         return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                             post:NO 
+                                                   authenticated:YES
                                                           params:[NSDictionary dictionaryWithObject:key forKey:@"entity_id"] 
                                                          mapping:[STSimpleStampedBy mapping]
                                                      andCallback:^(id stampedBy, NSError* error, STCancellation* cancellation) {
@@ -806,25 +847,11 @@ static STStampedAPI* _sharedInstance;
         return @"inbox";
     }
     else if (scope == STStampedAPIScopeFriendsOfFriends) {
-        return @"robby";
+        return @"user";
     }
     else {
         return @"everyone";
     }
-}
-
-- (STCancellation*)loginWithFacebookID:(NSString*)userID 
-                                 token:(NSString*)token
-                           andCallback:(void(^)(id<STLoginResponse>, NSError*, STCancellation*))block {
-    NSString* path = @"/account/create_using_facebook.json";
-    NSDictionary* params = nil;
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
-                                                        post:YES
-                                                      params:params
-                                                     mapping:[STSimpleLoginResponse mapping]
-                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                     block(result, error, cancellation); 
-                                                 }];
 }
 
 - (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
@@ -841,6 +868,7 @@ static STStampedAPI* _sharedInstance;
     }
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
+                                            authenticated:YES
                                                    params:params
                                                   mapping:[STSimpleEntityAutoCompleteResult mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
@@ -869,6 +897,7 @@ static STStampedAPI* _sharedInstance;
     NSAssert1(date, @"Date must not be nil for %@", self);
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
+                                            authenticated:YES
                                                    params:params
                                                   mapping:[STSimpleStamp mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
@@ -898,6 +927,7 @@ static STStampedAPI* _sharedInstance;
     NSAssert1(date, @"Date must not be nil for %@", self);
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
+                                            authenticated:YES
                                                    params:params
                                                   mapping:[STSimpleStamp mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
@@ -932,6 +962,7 @@ static STStampedAPI* _sharedInstance;
     }
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
+                                            authenticated:YES
                                                    params:params
                                                   mapping:[STSimpleEntityDetail mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
@@ -945,6 +976,53 @@ static STStampedAPI* _sharedInstance;
         block((id)model, error, cancellation); 
     }];
 }
+
+- (STCancellation *)createAccountWithPassword:(NSString *)password 
+                            accountParameters:(STAccountParameters*)accountParameters
+                                  andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] createAccountWithPassword:password 
+                                                     accountParameters:accountParameters
+                                                           andCallback:block];
+}
+
+- (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
+                                    accountParameters:(STAccountParameters*)accountParameters
+                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] createAccountWithFacebookUserToken:userToken
+                                                              accountParameters:accountParameters
+                                                                    andCallback:block];
+}
+
+- (STCancellation *)createAccountWithTwitterUserToken:(NSString *)userToken 
+                                           userSecret:(NSString *)userSecret 
+                                    accountParameters:(STAccountParameters*)accountParameters
+                                          andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] createAccountWithTwitterUserToken:userToken
+                                                                    userSecret:userSecret
+                                                             accountParameters:accountParameters
+                                                                   andCallback:block];
+}
+
+
+- (STCancellation*)loginWithScreenName:(NSString*)screenName 
+                              password:(NSString*)password 
+                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loginWithScreenName:screenName password:password andCallback:block];
+}
+
+- (STCancellation *)loginWithFacebookUserToken:(NSString *)userToken
+                                   andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] loginWithFacebookUserToken:userToken andCallback:block];
+}
+
+- (STCancellation *)loginWithTwitterUserToken:(NSString *)userToken
+                                   userSecret:(NSString *)userSecret
+                                  andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
+    return [[STRestKitLoader sharedInstance] loginWithTwitterUserToken:userToken
+                                                            userSecret:userSecret
+                                                           andCallback:block];
+}
+
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];

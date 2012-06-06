@@ -7,11 +7,11 @@
 //
 
 #import "STStampsView.h"
-#import "STLegacyStampCell.h"
 #import "STStampedAPI.h"
 #import "Util.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
+#import "STStampCell.h"
 
 static const NSInteger _batchSize = 20;
 
@@ -132,8 +132,8 @@ static const NSInteger _batchSize = 20;
     return cell;
   }
   else {
-    STLegacyStampCell* cell = [[[STLegacyStampCell alloc] initWithReuseIdentifier:@"testing"] autorelease];
-    cell.stamp = [self.stamps objectAtIndex:indexPath.row];
+    STStampCell* cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"testing"] autorelease];
+    [cell setupWithStamp:[self.stamps objectAtIndex:indexPath.row]];
     self.maxRow = MAX(self.maxRow, indexPath.row);
     [self populateStamps];
     return cell;

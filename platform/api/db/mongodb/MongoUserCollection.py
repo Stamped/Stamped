@@ -72,7 +72,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         try:
             self.getUserByScreenName(screenName)
             return True
-        except:
+        except StampedUnavailableError:
             return False
     
     def lookupUsers(self, userIds, screenNames=None, limit=0):
@@ -133,8 +133,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             user = self.getUserByScreenName(query)
             if user is not None and (domain is None or user.user_id in domain):
                 users.append(user)
-        except:
-            pass
+        except Exception as e:
+            logs.warning("Exact user match not found for '%s': %s" % (query, e))
         
         m = bson.code.Code("""function () {
             var score = 0.0;
@@ -199,7 +199,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             else:
                 data = [value]
             assert(isinstance(data, list))
-        except:
+        except Exception as e:
+            logs.warning("User search mapreduce error for '%s': %s" % (user_query, e))
             return users
         
         for i in data:
@@ -207,7 +208,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 user = self._convertFromMongo(i['user'])
                 if user.screen_name.lower() != query:
                     users.append(user)
-            except:
+            except Exception as e:
+                logs.warning("Unable to convert user (%s) from mongo: %s" % (i, e))
                 continue
         
         return users[:20]
@@ -238,8 +240,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             if user is not None and (domain is None or user.user_id in domain):
                 seen.add(user.user_id)
                 users.append(user)
-        except:
-            pass
+        except Exception as e:
+            logs.warning("Exact user match not found for '%s': %s" % (query, e))
         
         q = StringQuery(query, default_operator="AND", search_fields=[ "name", "screen_name" ])
         q = CustomScoreQuery(q, lang="mvel", script="""
@@ -321,23 +323,22 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             
         result = []
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['email']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['email']
             result.append(user)
         return result
 
     def findUsersByPhone(self, phone, limit=0):
-        queryPhone = []
-        for number in phone:
-            queryPhone.append(int(number))
+        queryPhone = [int(num) for num in phone]
+        queryPhone.extend( [str(num) for num in phone] )
         
         ### TODO: Add Index
-        data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
+        data = self._collection.find( {"phone": {"$in": queryPhone}} ).limit(limit)
         
         result = []
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['phone']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['phone']
             result.append(user)
         return result
 
@@ -351,8 +352,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         result = []
         for item in data:
-            user                = self._convertFromMongo(item)
-            user.identifier     = item['linked_accounts']['twitter']['twitter_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked_accounts']['twitter']['twitter_id']
             result.append(user)
 
         # new format find
@@ -361,8 +362,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         ).limit(limit)
 
         for item in data:
-            user                = self._convertFromMongo(item)
-            user.identifier     = item['linked']['twitter']['user_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked']['twitter']['user_id']
             result.append(user)
         return result
 
@@ -375,18 +376,18 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         result = []
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['linked_accounts']['facebook']['facebook_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked_accounts']['facebook']['facebook_id']
             result.append(user)
 
         # new format find
         data = self._collection.find(
-                {"linked.twitter.user_id": {"$in": twitterIds}}
+                {"linked.facebook.user_id": {"$in": facebookIds}}
         ).limit(limit)
 
         for item in data:
-            user = self._convertFromMongo(item)
-            user.identifier = item['linked']['facebook']['user_id']
+            user = SuggestedUser().importUser(self._convertFromMongo(item))
+            user.search_identifier = item['linked']['facebook']['user_id']
             result.append(user)
         
         return result

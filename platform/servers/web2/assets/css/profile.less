@@ -11,6 +11,7 @@
                                     IMPORTS
    ************************************************************************** */
 
+
 @import "common.less";
 
 
@@ -18,6 +19,20 @@
                                 PROFILE HEADER
    ************************************************************************** */
 
+
+.header-selection() {
+    position: relative !important;
+    display: block !important;
+    top: 0 !important;
+    z-index: 51 !important;
+}
+
+.header-hidden() {
+    position: absolute !important;
+    display: none !important;
+    top: -100% !important;
+    z-index: 50 !important;
+}
 
 .profile-header-wrapper {
     .fullwidth;
@@ -42,30 +57,37 @@
             left: 0;
             
             .profile-header-body {
-                position: relative;
-                top:  0;
+                position: absolute;
+                top:  -100%;
                 left: 0;
+                display: none;
+                
+                background: url(/assets/img/covers/default_cover_temp.png) repeat;
+                width:   100%;
+                height:  100%;
+                
+                /*.transition(top, 0.5s, linear);*/
                 
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .profile-image-large {
-                        .floatleft;
+                    .profile-image-large, .profile-image-medium {
+                        float: left;
                     }
                     
-                    .floatleft, .profile-image-large {
+                    .floatleft, .profile-image-large, .profile-image-medium {
                         margin: 0 24px 0 0;
                     }
                     
-                    p {
-                        margin: 0;
-                    }
-                    
-                    .profile-section-default {
-                        .floatleft;
+                    .lhs {
+                        float: left;
                         
                         a.screen-name {
                             color: #000;
+                        }
+                        
+                        p {
+                            margin: 0;
                         }
                         
                         p.profile-title {
@@ -81,14 +103,153 @@
                             margin:  0;
                             padding: 0;
                         }
+                        
+                        p.name {
+                            font-weight: 700;
+                            color: #333;
+                        }
+                        
+                        p.title {
+                            .stamped-font();
+                            
+                            line-height: 100%;
+                            font-size: 7em;
+                            letter-spacing: .05em;
+                            color: #000;
+                            
+                            display: block;
+                            padding: 0;
+                        }
+                    }
+                    
+                    .rhs {
+                        float: right;
+                        
+                        .subnav {
+                            width: 256px;
+                            
+                            .subnav_button {
+                                background: url(/assets/img/profile_header_subnav_sprite.png) no-repeat;
+                                display: inline-block;
+                                width:  38px;
+                                height: 38px;
+                                
+                                .transition-transform2(0.1s, ease-out, opacity, 0.1s, ease-out);
+                                opacity: .5;
+                                
+                                &:hover, &:active {
+                                    cursor: pointer;
+                                    
+                                    opacity: 1;
+                                    .transition-transform2(0s, linear, opacity, 0s, linear);
+                                }
+                                
+                                &:active {
+                                    .transform(scale(1.2, 1.2));
+                                }
+                            }
+                            
+                            .subnav_button1 {
+                                background-position: -40px 0;
+                            }
+                            
+                            .subnav_button2 {
+                                background-position: -80px 0;
+                            }
+                        }
+                        
+                        .share-widget {
+                            background-color: #fff;
+                            padding: 0.25em 0.5em;
+                            
+                            .rounded(1em);
+                            .box-shadow(0, 0, 18px, 0, @shadow);
+                            
+                            /* NOTE: because social sharing requires JS, sharing widgets are hidden 
+                               by default in CSS and only displayed on page load via JS if JS is 
+                               supported.
+                            */
+                            display: none;
+                            
+                            .desc {
+                                font-size: 80%;
+                                font-weight: 700;
+                                white-space: nowrap;
+                                color: #333;
+                            }
+                            
+                            .transition-rounded(0.5s, ease-out);
+                            overflow: hidden;
+                            
+                            .share-buttons {
+                                display: none;
+                                white-space: nowrap;
+                                
+                                margin: 4px auto;
+                                
+                                .share-button {
+                                    display: inline-block;
+                                }
+                            }
+                            
+                            &:hover {
+                                .rounded(0);
+                                
+                                .share-buttons {
+                                    display: block;
+                                }
+                            }
+                        }
                     }
                 }
             }
             
-            .profile-header-post {
-                .box-shadow(0, -3px, 3px, 0, @shadow);
+            .header-category-default {
+            }
+            
+            .header-category-place {
+                background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-music {
+                background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-book {
+                background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-film {
+                background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-category-other {
+                background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
+                background-size: 100% 100%;
+            }
+            
+            .header-animating {
+                position: absolute;
+                display: block;
+                top: -100%;
                 
-                height: 16px;
+                z-index: 52;
+            }
+            
+            .header-selected {
+                .header-selection();
+            }
+            
+            .profile-header-post {
+                position: relative;
+                z-index: 54;
+                height:  16px;
+                
+                .box-shadow(0, -3px, 3px, 0, @shadow);
                 
                 .inset-stamp {
                     background: url(/assets/img/insetstamp2.png) center top no-repeat;
@@ -98,7 +259,7 @@
                     
                     width: 167px;
                     min-height: 75px;
-                    z-index: 52;
+                    z-index: 55;
                     
                     margin: 0 auto;
                     padding: 18px 20px 0;
@@ -121,36 +282,88 @@
     }
 }
 
-.innerbg {
-    background: url(/assets/img/covers/default_cover_temp.png) repeat;
-    position: absolute;
-    width:   100%;
-    height:  100%;
+.stamp-count {
+    display: none;
 }
 
-body.place .innerbg {
-    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.default {
+    .header-category-default {
+        .header-selection();
+    }
+    
+    .stamp-count-default {
+        display: block !important;
+    }
 }
 
-body.music .innerbg {
-    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.place {
+    .header-category-default {
+        .header-hidden();
+    }
+    
+    .header-category-place {
+        .header-selection();
+    }
+    
+    .stamp-count-place {
+        display: block !important;
+    }
 }
 
-body.book .innerbg {
-    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.music {
+    .header-category-default {
+        .header-hidden();
+    }
+    
+    .header-category-music {
+        .header-selection();
+    }
+    
+    .stamp-count-music {
+        display: block !important;
+    }
 }
 
-body.film .innerbg {
-    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.book {
+    .header-category-default {
+        .header-hidden();
+    }
+    
+    .header-category-book {
+        .header-selection();
+    }
+    
+    .stamp-count-book {
+        display: block !important;
+    }
 }
 
-body.other .innerbg {
-    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-    background-size: 100% 100%;
+body.film {
+    .header-category-default {
+        .header-hidden();
+    }
+    
+    .header-category-film {
+        .header-selection();
+    }
+    
+    .stamp-count-film {
+        display: block !important;
+    }
+}
+
+body.other {
+    .header-category-default {
+        .header-hidden();
+    }
+    
+    .header-category-other {
+        .header-selection();
+    }
+    
+    .stamp-count-other {
+        display: block !important;
+    }
 }
 
 
@@ -164,16 +377,25 @@ body.other .innerbg {
 }
 
 .stamp-gallery-header {
-    margin: 1em 5% 0;
+    margin: 1em 0 0;
     
     .stamp-gallery-sort {
         position: relative;
         z-index: 80;
+        left: -24px;
         float: left;
+        
+        border: 1px none;
+        .rounded(4px);
         
         .item {
             display: none;
-            position: absolute;
+            text-decoration: none;
+            padding: .25em 24px;
+            
+            &:hover, &:active {
+                text-decoration: none;
+            }
             
             .arrow {
                 display: none;
@@ -193,19 +415,57 @@ body.other .innerbg {
     
     .stamp-gallery-view-map {
         float: right;
+        
+        a {
+            background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
+            display: block;
+            
+            width:  39px;
+            height: 33px;
+            
+            &:hover {
+                background-position: -41px 0;
+            }
+            
+            &:active {
+                background-position: -82px 0;
+            }
+        }
     }
     
     .expanded {
+        position: absolute;
         background: #fff;
-        .rounded(4px);
+        
+        border: 1px solid @shadow;
+        .box-shadow(0, 0, 8px, 0, @shadow);
         
         .item, .selected {
             display: block;
-            position: absolute;
             
             .arrow {
                 display: none;
             }
+        }
+        
+        .item {
+            border-bottom: 1px solid @shadow;
+            
+            &:hover, &:active {
+                color: #fff;
+                cursor: pointer;
+            }
+            
+            &:hover {
+                background: @shadow;
+            }
+            &:active {
+                background: darken(@shadow, 15%);
+            }
+        }
+        
+        .item:last-child {
+            border: 0 none;
         }
         
         .item:first-child {
@@ -228,8 +488,9 @@ body.other .innerbg {
     clear: both;
     text-align: center;
     
-    padding: 1.5em;
+    padding: 1.5em 0;
     margin:  0;
+    left: -24px;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) left top repeat-x;
@@ -541,10 +802,10 @@ a.lightbox {
 .subtitle-line {
     position: relative;
     display: block;
-    margin: -0.5em 0 0;
+    margin: -0.25em 0 0;
     
     p {
-        margin: 0;
+        margin:  0;
         padding: 0;
     }
     
@@ -644,13 +905,20 @@ a.lightbox {
 
 
 .active() {
+    background-position: -194px -6px;
     opacity: 1;
-    .transition(all, 0s, linear);
-    .transform(scale(1, 1));
+    
+    .transition(opacity, 0s, linear);
 }
 
 #main-content {
     visibility: hidden;
+}
+
+.expanded-desc() {
+    opacity: 1;
+    font-weight: 700;
+    .transform(translatex(0));
 }
 
 #stamp-category-nav-bar {
@@ -662,10 +930,11 @@ a.lightbox {
     .transition(opacity, 0.4s, ease-out);
     
     visibility: hidden;
+    background: #666;
     
-    background: #262626;
-    .rounded(8px);
-    .box-shadow(0, 0, 4px, 0, @shadow);
+    @radius: 4px;
+    .rounded(@radius);
+    .box-shadow(0, 2px, 8px, -2px, @shadow);
     
     top:   50%;
     right: 40px;
@@ -680,25 +949,32 @@ a.lightbox {
     margin: -180px 0 0;
     padding: 0;
     
+    .stamp-category-nav-bar-pre {
+        background: #4a4a4a url(/assets/img/sidenav_top_ribbon.png) repeat-x;
+        border-top: 2px solid #5e5e5e;
+        width:  100%;
+        height: 16px;
+        .border-radius(@radius, 0, 0, @radius);
+    }
+    
+    .stamp-category-nav-bar-post {
+        background: #4a4a4a url(/assets/img/sidenav_bottom_ribbon.png) repeat-x;
+        border-bottom: 2px solid #5e5e5e;
+        width:  100%;
+        height: 16px;
+        .border-radius(0, @radius, @radius, 0);
+    }
+    
     ol {
         li {
-            position: relative;
-            
             a {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat -192px 0;
-                
-                text-align: center;
-                display: block;
-                width:  60px;
-                height: 60px;
-                margin: 6px 0;
-                
                 position: relative;
-                z-index: 1000;
-                
-                opacity: 0;
-                .transform(scale(.8, .8));
-                .transition(all, 0.3s, ease-out);
+                display: block;
+                width:  56px;
+                height: 56px;
+                overflow: visible;
+                text-overflow: visible;
+                cursor: pointer;
                 
                 /*@params: 0.3s ease-out;
                 @args: opacity @params, transform @params;
@@ -706,69 +982,140 @@ a.lightbox {
                 -webkit-transition: @args;
                 -moz-transition: @args;
                 transition: @args;*/
-            }
-            
-            div {
-                background: url(/assets/img/sidenav_sprite2.png) no-repeat;
-                position: absolute;
-                left: 15px;
-                top:  17px;
                 
-                display: block;
-                width:  30px;
-                height: 30px;
+                .selection {
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat -194px -6px;
+                    position: absolute;
+                    width:  100%;
+                    height: 100%;
+                    
+                    opacity: 0;
+                    .transition(opacity, 0.3s, ease-out);
+                }
                 
-                z-index: 999;
+                .icon {
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat;
+                    position: absolute;
+                    left: 13px;
+                    top:  13px;
+                    
+                    .transform(scale(.8, .8));
+                    .transition(-webkit-transform, 0.3s, ease-out);
+                    
+                    display: block;
+                    width:  30px;
+                    height: 30px;
+                }
+                
+                .desc-overlay {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    background: #666;
+                    cursor: pointer;
+                }
+                
+                .desc {
+                    position: absolute;
+                    top:   50%;
+                    left: 72px;
+                    margin-top: -6px;
+                    text-indent: 0;
+                    
+                    font-size: 13px;
+                    color: #262626;
+                    width: 120px;
+                    
+                    opacity: 0;
+                    .transform(translatex(-72px));
+                    .transition-transform2(.3s, ease-out, opacity, .3s, ease-out);
+                }
+                
+                &:hover, &:active {
+                    .icon {
+                        .transform(scale(1.0, 1.0));
+                        .transition(-webkit-transform, 0s, linear);
+                        // TODO
+                    }
+                    
+                    .desc {
+                        .expanded-desc();
+                    }
+                }
+                
+                &:hover {
+                    .selection {
+                        .active();
+                        
+                        background-position: -255px -6px;
+                    }
+                }
+                
+                &:active {
+                    .selection {
+                        .active();
+                    }
+                }
             }
         }
         
-        a:hover {
-            .active();
-            /*background-position: -252px 0;*/
-        }
-        a:active {
-            .active();
-        }
-        
-        li.default div {
+        li.default .icon {
             background-position: 0 0;
         }
-        li.default a:hover + div, li.default a:active + div {
+        li.default a:hover .icon {
+            background-position: 0 -64px;
+        }
+        li.default a:active .icon {
             background-position: 0 -32px;
         }
         
-        li.place div {
+        li.place .icon {
             background-position: -32px 0;
         }
-        li.place a:hover + div, li.place a:active + div {
+        li.place a:hover .icon {
+            background-position: -32px -64px;
+        }
+        li.place a:active .icon {
             background-position: -32px -32px;
         }
         
-        li.music div {
+        li.music .icon {
             background-position: -64px 0;
         }
-        li.music a:hover + div, li.music a:active + div {
+        li.music a:hover .icon {
+            background-position: -64px -64px;
+        }
+        li.music a:active .icon {
             background-position: -64px -32px;
         }
         
-        li.book div {
+        li.book .icon {
             background-position: -96px 0;
         }
-        li.book a:hover + div, li.book a:active + div {
+        li.book a:hover .icon {
+            background-position: -96px -64px;
+        }
+        li.book a:active .icon {
             background-position: -96px -32px;
         }
         
-        li.film div {
+        li.film .icon {
             background-position: -128px 0;
         }
-        li.film a:hover + div, li.film a:active + div {
+        li.film a:hover .icon {
+            background-position: -128px -64px;
+        }
+        li.film a:active .icon {
             background-position: -128px -32px;
         }
         
-        li.other div {
+        li.other .icon {
             background-position: -160px 0;
         }
-        li.other a:hover + div, .other a:active + div {
+        li.other a:hover .icon {
+            background-position: -160px -64px;
+        }
+        li.other a:active .icon {
             background-position: -160px -32px;
         }
     }
@@ -805,7 +1152,17 @@ body.book       #stamp-category-nav-bar ol li.book,
 body.film       #stamp-category-nav-bar ol li.film, 
 body.other      #stamp-category-nav-bar ol li.other {
     a, a:hover {
-        .active();
+        .icon {
+            .transform(scale(1.0, 1.0));
+        }
+        
+        .selection {
+            .active();
+        }
+        
+        .desc {
+            .expanded-desc();
+        }
         
         pointer-events: none;
         cursor: default;
@@ -907,6 +1264,9 @@ ul.user-category-distribution {
     height: 100%;
     
     position: fixed;
+    overflow: scroll;
+    //position: absolute;
+    
     top: 15%;
     z-index: 100;
 }
@@ -918,10 +1278,15 @@ body.sdetail_popup_animation, body.sdetail_popup {
     }
     
     #main-page-content-body {
+        display: block;
         visibility: visible !important;
         
         #stamp-category-nav-bar {
             opacity: 0;
+        }
+        
+        #main-content {
+            display: block;
         }
     }
 }
@@ -930,17 +1295,19 @@ body.sdetail_popup {
     /* hide scrollbars when displaying sdetail */
     /* TODO: find a way of doing this that does not result in the scroll 
      * position jumping */
-    /*overflow: hidden;*/
+    overflow-y: hidden;
     
     #main-page-content-body {
-        visibility: hidden !important;
+        display: none;
+        //visibility: hidden !important;
         
         /*#stamp-category-nav-bar {
             visibility: hidden !important;
             opacity: 0;
         }*/
         #main-content {
-            visibility: hidden !important;
+            display: none;
+            //visibility: hidden !important;
         }
     }
 }

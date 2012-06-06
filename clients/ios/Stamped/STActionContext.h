@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "STEntityDetail.h"
-#import "Stamp.h"
 #import "STUser.h"
 
 @interface STActionContext : NSObject

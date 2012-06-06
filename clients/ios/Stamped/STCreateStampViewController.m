@@ -10,7 +10,6 @@
 #import "STToolbarView.h"
 #import "STStampDetailHeaderView.h"
 #import "STRippleBar.h"
-#import "AccountManager.h"
 #import "STSimpleUser.h"
 #import "Util.h"
 #import <QuartzCore/QuartzCore.h>

@@ -10,7 +10,6 @@
 #import "STConsumptionToolbar.h"
 #import "STSearchField.h"
 #import <MapKit/MapKit.h>
-#import "STPlaceAnnotation.h"
 #import "STConfiguration.h"
 #import <math.h>
 #import "Util.h"
@@ -388,6 +387,8 @@ NSInteger zoom;
     if (!view)
         return;
     
+    /*
+     TODO FIX
     STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
     UIViewController* vc = nil;
     if (annotation.stamp) {
@@ -399,6 +400,7 @@ NSInteger zoom;
         return;
     
     [self.navigationController pushViewController:vc animated:YES];
+     */
 }
 
 - (void)viewUser:(id<STUser>)user {

@@ -37,6 +37,7 @@
 #import "STLoginResponse.h"
 #import "STEntityAutoCompleteResult.h"
 #import "STHybridCacheSource.h"
+#import "STAccountParameters.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -48,6 +49,10 @@ typedef enum {
 typedef enum {
     STStampedAPIErrorUnavailable,
 } STStampedAPIError;
+
+extern NSString* const STStampedAPILoginNotification;
+extern NSString* const STStampedAPILogoutNotification;
+extern NSString* const STStampedAPIUserUpdatedNotification;
 
 @interface STStampedAPI : NSObject
 
@@ -160,10 +165,6 @@ typedef enum {
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block;
 
-- (STCancellation*)loginWithFacebookID:(NSString*)userID 
-                                 token:(NSString*)token
-                           andCallback:(void(^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
-
 - (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
                                          coordinates:(NSString*)coordinates
                                             category:(NSString*)category
@@ -204,6 +205,30 @@ typedef enum {
 - (void)handleCompletionWithSource:(id<STSource>)source action:(NSString*)action andContext:(STActionContext*)context;
 
 - (STCancellation*)unreadCountWithCallback:(void(^)(id<STActivityCount> count, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loginWithScreenName:(NSString*)screenName 
+                              password:(NSString*)password 
+                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loginWithFacebookUserToken:(NSString*)userToken
+                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loginWithTwitterUserToken:(NSString*)userToken 
+                                  userSecret:(NSString*)userSecret
+                                 andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)createAccountWithPassword:(NSString*)password
+                           accountParameters:(STAccountParameters*)accountParameters
+                                 andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
+                                    accountParameters:(STAccountParameters*)accountParameters
+                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
+                                          userSecret:(NSString*)userSecret 
+                                   accountParameters:(STAccountParameters*)accountParameters
+                                         andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 

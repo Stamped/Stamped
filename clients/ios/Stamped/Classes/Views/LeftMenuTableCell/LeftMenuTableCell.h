@@ -15,6 +15,9 @@
     STBlockUIView *_iconView;
     UIImageView *_selectedView;
     UIView *_highlightedView;
+    
+    UIView *_topBorder;
+    UIView *_bottomBorder;
 }
 
 
@@ -22,8 +25,9 @@
 @property(nonatomic,retain) UILabel *titleLabel;
 @property(nonatomic,assign) NSInteger badgeCount;
 @property(nonatomic,assign) BOOL border;
-@property(nonatomic,assign) BOOL topBorder;
 @property(nonatomic,assign) id delegate;
+
+- (void)setTop:(BOOL)top bottom:(BOOL)bottom;
 
 @end
 @protocol LeftMenuTableCellDelegate

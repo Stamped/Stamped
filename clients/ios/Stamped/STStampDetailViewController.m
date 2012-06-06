@@ -10,11 +10,7 @@
 
 #import <Twitter/Twitter.h>
 
-#import "AccountManager.h"
-#import "Entity.h"
 #import "EntityDetailViewController.h"
-#import "Stamp.h"
-#import "User.h"
 #import "Util.h"
 #import "STSynchronousWrapper.h"
 #import "STEntityDetailFactory.h"
@@ -256,14 +252,10 @@
     
     _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
     [self.scrollView appendChildView:_headerView];
-    for (NSInteger i = 0; i < 1; i++) {
-        _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp 
-                                                                   index:i 
-                                                                   style:STStampDetailCommentsViewStyleNormal 
-                                                             andDelegate:self.scrollView];
-        [self.scrollView appendChildView:_commentsView];
-    }
-    if ([AccountManager.sharedManager.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
+    _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp 
+                                                         andDelegate:self.scrollView];
+    [self.scrollView appendChildView:_commentsView];
+    if ([STStampedAPI.sharedInstance.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
         UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:@"Delete"
                                                                          style:UIBarButtonItemStylePlain
                                                                         target:self

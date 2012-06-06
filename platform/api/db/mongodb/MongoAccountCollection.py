@@ -31,9 +31,11 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         document = AMongoCollection._convertToMongo(self, account)
         
         if 'screen_name' in document:
-           document['screen_name_lower'] = str(document['screen_name']).lower()
+            document['screen_name_lower'] = str(document['screen_name']).lower()
         if 'name' in document:
-           document['name_lower'] = unicode(document['name']).lower()
+            document['name_lower'] = unicode(document['name']).lower()
+        if 'phone' in document:
+            document['phone'] = str(document['phone'])
 
         return document
 
@@ -51,37 +53,41 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'twitter' in linkedAccounts:
             twitterAcct = {
                 'service_name'      : 'twitter',
-                'user_id'           : linkedAccounts.pop('twitter_id', None),
-                'name'              : linkedAccounts.pop('twitter_name', None),
-                'screen_name'       : linkedAccounts.pop('twitter_screen_name', None),
-                'alerts_sent'       : linkedAccounts.pop('twitter_alerts_sent', None),
+                'user_id'           : linkedAccounts['twitter'].pop('twitter_id', None),
+                'name'              : linkedAccounts['twitter'].pop('twitter_name', None),
+                'screen_name'       : linkedAccounts['twitter'].pop('twitter_screen_name', None),
             }
-            twitterAcctSparse = {}.update((k, v) for k, v in twitterAcct.iteritems() if v is not None)
+            twitterAcctSparse = {}
+            for k,v in twitterAcct.iteritems():
+                if v is not None:
+                    twitterAcctSparse[k] = v
             document['linked']['twitter'] = twitterAcctSparse
 
         if 'facebook' in linkedAccounts:
             facebookAcct = {
                 'service_name'      : 'facebook',
-                'user_id'           : linkedAccounts.pop('facebook_id', None),
-                'name'              : linkedAccounts.pop('facebook_name', None),
-                'screen_name'       : linkedAccounts.pop('facebook_screen_name', None),
-                'alerts_sent'       : linkedAccounts.pop('facebook_alerts_sent', None),
+                'user_id'           : linkedAccounts['facebook'].pop('facebook_id', None),
+                'name'              : linkedAccounts['facebook'].pop('facebook_name', None),
+                'screen_name'       : linkedAccounts['facebook'].pop('facebook_screen_name', None),
                 }
-            facebookAcctSparse = {}.update((k, v) for k, v in facebookAcct.iteritems() if v is not None)
+            facebookAcctSparse = {}
+            for k,v in facebookAcct.iteritems():
+                if v is not None:
+                    facebookAcctSparse[k] = v
             document['linked']['facebook'] = facebookAcctSparse
 
         if 'netflix' in linkedAccounts:
             netflixAcct = {
                 'service_name'      : 'netflix',
-                'user_id'           : linkedAccounts.pop('netflix_user_id', None),
-                'token'             : linkedAccounts.pop('netflix_token', None),
-                'secret'            : linkedAccounts.pop('netflix_secret', None),
+                'user_id'           : linkedAccounts['netflix'].pop('netflix_user_id', None),
+                'token'             : linkedAccounts['netflix'].pop('netflix_token', None),
+                'secret'            : linkedAccounts['netflix'].pop('netflix_secret', None),
                 }
-            netflixAcctSparse = {}.update((k, v) for k, v in netflixAcct.iteritems() if v is not None)
+            netflixAcctSparse = {}
+            for k,v in netflixAcct.iteritems():
+                if v is not None:
+                    netflixAcctSparse[k] = v
             document['linked']['netflix'] = netflixAcctSparse
-        del(document['linked_accounts'])
-        from pprint import pformat
-        logs.info('### document: %s' % pformat(document))
 
     def _convertFromMongo(self, document):
         if document is None:
@@ -183,6 +189,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
         documents = self._collection.find({"linked.twitter.user_id" : twitterId })
+        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        return accounts
+
+    def getAccountsByNetflixId(self, netflixId):
+        documents = self._collection.find({"linked_accounts.twitter.netflix_user_id" : netflixId})
+        accounts = [self._convertFromMongo(doc) for doc in documents]
+        documents = self._collection.find({"linked.netflix.user_id" : netflixId })
         accounts.extend([self._convertFromMongo(doc) for doc in documents])
         return accounts
 

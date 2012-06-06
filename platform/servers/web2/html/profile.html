@@ -31,27 +31,135 @@
     <div class="profile-header-wrapper">
         <div class="profile-header">
             <div class="profile-content-page">
-                <div class="profile-header-body">
-                    <div class="innerbg"></div>
+                
+                <!-- DEFAULT HEADER -->
+                <div class="profile-header-body header-category-default">
                     <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                         {% handlebars_template "profile-image-large" user %}
                         
-                        <div class="floatleft profile-section profile-section-default">
+                        <div class="lhs">
                             <p class='profile-title'>
                                 {{user.name}}
                             </p>
                             
                             <p>
-                                <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
+                                <a class='screen-name' href="/{{user.screen_name}}">{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
                             </p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                            
+                            <div class="subnav">
+                                <div class="subnav_button subnav_button0"></div>
+                                <div class="subnav_button subnav_button1"></div>
+                                <div class="subnav_button subnav_button2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PLACE HEADER -->
+                <div class="profile-header-body header-category-place">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Place Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MUSIC HEADER -->
+                <div class="profile-header-body header-category-music">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Music Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- BOOK HEADER -->
+                <div class="profile-header-body header-category-book">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Book Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FILM & TV HEADER -->
+                <div class="profile-header-body header-category-film">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Film &amp; TV Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- OTHER HEADER -->
+                <div class="profile-header-body header-category-other">
+                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        
+                        {% handlebars_template "profile-image-medium" user %}
+                        
+                        <div class="lhs">
+                            <p class='name'>{{user.screen_name}}'s</p>
+                            <p class='title'>Other Stamps</p>
+                        </div>
+                        
+                        <div class="rhs">
+                            {% handlebars_template "share-widget" %}
                         </div>
                     </div>
                 </div>
                 
                 <div class="profile-header-post">
-                    <div class="ribbon-bottom"></div>
+                    <div class="user-gradient">
+                        <div class="ribbon-bottom"></div>
+                    </div>
+                    
                     <div class="inset-stamp">
-                        <div class="stamp-count">{{user.num_stamps}}</div>
+                        <div class="stamp-count user-primary stamp-count-default">
+                            {{user.num_stamps}}
+                        </div>
+                        
+                        {% for distro in user.distribution %}
+                            <div class="stamp-count user-primary stamp-count-{{distro.category}}">
+                                {{distro.count}}
+                            </div>
+                        {% endfor %}
+                        
                         <p>STAMPS</p>
                     </div>
                 </div>
@@ -62,32 +170,60 @@
     
     {% block stamp_category_nav_bar %}
     <nav id="stamp-category-nav-bar" style="display: block;">
+        <div class='stamp-category-nav-bar-pre'></div>
+        
         <ol>
             <li class="default">
-                <a class="replaced" href="/{{user.screen_name}}"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}">
+                    <div class='desc'>All Stamps</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
             </li>
             <li class="place">
-                <a class="replaced" href="/{{user.screen_name}}?category=place"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=place">
+                    <div class='desc'>Places</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
             </li>
             <li class="music">
-                <a class="replaced" href="/{{user.screen_name}}?category=music"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=music">
+                    <div class='desc'>Music</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
             </li>
             <li class="book">
-                <a class="replaced" href="/{{user.screen_name}}?category=book"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=book">
+                    <div class='desc'>Books</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
             </li>
             <li class="film">
-                <a class="replaced" href="/{{user.screen_name}}?category=film"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=film">
+                    <div class='desc'>Film & TV</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
             </li>
             <li class="other">
-                <a class="replaced" href="/{{user.screen_name}}?category=other"></a>
-                <div></div>
+                <a class="replaced" href="/{{user.screen_name}}?category=other">
+                    <div class='desc'>Apps & Other</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
             </li>
         </ol>
+        
+        <div class='stamp-category-nav-bar-post'></div>
     </nav>
     {% endblock stamp_category_nav_bar %}
     
@@ -106,7 +242,7 @@
             </div>
             
             <div class='stamp-gallery-view-map'>
-                <a href="#">View Map</a>
+                <a href="#"></a>
             </div>
         </div>
         
@@ -134,10 +270,19 @@
     <script src="{{ STATIC_URL }}js/libs/jquery.fancybox{% if IS_PROD %}.pack{% endif %}.js?v=2.0.6"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane{% if IS_PROD %}.min{% endif %}.js"></script>
+    
+    <!-- Social sharing plugins -->
+    <script src="//platform.twitter.com/widgets.js"></script>
+    <script src="//connect.facebook.net/en_US/all.js"></script>
+    <script src="https://apis.google.com/js/plusone.js"></script>
+    
     <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
     
+    <!-- Misc library dependencies -->
     <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
+    
+    <!-- Stamped scripts -->
     <script src="{{ STATIC_URL }}js/client.js"></script>
     <script src="{{ STATIC_URL }}js/profile.js"></script>
     

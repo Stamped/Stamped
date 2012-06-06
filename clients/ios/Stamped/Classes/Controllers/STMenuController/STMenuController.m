@@ -18,19 +18,23 @@
 #import "STTwitter.h"
 
 @interface STMenuController ()
-- (void)showWelcome;
+@property(nonatomic,retain) LoginViewController *loginController;
 @end
 
 @implementation STMenuController
 
+@synthesize loginController = _loginController;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!LOGGED_IN || YES) {
+    if (!LOGGED_IN) {
         [self showWelcome];
     }
     
 }
+
+- (void)resetNavButtons {} // overide showing nav buttons, already handled by app
 
 
 #pragma mark - Welcome
@@ -63,12 +67,17 @@
     if (option == STWelcomeViewControllerOptionLogin) {
     
         LoginViewController *controller = [[LoginViewController alloc] init];
-        [self presentModalViewController:controller animated:YES];
+        controller.delegate = (id<LoginViewControllerDelegate>)self;
+        [self.view addSubview:controller.view];
+        controller.view.frame = self.view.bounds;
+        self.loginController = controller;
         [controller release];
+        
+        [self.loginController animateIn];
     
     } else if (option == STWelcomeViewControllerOptionTwitter) {
         
-        if (NO && NSClassFromString(@"TWTweetComposeViewController")) {
+        if (NSClassFromString(@"TWTweetComposeViewController")) {
             
             TwitterAccountsViewController *controller = [[TwitterAccountsViewController alloc] init];
             controller.delegate = (id<TwitterAccountsViewControllerDelegate>)self;
@@ -86,7 +95,6 @@
             [navController release];
             
         }
-
     
     } else if (option == STWelcomeViewControllerOptionSignup) {
         
@@ -123,6 +131,14 @@
     
     [self dismissModalViewControllerAnimated:YES];
     
+}
+
+
+#pragma mark - LoginViewControllerDelegate
+
+- (void)loginViewControllerDidDismiss:(LoginViewController*)controller {
+    [controller.view removeFromSuperview];
+    self.loginController = nil;
 }
 
 

@@ -194,7 +194,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "client_secret"     : c_secret,
             "name"              : name,
             "screen_name"       : name,
-            "user_token"    : fb_user_token,
+            "user_token"        : fb_user_token,
         }
         response = self.handlePOST(path, data)
         self.assertIn('user', response)
@@ -339,6 +339,13 @@ class AStampedAPITestCase(AStampedTestCase):
 
     def showLinkedAccounts(self, token):
         path = "account/linked/show.json"
+        data = {
+            'oauth_token'       : token['access_token'],
+            }
+        return self.handleGET(path, data)
+
+    def showActivity(self, token):
+        path = "activity/show.json"
         data = {
             'oauth_token'       : token['access_token'],
             }

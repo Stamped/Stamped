@@ -1,35 +1,33 @@
 
 var init_social_sharing = function() {
-};
     // Twitter
-    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+    if (typeof(twttr) !== 'undefined' && !!twttr.widgets) {
+        twttr.widgets.load();
+    }
     
-    // Google Plus
-    (function() {
-        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-        po.src = 'https://apis.google.com/js/plusone.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-    })();
+    // Google
+    if (typeof(gapi) !== 'undefined' && !!gapi.plusone) {
+        gapi.plusone.go();
+    }
+    
+    // Facebook
+    if (typeof(FB) !== 'undefined' && !!FB.XFBML) {
+        FB.XFBML.parse();
+        //FB.Share.renderAll();
+    }
+    
+    if (typeof(g_init_social_sharing) !== 'undefined') {
+        g_init_social_sharing();
+    }
+};
 
-// Facebook
-window.fbAsyncInit = function() {
+$(document).ready(function() {
     FB.init({
         appId      : '297022226980395', // App ID
-        channelUrl : '//www.stamped.com/channel.html', // Channel File
+        channelUrl : '//www.stamped.com/channel.html', // Channel File (TODO)
         status     : true, // check login status
         cookie     : true, // enable cookies to allow the server to access the session
         xfbml      : true  // parse XFBML
     });
-    
-    // Additional initialization code here
-};
-
-// Load the Facebook SDK Asynchronously
-(function(d){
-    var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-    if (d.getElementById(id)) {return;}
-    js = d.createElement('script'); js.id = id; js.async = true;
-    js.src = "//connect.facebook.net/en_US/all.js";
-    ref.parentNode.insertBefore(js, ref);
-}(document));
+});
 

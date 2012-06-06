@@ -9,109 +9,12 @@ import Globals
 from logs import report
 
 try:
-    from BasicFieldGroup        import BasicFieldGroup
+    import sys, inspect
+    from AEntityGroups        import *
 except:
     report()
     raise
 
-class AKindTypeGroup(BasicFieldGroup):
-    def __init__(self, *args, **kwargs):
-        BasicFieldGroup.__init__(self, *args, **kwargs)
-        self.__kinds = set( )
-        self.__types = set( )
-        
-    def addKind(self, kind):
-        self.__kinds.add(kind)
-
-    def removeKind(self, kind):
-        self.__kinds.remove(kind)
-        
-    def addType(self, t):
-        self.__types.add(t)
-
-    def removeType(self, t):
-        self.__types.remove(t)
-
-    def getKinds(self):
-        return self.__kinds 
-
-    def getTypes(self):
-        return self.__types
-    
-    def eligible(self, entity):
-        if len(self.__kinds) == 0 or entity.kind in self.__kinds:
-            if len(self.__types) == 0 or len(self.__types.intersection(entity.types)) > 0:
-                return True
-        return False
-
-class APlaceGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('place')
-
-class APersonGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('person')
-
-class AMediaCollectionGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('media_collection')
-
-class AMediaItemGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('media_item')
-
-class ASoftwareGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('software')
-
-class ARestaurantGroup(APlaceGroup):
-
-    def __init__(self, *args, **kwargs):
-        APlaceGroup.__init__(self, *args, **kwargs)
-        eligible = set( [
-            'restaurant',
-            'bar', 
-            'bakery',
-            'cafe', 
-            'market',
-            'food',
-            'night_club',
-        ] )
-        for v in eligible:
-            self.addType(v)
-
-class ABookGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('media_item')
-        self.addType('book')
-
-class AMovieGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('media_item')
-        self.addType('movie')
-
-class AFilmGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('media_collection')
-        self.addKind('media_item')
-        self.addType('movie')
-        self.addType('tv')
 
 class FactualGroup(APlaceGroup):
 
@@ -242,13 +145,10 @@ class TheTVDBGroup(AKindTypeGroup):
             source_path=['sources', 'thetvdb_source'], 
             timestamp_path=['sources', 'thetvdb_timestamp']
         )
-        self.addKind('media_item')
-        self.addType('album')
         self.addKind('media_collection')
         self.addType('tv')
 
         self.addField(['sources', 'thetvdb_id'])
-        self.addField(['sources', 'imdb_id'])
 
 class SpotifyGroup(AKindTypeGroup):
 
@@ -436,18 +336,6 @@ class IMDBGroup(AFilmGroup):
         )
         self.addField(['sources', 'imdb_id'])
 
-class AAmazonGroup(AKindTypeGroup):
-
-    def __init__(self, *args, **kwargs):
-        AKindTypeGroup.__init__(self, *args, **kwargs)
-        self.addKind('media_collection')
-        self.addType('album')
-        self.addKind('media_item')
-        self.addType('book')
-        self.addType('track')
-        self.addKind('software')
-        self.addType('video_game')
-
 class AmazonGroup(AAmazonGroup):
 
     def __init__(self):
@@ -532,52 +420,15 @@ class SKUNumberGroup(ABookGroup):
         self.addNameField()
 
 
-allGroups = [
-    FactualGroup,
-    SinglePlatformGroup,
-    FoursquareGroup,
-    InstagramGroup,
-    GooglePlacesGroup,
-    TMDBGroup,
-    RdioGroup,
-    SpotifyGroup,
-    iTunesGroup,
-    AmazonGroup,
-    FandangoGroup,
-    NetflixGroup,
-    StampedTombstoneGroup,
+"""
+Add all defined groups to the 'allGroups' list. This is necessary for EntityProxySource to enrich all possible groups.
 
-    # AmazonLinkGroup,
-    # AmazonUnderlyingGroup,
-    OpenTableGroup,
-    OpenTableNicknameGroup,
+Note that this only works if no abstract classes exist within this module (EntityGroups.py). All abstract classes should
+be defined in AEntityGroups.py.
+"""
 
-    DescGroup,
-    ImagesGroup,
+allGroups = []
+allGroupObjects = inspect.getmembers(sys.modules[__name__], lambda x: inspect.isclass(x) and x.__module__ == __name__)
+for groupObject in allGroupObjects:
+    allGroups.append(groupObject[1])
 
-    AddressGroup,
-    FormattedAddressGroup,
-    CoordinatesGroup,
-    PhoneGroup,
-    SiteGroup,
-    GalleryGroup,
-    PriceRangeGroup,
-    CuisineGroup,
-    MenuGroup,
-    ReleaseDateGroup,
-    DirectorsGroup,
-    CastGroup,
-    LengthGroup,
-    AlbumsGroup,
-    TracksGroup,
-    MPAARatingGroup,
-    ArtistsGroup,
-    GenresGroup,
-    ScreenshotsGroup,
-    AuthorsGroup,
-    PublishersGroup,
-    ISBNGroup,
-    SKUNumberGroup,
-
-    # ShortDescriptionGroup, # Deprecated?
-]

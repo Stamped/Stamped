@@ -54,63 +54,32 @@
     return;
   }
 
-  CGContextRef ctx = UIGraphicsGetCurrentContext();
-  CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
-  CGContextFillRect(ctx, rect);
-  
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
+    CGContextFillRect(ctx, rect);
     CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect byRoundingCorners:(UIRectCornerTopLeft | UIRectCornerTopRight) cornerRadii:CGSizeMake(2.0f, 2.0f)].CGPath);
     CGContextClip(ctx);
     
-  //hideLogo_ = ![self.topItem.title isEqualToString:@"Stamps"];
+    hideLogo_ = self.topItem.title!=nil && ![self.topItem.title isEqualToString:@"Stamps"];
+    if (hideLogo_)
+        [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];
+    else
+        [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
   
-  if (hideLogo_)
-    [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];
-  else
-    [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
-  
-  if (hideLogo_) {
-    CGPathRef textPath = [self newPathForTitle];
-    if (!textPath)
-      return;
-
-    CGRect textPathBounds = CGPathGetBoundingBox(textPath);
-    
-    CGColorRef color1 = [UIColor colorWithWhite:0.90 alpha:1.0].CGColor;
-//    CGColorRef     color2 = [UIColor colorWithWhite:0.85  alpha:1.0].CGColor;
-//    CFArrayRef     colors = (CFArrayRef)[NSArray arrayWithObjects:(id)color1, (id)color2, nil];
-//    CGFloat  locations[2] = { 0.0, 1.0 };    
-//    CGGradientRef gradient = CGGradientCreateWithColors(NULL, colors, NULL);
-    
-  
-    CGContextTranslateCTM(ctx, 
-                          (self.frame.size.width - textPathBounds.size.width) / 2,
-                          (self.frame.size.height - 12.0) / 2);
-    CGContextAddPath(ctx, textPath);
-    CGContextSetFillColorWithColor(ctx, color1);
-    CGContextFillPath(ctx);
-
-    CGContextAddPath(ctx, textPath);
-    CGContextClip(ctx);
-
-    CGContextAddPath(ctx, textPath);
-    CGContextSetStrokeColorWithColor(ctx, [UIColor whiteColor].CGColor);
-    CGContextSetShadowWithColor(ctx, CGSizeMake(0.0, 1.0), 2.0, [UIColor colorWithWhite:0.0 alpha:0.3].CGColor);
-    CGContextSetBlendMode(ctx, kCGBlendModeMultiply);
-    CGContextStrokePath(ctx);
-    
-    
-    CGContextTranslateCTM(ctx, 
-                          -(self.frame.size.width - textPathBounds.size.width) / 2,
-                          -(self.frame.size.height - 10.0) / 2);
-    
-    
-//    CGContextDrawLinearGradient(ctx, gradient,
-//                                CGPointMake(self.bounds.size.width/2, 0),
-//                                CGPointMake(self.bounds.size.width/2, self.bounds.size.height),
-//                                0);
-
-    CFRelease(textPath);
-  }
+    if (hideLogo_ && self.topItem.title) {
+        
+        for (UIView *view in self.subviews) {
+            if ([view isKindOfClass:NSClassFromString(@"UINavigationItemView")]) {
+                view.hidden = YES;
+            }
+        }
+        
+        UIFont *font = [UIFont boldSystemFontOfSize:18];
+        [[UIColor colorWithRed:0.0f green:0.333f blue:0.8f alpha:1.0f] setFill];
+        CGSize size = [self.topItem.title sizeWithFont:font];
+        [self.topItem.title drawInRect:CGRectMake(floorf((self.bounds.size.width-size.width)/2), floorf((self.bounds.size.height-size.height)/2), size.width, size.height) withFont:font lineBreakMode:UILineBreakModeWordWrap];
+        
+    }
 }
 
 - (void)initialize {
@@ -192,6 +161,58 @@
     }
   }
   return textPath;
+}
+
+- (void)showUserStrip:(BOOL)show forUser:(id<STUser>)user {
+    
+    if (show) {
+        
+        float r,g,b;
+        [Util splitHexString:user.primaryColor toRed:&r green:&g blue:&b];
+        
+        float r2,g2,b2;
+        [Util splitHexString:user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+                
+        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height, self.bounds.size.width, 4.0f)];
+        view.backgroundColor = [UIColor whiteColor];
+        [self insertSubview:view atIndex:0];
+        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+            
+            CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
+            size_t _numLocations = 2;
+            CGFloat _locations[2] = { 0.0, 1.0 };
+            CGFloat _colors[8] = { r, g, b, 1.0f, r2, g2, b2, 1.0f };
+            CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
+            CGColorSpaceRelease(_rgb);
+            
+            CGPoint start = CGPointMake(rect.origin.x, CGRectGetMidY(rect));
+            CGPoint end = CGPointMake(rect.size.width, CGRectGetMidY(rect));
+            
+            CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
+            CGGradientRelease(gradient);
+            
+            [[UIColor whiteColor] setStroke];
+            CGContextMoveToPoint(ctx, 0.0f, rect.size.height - 0.5f);
+            CGContextAddLineToPoint(ctx, rect.size.width, rect.size.height - 0.5f);
+            CGContextStrokePath(ctx);
+            
+        }];
+        [view release];
+        view.layer.shadowPath = [UIBezierPath bezierPathWithRect:view.bounds].CGPath;
+        view.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+        view.layer.shadowRadius = 4.0f;
+        view.layer.shadowOpacity = 0.15f;
+        _userStrip = view;
+        
+    } else {
+        
+        if (_userStrip) {
+            [_userStrip removeFromSuperview], _userStrip=nil;
+        }
+        
+    }
+    
+    
 }
 
 @end

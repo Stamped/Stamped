@@ -93,7 +93,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     for email in q:
         try:
             emails.append(email.decode('ascii'))
-        except:
+        except Exception:
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
     
@@ -102,7 +102,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importUser(user).dataExport())
+            output.append(HTTPSuggestedUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -133,7 +133,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importUser(user).dataExport())
+            output.append(HTTPSuggestedUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -146,7 +146,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     output = []
     for user in users:
         if user.user_id != authUserId:
-            output.append(HTTPUser().importUser(user).dataExport())
+            output.append(HTTPSuggestedUser().importUser(user).dataExport())
     
     return transformOutput(output)
 
@@ -155,8 +155,8 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token' ]})
 @require_http_methods(["POST"])
 def findFacebook(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.findUsersByFacebook(authUserId, http_schema.facebook_token)
+    users = stampedAPI.findUsersByFacebook(authUserId, http_schema.user_token)
 
-    output = [HTTPUser().importUser(user).dataExport() for user in users if user.user_id != authUserId]
+    output = [HTTPSuggestedUser().importUser(user).dataExport() for user in users if user.user_id != authUserId]
     return transformOutput(output)
 
