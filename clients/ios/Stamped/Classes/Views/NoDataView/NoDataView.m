@@ -62,7 +62,7 @@
     
     CGRect frame = label.frame;
     frame.origin.x = floorf((self.imageView.bounds.size.width-frame.size.width)/2);
-    frame.origin.y = 24.0f; 
+    frame.origin.y = 36.0f;
     label.frame = frame;
     CGFloat maxY = CGRectGetMaxY(label.frame);
 

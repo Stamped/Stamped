@@ -8,9 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STNavigationBar : UINavigationBar
+@interface STNavigationBar : UINavigationBar {
+    STBlockUIView *_userStrip;
+}
 
 @property (nonatomic, assign) BOOL black;
 @property (nonatomic, assign) BOOL hideLogo;
 @property (nonatomic, copy) NSString* string;
+
+- (void)showUserStrip:(BOOL)show forUser:(id<STUser>)user;
+
 @end

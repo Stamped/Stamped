@@ -9,6 +9,9 @@
 #import "LoginViewController.h"
 #import "STStampedAPI.h"
 
+#define kStampBackgroundOffset 160
+#define inOutAnimationDuration 0.45f
+
 @interface LoginLoadingView : UIView {
     UIActivityIndicatorView *_activityView;
 }
@@ -22,6 +25,7 @@
 @end
 
 @interface LoginTextView : UIView {
+    LoginKeyboardButton *_loginButton;
     UITextField *_username;
     UITextField *_password;
 }
@@ -48,6 +52,7 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+        _didAnimateIn = NO;
         
     }
     return self;
@@ -71,6 +76,10 @@
         [imageView release];
         _stampedImageView = imageView;
         
+        CGRect frame = _stampedImageView.frame;
+        frame.origin.y = -kStampBackgroundOffset;
+        _stampedImageView.frame = frame;
+        
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
         [self.view addSubview:corner];
         [corner release];
@@ -79,16 +88,16 @@
         [self.view addSubview:corner];
         [corner release];
         
-        CGRect frame = corner.frame;
+        frame = corner.frame;
         frame.origin.x = (self.view.bounds.size.width - corner.frame.size.width);
         corner.frame = frame;
         
     }
 
     if (!_textView) {
-        LoginTextView *view = [[LoginTextView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height, self.view.bounds.size.width, 44.0f)];
+        LoginTextView *view = [[LoginTextView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height - (216.0f+44.0f), self.view.bounds.size.width, 44.0f)];
         view.delegate = self;
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self.view addSubview:view];
         [view release];
         _textView = view;
@@ -108,36 +117,41 @@
 
 - (void)animateIn {
     
-    _stampedImageView.layer.shadowOpacity = 0.7f;
-    _stampedImageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
-    _stampedImageView.layer.shadowRadius = 10;
-    _stampedImageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_stampedImageView.bounds].CGPath;
-
+    BOOL _enabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:NO];
+    [_textView setEditing:YES];
+    [UIView setAnimationsEnabled:_enabled];
+    
+    UIWindow *window = nil;
+    for (UIWindow *aWindow in [[UIApplication sharedApplication] windows]) {
+        if ([aWindow isKindOfClass:NSClassFromString(@"UITextEffectsWindow")]) {
+            window = aWindow;
+            break;
+        }
+    }
+    
     [CATransaction begin];
-    [CATransaction setAnimationDuration:0.4f];
+    [CATransaction setAnimationDuration:inOutAnimationDuration];
     [CATransaction setCompletionBlock:^{
-        
         self.view.backgroundColor = [UIColor whiteColor];
-        _stampedImageView.layer.shadowOpacity = 0.0f;
-        
-        [UIView animateWithDuration:0.3f animations:^{
-            CGRect frame = _textView.frame;
-            frame.origin.y = self.view.bounds.size.height - 44.0f;
-            _textView.frame = frame;
-        }];
-        
+        _didAnimateIn = YES;
     }];
     
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.translation.y"];
+    animation.fromValue = [NSNumber numberWithFloat:self.view.bounds.size.height + 20.0f];
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    animation.fromValue = [NSValue valueWithCGPoint:CGPointMake(_stampedImageView.layer.position.x, -_stampedImageView.bounds.size.height/2)];
+    
     [_stampedImageView.layer addAnimation:animation forKey:nil];
+    [_textView.layer addAnimation:animation forKey:nil];
+    [window.layer addAnimation:animation forKey:nil];
     
     [CATransaction commit];
-    
+        
 }
 
 - (void)animateOut {
+    
+    self.view.backgroundColor = [UIColor clearColor];
     
     _stampedImageView.layer.shadowOpacity = 0.0f;
     _stampedImageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
@@ -145,7 +159,7 @@
     _stampedImageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_stampedImageView.bounds].CGPath;
     
     [CATransaction begin];
-    [CATransaction setAnimationDuration:0.4f];
+    [CATransaction setAnimationDuration:inOutAnimationDuration];
     [CATransaction setCompletionBlock:^{
         
         if ([(id)delegate respondsToSelector:@selector(loginViewControllerDidDismiss:)]) {
@@ -199,6 +213,14 @@
 
     if (_loading) {
         
+        [UIView animateWithDuration:0.3f animations:^{
+           
+            CGRect frame = _stampedImageView.frame;
+            frame.origin.y = 0.0f;
+            _stampedImageView.frame = frame;
+            
+        }];
+        
         if (!_loadingView) {
 
             LoginLoadingView *view = [[LoginLoadingView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height-82.0f, self.view.bounds.size.width, 60.0f)];
@@ -224,53 +246,38 @@
 
 - (void)keyboardWillShow:(NSNotification*)notification {
     
-    UIWindow *window = nil;
-    
-    for (UIWindow *aWindow in [[UIApplication sharedApplication] windows]) {
-        if ([aWindow isKindOfClass:NSClassFromString(@"UITextEffectsWindow")]) {
-            window = aWindow;
-            break;
-        }
+    if (!_didAnimateIn) {
+        return;
     }
     
-    if (window && !_loginButton) {
-                
-        LoginKeyboardButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
-        UIImage *image = [UIImage imageNamed:@"login_keyboard_btn.png"];
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
-        image = [UIImage imageNamed:@"login_keyboard_btn_disabled.png"];
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateDisabled];
-        button.frame = CGRectMake(floorf(window.bounds.size.width - 78.0f), floorf(window.bounds.size.height - (image.size.height+1.0f)), 76.0f, image.size.height);
-        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:14];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.7f] forState:UIControlStateNormal];
-        [button setTitle:@"Login" forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(loginButtonHit:) forControlEvents:UIControlEventTouchUpInside];
-        [window addSubview:button];
-        _loginButton = button;
-
-    }
-
-    CGFloat duration = [[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] integerValue];
+    CGFloat duration = [[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] floatValue];
     CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     [UIView animateWithDuration:duration animations:^{
-        _textView.layer.transform = CATransform3DMakeTranslation(0.0f, -keyboardFrame.size.height, 0);
-        _stampedImageView.layer.transform = CATransform3DMakeTranslation(0.0f, -keyboardFrame.size.height, 0);
-    }];
+        
+        CGRect frame = _stampedImageView.frame;
+        frame.origin.y = -kStampBackgroundOffset;
+        _stampedImageView.frame = frame;
+        
+        frame = _textView.frame;
+        frame.origin.y = (self.view.bounds.size.height - (keyboardFrame.size.height+_textView.bounds.size.height));
+        _textView.frame = frame;
 
+    }];
+    
 }
 
 - (void)keyboardWillHide:(NSNotification*)notification {
     
-    if (_loginButton) {
-        [_loginButton removeFromSuperview];
-        _loginButton=nil;
+    if (_animatingOut) {
+        return;
     }
+    
     [UIView animateWithDuration:0.25f animations:^{
-        _textView.layer.transform = CATransform3DMakeTranslation(0.0f, _textView.bounds.size.height, 0);;
-        _stampedImageView.layer.transform = CATransform3DIdentity;        
+       
+        CGRect frame = _textView.frame;
+        frame.origin.y = self.view.bounds.size.height;
+        _textView.frame = frame;
+        
     }];;
     
 }
@@ -283,6 +290,8 @@
     [_textView setEditing:NO];
     [self setLoading:YES];
     
+    _stampedImageView.image = [UIImage imageNamed:@"stamped_login_red.png"];
+    
     double delayInSeconds = 0.6f;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
@@ -293,8 +302,51 @@
 }
 
 - (void)cancel:(LoginTextView*)view {
-    [view setEditing:NO];
-    [self animateOut];
+   
+    _animatingOut = YES;
+    self.view.backgroundColor = [UIColor clearColor];
+    
+    UIWindow *window = nil;
+    for (UIWindow *aWindow in [[UIApplication sharedApplication] windows]) {
+        if ([aWindow isKindOfClass:NSClassFromString(@"UITextEffectsWindow")]) {
+            window = aWindow;
+            break;
+        }
+    }
+
+    CGRect frame = window.frame;
+    
+    [UIView animateWithDuration:inOutAnimationDuration animations:^{
+        
+        CGRect frame = _textView.frame;
+        CGFloat diff = (self.view.bounds.size.height + kStampBackgroundOffset);
+        
+        frame.origin.y += diff;
+        _textView.frame = frame;
+        
+        frame = _stampedImageView.frame;
+        frame.origin.y += diff;
+        _stampedImageView.frame = frame;
+        
+        frame = window.frame;
+        frame.origin.y += diff;
+        window.frame = frame;
+        
+    } completion:^(BOOL finished) {
+       
+        BOOL _enabled = [UIView areAnimationsEnabled];
+        [UIView setAnimationsEnabled:NO];
+        window.frame = frame;
+        [_textView setEditing:NO];
+        [UIView setAnimationsEnabled:_enabled];
+        
+        if ([(id)delegate respondsToSelector:@selector(loginViewControllerDidDismiss:)]) {
+            [self.delegate loginViewControllerDidDismiss:self];
+        }
+        
+    }];
+    
+
 }
 
 
@@ -346,13 +398,14 @@
         frame = button.frame;
         frame.size = image.size;
         frame.origin.y = ((self.bounds.size.height - frame.size.height) / 2) + 1.5f;
-        frame.origin.x = (self.bounds.size.width - (frame.size.width+4.0f));
+        frame.origin.x = (self.bounds.size.width - (frame.size.width+3.0f));
         button.frame = frame;
         
         image = [UIImage imageNamed:@"login_text_gutter.png"];
         CGFloat height = image.size.height;
         
         LoginTextField *textField = [[LoginTextField alloc] initWithFrame:CGRectMake(4.0f, floorf((self.bounds.size.height-height)/2)+1.0f, 133.0f, height)];
+        [textField addTarget:self action:@selector(textFieldTextDidChange:) forControlEvents:UIControlEventEditingChanged];
         textField.delegate = (id<UITextFieldDelegate>)self;
         textField.textColor = [UIColor colorWithWhite:0.149f alpha:1.0f];
         textField.font = [UIFont systemFontOfSize:14];
@@ -367,6 +420,7 @@
         _username = textField;
         
         textField = [[LoginTextField alloc] initWithFrame:CGRectMake(floorf(CGRectGetMaxX(textField.frame) + 6.0f), floorf((self.bounds.size.height-height)/2)+1.0f, 133.0f, height)];
+        [textField addTarget:self action:@selector(textFieldTextDidChange:) forControlEvents:UIControlEventEditingChanged];
         textField.delegate = (id<UITextFieldDelegate>)self;
         textField.textColor = [UIColor colorWithWhite:0.149f alpha:1.0f];
         textField.placeholder = @"Password";
@@ -394,6 +448,10 @@
         [_username becomeFirstResponder];
         
     } else {
+    
+        if (_loginButton) {
+            [_loginButton removeFromSuperview], _loginButton=nil;
+        }
         
         [self endEditing:YES];
         
@@ -405,11 +463,21 @@
 #pragma mark - Getters
 
 - (NSString*)username {
-    return _username.text;
+    
+    if (_username.text) {
+        return [_username.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    }
+    
+    return @"";
 }
 
 - (NSString*)password {
-    return _password.text;
+    
+    if (_password.text) {
+        return [_password.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    }
+    
+    return @"";
 }
 
 
@@ -421,6 +489,82 @@
     
 }
 
+- (void)login:(id)sender {
+    
+    [self.delegate loginButtonHit:sender];
+    
+}
+
+
+#pragma mark - UITextFieldDelegate 
+
+- (void)textFieldTextDidChange:(UITextField*)textField {
+    
+    if (_loginButton) {
+        _loginButton.enabled = ([self username].length > 0 && [self password].length > 0);
+    }
+    
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    
+    if (textField == _password) {
+        if (_loginButton) {
+            [_loginButton removeFromSuperview], _loginButton=nil;
+        }
+    }
+    
+}
+
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    
+    if (textField == _password) {
+        
+        UIWindow *window = nil;
+        
+        for (UIWindow *aWindow in [[UIApplication sharedApplication] windows]) {
+            if ([aWindow isKindOfClass:NSClassFromString(@"UITextEffectsWindow")]) {
+                window = aWindow;
+                break;
+            }
+        }
+        
+        if (window && !_loginButton) {
+            
+            LoginKeyboardButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
+            UIImage *image = [UIImage imageNamed:@"login_keyboard_btn.png"];
+            [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+            image = [UIImage imageNamed:@"login_keyboard_btn_disabled.png"];
+            [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateDisabled];
+            button.frame = CGRectMake(floorf(window.bounds.size.width - 78.0f), floorf(window.bounds.size.height - (image.size.height+1.0f)), 76.0f, image.size.height);
+            [button setTitleColor:[UIColor colorWithRed:0.513f green:0.592f blue:0.694f alpha:1.0f] forState:UIControlStateDisabled];
+            [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            button.titleLabel.font = [UIFont boldSystemFontOfSize:17];
+            button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
+            [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.4f] forState:UIControlStateNormal];
+            [button setTitle:@"Login" forState:UIControlStateNormal];
+            [button addTarget:self action:@selector(login:) forControlEvents:UIControlEventTouchUpInside];
+            [window addSubview:button];
+            _loginButton.enabled = ([self username].length > 0 && [self password].length > 0);
+            _loginButton = button;
+            
+        }
+
+    } 
+    
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    
+    if (textField == _username) {
+        [_password becomeFirstResponder];
+    }
+    
+    return YES;
+    
+}
+
 @end
 
 
@@ -429,7 +573,7 @@
 @implementation LoginTextField
 
 - (CGRect)textRectForBounds:(CGRect)bounds {
-    bounds.origin.y += 8.0f;
+    bounds.origin.y += self.secureTextEntry ? 4.0f : 7.0f;
     bounds.origin.x += 8.0f;
     bounds.size.width -= 16.0f;
     return bounds;
@@ -443,7 +587,7 @@
 }
 
 - (CGRect)editingRectForBounds:(CGRect)bounds {
-    bounds.origin.y += 8.0f;
+    bounds.origin.y += self.secureTextEntry ? 4.0f : 7.0f;
     bounds.origin.x += 8.0f;
     bounds.size.width -= 16.0f;
     return bounds;
@@ -455,7 +599,7 @@
 
 - (void)drawPlaceholderInRect:(CGRect)rect {
     
-    rect.origin.x += 2.0f;
+    rect.origin.x = floorf(rect.origin.x+2.0f);
     [[UIColor colorWithRed:0.769f green:0.769f blue:0.769f alpha:1.0f] setFill];
     [self.placeholder drawInRect:rect withFont:[UIFont systemFontOfSize:13]];
     

@@ -24,6 +24,7 @@
 #import "STNavigationItem.h"
 #import "STStampedAPI.h"
 #import "STUser.h"
+#import "STUserViewController.h"
 
 static NSString* const _inboxNameKey = @"Root.inboxName";
 static NSString* const _iWantToNameKey = @"Root.iWantToName";
@@ -317,9 +318,10 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
     if ([[STConfiguration value:value] isEqual:[STProfileViewController class]]) {
         
-        id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
-        controller = [[STProfileViewController alloc] initWithUserID:[user userID]];
-        
+        id user = [[STStampedAPI sharedInstance] currentUser];
+        //controller = [[STProfileViewController alloc] initWithUserID:[user userID]];
+        controller = [[STUserViewController alloc] initWithUser:(STSimpleUserDetail*)user];
+
     } else {
         
         controller = [[[STConfiguration value:value] alloc] init];

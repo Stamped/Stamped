@@ -21,6 +21,7 @@
 @implementation FriendStatusButton
 @synthesize status=_status;
 @synthesize loading=_loading;
+@synthesize showCheck;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -62,8 +63,15 @@
         }
             break;
         case FriendStatusFollowing: {
-            self.enabled = NO;
-            [self setImage:kFollowingIcon forState:UIControlStateNormal];
+            if (showCheck) {
+                self.enabled = NO;
+                [self setImage:kFollowingIcon forState:UIControlStateNormal];
+            } else {
+                [self setTitle:@"Unfollow" forState:UIControlStateNormal];
+                [self setBackgroundImage:[kWhiteButton stretchableImageWithLeftCapWidth:kButtonImageLeftCap topCapHeight:0.0f] forState:UIControlStateNormal];
+                [self setBackgroundImage:[kWhiteButtonHi stretchableImageWithLeftCapWidth:kButtonImageLeftCap topCapHeight:0.0f] forState:UIControlStateHighlighted];
+                [self setTitleColor:[UIColor colorWithRed:0.8f green:0.296f blue:0.239f alpha:1.0f] forState:UIControlStateNormal];
+            }
         }
             break;
         case FriendStatusRequestSent: 
