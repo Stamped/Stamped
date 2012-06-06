@@ -191,10 +191,10 @@ class EntitySearch(object):
         all_results = {}
         total = 0
         
-        for name, result in results:
+        for source_name, result in results:
             if query.kinds is None or result[1].target.kind in query.kinds:
                 if query.types is None or len(query.types.intersection(result[1].target.types)) > 0:
-                    source_results = all_results.setdefault(name,[])
+                    source_results = all_results.setdefault(source_name,[])
                     source_results.append(result)
                     total += 1
                 else:
@@ -204,8 +204,8 @@ class EntitySearch(object):
                 logs.debug("Filtered out %s (kind=%s)" % 
                           (result[1].name, result[1].target.kind))
         
-        for name, source_results in all_results.iteritems():
-            all_results[name] = sortedResults(source_results)
+        for source_name, source_results in all_results.iteritems():
+            all_results[source_name] = sortedResults(source_results)
         
         print("\n\n\nGenerated %d results in %f seconds from: %s\n\n\n" % (
             total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.iteritems()])
@@ -266,7 +266,7 @@ class EntitySearch(object):
                 break
         
         if _verbose:
-            print("\n\n\nDedupped %d results in %f seconds\n\n\n" % (total - len(chosen), time() - before2))
+            print("\n\n\nDeduped %d results in %f seconds\n\n\n" % (total - len(chosen), time() - before2))
         
         return chosen
     
