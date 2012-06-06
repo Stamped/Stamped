@@ -204,10 +204,10 @@ class Schema(object):
         return str(self)
 
     def __str__(self):
-        return '[%s %s]' % (self.__class__, self.dataExport())
+        return '<%s %s>' % (self.__class__.__name__, self.dataExport())
 
     def __unicode__(self):
-        return u'[%s %s]' % (self.__class__, self.dataExport())
+        return u'<%s %s>' % (self.__class__.__name__, self.dataExport())
 
     def dataExport(self):
         properties = {}
