@@ -10,24 +10,24 @@ __all__       = [ 'TheTVDB', 'globalTheTVDB' ]
 import Globals
 import string, sys, urllib, utils
 
-from api.Schemas    import *
-from optparse       import OptionParser
-from LibUtils       import parseDateString
-from lxml           import objectify, etree
-from pprint         import pprint
-from LRUCache       import lru_cache
-from Memcache       import memcached_function
+from api.Schemas     import *
+from optparse        import OptionParser
+from LibUtils        import parseDateString
+from lxml            import objectify, etree
+from pprint          import pprint
+from LRUCache        import lru_cache
+from CachedFunction  import cachedFn
 
 class TheTVDB(object):
     
     def __init__(self, api_key='F1D337C9BF2357FB'):
         self.api_key = api_key
-    
+
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
+    @cachedFn()
     def search(self, query, transform=True, detailed=False):
         url = self._get_url(query)
         

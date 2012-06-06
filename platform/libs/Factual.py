@@ -65,7 +65,7 @@ import logs
 
 from urlparse               import urlparse, parse_qsl
 from LRUCache               import lru_cache
-from Memcache               import memcached_function
+from CachedFunction         import cachedFn
 from api.Schemas            import BasicEntity
 from SinglePlatform         import StampedSinglePlatform
 from pprint                 import pprint
@@ -548,12 +548,12 @@ class Factual(object):
             return m
         else:
             return None
-    
+
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
+    @cachedFn()
     def __factual(self, service, prefix='places', **args):
         """
         Helper method for making OAuth Factual API calls.
