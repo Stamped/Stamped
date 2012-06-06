@@ -113,6 +113,7 @@
         [button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
         [button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
         [button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
+        button.titleLabel.lineBreakMode = UILineBreakModeTailTruncation;
         size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
             
     } else {

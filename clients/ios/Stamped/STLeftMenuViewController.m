@@ -77,13 +77,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
-        if (count && count.numberUnread.integerValue > 0) {
-            _unreadCount = count.numberUnread.integerValue;
-            [self.tableView reloadData];
-        }
-    }];
-    
     if (!_tableView) {
         
         UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
@@ -258,12 +251,13 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
             cell.delegate = (id<LeftMenuTableCellDelegate>)self;
         }
         
+        [STEvents removeObserver:cell];
         cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
         cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
         [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
         
         if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
-            [cell setBadgeCount:_unreadCount];
+            [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
         } 
         
         if ([indexPath isEqual:_selectedIndexPath]) {

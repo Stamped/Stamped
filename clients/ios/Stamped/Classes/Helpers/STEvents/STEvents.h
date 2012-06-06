@@ -29,6 +29,9 @@ enum EventType {
     // user
     EventTypeUserFollowToggleFinished,
     EventTypeUserStampsFinished,
+    
+    // activity unread count
+    EventTypeUnreadCountUpdated,
 
 	
 }; typedef int EventType;
