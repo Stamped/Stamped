@@ -252,19 +252,6 @@ static STStampedAPI* _sharedInstance;
     return [self stampsForSlice:slice withPath:@"/collections/consumption.json" andCallback:block];
 }
 
-- (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
-                                  andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/entities/stamped_by.json";
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
-                                                        post:NO 
-                                               authenticated:YES
-                                                      params:[slice asDictionaryParams] 
-                                                     mapping:[STSimpleStampedBy mapping]
-                                                 andCallback:^(id stampedBy, NSError* error, STCancellation* cancellation) {
-                                                     block(stampedBy, block, cancellation);
-                                                 }];
-}
-
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
                                andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block {
     NSString* path = @"/stamps/create.json";

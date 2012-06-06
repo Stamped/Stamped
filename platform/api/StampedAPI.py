@@ -1190,7 +1190,7 @@ class StampedAPI(AStampedAPI):
             self._addFollowActivity(authUserId, userId)
 
             # Remove 'friend' activity item
-            self._activityDB.removeFriendActivity('friend', authUserId, userId)
+            self._activityDB.removeFriendActivity(authUserId, userId)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
@@ -4061,15 +4061,12 @@ class StampedAPI(AStampedAPI):
             activityData = []
             params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
 
+            # Get activities where friends are a subject member
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
             activityItemIds = [item.activity_id for item in dirtyActivityData]
-            # Find which activity items with friends in subject are already appearing in our Personal Activity feed
+            # Find activity items for friends that also appear in personal feed
             personalActivityIds = self._activityDB.getActivityIdsForUser(authUserId, **params)
             overlappingActivityIds =  list(set(personalActivityIds).intersection(set(activityItemIds)))
-
-            from pprint import pformat
-            logs.info('###### overlapping activitydata')
-            logs.info(pformat(overlappingActivityIds))
 
             for item in dirtyActivityData:
                 # Exclude the item if it is in the user's personal feed, unless it is a 'follow' item.  In that case,
