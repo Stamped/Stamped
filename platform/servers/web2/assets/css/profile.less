@@ -125,48 +125,79 @@
                     .rhs {
                         float: right;
                         
+                        .subnav {
+                            width: 256px;
+                            
+                            .subnav_button {
+                                background: url(/assets/img/profile_header_subnav_sprite.png) no-repeat;
+                                display: inline-block;
+                                width:  38px;
+                                height: 38px;
+                                
+                                .transition-transform2(0.1s, ease-out, opacity, 0.1s, ease-out);
+                                opacity: .5;
+                                
+                                &:hover, &:active {
+                                    cursor: pointer;
+                                    
+                                    opacity: 1;
+                                    .transition-transform2(0s, linear, opacity, 0s, linear);
+                                }
+                                
+                                &:active {
+                                    .transform(scale(1.2, 1.2));
+                                }
+                            }
+                            
+                            .subnav_button1 {
+                                background-position: -40px 0;
+                            }
+                            
+                            .subnav_button2 {
+                                background-position: -80px 0;
+                            }
+                        }
+                        
                         .share-widget {
                             background-color: #fff;
                             padding: 0.25em 0.5em;
                             
-                            .rounded(8px);
+                            .rounded(1em);
                             .box-shadow(0, 0, 18px, 0, @shadow);
+                            
+                            /* NOTE: because social sharing requires JS, sharing widgets are hidden 
+                               by default in CSS and only displayed on page load via JS if JS is 
+                               supported.
+                            */
+                            display: none;
                             
                             .desc {
                                 font-size: 80%;
                                 font-weight: 700;
+                                white-space: nowrap;
                                 color: #333;
                             }
                             
+                            .transition-rounded(0.5s, ease-out);
+                            overflow: hidden;
+                            
                             .share-buttons {
-                                /* TODO: top and opacity */
-                                .transition(all, 0.3s, ease-out);
-                                
-                                margin: 0;
-                                height: 0;
                                 display: none;
+                                white-space: nowrap;
+                                
+                                margin: 4px auto;
                                 
                                 .share-button {
-                                    //display: inline-block;
+                                    display: inline-block;
                                 }
                             }
                             
-                            &:hover, &:active {
-                                cursor: pointer;
+                            &:hover {
+                                .rounded(0);
                                 
-                                background-color: #666;
-                                
-                                .desc {
-                                    color: #fff;
+                                .share-buttons {
+                                    display: block;
                                 }
-                            }
-                        }
-                        
-                        .share-widget-expanded {
-                            .share-buttons {
-                                height:  auto;
-                                margin-top: 1em;
-                                display: block;
                             }
                         }
                     }
@@ -216,9 +247,9 @@
             .profile-header-post {
                 position: relative;
                 z-index: 54;
-                .box-shadow(0, -3px, 3px, 0, @shadow);
+                height:  16px;
                 
-                height: 16px;
+                .box-shadow(0, -3px, 3px, 0, @shadow);
                 
                 .inset-stamp {
                     background: url(/assets/img/insetstamp2.png) center top no-repeat;
@@ -384,6 +415,22 @@ body.other {
     
     .stamp-gallery-view-map {
         float: right;
+        
+        a {
+            background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
+            display: block;
+            
+            width:  39px;
+            height: 33px;
+            
+            &:hover {
+                background-position: -41px 0;
+            }
+            
+            &:active {
+                background-position: -82px 0;
+            }
+        }
     }
     
     .expanded {

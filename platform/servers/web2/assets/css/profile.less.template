@@ -56,6 +56,7 @@
 
 .user-gradient {
     .user-gradient-func(135deg, 40%);
+    width: 100%;
 }
 
 .post-header, .stamp-card-pre {
@@ -66,8 +67,7 @@
 }
 
 .profile-header-post, .stamp-card-post {
-    // TODO: this gradient is too dark because it overlays the innerbg gradient!
-    .user-gradient-func(135deg, 40%);
+    background: #fff;
     
     width:  100%;
     margin: 0;

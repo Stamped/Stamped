@@ -114,25 +114,25 @@ footer {
    ************************************************************************** */
     
     
+    @map_nav_space: 32px;
+    
     .fixedwidth {
         position: absolute;
-        top:    0;
-        left:   50%;
-        margin-left: -500px;
+        top:  0;
+        left: 50%;
+        margin-left: -(@fixed-width / 2) - @map_nav_space;
         
-        width: 360px;
+        width:  360px;
         height: 100%;
         
         .stamp-map-nav {
-            
             height: 100%;
             background: #fff;
-            @space: 32px;
             
             .box-shadow(0, 0, 8px, 0, @shadow);
             
             .nav-header {
-                padding: @space @space (@space / 4);
+                padding: @map_nav_space (@map_nav_space / 4 - 2px) 0 @map_nav_space;
                 
                 .profile-image-small {
                     float: left;
@@ -143,6 +143,7 @@ footer {
                     
                     .name {
                         color: #333;
+                        margin-right: (.75 * @map_nav_space);
                     }
                     
                     .stamp-map-title {
@@ -154,32 +155,92 @@ footer {
                         display: block;
                         margin:  0;
                         padding: 0;
+                        margin-right: (.75 * @map_nav_space);
+                    }
+                    
+                    .list-view-nav {
+                        clear: both;
+                        text-align: right;
+                        
+                        a {
+                            margin:  0;
+                            padding: 0;
+                            line-height: 80%;
+                            
+                            .up-arrow {
+                                display: block;
+                            }
+                            
+                            .down-arrow {
+                                display: none;
+                            }
+                            
+                            &:hover, &:active {
+                                cursor: pointer;
+                                color: #fff;
+                            }
+                            
+                            &:hover {
+                                background-color: #999;
+                            }
+                            
+                            &:active {
+                                background-color: #666;
+                            }
+                        }
                     }
                 }
             }
             
             .top-user-gradient {
                 .box-shadow(0, 3px, 3px, 0, @shadow);
+                //.border-radius(0, 4px, 4px, 0);
             }
             
             .bottom-user-gradient {
                 .box-shadow(0, -3px, 3px, 0, @shadow);
+                //.border-radius(4px, 0, 0, 4px);
             }
             
             .stamp-list-view {
                 overflow-y: scroll;
-                padding: (@space / 4) @space;
+                padding: (@map_nav_space / 4) @map_nav_space;
                 margin: 8px 0;
-                width: 288px;
+                
+                // TODO: animate stamp-list-view collapsing
+                .transition(height, 0.5s, easeOutCubic);
+                
+                width:  288px;
                 height: 70%;
             }
             
             .nav-footer {
-                padding: @space;
-                height: 5%;
+                padding: (@map_nav_space / 2) @map_nav_space;
                 
                 a.back {
                 }
+            }
+        }
+        
+        .stamp-map-nav-collapsed {
+            .nav-header {
+                .rhs {
+                    .list-view-nav {
+                        a {
+                            .up-arrow {
+                                display: none;
+                            }
+                            
+                            .down-arrow {
+                                display: block;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            .stamp-list-view {
+                height: 0;
             }
         }
     }

@@ -15,6 +15,10 @@ var init_social_sharing = function() {
         FB.XFBML.parse();
         //FB.Share.renderAll();
     }
+    
+    if (typeof(g_init_social_sharing) !== 'undefined') {
+        g_init_social_sharing();
+    }
 };
 
 $(document).ready(function() {

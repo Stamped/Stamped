@@ -168,6 +168,15 @@
         window.addEventListener('resize', resize_map, false);
         
         $('.stamp-list-view').jScrollPane();
+        
+        $('.list-view-nav a').click(function(event) {
+            event.preventDefault();
+            var $this = $(this);
+            
+            $this.parents('.stamp-map-nav').toggleClass('stamp-map-nav-collapsed');
+            
+            return false;
+        });
     });
 })();
 

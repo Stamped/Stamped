@@ -94,14 +94,65 @@ var g_update_stamps = null;
             $(this).attr('href', href);
         });
         
-        $(".share-widget").click(function(event) {
-            event.preventDefault();
-            
-            var $this = $(this);
-            $this.toggleClass('share-widget-expanded');
-            
-            return false;
-        });
+        window.g_init_social_sharing = function() {
+            // initialize animated social sharing widgets
+            $(".share-widget").each(function(i, elem) {
+                var $elem   = $(elem);
+                var $share  = $elem.find('.share-buttons');
+                
+                $elem.css({
+                    'display' : 'inline-block', 
+                    'width'   : 'auto', 
+                    'height'  : 'auto'
+                });
+                
+                var width0  = $elem.width();
+                var height0 = $elem.height();
+                
+                $elem.css('display', 'block');
+                $share.show();
+                
+                var width1  = $elem.width();
+                var height1 = $elem.height();
+                
+                $share.hide();
+                
+                $elem.css({
+                    width  : width0, 
+                    height : height0
+                });
+                
+                $elem.hover(function(event) {
+                    $elem.stop(true, false);
+                    
+                    $share.show();
+                    $elem.animate({
+                        width  : width1, 
+                        height : height1
+                    }, {
+                        duration : 500, 
+                        specialEasing : { 
+                            width  : 'easeOutCubic', 
+                            height : 'easeOutCubic'
+                        }
+                    });
+                }, function(event) {
+                    $elem.stop(true, false);
+                    
+                    $share.hide();
+                    $elem.animate({
+                        width  : width0, 
+                        height : height0
+                    }, {
+                        duration : 500, 
+                        specialEasing : { 
+                            width  : 'easeOutCubic', 
+                            height : 'easeOutCubic'
+                        }
+                    });
+                });
+            });
+        };
         
         // TODO: may not be recursive
         //$(document).emoji();
@@ -1609,6 +1660,7 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
+        window.g_init_social_sharing();
         update_dynamic_header();
         update_stamps();
         init_gallery();

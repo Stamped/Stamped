@@ -42,7 +42,6 @@
 
 
 TODO:
-    * fix opacity of lower profile header ribbon
     * align stamp-gallery with profile header
     
     * sDetail:
@@ -159,4 +158,5 @@ OLD:
     * sDetail overlay now deals properly with scrollbars hiding / reappearing
     * experiment with making innerbg fixed for parallax
     * link stamp image to lightboxed full-resolution version
+    * fix opacity of lower profile header ribbon
 
