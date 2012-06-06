@@ -12,23 +12,24 @@
 #import "Util.h"
 
 int main(int argc, char* argv[]) {
-  @try {
+    //@try {
     
     if ([[STConfiguration sharedInstance] internalVersion] > 0) {
-      @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
-      }
+        @autoreleasepool {
+            return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
+        }
     }
     else {
-      NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-      int retVal = UIApplicationMain(argc, argv, nil, nil);
-      [pool release];
-      return retVal;
+        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+        int retVal = UIApplicationMain(argc, argv, nil, nil);
+        [pool release];
+        return retVal;
     }
-  }
-  @catch (NSException *exception) {
-    [Util logOperationException:exception withMessage:@"Main application error"];
-  }
-  @finally {
-  }
+    /*}
+     @catch (NSException *exception) {
+     [Util logOperationException:exception withMessage:@"Main application error"];
+     }
+     @finally {
+     }
+     */
 }

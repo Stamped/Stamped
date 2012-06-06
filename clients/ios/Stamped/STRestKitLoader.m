@@ -76,7 +76,7 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-    NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
+    //NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
     if ([self.cancellation finish]) {
         [Util executeOnMainThread:^{
             self.callback(objects, nil, self.cancellation);
@@ -221,7 +221,6 @@ static STRestKitLoader* _sharedInstance;
     NSAssert1(path, @"Path must not be nil %@", params);
     NSAssert1(params, @"Params must not be nil %@", path);
     NSAssert1(mapping, @"Mapping must not be nil %@", mapping);
-    NSLog(@"%@ %@", path, params);
     RKClient* client = [RKClient sharedClient];
     if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
         NSLog(@"Offline");
@@ -253,7 +252,7 @@ static STRestKitLoader* _sharedInstance;
                 [paramsCopy setObject:accessToken forKey:@"oauth_token"];
             }
             else {
-                NSLog(@"Couldn't get auth token");
+                //TODO logging
             }
         }
         
@@ -310,7 +309,6 @@ static STRestKitLoader* _sharedInstance;
         self.authToken.accessToken = token.accessToken;
     }
     if (token.lifespanInSeconds) {
-        NSLog(@"Setting expiration");
         [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifespanInSeconds.floatValue] forKey:_tokenExpirationUserDefaultsKey];
     }
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -640,10 +638,8 @@ static STRestKitLoader* _sharedInstance;
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     if (queue == _authRequestQueue) {
-        NSLog(@"Suspend request queue %@", request.URL);
         [RKClient sharedClient].requestQueue.suspended = YES;
     } else if (queue == [RKClient sharedClient].requestQueue) {
-        NSLog(@"Other queue");
         if (!self.authToken.accessToken) {
             [self refreshToken];
             return;

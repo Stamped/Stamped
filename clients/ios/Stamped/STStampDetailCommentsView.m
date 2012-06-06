@@ -25,6 +25,14 @@ static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
 static const CGFloat _imagePaddingY = _imagePaddingX;
 
+@interface STStampDetailCommentsView ()
+
+@property (nonatomic, readwrite, retain) id<STStamp> stamp;
+
++ (UIView*)viewWithUser:(id<STUser>)user header:(NSString*)header date:(NSDate*)date andBody:(NSString*)body;
+
+@end
+
 @interface STStampDetailBarView : UIView
 
 @end
@@ -185,7 +193,7 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @interface STStampDetailBlurbView : STAStampDetailCommentWithText
 
-- (id)initWithStamp:(id<STStamp>)stamp preview:(BOOL)hasPreview andIndex:(NSInteger)index;
+- (id)initWithStamp:(id<STStamp>)stamp;
 
 @property (nonatomic, readonly, copy) NSString* imageURL;
 
@@ -195,7 +203,7 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @synthesize imageURL = imageURL_;
 
-- (id)initWithStamp:(id<STStamp>)stamp preview:(BOOL)hasPreview andIndex:(NSInteger)index {
+- (id)initWithStamp:(id<STStamp>)stamp {
     id<STContentItem> item = [stamp.contents objectAtIndex:index];
     self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:STProfileImageSize46];
     if (self) {
@@ -214,21 +222,18 @@ andProfileImageSize:(STProfileImageSize)size {
                 }
             }
         }
-        if (hasPreview) {
-            CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
-            if ( previewHeight > 0) {
-                [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 8)];
-                STPreviewsView *view = [[[STPreviewsView alloc] initWithFrame:CGRectZero] autorelease];
-                [view setupWithStamp:stamp maxRows:2];
-                CGRect frame = view.frame;
-                frame.origin.x = 60.0f;
-                //frame.origin.y = self.frame.size.height;
-                //frame.size.height += previewHeight;
-                view.frame = frame;
-                [Util appendView:view toParentView:self];
-            }
+        CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
+        if ( previewHeight > 0) {
+            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 8)];
+            STPreviewsView *view = [[[STPreviewsView alloc] initWithFrame:CGRectZero] autorelease];
+            [view setupWithStamp:stamp maxRows:2];
+            CGRect frame = view.frame;
+            frame.origin.x = 60.0f;
+            //frame.origin.y = self.frame.size.height;
+            //frame.size.height += previewHeight;
+            view.frame = frame;
+            [Util appendView:view toParentView:self];
         }
-        //TODO likes, credited, border
     }
     return self;
 }
@@ -247,18 +252,8 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @end
 
-@interface STStampDetailCommentsView ()
-
-@property (nonatomic, readonly, assign) NSInteger index;
-@property (nonatomic, readonly, assign) STStampDetailCommentsViewStyle style;
-@property (nonatomic, readwrite, retain) id<STStamp> stamp;
-
-@end
-
 @implementation STStampDetailCommentsView
 
-@synthesize index = index_;
-@synthesize style = style_;
 @synthesize stamp = stamp_;
 @synthesize delegate = delegate_;
 
@@ -277,14 +272,8 @@ andProfileImageSize:(STProfileImageSize)size {
         STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
         [Util appendView:topBar toParentView:self];
         
-        for (NSInteger blurbI = 0; blurbI < stamp.contents.count; blurbI++) {
-            if (blurbI != 0) {
-                [Util appendView:[[[STStampDetailBarView alloc] init] autorelease] toParentView:self];
-            }
-            BOOL hasPreview = blurbI == stamp.contents.count - 1;
-            UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp preview:hasPreview andIndex:blurbI] autorelease];
-            [Util appendView:blurbView toParentView:self];
-        }
+        UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp] autorelease];
+        [Util appendView:blurbView toParentView:self];
         if (index == 0 || YES) {
             NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
             for (NSInteger i = 0; i < limit; i++) {
@@ -301,30 +290,28 @@ andProfileImageSize:(STProfileImageSize)size {
         
         if (!first) {
             CGFloat heightDelta = self.frame.size.height - heightBefore;
-            NSLog(@"%f,%f,%f", heightBefore, self.frame.size.height, heightDelta);
             [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -heightDelta)];
             self.clipsToBounds = YES;
             [self.delegate childView:self shouldChangeHeightBy:heightDelta overDuration:.25];
         }
+        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
     }
 }
 
-- (id)initWithStamp:(id<STStamp>)stamp index:(NSInteger)index style:(STStampDetailCommentsViewStyle)style andDelegate:(id<STViewDelegate>)delegate
+- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate
 {
     CGFloat width = _totalWidth;
     CGFloat padding_x = 5;
-    self = [super initWithFrame:CGRectMake(padding_x, 5, width, 0)];
+    self = [super initWithFrame:CGRectMake(padding_x, 0, width, 0)];
     if (self) {
         delegate_ = delegate;
-        index_ = index;
-        style_ = style;
         self.backgroundColor = [UIColor whiteColor];
         
         self.layer.shadowColor = [UIColor blackColor].CGColor;
-        self.layer.shadowOpacity = .1;
-        self.layer.shadowRadius = 3.0;
-        self.layer.shadowOffset = CGSizeMake(0, 1);
-        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+        self.layer.shadowOpacity = .2;
+        self.layer.shadowRadius = 2.5;
+        self.layer.shadowOffset = CGSizeMake(0, 5);
+        //self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
         
         [self setStamp:stamp];
     }
@@ -343,6 +330,43 @@ andProfileImageSize:(STProfileImageSize)size {
             self.stamp = stamp;
         }
     }];
+}
+
++ (UIView*)viewWithUser:(id<STUser>)user header:(NSString*)header date:(NSDate*)date andBody:(NSString*)body {
+    UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 240, 0)] autorelease];
+    
+    UIFont* userFont = [UIFont stampedBoldFontWithSize:10];
+    UIView* userView = [Util viewWithText:user.screenName
+                                     font:userFont
+                                    color:[UIColor stampedGrayColor] 
+                               lineHeight:12
+                                     mode:UILineBreakModeTailTruncation
+                               andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+    [Util appendView:userView toParentView:view];
+    
+    if (header) {
+        UIFont* headerFont = [UIFont stampedFontWithSize:10];
+        UIView* headerView = [Util viewWithText:header 
+                                         font:headerFont
+                                        color:[UIColor stampedLightGrayColor]
+                                         mode:UILineBreakModeTailTruncation
+                                   andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+        [Util reframeView:headerView withDeltas:CGRectMake(CGRectGetMaxX(userView.frame),
+                                                           0,
+                                                           0,
+                                                           0)];
+        [view addSubview:headerView];
+    }
+    
+    UIFont* bodyFont = [UIFont stampedFontWithSize:10];
+    UIView* bodyView = [Util viewWithText:body
+                                     font:bodyFont
+                                    color:[UIColor stampedBlackColor]
+                                     mode:UILineBreakModeWordWrap
+                               andMaxSize:CGSizeMake(240, CGFLOAT_MAX)];
+    [view addSubview:bodyView];
+    
+    return view;
 }
 
 @end

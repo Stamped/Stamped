@@ -23,10 +23,12 @@
 
 @implementation STMenuController
 
+@synthesize loginController = _loginController;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!LOGGED_IN || YES) {
+    if (!LOGGED_IN) {
         [self showWelcome];
     }
     
