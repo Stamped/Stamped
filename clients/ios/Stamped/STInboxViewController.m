@@ -105,6 +105,7 @@
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;
+        _slider.dataSource = (id<STSliderScopeViewDataSource>)self;
         self.footerView = _slider;
         _slider.scope = self.scope;
     }
@@ -189,6 +190,29 @@
     if (self.showsSearchBar) {
         [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
     }
+}
+
+
+#pragma mark - STSliderScopeViewDataSource
+
+- (NSString*)sliderScopeView:(STSliderScopeView*)slider titleForScope:(STStampedAPIScope)scope {
+    
+    switch (scope) {
+        case STStampedAPIScopeYou:
+            return @"you";
+            break;
+        case STStampedAPIScopeFriends:
+            return @"friends";
+            break;
+        case STStampedAPIScopeEveryone:
+            return @"everyone";
+            break;
+        default:
+            break;
+    }
+    
+    return @"";
+    
 }
 
 

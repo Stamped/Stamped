@@ -101,7 +101,7 @@ def logRaw(s, includeFormat=False):
 def _formatLog(s):
     try:
         return normalize(str(s), strict=True)
-    except:
+    except Exception:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
     
     """

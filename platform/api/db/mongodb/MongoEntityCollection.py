@@ -127,9 +127,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
             self._collection.remove(query)
             return True
-        except:
-            logs.warning("Cannot remove document")
-            raise Exception
+        except Exception:
+            logs.warning("Cannot remove custom entity")
+            raise
     
     def addEntities(self, entities):
         return self._addObjects(entities)

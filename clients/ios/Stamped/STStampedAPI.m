@@ -978,52 +978,28 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (STCancellation *)createAccountWithPassword:(NSString *)password 
-                                   screenName:(NSString *)screenName 
-                                         name:(NSString *)name 
-                                        email:(NSString *)email 
-                                        phone:(NSString *)phone 
-                                 profileImage:(NSString *)profileImage 
+                            accountParameters:(STAccountParameters*)accountParameters
                                   andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
-    return [[STRestKitLoader sharedInstance] createAccountWithPassword:password
-                                                            screenName:screenName
-                                                                  name:name
-                                                                 email:email
-                                                                 phone:phone
-                                                          profileImage:profileImage
+    return [[STRestKitLoader sharedInstance] createAccountWithPassword:password 
+                                                     accountParameters:accountParameters
                                                            andCallback:block];
 }
 
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
-                                           screenName:(NSString*)screenName
-                                                 name:(NSString*)name
-                                                email:(NSString*)email
-                                                phone:(NSString*)phone
-                                         profileImage:(NSString*)profileImage 
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
     return [[STRestKitLoader sharedInstance] createAccountWithFacebookUserToken:userToken
-                                                                     screenName:screenName
-                                                                           name:name
-                                                                          email:email
-                                                                          phone:phone
-                                                                   profileImage:profileImage
+                                                              accountParameters:accountParameters
                                                                     andCallback:block];
 }
 
 - (STCancellation *)createAccountWithTwitterUserToken:(NSString *)userToken 
                                            userSecret:(NSString *)userSecret 
-                                           screenName:(NSString *)screenName 
-                                                 name:(NSString *)name 
-                                                email:(NSString *)email 
-                                                phone:(NSString *)phone 
-                                         profileImage:(NSString *)profileImage 
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse>, NSError *, STCancellation *))block {
     return [[STRestKitLoader sharedInstance] createAccountWithTwitterUserToken:userToken
                                                                     userSecret:userSecret
-                                                                    screenName:screenName
-                                                                          name:name
-                                                                         email:email
-                                                                         phone:phone
-                                                                  profileImage:profileImage
+                                                             accountParameters:accountParameters
                                                                    andCallback:block];
 }
 

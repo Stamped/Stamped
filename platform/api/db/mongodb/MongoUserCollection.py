@@ -51,6 +51,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         for document in documents:
             userIds.append(self._getStringFromObjectId(document['_id']))
         return userIds
+
+    def _getAllScreenNames(self):
+        documents = self._collection.find({}, fields=['screen_name'])
+        screenNames = []
+        for document in documents:
+            screenNames.append(document['screen_name'])
+        return screenNames
     
     ### PUBLIC
     
@@ -72,7 +79,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         try:
             self.getUserByScreenName(screenName)
             return True
-        except:
+        except StampedUnavailableError:
             return False
     
     def lookupUsers(self, userIds, screenNames=None, limit=0):
@@ -133,8 +140,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             user = self.getUserByScreenName(query)
             if user is not None and (domain is None or user.user_id in domain):
                 users.append(user)
-        except:
-            pass
+        except Exception as e:
+            logs.warning("Exact user match not found for '%s': %s" % (query, e))
         
         m = bson.code.Code("""function () {
             var score = 0.0;
@@ -199,7 +206,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             else:
                 data = [value]
             assert(isinstance(data, list))
-        except:
+        except Exception as e:
+            logs.warning("User search mapreduce error for '%s': %s" % (user_query, e))
             return users
         
         for i in data:
@@ -207,7 +215,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 user = self._convertFromMongo(i['user'])
                 if user.screen_name.lower() != query:
                     users.append(user)
-            except:
+            except Exception as e:
+                logs.warning("Unable to convert user (%s) from mongo: %s" % (i, e))
                 continue
         
         return users[:20]
@@ -238,8 +247,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             if user is not None and (domain is None or user.user_id in domain):
                 seen.add(user.user_id)
                 users.append(user)
-        except:
-            pass
+        except Exception as e:
+            logs.warning("Exact user match not found for '%s': %s" % (query, e))
         
         q = StringQuery(query, default_operator="AND", search_fields=[ "name", "screen_name" ])
         q = CustomScoreQuery(q, lang="mvel", script="""

@@ -381,20 +381,19 @@
   [header addSubview:secondText];
   [friendsView appendChildView:header];
   [Util reframeView:friendsView withDeltas:CGRectMake(0, 0, 0, 50)];
-  NSMutableArray* stamps = [NSMutableArray arrayWithObject:self.stamp];
-  for (id<STStamp> stamp in self.stampedBy.friends.stamps) {
-    if (stamps.count > 7) {
+  NSMutableArray* stampPreviews = [NSMutableArray arrayWithObject:self.stamp];
+  for (id<STStampPreview> stampPreview in self.stampedBy.friends.stampPreviews) {
+    if (stampPreviews.count > 7) {
       break;
     }
     else {
-      [stamps addObject:stamp];
+      [stampPreviews addObject:stampPreview];
     }
   }
-  NSLog(@"%@",self.stampedBy.friends.stamps);
   CGFloat xOffset = 5;
   CGFloat yOffset = CGRectGetMaxY(ordinalText.frame)+10;
-  for (NSInteger i = stamps.count - 1; i >= 0; i--) {
-    id<STStamp> stamp = [stamps objectAtIndex:i];
+  for (NSInteger i = stampPreviews.count - 1; i >= 0; i--) {
+    id<STStamp> stamp = [stampPreviews objectAtIndex:i];
     UIView* imageView = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize37];
     [Util reframeView:imageView withDeltas:CGRectMake(xOffset, yOffset, 0, 0)];
     [friendsView addSubview:imageView];

@@ -385,6 +385,24 @@ static Rdio* _rdio;
     return [text sizeWithFont:font constrainedToSize:size lineBreakMode:mode];
 }
 
+
++ (UILabel*)viewWithText:(NSString*)text 
+                    font:(UIFont*)font 
+                   color:(UIColor*)color
+              lineHeight:(CGFloat)lineHeight
+                    mode:(UILineBreakMode)mode 
+              andMaxSize:(CGSize)size {
+    return [self viewWithText:text font:font color:color mode:mode andMaxSize:size];
+}
+
++ (CGSize)sizeWithText:(NSString*)text 
+                  font:(UIFont*)font 
+            lineHeight:(CGFloat)lineHeight 
+                  mode:(UILineBreakMode)mode 
+            andMaxSize:(CGSize)size {
+    return [self sizeWithText:text font:font mode:mode andMaxSize:size];
+}
+
 + (CGRect)centeredAndBounded:(CGSize)size inFrame:(CGRect)frame {
     CGFloat delta_w = frame.size.width - size.width;
     CGFloat delta_h = frame.size.height - size.height;
@@ -624,6 +642,9 @@ static Rdio* _rdio;
 }
 
 + (UIImage*)imageForCategory:(NSString*)category {
+    if ([category isEqualToString:@"place"]) {
+        return [self imageForCategory:@"food"];
+    }
     if (category)
         return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_sDetail_%@", category.lowercaseString]];
     

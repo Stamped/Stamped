@@ -37,12 +37,13 @@
 #import "STLoginResponse.h"
 #import "STEntityAutoCompleteResult.h"
 #import "STHybridCacheSource.h"
+#import "STAccountParameters.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
     STStampedAPIScopeFriends,
+    STStampedAPIScopeEveryone,
     STStampedAPIScopeFriendsOfFriends,
-    STStampedAPIScopeEveryone
 } STStampedAPIScope;
 
 typedef enum {
@@ -217,28 +218,16 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createAccountWithPassword:(NSString*)password
-                                  screenName:(NSString*)screenName
-                                        name:(NSString*)name
-                                       email:(NSString*)email
-                                       phone:(NSString*)phone //optional
-                                profileImage:(NSString*)profileImage //optional
+                           accountParameters:(STAccountParameters*)accountParameters
                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
-                                           screenName:(NSString*)screenName
-                                                 name:(NSString*)name
-                                                email:(NSString*)email //optional
-                                                phone:(NSString*)phone //optional
-                                         profileImage:(NSString*)profileImage //optional
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
-                                          userSecret:(NSString*)userSecret
-                                          screenName:(NSString*)screenName
-                                                name:(NSString*)name
-                                               email:(NSString*)email //optional
-                                               phone:(NSString*)phone //optional
-                                        profileImage:(NSString*)profileImage //optional
+                                          userSecret:(NSString*)userSecret 
+                                   accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;

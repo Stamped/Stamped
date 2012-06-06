@@ -18,6 +18,7 @@
 @synthesize secondaryColor = _secondaryColor;
 @synthesize privacy = _privacy;
 @synthesize imageURL = _imageURL;
+@synthesize following = _following;
 
 - (id)initWithCoder:(NSCoder *)decoder {
     NSString* userID = [decoder decodeObjectForKey:@"userID"];
@@ -37,6 +38,7 @@
             _secondaryColor = [[decoder decodeObjectForKey:@"secondaryColor"] retain];
             _privacy = [[decoder decodeObjectForKey:@"privacy"] retain];
             _imageURL = [[decoder decodeObjectForKey:@"imageURL"] retain];
+            _following = [[decoder decodeObjectForKey:@"following"] retain];
             [[STStampedAPI sharedInstance] cacheUser:self];
         }
         return self;
@@ -52,6 +54,7 @@
     [_secondaryColor release];
     [_privacy release];
     [_imageURL release];
+    [_following release];
     [super dealloc];
 }
 
@@ -63,6 +66,7 @@
     [encoder encodeObject:self.secondaryColor forKey:@"secondaryColor"];
     [encoder encodeObject:self.privacy forKey:@"privacy"];
     [encoder encodeObject:self.imageURL forKey:@"imageURL"];
+    [encoder encodeObject:self.following forKey:@"following"];
 }
 
 + (RKObjectMapping*)mapping {
@@ -79,6 +83,7 @@
     [mapping mapAttributes:
      @"name",
      @"privacy",
+     @"following",
      nil];
     
     return mapping;

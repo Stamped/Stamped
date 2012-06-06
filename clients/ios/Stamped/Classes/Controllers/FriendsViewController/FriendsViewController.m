@@ -7,7 +7,7 @@
 //
 
 #import "FriendsViewController.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 #import "STNavigationItem.h"
 #import "FriendTableCell.h"
 #import "STTwitter.h"
@@ -362,7 +362,7 @@
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     id<STUser> user = [_friends objectAtIndex:indexPath.row];
-    STProfileViewController *controller = [[STProfileViewController alloc] initWithUserID:user.userID];
+    STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
     

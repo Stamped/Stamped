@@ -10,6 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "STCancellation.h"
 #import "STLoginResponse.h"
+#import "STAccountParameters.h"
 
 @interface STRestKitLoader : NSObject
 
@@ -41,28 +42,16 @@
                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createAccountWithPassword:(NSString*)password
-                                  screenName:(NSString*)screenName
-                                        name:(NSString*)name
-                                       email:(NSString*)email
-                                       phone:(NSString*)phone //optional
-                                profileImage:(NSString*)profileImage //optional
+                           accountParameters:(STAccountParameters*)accountParameters
                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
-                                           screenName:(NSString*)screenName
-                                                 name:(NSString*)name
-                                                email:(NSString*)email //optional
-                                                phone:(NSString*)phone //optional
-                                         profileImage:(NSString*)profileImage //optional
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
                                           userSecret:(NSString*)userSecret
-                                          screenName:(NSString*)screenName
-                                                name:(NSString*)name
-                                               email:(NSString*)email //optional
-                                               phone:(NSString*)phone //optional
-                                        profileImage:(NSString*)profileImage //optional
+                                   accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
 
 - (void)refreshToken;

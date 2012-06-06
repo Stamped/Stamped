@@ -52,7 +52,18 @@ q = 'katy perry'
 # entity = stampedAPI.getEntity({'entity_id': '4e4c691ddb6bbe2bcd000401'}) # Artist
 # stampedAPI._enrichEntity(entity)
 
-stampedAPI.mergeEntityIdAsync('4eb3024641ad855d53000e2d')
+entityId = '4ecdc566e4146a300e000833'
+entity = stampedAPI._entityDB.getEntity(entityId)
+entity, modified = stampedAPI._resolveEntity(entity)
+print 'ENTITY (%s):' % modified
+pprint(entity.dataExport())
+
+modified = stampedAPI._resolveEntityLinks(entity)
+print 
+print 'LINKED (%s):' % modified
+pprint(entity.dataExport())
+
+# stampedAPI.mergeEntityIdAsync('4eb3024641ad855d53000e2d')
 
 # print 'SKIP\n\n\n'
 

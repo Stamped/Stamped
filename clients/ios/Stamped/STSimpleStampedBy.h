@@ -13,7 +13,6 @@
 @interface STSimpleStampedBy : NSObject <STStampedBy, NSCoding>
 
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> friends;
-@property (nonatomic, readwrite, retain) id<STStampedByGroup> friendsOfFriends;
 @property (nonatomic, readwrite, retain) id<STStampedByGroup> everyone;
 
 + (RKObjectMapping*)mapping;

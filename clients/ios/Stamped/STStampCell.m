@@ -143,7 +143,18 @@
                       } else {
                           
                           if (_primaryColor && _secondarayColor) {
-                              drawStampGradient([_primaryColor CGColor], [_secondarayColor CGColor], ctx);
+                              
+                              CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
+                              size_t _numLocations = 2;
+                              CGFloat _locations[2] = { 0.0, 1.0 };
+                              CGFloat _colors[8] = { r, g, b, 1, r1, g1, b1, 1 };
+                              CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
+                              CGColorSpaceRelease(_rgb);
+                              CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height);
+                              CGPoint end = CGPointMake(rect.origin.x + rect.size.width, rect.origin.y);
+                              CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
+                              CGGradientRelease(gradient);
+                              
                           } else {
                               CGContextFillRect(ctx, rect);
                           }
@@ -273,13 +284,8 @@
     [_categoryImage release], _categoryImage=nil;
     _categoryImage = [[Util imageForCategory:stamp.entity.category] retain];
     
-    float r,g,b;
     [Util splitHexString:stamp.user.primaryColor toRed:&r green:&g blue:&b];
-    [_primaryColor release], _primaryColor=nil;
-    _primaryColor = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
     [Util splitHexString:stamp.user.secondaryColor toRed:&r green:&g blue:&b];
-    [_secondarayColor release], _secondarayColor=nil;
-    _secondarayColor = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
 
     _commentCount = [stamp.numComments integerValue];
     for (id obj in stamp.contents) {

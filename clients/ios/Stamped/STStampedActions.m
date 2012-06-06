@@ -14,7 +14,7 @@
 #import "STStampedAPI.h"
 #import "STMenuPopUp.h"
 #import "STActionManager.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 #import "STPhotoViewController.h"
 
 @interface STStampedActions ()
@@ -90,12 +90,10 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
       UIViewController* controller = nil;
       if (context.user) {
-        STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
-        controller = profileViewController;
+        controller = [[[STUserViewController alloc] initWithUser:source] autorelease];
       }
       else {
-        STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
-        controller = profileViewController;
+        controller = [[[STUserViewController alloc] initWithUser:source] autorelease];
       }
       if (controller) {
         [[Util sharedNavigationController] pushViewController:controller animated:YES];

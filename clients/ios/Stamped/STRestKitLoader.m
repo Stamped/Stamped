@@ -76,7 +76,7 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-    NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
+    //NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
     if ([self.cancellation finish]) {
         [Util executeOnMainThread:^{
             self.callback(objects, nil, self.cancellation);
@@ -221,7 +221,6 @@ static STRestKitLoader* _sharedInstance;
     NSAssert1(path, @"Path must not be nil %@", params);
     NSAssert1(params, @"Params must not be nil %@", path);
     NSAssert1(mapping, @"Mapping must not be nil %@", mapping);
-    NSLog(@"%@ %@", path, params);
     RKClient* client = [RKClient sharedClient];
     if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
         NSLog(@"Offline");
@@ -253,7 +252,7 @@ static STRestKitLoader* _sharedInstance;
                 [paramsCopy setObject:accessToken forKey:@"oauth_token"];
             }
             else {
-                NSLog(@"Couldn't get auth token");
+                //TODO logging
             }
         }
         
@@ -310,7 +309,6 @@ static STRestKitLoader* _sharedInstance;
         self.authToken.accessToken = token.accessToken;
     }
     if (token.lifespanInSeconds) {
-        NSLog(@"Setting expiration");
         [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifespanInSeconds.floatValue] forKey:_tokenExpirationUserDefaultsKey];
     }
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -508,48 +506,22 @@ static STRestKitLoader* _sharedInstance;
     
 }
 
-- (NSMutableDictionary*)_commonCreateScreenName:(NSString*)screenName 
-                                           name:(NSString*)name
-                                          email:(NSString*)email
-                                          phone:(NSString*)phone 
-                                   profileImage:(NSString*)profileImage {
-    NSMutableDictionary* params = [NSMutableDictionary dictionary];
-    [params setObject:screenName forKey:@"screen_name"];
-    [params setObject:name forKey:@"name"];
-    [params setObject:email forKey:@"email"];
-    if (phone) {
-        [params setObject:phone forKey:@"phone"];
-    }
-    if (profileImage) {
-        [params setObject:profileImage forKey:@"profile_image"];
-    }
-    return params;
-}
-
 - (STCancellation*)createAccountWithPassword:(NSString*)password
-                                  screenName:(NSString*)screenName
-                                        name:(NSString*)name
-                                       email:(NSString*)email
-                                       phone:(NSString*)phone //optional
-                                profileImage:(NSString*)profileImage //optional
+                           accountParameters:(STAccountParameters*)accountParameters
                                  andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    NSMutableDictionary* params = [accountParameters asDictionaryParams];
     [params setObject:password forKey:@"password"];
     return [self _loginWithPath:@"/account/create.json"
                          params:params
                storeCredentials:^(id<STLoginResponse> response) {
-                   [self storeStampedScreenName:screenName andPassword:password];
+                   [self storeStampedScreenName:accountParameters.screenName andPassword:password];
                } andCallback:block];
 }
 
 - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
-                                           screenName:(NSString*)screenName
-                                                 name:(NSString*)name
-                                                email:(NSString*)email //optional
-                                                phone:(NSString*)phone //optional
-                                         profileImage:(NSString*)profileImage //optional
+                                    accountParameters:(STAccountParameters*)accountParameters
                                           andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    NSMutableDictionary* params = [accountParameters asDictionaryParams];
     [params setObject:userToken forKey:@"user_token"];
     return [self _loginWithPath:@"/account/create/facebook.json"
                          params:params
@@ -560,13 +532,9 @@ static STRestKitLoader* _sharedInstance;
 
 - (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
                                           userSecret:(NSString*)userSecret
-                                          screenName:(NSString*)screenName
-                                                name:(NSString*)name
-                                               email:(NSString*)email //optional
-                                               phone:(NSString*)phone //optional
-                                        profileImage:(NSString*)profileImage //optional
+                                   accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
-    NSMutableDictionary* params = [self _commonCreateScreenName:screenName name:name email:email phone:phone profileImage:profileImage];
+    NSMutableDictionary* params = [accountParameters asDictionaryParams];
     [params setObject:userToken forKey:@"user_token"];
     [params setObject:userSecret forKey:@"user_secret"];
     return [self _loginWithPath:@"/account/create/twitter.json"
@@ -640,10 +608,8 @@ static STRestKitLoader* _sharedInstance;
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     if (queue == _authRequestQueue) {
-        NSLog(@"Suspend request queue %@", request.URL);
         [RKClient sharedClient].requestQueue.suspended = YES;
     } else if (queue == [RKClient sharedClient].requestQueue) {
-        NSLog(@"Other queue");
         if (!self.authToken.accessToken) {
             [self refreshToken];
             return;
