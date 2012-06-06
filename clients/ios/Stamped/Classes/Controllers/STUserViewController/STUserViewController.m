@@ -109,6 +109,15 @@
     [super viewDidUnload];
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
+    if ([self.navigationController.navigationBar isKindOfClass:[STNavigationBar class]]) {
+        [(STNavigationBar*)self.navigationController.navigationBar showUserStrip:NO forUser:nil];
+    }
+    
+}
+
 - (void)dealloc {
     [STEvents removeObserver:self];
     if (_graphView) {
@@ -367,11 +376,11 @@
 }
 
 - (void)loadNextPage {
-    
+    [self.stamps loadNextPage];
 }
 
 - (BOOL)dataSourceHasMoreData {
-    return NO;
+    return [self.stamps hasMore] && [self selectedTab] == STUserHeaderTabStamps;
 }
 
 - (void)reloadDataSource {

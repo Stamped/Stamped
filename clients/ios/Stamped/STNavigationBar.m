@@ -171,9 +171,10 @@
         [Util splitHexString:user.primaryColor toRed:&r green:&g blue:&b];
         
         float r2,g2,b2;
-        [Util splitHexString:user.secondaryColor toRed:&r green:&g blue:&b];
+        [Util splitHexString:user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
                 
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height, self.bounds.size.width, 4.0f)];
+        view.backgroundColor = [UIColor whiteColor];
         [self insertSubview:view atIndex:0];
         [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
             
