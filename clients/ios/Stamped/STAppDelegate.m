@@ -38,7 +38,7 @@
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -279,7 +279,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addValue:[STIWantToViewController class] forKey:@"Root.iWantTo"];
     [STConfiguration addValue:[STUniversalNewsController class] forKey:@"Root.news"];
     [STConfiguration addValue:[FindFriendsViewController class] forKey:@"Root.findFriends"];
-    [STConfiguration addValue:[STProfileViewController class] forKey:@"Root.user"];
+    [STConfiguration addValue:[STUserViewController class] forKey:@"Root.user"];
     [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];
     [STConfiguration addValue:[STDebugViewController class] forKey:@"Root.debug"];
     [STConfiguration addValue:[STSettingsViewController class] forKey:@"Root.settings"];

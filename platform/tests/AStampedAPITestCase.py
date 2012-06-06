@@ -344,8 +344,17 @@ class AStampedAPITestCase(AStampedTestCase):
             }
         return self.handleGET(path, data)
 
-    def showActivity(self, token):
+    def showActivity(self, token, coordinates=None):
         path = "activity/show.json"
+        data = {
+            'oauth_token'       : token['access_token'],
+            }
+        if coordinates is not None:
+            data['coordinates'] = coordinates
+        return self.handleGET(path, data)
+
+    def showFriendsActivity(self, token):
+        path = "activity/friends.json"
         data = {
             'oauth_token'       : token['access_token'],
             }
@@ -482,6 +491,30 @@ class AStampedAPITestCase(AStampedTestCase):
             "complete":     complete,
         }
         return self.handlePOST(path, data)
+
+    def createLike(self, token, stampId):
+        path = "stamps/likes/create.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
+        }
+        return self.handlePOST(path, data)
+
+    def deleteLike(self, token, stampId):
+        path = "stamps/likes/remove.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
+        }
+        return self.handlePOST(path, data)
+
+    def showLikes(self, token, stampId):
+        path = "stamps/likes/show.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
+        }
+        return self.handleGET(path, data)
 
     def _loadCollection(self, collection, filename=None, drop=True):
         if filename is None:

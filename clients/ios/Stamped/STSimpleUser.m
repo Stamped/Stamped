@@ -20,6 +20,9 @@
 @synthesize imageURL = _imageURL;
 @synthesize following = _following;
 
+@synthesize loading=_loading;
+
+
 - (id)initWithCoder:(NSCoder *)decoder {
     NSString* userID = [decoder decodeObjectForKey:@"userID"];
     NSAssert1(userID, @"UserID should not be none for %@", self);
@@ -45,8 +48,7 @@
     }
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_name release];
     [_userID release];
     [_screenName release];
@@ -87,6 +89,28 @@
      nil];
     
     return mapping;
+}
+
+- (void)toggleFollowing {
+    
+    if ([self.following boolValue]) {
+        
+        [[STStampedAPI sharedInstance] removeFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+            self.following = [NSNumber numberWithBool:![self.following boolValue]];
+            [STEvents postEvent:EventTypeUserFollowToggleFinished identifier:self.userID object:self.following];
+            _loading = NO;
+        }];
+        
+    } else {
+        
+        [[STStampedAPI sharedInstance] addFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+            self.following = [NSNumber numberWithBool:![self.following boolValue]];
+            [STEvents postEvent:EventTypeUserFollowToggleFinished identifier:self.userID object:self.following];
+            _loading = NO;
+        }];
+        
+    }
+    
 }
 
 

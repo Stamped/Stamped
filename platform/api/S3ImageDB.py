@@ -163,8 +163,8 @@ class S3ImageDB(AImageDB):
             
             for size in sizes:
                 self._removeFromS3('%s-%s%s') % (prefix, size, suffix)
-        except:
-            logs.warning('Failed to remove file')
+        except Exception:
+            logs.warning('Warning: Failed to remove file')
     
     def addEntityImage(self, entityId, image):
         assert isinstance(image, Image.Image)
@@ -332,8 +332,8 @@ class S3ImageDB(AImageDB):
                 try:
                     if not key.closed:
                         key.close()
-                except:
-                    pass
+                except Exception:
+                    logs.warning("Error closing key")
 
     def _removeFromS3(self, name):
         num_retries = 0

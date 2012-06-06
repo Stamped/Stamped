@@ -107,6 +107,12 @@
 #pragma mark - Setters
 
 - (void)setupWithUser:(STSimpleUserDetail*)user {
+    
+    if ([user isKindOfClass:NSClassFromString(@"STSimpleSource")]) {
+        _titleLabel.text = user.name;
+        [_titleLabel sizeToFit];
+        return;
+    }
         
     [_avatarView setImageURL:[NSURL URLWithString:[user imageURL]]];
     _titleLabel.text = user.name;
@@ -120,6 +126,7 @@
     if (_statsView) {
         [_statsView setupWithUser:user];
     }
+    [self setNeedsLayout];
     
 }
 

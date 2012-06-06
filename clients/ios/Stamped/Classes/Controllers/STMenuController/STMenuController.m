@@ -28,7 +28,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!LOGGED_IN) {
+    if (!LOGGED_IN || YES) {
         [self showWelcome];
     }
     
@@ -77,7 +77,7 @@
     
     } else if (option == STWelcomeViewControllerOptionTwitter) {
         
-        if (NSClassFromString(@"TWTweetComposeViewController")) {
+        if (NSClassFromString(@"TWTweetComposeViewController") && [TWTweetComposeViewController canSendTweet]) {
             
             TwitterAccountsViewController *controller = [[TwitterAccountsViewController alloc] init];
             controller.delegate = (id<TwitterAccountsViewControllerDelegate>)self;

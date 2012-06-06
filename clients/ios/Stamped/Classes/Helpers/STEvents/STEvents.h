@@ -27,6 +27,7 @@ enum EventType {
     EventTypeFriendsFinished,
     
     // user
+    EventTypeUserFollowToggleFinished,
     EventTypeUserStampsFinished,
 
 	

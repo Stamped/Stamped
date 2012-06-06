@@ -93,7 +93,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     for email in q:
         try:
             emails.append(email.decode('ascii'))
-        except:
+        except Exception:
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
     

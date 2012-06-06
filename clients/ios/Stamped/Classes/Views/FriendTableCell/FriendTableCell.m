@@ -15,6 +15,7 @@
 @end
 
 @implementation FriendTableCell
+@synthesize delegate;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
@@ -58,6 +59,7 @@
         [button addTarget:self action:@selector(action:) forControlEvents:UIControlEventTouchUpInside];
         button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         button.backgroundColor = [UIColor whiteColor];
+        button.showCheck = YES;
         [self addSubview:button];
         _actionButton = button;
         
@@ -66,6 +68,7 @@
 }
 
 - (void)dealloc {
+    [STEvents removeObserver:self];
     [super dealloc];
 }
 
@@ -89,7 +92,11 @@
     [_stampView setupWithUser:user];
 
     [_actionButton setLoading:NO];
-    [_actionButton setStatus:FriendStatusNotFollowing];
+    NSNumber *following = [user following];
+    [_actionButton setStatus:(following!=nil && [following boolValue]) ? FriendStatusFollowing : FriendStatusNotFollowing];
+    
+    [STEvents removeObserver:self];
+    [STEvents addObserver:self selector:@selector(toggleFinished:) event:EventTypeUserFollowToggleFinished identifier:user.userID];
     
 }
 
@@ -108,15 +115,21 @@
 
 - (void)action:(id)sender {
     
-    [_actionButton setLoading:YES];
-    
-    double delayInSeconds = 2.0;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        [_actionButton setLoading:NO];
-        [_actionButton setStatus:FriendStatusFollowing];
-    });
+    if ([(id)delegate respondsToSelector:@selector(friendTableCellToggleFollowing:)]) {
+        [self.delegate friendTableCellToggleFollowing:self];
+        [_actionButton setLoading:YES];
+    }
 
+}
+
+
+#pragma mark - Notifications
+
+- (void)toggleFinished:(NSNotification*)notification {
+    
+    _actionButton.status = [[notification object] boolValue] ? FriendStatusFollowing : FriendStatusNotFollowing;
+    _actionButton.loading = NO;
+    
 }
 
 @end

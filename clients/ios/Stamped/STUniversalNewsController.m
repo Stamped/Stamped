@@ -12,9 +12,11 @@
 #import "STActionManager.h"
 #import "STActivityCell.h"
 #import "Util.h"
+#import "STSliderScopeView.h"
 
 @interface STUniversalNewsController ()
 
+@property (nonatomic, retain, readonly) STSliderScopeView *slider;
 @property (nonatomic, readonly, retain) NSMutableArray* newsItems;
 @property (nonatomic, readwrite, assign) STStampedAPIScope scope;
 @property (nonatomic, readwrite, assign) BOOL reloading;
@@ -26,6 +28,7 @@
 @synthesize newsItems = newsItems_;
 @synthesize scope = scope_;
 @synthesize reloading = _reloading;
+@synthesize slider=_slider;
 
 - (id)init {
     if ((self = [super init])) {
@@ -34,43 +37,96 @@
     return self;    
 }
 
-- (void)_toggleButtonClicked:(id)notImportant {
-    self.scope = self.scope == STStampedAPIScopeYou ? STStampedAPIScopeFriends : STStampedAPIScopeYou;
-    [self updateRightButton];
-}
-
-- (void)updateRightButton {
-    NSString* scope = self.scope == STStampedAPIScopeYou ? @"Friends" : @"You";
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:scope
-                                                                               style:UIBarButtonItemStyleDone
-                                                                              target:self 
-                                                                              action:@selector(_toggleButtonClicked:)] autorelease];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.tableView.backgroundColor = [UIColor clearColor];
-    //self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [Util addGradientToLayer:self.view.layer 
-                  withColors:[NSArray arrayWithObjects:
-                              [UIColor whiteColor],
-                              [UIColor colorWithWhite:.85 alpha:1],
-                              nil]
-                    vertical:YES];
-    [self updateRightButton];
+    
+    if (!self.tableView.backgroundView) {
+        STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
+        background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+            drawGradient([UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor, [UIColor colorWithRed:.85 green:.85 blue:.85 alpha:1.0f].CGColor, ctx);
+        }];
+        self.tableView.backgroundView = background;
+        [background release];
+    }
+    
+    if (!self.footerView) {
+        STSliderScopeView *view = [[STSliderScopeView alloc] initWithStyle:STSliderScopeStyleTwo frame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 54.0f)];
+        view.delegate = (id<STSliderScopeViewDelegate>)self;
+        view.dataSource = (id<STSliderScopeViewDataSource>)self;
+        self.footerView = view;
+        [view release];
+        _slider = [view retain];
+    }
+    
+    [Util addCreateStampButtonToController:self];
     [self reloadDataSource];
+    
 }
 
 - (void)viewDidUnload {
+    [_slider release], _slider=nil;
     [super viewDidUnload];
+}
+
+- (void)dealloc {
+    [newsItems_ release], newsItems_=nil;
+    [_slider release], _slider=nil;
+    [super dealloc];
 }
 
 
 #pragma mark - Setters
 
 - (void)setScope:(STStampedAPIScope)scope {
+    if (scope_==scope) return; 
     scope_ = scope;
-    [self reloadStampedData];
+    [self reloadDataSource];
+}
+
+
+#pragma mark - STSliderScopeViewDelegate
+
+- (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
+    
+    [self setScope:scope];
+    
+}
+
+
+#pragma mark - STSliderScopeViewDataSource
+
+- (NSString*)sliderScopeView:(STSliderScopeView*)slider titleForScope:(STStampedAPIScope)scope {
+    
+    switch (scope) {
+        case STStampedAPIScopeYou:
+            return @"about you";
+            break;
+        case STStampedAPIScopeEveryone:
+            return @"about your friends";
+            break;
+        default:
+            break;
+    }
+    
+    return nil;
+}
+
+- (NSString*)sliderScopeView:(STSliderScopeView*)slider boldTitleForScope:(STStampedAPIScope)scope {
+    
+    switch (scope) {
+        case STStampedAPIScopeYou:
+            return @"you";
+            break;
+        case STStampedAPIScopeEveryone:
+            return @"your friends";
+            break;
+        default:
+            break;
+    }
+    
+    return nil;
+    
 }
 
 
@@ -180,63 +236,7 @@
 
 - (void)setupNoDataView:(NoDataView*)view {
     
-    view.imageView.userInteractionEnabled = YES;
-    [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    
-    if (self.scope == STStampedAPIScopeYou) {
-        
-        view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-        view.imageView.backgroundColor = view.backgroundColor;
-        
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.lineBreakMode = UILineBreakModeWordWrap;
-        label.numberOfLines = 3;
-        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
-        label.font = [UIFont boldSystemFontOfSize:13];
-        label.backgroundColor = [UIColor clearColor];
-        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
-        label.textAlignment = UITextAlignmentCenter;
-        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
-        [view.imageView addSubview:label];
-        [label release];
-        
-        label.text = @"That amazing burrito place.\nThe last great book you read.\nA movie your friends have to see.";
-        
-        CGSize size = [label.text sizeWithFont:label.font constrainedToSize:CGSizeMake(240.0f, CGFLOAT_MAX) lineBreakMode:UILineBreakModeWordWrap];
-        CGRect frame = label.frame;
-        frame.size = size;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-size.width)/2);
-        frame.origin.y = 24.0f;
-        label.frame = frame;
-        
-        CGFloat maxY = CGRectGetMaxY(label.frame);
-        
-        label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.lineBreakMode	= UILineBreakModeTailTruncation;
-        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
-        label.font = [UIFont boldSystemFontOfSize:17];
-        label.backgroundColor = [UIColor clearColor];
-        label.textColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f];
-        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
-        [view.imageView addSubview:label];
-        [label release];
-        
-        label.text = @"Stamp it.";
-        [label sizeToFit];
-        
-        frame = label.frame;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
-        frame.origin.y = floorf(maxY + 4.0f);
-        label.frame = frame;
-        
-        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(noDataTapped:)];
-        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
-        [view addGestureRecognizer:gesture];
-        [gesture release];
-        
-    } 
+    [view setupWithTitle:@"No news" detailTitle:@"No news found."];
     
 }
 

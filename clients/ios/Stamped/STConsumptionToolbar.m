@@ -60,8 +60,9 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
     [Util reframeView:backButton withDeltas:CGRectMake(self.frame.size.width + 10, 10, 0, 0)];
     [toolbarContents_ addSubview:backButton];
     
-    slider_ = [[STSliderScopeView alloc] initWithFrame:CGRectMake(self.frame.size.width + 45, 0.0f, self.bounds.size.width - 90.0f, self.bounds.size.height)];
-    [toolbarContents_ addSubview:slider_];
+    slider_ = [[STSliderScopeView alloc] initWithFrame:CGRectMake(self.frame.size.width + 60, 0.0f, self.bounds.size.width - 120, self.bounds.size.height)];
+      slider_.layer.shadowOpacity = 0.0f;
+      [toolbarContents_ addSubview:slider_];
     [self updateWithItem:item animated:NO];
   }
   return self;

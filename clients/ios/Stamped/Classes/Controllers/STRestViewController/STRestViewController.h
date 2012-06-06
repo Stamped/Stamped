@@ -53,6 +53,7 @@
 
 - (void)reloadDataSource;
 - (void)dataSourceDidFinishLoading;
+- (void)animateIn;
 
 @end
 

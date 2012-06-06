@@ -254,8 +254,8 @@ def handleHTTPRequest(requires_auth=True,
             finally:
                 try:
                     logs.save()
-                except:
-                    pass
+                except Exception:
+                    print 'Unable to save logs'
         
         return wrapper
     return decorator

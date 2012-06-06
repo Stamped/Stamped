@@ -823,8 +823,8 @@ class BasicEntity(BasicEntityMini):
         try:
             if t in self.types:
                 return True
-        except:
-            pass
+        except Exception as e:
+            logs.warning("isType error (%s): %s" % (self, e))
         return False
 
     # def __str__(self):
