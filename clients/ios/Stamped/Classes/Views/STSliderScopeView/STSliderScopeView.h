@@ -26,7 +26,7 @@ typedef enum {
     CGPoint _beginPress;
     BOOL _firstPan;
     BOOL _firstPress;
-    UIImageView *_userImageView;
+    UIImage *_userImage;
     STStampedAPIScope _prevScope;
     
     STSliderScopeStyle _style; // default STSliderScopeStyleThree

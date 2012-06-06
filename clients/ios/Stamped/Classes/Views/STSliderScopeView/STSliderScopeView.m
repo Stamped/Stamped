@@ -93,14 +93,7 @@
     self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
     self.layer.shadowOpacity = 1;
     self.layer.shadowOffset = CGSizeMake(0, -1);
-    
-    imageView = [[UIImageView alloc] initWithFrame:_draggingView.bounds];
-    imageView.contentMode = UIViewContentModeCenter;
-    [_draggingView addSubview:imageView];
-    _userImageView = imageView;
-    _userImageView.hidden = YES;
-    [imageView release];
-    
+
     id<STUser> user = STStampedAPI.sharedInstance.currentUser;
     if (user) {
         
@@ -137,7 +130,9 @@
 }
 
 - (void)dealloc {
-    _userImageView = nil;
+    if (_userImage) {
+        [_userImage release], _userImage = nil;
+    }
     _textCallout = nil;
     [super dealloc];
 }
@@ -185,7 +180,6 @@
     if (!_dragging) {
         _draggingView.layer.position = [self positionForScope:_scope];
         _draggingView.image = [self imageForScope:_scope];
-        _userImageView.hidden = (_scope != STStampedAPIScopeYou);
     }
 
 }
@@ -205,17 +199,31 @@
 
 - (void)setUserImageViewImage:(UIImage*)image {
     
-    if (_userImageView && image) {
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(24, 28), NO, 0);
+    if (image) {
+        
+        UIImage *overlay = [UIImage imageNamed:@"scope_drag_inner_avatar.png"];
+        UIGraphicsBeginImageContextWithOptions(overlay.size, NO, 0);
         CGContextRef ctx = UIGraphicsGetCurrentContext();
         CGRect rect = CGContextGetClipBoundingBox(ctx);
-        rect.size.height -= 4.0f;
-        CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:12.0f].CGPath);
+        rect.origin.y = 6.0f;
+        rect.origin.x = (rect.size.width-28.0f)/2;
+        rect.size =  CGSizeMake(28, 28);
+    
+        CGContextSaveGState(ctx);
+        CGPathRef path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:14.0f].CGPath;
+        CGContextAddPath(ctx, path);
         CGContextClip(ctx);
-        
         [image drawInRect:rect];
-        _userImageView.image = UIGraphicsGetImageFromCurrentImageContext();
+        CGContextRestoreGState(ctx);
+        [overlay drawAtPoint:CGPointZero];
+
+        _userImage = [UIGraphicsGetImageFromCurrentImageContext() retain];        
         UIGraphicsEndImageContext();
+        
+        if (self.scope == STStampedAPIScopeYou) {
+            _draggingView.image = _userImage;
+        }
+        
     }
     
 }
@@ -294,7 +302,7 @@
     UIImage *image = nil;
     switch (scope) {
         case STStampedAPIScopeYou:
-            image = [UIImage imageNamed:@"scope_drag_inner_you.png"];
+            image = (_userImage== nil) ? [UIImage imageNamed:@"scope_drag_inner_you.png"] : _userImage;
             break;
         case STStampedAPIScopeFriends:
             image = [UIImage imageNamed:@"scope_drag_inner_friends.png"];
@@ -382,7 +390,6 @@
         [_textCallout setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
         if (_prevScope != scope) {
             _draggingView.image = [self imageForScope:scope];
-            _userImageView.hidden = (scope != STStampedAPIScopeYou);
             _prevScope = scope;
         }
 
@@ -497,7 +504,7 @@
 }
 
 
-#pragma mark -  UIGestureRecognizerDelegate 
+#pragma mark -  UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     return YES;
