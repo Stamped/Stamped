@@ -157,7 +157,7 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         if 'albums' in self.data:
             results = self.data['albums']
         else:
-            results = self.itunes.method('lookup', id=self.key, entity='album')['results']
+            results = self.itunes.method('lookup', id=self.key, entity='album', limit=1000)['results']
         return [
             {
                 'name'  : album['collectionName'], 
@@ -179,7 +179,7 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            results = self.itunes.method('lookup', id=self.key, entity='song')['results']
+            results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
         return [
             {
                 'name':             track['trackName'],
@@ -253,7 +253,7 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            results = self.itunes.method('lookup', id=self.key, entity='song')['results']
+            results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
         if results is None:
             return []
         return [
@@ -341,7 +341,7 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     def preview(self):
         try:
             return self.data['previewUrl']
-        except Exception:
+        except KeyError:
             return None
 
 
@@ -419,7 +419,7 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
     def preview(self):
         try:
             return self.data['previewUrl']
-        except Exception:
+        except KeyError:
             return None
 
 
@@ -639,8 +639,8 @@ class iTunesSource(GenericSource):
         )
 
     @property 
-    def __mapper(self):
-        mapper = [
+    def __types_to_itunes_strings(self):
+        types_to_itunes_strings = [
             ('track',   'song'), 
             ('album',   'album'), 
             ('artist',  'musicArtist'), 
@@ -649,7 +649,7 @@ class iTunesSource(GenericSource):
             ('movie',   'movie'), 
             ('tv',      'tvShow'), 
         ]
-        return mapper
+        return types_to_itunes_strings
 
     @lazyProperty
     def __itunes(self):
@@ -693,9 +693,9 @@ class iTunesSource(GenericSource):
                         if entity.sources.itunes_url is not None:
                             url = entity.sources.itunes_url
                         else:
-                            for t in self.__mapper:
-                                if entity.isType(t[0]):
-                                    url = 'http://itunes.apple.com/us/%s/id%s' % (t[1], itunesId)
+                            for (type_, str_) in self.__types_to_itunes_strings:
+                                if entity.isType(type_):
+                                    url = 'http://itunes.apple.com/us/%s/id%s' % (str_, itunesId)
                         assert url is not None
                         source = urllib2.urlopen(url)
                         if source.code == 200 and source.url != url:
@@ -741,11 +741,8 @@ class iTunesSource(GenericSource):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.sources.itunes_id = proxy.key
 
-        try:
-            if proxy.preview is not None:
-                entity.sources.itunes_preview = proxy.preview
-        except:
-            pass
+        if hasattr(proxy, 'preview') and proxy.preview is not None:
+            entity.sources.itunes_preview = proxy.preview
         return True
 
     def matchSource(self, query):
@@ -841,13 +838,13 @@ class iTunesSource(GenericSource):
         def gen():
             try:
                 if query.types is None:
-                    queries = [v[1] for v in self.__mapper]
+                    queries = [itunes_str for (type_, itunes_str) in self.__types_to_itunes_strings]
                 else:
                     queries = []
-                    for t in query.types:
-                        for t2 in self.__mapper:
-                            if t == t2[0]:
-                                queries.append(t2[1])
+                    for query_type in query.types:
+                        for (type_, itunes_str) in self.__types_to_itunes_strings:
+                            if query_type == type_:
+                                queries.append(itunes_str)
                 
                 if len(queries) == 0:
                     return
