@@ -47,26 +47,28 @@ class MongoActivityCollection(AActivityDB):
     @lazyProperty
     def activity_links_collection(self):
         return MongoActivityLinkCollection()
-    
-    def getActivity(self, userId, **kwargs):
+
+    def getActivityIdsForUser(self, userId, **kwargs):
         params = {
             'since'     : kwargs.pop('since', None),
             'before'    : kwargs.pop('before', None),
             'limit'     : kwargs.pop('limit', 20),
             'sort'      : 'timestamp.modified',
             'sortOrder' : pymongo.DESCENDING,
-        }
+            }
+        return self.activity_links_collection.getActivityIdsForUser(userId, **params)
+    
+    def getActivity(self, userId, **kwargs):
+        activityIds = self.getActivityIdsForUser(userId, **kwargs)
 
         sort = {
             'sort'      : 'timestamp.modified',
             'sortOrder' : pymongo.DESCENDING,
-        }
+            }
 
-        activityIds = self.activity_links_collection.getActivityIdsForUser(userId, **params)
         activity    = self.activity_items_collection.getActivityItems(activityIds, **sort)
+        return activity
 
-        return activity 
-    
     def getActivityForUsers(self, userIds, **kwargs):
         params = {
             'verbs'     : kwargs.pop('verbs', []),
