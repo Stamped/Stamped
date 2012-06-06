@@ -59,12 +59,8 @@
 
 - (void)stWelcomeViewController:(STWelcomeViewController*)controller selectedOption:(STWelcomeViewControllerOption)option {
     
-    double delayInSeconds = 1.0f;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        [controller.view removeFromSuperview];
-        [controller release];
-    });
+    [controller.view removeFromSuperview];
+    [controller release];
     
     if (option == STWelcomeViewControllerOptionLogin) {
     
@@ -97,7 +93,6 @@
             [navController release];
             
         }
-
     
     } else if (option == STWelcomeViewControllerOptionSignup) {
         

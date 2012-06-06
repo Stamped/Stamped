@@ -59,7 +59,15 @@ static id __instance;
         if ([self.facebook shouldExtendAccessToken]) {
             [self.facebook extendAccessToken];
         } else {
-            [self.facebook authorize:[NSArray arrayWithObjects:@"user_about_me", @"friends_about_me", @"publish_stream", nil]];
+            
+            /*
+             email
+             user_location
+             publish_stream (for posting to wall)
+             user_about_me (for bio)
+             */
+            
+            [self.facebook authorize:[NSArray arrayWithObjects:@"user_about_me", @"user_location", @"email", @"publish_stream", nil]];
         }
         
     } else {
