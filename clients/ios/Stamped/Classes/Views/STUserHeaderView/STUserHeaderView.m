@@ -32,6 +32,7 @@
         [self addSubview:view];
         [view release];
         _avatarView = view;
+        [view setDefault];
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
         [_avatarView addGestureRecognizer:tap];

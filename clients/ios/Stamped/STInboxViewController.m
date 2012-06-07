@@ -109,6 +109,7 @@
         self.footerView = _slider;
         _slider.scope = self.scope;
     }
+    
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self.tableView reloadData];

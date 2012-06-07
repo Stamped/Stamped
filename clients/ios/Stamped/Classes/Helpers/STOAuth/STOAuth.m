@@ -216,7 +216,6 @@
     
     NSString *sigBaseString = [NSString stringWithFormat:@"%@&%@&%@", method, requestURLStrEnc, paramStrEnc];
         
-    NSLog(@"%@", sigBaseString);
     return [STOAuth signatureWithBaseString:sigBaseString secret:token];
 }
 

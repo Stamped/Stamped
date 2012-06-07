@@ -10,6 +10,7 @@
 #import "STSimpleLoginResponse.h"
 #import "STRestKitLoader.h"
 #import "STDebug.h"
+#import "STStampedAPI.h"
 #import "ASIHTTPRequest.h"
 #import "ASIS3ObjectRequest.h"
 #import <RestKit/NSData+MD5.h>
@@ -79,6 +80,35 @@ static id __instance;
  cls.addProperty('color_primary',                    basestring)
  cls.addProperty('color_secondary',                  basestring)
  
+ */
+
+
+/*
+ 
+ - (STCancellation*)loginWithScreenName:(NSString*)screenName 
+ password:(NSString*)password 
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)loginWithFacebookUserToken:(NSString*)userToken
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)loginWithTwitterUserToken:(NSString*)userToken 
+ userSecret:(NSString*)userSecret
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)createAccountWithPassword:(NSString*)password
+ accountParameters:(STAccountParameters*)accountParameters
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
+ accountParameters:(STAccountParameters*)accountParameters
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
+ userSecret:(NSString*)userSecret 
+ accountParameters:(STAccountParameters*)accountParameters
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
  
  */
 
@@ -88,7 +118,7 @@ static id __instance;
 - (void)facebookSignupWithParams:(NSDictionary*)params {
     
     NSString *path = @"/account/create/facebook.json";
-    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:NO params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
         
         if (error) {
             
@@ -165,6 +195,18 @@ static id __instance;
 
 #pragma mark - Updates
 
+- (void)checkUserName:(NSString*)username completion:(STAuthRequestFinished)completion {
+    
+    NSString *path = @"/account/check.json";
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:NO params:[NSDictionary dictionaryWithObject:username forKey:@"login"] mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+        
+        completion(error);
+        
+    }];
+    
+}
+
+
 /*
  GET /v0/account/check.json 
  Takes one field (login) and returns a 200 plus user object if it exists, otherwise returns a 404 if available and a 400 if invalid (e.g. if it's a blacklisted screen name).
@@ -205,12 +247,12 @@ static id __instance;
 
 #pragma mark - ASIRequestDelegate methods
 
-
-
 - (void)requestFinished:(ASIHTTPRequest*)request {
+
 }
 
 - (void)requestFailed:(ASIHTTPRequest*)request {
+
 }
 
 

@@ -58,6 +58,7 @@
     
     if (_cancellation) {
         [_cancellation cancel];
+        [_cancellation release];
         _cancellation = nil;
     }
     
@@ -70,7 +71,7 @@
 #pragma mark Loading
 
 - (void)loadWithPath:(NSString*)path params:(NSDictionary*)params {
-        
+            
     _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:YES params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping] andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
 
         _moreData = NO;
@@ -92,7 +93,6 @@
             
             _data = [array retain];
             _identifiers = [identifiers retain];
-            [_cancellation release], _cancellation=nil;
             
             [array release];
             [identifiers release];
