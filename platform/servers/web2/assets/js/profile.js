@@ -1682,10 +1682,15 @@ var g_update_stamps = null;
         $window.resize(update_navbar_layout);
         
         $(document).bind('keydown', function(e) {
-            // close all lightboxes and sDetail if the user presses ESC
+            // close lightboxes, sDetail, and/or map popups when the user presses ESC
+            // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
-                if (!!close_sdetail_func) {
+                if (typeof(close_sdetail_func) !== 'undefined' && !!close_sdetail_func) {
                     close_sdetail_func();
+                }
+                
+                if (typeof(g_close_map_popup) !== 'undefined' && !!g_close_map_popup) {
+                    g_close_map_popup();
                 }
             }
         });

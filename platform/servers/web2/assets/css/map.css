@@ -123,6 +123,11 @@ footer {
   position: relative;
   background: #fff;
   padding: 12px;
+  -webkit-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -143,6 +148,12 @@ footer {
   float: left;
   margin: 0 12px 12px 0;
 }
+.stamp-map .stamp-map-canvas .stamp-map-item .profile-image-small img {
+  display: none;
+}
+.stamp-map .stamp-map-canvas .stamp-map-item .profile-image-small img:first-child {
+  display: block;
+}
 .stamp-map .stamp-map-canvas .stamp-map-item .entity-header {
   float: left;
 }
@@ -150,14 +161,14 @@ footer {
   clear: both;
   margin: .5em 0 0 56px;
 }
+.stamp-map .stamp-map-canvas .stamp-map-item .content .blurbs .stamped-content {
+  display: none;
+}
 .stamp-map .stamp-map-canvas .stamp-map-item .content .blurbs .stamped-content p.blurb {
   font-size: 80%;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .content .blurbs .stamped-content p.blurb:hover {
   cursor: text;
-}
-.stamp-map .stamp-map-canvas .stamp-map-item .content .blurbs .stamped-content:last-child {
-  display: none;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .content .blurbs .stamped-content:first-child {
   display: block;

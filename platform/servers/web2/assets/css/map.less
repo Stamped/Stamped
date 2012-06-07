@@ -69,6 +69,7 @@ footer {
             background: #fff;
             padding: @marker_space;
             
+            .box-shadow(0, 0, 4px, 0, @shadow);
             .rounded(4px);
             
             .stamp-map-item-overlay {
@@ -85,6 +86,13 @@ footer {
             .profile-image-small {
                 float: left;
                 margin: 0 @marker_space @marker_space 0;
+                
+                img {
+                    display: none;
+                }
+                img:first-child {
+                    display: block;
+                }
             }
             
             .entity-header {
@@ -97,16 +105,14 @@ footer {
                 
                 .blurbs {
                     .stamped-content {
+                        display: none;
+                        
                         p.blurb {
                             font-size: 80%;
                         }
                         p.blurb:hover {
                             cursor: text;
                         }
-                    }
-                    
-                    .stamped-content:last-child {
-                        display: none;
                     }
                     
                     .stamped-content:first-child {

@@ -83,6 +83,7 @@
                     popup.selected = null;
                 }
             };
+            window.g_close_map_popup = close_popup;
             
             google.maps.event.addListener(map, 'click',        close_popup);
             google.maps.event.addListener(map, 'zoom_changed', close_popup);
@@ -185,7 +186,9 @@
                 
                 info += "</div><div class='bottom-wave'></div></div>";*/
                 
-                var info = template(stamp, { partials : partial_templates });
+                var info = template(stamp, {
+                    partials : partial_templates
+                });
                 
                 //info = "<div class='stamp-map-item'>" + stamp.entity.title + "</div>";
                 //console.debug(stamp.entity.title + ":");

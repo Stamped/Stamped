@@ -2,18 +2,18 @@
 <div class="stamp-map-item clearfix">
     <div class="stamp-map-item-overlay user-primary-selection"></div>
     
-    {{#user}}
-        {{> profile-image-small }}
-    {{/user}}
+    <div class="profile-image-small">
+        {{#user.image.sizes}}
+            <img src="{{url}}" />
+        {{/user.image.sizes}}
+    </div>
     
     <div class="entity-header">
         <div class="stamp-category-{{entity.category}}">
             <div class='title clearfloat'>
                 <div class="pronounced-title">
-                    <a class='sdetail' href="{{url}}" title="{{entity.title}}">{{entity.title}}</a>
+                    <a class='sdetail' href="{{#url}}{{.}}{{/url}}" title="{{entity.title}}">{{entity.title}}</a>
                 </div>
-                
-                <span class='user-logo-small'></span>
             </div>
         </div>
     </div>
