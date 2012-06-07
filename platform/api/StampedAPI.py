@@ -1942,9 +1942,8 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credit is not None:
                     for credit in stamp.credit:
-                        user                    = userIds[credit.user.user_id]
                         item                    = StampPreview()
-                        item.user               = user
+                        item.user               = userIds[str(credit.user.user_id)]
                         item.stamp_id           = credit.stamp_id
                         credits.append(item)
                     stamp.credit = credits
