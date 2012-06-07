@@ -167,8 +167,10 @@ def handleHTTPRequest(requires_auth=True,
                         if http_schema is None:
                             raise Exception("ERROR: handleHTTPRequest requires http_schema if upload is provided")
                         
+                        http_schema.validate()
                         params['http_schema']   = parseFileUpload(http_schema(), request, upload, **parse_kwargs)
                     elif http_schema is not None:
+                        http_schema.validate()
                         params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
                     else:
                         params['http_schema']   = parseRequest(None, request, **parse_kwargs)
