@@ -1228,7 +1228,7 @@ class HTTPEntity(Schema):
                     item.action         = action
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                self.galleries = [gallery]
 
             # Actions: Reservation
 
