@@ -2160,21 +2160,21 @@ class HTTPEntitySearchResultsItem(Schema):
 
         # Build icon
         if entity.isType('food'):
-            self.icon = _getIconURL('food')
+            self.icon = _getIconURL('search_food')
         elif entity.isType('bar'):
-            self.icon = _getIconURL('bar')
+            self.icon = _getIconURL('search_bar')
         elif entity.kind == 'place':
-            self.icon = _getIconURL('place')
+            self.icon = _getIconURL('search_place')
         elif entity.isType('tv'):
-            self.icon = _getIconURL('tv')
+            self.icon = _getIconURL('search_tv')
         elif entity.isType('movie'):
-            self.icon = _getIconURL('movie')
+            self.icon = _getIconURL('search_movie')
         elif entity.isType('artist'):
-            self.icon = _getIconURL('artist')
+            self.icon = _getIconURL('search_artist')
         elif entity.isType('album'):
-            self.icon = _getIconURL('album')
+            self.icon = _getIconURL('search_album')
         elif entity.isType('track'):
-            self.icon = _getIconURL('track')
+            self.icon = _getIconURL('search_track')
 
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance
