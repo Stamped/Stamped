@@ -139,8 +139,8 @@ header .header-body p .desc {
 header .header-body p a.button {
   background: url(/assets/img/join_signup_sprite.png) no-repeat;
   display: inline-block;
-  width: 82px;
-  height: 27px;
+  width: 86px;
+  height: 31px;
   margin-left: .5em;
   position: relative;
   top: .5em;
@@ -155,10 +155,10 @@ header .header-body p.join a.button {
   background-position: 0 0;
 }
 header .header-body p.join a.button:hover {
-  background-position: -84px 0;
+  background-position: -88px 0;
 }
 header .header-body p.join a.button:active {
-  background-position: -168px 0;
+  background-position: -176px 0;
 }
 header .header-body p.login {
   z-index: 26;
@@ -168,13 +168,13 @@ header .header-body p.login span.desc {
   color: #bbb;
 }
 header .header-body p.login a.button {
-  background-position: 0 -29px;
+  background-position: 0 -33px;
 }
 header .header-body p.login a.button:hover {
-  background-position: -84px -29px;
+  background-position: -88px -33px;
 }
 header .header-body p.login a.button:active {
-  background-position: -168px -29px;
+  background-position: -176px -33px;
 }
 .post-header {
   position: relative;
@@ -195,7 +195,7 @@ header .header-body p.login a.button:active {
   left: -110px;
   width: 210px;
   height: 210px;
-  z-index: 101;
+  z-index: 160;
 }
 .user-logo-small {
   position: absolute;
@@ -204,6 +204,15 @@ header .header-body p.login a.button:active {
   display: inline-block;
   width: 44px;
   height: 44px;
+  z-index: 101;
+}
+.user-logo-tiny {
+  position: absolute;
+  top: 0px;
+  right: -12px;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
   z-index: 101;
 }
 .ribbon-top {
@@ -1311,8 +1320,69 @@ header .header-body p.login a.button:active {
   filter: none;
 }
 /* **************************************************************************
+                            SOCIAL SHARING WIDGET
+   ************************************************************************** */
+.share-widget {
+  background-color: #fff;
+  padding: 0.25em 0.5em;
+  -webkit-border-radius: 1em;
+  -moz-border-radius: 1em;
+  border-radius: 1em;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  /* NOTE: because social sharing requires JS, sharing widgets are hidden 
+       by default in CSS and only displayed on page load via JS if JS is 
+       supported.
+    */
+
+  display: none;
+  -webkit-transition: -webkit-border-radius 0.3s ease-out;
+  -moz-transition: -moz-border-radius 0.3s ease-out;
+  -ms-transition: -ms-border-radius 0.3s ease-out;
+  -o-transition: -o-border-radius 0.3s ease-out;
+  transition: border-radius 0.3s ease-out;
+  overflow: hidden;
+}
+.share-widget .desc {
+  font-size: 80%;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #333;
+}
+.share-widget .share-buttons {
+  display: none;
+  white-space: nowrap;
+  margin: 4px auto;
+}
+.share-widget .share-buttons .share-button {
+  display: inline-block;
+}
+.share-widget:hover {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.share-widget:hover .share-buttons {
+  display: block;
+}
+/* **************************************************************************
                               MISC / DEPRECATED
    ************************************************************************** */
+a.sdetail:hover,
+.pronounced-title a:hover,
+a.sdetail:active,
+.pronounced-title a:active {
+  text-decoration: none;
+}
 .bold {
   color: #333;
   font-weight: bold;

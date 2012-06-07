@@ -424,6 +424,11 @@
                 [button release];
                 [barButton release];
                 
+                CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+                animation.fromValue = [NSNumber numberWithFloat:0.0f];
+                animation.duration = 0.3f;
+                [button.layer addAnimation:animation forKey:nil];
+                
             }];
         }
 

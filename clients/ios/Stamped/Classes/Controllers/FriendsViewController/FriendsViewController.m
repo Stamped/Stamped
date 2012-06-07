@@ -115,7 +115,7 @@
             _performingAuth = YES;
             dispatch_after( dispatch_time(DISPATCH_TIME_NOW, 0.3f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
                 
-                if (NSClassFromString(@"TWTweetComposeViewController")) {
+                if (NSClassFromString(@"TWTweetComposeViewController") && [TWTweetComposeViewController canSendTweet]) {
                     [[STTwitter sharedInstance] requestAccess:^(BOOL granted) {
                         if (granted) {
                             [self presentTwitterAccounts];
@@ -412,7 +412,22 @@
 
 - (void)setupNoDataView:(NoDataView*)view {
  
-    [view setupWithTitle:@"No Friends" detailTitle:@"No friends found."];
+    NSString *string = @"";
+    switch (_friends.requestType) {
+        case FriendsRequestTypeContacts:
+            string = @" from your Address Book";
+            break;
+        case FriendsRequestTypeTwitter:
+            string = @" from Twitter";
+            break;
+        case FriendsRequestTypeFacebook:
+            string = @" from Facebook";
+            break;
+        default:
+            break;
+    }
+    
+    [view setupWithTitle:@"No Friends" detailTitle:[NSString stringWithFormat:@"No friends found%@.", string]];
     
 }
 

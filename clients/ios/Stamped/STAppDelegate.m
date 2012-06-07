@@ -35,6 +35,7 @@
 #import "STTwitter.h"
 #import "STFacebook.h"
 #import "STRestKitLoader.h"
+#import "STUnreadActivity.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -140,6 +141,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [Util executeAsync:^{
         [Util removeOldCacheDirectories];
     }];
+    
+    [[STUnreadActivity sharedInstance] update];
+    
     return YES;
 }
 

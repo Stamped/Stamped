@@ -92,8 +92,8 @@ header {
             a.button {
                 background: url(/assets/img/join_signup_sprite.png) no-repeat;
                 display: inline-block;
-                width:  82px;
-                height: 27px;
+                width:  86px;
+                height: 31px;
                 margin-left: .5em;
                 position: relative;
                 top: .5em;
@@ -104,16 +104,17 @@ header {
             background-position: 0 @y;
             
             &:hover {
-                background-position: -84px  @y;
+                background-position: -88px  @y;
             }
             
             &:active {
-                background-position: -168px @y;
+                background-position: -176px @y;
             }
         }
         
         p.join {
             z-index: 27;
+            
             span.desc {
                 color: #438fed;
             }
@@ -132,7 +133,7 @@ header {
             }
             
             a.button {
-                .button(-29px);
+                .button(-33px);
             }
         }
     }
@@ -158,7 +159,7 @@ header {
     width:  210px;
     height: 210px;
     
-    z-index: 101;
+    z-index: 160;
 }
 
 .user-logo-small {
@@ -170,6 +171,19 @@ header {
     display: inline-block;
     width:  44px;
     height: 44px;
+    
+    z-index: 101;
+}
+
+.user-logo-tiny {
+    position: absolute;
+    
+    top:   -0px;
+    right: -12px;
+    
+    display: inline-block;
+    width:  24px;
+    height: 24px;
     
     z-index: 101;
 }
@@ -493,9 +507,64 @@ header {
 
 
 /* **************************************************************************
+                            SOCIAL SHARING WIDGET
+   ************************************************************************** */
+
+
+.share-widget {
+    background-color: #fff;
+    padding: 0.25em 0.5em;
+    
+    .rounded(1em);
+    .box-shadow(0, 0, 18px, 0, @shadow);
+    
+    /* NOTE: because social sharing requires JS, sharing widgets are hidden 
+       by default in CSS and only displayed on page load via JS if JS is 
+       supported.
+    */
+    display: none;
+    
+    .desc {
+        font-size: 80%;
+        font-weight: 700;
+        white-space: nowrap;
+        color: #333;
+    }
+    
+    .transition-rounded(0.3s, ease-out);
+    overflow: hidden;
+    
+    .share-buttons {
+        display: none;
+        white-space: nowrap;
+        
+        margin: 4px auto;
+        
+        .share-button {
+            display: inline-block;
+        }
+    }
+    
+    &:hover {
+        .rounded(4px);
+        
+        .share-buttons {
+            display: block;
+        }
+    }
+}
+
+
+/* **************************************************************************
                               MISC / DEPRECATED
    ************************************************************************** */
 
+
+a.sdetail, .pronounced-title a {
+    &:hover, &:active {
+        text-decoration: none;
+    }
+}
 
 .bold {
     color: #333;

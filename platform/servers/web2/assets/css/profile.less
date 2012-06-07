@@ -157,49 +157,6 @@
                                 background-position: -80px 0;
                             }
                         }
-                        
-                        .share-widget {
-                            background-color: #fff;
-                            padding: 0.25em 0.5em;
-                            
-                            .rounded(1em);
-                            .box-shadow(0, 0, 18px, 0, @shadow);
-                            
-                            /* NOTE: because social sharing requires JS, sharing widgets are hidden 
-                               by default in CSS and only displayed on page load via JS if JS is 
-                               supported.
-                            */
-                            display: none;
-                            
-                            .desc {
-                                font-size: 80%;
-                                font-weight: 700;
-                                white-space: nowrap;
-                                color: #333;
-                            }
-                            
-                            .transition-rounded(0.5s, ease-out);
-                            overflow: hidden;
-                            
-                            .share-buttons {
-                                display: none;
-                                white-space: nowrap;
-                                
-                                margin: 4px auto;
-                                
-                                .share-button {
-                                    display: inline-block;
-                                }
-                            }
-                            
-                            &:hover {
-                                .rounded(0);
-                                
-                                .share-buttons {
-                                    display: block;
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -377,7 +334,7 @@ body.other {
 }
 
 .stamp-gallery-header {
-    margin: 1em 0 0;
+    margin: 1em 24px;
     
     .stamp-gallery-sort {
         position: relative;
@@ -417,18 +374,28 @@ body.other {
         float: right;
         
         a {
-            background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
-            display: block;
+            //display: block;
+            //-moz-box-align: center;
+            //-webkit-box-align: center;
             
-            width:  39px;
-            height: 33px;
+            .icon {
+                background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
+                display: inline-block;
+                
+                width:  39px;
+                height: 33px;
+            }
             
             &:hover {
-                background-position: -41px 0;
+                .icon {
+                    background-position: -41px 0;
+                }
             }
             
             &:active {
-                background-position: -82px 0;
+                .icon {
+                    background-position: -82px 0;
+                }
             }
         }
     }
@@ -528,15 +495,13 @@ body.other {
     /*background-color: #FEFEFE;*/
     
     &:hover {
-        cursor: pointer;
-        
         .content .content_2 .timestamp {
             opacity: 1;
         }
     }
     
     .stamp-gallery-item-inner {
-        border-bottom: 1px solid #bbb;
+        border-bottom: 1px solid #c2c2c2;
     }
     
     .content {
@@ -722,7 +687,7 @@ a.lightbox {
     height: auto;
 }
 
-.stamp-preview {
+.stamp-preview, .stamp-preview-raw {
     .sized(@preview-wrapper-width);
     
     .preview-image {
@@ -1264,11 +1229,11 @@ ul.user-category-distribution {
     height: 100%;
     
     position: fixed;
-    overflow: scroll;
+    overflow-y: scroll;
     //position: absolute;
     
     top: 15%;
-    z-index: 100;
+    z-index: 125;
 }
 
 

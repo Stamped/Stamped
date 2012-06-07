@@ -32,137 +32,140 @@
         <div class="profile-header">
             <div class="profile-content-page">
                 
-                <!-- DEFAULT HEADER -->
-                <div class="profile-header-body header-category-default">
-                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        {% handlebars_template "profile-image-large" user %}
-                        
-                        <div class="lhs">
-                            <p class='profile-title'>
-                                {{user.name}}
-                            </p>
+                {% with share_widget_desc="Share this collection" %}
+                    
+                    <!-- DEFAULT HEADER -->
+                    <div class="profile-header-body header-category-default">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            {% handlebars_template "profile-image-large" user %}
                             
-                            <p>
-                                <a class='screen-name' href="/{{user.screen_name}}">{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
-                            </p>
-                        </div>
-                        
-                        <div class="rhs">
-                            {% handlebars_template "share-widget" %}
+                            <div class="lhs">
+                                <p class='profile-title'>
+                                    {{user.name}}
+                                </p>
+                                
+                                <p>
+                                    <a class='screen-name' href="/{{user.screen_name}}">{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
+                                </p>
+                            </div>
                             
-                            <div class="subnav">
-                                <div class="subnav_button subnav_button0"></div>
-                                <div class="subnav_button subnav_button1"></div>
-                                <div class="subnav_button subnav_button2"></div>
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                                
+                                <div class="subnav">
+                                    <div class="subnav_button subnav_button0"></div>
+                                    <div class="subnav_button subnav_button1"></div>
+                                    <div class="subnav_button subnav_button2"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- PLACE HEADER -->
-                <div class="profile-header-body header-category-place">
-                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        
-                        {% handlebars_template "profile-image-medium" user %}
-                        
-                        <div class="lhs">
-                            <p class='name'>{{user.screen_name}}'s</p>
-                            <p class='title'>Place Stamps</p>
-                        </div>
-                        
-                        <div class="rhs">
-                            {% handlebars_template "share-widget" %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- MUSIC HEADER -->
-                <div class="profile-header-body header-category-music">
-                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        
-                        {% handlebars_template "profile-image-medium" user %}
-                        
-                        <div class="lhs">
-                            <p class='name'>{{user.screen_name}}'s</p>
-                            <p class='title'>Music Stamps</p>
-                        </div>
-                        
-                        <div class="rhs">
-                            {% handlebars_template "share-widget" %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- BOOK HEADER -->
-                <div class="profile-header-body header-category-book">
-                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        
-                        {% handlebars_template "profile-image-medium" user %}
-                        
-                        <div class="lhs">
-                            <p class='name'>{{user.screen_name}}'s</p>
-                            <p class='title'>Book Stamps</p>
-                        </div>
-                        
-                        <div class="rhs">
-                            {% handlebars_template "share-widget" %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- FILM & TV HEADER -->
-                <div class="profile-header-body header-category-film">
-                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        
-                        {% handlebars_template "profile-image-medium" user %}
-                        
-                        <div class="lhs">
-                            <p class='name'>{{user.screen_name}}'s</p>
-                            <p class='title'>Film &amp; TV Stamps</p>
-                        </div>
-                        
-                        <div class="rhs">
-                            {% handlebars_template "share-widget" %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- OTHER HEADER -->
-                <div class="profile-header-body header-category-other">
-                    <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                        
-                        {% handlebars_template "profile-image-medium" user %}
-                        
-                        <div class="lhs">
-                            <p class='name'>{{user.screen_name}}'s</p>
-                            <p class='title'>Other Stamps</p>
-                        </div>
-                        
-                        <div class="rhs">
-                            {% handlebars_template "share-widget" %}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="profile-header-post">
-                    <div class="user-gradient">
-                        <div class="ribbon-bottom"></div>
                     </div>
                     
-                    <div class="inset-stamp">
-                        <div class="stamp-count user-primary stamp-count-default">
-                            {{user.num_stamps}}
+                    <!-- PLACE HEADER -->
+                    <div class="profile-header-body header-category-place">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            {% handlebars_template "profile-image-medium" user %}
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Place Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- MUSIC HEADER -->
+                    <div class="profile-header-body header-category-music">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            {% handlebars_template "profile-image-medium" user %}
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Music Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- BOOK HEADER -->
+                    <div class="profile-header-body header-category-book">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            {% handlebars_template "profile-image-medium" user %}
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Book Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FILM & TV HEADER -->
+                    <div class="profile-header-body header-category-film">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            {% handlebars_template "profile-image-medium" user %}
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Film &amp; TV Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- OTHER HEADER -->
+                    <div class="profile-header-body header-category-other">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            {% handlebars_template "profile-image-medium" user %}
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Other Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-header-post">
+                        <div class="user-gradient">
+                            <div class="ribbon-bottom"></div>
                         </div>
                         
-                        {% for distro in user.distribution %}
-                            <div class="stamp-count user-primary stamp-count-{{distro.category}}">
-                                {{distro.count}}
+                        <div class="inset-stamp">
+                            <div class="stamp-count user-primary stamp-count-default">
+                                {{user.num_stamps}}
                             </div>
-                        {% endfor %}
-                        
-                        <p>STAMPS</p>
+                            
+                            {% for distro in user.distribution %}
+                                <div class="stamp-count user-primary stamp-count-{{distro.category}}">
+                                    {{distro.count}}
+                                </div>
+                            {% endfor %}
+                            
+                            <p>STAMPS</p>
+                        </div>
                     </div>
-                </div>
+                {% endwith %}
             </div>
         </div>
     </div>
@@ -229,23 +232,6 @@
     
     {% block pre_profile_main_content %}
     <div id="main-content" class="fixedwidth">
-        
-        <div class='stamp-gallery-header'>
-            <div class='stamp-gallery-sort'>
-                <a href="#" class='item selected sort-modified' title='Sort stamps by most recent'>
-                    Newest<span class='arrow'> &#x25BC</span>
-                </a>
-                
-                <a href="#" class='item sort-popularity' title='Sort stamps by popularity'>
-                    Popular<span class='arrow'> &#x25BC</span>
-                </a>
-            </div>
-            
-            <div class='stamp-gallery-view-map'>
-                <a href="#"></a>
-            </div>
-        </div>
-        
         {% endblock pre_profile_main_content %}
         
         {% block profile_main_content %}

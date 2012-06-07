@@ -80,6 +80,7 @@
 - (void)dealloc {
     [_icon release], _icon=nil;
     [_titleLabel release], _titleLabel=nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
@@ -263,29 +264,7 @@
     
     
 }
-/*
-- (void)setTopBorder:(BOOL)border {
-    _topBorder = border;
-    
-    if (_topBorder) {
-        
-        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.bounds.size.width, 1.0f)];
-        view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.1f];
-        view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
-        [self insertSubview:view atIndex:0];
-        [view release];
-        
-        view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 1.0f, self.bounds.size.width, 1.0f)];
-        view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.05f];
-        view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
-        [self insertSubview:view atIndex:0];
-        [view release];
-        
-    }
-    
-    
-}
-*/
+
 - (void)setTop:(BOOL)top bottom:(BOOL)bottom {
     
     if (top) {
@@ -327,6 +306,14 @@
     }
     
     
+}
+
+
+#pragma mark - Notifications 
+
+- (void)countUpdated:(NSNotification*)notification {
+    if (![notification object]) return;
+    [self setBadgeCount:[[notification object] integerValue]];
 }
 
 @end

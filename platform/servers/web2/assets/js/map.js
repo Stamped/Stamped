@@ -5,6 +5,12 @@
 
 (function() {
     $(document).ready(function() {
+        
+        // ---------------------------------------------------------------------
+        // Initialize Google Maps canvas
+        // ---------------------------------------------------------------------
+        
+        
         var canvas  = $(".stamp-map .stamp-map-canvas")[0];
         var $canvas = $(canvas);
         
@@ -13,16 +19,23 @@
         var center  = new google.maps.LatLng(40.707913, -74.013696);
         
         var map     = new google.maps.Map(canvas, {
-            center      : center, 
-            zoom        : 8, 
-	        mapTypeId   : google.maps.MapTypeId.ROADMAP
-            /*zoomControl : true,
+	        mapTypeId           : google.maps.MapTypeId.ROADMAP, 
+            center              : center, 
+            zoom                : 8, 
             
+            // disable all default controls in favor of enabling a few explicitly
             disableDefaultUI    : true,
+            
+            zoomControl         : true,
             zoomControlOptions  : {
-                style   : google.maps.ZoomControlStyle.LARGE,
-                position: google.maps.ControlPosition.TOP_RIGHT
-            }*/
+                style           : google.maps.ZoomControlStyle.LARGE,
+                position        : google.maps.ControlPosition.TOP_RIGHT
+            }, 
+            
+            panControl          : true, 
+            panControlOptions   : {
+                position        : google.maps.ControlPosition.TOP_RIGHT
+            }
         });
         
         var image   = new google.maps.MarkerImage('/assets/img/pin.png',
@@ -37,9 +50,7 @@
         
         var client = new StampedClient();
         var stamps = STAMPED_PRELOAD.stamps;
-        //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
         
-        //var popup  = new google.maps.InfoWindow({ });
         var popup  = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
@@ -72,9 +83,63 @@
                     popup.selected = null;
                 }
             };
+            window.g_close_map_popup = close_popup;
             
             google.maps.event.addListener(map, 'click',        close_popup);
             google.maps.event.addListener(map, 'zoom_changed', close_popup);
+            
+            var partial_templates = {}
+            
+            $(".handlebars-template").each(function (i) {
+                var $this = $(this);
+                var key   = $this.attr('id');
+                var val   = $this.html();
+                
+                partial_templates[key] = val;
+            });
+            
+            // TODO: this doesn't currently work!
+            var user_profile_image = function(size) {
+                size = (typeof(size) === 'undefined' ? 144 : size);
+                
+                var name = this.name;
+                var screen_name = this.screen_name;
+                var alt  = screen_name;
+                var url  = "http://static.stamped.com/users/default.jpg";
+                var okay = false;
+                var multires_image = this.image;
+                
+                if (!!name) {
+                    alt  = name + "(" + alt + ")";
+                }
+                
+                if (!!multires_image) {
+                    for (image in multires_image.sizes) {
+                        if (image.width === size) {
+                            url  = image.url;
+                            okay = true;
+                            break
+                        }
+                    }
+                    
+                    if (!okay) {
+                        for (image in multires_image.sizes) {
+                            url  = image.url;
+                            okay = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!okay) {
+                    console.debug("no image of size '" + size + "' for user '" + screen_name + "'");
+                }
+                
+                return new Handlebars.SafeString('<img alt="' + alt + '" src="' + url + '" />');
+            };
+            
+            Handlebars.registerHelper('user_profile_image', user_profile_image);
+            var template = Handlebars.compile($('#stamp-map-item').html());
             
             // for each stamp, initialize a marker and add it to the map
             $.each(stamps, function(i, stamp) {
@@ -99,7 +164,7 @@
                 markers.push(marker);
                 
                 // create the html content for the popup InfoBox
-                var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
+                /*var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
                 
                 info += "<p class='subtitle-line'>" + 
                             "<span class='icon'></span>" + 
@@ -119,7 +184,15 @@
                     }
                 }
                 
-                info += "</div><div class='bottom-wave'></div></div>";
+                info += "</div><div class='bottom-wave'></div></div>";*/
+                
+                var info = template(stamp, {
+                    partials : partial_templates
+                });
+                
+                //info = "<div class='stamp-map-item'>" + stamp.entity.title + "</div>";
+                //console.debug(stamp.entity.title + ":");
+                //console.debug(info);
                 
                 var open_popup = function(e) {
                     // guard to only display a single marker InfoBox at a time
@@ -128,6 +201,14 @@
                     } else {
                         popup.setContent(info);
                         popup.open(map, marker);
+                        
+                        if (!!g_update_stamps) {
+                            setTimeout(function() {
+                                var $s = $('.stamp-map-item');
+                                g_update_stamps($s);
+                            }, 150);
+                        }
+                        
                         popup.selected = marker;
                     }
                     
@@ -149,17 +230,114 @@
             }
         }
         
+        
+        // ---------------------------------------------------------------------
+        // Initialize stamp map navigation column
+        // ---------------------------------------------------------------------
+        
+        
+        var $stamp_map_nav_wrapper  = $('.stamp-map-nav-wrapper');
+        var $list = $stamp_map_nav_wrapper.find('.stamp-list-view');
+        var list_height_expanded_px = 0;
+        var min_cls = 'stamp-map-nav-wrapper-collapsed';
+        var footer_height = 0;
+        
+        var update_stamp_list_scrollbars = function($elem) {
+            if (!!$elem) {
+                $elem.jScrollPane({
+                    contentWidth : "0"
+                });
+            }
+        };
+        
         // resize map to fit viewport without scrolling page and also reset map bounds
         var resize_map = function() {
             var header_height = $canvas.offset().top || 0;
-            var margin = 0;
-            var height = (window.innerHeight - header_height - margin) + 'px';
+            var height = (window.innerHeight - header_height);
+            var height_px = height + 'px';
             
-            $canvas.height(height);
+            $canvas.height(height_px);
             
             map.fitBounds(bounds);
             map.setCenter(bounds.getCenter());
+            
+            var nav_header_height = $stamp_map_nav_wrapper.find('.nav-header').height();
+            var list_height       = (height - footer_height - 64 - nav_header_height);
+            var list_height_px    = list_height + "px";
+            
+            list_height_expanded_px = list_height_px;
+            
+            if (!$stamp_map_nav_wrapper.hasClass(min_cls)) {
+                $list.css({
+                    'height'     : list_height_px, 
+                    'max-height' : list_height_px
+                });
+                
+                update_stamp_list_scrollbars($list);
+            }
         };
+        
+        $stamp_map_nav_wrapper.find('.nav-footer, .nav-dummy-footer').each(function(i, elem) {
+            var $elem  = $(elem);
+            var height = $elem.height();
+            
+            if (height > 0) {
+                footer_height = height;
+                
+                $elem.css({
+                    'min-height' : height, 
+                    'max-height' : height
+                });
+            }
+        });
+        
+        $('.list-view-nav a').click(function(event) {
+            event.preventDefault();
+            
+            var $this   = $(this);
+            var $nav    = $this.parents('.stamp-map-nav-wrapper');
+            var $list   = $nav.find('.stamp-list-view').stop(true, false);
+            
+            $nav.toggleClass(min_cls);
+            
+            if ($nav.hasClass(min_cls)) { // collapsing animation
+                
+                $nav.parent().css({
+                    'pointer-events' : 'none', 
+                });
+                
+                $list.animate({
+                    height : "0"
+                }, {
+                    duration : 600, 
+                    specialEasing : { 
+                        width  : 'easeOutCubic', 
+                        height : 'easeOutCubic'
+                    }
+                });
+            } else { // expanding animation
+                $list.animate({
+                    height : list_height_expanded_px
+                }, {
+                    duration : 600, 
+                    specialEasing : { 
+                        width  : 'easeOutCubic', 
+                        height : 'easeOutCubic'
+                    }, 
+                    complete : function() {
+                        update_stamp_list_scrollbars($list);
+                    }
+                })
+            }
+            
+            return false;
+        });
+        
+        
+        // ---------------------------------------------------------------------
+        // Misc bindings and base page initialization
+        // ---------------------------------------------------------------------
+        
         
         // TODO: put this in a generic page initialization handler
         resize_map();
@@ -167,16 +345,11 @@
         
         window.addEventListener('resize', resize_map, false);
         
-        $('.stamp-list-view').jScrollPane();
-        
-        $('.list-view-nav a').click(function(event) {
-            event.preventDefault();
-            var $this = $(this);
-            
-            $this.parents('.stamp-map-nav').toggleClass('stamp-map-nav-collapsed');
-            
-            return false;
-        });
+        setTimeout(function() {
+            if (typeof(g_init_social_sharing) !== 'undefined') {
+                g_init_social_sharing();
+            }
+        }, 1000);
     });
 })();
 

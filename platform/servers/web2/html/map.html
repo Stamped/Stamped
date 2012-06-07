@@ -22,123 +22,84 @@
     <div class="stamp-map">
         <div class="stamp-map-canvas"></div>
         
+        {% with share_widget_desc="Share this map" %}
+            {% handlebars_template "share-widget" %}
+        {% endwith %}
+        
         <div class="fixedwidth">
-            <div class="stamp-map-nav">
-                <div class="nav-header clearfix">
-                    {% handlebars_template "profile-image-medium-ish" user %}
-                    
-                    <div class="rhs">
-                        <div class="name">
-                            {% handlebars_template "screen-name" user %}'s
+            <div class="stamp-map-nav-wrapper">
+                <div class="stamp-map-nav">
+                    <div class="nav-header clearfix">
+                        {% handlebars_template "profile-image-medium-ish" user %}
+                        
+                        <div class="nav-header-title">
+                            <div class="name">
+                                {% handlebars_template "screen-name" user %}'s
+                            </div>
+                            
+                            <div class="stamp-map-title user-primary">Stamp Map</div>
                         </div>
                         
-                        <div class="stamp-map-title user-primary">Stamp Map</div>
-                        
                         <div class="list-view-nav">
-                            <a href="#">
-                                <span class='arrow up-arrow'>&#x25B2</span>
-                                <span class='arrow down-arrow'>&#x25BC</span>
-                            </a>
+                            <a href="#" class='arrow up-arrow' title="Collapse stamp list">&#x25B2</a>
+                            <a href="#" class='arrow down-arrow' title="Expand stamp list">&#x25BC</a>
+                        </div>
+                    </div>
+                    
+                    <div class="gradient-wrapper">
+                        <div class="top-user-gradient user-gradient">
+                            <div class="ribbon-top"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stamp-list-view">
+                        {% for stamp in stamps %}
+                            <div class="stamp-list-view-item user-primary-selection">
+                                <div class="entity-header">
+                                    <div class="stamp-category-{{stamp.entity.category}}">
+                                        <div class='title clearfloat'>
+                                            <div class="pronounced-title">
+                                                <a class='sdetail' href="{{stamp.url}}" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
+                                            </div>
+                                            
+                                            <span class='user-logo-tiny'></span>
+                                        </div>
+                                        
+                                        <div class="subtitle-line">
+                                            <p>
+                                                <span class="icon"></span>
+                                                <span class="subtitle">{{stamp.entity.subcategory|title}} - {{stamp.entity.subtitle}}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="nav-dummy-footer">
+                        <div class="gradient-wrapper">
+                            <div class="bottom-user-gradient user-gradient">
+                                <div class="ribbon-bottom"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="content">
+                            <a class="back" href="/{{user.screen_name}}">View {{user.screen_name}}'s Profile</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="top-user-gradient user-gradient">
-                    <div class="ribbon-top"></div>
-                </div>
-                
-                <div class="stamp-list-view">
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                    <p>TODO</p>
-                </div>
-                
-                <div class="bottom-user-gradient user-gradient">
-                    <div class="ribbon-bottom"></div>
-                </div>
-                
                 <div class="nav-footer">
-                    <a class="back" href="/{{user.screen_name}}">View {{user.screen_name}}'s Profile</a>
+                    <div class="gradient-wrapper">
+                        <div class="bottom-user-gradient user-gradient">
+                            <div class="ribbon-bottom"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="content">
+                        <a class="back" href="/{{user.screen_name}}">View {{user.screen_name}}'s Profile</a>
+                    </div>
                 </div>
             </div>
         </div>

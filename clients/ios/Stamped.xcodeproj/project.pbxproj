@@ -1248,6 +1248,10 @@
 		036C130E157FF64800FB9880 /* st_default_avatar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 036C130C157FF64800FB9880 /* st_default_avatar@2x.png */; };
 		036C130F157FF64800FB9880 /* st_default_avatar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 036C130C157FF64800FB9880 /* st_default_avatar@2x.png */; };
 		036C1310157FF64800FB9880 /* st_default_avatar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 036C130C157FF64800FB9880 /* st_default_avatar@2x.png */; };
+		036C13141580083100FB9880 /* STUnreadActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C13131580083100FB9880 /* STUnreadActivity.m */; };
+		036C13151580083100FB9880 /* STUnreadActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C13131580083100FB9880 /* STUnreadActivity.m */; };
+		036C13161580083100FB9880 /* STUnreadActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C13131580083100FB9880 /* STUnreadActivity.m */; };
+		036C13171580083100FB9880 /* STUnreadActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 036C13131580083100FB9880 /* STUnreadActivity.m */; };
 		0379DF41157FD9C900DEBCD2 /* slider_track_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */; };
 		0379DF42157FD9C900DEBCD2 /* slider_track_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */; };
 		0379DF43157FD9C900DEBCD2 /* slider_track_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */; };
@@ -4744,6 +4748,8 @@
 		036C1302157FEEF600FB9880 /* SignupCameraTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SignupCameraTableCell.h; sourceTree = "<group>"; };
 		036C1303157FEEF600FB9880 /* SignupCameraTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SignupCameraTableCell.m; sourceTree = "<group>"; };
 		036C130C157FF64800FB9880 /* st_default_avatar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "st_default_avatar@2x.png"; sourceTree = "<group>"; };
+		036C13121580083100FB9880 /* STUnreadActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUnreadActivity.h; sourceTree = "<group>"; };
+		036C13131580083100FB9880 /* STUnreadActivity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUnreadActivity.m; sourceTree = "<group>"; };
 		0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "slider_track_3@2x.png"; sourceTree = "<group>"; };
 		0387CDB0157962C90044A2D3 /* FriendsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendsViewController.h; sourceTree = "<group>"; };
 		0387CDB1157962C90044A2D3 /* FriendsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendsViewController.m; sourceTree = "<group>"; };
@@ -6303,6 +6309,7 @@
 		0301372015668BAF00B55B47 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				036C13111580082100FB9880 /* STUnreadActivity */,
 				03A64CB0157F074D00934ABC /* STUserStamps */,
 				0387CDD11579677D0044A2D3 /* Friends */,
 				03E0067D1577DFBF00CDFEFF /* STAuth */,
@@ -6619,6 +6626,15 @@
 				036C1303157FEEF600FB9880 /* SignupCameraTableCell.m */,
 			);
 			path = SignupCameraTableCell;
+			sourceTree = "<group>";
+		};
+		036C13111580082100FB9880 /* STUnreadActivity */ = {
+			isa = PBXGroup;
+			children = (
+				036C13121580083100FB9880 /* STUnreadActivity.h */,
+				036C13131580083100FB9880 /* STUnreadActivity.m */,
+			);
+			path = STUnreadActivity;
 			sourceTree = "<group>";
 		};
 		0387CDAF157962B40044A2D3 /* FriendsViewController */ = {
@@ -12754,6 +12770,7 @@
 				039D56B9157FB9D100E98525 /* STTextCalloutView.m in Sources */,
 				6355A756157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 				036C1307157FEEF700FB9880 /* SignupCameraTableCell.m in Sources */,
+				036C13171580083100FB9880 /* STUnreadActivity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13069,6 +13086,7 @@
 				039D56B8157FB9D100E98525 /* STTextCalloutView.m in Sources */,
 				6355A755157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 				036C1306157FEEF700FB9880 /* SignupCameraTableCell.m in Sources */,
+				036C13161580083100FB9880 /* STUnreadActivity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13383,6 +13401,7 @@
 				039D56B7157FB9D100E98525 /* STTextCalloutView.m in Sources */,
 				6355A754157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 				036C1305157FEEF700FB9880 /* SignupCameraTableCell.m in Sources */,
+				036C13151580083100FB9880 /* STUnreadActivity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13709,6 +13728,7 @@
 				039D56B6157FB9D100E98525 /* STTextCalloutView.m in Sources */,
 				6355A753157FA4F000FF6B0F /* STAccountParameters.m in Sources */,
 				036C1304157FEEF700FB9880 /* SignupCameraTableCell.m in Sources */,
+				036C13141580083100FB9880 /* STUnreadActivity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -150,8 +150,11 @@ def __global_memcache():
 def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
+
+        ### 6/7/12 (Kevin): Disabling this for now, since it's causing issues with iTunes. 
+        """
         key_prefix = user_function.func_name
-        
+
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
             # note: treat args[0] specially (self)
@@ -215,6 +218,13 @@ def memcached_function(time=0, min_compress_len=0):
         wrapper.hits  = wrapper.misses = 0
         wrapper.clear = clear
         
+        return wrapper
+        """
+
+        @functools.wraps(user_function)
+        def wrapper(*args, **kwargs):
+            return user_function(*args, **kwargs)
+
         return wrapper
     
     return decorating_function

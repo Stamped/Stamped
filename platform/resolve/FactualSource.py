@@ -25,7 +25,7 @@ try:
     from GenericSource              import generatorSource
     from pprint                     import pformat
     from gevent.pool                import Pool
-    from api.Schemas                import TimesSchema
+    from api.Schemas                import TimesSchema, HoursSchema
 except:
     report()
     raise
