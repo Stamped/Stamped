@@ -333,8 +333,8 @@
     }];
 }
 
-- (void)keyboardWasHidden:(NSNotification *)notification
-{
+- (void)textViewDidEndEditing:(UITextView *)textView {
+    
     _addCommentShading.userInteractionEnabled = NO;
     CGRect frame = self.addCommentView.frame;
     frame.origin.y = self.view.frame.size.height;
@@ -346,7 +346,11 @@
                      } completion:^(BOOL finished) {
                          
                          self.addCommentView.hidden = YES;
-                     }];
+                     }];   
+}
+
+- (void)keyboardWasHidden:(NSNotification *)notification
+{
 }
 
 - (void)viewDidAppear:(BOOL)animated {

@@ -20,6 +20,8 @@
 #import "STConfiguration.h"
 #import "DDMenuController.h"
 #import <RestKit/RestKit.h>
+#import <CoreText/CoreText.h>
+#import <QuartzCore/QuartzCore.h>
 #import "STMenuController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
@@ -1145,6 +1147,67 @@ static Rdio* _rdio;
     //TODO
     STAppDelegate* appDelegate = (id)[UIApplication sharedApplication].delegate;
     [appDelegate.menuController showWelcome];
+}
+
+
++ (CGSize)sizeForString:(NSAttributedString *)inString thatFits:(CGSize)inSize
+{
+    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)inString);
+    if (theFramesetter == NULL)
+    {
+        NSLog(@"Could not create CTFramesetter");
+        return(CGSizeZero);
+    }
+    
+    CGSize theSize = CTFramesetterSuggestFrameSizeWithConstraints(theFramesetter, (CFRange){}, NULL, inSize, NULL);
+    CFRelease(theFramesetter);
+    
+    if (inSize.width < CGFLOAT_MAX && inSize.height == CGFLOAT_MAX)
+    {
+        theSize.width = inSize.width;
+    }
+    
+    // On iOS 5.0 the function `CTFramesetterSuggestFrameSizeWithConstraints` returns rounded float values (e.g. "15.0").
+    // Prior to iOS 5.0 the function returns float values (e.g. "14.7").
+    // Make sure the return value for `sizeForString:thatFits:" is equal for both versions:
+    theSize = (CGSize){ .width = roundf(theSize.width), .height = roundf(theSize.height) };
+    
+    return(theSize);
+}
+
++ (NSAttributedString *)attributedStringForString:(NSString *)aString font:(UIFont *)aFont color:(UIColor *)aColor lineHeight:(CGFloat)lineHeight {
+    
+    if (!aString)
+        return nil;
+    
+    id fontAttr = [NSMakeCollectable(CTFontCreateWithName((CFStringRef)aFont.fontName, aFont.pointSize, NULL)) autorelease];
+    id foregroundColorAttr = (id)(aColor ? aColor.CGColor : [UIColor blackColor].CGColor);
+    id paragraphStyleAttr = ((^ {
+        
+        CTParagraphStyleSetting paragraphStyles[] = (CTParagraphStyleSetting[]){
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineHeightMultiple, sizeof(float_t), (float_t[]){ 0.01f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierFirstLineHeadIndent, sizeof(float_t), (float_t[]){ 10 } },
+        };
+        
+        CTParagraphStyleRef paragraphStyleRef = CTParagraphStyleCreate(paragraphStyles, sizeof(paragraphStyles) / sizeof(CTParagraphStyleSetting));
+        return [NSMakeCollectable(paragraphStyleRef) autorelease];
+        
+    })());
+    
+    NSAttributedString *returnedString = [[[NSAttributedString alloc] initWithString:aString attributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                                                         fontAttr, kCTFontAttributeName,
+                                                                                                         foregroundColorAttr, kCTForegroundColorAttributeName,
+                                                                                                         paragraphStyleAttr, kCTParagraphStyleAttributeName,
+                                                                                                         [NSNumber numberWithInt:kCTUnderlineStyleSingle], kCTUnderlineStyleAttributeName,
+                                                                                                         nil]] autorelease];
+    
+    return returnedString;
+    
 }
 
 @end

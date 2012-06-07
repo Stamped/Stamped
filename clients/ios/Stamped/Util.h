@@ -206,4 +206,8 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)launchFirstRun;
 
++ (CGSize)sizeForString:(NSAttributedString *)inString thatFits:(CGSize)inSize;
+
++ (NSAttributedString *)attributedStringForString:(NSString *)aString font:(UIFont *)aFont color:(UIColor *)aColor lineHeight:(CGFloat)lineHeight;
+
 @end

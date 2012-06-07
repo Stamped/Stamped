@@ -63,7 +63,7 @@
                                            font:titleFont
                                           color:titleColor 
                                            mode:UILineBreakModeTailTruncation
-                                     andMaxSize:CGSizeMake(280, CGFLOAT_MAX)];
+                                     andMaxSize:CGSizeMake(280, titleFont.lineHeight)];
         [titleView sizeToFit];
         [Util reframeView:titleView withDeltas:CGRectMake(13,
                                                           36 - titleFont.ascender,

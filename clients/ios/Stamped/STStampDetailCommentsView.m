@@ -359,6 +359,15 @@ andProfileImageSize:(STProfileImageSize)size {
         [view addSubview:headerView];
     }
     
+    UIFont* dateFont = [UIFont stampedFontWithSize:10];
+    UIView* dateView = [Util viewWithText:[Util shortUserReadableTimeSinceDate:date]
+                                     font:dateFont
+                                    color:[UIColor stampedLightGrayColor]
+                                     mode:UILineBreakModeTailTruncation
+                               andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+    [Util reframeView:dateView withDeltas:CGRectMake(view.frame.size.width - dateView.frame.size.width, 0, 0, 0)];
+    [view addSubview:dateView];
+    
     UIFont* bodyFont = [UIFont stampedFontWithSize:10];
     UIView* bodyView = [Util viewWithText:body
                                      font:bodyFont
@@ -366,6 +375,7 @@ andProfileImageSize:(STProfileImageSize)size {
                                      mode:UILineBreakModeWordWrap
                                andMaxSize:CGSizeMake(240, CGFLOAT_MAX)];
     [view addSubview:bodyView];
+    [Util appendView:bodyView toParentView:view];
     
     return view;
 }
