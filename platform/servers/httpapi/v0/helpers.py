@@ -162,15 +162,13 @@ def handleHTTPRequest(requires_auth=True,
 
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or {}
-                    
+
                     if upload is not None:
                         if http_schema is None:
                             raise Exception("ERROR: handleHTTPRequest requires http_schema if upload is provided")
                         
-                        http_schema.validate()
                         params['http_schema']   = parseFileUpload(http_schema(), request, upload, **parse_kwargs)
                     elif http_schema is not None:
-                        http_schema.validate()
                         params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
                     else:
                         params['http_schema']   = parseRequest(None, request, **parse_kwargs)
@@ -361,6 +359,7 @@ def parseRequest(schema, request, **kwargs):
             return
         
         schema.dataImport(data)
+        schema.validate()
         
         logs.debug("Parsed request data")
         return schema
@@ -419,6 +418,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
             return
         
         schema.dataImport(data)
+        schema.validate()
         
         logs.debug("Parsed request data")
         return schema
