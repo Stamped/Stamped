@@ -63,7 +63,8 @@ static id __instance;
     NSMutableString *authString = [[NSMutableString alloc] initWithString:@"OAuth "];
     [authString appendString:[STOAuth paramStringForParams:authArray joiner:@", " shouldQuote:YES shouldSort:NO]];
     [request addRequestHeader:@"Authorization" value:authString];
-    
+    [authArray release];
+    [authString release];
     
 }
 
@@ -93,10 +94,11 @@ static id __instance;
 			}
 		}
 		
+        [parameterScanner release];
 		parameterScanner=nil;
         
 	}
-    return foundParameters;
+    return [foundParameters autorelease];
     
 }
 
@@ -136,7 +138,9 @@ static id __instance;
     [array addObject:[NSDictionary dictionaryWithObject:token forKey:@"oauth_token"]];
     [array addObject:[NSDictionary dictionaryWithObject:verifier forKey:@"oauth_verifier"]];
     [self signRequest:_request params:array token:[NSString stringWithFormat:@"%@&%@", kTwitterConsumer, kTwitterSecret]];
+    [array release];
     [_request startAsynchronous];
+    [_request release];
     
 }
 
@@ -153,7 +157,7 @@ static id __instance;
     [_request setRequestMethod:@"POST"];
     [self signRequest:_request params:[NSArray arrayWithObject:[NSDictionary dictionaryWithObject:@"stamped://twitter" forKey:@"oauth_callback"]] token:kTwitterSecretApersand];      
     [_request startAsynchronous];
-    
+    [_request release];
 }
 
 
@@ -295,6 +299,7 @@ static id __instance;
             dispatch_async(dispatch_get_main_queue(), ^{
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Twitter Account" message:@"Access to your Twitter account must be enabled, you can enable it in settings." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"OK" otherButtonTitles:@"Settings", nil];
                 [alert show];
+                [alert release];
             });
             
         }

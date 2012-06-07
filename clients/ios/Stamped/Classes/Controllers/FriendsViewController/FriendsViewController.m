@@ -14,6 +14,7 @@
 #import "STFacebook.h"
 #import "STWelcomeViewController.h"
 #import "STSimpleUser.h"
+#import "FindFriendsViewController.h"
 
 @interface FriendsViewController ()
 @property(nonatomic,retain,readonly) Friends *friends;
@@ -79,12 +80,17 @@
     if (!self.navigationItem.rightBarButtonItem) {
         if (self.navigationController) {
             NSInteger index = [[self.navigationController viewControllers] indexOfObject:self];
-            if (index > 0) {
-                UIViewController *prevController = [[self.navigationController viewControllers] objectAtIndex:index-1];
-                if ([prevController isKindOfClass:[STWelcomeViewController class]]) {
+            if (index!=NSNotFound) {
+                if (index > 0) {
+                    UIViewController *prevController = [[self.navigationController viewControllers] objectAtIndex:index-1];
+                    if ([prevController isKindOfClass:[STWelcomeViewController class]]) {
+                        addDoneButton = YES;
+                    }
+                } else {
                     addDoneButton = YES;
                 }
             }
+           
         }
     }
     
@@ -195,9 +201,19 @@
 
 - (void)friendsFinished:(NSNotification*)notification {
     
+    NSInteger sections = [self.tableView numberOfSections];
     [self.tableView reloadData];
     [self dataSourceDidFinishLoading];
-    [self animateIn];
+    
+    if ([self isKindOfClass:[FindFriendsViewController class]]) {
+        if (sections == 1) {
+            [self animateIn];
+        }
+    } else {
+        if (sections == 0) {
+            [self animateIn];
+        }
+    }
     
 }
 
@@ -253,6 +269,7 @@
     [actionSheet addButtonWithTitle:NSLocalizedString(@"Cancel", nil)];
     actionSheet.cancelButtonIndex = [actionSheet numberOfButtons] - 1;
     [actionSheet showInView:self.view];
+    [actionSheet release];
     
 }
 
@@ -280,7 +297,7 @@
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return [_friends isEmpty] ? 0 : 1;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {

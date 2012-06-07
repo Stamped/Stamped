@@ -491,7 +491,7 @@
     if (!LOGGED_IN) {
         
         STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-        [controller showWelcome];
+        [controller showWelcome:NO];
         
     } else {
         

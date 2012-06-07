@@ -337,14 +337,11 @@
 	CGFloat minX = rect.origin.x;
 	CGFloat minY = rect.origin.y;
 	CGFloat maxX = rect.origin.x + rect.size.width;
-	CGFloat maxY = rect.origin.y + rect.size.height;
 
 	if (_arrowLocation!=0) {
 		if(_arrowDirection == STDetailTextCalloutArrowDirectionUp) {
 			minY += kPopoverArrowHeight; 
-		} else {
-			maxY -= kPopoverArrowHeight; 
-		}
+		} 
 	}
 
     // fill 
@@ -366,7 +363,6 @@
         CGContextSaveGState(ctx);
         
         minY = ceilf(minY+1);
-        maxY = ceilf(maxY-1);
         
         CGMutablePathRef _secondPath = CGPathCreateMutable();
         [[UIColor colorWithRed:1 green:1 blue:1 alpha:.4] setStroke];

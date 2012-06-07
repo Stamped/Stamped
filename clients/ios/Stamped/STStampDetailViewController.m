@@ -198,8 +198,7 @@
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_headerView release];
     [_commentsView release];
     [_stamp release];
@@ -301,7 +300,6 @@
     [super viewWillAppear:animated];
     //[self setUpToolbar];
     [_headerView setNeedsDisplay];
-    NSLog(@"viewWillAppear");
 }
 
 - (void)exitComment:(id)notImportant {
@@ -314,8 +312,7 @@
     //[self.dummyTextField.inputAccessoryView becomeFirstResponder];
 }
 
-- (void)keyboardWasShown:(NSNotification *)notification
-{
+- (void)keyboardWasShown:(NSNotification *)notification {
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     
     CGRect frame = self.addCommentView.frame;
@@ -333,8 +330,7 @@
     }];
 }
 
-- (void)keyboardWasHidden:(NSNotification *)notification
-{
+- (void)keyboardWasHidden:(NSNotification *)notification {
     _addCommentShading.userInteractionEnabled = NO;
     CGRect frame = self.addCommentView.frame;
     frame.origin.y = self.view.frame.size.height;
