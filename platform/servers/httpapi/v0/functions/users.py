@@ -143,6 +143,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.findUsersByTwitter(authUserId, http_schema.user_token, http_schema.user_secret)
+    logs.info('### len(users): %s' % len(users))
     output = []
     for user in users:
         if user.user_id != authUserId:
