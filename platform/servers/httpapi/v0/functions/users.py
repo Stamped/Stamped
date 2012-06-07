@@ -85,20 +85,18 @@ def privacy(request, authUserId, http_schema, **kwargs):
 
 
 @handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def findEmail(request, authUserId, http_schema, **kwargs):
     q = http_schema.q.split(',')
     emails = []
     
     for email in q:
-        logs.info('### attempting email: %s' % email)
         try:
             emails.append(email.decode('ascii'))
         except Exception:
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
 
-    logs.info('### emails: %s' % emails)
     users       = stampedAPI.findUsersByEmail(authUserId, emails)
 
     output = []
