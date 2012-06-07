@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STSettingsViewController : UITableViewController
+@interface STSettingsViewController : UITableViewController {
+    NSArray *_dataSource;
+    NSMutableArray *_sectionViews;
+}
 
 @end

@@ -176,6 +176,8 @@
     
         if (error) {
             
+            NSLog(@"error : %@", [error localizedDescription]);
+            
             [self signupTwitter];
             
         } else {
