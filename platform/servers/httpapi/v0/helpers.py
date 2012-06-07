@@ -190,18 +190,18 @@ def handleHTTPRequest(requires_auth=True,
             except StampedHTTPError as e:
                 logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
                 logs.warning(utils.getFormattedException())
-                
-                response = HttpResponse(e.msg, status=e.code)
-                logs.error(response.status_code)
-                return response
+                logs.error(e.code)
+
+                error = {'error': e.msg}
+                return transformOutput(error, status=409)
             
             except StampedAuthError as e:
                 logs.warning("401 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
-                
-                response = HttpResponse(e.msg, status=401)
                 logs.auth(e.msg)
-                return response
+
+                error = {'error': e.msg}
+                return transformOutput(error, status=401)
             
             except StampedInputError as e:
                 logs.warning("400 Error: %s" % (e.msg))
@@ -216,18 +216,18 @@ def handleHTTPRequest(requires_auth=True,
             except StampedIllegalActionError as e:
                 logs.warning("403 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
-                
-                response = HttpResponse("illegal_action", status=403)
-                logs.error(response.status_code)
-                return response
+                logs.error(403)
+
+                error = {'error': 'illegal_action'}
+                return transformOutput(error, status=403)
             
             except StampedPermissionsError as e:
                 logs.warning("403 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
-                
-                response = HttpResponse("insufficient_privileges", status=403)
-                logs.error(response.status_code)
-                return response
+                logs.error(403)
+
+                error = {'error': 'insufficient_privileges'}
+                return transformOutput(error, status=403)
             
             except StampedDuplicationError as e:
                 logs.warning("409 Error: %s" % (e.msg))
@@ -242,18 +242,20 @@ def handleHTTPRequest(requires_auth=True,
             except StampedUnavailableError as e:
                 logs.warning("404 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
-                
-                response = HttpResponse("not_found", status=404)
-                logs.error(response.status_code)
-                return response
+                logs.error(404)
+
+                error = {'error': 'not_found'}
+                if e.msg is not None:
+                    error['message'] = unicode(e.msg)
+                return transformOutput(error, status=404)
             
             except Exception as e:
                 logs.warning("500 Error: %s" % e)
                 logs.warning(utils.getFormattedException())
-                
-                response = HttpResponse("internal server error", status=500)
-                logs.error(response.status_code)
-                return response
+                logs.error(500)
+
+                error = {'error': 'internal server error'}
+                return transformOutput(error, status=500)
             
             finally:
                 try:
