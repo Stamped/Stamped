@@ -5,6 +5,12 @@
 
 (function() {
     $(document).ready(function() {
+        
+        // ---------------------------------------------------------------------
+        // Initialize Google Maps canvas
+        // ---------------------------------------------------------------------
+        
+        
         var canvas  = $(".stamp-map .stamp-map-canvas")[0];
         var $canvas = $(canvas);
         
@@ -149,34 +155,120 @@
             }
         }
         
+        
+        // ---------------------------------------------------------------------
+        // Initialize stamp map navigation column
+        // ---------------------------------------------------------------------
+        
+        
+        var $stamp_map_nav_wrapper  = $('.stamp-map-nav-wrapper');
+        var $list = $stamp_map_nav_wrapper.find('.stamp-list-view');
+        var list_height_expanded_px = 0;
+        var min_cls = 'stamp-map-nav-wrapper-collapsed';
+        var footer_height = 0;
+        
+        var update_stamp_list_scrollbars = function($elem) {
+            if (!!$elem) {
+                $elem.jScrollPane({
+                    contentWidth : "0"
+                });
+            }
+        };
+        
         // resize map to fit viewport without scrolling page and also reset map bounds
         var resize_map = function() {
             var header_height = $canvas.offset().top || 0;
-            var margin = 0;
-            var height = (window.innerHeight - header_height - margin) + 'px';
+            var height = (window.innerHeight - header_height);
+            var height_px = height + 'px';
             
-            $canvas.height(height);
+            $canvas.height(height_px);
             
             map.fitBounds(bounds);
             map.setCenter(bounds.getCenter());
+            
+            var nav_header_height = $stamp_map_nav_wrapper.find('.nav-header').height();
+            var list_height       = (height - footer_height - 64 - nav_header_height);
+            var list_height_px    = list_height + "px";
+            
+            list_height_expanded_px = list_height_px;
+            
+            if (!$stamp_map_nav_wrapper.hasClass(min_cls)) {
+                $list.css({
+                    'height'     : list_height_px, 
+                    'max-height' : list_height_px
+                });
+                
+                update_stamp_list_scrollbars($list);
+            }
         };
+        
+        $stamp_map_nav_wrapper.find('.nav-footer, .nav-dummy-footer').each(function(i, elem) {
+            var $elem  = $(elem);
+            var height = $elem.height();
+            
+            if (height > 0) {
+                footer_height = height;
+                
+                $elem.css({
+                    'min-height' : height, 
+                    'max-height' : height
+                });
+            }
+        });
+        
+        $('.list-view-nav a').click(function(event) {
+            event.preventDefault();
+            
+            var $this   = $(this);
+            var $nav    = $this.parents('.stamp-map-nav-wrapper');
+            var $list   = $nav.find('.stamp-list-view').stop(true, false);
+            
+            $nav.toggleClass(min_cls);
+            
+            if ($nav.hasClass(min_cls)) { // collapsing animation
+                
+                $nav.parent().css({
+                    'pointer-events' : 'none', 
+                });
+                
+                $list.animate({
+                    height : "0"
+                }, {
+                    duration : 600, 
+                    specialEasing : { 
+                        width  : 'easeOutCubic', 
+                        height : 'easeOutCubic'
+                    }
+                });
+            } else { // expanding animation
+                $list.animate({
+                    height : list_height_expanded_px
+                }, {
+                    duration : 600, 
+                    specialEasing : { 
+                        width  : 'easeOutCubic', 
+                        height : 'easeOutCubic'
+                    }, 
+                    complete : function() {
+                        update_stamp_list_scrollbars($list);
+                    }
+                })
+            }
+            
+            return false;
+        });
+        
+        
+        // ---------------------------------------------------------------------
+        // Misc bindings and base page initialization
+        // ---------------------------------------------------------------------
+        
         
         // TODO: put this in a generic page initialization handler
         resize_map();
         setTimeout(resize_map, 150);
         
         window.addEventListener('resize', resize_map, false);
-        
-        $('.stamp-list-view').jScrollPane();
-        
-        $('.list-view-nav a').click(function(event) {
-            event.preventDefault();
-            var $this = $(this);
-            
-            $this.parents('.stamp-map-nav').toggleClass('stamp-map-nav-collapsed');
-            
-            return false;
-        });
     });
 })();
 

@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^STAuthRequestFinished)(NSError *);
+
 @interface STAuth : NSObject
 
 + (id)sharedInstance;

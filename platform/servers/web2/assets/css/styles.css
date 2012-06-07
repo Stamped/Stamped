@@ -139,8 +139,8 @@ header .header-body p .desc {
 header .header-body p a.button {
   background: url(/assets/img/join_signup_sprite.png) no-repeat;
   display: inline-block;
-  width: 82px;
-  height: 27px;
+  width: 86px;
+  height: 31px;
   margin-left: .5em;
   position: relative;
   top: .5em;
@@ -155,10 +155,10 @@ header .header-body p.join a.button {
   background-position: 0 0;
 }
 header .header-body p.join a.button:hover {
-  background-position: -84px 0;
+  background-position: -88px 0;
 }
 header .header-body p.join a.button:active {
-  background-position: -168px 0;
+  background-position: -176px 0;
 }
 header .header-body p.login {
   z-index: 26;
@@ -168,13 +168,13 @@ header .header-body p.login span.desc {
   color: #bbb;
 }
 header .header-body p.login a.button {
-  background-position: 0 -29px;
+  background-position: 0 -33px;
 }
 header .header-body p.login a.button:hover {
-  background-position: -84px -29px;
+  background-position: -88px -33px;
 }
 header .header-body p.login a.button:active {
-  background-position: -168px -29px;
+  background-position: -176px -33px;
 }
 .post-header {
   position: relative;

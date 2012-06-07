@@ -132,8 +132,8 @@ var g_update_stamps = null;
                     }, {
                         duration : 500, 
                         specialEasing : { 
-                            width  : 'easeOutCubic', 
-                            height : 'easeOutCubic'
+                            width  : 'easeOutBounce', 
+                            height : 'easeOutBounce'
                         }
                     });
                 }, function(event) {
@@ -146,8 +146,8 @@ var g_update_stamps = null;
                     }, {
                         duration : 500, 
                         specialEasing : { 
-                            width  : 'easeOutCubic', 
-                            height : 'easeOutCubic'
+                            width  : 'easeOutBounce', 
+                            height : 'easeOutBounce'
                         }
                     });
                 });
@@ -316,6 +316,83 @@ var g_update_stamps = null;
             return options;
         };
         
+        var find_valid_image = function($elem, selector, is_sdetail) {
+            var $elements = $elem.find(selector);
+            $elements     = $elements.filter(function() {
+                var $this = $(this);
+                
+                if (is_blacklisted_image($this.attr('src'))) {
+                    $this.addClass('hidden').parent().addClass('hidden');
+                    return false;
+                } else {
+                    return !$this.hasClass('hidden');
+                }
+            });
+            
+            $elements.each(function(i, element) {
+                element.onerror = function() {
+                    var $element = $(element);
+                    $element.addClass('hidden').parent().addClass('hidden');
+                    
+                    // TODO: what to update here?
+                    //update_images();
+                    init_stamp_preview_images($elem, is_sdetail);
+                };
+            });
+            
+            return $elements;
+        };
+        
+        // enforce precedence of stamp preview images
+        var init_stamp_preview_images = function($elem, is_sdetail) {
+            var images = [];
+            
+            var $stamp_user_images   = find_valid_image($elem, '.stamp-user-image   img', is_sdetail);
+            var $stamp_entity_images = find_valid_image($elem, '.stamp-entity-image img', is_sdetail);
+            
+            var $map  = $elem.find('.stamp-map');
+            var $icon = $elem.find('.stamp-icon');
+            
+            if (is_sdetail) {
+                images.push.apply(images, $map);
+                images.push.apply(images, $stamp_entity_images);
+                images.push.apply(images, $icon);
+                
+                // note: user image is included in stamp-card
+                images.push.apply(images, $stamp_user_images);
+            } else {
+                images.push.apply(images, $stamp_user_images);
+                images.push.apply(images, $stamp_entity_images);
+                images.push.apply(images, $map);
+                images.push.apply(images, $icon);
+            }
+            
+            if (images.length > 0) {
+                var preview  = images[0];
+                var $preview = $(preview);
+                var i;
+                
+                if ($preview.is("img")) {
+                    // ensure gallery's layout is updated whenever this 
+                    preview.onload = function() {
+                        update_gallery_layout();
+                        //setTimeout(update_gallery_layout, 100);
+                    };
+                }
+                
+                $preview.removeClass('hidden').parent().removeClass('hidden');
+                $preview.show();
+                
+                for (i = 1; i < images.length; i++) {
+                    var $image = $(images[i]);
+                    
+                    $image.hide().addClass('hidden').parent().addClass('hidden');
+                }
+            }
+            
+            update_gallery_layout();
+        };
+        
         // post-processing of newly added stamps, including:
         //   1) using moment.js to make the stamp's timestamp human-readable and 
         //      relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
@@ -333,88 +410,18 @@ var g_update_stamps = null;
             
             update_timestamps($scope);
             
-            $scope.find('.stamp-preview').each(function(i, elem) {
+            $scope.find('.stamp-preview-raw').each(function(i, elem) {
                 var $this       = $(this);
                 var is_sdetail  = ($this.parents('.sdetail_body').length >= 1);
+                
+                $this.removeClass('stamp-preview-raw').addClass('stamp-preview');
                 
                 //var category    = extract_data($this, 'stamp-category-', 'other');
                 //console.debug("CATEGORY: " + category + "; is_sdetail: " + is_sdetail);
                 
                 // enforce precedence of stamp preview images
-                var update_images = function() {
-                    var images = [];
-                    
-                    var find = function(selector) {
-                        var $elements = $this.find(selector);
-                        $elements     = $elements.filter(function() {
-                            var $this = $(this);
-                            
-                            if (is_blacklisted_image($this.attr('src'))) {
-                                $this.addClass('hidden').parent().addClass('hidden');
-                                return false;
-                            } else {
-                                return !$this.hasClass('hidden');
-                            }
-                        });
-                        
-                        $elements.each(function(i, element) {
-                            element.onerror = function() {
-                                var $element = $(element);
-                                $element.addClass('hidden').parent().addClass('hidden');
-                                
-                                update_images();
-                            };
-                        });
-                        
-                        return $elements;
-                    };
-                    
-                    var $stamp_user_images   = find('.stamp-user-image   img');
-                    var $stamp_entity_images = find('.stamp-entity-image img');
-                    var $map  = $this.find('.stamp-map');
-                    var $icon = $this.find('.stamp-icon');
-                    
-                    if (is_sdetail) {
-                        images.push.apply(images, $map);
-                        images.push.apply(images, $stamp_entity_images);
-                        images.push.apply(images, $icon);
-                        
-                        // note: user image is included in stamp-card
-                        images.push.apply(images, $stamp_user_images);
-                    } else {
-                        images.push.apply(images, $stamp_user_images);
-                        images.push.apply(images, $stamp_entity_images);
-                        images.push.apply(images, $map);
-                        images.push.apply(images, $icon);
-                    }
-                    
-                    if (images.length > 0) {
-                        var preview  = images[0];
-                        var $preview = $(preview);
-                        var i;
-                        
-                        if ($preview.is("img")) {
-                            // ensure gallery's layout is updated whenever this 
-                            preview.onload = function() {
-                                update_gallery_layout();
-                                //setTimeout(update_gallery_layout, 100);
-                            };
-                        }
-                        
-                        $preview.removeClass('hidden').parent().removeClass('hidden');
-                        $preview.show();
-                        
-                        for (i = 1; i < images.length; i++) {
-                            var $image = $(images[i]);
-                            
-                            $image.hide().addClass('hidden').parent().addClass('hidden');
-                        }
-                    }
-                    
-                    update_gallery_layout();
-                };
-                
-                update_images();
+                init_stamp_preview_images($this, is_sdetail);
+                //update_images();
             });
             
             if (!!$items) {

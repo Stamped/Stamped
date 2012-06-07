@@ -142,22 +142,17 @@
                           
                       } else {
                           
-                          if (_primaryColor && _secondarayColor) {
-                              
-                              CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
-                              size_t _numLocations = 2;
-                              CGFloat _locations[2] = { 0.0, 1.0 };
-                              CGFloat _colors[8] = { r, g, b, 1, r1, g1, b1, 1 };
-                              CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
-                              CGColorSpaceRelease(_rgb);
-                              CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height);
-                              CGPoint end = CGPointMake(rect.origin.x + rect.size.width, rect.origin.y);
-                              CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
-                              CGGradientRelease(gradient);
-                              
-                          } else {
-                              CGContextFillRect(ctx, rect);
-                          }
+                          rect = CGContextGetClipBoundingBox(ctx);
+                          CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
+                          size_t _numLocations = 2;
+                          CGFloat _locations[2] = { 0.0, 1.0 };
+                          CGFloat _colors[8] = { r, g, b, 1, r1, g1, b1, 1 };
+                          CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
+                          CGColorSpaceRelease(_rgb);
+                          CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height);
+                          CGPoint end = CGPointMake(rect.origin.x + rect.size.width, rect.origin.y);
+                          CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
+                          CGGradientRelease(gradient);
                                                     
                       }
                       
@@ -285,7 +280,7 @@
     _categoryImage = [[Util imageForCategory:stamp.entity.category] retain];
     
     [Util splitHexString:stamp.user.primaryColor toRed:&r green:&g blue:&b];
-    [Util splitHexString:stamp.user.secondaryColor toRed:&r green:&g blue:&b];
+    [Util splitHexString:stamp.user.secondaryColor toRed:&r1 green:&g1 blue:&b1];
 
     _commentCount = [stamp.numComments integerValue];
     for (id obj in stamp.contents) {
@@ -303,30 +298,32 @@
         [_statsView setupWithStamp:stamp maxRows:1];
     }
     
-    CGRect frame = _commentView.frame;
-    frame.size.width = 0.0f;
-    frame.size.height = 10.0f;
-    if (_hasMedia) {
-        frame.size.width += 10.0f;
-    }
-    if (_commentCount > 0) {
-        frame.size.width += 12.0f;
-        if (!_hasMedia) {
-            frame.size.width += [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
-        }
-    }
-    frame.origin.x = ceilf(self.bounds.size.width-(frame.size.width+16.0f));
-    frame.origin.y = _statsView.hidden ? self.bounds.size.height - 20.0f : self.bounds.size.height - (45.0f + 29.0f);
-    _commentView.frame = frame;
     _commentView.hidden = (_commentCount==0 && !_hasMedia);
-    
+    if (!_commentView.hidden) {
+        CGRect frame = _commentView.frame;
+        frame.size.width = 0.0f;
+        frame.size.height = 10.0f;
+        if (_hasMedia) {
+            frame.size.width += 10.0f;
+        }
+        if (_commentCount > 0) {
+            frame.size.width += 12.0f;
+            if (!_hasMedia) {
+                frame.size.width += [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
+            }
+        }
+        frame.origin.x = ceilf(self.bounds.size.width-(frame.size.width+16.0f));
+        frame.origin.y = _statsView.hidden ? self.bounds.size.height - 20.0f : self.bounds.size.height - (45.0f + 29.0f);
+        _commentView.frame = frame;
+        [_commentView setNeedsDisplay];
+    }
+       
     [_headerView setNeedsDisplay];
-    [_commentView setNeedsDisplay];
     
     // date
     _dateLabel.text = [Util userReadableTimeSinceDate:stamp.created];
     [_dateLabel sizeToFit];
-    frame = _dateLabel.frame;
+    CGRect frame = _dateLabel.frame;
     frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 12);
     _dateLabel.frame = frame;
     
