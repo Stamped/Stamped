@@ -1217,7 +1217,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item                = HTTPImageSchema().dataImport(image)
+                    item                = HTTPImageSchema().dataImport(image.dataExport())
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
@@ -2145,11 +2145,12 @@ class HTTPEntitySuggested(Schema):
 class HTTPEntitySearchResultsItem(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('search_id',                    basestring, required=True)
-        cls.addProperty('title',                        basestring, required=True)
-        cls.addProperty('subtitle',                     basestring)
-        cls.addProperty('category',                     basestring, required=True)
-        cls.addProperty('distance',                     float)
+        cls.addProperty('search_id',                        basestring, required=True)
+        cls.addProperty('title',                            basestring, required=True)
+        cls.addProperty('subtitle',                         basestring)
+        cls.addProperty('category',                         basestring, required=True)
+        cls.addProperty('icon',                             basestring)
+        cls.addProperty('distance',                         float)
 
     def importEntity(self, entity, distance=None):
         self.search_id          = entity.search_id
@@ -2167,27 +2168,27 @@ class HTTPEntitySearchResultsItem(Schema):
 class HTTPEntitySearchResultsGroup(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('entities',           HTTPEntitySearchResultsItem)
-        cls.addProperty('title',                        basestring)
-        cls.addProperty('subtitle',                     basestring)
-        cls.addProperty('image_url',                    basestring)
+        cls.addNestedPropertyList('entities',               HTTPEntitySearchResultsItem)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('subtitle',                         basestring)
+        cls.addProperty('image_url',                        basestring)
 
 class HTTPEntityActionEndpoint(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('status',                       basestring)
-        cls.addProperty('message',                      basestring)
-        cls.addProperty('redirect',                     basestring)
+        cls.addProperty('status',                           basestring)
+        cls.addProperty('message',                          basestring)
+        cls.addProperty('redirect',                         basestring)
 
 class HTTPActionComplete(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('action',                       basestring)
-        cls.addProperty('source',                       basestring)
-        cls.addProperty('source_id',                    basestring)
-        cls.addProperty('entity_id',                    basestring)
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('stamp_id',                     basestring)
+        cls.addProperty('action',                           basestring)
+        cls.addProperty('source',                           basestring)
+        cls.addProperty('source_id',                        basestring)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('stamp_id',                         basestring)
 
 
 # ###### #
