@@ -19,16 +19,23 @@
         var center  = new google.maps.LatLng(40.707913, -74.013696);
         
         var map     = new google.maps.Map(canvas, {
-            center      : center, 
-            zoom        : 8, 
-	        mapTypeId   : google.maps.MapTypeId.ROADMAP
-            /*zoomControl : true,
+	        mapTypeId           : google.maps.MapTypeId.ROADMAP, 
+            center              : center, 
+            zoom                : 8, 
             
+            // disable all default controls in favor of enabling a few explicitly
             disableDefaultUI    : true,
+            
+            zoomControl         : true,
             zoomControlOptions  : {
-                style   : google.maps.ZoomControlStyle.LARGE,
-                position: google.maps.ControlPosition.TOP_RIGHT
-            }*/
+                style           : google.maps.ZoomControlStyle.LARGE,
+                position        : google.maps.ControlPosition.TOP_RIGHT
+            }, 
+            
+            panControl          : true, 
+            panControlOptions   : {
+                position        : google.maps.ControlPosition.TOP_RIGHT
+            }
         });
         
         var image   = new google.maps.MarkerImage('/assets/img/pin.png',
@@ -43,9 +50,7 @@
         
         var client = new StampedClient();
         var stamps = STAMPED_PRELOAD.stamps;
-        //var stamps = new client.Stamps(STAMPED_PRELOAD.stamps);
         
-        //var popup  = new google.maps.InfoWindow({ });
         var popup  = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
@@ -82,6 +87,57 @@
             google.maps.event.addListener(map, 'click',        close_popup);
             google.maps.event.addListener(map, 'zoom_changed', close_popup);
             
+            var partial_templates = {}
+            
+            $(".handlebars-template").each(function (i) {
+                var key = $(this).attr('id');
+                var val = $(this).html();
+                
+                partial_templates[key] = val;
+            });
+            
+            var user_profile_image = function(size) {
+                size = (typeof(size) === 'undefined' ? 144 : size);
+                
+                var name = this.name;
+                var screen_name = this.screen_name;
+                var alt  = screen_name;
+                var url  = "http://static.stamped.com/users/default.jpg";
+                var okay = false;
+                var multires_image = this.image;
+                
+                if (!!name) {
+                    alt  = name + "(" + alt + ")";
+                }
+                
+                if (!!multires_image) {
+                    for (image in multires_image.sizes) {
+                        if (image.width === size) {
+                            url  = image.url;
+                            okay = true;
+                            break
+                        }
+                    }
+                    
+                    if (!okay) {
+                        for (image in multires_image.sizes) {
+                            url  = image.url;
+                            okay = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!okay) {
+                    console.debug("no image of size '" + size + "' for user '" + screen_name + "'");
+                }
+                
+                return new Handlebars.SafeString('<img alt="' + alt + '" src="' + url + '" />');
+            };
+            
+            Handlebars.registerHelper('user_profile_image', user_profile_image);
+            var template = Handlebars.compile($('#stamp-map-item').html());
+            
             // for each stamp, initialize a marker and add it to the map
             $.each(stamps, function(i, stamp) {
                 var coords  = (stamp['entity']['coordinates']).split(",");
@@ -105,7 +161,7 @@
                 markers.push(marker);
                 
                 // create the html content for the popup InfoBox
-                var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
+                /*var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
                 
                 info += "<p class='subtitle-line'>" + 
                             "<span class='icon'></span>" + 
@@ -125,7 +181,12 @@
                     }
                 }
                 
-                info += "</div><div class='bottom-wave'></div></div>";
+                info += "</div><div class='bottom-wave'></div></div>";*/
+                
+                var info = template(stamp, { partials : partial_templates });
+                //console.debug(stamp.entity.title + ":");
+                //console.debug(info);
+                //var info = "<div class='stamp-map-item'>" + stamp.entity.title + "</div>";
                 
                 var open_popup = function(e) {
                     // guard to only display a single marker InfoBox at a time
@@ -269,6 +330,12 @@
         setTimeout(resize_map, 150);
         
         window.addEventListener('resize', resize_map, false);
+        
+        setTimeout(function() {
+            if (typeof(g_init_social_sharing) !== 'undefined') {
+                g_init_social_sharing();
+            }
+        }, 1000);
     });
 })();
 

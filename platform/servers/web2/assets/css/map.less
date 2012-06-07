@@ -47,8 +47,7 @@ footer {
     .box-shadow(0, 0, 8px, 0, rgba(0, 0, 0, 0.35));
     
     .stamp-map-canvas {
-        display: block;
-        width: 100%;
+        width:  100%;
         height: 100%;
         
         .marker-preview {
@@ -65,47 +64,55 @@ footer {
             z-index: 100;
         }
         
-        .marker {
-            background: transparent;
+        .stamp-map-item {
+            @marker_space: 12px;
             
-            .top-wave {
-                background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
-                height: 16px;
-                margin: 0;
-                padding: 0;
+            position: relative;
+            background: #fff;
+            padding: @marker_space;
+            
+            .rounded(4px);
+            
+            .stamp-map-item-overlay {
+                position: absolute;
+                width:  100%;
+                height: 100%;
+                
+                background: transparent;
+                pointer-events: none;
             }
             
-            .bottom-wave {
-                background: url(/assets/img/ribbon-top.png) left top repeat-x;
-                height: 16px;
-                margin: 0;
-                padding: 0;
+            .profile-image-small {
+                float: left;
+                margin: 0 @marker_space @marker_space 0;
             }
             
-            padding: 0;
+            .entity-header {
+                float: left;
+            }
             
-            .marker-content {
-                background: #FEFEFE;
+            .content {
+                clear: both;
+                margin: .5em 0 0 56px;
                 
-                p.pronounced-title {
-                    text-align: center;
-                    color: #000;
+                .blurbs {
+                    .stamped-content {
+                        p.blurb {
+                            font-size: 80%;
+                        }
+                        p.blurb:hover {
+                            cursor: text;
+                        }
+                    }
+                    
+                    .stamped-content:last-child {
+                        display: none;
+                    }
+                    
+                    .stamped-content:first-child {
+                        display: block;
+                    }
                 }
-                
-                p, p.pronounced-title {
-                    margin: 0;
-                }
-                
-                p.blurb {
-                    font-size: 80%;
-                }
-                p.blurb:hover {
-                    cursor: text;
-                }
-                
-                display: block;
-                padding: 0 .5em;
-                margin: 0;
             }
         }
     }
@@ -115,7 +122,8 @@ footer {
    ************************************************************************** */
     
     
-    @map_nav_space: 32px;
+    @map_nav_width: 316px;
+    @map_nav_space: 24px;
     
     .fixedwidth {
         position: absolute;
@@ -123,8 +131,10 @@ footer {
         left: 50%;
         margin-left: -(@fixed-width / 2) - @map_nav_space;
         
-        width:  360px;
-        height: 100%;
+        width:     @map_nav_width;
+        min-width: @map_nav_width;
+        max-width: @map_nav_width;
+        height:    100%;
         
         .stamp-map-nav-wrapper {
             position: relative;
@@ -145,56 +155,56 @@ footer {
                         float: left;
                     }
                     
-                    .rhs {
-                        float: right;
+                    .nav-header-title {
+                        float: left;
+                        margin: 0 (.75 * @map_nav_space);
                         
                         .name {
                             color: #333;
-                            margin-right: (.75 * @map_nav_space);
                         }
                         
                         .stamp-map-title {
                             .stamped-font();
-                            font-size: 4em;
+                            font-size: 2.5em;
                             letter-spacing: .05em;
                             line-height: 100%;
                             
                             display: block;
+                            padding: 0;
+                            margin:  0;
+                        }
+                    }
+                    
+                    .list-view-nav {
+                        clear: left;
+                        float: right;
+                        text-align: right;
+                        
+                        a {
                             margin:  0;
                             padding: 0;
-                            margin-right: (.75 * @map_nav_space);
+                            line-height: 80%;
+                            
+                            &:hover, &:active {
+                                cursor: pointer;
+                                color: #fff;
+                            }
+                            
+                            &:hover {
+                                background-color: #999;
+                            }
+                            
+                            &:active {
+                                background-color: #666;
+                            }
                         }
                         
-                        .list-view-nav {
-                            clear: both;
-                            text-align: right;
-                            
-                            a {
-                                margin:  0;
-                                padding: 0;
-                                line-height: 80%;
-                                
-                                &:hover, &:active {
-                                    cursor: pointer;
-                                    color: #fff;
-                                }
-                                
-                                &:hover {
-                                    background-color: #999;
-                                }
-                                
-                                &:active {
-                                    background-color: #666;
-                                }
-                            }
-                            
-                            a.up-arrow {
-                                display: inline;
-                            }
-                            
-                            a.down-arrow {
-                                display: none;
-                            }
+                        a.up-arrow {
+                            display: inline;
+                        }
+                        
+                        a.down-arrow {
+                            display: none;
                         }
                     }
                 }
@@ -211,18 +221,26 @@ footer {
                     .transition(all, 0.5s, easeOutCubic);
                     
                     height: 100%;
-                    width:  360px - (@map_nav_space / 4);
+                    width:  @map_nav_width - (@map_nav_space / 4);
                     
                     .stamp-list-view-item {
+                        padding: (@map_nav_space / 2) @map_nav_space;
+                        
                         border-bottom: 1px solid #c2c2c2;
-                        padding: .5em @map_nav_space;
+                        background-color: #fff;
+                        
+                        // very slight background-color transition on mouse-out
+                        // (immediate transition on mouse-over)
+                        .transition(background-color, 0.1s, ease-out);
                         
                         .entity-header {
                             float: none;
                             margin: 0;
+                            top: 0;
                             
                             .pronounced-title {
-                                font-size: 2.5em !important;
+                                font-size: 1.5em !important;
+                                margin-bottom: .5em;
                             }
                         }
                     }
@@ -281,15 +299,13 @@ footer {
             
             .stamp-map-nav {
                 .nav-header {
-                    .rhs {
-                        .list-view-nav {
-                            a.up-arrow {
-                                display: none;
-                            }
-                            
-                            a.down-arrow {
-                                display: inline;
-                            }
+                    .list-view-nav {
+                        a.up-arrow {
+                            display: none   !important;
+                        }
+                        
+                        a.down-arrow {
+                            display: inline !important;
                         }
                     }
                 }
@@ -298,6 +314,22 @@ footer {
                     display: none;
                 }
             }
+        }
+    }
+    
+    
+/* **************************************************************************
+                            SOCIAL SHARING WIDGET
+   ************************************************************************** */
+    
+    
+    .share-widget {
+        position: absolute;
+        top:   32px;
+        right: 110px;
+        
+        .desc {
+            text-align: right;
         }
     }
 }

@@ -175,6 +175,19 @@ header {
     z-index: 101;
 }
 
+.user-logo-tiny {
+    position: absolute;
+    
+    top:   -0px;
+    right: -12px;
+    
+    display: inline-block;
+    width:  24px;
+    height: 24px;
+    
+    z-index: 101;
+}
+
 .ribbon-top {
     background: url(/assets/img/ribbon-top.png) left top repeat-x;
     height: 16px;
@@ -494,9 +507,64 @@ header {
 
 
 /* **************************************************************************
+                            SOCIAL SHARING WIDGET
+   ************************************************************************** */
+
+
+.share-widget {
+    background-color: #fff;
+    padding: 0.25em 0.5em;
+    
+    .rounded(1em);
+    .box-shadow(0, 0, 18px, 0, @shadow);
+    
+    /* NOTE: because social sharing requires JS, sharing widgets are hidden 
+       by default in CSS and only displayed on page load via JS if JS is 
+       supported.
+    */
+    display: none;
+    
+    .desc {
+        font-size: 80%;
+        font-weight: 700;
+        white-space: nowrap;
+        color: #333;
+    }
+    
+    .transition-rounded(0.3s, ease-out);
+    overflow: hidden;
+    
+    .share-buttons {
+        display: none;
+        white-space: nowrap;
+        
+        margin: 4px auto;
+        
+        .share-button {
+            display: inline-block;
+        }
+    }
+    
+    &:hover {
+        .rounded(4px);
+        
+        .share-buttons {
+            display: block;
+        }
+    }
+}
+
+
+/* **************************************************************************
                               MISC / DEPRECATED
    ************************************************************************** */
 
+
+a.sdetail, .pronounced-title a {
+    &:hover, &:active {
+        text-decoration: none;
+    }
+}
 
 .bold {
     color: #333;
