@@ -58,7 +58,7 @@ def _log(level, msg, *args, **kwargs):
     
     if localData.format == 'object':
         try:
-            msg = str(msg)
+            msg = unicode(msg)
         except Exception:
             msg = "LOGGER ERROR: failed to convert msg (type: %s) to string" % type(msg)
         item = (datetime.datetime.utcnow(), level, filename, lineno, fnc, msg)

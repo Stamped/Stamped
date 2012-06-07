@@ -1217,7 +1217,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item                = HTTPImageSchema().dataImport(image)
+                    item                = HTTPImageSchema().dataImport(image.dataExport())
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
@@ -1228,7 +1228,7 @@ class HTTPEntity(Schema):
                     item.action         = action
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                self.galleries = [gallery]
 
             # Actions: Reservation
 
@@ -1295,18 +1295,18 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema().dataImport(image, overflow = True)
+                    item = HTTPImageSchema().dataImport(image.dataExport(), overflow=True)
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
                     source.link         = item.sizes[0].url
                     action              = HTTPAction()
                     action.type         = 'stamped_view_image'
-                    action.sources.append(source)
-                    item.action     = action
+                    action.sources      = [ source ]
+                    item.action         = action
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                self.galleries = [gallery]
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
@@ -1793,7 +1793,7 @@ class HTTPEntity(Schema):
 
                             for source in sources:
                                 source.setCompletion(
-                                    action      = action.type,
+                                    action      = 'listen',
                                     entity_id   = entity.entity_id,
                                     source      = source.source,
                                     source_id   = source.source_id,
@@ -2145,17 +2145,36 @@ class HTTPEntitySuggested(Schema):
 class HTTPEntitySearchResultsItem(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('search_id',                    basestring, required=True)
-        cls.addProperty('title',                        basestring, required=True)
-        cls.addProperty('subtitle',                     basestring)
-        cls.addProperty('category',                     basestring, required=True)
-        cls.addProperty('distance',                     float)
+        cls.addProperty('search_id',                        basestring, required=True)
+        cls.addProperty('title',                            basestring, required=True)
+        cls.addProperty('subtitle',                         basestring)
+        cls.addProperty('category',                         basestring, required=True)
+        cls.addProperty('icon',                             basestring)
+        cls.addProperty('distance',                         float)
 
     def importEntity(self, entity, distance=None):
         self.search_id          = entity.search_id
         self.title              = entity.title
         self.subtitle           = entity.subtitle
         self.category           = entity.category
+
+        # Build icon
+        if entity.isType('food'):
+            self.icon = _getIconURL('search_food')
+        elif entity.isType('bar'):
+            self.icon = _getIconURL('search_bar')
+        elif entity.kind == 'place':
+            self.icon = _getIconURL('search_place')
+        elif entity.isType('tv'):
+            self.icon = _getIconURL('search_tv')
+        elif entity.isType('movie'):
+            self.icon = _getIconURL('search_movie')
+        elif entity.isType('artist'):
+            self.icon = _getIconURL('search_artist')
+        elif entity.isType('album'):
+            self.icon = _getIconURL('search_album')
+        elif entity.isType('track'):
+            self.icon = _getIconURL('search_track')
 
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance
@@ -2167,27 +2186,27 @@ class HTTPEntitySearchResultsItem(Schema):
 class HTTPEntitySearchResultsGroup(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('entities',           HTTPEntitySearchResultsItem)
-        cls.addProperty('title',                        basestring)
-        cls.addProperty('subtitle',                     basestring)
-        cls.addProperty('image_url',                    basestring)
+        cls.addNestedPropertyList('entities',               HTTPEntitySearchResultsItem)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('subtitle',                         basestring)
+        cls.addProperty('image_url',                        basestring)
 
 class HTTPEntityActionEndpoint(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('status',                       basestring)
-        cls.addProperty('message',                      basestring)
-        cls.addProperty('redirect',                     basestring)
+        cls.addProperty('status',                           basestring)
+        cls.addProperty('message',                          basestring)
+        cls.addProperty('redirect',                         basestring)
 
 class HTTPActionComplete(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('action',                       basestring)
-        cls.addProperty('source',                       basestring)
-        cls.addProperty('source_id',                    basestring)
-        cls.addProperty('entity_id',                    basestring)
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('stamp_id',                     basestring)
+        cls.addProperty('action',                           basestring)
+        cls.addProperty('source',                           basestring)
+        cls.addProperty('source_id',                        basestring)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('stamp_id',                         basestring)
 
 
 # ###### #
@@ -2518,12 +2537,12 @@ class HTTPGuideRequest(Schema):
                 return subsection
             raise StampedInputError("Invalid subsection: %s" % subsection)
 
-        cls.addProperty('limit',                        int)
-        cls.addProperty('offset',                       int)
-        cls.addProperty('section',                      basestring, required=True, cast=checkSection)
-        cls.addProperty('subsection',                   basestring, cast=checkSubsection)
-        cls.addProperty('viewport',                     basestring) # lat0,lng0,lat1,lng1
-        cls.addProperty('scope',                        basestring)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
+        cls.addProperty('section',                          basestring, required=True, cast=checkSection)
+        cls.addProperty('subsection',                       basestring, cast=checkSubsection)
+        cls.addProperty('viewport',                         basestring) # lat0,lng0,lat1,lng1
+        cls.addProperty('scope',                            basestring)
 
     def exportGuideRequest(self):
         # return GuideRequest().dataImport(self.dataExport(), overflow=True)
@@ -2553,6 +2572,13 @@ class HTTPGuideRequest(Schema):
 
         return guideRequest
 
+class HTTPGuideSearchRequest(HTTPGuideRequest):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                            basestring, required=True)
+
+    def __init__(self):
+        HTTPGuideRequest.__init__(self)
 
 
 
@@ -2584,7 +2610,7 @@ class HTTPStampMini(Schema):
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent)
-        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('credit',     HTTPStampPreview)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
         cls.addProperty('url',                  basestring)
@@ -2612,7 +2638,7 @@ class HTTPStamp(Schema):
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent, required=True)
-        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('credit',     HTTPStampPreview)
         cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
@@ -2643,6 +2669,8 @@ class HTTPStamp(Schema):
         data['contents'] = []
         if 'previews' in data:
             del(data['previews'])
+        if 'credit' in data:
+            del(data['credit'])
         self.dataImport(data, overflow=True)
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
@@ -2653,7 +2681,11 @@ class HTTPStamp(Schema):
         self.stamped            = stamp.timestamp.stamped
 
         if credit is not None and len(credit) > 0:
-            self.credit = credit
+            httpCredit = []
+            for item in credit:
+                httpStampPreview = HTTPStampPreview().importStampPreview(item)
+                httpCredit.append(httpStampPreview)
+            self.credit = httpCredit
 
         contents = []
         for content in stamp.contents:
