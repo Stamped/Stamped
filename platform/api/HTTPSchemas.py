@@ -1295,7 +1295,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema().dataImport(image, overflow = True)
+                    item = HTTPImageSchema().dataImport(image.dataExport(), overflow=True)
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
@@ -1306,7 +1306,7 @@ class HTTPEntity(Schema):
                     item.action     = action
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                self.galleries = [gallery]
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
