@@ -1793,7 +1793,7 @@ class HTTPEntity(Schema):
 
                             for source in sources:
                                 source.setCompletion(
-                                    action      = action.type,
+                                    action      = 'listen',
                                     entity_id   = entity.entity_id,
                                     source      = source.source,
                                     source_id   = source.source_id,

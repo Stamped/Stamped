@@ -851,11 +851,17 @@ if (typeof(StampedClient) == "undefined") {
         // TODO: make this private
         this.StampsGalleryView = AStampedView.extend({
             _get_template   : function() {
-                return this._load_template('stamp-gallery2');
+                return this._load_template('stamp-gallery');
             }, 
             
             _get_context    : function() {
                 return { 'stamps' : AStampedView.prototype._get_context.apply(this) };
+            }
+        });
+        
+        this.StampMapMarkerView = AStampedView.extend({
+            _get_template   : function() {
+                return this._load_template('stamp-map-item');
             }
         });
     };
