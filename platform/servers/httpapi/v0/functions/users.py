@@ -140,7 +140,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
     logs.info('### Hit findTwitter')
     users = stampedAPI.findUsersByTwitter(authUserId, http_schema.user_token, http_schema.user_secret)
