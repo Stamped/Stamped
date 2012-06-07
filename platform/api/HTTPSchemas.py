@@ -2518,12 +2518,12 @@ class HTTPGuideRequest(Schema):
                 return subsection
             raise StampedInputError("Invalid subsection: %s" % subsection)
 
-        cls.addProperty('limit',                        int)
-        cls.addProperty('offset',                       int)
-        cls.addProperty('section',                      basestring, required=True, cast=checkSection)
-        cls.addProperty('subsection',                   basestring, cast=checkSubsection)
-        cls.addProperty('viewport',                     basestring) # lat0,lng0,lat1,lng1
-        cls.addProperty('scope',                        basestring)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
+        cls.addProperty('section',                          basestring, required=True, cast=checkSection)
+        cls.addProperty('subsection',                       basestring, cast=checkSubsection)
+        cls.addProperty('viewport',                         basestring) # lat0,lng0,lat1,lng1
+        cls.addProperty('scope',                            basestring)
 
     def exportGuideRequest(self):
         # return GuideRequest().dataImport(self.dataExport(), overflow=True)
@@ -2553,6 +2553,13 @@ class HTTPGuideRequest(Schema):
 
         return guideRequest
 
+class HTTPGuideSearchRequest(HTTPGuideRequest):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                            basestring, required=True)
+
+    def __init__(self):
+        HTTPGuideRequest.__init__(self)
 
 
 

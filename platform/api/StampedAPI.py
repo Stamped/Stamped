@@ -3509,7 +3509,7 @@ class StampedAPI(AStampedAPI):
             if previews.stamps is not None or previews.todos is not None:
                 entity.previews = previews
             result.append(entity)
-            
+
         # Refresh guide
         tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
@@ -3517,6 +3517,11 @@ class StampedAPI(AStampedAPI):
 
         # Build guide
         return None
+
+    @API_CALL
+    def searchGuide(self, guideRequest, authUserId):
+        #_searchStampCollection
+        pass
 
 
     @API_CALL
