@@ -2158,6 +2158,24 @@ class HTTPEntitySearchResultsItem(Schema):
         self.subtitle           = entity.subtitle
         self.category           = entity.category
 
+        # Build icon
+        if entity.isType('food'):
+            self.icon = _getIconURL('food')
+        elif entity.isType('bar'):
+            self.icon = _getIconURL('bar')
+        elif entity.kind == 'place':
+            self.icon = _getIconURL('place')
+        elif entity.isType('tv'):
+            self.icon = _getIconURL('tv')
+        elif entity.isType('movie'):
+            self.icon = _getIconURL('movie')
+        elif entity.isType('artist'):
+            self.icon = _getIconURL('artist')
+        elif entity.isType('album'):
+            self.icon = _getIconURL('album')
+        elif entity.isType('track'):
+            self.icon = _getIconURL('track')
+
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance
             
