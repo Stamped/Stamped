@@ -156,7 +156,7 @@ ClusterIcon.prototype.onAdd = function () {
      */
     google.maps.event.trigger(mc, "mouseenter", cClusterIcon.cluster_);
     
-    var $previews = $(cClusterIcon.div_).find('.marker-preview');
+    /*var $previews = $(cClusterIcon.div_).find('.marker-preview');
     $previews.show();
     
     $.each($previews, function(i, preview) {
@@ -193,7 +193,7 @@ ClusterIcon.prototype.onAdd = function () {
                 left    : 'easeOutBounce'
             }
         });
-    });
+    });*/
   });
   
   $div_.mouseleave(function (e) {
@@ -207,7 +207,7 @@ ClusterIcon.prototype.onAdd = function () {
      */
     google.maps.event.trigger(mc, "mouseleave", cClusterIcon.cluster_);
     
-    var $previews = $(cClusterIcon.div_).find('.marker-preview');
+    /*var $previews = $(cClusterIcon.div_).find('.marker-preview');
     
     $previews.stop(true, false).animate({
         opacity : 0, 
@@ -220,7 +220,7 @@ ClusterIcon.prototype.onAdd = function () {
             top     : 'easeOutBounce', 
             left    : 'easeOutBounce'
         }
-    });
+    });*/
   });
 };
 

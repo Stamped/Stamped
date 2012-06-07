@@ -49,28 +49,29 @@ TODO:
         * DONE - Polish social sharing buttons
         * DONE - Opening / closing animations
         * DONE - Comment collapsing ala Google Plus
-        * CLOSE - Relayout according to sdetail spec
+        * ALPHA - Relayout according to sdetail spec
         * Transformed entity image
         * Move like / todo / comment counters to their own section
     * Map view:
-        * 
-        * Refactor profile.js w/ map.js in mind
-        * Map layout matches spec
-        * CLOSE - Collapsable stamp list
+        * DONE - Refactor profile.js w/ map.js in mind
+        * DONE - Map layout matches spec
+        * DONE - Collapsable stamp list
+        * DONE - sDetail overlay
+        * ALPHA - Customize stamp popup
+        * ALPHA - Share this map button
+            * large z-index -- nuance positioning behavior on hover
         * Autocentering based on user's location
-        * Customize stamp popup
-        * sDetail overlay
-        * Share this map button
     * Profile Page:
         * header:
-            * BETA - Header functionality w/ temp header images
             * DONE - Dynamic, category-dependent header titles
-            * BLOCKED - View histogram
-            * BLOCKED - View bio / friends
+            * DONE - Separate # STAMPS header from user.num_stamps
+            * BETA - Header functionality w/ temp header images
             * BETA - Share this collection
-            * Separate # STAMPS header from user.num_stamps
+            * Customized user-specific, category-dependent header collages
+            * View histogram
+            * View bio / friends
         * gallery:
-            * BETA - Sort stamps by popularity
+            * DONE - Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
     
@@ -161,4 +162,8 @@ OLD:
     * link stamp image to lightboxed full-resolution version
     * fix opacity of lower profile header ribbon
     * modify update_stamps to be more efficient and only process new stamps!!!
+
+ChangeList:
+    * Map now centers by default to user's current location using HTML5 geolocation feature
+    * Clustering is now disabled by default (use the keyboard shortcut ctrl+t to toggle it on / off)
 

@@ -56,6 +56,7 @@ var g_update_stamps = null;
             
             return value;
         };
+        window.g_extract_data = extract_data;
         
         
         // ---------------------------------------------------------------------
@@ -132,8 +133,8 @@ var g_update_stamps = null;
                     }, {
                         duration : 500, 
                         specialEasing : { 
-                            width  : 'easeOutBounce', 
-                            height : 'easeOutBounce'
+                            width  : 'easeOutCubic', 
+                            height : 'easeOutCubic'
                         }
                     });
                 }, function(event) {
@@ -146,8 +147,8 @@ var g_update_stamps = null;
                     }, {
                         duration : 500, 
                         specialEasing : { 
-                            width  : 'easeOutBounce', 
-                            height : 'easeOutBounce'
+                            width  : 'easeOutCubic', 
+                            height : 'easeOutCubic'
                         }
                     });
                 });
