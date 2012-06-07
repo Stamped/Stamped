@@ -80,6 +80,19 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = created
 
+        if 'credit' in document:
+            credit = []
+            for item in document['credit']:
+                if 'user' in item:
+                    credit.append(item)
+                elif 'user_id' in item:
+                    creditItem = {}
+                    creditItem['user'] = {'user_id' : item['user_id']}
+                    if 'stamp_id' in item:
+                        creditItem['stamp_id'] = item['stamp_id']
+                    credit.append(creditItem)
+            document['credit'] = credit
+
         entityData = document.pop('entity')
         entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
