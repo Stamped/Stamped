@@ -111,6 +111,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             document['stats']['num_todos'] = document['stats']['num_faves']
             del(document['stats']['num_faves'])
 
+        if 'auth_service' not in document:
+            document['auth_service'] = 'stamped'
+
         self._upgradeLinkedAccounts(document)
 
         if self._obj is not None:
