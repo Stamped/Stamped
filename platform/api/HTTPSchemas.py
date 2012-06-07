@@ -1302,8 +1302,8 @@ class HTTPEntity(Schema):
                     source.link         = item.sizes[0].url
                     action              = HTTPAction()
                     action.type         = 'stamped_view_image'
-                    action.sources.append(source)
-                    item.action     = action
+                    action.sources      = [ source ]
+                    item.action         = action
                     images.append(item)
                 gallery.images = images
                 self.galleries = [gallery]
