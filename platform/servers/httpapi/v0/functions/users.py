@@ -85,7 +85,7 @@ def privacy(request, authUserId, http_schema, **kwargs):
 
 
 @handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 def findEmail(request, authUserId, http_schema, **kwargs):
     q = http_schema.q.split(',')
     emails = []
