@@ -387,7 +387,7 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(user_id)
 
         # Add activity if invitations were sent
-        if account.email is not None:
+        if account.email is not None and account.auth_service == 'stamped':
             invites = self._inviteDB.getInvitations(account.email)
             invitedBy = {}
 
