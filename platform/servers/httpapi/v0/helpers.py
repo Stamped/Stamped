@@ -230,10 +230,12 @@ def handleHTTPRequest(requires_auth=True,
             except StampedDuplicationError as e:
                 logs.warning("409 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
+                logs.error(409)
                 
-                response = HttpResponse("already_exists", status=409)
-                logs.error(response.status_code)
-                return response
+                error = {'error': 'already_exists'}
+                if e.msg is not None:
+                    error['message'] = e.msg
+                return self.transformOutput(error, status=409)
             
             except StampedUnavailableError as e:
                 logs.warning("404 Error: %s" % (e.msg))
