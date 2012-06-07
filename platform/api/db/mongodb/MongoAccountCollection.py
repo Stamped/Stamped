@@ -7,10 +7,11 @@ __license__   = "TODO"
 
 import Globals, utils, logs
 
-from datetime   import datetime
-from utils      import lazyProperty
-from api.Schemas    import *
-from errors     import *
+from datetime                   import datetime
+from utils                      import lazyProperty
+from api.Schemas                import *
+from errors                     import *
+from pymongo.errors             import DuplicateKeyError
 
 from AMongoCollection           import AMongoCollection
 from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
