@@ -59,7 +59,12 @@ class iTunes(object):
         except HTTPError as e:
             raise StampedHTTPError('itunes threw an exception',e.code,e.message)
         
-        return json.loads(result)
+        result = json.loads(result)
+
+        if result is None:
+            raise StampedHTTPError('iTunes returned "None" result')
+
+        return result
 
 __globaliTunes = None
 

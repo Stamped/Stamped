@@ -188,6 +188,7 @@ def memcached_function(time=0, min_compress_len=0):
                 compute = False
                 
                 wrapper.hits += 1
+                logs.debug("Cache hit: %s" % key)
             except KeyError:
                 store = True
             except Exception:
