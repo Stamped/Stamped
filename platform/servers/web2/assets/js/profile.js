@@ -4,7 +4,7 @@
  */
 
 /*jslint plusplus: true */
-/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, moment */
+/*global STAMPED_PRELOAD, StampedClient, jQuery, $, History, moment */
 
 var g_update_stamps = null;
 
@@ -401,6 +401,10 @@ var g_update_stamps = null;
         var update_stamps = function($scope) {
             var $items = $scope;
             
+            /*if (!!$items) {
+                console.debug("update_stamps: " + $items.length);
+            }*/
+            
             if (typeof($scope) === 'undefined') {
                 $scope = $(document);
                 $items = $scope.find('.stamp-gallery-item');
@@ -457,6 +461,8 @@ var g_update_stamps = null;
                     $(sdetail_wrapper_sel).remove();
                     var $target = $("<div class='" + sdetail_wrapper + "'></div>");
                     
+                    console.debug("AJAX: " + href);
+                    
                     // initialize sDetail popup after AJAX load
                     $target.load(href, {}, function(response, status, xhr) {
                         if (status == "error") {
@@ -488,18 +494,23 @@ var g_update_stamps = null;
                             close_sdetail_func = null;
                             $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                             
-                            update_gallery_layout(false, function() {
-                                $window.scrollTop(scroll_top);
-                                init_infinite_scroll();
-                                
+                            var close_sdetail_inner_func = function() {
                                 resize_sdetail_wrapper($target, 'closing', function() {
                                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
                                     update_dynamic_header();
-                                    
-                                    //update_gallery_layout(true);
-                                    //init_infinite_scroll();
                                 });
-                            });
+                            };
+                            
+                            if (!!$gallery) {
+                                update_gallery_layout(false, function() {
+                                    $window.scrollTop(scroll_top);
+                                    init_infinite_scroll();
+                                    
+                                    close_sdetail_inner_func();
+                                });
+                            } else {
+                                close_sdetail_inner_func();
+                            }
                         };
                         
                         // initialize sDetail close button logic
@@ -556,8 +567,14 @@ var g_update_stamps = null;
             }
             
             if ($sdetail_wrapper.length === 1) {
-                var offset = (cur_header_height + 16) + "px";
+                var offset = cur_header_height + 16;
                 var hidden = window.innerHeight + "px";
+                
+                if (!!$body && $body.hasClass('map')) {
+                    offset += 0;
+                }
+                
+                offset += "px";
                 
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 16));
@@ -661,17 +678,21 @@ var g_update_stamps = null;
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
             
-            $gallery.isotope({
-                itemSelector        : '.stamp-gallery-item', 
-                layoutMode          : "masonry"/*, 
-                animationOptions    : {
-                    duration        : 800,
-                    easing          : 'easeOut',
-                    queue           : true
-                }*/
-            });
-            
-            init_infinite_scroll();
+            if ($gallery.length <= 0) {
+                $gallery = null;
+            } else {
+                $gallery.isotope({
+                    itemSelector        : '.stamp-gallery-item', 
+                    layoutMode          : "masonry"/*, 
+                    animationOptions    : {
+                        duration        : 800,
+                        easing          : 'easeOut',
+                        queue           : true
+                    }*/
+                });
+                
+                init_infinite_scroll();
+            }
         };
         
         
@@ -943,7 +964,11 @@ var g_update_stamps = null;
         var update_dynamic_header = function() {
             // note: if sdetail's up, we round the dynamic header's size ratio to the 
             // nearest value s.t. it's either at maximum size or minimum size
-            var cur_ratio = Math.round(last_ratio);
+            var cur_ratio = 0.0;
+            
+            if (last_ratio !== null) {
+                cur_ratio = Math.round(last_ratio);
+            }
             
             if (!($body.hasClass(sdetail_popup) || 
                 $body.hasClass('sdetail_popup_animation') || 
@@ -1283,6 +1308,10 @@ var g_update_stamps = null;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
+            if (!$nav_bar || $nav_bar.length !== 1) {
+                return;
+            }
+            
             should_update_gallery = (typeof(should_update_gallery) !== 'boolean' ? true : should_update_gallery);
             
             var nav_bar_width   = $nav_bar.width();

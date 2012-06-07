@@ -195,7 +195,7 @@ header .header-body p.login a.button:active {
   left: -110px;
   width: 210px;
   height: 210px;
-  z-index: 101;
+  z-index: 160;
 }
 .user-logo-small {
   position: absolute;

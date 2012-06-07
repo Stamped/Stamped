@@ -90,12 +90,14 @@
             var partial_templates = {}
             
             $(".handlebars-template").each(function (i) {
-                var key = $(this).attr('id');
-                var val = $(this).html();
+                var $this = $(this);
+                var key   = $this.attr('id');
+                var val   = $this.html();
                 
                 partial_templates[key] = val;
             });
             
+            // TODO: this doesn't currently work!
             var user_profile_image = function(size) {
                 size = (typeof(size) === 'undefined' ? 144 : size);
                 
@@ -184,9 +186,10 @@
                 info += "</div><div class='bottom-wave'></div></div>";*/
                 
                 var info = template(stamp, { partials : partial_templates });
+                
+                //info = "<div class='stamp-map-item'>" + stamp.entity.title + "</div>";
                 //console.debug(stamp.entity.title + ":");
                 //console.debug(info);
-                //var info = "<div class='stamp-map-item'>" + stamp.entity.title + "</div>";
                 
                 var open_popup = function(e) {
                     // guard to only display a single marker InfoBox at a time
@@ -195,6 +198,14 @@
                     } else {
                         popup.setContent(info);
                         popup.open(map, marker);
+                        
+                        if (!!g_update_stamps) {
+                            setTimeout(function() {
+                                var $s = $('.stamp-map-item');
+                                g_update_stamps($s);
+                            }, 150);
+                        }
+                        
                         popup.selected = marker;
                     }
                     

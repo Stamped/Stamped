@@ -91,11 +91,6 @@ footer {
   padding: 0;
   margin: 0;
   height: auto;
-  -webkit-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
-  -moz-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
-  -ms-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
-  -o-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
-  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.35);
   /* **************************************************************************
                              STAMP MAP NAV COLUMN
    ************************************************************************** */
@@ -139,6 +134,8 @@ footer {
   position: absolute;
   width: 100%;
   height: 100%;
+  top: 0;
+  left: 0;
   background: transparent;
   pointer-events: none;
 }
@@ -334,4 +331,10 @@ footer {
 }
 .stamp-map .share-widget .desc {
   text-align: right;
+}
+/* **************************************************************************
+                                    MISC
+   ************************************************************************** */
+body.map .sdetail_body {
+  padding-top: 32px;
 }
