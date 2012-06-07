@@ -2741,8 +2741,8 @@ class StampedAPI(AStampedAPI):
         # Add full user object back
         comment.user = user.minimize()
 
-        self.addCommentAsync(user.user_id, stampId, comment.comment_id)
-        #tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
+        # self.addCommentAsync(user.user_id, stampId, comment.comment_id)
+        tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
 
         return comment
 
@@ -3509,12 +3509,22 @@ class StampedAPI(AStampedAPI):
             if previews.stamps is not None or previews.todos is not None:
                 entity.previews = previews
             result.append(entity)
+            
+        # Refresh guide
+        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         return result
 
         # Build guide
         return None
 
+
+    @API_CALL
+    def buildGuide(self, authUserId):
+        """
+        Pass if happening synchronously. Guide only needs to be regenerated async via this call.
+        """
+        pass
 
     @API_CALL
     def buildGuideAsync(self, authUserId):
