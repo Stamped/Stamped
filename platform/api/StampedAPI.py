@@ -3524,7 +3524,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def buildGuide(self, authUserId):
         """
-        Pass if happening synchronously. Guide only needs to be regenerated async via this call.
+        Pass if happening synchronously. The Guide only needs to be regenerated async, so it can fail if this is
+        called directly.
         """
         pass
 
