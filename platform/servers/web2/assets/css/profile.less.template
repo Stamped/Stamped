@@ -144,6 +144,10 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
     transition:         @target @duration @ease !important;
 }
 
+.user-primary-selection {
+    background-color: #fff;
+}
+
 .user-primary-selection:hover, .stamp-map .stamp-map-canvas .stamp-map-item:hover .stamp-map-item-overlay {
     background-color: fade(@primary, 15%) !important;
     cursor: pointer;

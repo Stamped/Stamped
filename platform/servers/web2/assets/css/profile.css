@@ -405,6 +405,11 @@ body.other .stamp-count-other {
   width: 39px;
   height: 33px;
 }
+.stamp-gallery-header .stamp-gallery-view-map a:hover,
+.stamp-gallery-header .stamp-gallery-view-map a:active {
+  color: #23a2f9 !important;
+  text-decoration: none !important;
+}
 .stamp-gallery-header .stamp-gallery-view-map a:hover .icon {
   background-position: -41px 0;
 }
