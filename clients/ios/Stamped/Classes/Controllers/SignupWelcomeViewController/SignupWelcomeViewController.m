@@ -146,7 +146,7 @@
         
         if (!_loadingView) {
             
-            STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
+            STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.view.bounds];
             background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
             [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
                 drawGradient([UIColor colorWithRed:0.961f green:0.961f blue:0.957f alpha:1.0f].CGColor, [UIColor colorWithRed:0.898f green:0.898f blue:0.898f alpha:1.0f].CGColor, ctx);
@@ -160,7 +160,7 @@
             STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
             LoginLoadingView *view = [[LoginLoadingView alloc] initWithFrame:CGRectMake(0.0f, (_loadingView.bounds.size.height-60.0f)/2, _loadingView.bounds.size.width, 60.0f)];
             view.titleLabel.text = cell.textField.text;
-            [_loadingView addSubview:cell];
+            [_loadingView addSubview:view];
             [view release];
             
             [UIView animateWithDuration:0.2f animations:^{
@@ -168,7 +168,6 @@
             }];
             
         }
-        
         
     } else {
         
