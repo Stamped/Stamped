@@ -235,15 +235,7 @@ def handleHTTPRequest(requires_auth=True,
                 error = {'error': 'already_exists'}
                 if e.msg is not None:
                     error['message'] = unicode(e.msg)
-                try:
-                    return self.transformOutput(error, status=409)
-                except Exception as e:
-                    print e 
-                    response = HttpResponse("internal server error", status=500)
-                    logs.error(response.status_code)
-                    return response
-                    
-
+                return transformOutput(error, status=409)
             
             except StampedUnavailableError as e:
                 logs.warning("404 Error: %s" % (e.msg))
