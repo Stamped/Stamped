@@ -266,7 +266,7 @@ class StampedAPI(AStampedAPI):
 
         # Add image timestamp if exists
         if tempImageUrl is not None:
-            account.image_cache = now
+            account.timestamp.image_cache = now
 
         # Create account
         ### TODO: Add intelligent error message
@@ -682,7 +682,7 @@ class StampedAPI(AStampedAPI):
         screen_name = user.screen_name
 
         image_cache = datetime.utcnow()
-        user.image_cache = image_cache
+        user.timestamp.image_cache = image_cache
         self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, schema.temp_image_url])
@@ -706,7 +706,7 @@ class StampedAPI(AStampedAPI):
 
         if user is not None:
             image_cache = datetime.utcnow()
-            user.image_cache = image_cache
+            user.timestamp.image_cache = image_cache
             self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
