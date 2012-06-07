@@ -2058,6 +2058,7 @@ class StampedAPI(AStampedAPI):
 
     def getStampBadges(self, stamp):
         userId = stamp.user.user_id
+        entityId = stamp.entity.entity_id
         badges  = []
 
         if stamp.stats.stamp_num == 1:
@@ -2066,18 +2067,21 @@ class StampedAPI(AStampedAPI):
             badge.genre     = "user_first_stamp"
             badges.append(badge)
 
-        stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+        except StampedUnavailableError:
+            stats = self.updateEntityStatsAsync(entityId)
 
-        if len(stamps) == 0:
+        if stats.num_stamps == 0:
             badge           = Badge()
             badge.user_id   = userId
             badge.genre     = "entity_first_stamp"
             badges.append(badge)
         else:
-            friendIds       = set(self._friendshipDB.getFriends(stamp.user.user_id))
-            stampUserIds    = set(map(lambda s: s.user.user_id, stamps))
+            friendUserIds = self._friendshipDB.getFriends(userId)
+            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
-            if friendIds.intersection(stampUserIds) == 0:
+            if len(friendStamps) == 0:
                 badge           = Badge()
                 badge.user_id   = userId
                 badge.genre     = "friends_first_stamp"
@@ -3381,7 +3385,6 @@ class StampedAPI(AStampedAPI):
 
 
     """
-
      #####
     #     # #    # # #####  ######
     #       #    # # #    # #
