@@ -482,11 +482,11 @@ class StampedAPI(AStampedAPI):
 
         for stamp in stamps:
             if stamp.credit is not None and len(stamp.credit) > 0:
-                for creditedUser in stamp.credit:
-                    self._stampDB.removeCredit(creditedUser.user_id, stamp)
+                for stampPreview in stamp.credit:
+                    self._stampDB.removeCredit(stampPreview.user.user_id, stamp)
 
                     # Decrement user stats by one
-                    self._userDB.updateUserStats(creditedUser.user_id, 'num_credits', increment=-1)
+                    self._userDB.updateUserStats(stampPreview.user.user_id, 'num_credits', increment=-1)
 
             # Remove activity on stamp
             self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -1750,9 +1750,8 @@ class StampedAPI(AStampedAPI):
                 if userId == user_id or userId in creditedUserIds:
                     continue
 
-                result              = CreditSchema()
-                result.user_id      = creditedUser.user_id
-                result.screen_name  = creditedUser.screen_name
+                result              = StampPreview()
+                result.user         = creditedUser.minimize()
 
                 # Add to user ids
                 userIds[userId] = creditedUser.minimize()
@@ -1763,7 +1762,7 @@ class StampedAPI(AStampedAPI):
                     result.stamp_id = creditedStamp.stamp_id
 
                 credit.append(result)
-                creditedUserIds.add(result.user_id)
+                creditedUserIds.add(userId)
 
         ### TODO: How do we handle credited users that have not yet joined?
         if len(credit) > 0:
@@ -1885,7 +1884,7 @@ class StampedAPI(AStampedAPI):
             # Credit given
             if stamp.credit is not None:
                 for credit in stamp.credit:
-                    allUserIds.add(credit.user_id)
+                    allUserIds.add(credit.user.user_id)
 
         for k, v in commentIds.items():
             allUserIds.add(v.user.user_id)
@@ -1943,14 +1942,9 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credit is not None:
                     for credit in stamp.credit:
-                        user                    = userIds[credit.user_id]
-                        item                    = CreditSchema()
-                        item.user_id            = credit.user_id
+                        item                    = StampPreview()
+                        item.user               = userIds[str(credit.user.user_id)]
                         item.stamp_id           = credit.stamp_id
-                        item.screen_name        = user.screen_name
-                        item.color_primary      = user.color_primary
-                        item.color_secondary    = user.color_secondary
-                        item.privacy            = user.privacy
                         credits.append(item)
                     stamp.credit = credits
 
@@ -2270,12 +2264,12 @@ class StampedAPI(AStampedAPI):
         # Give credit
         if stamp.credit is not None and len(stamp.credit) > 0:
             for item in stamp.credit:
-                if item.user_id == authUserId:
+                if item.user.user_id == authUserId:
                     continue
 
                 friendship              = Friendship()
                 friendship.user_id      = authUserId
-                friendship.friend_id    = item.user_id
+                friendship.friend_id    = item.user.user_id
 
                 # Check if block exists between user and credited user
                 if self._friendshipDB.blockExists(friendship) == True:
@@ -2289,15 +2283,15 @@ class StampedAPI(AStampedAPI):
                 # unblocked), but for now we're not going to do anything.
 
                 # Assign credit
-                self._stampDB.giveCredit(item.user_id, stamp)
-                creditedUserIds.add(item.user_id)
+                self._stampDB.giveCredit(item.user.user_id, stamp)
+                creditedUserIds.add(item.user.user_id)
 
                 # Add stats
                 self._statsSink.increment('stamped.api.stamps.credit')
 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits',     increment=1)
-                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
+                self._userDB.updateUserStats(item.user.user_id, 'num_credits',     increment=1)
+                self._userDB.updateUserStats(item.user.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -2416,8 +2410,8 @@ class StampedAPI(AStampedAPI):
             stamp.credit = None
         else:
             previouslyCredited = []
-            for creditedUser in stamp.credit:
-                previouslyCredited.append(creditedUser.user_id)
+            for stampPreview in stamp.credit:
+                previouslyCredited.append(stampPreview.user.user_id)
 
             ### TODO: Filter out non-ASCII data for credit
             creditedScreenNames = []
@@ -2483,7 +2477,7 @@ class StampedAPI(AStampedAPI):
                     continue
 
                 # Assign credit
-                self._stampDB.giveCredit(item.user_id, stamp)
+                self._stampDB.giveCredit(item.user.user_id, stamp)
 
                 # # Add restamp as comment (if prior stamp exists)
                 # if 'stamp_id' in item and item['stamp_id'] is not None:
@@ -2589,14 +2583,14 @@ class StampedAPI(AStampedAPI):
         if stamp.credit is not None and len(stamp.credit) > 0:
             for item in stamp.credit:
                 # Only run if user is flagged as credited
-                if item.user_id is None:
+                if item.user.user_id is None:
                     continue
 
                 # Assign credit
-                self._stampDB.removeCredit(item.user_id, stamp)
+                self._stampDB.removeCredit(item.user.user_id, stamp)
 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits', increment=-1)
+                self._userDB.updateUserStats(item.user.user_id, 'num_credits', increment=-1)
 
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
@@ -3537,7 +3531,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def buildGuideAsync(self, authUserId):
         try:
-            guide = self._guideDB.getGuide(guideRequest, authUserId)
+            guide = self._guideDB.getGuide(authUserId)
             if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
                 return
         except (StampedUnavailableError, KeyError):

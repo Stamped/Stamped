@@ -2591,7 +2591,7 @@ class HTTPStampMini(Schema):
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent)
-        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('credit',     HTTPStampPreview)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
         cls.addProperty('url',                  basestring)
@@ -2619,7 +2619,7 @@ class HTTPStamp(Schema):
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent, required=True)
-        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('credit',     HTTPStampPreview)
         cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
@@ -2650,6 +2650,8 @@ class HTTPStamp(Schema):
         data['contents'] = []
         if 'previews' in data:
             del(data['previews'])
+        if 'credit' in data:
+            del(data['credit'])
         self.dataImport(data, overflow=True)
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
@@ -2660,7 +2662,11 @@ class HTTPStamp(Schema):
         self.stamped            = stamp.timestamp.stamped
 
         if credit is not None and len(credit) > 0:
-            self.credit = credit
+            httpCredit = []
+            for item in credit:
+                httpStampPreview = HTTPStampPreview().importStampPreview(item)
+                httpCredit.append(httpStampPreview)
+            self.credit = httpCredit
 
         contents = []
         for content in stamp.contents:

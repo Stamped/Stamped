@@ -380,65 +380,65 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         self.deleteAccount(self.tokenD)
         self.deleteAccount(self.tokenE)
 
-    def test_follow_outsider(self):
+#     def test_follow_outsider(self):
+#         # There should be 1 personal activity item for User A - User D followed User A:
+#         results = self.showActivity(self.tokenE)
+# #        from pprint import pprint
+# #        pprint([(result['body'], result['activity_id']) for result in results])
+#         self.assertEqual(len(results), 0)
+
+#         results = self.showFriendsActivity(self.tokenE)
+#         self.assertEqual(len(results), 3)
+
+#         self.assertEqual(len(results), 1)
+#         self._assertBody(results, ['UserA is now following UserB.'])
+#         self._assertBody(results, ['UserA is now following UserC.'])
+#         self._assertBody(results, ['UserA is now following UserD.'])
+
+    def test_follow_activity(self):
         # There should be 1 personal activity item for User A - User D followed User A:
-        results = self.showActivity(self.tokenE)
+        results = self.showActivity(self.tokenA)
+        self.assertEqual(len(results), 1)
+        self._assertBody(results, ['UserD is now following you.'])
+
+    def test_follow_activity_universal(self):
+        # For friends activity, User A should see that UserB liked Kanye West and Users B,C,D are mutual friends
+        results = self.showFriendsActivity(self.tokenA)
+        self.assertEqual(len(results), 4)
+        self._assertBody(results, ['UserB liked Kanye West.'])
+        self._assertBody(results, ['UserC and UserD are now following UserB.', 'UserD and UserC are now following UserB.'])
+        self._assertBody(results, ['UserB and UserD are now following UserC.', 'UserD and UserB are now following UserC.'])
+        self._assertBody(results, ['UserC and UserB are now following UserD.', 'UserB and UserC are now following UserD.'])
+
+    def test_follow_activity_overlap(self):
+        # Now look at UserD's feeds.  We expect to see that User A, B, and C have added him as a follower in his personal feed
+        results = self.showActivity(self.tokenD)
+        self.assertEqual(len(results), 1)
+        self._assertBody(results, ['UserA and 2 others are now following you.', 'UserB and 2 others are now following you.',
+                                                                               'UserC and 2 others are now following you.'])
+    def test_follow_activity_overlap_universal(self):
+        # We should NOT see anyone following UserD.
+        results = self.showFriendsActivity(self.tokenD)
+        self.assertEqual(len(results), 3)
+        self._assertBody(results, ['UserB liked Kanye West.'])
+        self._assertBody(results, ['UserA and UserC are now following UserB.', 'UserC and UserA are now following UserB.'])
+        self._assertBody(results, ['UserA and UserB are now following UserC.', 'UserB and UserA are now following UserC.'])
+
+    def test_like_activity(self):
+        # Test UserC's personal feed.  We expect to see that UserB has liked his stamp, also a grouped item for followers
+        results = self.showActivity(self.tokenC)
 #        from pprint import pprint
 #        pprint([(result['body'], result['activity_id']) for result in results])
-        self.assertEqual(len(results), 0)
+        self.assertEqual(len(results), 2)
+        self._assertBody(results, ['UserB liked Kanye West.'])
 
-        results = self.showFriendsActivity(self.tokenE)
+    def test_like_activity_universal(self):
+        # Test UserC's friends feed.  We expect that UserB's like is absent.
+        results = self.showFriendsActivity(self.tokenC)
         self.assertEqual(len(results), 3)
-
-        self.assertEqual(len(results), 1)
-        self._assertBody(results, ['UserA is now following UserB.'])
-        self._assertBody(results, ['UserA is now following UserC.'])
-        self._assertBody(results, ['UserA is now following UserD.'])
-
-#    def test_follow_activity(self):
-#        # There should be 1 personal activity item for User A - User D followed User A:
-#        results = self.showActivity(self.tokenA)
-#        self.assertEqual(len(results), 1)
-#        self._assertBody(results, ['UserD is now following you.'])
-#
-#    def test_follow_activity_universal(self):
-#        # For friends activity, User A should see that UserB liked Kanye West and Users B,C,D are mutual friends
-#        results = self.showFriendsActivity(self.tokenA)
-#        self.assertEqual(len(results), 4)
-#        self._assertBody(results, ['UserB liked Kanye West.'])
-#        self._assertBody(results, ['UserC and UserD are now following UserB.', 'UserD and UserC are now following UserB.'])
-#        self._assertBody(results, ['UserB and UserD are now following UserC.', 'UserD and UserB are now following UserC.'])
-#        self._assertBody(results, ['UserC and UserB are now following UserD.', 'UserB and UserC are now following UserD.'])
-#
-#    def test_follow_activity_overlap(self):
-#        # Now look at UserD's feeds.  We expect to see that User A, B, and C have added him as a follower in his personal feed
-#        results = self.showActivity(self.tokenD)
-#        self.assertEqual(len(results), 1)
-#        self._assertBody(results, ['UserA and 2 others are now following you.', 'UserB and 2 others are now following you.',
-#                                                                                'UserC and 2 others are now following you.'])
-#    def test_follow_activity_overlap_universal(self):
-#        # We should NOT see anyone following UserD.
-#        results = self.showFriendsActivity(self.tokenD)
-#        self.assertEqual(len(results), 3)
-#        self._assertBody(results, ['UserB liked Kanye West.'])
-#        self._assertBody(results, ['UserA and UserC are now following UserB.', 'UserC and UserA are now following UserB.'])
-#        self._assertBody(results, ['UserA and UserB are now following UserC.', 'UserB and UserA are now following UserC.'])
-#
-#    def test_like_activity(self):
-#        # Test UserC's personal feed.  We expect to see that UserB has liked his stamp, also a grouped item for followers
-#        results = self.showActivity(self.tokenC)
-##        from pprint import pprint
-##        pprint([(result['body'], result['activity_id']) for result in results])
-#        self.assertEqual(len(results), 2)
-#        self._assertBody(results, ['UserB liked Kanye West.'])
-#
-#    def test_like_activity_universal(self):
-#        # Test UserC's friends feed.  We expect that UserB's like is absent.
-#        results = self.showFriendsActivity(self.tokenC)
-#        self.assertEqual(len(results), 3)
-#        self._assertBody(results, ['UserD is now following UserB.'])
-#        self._assertBody(results, ['UserB is now following UserD.'])
-#        self._assertBody(results, ['UserD is now following UserA.'])
+        self._assertBody(results, ['UserD is now following UserB.'])
+        self._assertBody(results, ['UserB is now following UserD.'])
+        self._assertBody(results, ['UserD is now following UserA.'])
 
 if __name__ == '__main__':
     main()
