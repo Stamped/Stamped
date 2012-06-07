@@ -202,58 +202,6 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button2 {
   background-position: -80px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget {
-  background-color: #fff;
-  padding: 0.25em 0.5em;
-  -webkit-border-radius: 1em;
-  -moz-border-radius: 1em;
-  border-radius: 1em;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  -webkit-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  /* NOTE: because social sharing requires JS, sharing widgets are hidden 
-                               by default in CSS and only displayed on page load via JS if JS is 
-                               supported.
-                            */
-
-  display: none;
-  -webkit-transition: -webkit-border-radius 0.3s ease-out;
-  -moz-transition: -moz-border-radius 0.3s ease-out;
-  -ms-transition: -ms-border-radius 0.3s ease-out;
-  -o-transition: -o-border-radius 0.3s ease-out;
-  transition: border-radius 0.3s ease-out;
-  overflow: hidden;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget .desc {
-  font-size: 80%;
-  font-weight: 700;
-  white-space: nowrap;
-  color: #333;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget .share-buttons {
-  display: none;
-  white-space: nowrap;
-  margin: 4px auto;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget .share-buttons .share-button {
-  display: inline-block;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget:hover {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .share-widget:hover .share-buttons {
-  display: block;
-}
 .profile-header-wrapper .profile-header .profile-content-page .header-category-place {
   background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
   background-size: 100% 100%;
@@ -451,16 +399,16 @@ body.other .stamp-count-other {
 .stamp-gallery-header .stamp-gallery-view-map {
   float: right;
 }
-.stamp-gallery-header .stamp-gallery-view-map a {
+.stamp-gallery-header .stamp-gallery-view-map a .icon {
   background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
-  display: block;
+  display: inline-block;
   width: 39px;
   height: 33px;
 }
-.stamp-gallery-header .stamp-gallery-view-map a:hover {
+.stamp-gallery-header .stamp-gallery-view-map a:hover .icon {
   background-position: -41px 0;
 }
-.stamp-gallery-header .stamp-gallery-view-map a:active {
+.stamp-gallery-header .stamp-gallery-view-map a:active .icon {
   background-position: -82px 0;
 }
 .stamp-gallery-header .expanded {
@@ -551,9 +499,6 @@ body.other .stamp-count-other {
 
   /*background-color: #FEFEFE;*/
 
-}
-.stamp-gallery-item:hover {
-  cursor: pointer;
 }
 .stamp-gallery-item:hover .content .content_2 .timestamp {
   opacity: 1;
@@ -1316,9 +1261,9 @@ ul.user-category-distribution li .bargraph .value {
   width: 100%;
   height: 100%;
   position: fixed;
-  overflow: scroll;
+  overflow-y: scroll;
   top: 15%;
-  z-index: 100;
+  z-index: 125;
 }
 body.sdetail_popup_animation .post-header,
 body.sdetail_popup .post-header {

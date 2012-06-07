@@ -232,7 +232,7 @@ def map(request, schema, **kwargs):
     # TODO: enforce stricter validity checking on offset and limit
     
     schema.offset = schema.offset or 0
-    schema.limit  = None
+    schema.limit  = 1000
     #schema.limit  or 25
     
     if ENABLE_TRAVIS_TEST:

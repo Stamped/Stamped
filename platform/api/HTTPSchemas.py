@@ -1793,7 +1793,7 @@ class HTTPEntity(Schema):
 
                             for source in sources:
                                 source.setCompletion(
-                                    action      = action.type,
+                                    action      = 'listen',
                                     entity_id   = entity.entity_id,
                                     source      = source.source,
                                     source_id   = source.source_id,
@@ -2518,12 +2518,12 @@ class HTTPGuideRequest(Schema):
                 return subsection
             raise StampedInputError("Invalid subsection: %s" % subsection)
 
-        cls.addProperty('limit',                        int)
-        cls.addProperty('offset',                       int)
-        cls.addProperty('section',                      basestring, required=True, cast=checkSection)
-        cls.addProperty('subsection',                   basestring, cast=checkSubsection)
-        cls.addProperty('viewport',                     basestring) # lat0,lng0,lat1,lng1
-        cls.addProperty('scope',                        basestring)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
+        cls.addProperty('section',                          basestring, required=True, cast=checkSection)
+        cls.addProperty('subsection',                       basestring, cast=checkSubsection)
+        cls.addProperty('viewport',                         basestring) # lat0,lng0,lat1,lng1
+        cls.addProperty('scope',                            basestring)
 
     def exportGuideRequest(self):
         # return GuideRequest().dataImport(self.dataExport(), overflow=True)
@@ -2553,6 +2553,13 @@ class HTTPGuideRequest(Schema):
 
         return guideRequest
 
+class HTTPGuideSearchRequest(HTTPGuideRequest):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                            basestring, required=True)
+
+    def __init__(self):
+        HTTPGuideRequest.__init__(self)
 
 
 
@@ -2584,7 +2591,7 @@ class HTTPStampMini(Schema):
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent)
-        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('credit',     HTTPStampPreview)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
         cls.addProperty('url',                  basestring)
@@ -2612,7 +2619,7 @@ class HTTPStamp(Schema):
         cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
         cls.addNestedProperty('user',           HTTPUserMini, required=True)
         cls.addNestedPropertyList('contents',   HTTPStampContent, required=True)
-        cls.addNestedPropertyList('credit',     CreditSchema)
+        cls.addNestedPropertyList('credit',     HTTPStampPreview)
         cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addNestedPropertyList('badges',     HTTPBadge)
         cls.addProperty('via',                  basestring)
@@ -2643,6 +2650,8 @@ class HTTPStamp(Schema):
         data['contents'] = []
         if 'previews' in data:
             del(data['previews'])
+        if 'credit' in data:
+            del(data['credit'])
         self.dataImport(data, overflow=True)
 
         self.user               = HTTPUserMini().importUserMini(stamp.user)
@@ -2653,7 +2662,11 @@ class HTTPStamp(Schema):
         self.stamped            = stamp.timestamp.stamped
 
         if credit is not None and len(credit) > 0:
-            self.credit = credit
+            httpCredit = []
+            for item in credit:
+                httpStampPreview = HTTPStampPreview().importStampPreview(item)
+                httpCredit.append(httpStampPreview)
+            self.credit = httpCredit
 
         contents = []
         for content in stamp.contents:

@@ -96,9 +96,9 @@ def findEmail(request, authUserId, http_schema, **kwargs):
         except Exception:
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
-    
+
     users       = stampedAPI.findUsersByEmail(authUserId, emails)
-    
+
     output = []
     for user in users:
         if user.user_id != authUserId:
@@ -142,7 +142,9 @@ def findPhone(request, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
 @require_http_methods(["POST"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
+    logs.info('### Hit findTwitter')
     users = stampedAPI.findUsersByTwitter(authUserId, http_schema.user_token, http_schema.user_secret)
+    logs.info('### len(users): %s' % len(users))
     output = []
     for user in users:
         if user.user_id != authUserId:

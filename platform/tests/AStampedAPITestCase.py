@@ -47,7 +47,7 @@ class AStampedAPITestCase(AStampedTestCase):
     
     _opener = StampedAPIURLOpener()
 
-    def handleGET(self, path, data):
+    def handleGET(self, path, data, handleExceptions=True):
         global _baseurl
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (_baseurl, path, params)
@@ -59,10 +59,13 @@ class AStampedAPITestCase(AStampedTestCase):
             result = json.loads(raw)
         except:
             raise StampedAPIException(raw)
+
+        if handleExceptions and 'error' in result:
+            raise Exception("GET failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
         
         return result
     
-    def handlePOST(self, path, data):
+    def handlePOST(self, path, data, handleExceptions=True):
         global _baseurl
         params = urllib.urlencode(data)
         url    = "%s/%s" % (_baseurl, path)
@@ -76,6 +79,9 @@ class AStampedAPITestCase(AStampedTestCase):
             result = json.loads(raw)
         except:
             raise StampedAPIException(raw)
+
+        if handleExceptions and 'error' in result:
+            raise Exception("POST failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
         
         return result
     

@@ -209,6 +209,13 @@ class Schema(object):
     def __unicode__(self):
         return u'<%s %s>' % (self.__class__.__name__, self.dataExport())
 
+    def validate(self):
+        if self.__required_count < len(self.__class__._required_fields):
+            logs.info('Object: %s' % pprint.pformat(self))
+            logs.info('Required: %s' % self.__class__._required_fields)
+            raise SchemaException('Invalid access, required properties not set')
+        return True 
+
     def dataExport(self):
         properties = {}
         for k,v in self.__properties.items():
