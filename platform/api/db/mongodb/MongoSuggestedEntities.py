@@ -133,7 +133,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
             seen = set()
             
             for artist in artists:
-                if artist.itunes_id not in seen:
+                if artist.sources.itunes_id not in seen:
                     seen.add(artist.itunes_id)
                     unique_artists.append(artist)
             
