@@ -266,7 +266,7 @@ class StampedAPI(AStampedAPI):
 
         # Add image timestamp if exists
         if tempImageUrl is not None:
-            account.image_cache = now
+            account.timestamp.image_cache = now
 
         # Create account
         ### TODO: Add intelligent error message
@@ -387,7 +387,7 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(user_id)
 
         # Add activity if invitations were sent
-        if account.email is not None:
+        if account.email is not None and account.auth_service == 'stamped':
             invites = self._inviteDB.getInvitations(account.email)
             invitedBy = {}
 
@@ -682,7 +682,7 @@ class StampedAPI(AStampedAPI):
         screen_name = user.screen_name
 
         image_cache = datetime.utcnow()
-        user.image_cache = image_cache
+        user.timestamp.image_cache = image_cache
         self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, schema.temp_image_url])
@@ -706,7 +706,7 @@ class StampedAPI(AStampedAPI):
 
         if user is not None:
             image_cache = datetime.utcnow()
-            user.image_cache = image_cache
+            user.timestamp.image_cache = image_cache
             self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
@@ -2058,6 +2058,7 @@ class StampedAPI(AStampedAPI):
 
     def getStampBadges(self, stamp):
         userId = stamp.user.user_id
+        entityId = stamp.entity.entity_id
         badges  = []
 
         if stamp.stats.stamp_num == 1:
@@ -2066,18 +2067,21 @@ class StampedAPI(AStampedAPI):
             badge.genre     = "user_first_stamp"
             badges.append(badge)
 
-        stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+        except StampedUnavailableError:
+            stats = self.updateEntityStatsAsync(entityId)
 
-        if len(stamps) == 0:
+        if stats.num_stamps == 0:
             badge           = Badge()
             badge.user_id   = userId
             badge.genre     = "entity_first_stamp"
             badges.append(badge)
         else:
-            friendIds       = set(self._friendshipDB.getFriends(stamp.user.user_id))
-            stampUserIds    = set(map(lambda s: s.user.user_id, stamps))
+            friendUserIds = self._friendshipDB.getFriends(userId)
+            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
-            if friendIds.intersection(stampUserIds) == 0:
+            if len(friendStamps) == 0:
                 badge           = Badge()
                 badge.user_id   = userId
                 badge.genre     = "friends_first_stamp"
@@ -2741,8 +2745,8 @@ class StampedAPI(AStampedAPI):
         # Add full user object back
         comment.user = user.minimize()
 
-        self.addCommentAsync(user.user_id, stampId, comment.comment_id)
-        #tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
+        # self.addCommentAsync(user.user_id, stampId, comment.comment_id)
+        tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
 
         return comment
 
@@ -3381,7 +3385,6 @@ class StampedAPI(AStampedAPI):
 
 
     """
-
      #####
     #     # #    # # #####  ######
     #       #    # # #    # #
@@ -3510,11 +3513,26 @@ class StampedAPI(AStampedAPI):
                 entity.previews = previews
             result.append(entity)
 
+        # Refresh guide
+        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
+
         return result
 
         # Build guide
         return None
 
+    @API_CALL
+    def searchGuide(self, guideRequest, authUserId):
+        #_searchStampCollection
+        pass
+
+
+    @API_CALL
+    def buildGuide(self, authUserId):
+        """
+        Pass if happening synchronously. Guide only needs to be regenerated async via this call.
+        """
+        pass
 
     @API_CALL
     def buildGuideAsync(self, authUserId):
