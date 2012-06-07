@@ -206,10 +206,12 @@ def handleHTTPRequest(requires_auth=True,
             except StampedInputError as e:
                 logs.warning("400 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
+                logs.error(400)
                 
-                response = HttpResponse("invalid_request", status=400)
-                logs.error(response.status_code)
-                return response
+                error = {'error': 'invalid_request'}
+                if e.msg is not None:
+                    error['message'] = unicode(e.msg)
+                return transformOutput(error, status=400)
             
             except StampedIllegalActionError as e:
                 logs.warning("403 Error: %s" % (e.msg))
