@@ -62,6 +62,8 @@
 - (id)init {
   if (self = [super init]) {
       
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILoginNotification object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
@@ -566,6 +568,24 @@
     
 }
 
+
+#pragma mark - Login Notifications 
+
+- (void)logginStatusChanged:(NSNotification*)notification {
+    
+    if (!LOGGED_IN) {
+        
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        self.navigationItem.rightBarButtonItem = button;
+        [button release];
+        
+    } else {
+        
+        [Util addCreateStampButtonToController:self];
+        
+    }
+    
+}
 
 
 @end

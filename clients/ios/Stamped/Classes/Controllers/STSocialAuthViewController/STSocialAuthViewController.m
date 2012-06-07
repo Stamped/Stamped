@@ -154,6 +154,8 @@
     [[STFacebook sharedInstance] loadMe];
     [[STFacebook sharedInstance] setHandler:^(NSDictionary *dictionary) {
         
+        NSLog(@"user finished : %@", [dictionary description]);
+        
         SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeFacebook];
         controller.navigationItem.hidesBackButton = YES;
         double delayInSeconds = 0.1f;
@@ -175,14 +177,12 @@
     [[STAuth sharedInstance] twitterAuthWithToken:[[STTwitter sharedInstance] twitterToken] secretToken:[[STTwitter sharedInstance] twitterTokenSecret] completion:^(NSError *error) {
     
         if (error) {
-            
-            NSLog(@"error : %@", [error localizedDescription]);
-            
+                        
             [self signupTwitter];
             
         } else {
             
-            if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFailed:)]) {
+            if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFinished:)]) {
                 [self.delegate socialAuthViewControllerFinished:self];
             }
             
@@ -213,7 +213,7 @@
             
         } else {
             
-            if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFailed:)]) {
+            if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFinished:)]) {
                 [self.delegate socialAuthViewControllerFinished:self];
             }
             

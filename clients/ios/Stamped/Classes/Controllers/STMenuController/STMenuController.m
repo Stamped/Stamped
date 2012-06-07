@@ -139,6 +139,12 @@
     
 }
 
+- (void)twitterAccountsViewControllerSuccessful:(TwitterAccountsViewController*)controller {
+    
+    [self dismissModalViewControllerAnimated:YES];
+    
+}
+
 
 #pragma mark - LoginViewControllerDelegate
 

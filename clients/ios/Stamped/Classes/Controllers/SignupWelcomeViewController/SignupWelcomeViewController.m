@@ -33,6 +33,7 @@
         _signupType = type;
         [STEvents addObserver:self selector:@selector(signupFinished:) event:EventTypeSignupFinished];
         [STEvents addObserver:self selector:@selector(signupFailed:) event:EventTypeSignupFailed];
+        self.navigationItem.hidesBackButton = YES;
     }
     return self;
 }
@@ -48,7 +49,6 @@
     self.tableView.showsVerticalScrollIndicator = NO;
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
-    self.navigationItem.hidesBackButton = YES;
     
     if (!self.tableView.tableHeaderView) {
         
@@ -275,11 +275,30 @@
             parameters.name = parameters.screenName;
         }
 
-        NSLog(@"params : %@", [parameters description]);
+        NSString *email = [dictionary objectForKey:@"email"];
+        if (email != nil && ![email isEqual:[NSNull null]]) {
+            parameters.email = email;
+        }
+        
+        NSString *link = [dictionary objectForKey:@"link"];
+        if (link != nil && ![link isEqual:[NSNull null]]) {
+            parameters.website = link;
+        }
+        
+        if (self.tableView.tableFooterView) {
+            
+            StampColorPickerView *view = (StampColorPickerView*)self.tableView.tableFooterView;
+            NSArray *colors = [view colors];
+            UIColor *color = [colors objectAtIndex:0];
+            parameters.colorPrimary = [color hexString];
+            color = [colors objectAtIndex:1];
+            parameters.colorSecondary = [color hexString];
+            
+        }
+        
+        [[STAuth sharedInstance] facebookSignupWithToken:[[[STFacebook sharedInstance] facebook] accessToken] params:parameters];
         [parameters release];
         
-        
-
     } else if (_signupType == SignupWelcomeTypeEmail) {
         
      

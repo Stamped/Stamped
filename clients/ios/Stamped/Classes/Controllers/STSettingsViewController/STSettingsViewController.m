@@ -87,23 +87,35 @@
             
             CGPathRef path = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(rect, inset, 2) cornerRadius:corner].CGPath;
 
+            // drop shadow
             CGContextSaveGState(ctx);
             CGContextSetFillColorWithColor(ctx, [UIColor whiteColor].CGColor);
             CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 2.0f, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.05].CGColor);
             CGContextAddPath(ctx, path);
             CGContextFillPath(ctx);
-            
             CGContextAddPath(ctx, path);
             CGContextClip(ctx);
             CGContextClearRect(ctx, rect);
             CGContextRestoreGState(ctx);
             
+            // gradient fill
             CGContextSaveGState(ctx);
             CGContextAddPath(ctx, path);
             CGContextClip(ctx);
             drawGradient(topColor.CGColor, bottomColor.CGColor, ctx);
+            
+            // inner shadow
+            CGFloat originY = 2.0f;
+            CGFloat originX = inset;
+            CGContextSetStrokeColorWithColor(ctx, [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor);
+            CGContextMoveToPoint(ctx, originX, originY + corner);
+            CGContextAddQuadCurveToPoint(ctx, originX, originY, originX + corner, originY);
+            CGContextAddLineToPoint(ctx, rect.size.width-(originX+corner), originY);
+            CGContextAddQuadCurveToPoint(ctx, rect.size.width-originX, originY, rect.size.width-originX, originY + corner);
+            CGContextStrokePath(ctx);
             CGContextRestoreGState(ctx);
             
+            // gradient stroke
             topColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:0.6f];
             bottomColor = [UIColor colorWithRed:0.8f green:0.8f blue:0.8f alpha:0.8f];
             CGContextAddPath(ctx, path);
@@ -238,12 +250,12 @@
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
         
-    } else if (indexPath.section == 4) {
+    } else if (indexPath.section == 3) {
         
         // sign out
         
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to sign out?" delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Sign out" otherButtonTitles:nil];
-        actionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+        actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
         [actionSheet showInView:self.view];
         [actionSheet release];
         
