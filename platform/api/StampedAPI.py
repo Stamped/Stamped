@@ -1567,7 +1567,7 @@ class StampedAPI(AStampedAPI):
             names = list(set([i['name'] for i in result['result']]))[:10]
             completions = []
             for name in names:
-                completions.append( { 'completion' : item['name']})
+                completions.append( { 'completion' : name})
             return completions
         return []
 
