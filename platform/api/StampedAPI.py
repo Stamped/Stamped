@@ -3539,6 +3539,13 @@ class StampedAPI(AStampedAPI):
                 previews.stamps = entityStampPreviews[stamp.entity.entity_id]
                 entity.previews = previews
                 result.append(entity)
+                
+            limit = 20
+            if guideRequest.limit is not None:
+                limit = guideRequest.limit
+            offset = 0
+            if guideRequest.offset is not None:
+                offset = guideRequest.offset
 
             return result[offset:][:limit]
 
