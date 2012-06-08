@@ -9,6 +9,7 @@ import Globals
 from logs import report
 
 try:
+    import pymongo
     from AMongoCollection               import AMongoCollection
     from api.Schemas                        import *
 except:
