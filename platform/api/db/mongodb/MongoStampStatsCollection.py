@@ -60,7 +60,7 @@ class MongoStampStatsCollection(AMongoCollection):
         documentIds = map(self._getObjectIdFromString, stampIds)
         return self._removeMongoDocuments(documentIds)
 
-    def findPopularStamps(self, **kwargs):
+    def getPopularStampIds(self, **kwargs):
         kinds = kwargs.pop('kinds', None)
         types = kwargs.pop('types', None)
         viewport = kwargs.pop('viewport', None)
@@ -104,11 +104,11 @@ class MongoStampStatsCollection(AMongoCollection):
         if since is not None:
             query['last_stamped'] = {'$gte': since}
 
-        results = self._collection.find(query) \
+        results = self._collection.find(query, fields=['_id']) \
                       .sort([('score', pymongo.DESCENDING)]) \
                       .limit(limit)
 
-        return map(self._convertFromMongo, results)
+        return map(lambda x: self._getStringFromObjectId(x['_id']), results)
 
 
 
