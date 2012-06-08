@@ -1564,8 +1564,9 @@ class StampedAPI(AStampedAPI):
             result = self._rdio.searchSuggestions(autosuggestForm.query, types="Artist,Album,Track")
             if 'result' not in result:
                 return []
+            names = list(set([i['name'] for i in result['result']]))[:10]
             completions = []
-            for item in result['result']:
+            for name in names:
                 completions.append( { 'completion' : item['name']})
             return completions
         return []
