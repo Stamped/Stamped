@@ -2597,8 +2597,6 @@ class HTTPGuideRequest(Schema):
         cls.addProperty('scope',                            basestring)
 
     def exportGuideRequest(self):
-        # return GuideRequest().dataImport(self.dataExport(), overflow=True)
-
         data = self.dataExport()
         if 'viewport' in data:
             del(data['viewport'])
@@ -2633,9 +2631,30 @@ class HTTPGuideSearchRequest(HTTPGuideRequest):
         HTTPGuideRequest.__init__(self)
 
     def exportGuideSearchRequest(self):
-        result = GuideSearchRequest()
-        result.dataImport(HTTPGuideRequest.exportGuideRequest(self).dataExport())
-        return result 
+        data = self.dataExport()
+        if 'viewport' in data:
+            del(data['viewport'])
+        guideSearchRequest = GuideSearchRequest()
+        guideSearchRequest.dataImport(data)
+
+        if self.viewport is not None:
+            viewportData            = self.viewport.split(',')
+            
+            coordinates0            = CoordinatesSchema()
+            coordinates0.lat        = viewportData[0]
+            coordinates0.lng        = viewportData[1]
+            
+            coordinates1            = CoordinatesSchema()
+            coordinates1.lat        = viewportData[2]
+            coordinates1.lng        = viewportData[3]
+
+            viewport                = ViewportSchema()
+            viewport.upperLeft      = coordinates0
+            viewport.lowerRight     = coordinates1
+
+            guideSearchRequest.viewport   = viewport 
+
+        return guideSearchRequest
 
 
 # ###### #
