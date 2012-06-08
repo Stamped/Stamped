@@ -88,14 +88,17 @@
         var marker_clusterer            = null;
         var marker_clusterer_enabled    = false;
         
-        // TODO: use normal google maps popup InfoWindow as opposed to InfoBox
+        /*var popup  = new google.maps.InfoWindow({
+            maxWidth : 340
+        });*/
+        
         var popup  = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
-            pixelOffset: new google.maps.Size(-140, -25), 
+            pixelOffset: new google.maps.Size(-48, -32), 
             zIndex: null, 
             boxStyle: {
-                width: "280px"
+                width: "340px"
             }, 
             closeBoxMargin: "16px 6px 2px 2px", 
             closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif", 

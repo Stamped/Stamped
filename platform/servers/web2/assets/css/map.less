@@ -102,11 +102,27 @@ footer {
             
             .entity-header {
                 float: left;
+                position: relative;
+                top: -2px;
+                
+                margin-left: 0;
+                
+                @width: 340px - (40px + @marker_space * 2) - (@marker_space * 4);
+                max-width: @width;
+                width:     @width;
+                
+                .title {
+                    .pronounced-title {
+                        line-height: 100%;
+                        padding: 0;
+                        margin:  0;
+                    }
+                }
             }
             
             .content {
                 clear: both;
-                margin: .5em 0 0 56px;
+                margin: 0 0 0 (40px + @marker_space * 2);
                 
                 .blurbs {
                     .stamped-content {

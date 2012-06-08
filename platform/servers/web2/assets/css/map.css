@@ -156,10 +156,20 @@ footer {
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .entity-header {
   float: left;
+  position: relative;
+  top: -2px;
+  margin-left: 0;
+  max-width: 228px;
+  width: 228px;
+}
+.stamp-map .stamp-map-canvas .stamp-map-item .entity-header .title .pronounced-title {
+  line-height: 100%;
+  padding: 0;
+  margin: 0;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .content {
   clear: both;
-  margin: .5em 0 0 56px;
+  margin: 0 0 0 64px;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .content .blurbs .stamped-content {
   display: none;

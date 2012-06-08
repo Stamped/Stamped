@@ -1682,7 +1682,9 @@ var g_update_stamps = null;
             // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
                 if (typeof(close_sdetail_func) !== 'undefined' && !!close_sdetail_func) {
-                    close_sdetail_func();
+                    if ($('.fancybox-opened').length <= 0) {
+                        close_sdetail_func();
+                    }
                 }
                 
                 if (typeof(g_close_map_popup) !== 'undefined' && !!g_close_map_popup) {
