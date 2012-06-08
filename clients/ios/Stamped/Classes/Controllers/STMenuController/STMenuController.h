@@ -11,6 +11,6 @@
 
 @interface STMenuController : DDMenuController 
 
-- (void)showWelcome;
+- (void)showWelcome:(BOOL)animated;
 
 @end

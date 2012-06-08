@@ -231,7 +231,7 @@
     STOAuthParameter *obj = [[self alloc] init] ;
     [obj setName:name];
     [obj setValue:value];
-    return obj;
+    return [obj autorelease];
 }
 
 - (void)dealloc {
@@ -271,8 +271,8 @@
     SEL sel = @selector(compare:);
     
     NSSortDescriptor *desc1, *desc2;
-    desc1 = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:sel];
-    desc2 = [[NSSortDescriptor alloc] initWithKey:@"encodedValue" ascending:YES selector:sel];
+    desc1 = [[[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:sel] autorelease];
+    desc2 = [[[NSSortDescriptor alloc] initWithKey:@"encodedValue" ascending:YES selector:sel] autorelease];
     
     return [NSArray arrayWithObjects:desc1, desc2, nil];
 }

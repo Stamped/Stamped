@@ -58,6 +58,7 @@ try:
     from Facebook               import *
     from Twitter                import *
     from GooglePlaces           import *
+    from Rdio                   import *
 except Exception:
     report()
     raise
@@ -89,6 +90,10 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def _googlePlaces(self):
         return globalGooglePlaces()
+
+    @lazyProperty
+    def _rdio(self):
+        return globalRdio()
 
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
@@ -1536,6 +1541,17 @@ class StampedAPI(AStampedAPI):
 
         return results
 
+    def _orderedUnique(self, theList):
+        known = set()
+        newlist = []
+
+        for d in theList:
+            if d in known: continue
+            newlist.append(d)
+            known.add(d)
+
+        return newlist
+
     @API_CALL
     def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
         if autosuggestForm.category == 'film':
@@ -1549,14 +1565,21 @@ class StampedAPI(AStampedAPI):
                 latLng,
                 autosuggestForm.query,
                 {'radius': 500, 'types' : 'establishment'})
-            logs.info(results)
             #make list of names from results, remove duplicate entries, limit to 10
-            names = list(set([place['terms'][0]['value'] for place in results]))[:10]
+            names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
             completions = []
             for name in names:
                 completions.append( { 'completion' : name } )
-
-
+            return completions
+        elif autosuggestForm.category == 'music':
+            result = self._rdio.searchSuggestions(autosuggestForm.query, types="Artist,Album,Track")
+            if 'result' not in result:
+                return []
+            #names = list(set([i['name'] for i in result['result']]))[:10]
+            names = self._orderedUnique([i['name'] for i in result['result']])[:10]
+            completions = []
+            for name in names:
+                completions.append( { 'completion' : name})
             return completions
         return []
 

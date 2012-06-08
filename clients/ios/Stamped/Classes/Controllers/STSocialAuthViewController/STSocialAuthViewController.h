@@ -24,5 +24,6 @@ typedef enum {
 @end
 
 @protocol SocialAuthViewControllerDelegate
-- (void)socialAuthViewControllerFailed:(STSocialAuthViewController*)controller;
+- (void)socialAuthViewControllerFinished:(STSocialAuthViewController*)controller; // login successful
+- (void)socialAuthViewControllerFailed:(STSocialAuthViewController*)controller; // auth failed
 @end

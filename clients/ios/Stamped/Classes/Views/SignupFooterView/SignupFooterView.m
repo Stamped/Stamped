@@ -31,6 +31,8 @@
     [string setAttributes:boldStyle range:[string.string rangeOfString:@"privacy policy"]];
     self.string = string;
     [string release];
+    [defaultStyle release];
+    [boldStyle release];
     
 }
 
@@ -43,6 +45,7 @@
 
 @implementation SignupFooterView
 @synthesize delegate;
+@synthesize loading=_loading;
 
 - (id)initWithFrame:(CGRect)frame {
 
@@ -51,10 +54,11 @@
         STSignupTextLayer *layer = [STSignupTextLayer layer];
         layer.wrapped = YES;
         layer.contentsScale = [[UIScreen mainScreen] scale];
-        layer.frame = CGRectMake(20.0f, 20.0f, self.bounds.size.width-40.0f, 40.0f);
+        layer.frame = CGRectMake(20.0f, 30.0f, self.bounds.size.width-40.0f, 40.0f);
         layer.backgroundColor = [UIColor clearColor].CGColor;
         layer.alignmentMode = @"center";
         [self.layer addSublayer:layer];
+        [layer setup];
 
         UIImage *image = [UIImage imageNamed:@"signup_create_btn.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -68,6 +72,7 @@
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button addTarget:self action:@selector(buttonHit:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:button];
+        _button = button;
         
         UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
         gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
@@ -82,6 +87,38 @@
 - (void)dealloc {
     self.delegate=nil;
     [super dealloc];
+}
+
+
+#pragma mark - Setters 
+
+- (void)setLoading:(BOOL)loading {
+    _loading = loading;
+    
+    _button.titleLabel.alpha = _loading ? 0.0f : 1.0f;
+    self.userInteractionEnabled = !_loading;
+    
+    if (_loading) {
+        
+        if (!_activityView) {
+            
+            UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+            [self addSubview:view];
+            [view startAnimating];
+            view.layer.position = _button.layer.position;
+            _activityView = view;
+            
+        }
+        
+        
+    } else {
+        
+        if (_activityView) {
+            [_activityView removeFromSuperview], _activityView=nil;
+        }
+        
+    }
+    
 }
 
 

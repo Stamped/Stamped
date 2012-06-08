@@ -14,5 +14,6 @@
 @end
 
 @protocol TwitterAccountsViewControllerDelegate
+- (void)twitterAccountsViewControllerSuccessful:(TwitterAccountsViewController*)controller;
 - (void)twitterAccountsViewControllerCancelled:(TwitterAccountsViewController*)controller;
 @end

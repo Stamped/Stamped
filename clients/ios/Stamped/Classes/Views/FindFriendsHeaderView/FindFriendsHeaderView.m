@@ -84,6 +84,8 @@
     if (boldText) {
         [string setAttributes:boldStyle range:[string.string rangeOfString:boldText]];
     }
+    [boldStyle release];
+    [defaultStyle release];
     
     CATextLayer *layer = [CATextLayer layer];
     layer.contentsScale = [[UIScreen mainScreen] scale];

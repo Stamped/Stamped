@@ -59,4 +59,16 @@
     return [STConfiguration value:@"UIColor.buttonGradient"];
 }
 
+- (NSString*)hexString {
+    
+    const CGFloat *color = CGColorGetComponents([self CGColor]);
+
+    NSInteger r = color[0] * 255.99999f;
+    NSInteger g = color[1] * 255.99999f;
+    NSInteger b = color[2] * 255.99999f;
+    
+    return [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
+    
+}
+
 @end

@@ -317,6 +317,8 @@
     if (boldText) {
         [string setAttributes:boldStyle range:[string.string rangeOfString:boldText]];
     }
+    [defaultStyle release];
+    [boldStyle release];
     
     CGFloat width = ceilf([self boundingWidthForAttributedString:string]);
     

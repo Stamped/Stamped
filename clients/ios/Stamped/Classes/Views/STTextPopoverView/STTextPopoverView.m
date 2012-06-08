@@ -97,7 +97,6 @@
         CGContextSaveGState(ctx);
         
         minY = ceilf(minY+1);
-        maxY = ceilf(maxY-1);
         
         CGMutablePathRef _secondPath = CGPathCreateMutable();
         [[UIColor colorWithRed:0.439f green:0.439f blue:0.439f alpha:1.0f] setStroke];

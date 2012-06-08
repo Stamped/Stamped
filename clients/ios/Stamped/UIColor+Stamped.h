@@ -21,4 +21,6 @@
 + (NSArray*)stampedBlueGradient;
 + (NSArray*)stampedButtonGradient;
 
+- (NSString*)hexString;
+
 @end
