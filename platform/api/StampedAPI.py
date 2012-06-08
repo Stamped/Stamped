@@ -58,6 +58,7 @@ try:
     from Facebook               import *
     from Twitter                import *
     from GooglePlaces           import *
+    from Rdio                   import *
 except Exception:
     report()
     raise
@@ -89,6 +90,10 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def _googlePlaces(self):
         return globalGooglePlaces()
+
+    @lazyProperty
+    def _rdio(self):
+        return globalRdio()
 
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
@@ -1555,8 +1560,13 @@ class StampedAPI(AStampedAPI):
             completions = []
             for name in names:
                 completions.append( { 'completion' : name } )
-
-
+        elif autosuggestForm.category == 'music':
+            result = self._rdio.searchSuggestions(autosuggestForm.query, types="Artist,Album,Track")
+            if 'result' not in result:
+                return []
+            completions = []
+            for item in result['result']:
+                completions.append( { 'completion' : item['name']})
             return completions
         return []
 
