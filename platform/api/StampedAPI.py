@@ -1570,7 +1570,7 @@ class StampedAPI(AStampedAPI):
             completions = []
             for name in names:
                 completions.append( { 'completion' : name } )
-            return completion
+            return completions
         elif autosuggestForm.category == 'music':
             result = self._rdio.searchSuggestions(autosuggestForm.query, types="Artist,Album,Track")
             if 'result' not in result:
