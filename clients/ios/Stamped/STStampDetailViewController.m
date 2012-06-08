@@ -330,12 +330,7 @@
     }];
 }
 
-<<<<<<< HEAD
 - (void)textViewDidEndEditing:(UITextView *)textView {
-    
-=======
-- (void)keyboardWasHidden:(NSNotification *)notification {
->>>>>>> 6f754a127edc448d00c15e624f705f8560b0ab82
     _addCommentShading.userInteractionEnabled = NO;
     CGRect frame = self.addCommentView.frame;
     frame.origin.y = self.view.frame.size.height;

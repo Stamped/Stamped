@@ -14,7 +14,32 @@
 #import "Util.h"
 #import <QuartzCore/QuartzCore.h>
 
+typedef enum STTodoState {
+STTodoStateDone,
+STTodoStateUndone,
+STTodoStateStamped,
+} STTodoState;
+
 static NSString* const _todoReuseIdentifier = @"todo-cell";
+
+@protocol STTodoCellDelegate <NSObject>
+
+- (void)clickedImageForTodo:(id<STTodo>)todo;
+
+@end
+
+
+@interface STTodoViewController () <UITableViewDelegate, UITableViewDataSource, STTodoCellDelegate, UIActionSheetDelegate>
+
+@property (nonatomic, readonly, retain) NSMutableArray* todos;
+@property (nonatomic, readwrite, retain) STCancellation* pending;
+@property (nonatomic, readwrite, assign) BOOL finished;
+@property (nonatomic, readwrite, retain) id<STTodo> actionSheetTodo;
+@property (nonatomic, readonly, retain) NSMutableSet* cancellations;
+
++ (STTodoState)todoState:(id<STTodo>)todo;
+
+@end
 
 @interface STTodoCell : UITableViewCell
 
@@ -25,6 +50,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 @property (nonatomic, readonly, retain) UIImageView* categoryImageView;
 @property (nonatomic, readonly, retain) UILabel* subtitleView;
 @property (nonatomic, readwrite, retain) id<STTodo> todo;
+@property (nonatomic, readwrite, assign) id<STTodoCellDelegate> delegate;
 
 @end
 
@@ -35,6 +61,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 @synthesize categoryImageView = _categoryImageView;
 @synthesize subtitleView = _subtitleView;
 @synthesize todo = _todo;
+@synthesize delegate = _delegate;
 
 - (id)init {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:_todoReuseIdentifier];
@@ -54,16 +81,19 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         
         CGFloat yOffset = 39;
         _categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(xOffset, yOffset, 10, 10)];
+        
+        UIView* tapButton = [Util tapViewWithFrame:_checkView.frame target:self selector:@selector(iconClicked:) andMessage:nil];
         _subtitleView = [[UILabel alloc] initWithFrame:CGRectMake(82, yOffset - 1, 0, 0)];
         _subtitleView.font = [UIFont stampedFontWithSize:10];
         _subtitleView.textColor = [UIColor stampedGrayColor];
         _subtitleView.textAlignment = UITextAlignmentLeft;
         _subtitleView.lineBreakMode = UILineBreakModeTailTruncation;
         
-        [self addSubview:_checkView];
-        [self addSubview:_titleView];
-        [self addSubview:_categoryImageView];
-        [self addSubview:_subtitleView];
+        [self.contentView addSubview:_checkView];
+        [self.contentView addSubview:_titleView];
+        [self.contentView addSubview:_categoryImageView];
+        [self.contentView addSubview:_subtitleView];
+        [self.contentView addSubview:tapButton];
     }
     return self;
 }
@@ -78,6 +108,10 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     [super dealloc];
 }
 
+- (void)iconClicked:(id)notImportant {
+    [self.delegate clickedImageForTodo:self.todo];
+}
+
 - (void)setupWithTodo:(id<STTodo>)todo {
     id<STEntity> entity = todo.source.entity;
     _titleView.text = entity.title;
@@ -87,10 +121,11 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     [_subtitleView sizeToFit];
     _categoryImageView.image = [Util imageForCategory:entity.category];
     NSString* imageName = nil;
-    if (todo.stampID) {
+    STTodoState state = [STTodoViewController todoState:todo];
+    if (state == STTodoStateStamped) {
         imageName = @"TEMP_todo_done";
     }
-    else if ([todo.complete boolValue]) {
+    else if (state == STTodoStateDone) {
         imageName = @"TEMP_todo_finished";
     }
     else {
@@ -102,27 +137,40 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 
 @end
 
-@interface STTodoViewController () <UITableViewDelegate, UITableViewDataSource>
-
-@property (nonatomic, readonly, retain) NSMutableArray* todos;
-@property (nonatomic, readwrite, retain) STCancellation* pending;
-@property (nonatomic, readwrite, assign) BOOL finished;
-
-@end
-
 @implementation STTodoViewController
 
 @synthesize todos = todos_;
 @synthesize pending = _pending;
 @synthesize finished = _finished;
+@synthesize actionSheetTodo = _actionSheetTodo;
+@synthesize cancellations = _cancellations;
 
 - (id)init
 {
     self = [super init];
     if (self) {
         todos_ = [[NSMutableArray alloc] init];
+        _cancellations = [[NSMutableSet alloc] init];
     }
     return self;
+}
+
+- (void)cancelPendingOps {
+    [_pending cancel];
+    for (STCancellation* cancellation in _cancellations) {
+        [cancellation cancel];
+    }
+    [_cancellations removeAllObjects];
+}
+
+- (void)dealloc
+{
+    [self cancelPendingOps];
+    [todos_ release];
+    [_pending release];
+    [_actionSheetTodo release];
+    [_cancellations release];
+    [super dealloc];
 }
 
 - (void)viewDidLoad
@@ -133,6 +181,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     [Util addHomeButtonToController:self withBadge:YES];
     [Util addCreateStampButtonToController:self];
     
+    [self reloadDataSource];
     //self.showsSearchBar = NO;
 }
 
@@ -143,7 +192,22 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self reloadDataSource];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [self cancelPendingOps];
+}
+
++ (STTodoState)todoState:(id<STTodo>)todo {
+    if (todo.stampID) {
+        return STTodoStateStamped;
+    }
+    else if (todo.complete.boolValue) {
+        return STTodoStateDone;
+    }
+    else {
+        return STTodoStateUndone;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -167,18 +231,17 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     STTodoCell* cell = [tableView dequeueReusableCellWithIdentifier:_todoReuseIdentifier];
     if (!cell) {
         cell = [[[STTodoCell alloc] init] autorelease];
-        NSLog(@"Create cell");
     }
     [cell setupWithTodo:todo];
+    cell.delegate = self;
     return cell;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     id<STTodo> todo = [self.todos objectAtIndex:indexPath.row];
     STActionContext* context = [STActionContext context];
-    id<STAction> action = [STStampedActions actionViewEntity:todo.entity.entityID withOutputContext:context];
+    id<STAction> action = [STStampedActions actionViewEntity:todo.source.entity.entityID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
-    NSLog(@"chose entity");
 }
 
 
@@ -239,6 +302,94 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
                             andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
     text.frame = [Util centeredAndBounded:text.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
     //[view addSubview:view];
+}
+
+
+#pragma mark - UIActionSheetDelegate
+
+- (void)_stampIt:(id<STTodo>)todo {
+    
+}
+
+- (void)_setComplete:(id<STTodo>)todo value:(BOOL)complete {
+    STCancellation* cancellation = [[STStampedAPI sharedInstance] setTodoCompleteWithEntityID:todo.source.entity.entityID
+                                                                                     complete:complete
+                                                                                  andCallback:^(id<STTodo> todo, NSError *error, STCancellation *cancellation) {
+                                                                                      if (todo) {
+                                                                                          [self reloadDataSource];
+                                                                                      }
+                                                                                      else {
+                                                                                          [Util warnWithMessage:@"Could not complete operation" andBlock:nil];
+                                                                                      }
+                                                                                  }];
+    [self.cancellations addObject:cancellation];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    STTodoState state = [STTodoViewController todoState:self.actionSheetTodo];
+    id<STTodo> todo = self.actionSheetTodo;
+    self.actionSheetTodo = nil;
+    if (state == STTodoStateDone) {
+        //otherButtonTitles = [NSArray arrayWithObjects:@"Mark as undone", @"Stamp it", nil];
+        if (buttonIndex == 0) {
+            [self _setComplete:todo value:NO];
+        }
+        else if (buttonIndex == 1) {
+            [self _stampIt:todo];
+        }
+    }
+    else if (state == STTodoStateStamped) {
+        //otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
+        if (buttonIndex == 0) {
+            
+        }
+    }
+    else {
+        //otherButtonTitles = [NSArray arrayWithObjects:@"Mark as done", @"Stamp it", nil];
+        if (buttonIndex == 0) {
+            [self _setComplete:todo value:YES];
+        }
+        else if (buttonIndex == 1) {
+            [self _stampIt:todo];
+        }
+    }
+}
+
+#pragma mark - STTodoCellDelegate
+
+- (void)clickedImageForTodo:(id<STTodo>)todo {
+    self.actionSheetTodo = todo;
+    
+    NSArray* otherButtonTitles = nil;
+    STTodoState state = [STTodoViewController todoState:todo];
+    if (state == STTodoStateDone) {
+        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as undone", @"Stamp it", nil];
+    }
+    else if (state == STTodoStateStamped) {
+        otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
+    }
+    else {
+        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as done", @"Stamp it", nil];
+    }
+    
+    UIActionSheet *actionSheet = nil;
+    if (otherButtonTitles.count == 1) {
+        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                  delegate:self 
+                                         cancelButtonTitle:@"Cancel" 
+                                    destructiveButtonTitle:nil 
+                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], nil];
+    }
+    else {
+        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                  delegate:self 
+                                         cancelButtonTitle:@"Cancel" 
+                                    destructiveButtonTitle:nil 
+                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], [otherButtonTitles objectAtIndex:1], nil];
+    }
+    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [actionSheet showInView:self.view];
+    [actionSheet release];
 }
 
 @end

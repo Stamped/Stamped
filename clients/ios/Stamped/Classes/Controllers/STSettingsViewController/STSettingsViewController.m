@@ -8,6 +8,9 @@
 
 #import "STSettingsViewController.h"
 #import "SettingsTableCell.h"
+#import "STRestKitLoader.h"
+#import "STMenuController.h"
+#import "STAppDelegate.h"
 
 @interface STSettingsViewController ()
 
@@ -269,9 +272,18 @@
 #pragma mark - UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    
+    NSIndexPath* path = self.tableView.indexPathForSelectedRow;
+    if (path) {
     [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
-    
+        if (path.section == 3) {
+            //sign out
+            if (buttonIndex == 0) {
+                [[STRestKitLoader sharedInstance] logout];
+                STAppDelegate* appDelegate = [UIApplication sharedApplication].delegate;
+                [appDelegate.menuController showWelcome:NO];
+            }
+        }
+    }
 }
 
 
