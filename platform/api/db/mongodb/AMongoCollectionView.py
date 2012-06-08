@@ -142,7 +142,8 @@ class AMongoCollectionView(AMongoCollection):
             query["entity.kind"] = {'$in': list(searchSlice.kinds)}
 
         if searchSlice.types is not None and len(searchSlice.types) > 0:
-            query["entity.types"] = {'$in': list(searchSlice.types)}
+            add_or_query([  {'entity.types': {'$in': list(searchSlice.types)}},
+                            {'entity.subcategory': {'$in': list(searchSlice.types)}} ])
 
         """
             raise NotImplementedError("NEED TO BUILD searchSlice CATEGORIES")
