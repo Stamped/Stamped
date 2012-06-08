@@ -138,7 +138,13 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle category / subcategory filters
         # -------------------------------------
-        if searchSlice.kinds is not None:
+        if searchSlice.kinds is not None and len(searchSlice.kinds) > 0:
+            query["entity.kind"] = {'$in': list(searchSlice.kinds)}
+
+        if searchSlice.types is not None and len(searchSlice.types) > 0:
+            query["entity.types"] = {'$in': list(searchSlice.types)}
+
+        """
             raise NotImplementedError("NEED TO BUILD searchSlice CATEGORIES")
             # kinds           = deriveKindFromCategory(searchSlice.category) 
             # types           = deriveTypesFromCategory(searchSlice.category)
@@ -164,6 +170,7 @@ class AMongoCollectionView(AMongoCollection):
         if searchSlice.types is not None:
             raise NotImplementedError("NEED TO BUILD searchSlice SUBCATEGORIES")
             query['entity.subcategory'] = str(searchSlice.subcategory).lower()
+        """
 
         # Query
         if searchSlice.query is not None:
