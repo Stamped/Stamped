@@ -3540,8 +3540,7 @@ class StampedAPI(AStampedAPI):
                 entity.previews = previews
                 result.append(entity)
 
-            return result
-
+            return result[offset:][:limit]
 
 
     @API_CALL
