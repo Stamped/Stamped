@@ -280,6 +280,17 @@ def _initialize_comment_html(comment):
     """
     pass
 
+def _phoneToInt(string):
+    if string is None:
+        return None 
+
+    try:
+        digits = re.findall(r'\d+', string)
+        return int("".join(digits))
+    except Exception as e:
+        logs.warning("Unable to convert phone number to int (%s): %s" % (string, e))
+        return None
+
 
 
 
@@ -406,7 +417,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -418,7 +429,12 @@ class HTTPAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToAccount(self):
-        return Account().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return Account().dataImport(data, overflow=True)
 
 class HTTPFacebookAccountNew(Schema):
     @classmethod
@@ -427,7 +443,7 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('screen_name',                      basestring, required=True)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -438,7 +454,12 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToFacebookAccountNew(self):
-        return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return FacebookAccountNew().dataImport(data, overflow=True)
 
 class HTTPTwitterAccountNew(Schema):
     @classmethod
@@ -448,7 +469,7 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -459,7 +480,12 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToTwitterAccountNew(self):
-        return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return TwitterAccountNew().dataImport(data, overflow=True)
 
 
 
