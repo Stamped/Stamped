@@ -8,6 +8,8 @@ __license__   = "TODO"
 
 import Globals, utils, pprint
 from AStampedAPITestCase import *
+from MongoStampedAPI import *
+from Schemas import *
 
 # ######## #
 # ACTIVITY #
@@ -380,21 +382,6 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         self.deleteAccount(self.tokenD)
         self.deleteAccount(self.tokenE)
 
-#     def test_follow_outsider(self):
-#         # There should be 1 personal activity item for User A - User D followed User A:
-#         results = self.showActivity(self.tokenE)
-# #        from pprint import pprint
-# #        pprint([(result['body'], result['activity_id']) for result in results])
-#         self.assertEqual(len(results), 0)
-
-#         results = self.showFriendsActivity(self.tokenE)
-#         self.assertEqual(len(results), 3)
-
-#         self.assertEqual(len(results), 1)
-#         self._assertBody(results, ['UserA is now following UserB.'])
-#         self._assertBody(results, ['UserA is now following UserC.'])
-#         self._assertBody(results, ['UserA is now following UserD.'])
-
     def test_follow_activity(self):
         # There should be 1 personal activity item for User A - User D followed User A:
         results = self.showActivity(self.tokenA)
@@ -415,7 +402,7 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         results = self.showActivity(self.tokenD)
         self.assertEqual(len(results), 1)
         self._assertBody(results, ['UserA and 2 others are now following you.', 'UserB and 2 others are now following you.',
-                                                                               'UserC and 2 others are now following you.'])
+                                                                                'UserC and 2 others are now following you.'])
     def test_follow_activity_overlap_universal(self):
         # We should NOT see anyone following UserD.
         results = self.showFriendsActivity(self.tokenD)
@@ -439,6 +426,209 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         self._assertBody(results, ['UserD is now following UserB.'])
         self._assertBody(results, ['UserB is now following UserD.'])
         self._assertBody(results, ['UserD is now following UserA.'])
+
+api = MongoStampedAPI()
+class StampedAPIActivityCache(AStampedAPITestCase):
+    def setUp(self):
+        global api
+        self.api = api
+        if api._cache._client is None:
+            logs.info('WARNING: Not connected to memcached server.')
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
+        (self.userD, self.tokenD) = self.createAccount('UserD')
+        (self.userE, self.tokenE) = self.createAccount('UserE')
+        (self.userF, self.tokenF) = self.createAccount('UserF')
+        (self.userG, self.tokenG) = self.createAccount('UserG')
+        (self.userH, self.tokenH) = self.createAccount('UserH')
+
+        self.createFriendship(self.tokenA, self.userB)
+
+        self.createFriendship(self.tokenB, self.userA)
+        self.createFriendship(self.tokenB, self.userC)
+        self.createFriendship(self.tokenB, self.userD)
+        self.createFriendship(self.tokenB, self.userE)
+        self.createFriendship(self.tokenB, self.userF)
+        self.createFriendship(self.tokenB, self.userG)
+        self.createFriendship(self.tokenB, self.userH)
+
+
+    def tearDown(self):
+        self.deleteFriendship(self.tokenA, self.userB)
+
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteFriendship(self.tokenB, self.userC)
+        self.deleteFriendship(self.tokenB, self.userD)
+        self.deleteFriendship(self.tokenB, self.userE)
+        self.deleteFriendship(self.tokenB, self.userF)
+        self.deleteFriendship(self.tokenB, self.userG)
+        self.deleteFriendship(self.tokenB, self.userH)
+
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
+        self.deleteAccount(self.tokenD)
+        self.deleteAccount(self.tokenE)
+        self.deleteAccount(self.tokenF)
+        self.deleteAccount(self.tokenG)
+        self.deleteAccount(self.tokenH)
+
+    def test_offset(self):
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 0
+        slice.limit = 4
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 4)
+
+        # Test offset
+        slice.offset = 1
+        slice.limit = 1
+        results2 = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results2), 1)
+        self.assertEqual(results2[0].activity_id, results[1].activity_id)
+
+    def test_limit_greater_than_items_in_cache(self):
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 0
+        slice.limit = 10
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 6)
+
+    def test_limit_larger_than_cache_block(self):
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 0
+        slice.limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 6)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        results2 = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results2), 6)
+        for i, result in enumerate(results2):
+            self.assertEqual(result.activity_id, results[i].activity_id)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+    def test_prev_cache_block_expired(self):
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 0
+        slice.limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 6)
+
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 5
+        slice.limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        try:
+            api._cache.flush_all()
+        except:
+            pass
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 1)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        from pprint import pprint
+        pprint(results)
+
+    def test_clear_activity_cache(self):
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 0
+        slice.limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 6)
+
+        key = api._createActivityCacheKey(self.userA['user_id'], slice.distance, 0)
+        key2 = api._createActivityCacheKey(self.userA['user_id'], slice.distance, 5)
+        self.assertEqual(key in api._cache, True)
+        self.assertEqual(key2 in api._cache, True)
+        api._clearActivityCacheForUser(self.userA['user_id'], slice.distance)
+        self.assertEqual(key in api._cache, False)
+        self.assertEqual(key2 in api._cache, False)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+
+    def test_cache_clear_on_offset_0(self):
+        slice = ActivitySlice()
+        slice.distance = 1
+        slice.offset = 0
+        slice.limit = 10
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        results = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results), 6)
+
+        # Create a new activity item that will appear for User A
+        (user, token) = self.createAccount('tempUser')
+        self.createFriendship(self.tokenB, user)
+
+        # First test that this new item will not be retrieved if we pull from offset != 0
+        slice.offset = 5
+        results2 = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results2), 1)
+        self.assertEqual(results2[0].activity_id, results[5].activity_id)
+
+        # Now test that the new item is retrieved when we pull from offset 0
+        slice.offset = 0
+        results2 = self.api.getActivity(self.userA['user_id'], slice)
+        self.assertEqual(len(results2), 7)
+        self.assertEqual(results2[1].activity_id, results[0].activity_id)
+
+        self.deleteFriendship(self.tokenB, user)
+        self.deleteAccount(token)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+
+#        results = api.getActivity(userId, slice)
+#        pprint(results)
+#        print('\n\n%d' % len(results))
+#
+#        slice.offset=1
+#        slice.limit=10
+#        results = api.getActivity(userId, slice)
+#        pprint(results)
+#        print('\n\n%d' % len(results))
 
 if __name__ == '__main__':
     main()

@@ -1734,6 +1734,19 @@ class CommentSlice(Schema):
         self.limit = 20
         self.offset = 0
 
+class ActivitySlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('distance',                     int, required=True)
+        cls.addProperty('before',                       datetime)
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.limit = 20
+        self.offset = 0
 
 class GuideRequest(Schema):
     @classmethod

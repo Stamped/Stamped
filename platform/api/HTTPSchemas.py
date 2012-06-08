@@ -280,6 +280,22 @@ def _initialize_comment_html(comment):
     """
     pass
 
+def _phoneToInt(string):
+    if string is None:
+        return None 
+
+    try:
+        return int(string)
+    except ValueError:
+        pass 
+
+    try:
+        digits = re.findall(r'\d+', string)
+        return int("".join(digits))
+    except Exception as e:
+        logs.warning("Unable to convert phone number to int (%s): %s" % (string, e))
+        return None
+
 
 
 
@@ -406,7 +422,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -418,7 +434,12 @@ class HTTPAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToAccount(self):
-        return Account().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return Account().dataImport(data, overflow=True)
 
 class HTTPFacebookAccountNew(Schema):
     @classmethod
@@ -427,7 +448,7 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('screen_name',                      basestring, required=True)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -438,7 +459,12 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToFacebookAccountNew(self):
-        return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return FacebookAccountNew().dataImport(data, overflow=True)
 
 class HTTPTwitterAccountNew(Schema):
     @classmethod
@@ -448,7 +474,7 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -459,7 +485,12 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToTwitterAccountNew(self):
-        return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return TwitterAccountNew().dataImport(data, overflow=True)
 
 
 
@@ -2380,7 +2411,22 @@ class HTTPCommentSlice(Schema):
 
         return slc
 
+class HTTPActivitySlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('distance',             int)
+        cls.addProperty('before',               int)
+        cls.addProperty('limit',                int)
+        cls.addProperty('offset',               int)
 
+    def exportActivitySlice(self):
+        slice = ActivitySlice().dataImport(self.dataExport(), overflow=True)
+
+        if self.before is not None:
+            slice.before = datetime.utcfromtimestamp(self.before)
+
+        return slice
 
 class HTTPGenericSlice(Schema):
     @classmethod
@@ -2901,8 +2947,6 @@ class HTTPTodo(Schema):
         cls.addProperty('todo_id',              basestring, required=True)
         cls.addProperty('user_id',              basestring, required=True)
         cls.addNestedProperty('source',         HTTPTodoSource, required=True)
-        #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        #cls.addNestedProperty('stamp',          HTTPStamp)
         cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
         cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addProperty('created',              basestring)
@@ -3406,11 +3450,6 @@ class HTTPActivity(Schema):
             raise Exception("Uncrecognized verb: %s" % self.verb)
 
         return self
-
-class HTTPActivitySlice(HTTPGenericSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('distance',             int)
 
 class HTTPLinkedURL(Schema):
     @classmethod
