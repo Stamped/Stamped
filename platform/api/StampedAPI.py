@@ -508,6 +508,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamps(stampIds)
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
+        self._stampDB.removeStatsForStamps(stampIds)
         ### TODO: If restamp, remove from credited stamps' comment list?
 
         # Remove comments
@@ -2583,6 +2584,9 @@ class StampedAPI(AStampedAPI):
 
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
+
+        # Remove from stats
+        self._stampStatsDB.removeStampStats(stampId)
 
         ### TODO: Remove from activity? To do? Anything else?
 

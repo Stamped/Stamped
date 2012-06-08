@@ -44,9 +44,13 @@ class MongoStampStatsCollection(AMongoCollection):
         self._collection.save(document, safe=True)
         return self._convertFromMongo(document)
     
-    def removeStampStats(self, entityId):
-        documentId = self._getObjectIdFromString(entityId)
-        return self._removeMongoDocument(documentId)
+    def removeStampStats(self, stampId):
+        documentId = self._getObjectIdFromString(stampId)
+        return self._removeMongoDocument(stampId)
+    
+    def removeStatsForStamps(self, stampIds):
+        documentIds = map(self._getObjectIdFromString, stampIds)
+        return self._removeMongoDocuments(documentIds)
 
     # def updateNumStamps(self, entityId, numStamps):
     #     self._collection.update(
