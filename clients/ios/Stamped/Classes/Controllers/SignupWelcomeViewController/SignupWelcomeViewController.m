@@ -19,13 +19,20 @@
 #import "SignupCameraTableCell.h"
 #import "STAccountParameters.h"
 #import "LoginLoadingView.h"
+#import "STS3Uploader.h"
 
 @interface SignupWelcomeViewController ()
+@property(nonatomic,retain) NSDictionary *userInfo;
+@property(nonatomic,readonly) SignupWelcomeType signupType;
+@property(nonatomic,retain) STS3Uploader *avatarUploader;
+@property(nonatomic,retain) NSString *avatarTempPath;
 @end
 
 @implementation SignupWelcomeViewController
 @synthesize signupType=_signupType;
 @synthesize userInfo;
+@synthesize avatarUploader;
+@synthesize avatarTempPath;
 
 - (id)initWithType:(SignupWelcomeType)type {
     if ((self = [super initWithStyle:UITableViewStyleGrouped])) {
@@ -34,11 +41,14 @@
         [STEvents addObserver:self selector:@selector(signupFinished:) event:EventTypeSignupFinished];
         [STEvents addObserver:self selector:@selector(signupFailed:) event:EventTypeSignupFailed];
         self.navigationItem.hidesBackButton = YES;
+        self.avatarUploader = [[STS3Uploader alloc] init];
     }
     return self;
 }
 
 - (void)dealloc {
+    [self.avatarUploader cancel];
+    self.avatarUploader = nil;
     [STEvents removeObserver:self];
     [super dealloc];
 }
@@ -86,6 +96,10 @@
             
             NSDictionary *dictionary = [[STFacebook sharedInstance] userData];
             header.titleLabel.text = [dictionary objectForKey:@"name"];
+            [header setNeedsLayout];
+            
+            NSString *avatar = [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture&type=large", [dictionary objectForKey:@"id"]];
+            [header.imageView setImageURL:[NSURL URLWithString:avatar]];
             [header setNeedsLayout];
 
         } else if (_signupType == SignupWelcomeTypeEmail) {
@@ -159,7 +173,7 @@
             
             STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
             LoginLoadingView *view = [[LoginLoadingView alloc] initWithFrame:CGRectMake(0.0f, (_loadingView.bounds.size.height-60.0f)/2, _loadingView.bounds.size.width, 60.0f)];
-            view.titleLabel.text = cell.textField.text;
+            view.titleLabel.text = (_signupType == SignupWelcomeTypeEmail) ? @"Saving..." : cell.textField.text;
             [_loadingView addSubview:view];
             [view release];
             
@@ -212,7 +226,17 @@
 
 - (void)next:(id)sender {
     
+    [self.tableView endEditing:YES];
+    [self.tableView setContentOffset:CGPointZero animated:YES];
     [self setLoading:YES];
+
+    StampColorPickerView *view = (StampColorPickerView*)self.tableView.tableFooterView;
+    NSArray *colors = [view colors];
+    UIColor *color = [colors objectAtIndex:0];
+    NSString *primaryColor = [color hexString];
+    color = [colors objectAtIndex:1];
+    NSString *secondaryColor = [color hexString];
+
     
     STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
 
@@ -220,18 +244,9 @@
         
         STAccountParameters *parameters = [[STAccountParameters alloc] init];
         parameters.screenName = cell.textField.text;
-        
-        if (self.tableView.tableFooterView) {
-            
-            StampColorPickerView *view = (StampColorPickerView*)self.tableView.tableFooterView;
-            NSArray *colors = [view colors];
-            UIColor *color = [colors objectAtIndex:0];
-            parameters.colorPrimary = [color hexString];
-            color = [colors objectAtIndex:1];
-            parameters.colorSecondary = [color hexString];
-            
-        }
-        
+        parameters.colorPrimary = primaryColor;
+        parameters.colorSecondary = secondaryColor;
+
         NSDictionary *userDic = [[STTwitter sharedInstance] twitterUser];
         
         NSString *name = [userDic objectForKey:@"name"];
@@ -265,6 +280,9 @@
         
         STAccountParameters *parameters = [[STAccountParameters alloc] init];
         parameters.screenName = cell.textField.text;
+        parameters.colorPrimary = primaryColor;
+        parameters.colorSecondary = secondaryColor;
+
         NSDictionary *dictionary = [[STFacebook sharedInstance] userData];
         
         NSString *name = [dictionary objectForKey:@"name"];
@@ -284,23 +302,32 @@
             parameters.website = link;
         }
         
-        if (self.tableView.tableFooterView) {
-            
-            StampColorPickerView *view = (StampColorPickerView*)self.tableView.tableFooterView;
-            NSArray *colors = [view colors];
-            UIColor *color = [colors objectAtIndex:0];
-            parameters.colorPrimary = [color hexString];
-            color = [colors objectAtIndex:1];
-            parameters.colorSecondary = [color hexString];
-            
-        }
+    
+        NSString *avatar = [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture&type=large", [dictionary objectForKey:@"id"]];
+        parameters.tempImageURL = avatar;
         
         [[STAuth sharedInstance] facebookSignupWithToken:[[[STFacebook sharedInstance] facebook] accessToken] params:parameters];
         [parameters release];
         
     } else if (_signupType == SignupWelcomeTypeEmail) {
         
-     
+        [[STAuth sharedInstance] updateStampWithPrimaryColor:primaryColor secondary:secondaryColor completion:^(NSError *error) {
+            
+            if (self.avatarTempPath) {
+                [[STAuth sharedInstance] updateProfileImageWithPath:self.avatarTempPath completion:^(NSError *error) {                    
+                    FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
+                    controller.navigationItem.hidesBackButton = YES;
+                    [self.navigationController pushViewController:controller animated:YES];
+                    [controller release];
+                }];
+            } else {
+                FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
+                controller.navigationItem.hidesBackButton = YES;
+                [self.navigationController pushViewController:controller animated:YES];
+                [controller release];
+            }
+            
+        }];
         
     }
     
@@ -337,8 +364,7 @@
             cell.delegate = (id<SignupCameraCellDelegate>)self;
         }
         
-        cell.titleLabel.text = @"1. Add a profile picture";
-        
+        cell.titleLabel.text = @"1. Add a profile picture";        
         return cell;
         
     }
@@ -484,7 +510,31 @@
             SocialSignupHeaderView *header = (SocialSignupHeaderView*)self.tableView.tableHeaderView;
             header.imageView.imageView.image = image;
         }
-        
+     
+        [self.avatarUploader cancel];
+        SignupCameraTableCell *cell = (SignupCameraTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+        NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+		path = [[path stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"UploadTemp"];
+        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+        path = [path stringByAppendingPathComponent:@"temp.jpg"];
+        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+        [UIImageJPEGRepresentation(image, 0.85) writeToFile:path atomically:NO];
+        self.avatarUploader.filePath = path;
+        [self.avatarUploader startWithProgress:^(float progress) {
+            
+            if (cell) {
+                [cell setProgress:progress];
+            }
+            
+        } completion:^(NSString *path, BOOL finished) {
+           
+            if (cell) {
+                [cell setProgress:0.0f];
+            }
+            
+            self.avatarTempPath = path;
+         
+        }];
     
     }
     

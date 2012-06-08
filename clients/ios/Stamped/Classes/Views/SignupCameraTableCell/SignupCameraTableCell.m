@@ -7,9 +7,11 @@
 //
 
 #import "SignupCameraTableCell.h"
+#import "STProgressView.h"
 
 @implementation SignupCameraTableCell
 @synthesize delegate;
+@synthesize progress=_progress;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
@@ -73,6 +75,35 @@
     
     if ([(id)delegate respondsToSelector:@selector(signupCameraTableCellChoosePhoto:)]) {
         [self.delegate signupCameraTableCellChoosePhoto:self];
+    }
+    
+}
+
+
+#pragma mark - Setters
+
+- (void)setProgress:(CGFloat)progress {
+    _progress = progress;
+    
+    if (_progress > 0.0f) {
+        
+        if (!_progressView) {
+            self.titleLabel.hidden = YES;
+            STProgressView *view = [[STProgressView alloc] initWithFrame:CGRectMake(15.0f, (self.bounds.size.height-5.0f)/2, 175.0f, 10.0f)];
+            view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+            [self addSubview:view];
+            [view release];
+            _progressView = view;
+        }
+        _progressView.progress = progress;
+        
+    } else {
+        
+        if (_progressView) {
+            [_progressView removeFromSuperview], _progressView=nil;
+        }
+        self.titleLabel.hidden = NO;
+        
     }
     
 }

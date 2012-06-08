@@ -12,7 +12,7 @@
 #import "FriendTableCell.h"
 #import "STTwitter.h"
 #import "STFacebook.h"
-#import "STWelcomeViewController.h"
+#import "SignupWelcomeViewController.h"
 #import "STSimpleUser.h"
 #import "FindFriendsViewController.h"
 
@@ -77,20 +77,12 @@
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
     
     BOOL addDoneButton = NO;
-    if (!self.navigationItem.rightBarButtonItem) {
-        if (self.navigationController) {
-            NSInteger index = [[self.navigationController viewControllers] indexOfObject:self];
-            if (index!=NSNotFound) {
-                if (index > 0) {
-                    UIViewController *prevController = [[self.navigationController viewControllers] objectAtIndex:index-1];
-                    if ([prevController isKindOfClass:[STWelcomeViewController class]]) {
-                        addDoneButton = YES;
-                    }
-                } else {
-                    addDoneButton = YES;
-                }
+    if (!self.navigationItem.rightBarButtonItem && self.navigationController) {
+        for (UIViewController *controller in self.navigationController.viewControllers) {
+            if ([controller isKindOfClass:[SignupWelcomeViewController class]]) {
+                addDoneButton = YES;
+                break;
             }
-           
         }
     }
     

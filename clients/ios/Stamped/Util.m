@@ -21,6 +21,7 @@
 #import "DDMenuController.h"
 #import <RestKit/RestKit.h>
 #import "STMenuController.h"
+#import "STBadgeBarButtonItem.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -985,14 +986,9 @@ static Rdio* _rdio;
 
 + (void)addHomeButtonToController:(UIViewController*)controller withBadge:(BOOL)flag {
     
-    STNavigationItem *button = [[STNavigationItem alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(_homeButtonClicked:)];
+    STBadgeBarButtonItem *button = [[STBadgeBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(_homeButtonClicked:)];
     controller.navigationItem.leftBarButtonItem = button;
-    
-    if (flag || YES) {
-        
-        [Util addUnreadBadgeToView:button.customView origin:CGPointMake(10, 10)];
-        
-    }
+
     [button release];
     
 }
@@ -1002,7 +998,7 @@ static Rdio* _rdio;
         if (count && count.numberUnread.integerValue >0) {
             UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 19, 19)] autorelease];
             countView.userInteractionEnabled = NO;
-            UILabel* label = [Util viewWithText:[NSString stringWithFormat:@"%d", 2]
+            UILabel* label = [Util viewWithText:[NSString stringWithFormat:@"%d", count.numberUnread.integerValue ]
                                            font:[UIFont boldSystemFontOfSize:10]
                                           color:[UIColor whiteColor]
                                            mode:UILineBreakModeTailTruncation

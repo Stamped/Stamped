@@ -20,6 +20,4 @@ typedef enum {
 
 - (id)initWithType:(SignupWelcomeType)type;
 
-@property(nonatomic,retain) NSDictionary *userInfo;
-@property(nonatomic,readonly) SignupWelcomeType signupType;
 @end

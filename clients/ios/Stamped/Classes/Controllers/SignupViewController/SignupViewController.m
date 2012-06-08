@@ -87,6 +87,52 @@
 }
 
 
+#pragma mark - Sign up
+
+- (void)signup {
+    
+    STAccountParameters *parameters = [[STAccountParameters alloc] init];
+    
+    NSString *password = nil;
+    NSInteger index = 0;
+    for (NSString *key in _dataSource) {
+        STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
+        switch (index) {
+            case 0:
+                parameters.name = cell.textField.text;
+                break;
+            case 1:
+                parameters.email = cell.textField.text;
+                break;
+            case 2:
+                parameters.screenName = cell.textField.text;
+                break;
+            case 3:
+                password = cell.textField.text;
+                break;
+            case 4:
+                parameters.phone = cell.textField.text;
+                break;
+            default:
+                break;
+        }
+        index++;
+    }
+    
+    [self setLoading:YES];
+    
+    
+    if (!password) {
+        password = @"";
+    }
+    
+    NSLog(@"%@", [parameters description]);
+    [[STAuth sharedInstance] signupWithPassword:password parameters:parameters];
+    [parameters release];
+    
+}
+
+
 #pragma mark - Notifications 
 
 - (void)signupFinished:(NSNotification*)notification {
@@ -268,6 +314,15 @@
     if ((indexPath.row == [_dataSource count]-1)) {
         cell.textField.placeholder = @"optional";
     }
+    cell.textField.secureTextEntry = (indexPath.row==3);
+    cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
+    cell.textField.autocapitalizationType = (indexPath.row==0) ? UITextAutocapitalizationTypeAllCharacters : UITextAutocapitalizationTypeNone;
+    
+    if (indexPath.row == 1) {
+        cell.textField.keyboardType = UIKeyboardTypeEmailAddress;
+    } else if (indexPath.row == 4) {
+        cell.textField.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
+    }
     
     return cell;
     
@@ -299,48 +354,15 @@
 
 #pragma mark - SignupFooterViewDelegate
 
+
 - (void)signupFooterViewCreate:(SignupFooterView*)view {
-    
+
+    [self setLoading:YES];
     [self.tableView endEditing:YES];
 
-    STAccountParameters *parameters = [[STAccountParameters alloc] init];
-    
-    NSString *password = nil;
-    NSInteger index = 0;
-    for (NSString *key in _dataSource) {
-        STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
-        switch (index) {
-            case 0:
-                parameters.name = cell.textField.text;
-                break;
-            case 1:
-                parameters.email = cell.textField.text;
-                break;
-            case 2:
-                parameters.screenName = cell.textField.text;
-                break;
-            case 3:
-                password = cell.textField.text;
-                break;
-            case 4:
-                parameters.phone = cell.textField.text;
-                break;
-            default:
-                break;
-        }
-        index++;
-    }
-    
-    [self setLoading:YES];
-    
-    
-    if (!password) {
-        password = @"";
-    }
-        
-    NSLog(@"%@", [parameters description]);
-    [[STAuth sharedInstance] signupWithPassword:password parameters:parameters];
-    [parameters release];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+        [self signup];
+    });
     
 
 }

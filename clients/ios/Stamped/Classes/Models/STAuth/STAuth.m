@@ -11,14 +11,6 @@
 #import "STRestKitLoader.h"
 #import "STDebug.h"
 #import "STStampedAPI.h"
-#import "ASIHTTPRequest.h"
-#import "ASIS3ObjectRequest.h"
-#import <RestKit/NSData+MD5.h>
-
-// Amazon S3 Shit. -bons
-static NSString* const kS3SecretAccessKey = @"4hqp3tVDt9ALgEFhDTqC4Y1P661uFNjtYqPVu2MW";
-static NSString* const kS3AccessKeyID = @"AKIAIRLTXI62SD3BWAHQ";
-static NSString* const kS3Bucket = @"stamped.com.static.temp";
 
 static id __instance;
 
@@ -150,9 +142,7 @@ static id __instance;
 }
 
 - (void)twitterSignupWithToken:(NSString*)token secretToken:(NSString*)secretToken params:(STAccountParameters*)params {
-    
-    NSLog(@"token : %@ %@", token, secretToken);
-    
+        
     [[STStampedAPI sharedInstance] createAccountWithTwitterUserToken:token userSecret:secretToken accountParameters:params andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
         
         if (error) {
@@ -199,6 +189,11 @@ static id __instance;
 
 - (void)checkUserName:(NSString*)username completion:(STAuthRequestFinished)completion {
     
+    /*
+     GET /v0/account/check.json 
+     Takes one field (login) and returns a 200 plus user object if it exists, otherwise returns a 404 if available and a 400 if invalid (e.g. if it's a blacklisted screen name).
+     */
+    
     NSString *path = @"/account/check.json";
     [[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:NO params:[NSDictionary dictionaryWithObject:username forKey:@"login"] mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
         
@@ -208,53 +203,38 @@ static id __instance;
     
 }
 
-
-/*
- GET /v0/account/check.json 
- Takes one field (login) and returns a 200 plus user object if it exists, otherwise returns a 404 if available and a 400 if invalid (e.g. if it's a blacklisted screen name).
- 
- POST /v0/account/customize_stamp.json
- Takes two fields (color_primary and color_secondary) that are the hex values of the two colors. Returns the full user object.
- 
- POST /v0/account/update_profile_image.json
- Takes one field (temp_image_url) that has the url of the image. Returns the full user object.
- */
-
-
-#pragma mark - S3 Upload
-
-- (void)s3UploadImageAtPath:(NSString*)path {
-    if (!path) return;
+- (void)updateStampWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary completion:(STAuthRequestFinished)completion {
     
-    NSData *imageData = [NSData dataWithContentsOfFile:path];
-    NSDate *now = [NSDate date];
-    NSString *key = [NSString stringWithFormat:@"%@-%.0f.jpg", [imageData MD5], now.timeIntervalSince1970];
-    ASIS3ObjectRequest *request = [ASIS3ObjectRequest PUTRequestForData:imageData withBucket:kS3Bucket key:key];
-    request.secretAccessKey = kS3SecretAccessKey;
-    request.delegate = self;
-    request.uploadProgressDelegate = self;
-    request.accessKey = kS3AccessKeyID;
-    request.accessPolicy = ASIS3AccessPolicyPublicRead;
-    request.timeOutSeconds = 30;
-    request.numberOfTimesToRetryOnTimeout = 2;
-    request.mimeType = @"image/jpeg";
-    request.shouldAttemptPersistentConnection = NO;
-    [ASIS3Request setShouldUpdateNetworkActivityIndicator:NO];
-    [request startAsynchronous];
-    //self.photoUploadRequest = request;
-    //self.tempPhotoURL = [NSString stringWithFormat:@"http://s3.amazonaws.com/stamped.com.static.temp/%@", key];
-
+    /*
+     POST /v0/account/customize_stamp.json
+     Takes two fields (color_primary and color_secondary) that are the hex values of the two colors. Returns the full user object.
+     */
+    
+    NSString *path = @"/account/customize_stamp.json";
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary", secondary, @"color_secondary", nil];
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+        
+        completion(error);
+        
+    }];
+    
 }
 
-
-#pragma mark - ASIRequestDelegate methods
-
-- (void)requestFinished:(ASIHTTPRequest*)request {
-
-}
-
-- (void)requestFailed:(ASIHTTPRequest*)request {
-
+- (void)updateProfileImageWithPath:(NSString*)tempPath completion:(STAuthRequestFinished)completion {
+    
+    /*
+     POST /v0/account/update_profile_image.json
+     Takes one field (temp_image_url) that has the url of the image. Returns the full user object.
+     */
+    
+    NSString *path = @"/account/update_profile_image.json";
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:tempPath, @"temp_image_url", nil];
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+        
+        completion(error);
+        
+    }];
+    
 }
 
 

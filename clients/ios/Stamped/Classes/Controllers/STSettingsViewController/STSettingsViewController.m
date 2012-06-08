@@ -269,9 +269,10 @@
 #pragma mark - UIActionSheetDelegate
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    
-    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
-    
+    if (buttonIndex!=actionSheet.cancelButtonIndex) {
+        [[STRestKitLoader sharedInstance] logout];
+    }
+    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];    
 }
 
 

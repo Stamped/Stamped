@@ -61,6 +61,7 @@
     
     [Util addCreateStampButtonToController:self];
     [self reloadDataSource];
+    [STEvents postEvent:EventTypeUnreadCountUpdated object:[NSNumber numberWithInt:0]];
     
 }
 
