@@ -3555,10 +3555,10 @@ class StampedAPI(AStampedAPI):
             user = self._userDB.getUserByScreenName('kevin')
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=user.user_id)
 
-        searchSlice = SearchSlice()
-        searchSlice.limit   = guideSearchRequest.limit 
-        searchSlice.viewport = guideSearchRequest.viewport
-        searchSlice.query   = guideSearchRequest.query
+        searchSlice             = SearchSlice()
+        searchSlice.limit       = 100
+        searchSlice.viewport    = guideSearchRequest.viewport
+        searchSlice.query       = guideSearchRequest.query
 
         # Subsection conversion
         if guideSearchRequest.subsection is not None:
@@ -3598,6 +3598,19 @@ class StampedAPI(AStampedAPI):
         for user in users:
             userIds[user.user_id] = user.minimize()
 
+        # Build previews
+        entityStampPreviews = {}
+        for stamp in stamps:
+            stampPreview = StampPreview()
+            stampPreview.user = userIds[stamp.user.user_id]
+            stampPreview.stamp_id = stamp.stamp_id
+
+            if stamp.entity.entity_id in entityStampPreviews:
+                entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
+            else:
+                entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+
+
         # Results
         result = []
         seenEntities = set()
@@ -3606,11 +3619,9 @@ class StampedAPI(AStampedAPI):
                 continue 
             entity = entityIds[stamp.entity.entity_id]
             seenEntities.add(stamp.entity.entity_id)
-            stampPreview = StampPreview()
-            stampPreview.user = userIds[stamp.user.user_id]
-            stampPreview.stamp_id = stamp.stamp_id
+
             previews = Previews()
-            previews.stamps = [ stampPreview ]
+            previews.stamps = entityStampPreviews[stamp.entity.entity_id]
             entity.previews = previews
             result.append(entity)
 
