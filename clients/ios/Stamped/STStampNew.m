@@ -58,4 +58,17 @@
   }
 }
 
+- (void)addCreditWithScreenName:(NSString*)screenName {
+    if (screenName == nil) {
+        return;
+    }
+    NSString* cur = self.credit;
+    if (!cur && [cur isEqualToString:@""]) {
+        self.credit = screenName;
+    }
+    else {
+        self.credit = [NSString stringWithFormat:@"%@,%@", cur, screenName];
+    }
+}
+
 @end

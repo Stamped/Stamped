@@ -703,9 +703,6 @@ NSInteger zoom;
         else if (self.scope == STStampedAPIScopeFriends) {
             scope = @"friends";
         }
-        else if (self.scope == STStampedAPIScopeFriendsOfFriends) {
-            scope = @"fof";
-        }
         else if (self.scope == STStampedAPIScopeEveryone) {
             scope = @"everyone";
         }
@@ -767,7 +764,7 @@ NSInteger zoom;
         y_ = y;
         zoom_ = zoom;
         stamps_ = [[NSMutableDictionary alloc] init];
-        key_ = [STConsumptionMapTile keyForX:x_ y:y_ andZoom:zoom_];
+        key_ = [[STConsumptionMapTile keyForX:x_ y:y_ andZoom:zoom_] retain];
     }
     return self;
 }
@@ -778,8 +775,8 @@ NSInteger zoom;
         x_ = [decoder decodeIntegerForKey:@"x"];
         y_ = [decoder decodeIntegerForKey:@"y"];
         zoom_ = [decoder decodeIntegerForKey:@"zoom"];
-        stamps_ = [decoder decodeObjectForKey:@"stamps"];
-        key_ = [decoder decodeObjectForKey:@"key"];
+        stamps_ = [[decoder decodeObjectForKey:@"stamps"] retain];
+        key_ = [[decoder decodeObjectForKey:@"key"] retain];
     }
     return self;
 }

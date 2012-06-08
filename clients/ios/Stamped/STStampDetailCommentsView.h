@@ -9,11 +9,9 @@
 #import "STViewContainer.h"
 #import "STStamp.h"
 
-@interface STStampDetailCommentsView : UIView
+@interface STStampDetailCommentsView : STViewContainer
 
 - (id)initWithStamp:(id<STStamp>)stamp
         andDelegate:(id<STViewDelegate>)delegate;
-
-@property (nonatomic, readwrite, assign) id<STViewDelegate> delegate;
 
 @end

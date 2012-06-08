@@ -53,6 +53,10 @@ class Memcache(object):
             return False
 
         return True
+
+    def flush_all(self):
+        if self._client:
+            self._client.flush_all()
     
     def set(self, key, value, *args, **kwargs):
         value = self._import_value(value)
@@ -76,6 +80,10 @@ class Memcache(object):
             return self._export_value(self._client[key])
 
         raise KeyError(key)
+
+    def __delitem__(self, key):
+        if self._client:
+            del(self._client[key])
     
     def __contains__(self, key):
         if self._client:

@@ -38,6 +38,7 @@
 #import "STEntityAutoCompleteResult.h"
 #import "STHybridCacheSource.h"
 #import "STAccountParameters.h"
+#import "STRestKitLoader.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -162,6 +163,10 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block;
 
+- (STCancellation*)setTodoCompleteWithEntityID:(NSString*)entityID 
+                                      complete:(BOOL)complete
+                                   andCallback:(void(^)(id<STTodo> todo, NSError* error, STCancellation* cancellation))block;
+
 - (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
                                          coordinates:(NSString*)coordinates
                                             category:(NSString*)category
@@ -226,6 +231,7 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                                           userSecret:(NSString*)userSecret 
                                    accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 

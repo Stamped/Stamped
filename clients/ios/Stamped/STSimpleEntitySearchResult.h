@@ -17,6 +17,7 @@
 @property (nonatomic, readwrite, copy) NSString* subtitle;
 @property (nonatomic, readwrite, copy) NSString* category;
 @property (nonatomic, readwrite, copy) NSNumber* distance;
+@property (nonatomic, readwrite, copy) NSString* icon;
 
 + (RKObjectMapping*)mapping;
 
