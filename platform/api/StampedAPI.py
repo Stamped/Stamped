@@ -1438,7 +1438,7 @@ class StampedAPI(AStampedAPI):
                 albums = []
 
             for album in albums:
-                albumIds[album.entity_id] = album
+                albumIds[album.entity_id] = album.minimize()
 
             enrichedAlbums = []
             for album in entity.albums:
