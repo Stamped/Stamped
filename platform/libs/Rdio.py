@@ -136,8 +136,7 @@ def globalRdio():
 def demo(method, **params):
     import pprint
     rdio = globalRdio()
-    pprint.pprint(rdio.searchSuggestions('purpl', types='Artist,Album,Track'))
-    #pprint.pprint(rdio.method(method, **params))
+    pprint.pprint(rdio.method(method, **params))
 
 if __name__ == '__main__':
     import sys

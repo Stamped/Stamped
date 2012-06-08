@@ -1541,6 +1541,17 @@ class StampedAPI(AStampedAPI):
 
         return results
 
+    def _orderedUnique(self, theList):
+        known = set()
+        newlist = []
+
+        for d in theList:
+            if d in known: continue
+            newlist.append(d)
+            known.add(d)
+
+        return newlist
+
     @API_CALL
     def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
         if autosuggestForm.category == 'film':
@@ -1556,7 +1567,8 @@ class StampedAPI(AStampedAPI):
                 {'radius': 500, 'types' : 'establishment'})
             logs.info(results)
             #make list of names from results, remove duplicate entries, limit to 10
-            names = list(set([place['terms'][0]['value'] for place in results]))[:10]
+            names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
+            #names = list(set([place['terms'][0]['value'] for place in results]))[:10]
             completions = []
             for name in names:
                 completions.append( { 'completion' : name } )
@@ -1564,7 +1576,8 @@ class StampedAPI(AStampedAPI):
             result = self._rdio.searchSuggestions(autosuggestForm.query, types="Artist,Album,Track")
             if 'result' not in result:
                 return []
-            names = list(set([i['name'] for i in result['result']]))[:10]
+            #names = list(set([i['name'] for i in result['result']]))[:10]
+            names = self._orderedUnique([i['name'] for i in result['result']])
             completions = []
             for name in names:
                 completions.append( { 'completion' : name})
