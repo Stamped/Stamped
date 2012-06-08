@@ -285,6 +285,11 @@ def _phoneToInt(string):
         return None 
 
     try:
+        return int(string)
+    except ValueError:
+        pass 
+
+    try:
         digits = re.findall(r'\d+', string)
         return int("".join(digits))
     except Exception as e:
