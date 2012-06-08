@@ -136,6 +136,10 @@ def updateEntityStats(*args, **kwargs):
 def updateStampStats(*args, **kwargs):
     invoke(updateStampStats.request, *args, **kwargs)
 
+@task(ignore_result=True)
+def buildGuide(*args, **kwargs):
+    invoke(buildGuide.request, *args, **kwargs)
+
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
     version = "%prog " + __version__

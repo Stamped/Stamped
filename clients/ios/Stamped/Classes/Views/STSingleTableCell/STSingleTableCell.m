@@ -17,6 +17,7 @@
 @implementation STSingleTableCell
 
 @synthesize titleLabel;
+@synthesize loading=_loading;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
@@ -64,6 +65,36 @@
     frame.origin.y = floorf((self.bounds.size.height-frame.size.height)/2);
     self.titleLabel.frame = frame;
     
+    
+}
+
+- (void)setLoading:(BOOL)loading {
+    _loading = loading;
+    
+    self.titleLabel.hidden = _loading;
+    
+    if (_loading) {
+        
+        if (!_activityView) {
+            
+            UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+            view.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+            [self addSubview:view];
+            [view startAnimating];
+            [view release];
+            _activityView = view;
+            
+            view.frame = CGRectMake((self.bounds.size.width-20.0f)/2, (self.bounds.size.height-20.0f)/2, 20.0f, 20.0f);
+            
+        }
+        
+    } else {
+        
+        if (_activityView) {
+            [_activityView removeFromSuperview], _activityView=nil;
+        }
+        
+    }
     
 }
 

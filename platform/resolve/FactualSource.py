@@ -352,8 +352,8 @@ class FactualSource(GenericSource):
                         else:
                             broken = True
                             break
-                    if not broken and len(hours) > 0:
-                        entity.hours = TimesSchema().dataImport(hours)
+                    if not broken:
+                        entity.hours = hours
                 except ValueError:
                     logs.warning('bad json for hours')
 

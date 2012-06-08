@@ -13,7 +13,7 @@ from pprint                 import pprint
 from errors                 import *
 from utils                  import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
 from datetime               import datetime
-from pymongo.errors         import AutoReconnect
+from pymongo.errors         import AutoReconnect, DuplicateKeyError
 from MongoCollectionProxy   import MongoCollectionProxy
 
 class MongoDBConfig(Singleton):

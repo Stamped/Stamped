@@ -7,10 +7,11 @@ __license__   = "TODO"
 
 import Globals, utils, logs
 
-from datetime   import datetime
-from utils      import lazyProperty
-from api.Schemas    import *
-from errors     import *
+from datetime                   import datetime
+from utils                      import lazyProperty
+from api.Schemas                import *
+from errors                     import *
+from pymongo.errors             import DuplicateKeyError
 
 from AMongoCollection           import AMongoCollection
 from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
@@ -111,6 +112,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             document['stats']['num_todos'] = document['stats']['num_faves']
             del(document['stats']['num_faves'])
 
+        if 'auth_service' not in document:
+            document['auth_service'] = 'stamped'
+
         self._upgradeLinkedAccounts(document)
 
         if self._obj is not None:
@@ -129,7 +133,16 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return MongoUserLinkedAlertsHistoryCollection()
     
     def addAccount(self, user):
-        return self._addObject(user)
+        try:
+            return self._addObject(user)
+        except DuplicateKeyError as e:
+            logs.warning("Unable to add account: %s" % e)
+            if self._collection.find_one({"email": user.email}) is not None:
+                raise StampedDuplicationError("An account already exists with email '%s'" % user.email)
+            elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
+                raise StampedDuplicationError("An account already exists with screen name '%s'" % user.screen_name)
+            else:
+                raise StampedDuplicationError("Account information already exists")
     
     def getAccount(self, userId):
         documentId = self._getObjectIdFromString(userId)

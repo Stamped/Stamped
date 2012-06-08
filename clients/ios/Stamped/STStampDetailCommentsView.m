@@ -171,8 +171,7 @@ andProfileImageSize:(STProfileImageSize)size {
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_blurbView release];
     [_userNameView release];
     [_dateView release];
@@ -358,8 +357,7 @@ andProfileImageSize:(STProfileImageSize)size {
     }
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [imageURL_ release];
     [super dealloc];
 }
@@ -416,8 +414,7 @@ andProfileImageSize:(STProfileImageSize)size {
     }
 }
 
-- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate
-{
+- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate {
     CGFloat width = _totalWidth;
     CGFloat padding_x = 5;
     self = [super initWithDelegate:delegate andFrame:CGRectMake(padding_x, 0, width, 0)];
@@ -428,17 +425,20 @@ andProfileImageSize:(STProfileImageSize)size {
         self.layer.shadowOpacity = .2;
         self.layer.shadowRadius = 2.5;
         self.layer.shadowOffset = CGSizeMake(0, 5);
-        //self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
         
         [self setStamp:stamp];
     }
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [stamp_ release];
     [super dealloc];
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
 }
 
 - (void)reloadStampedData {

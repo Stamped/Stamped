@@ -69,7 +69,12 @@
     
     [self.titleLabel sizeToFit];
     CGRect frame = self.titleLabel.frame;
-    frame.origin.x = 20.0f;
+    
+    if (self.titleLabel.textAlignment == UITextAlignmentRight) {
+        frame.origin.x = 100 - frame.size.width;
+    } else {
+        frame.origin.x = 20.0f;
+    }
     frame.origin.y = floorf((44.0f-frame.size.height)/2);
     self.titleLabel.frame = frame;
     
@@ -80,12 +85,27 @@
     
 }
 
+- (void)disable {
+
+    self.userInteractionEnabled = NO;
+    self.alpha = 0.6f;
+    
+}
+
+- (void)enable {
+    
+    self.userInteractionEnabled = YES;
+    self.alpha = 1.0f;
+    
+}
+
 
 #pragma mark - Gesture
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
     [self.textField becomeFirstResponder];    
 }
+
 
 #pragma mark - UIGestureRecognizerDelegate
 

@@ -11,6 +11,7 @@
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
 #import "STTwitter.h"
+#import "STAuth.h"
 
 #import "SocialSignupViewController.h"
 #import "SignupWelcomeViewController.h"
@@ -40,6 +41,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     
     if (!self.navigationItem.leftBarButtonItem) {
         STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
@@ -134,10 +136,11 @@
 }
 
 
-#pragma mark - Notifications 
+#pragma mark - Signup
 
-- (void)twitterAuthFinished:(NSNotification*)notification {
+- (void)signupTwitter {
     
+    [STEvents removeObserver:self];
     [[STTwitter sharedInstance] getTwitterUser:^(id user, NSError *error) {
         
         if (user && !error) {
@@ -156,8 +159,45 @@
     
 }
 
+
+#pragma mark - Notifications 
+
+- (void)twitterAuthFinished:(NSNotification*)notification {
+    
+    [[STAuth sharedInstance] twitterAuthWithToken:[[STTwitter sharedInstance] twitterToken] secretToken:[[STTwitter sharedInstance] twitterTokenSecret] completion:^(NSError *error) {
+        
+        if (error) {
+            
+            [self signupTwitter];
+            STSingleTableCell *cell = (STSingleTableCell*)[self.tableView cellForRowAtIndexPath:self.tableView.indexPathForSelectedRow];
+            if (cell) {
+                [cell setLoading:YES];
+                self.view.userInteractionEnabled = NO;
+            }
+            [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
+            
+        } else {
+            
+            if ([(id)delegate respondsToSelector:@selector(twitterAccountsViewControllerSuccessful:)]) {
+                [self.delegate twitterAccountsViewControllerSuccessful:self];
+            }
+            
+        }
+        
+    }];
+    
+
+    
+}
+
 - (void)twitterAuthFailed:(NSNotification*)notification {
     
+    STSingleTableCell *cell = (STSingleTableCell*)[self.tableView cellForRowAtIndexPath:self.tableView.indexPathForSelectedRow];
+    if (cell) {
+        [cell setLoading:YES];
+        self.view.userInteractionEnabled = NO;
+    }
+    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
     
     NSLog(@"twitter auth failed");
     
@@ -199,6 +239,10 @@
     
     ACAccount *account = [[STTwitter sharedInstance] accountAtIndex:indexPath.row];
     [[STTwitter sharedInstance] reverseAuthWithAccount:account];
+    
+    STSingleTableCell *cell = (STSingleTableCell*)[tableView cellForRowAtIndexPath:indexPath];
+    [cell setLoading:YES];
+    self.view.userInteractionEnabled = NO;
         
 }
 

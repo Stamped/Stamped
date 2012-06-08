@@ -48,16 +48,19 @@ footer {
         width:  100%;
         height: 100%;
         
+        // marker clusterer radial popup preview item
         .marker-preview {
             position: absolute;
             display: none;
+            
             background: #FEFEFE;
             color: #666;
             
             .box-shadow(0, 0, 8px, 0, rgba(0, 0, 0, 0.35));
             
             padding: 3px;
-            margin: 0;
+            margin:  0;
+            
             line-height: 1em;
             z-index: 100;
         }
@@ -74,22 +77,24 @@ footer {
             
             .stamp-map-item-overlay {
                 position: absolute;
-                width:  100%;
-                height: 100%;
                 top:  0;
                 left: 0;
+                
+                width:  100%;
+                height: 100%;
                 
                 background: transparent;
                 pointer-events: none;
             }
             
             .profile-image-small {
-                float: left;
                 margin: 0 @marker_space @marker_space 0;
+                float: left;
                 
                 img {
                     display: none;
                 }
+                
                 img:first-child {
                     display: block;
                 }
@@ -97,11 +102,27 @@ footer {
             
             .entity-header {
                 float: left;
+                position: relative;
+                top: 0;
+                
+                margin-left: 0;
+                
+                @width: 340px - (40px + @marker_space * 2) - (@marker_space * 4);
+                max-width: @width;
+                width:     @width;
+                
+                .title {
+                    .pronounced-title {
+                        line-height: 100%;
+                        padding: 0;
+                        margin:  0;
+                    }
+                }
             }
             
             .content {
                 clear: both;
-                margin: .5em 0 0 56px;
+                margin: 0 0 0 (40px + @marker_space * 2);
                 
                 .blurbs {
                     .stamped-content {
@@ -171,6 +192,7 @@ footer {
                         
                         .stamp-map-title {
                             .stamped-font();
+                            
                             font-size: 2.5em;
                             letter-spacing: .05em;
                             line-height: 100%;
@@ -233,10 +255,10 @@ footer {
                         padding: (@map_nav_space / 2) @map_nav_space;
                         
                         border-bottom: 1px solid #c2c2c2;
-                        background-color: #fff;
                         
                         // very slight background-color transition on mouse-out
                         // (immediate transition on mouse-over)
+                        background-color: #fff;
                         .transition(background-color, 0.1s, ease-out);
                         
                         .entity-header {
@@ -252,7 +274,7 @@ footer {
                     }
                     
                     .stamp-list-view-item:last-child {
-                        border-bottom: 0 none;
+                        border-bottom:  0 none;
                         padding-bottom: 0;
                     }
                     
@@ -276,8 +298,8 @@ footer {
             }
             
             .nav-footer, .nav-dummy-footer {
-                width: 100%;
                 background: #fff;
+                width: 100%;
                 
                 .content {
                     padding: (@map_nav_space / 2) @map_nav_space;
@@ -332,10 +354,57 @@ footer {
     .share-widget {
         position: absolute;
         top:   32px;
-        right: 110px;
+        right: 144px;
         
         .desc {
-            text-align: right;
+            text-align: center;
+        }
+    }
+    
+    a.my-location {
+        position: absolute;
+        right: 96px;
+        top:   36px;
+        
+        display: none;
+        width:  22px;
+        height: 22px;
+        
+        background: url(/assets/img/mylocation.png) no-repeat;
+        
+        /*@active-color:   #498dfe;
+        @inactive-color: #989;
+        
+        background: @inactive-color;
+        
+        &:hover {
+            background: lighten(@inactive-color, 10%);
+        }
+        
+        &:active {
+            background: @active-color;
+        }*/
+        
+        .inner {
+            position: relative;
+            
+            left: 6px;
+            top:  4px;
+            
+            width:  10px;
+            height: 10px;
+        }
+        
+        &:hover, &:active {
+            background: url(/assets/img/mylocation-inner.png) no-repeat 0 -22px;
+        }
+    }
+    
+    a.my-location-loading {
+        background: url(/assets/img/mylocation-inner.png) no-repeat 0 0 !important;
+        
+        .inner {
+            background: url(/assets/img/mylocation-loading.gif) no-repeat 0 0;
         }
     }
 }
@@ -345,7 +414,6 @@ footer {
                                     MISC
    ************************************************************************** */
 
-// TODO
 
 body.map {
     .sdetail_body {

@@ -51,7 +51,7 @@ class Memcache(object):
             logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
             self._client = None
             return False
-        
+
         return True
     
     def set(self, key, value, *args, **kwargs):
@@ -74,7 +74,7 @@ class Memcache(object):
     def __getitem__(self, key):
         if self._client:
             return self._export_value(self._client[key])
-        
+
         raise KeyError(key)
     
     def __contains__(self, key):
@@ -110,11 +110,12 @@ class Memcache(object):
         if isinstance(value, dict):
             if '__schema__' in value and '__value__' in value:
                 # reinstantiate the Schema subclass with its prior data
-                return value['__schema__']().importData(value['__value__'])
+                return value['__schema__']().dataImport(value['__value__'])
             else:
                 return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
         elif isinstance(value, (list, tuple)):
             value = map(self._export_value, value)
+            return value
         else:
             return value
     
@@ -188,6 +189,7 @@ def memcached_function(time=0, min_compress_len=0):
                 compute = False
                 
                 wrapper.hits += 1
+                logs.debug("Cache hit: %s" % key)
             except KeyError:
                 store = True
             except Exception:

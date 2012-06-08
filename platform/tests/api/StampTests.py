@@ -274,9 +274,10 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
             "stamp_id": self.stampB['stamp_id']
         }
         result = self.handleGET(path, data)
+        
         self.assertTrue(len(result['credit']) == 1)
         self.assertEqual(
-            result['credit'][0]['screen_name'], 
+            result['credit'][0]['user']['screen_name'], 
             self.stampData['credit']
             )
         self.assertEqual(
@@ -427,7 +428,6 @@ class StampedAPIEntitiesStampedBy(StampedAPIStampTest):
         result = self.handleGET(path, data)
 
         self.assertEqual(result['friends']['count'], 1)
-        self.assertEqual(result['friends']['stamps'][0]['entity']['entity_id'], self.entity['entity_id'])
         self.assertEqual(result['friends']['stamps'][0]['stamp_id'], self.stamp['stamp_id'])
         self.assertEqual(result['friends']['stamps'][0]['user']['screen_name'], 'UserA')
         #self.assertEqual(result[0]['title'].lower(), self.entity['title'].lower())

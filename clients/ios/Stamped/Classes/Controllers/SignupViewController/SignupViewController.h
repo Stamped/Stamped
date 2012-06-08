@@ -13,7 +13,7 @@
     NSArray *_dataSource;
 }
 @property (nonatomic,assign) id <SignupViewControllerDelegate> delegate;
-
+ 
 @end
 @protocol SignupViewControllerDelegate
 - (void)signupViewControllerCancelled:(SignupViewController*)controller;

@@ -22,6 +22,10 @@
     <div class="stamp-map">
         <div class="stamp-map-canvas"></div>
         
+        <a class="my-location" href="#" title="My Location">
+            <div class="inner"></div>
+        </a>
+        
         {% with share_widget_desc="Share this map" %}
             {% handlebars_template "share-widget" %}
         {% endwith %}
@@ -54,7 +58,7 @@
                     
                     <div class="stamp-list-view">
                         {% for stamp in stamps %}
-                            <div class="stamp-list-view-item user-primary-selection">
+                            <div class="stamp-list-view-item user-primary-selection stamp-id-{{stamp.stamp_id}}">
                                 <div class="entity-header">
                                     <div class="stamp-category-{{stamp.entity.category}}">
                                         <div class='title clearfloat'>

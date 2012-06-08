@@ -89,12 +89,12 @@
 
 #stamp-category-nav-bar {
     ol {
-        li.default a:active .icon, 
-        li.place a:active .icon, 
-        li.music a:active .icon, 
-        li.book a:active .icon, 
-        li.film a:active .icon, 
-        li.other a:active .icon {
+        li.default  a:active .icon, 
+        li.place    a:active .icon, 
+        li.music    a:active .icon, 
+        li.book     a:active .icon, 
+        li.film     a:active .icon, 
+        li.other    a:active .icon {
             background-color: fade(@secondary, 100%);
         }
     }
@@ -142,6 +142,10 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
     -ms-transition:     @target @duration @ease !important;
     -o-transition:      @target @duration @ease !important;
     transition:         @target @duration @ease !important;
+}
+
+.user-primary-selection {
+    background-color: #fff;
 }
 
 .user-primary-selection:hover, .stamp-map .stamp-map-canvas .stamp-map-item:hover .stamp-map-item-overlay {

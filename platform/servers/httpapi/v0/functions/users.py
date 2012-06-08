@@ -96,9 +96,9 @@ def findEmail(request, authUserId, http_schema, **kwargs):
         except Exception:
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
-    
+
     users       = stampedAPI.findUsersByEmail(authUserId, emails)
-    
+
     output = []
     for user in users:
         if user.user_id != authUserId:

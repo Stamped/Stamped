@@ -22,6 +22,7 @@ enum EventType {
     
     // signup
     EventTypeSignupFinished,
+    EventTypeSignupFailed,
     
     // friend finding
     EventTypeFriendsFinished,

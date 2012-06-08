@@ -1146,7 +1146,7 @@ static Rdio* _rdio;
 + (void)launchFirstRun {
     //TODO
     STAppDelegate* appDelegate = (id)[UIApplication sharedApplication].delegate;
-    [appDelegate.menuController showWelcome];
+    [appDelegate.menuController showWelcome:NO];
 }
 
 

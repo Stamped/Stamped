@@ -42,6 +42,7 @@
 
 
 TODO:
+    * generic JS-reliance class w/ display: none and display: block in head initialization if JS is supported
     * align stamp-gallery with profile header
     
     * sDetail:
@@ -49,28 +50,30 @@ TODO:
         * DONE - Polish social sharing buttons
         * DONE - Opening / closing animations
         * DONE - Comment collapsing ala Google Plus
-        * CLOSE - Relayout according to sdetail spec
+        * ALPHA - Relayout according to sdetail spec
         * Transformed entity image
         * Move like / todo / comment counters to their own section
     * Map view:
-        * 
-        * Refactor profile.js w/ map.js in mind
-        * Map layout matches spec
-        * CLOSE - Collapsable stamp list
-        * Autocentering based on user's location
-        * Customize stamp popup
-        * sDetail overlay
-        * Share this map button
+        * DONE - Refactor profile.js w/ map.js in mind
+        * DONE - Map layout matches spec
+        * DONE - Collapsable stamp list
+        * DONE - sDetail overlay
+        * DONE - Autocentering based on user's location
+        * ALPHA - Customize stamp popup
+        * ALPHA - Share this map button
+            * large z-index -- nuance positioning behavior on hover
+        * Incorporate geocoded metropolitan area or into marker cluster hover
     * Profile Page:
         * header:
-            * BETA - Header functionality w/ temp header images
             * DONE - Dynamic, category-dependent header titles
-            * BLOCKED - View histogram
-            * BLOCKED - View bio / friends
+            * DONE - Separate # STAMPS header from user.num_stamps
+            * BETA - Header functionality w/ temp header images
             * BETA - Share this collection
-            * Separate # STAMPS header from user.num_stamps
+            * Customized user-specific, category-dependent header collages
+            * View histogram
+            * View bio / friends
         * gallery:
-            * BETA - Sort stamps by popularity
+            * DONE - Sort stamps by popularity
     
     * experiment with 'screen' blending mode for header cover images
     
@@ -161,4 +164,24 @@ OLD:
     * link stamp image to lightboxed full-resolution version
     * fix opacity of lower profile header ribbon
     * modify update_stamps to be more efficient and only process new stamps!!!
+
+ChangeList 6/8/2012:
+    * Map:
+        * Map's initial bounds are now calculated from the user's largest stamp cluster
+        * My location button implemented as a copy of the Google Maps version
+        * "Share this map" title moves to center and bounce is smoother
+        * Filter stamp list based on current viewport
+        * Marker popup layout closer to spec (no longer overflows box; polished layout, etc.)
+        * Clustering:
+            * less aggressive now (removed radial menu, disabled clustering after a specific zoom level, and upped the minimum number of stamps in a cluster to 4)
+            * you may now use the keyboard shortcut ctrl+t to toggle clustering on / off
+    
+    * Profile:
+        * Occasional layout jankiness should now be gone from initial page load / refresh
+        * View map button only exists on 'all stamps' and 'places' categories subpages
+        * Updated category/subcategory-specific fallback icons from Anthony that are a definite visual improvement over the old / janky STANDIN icons but should still be viewed as a work in progress
+        * Added slight text-shadow to stamp count text per our discussion yesterday
+    
+    * sDetail:
+        * if a lightbox is active, ESC will now only close the lightbox, and then you have to press ESC again to close the sDetail overlay
 

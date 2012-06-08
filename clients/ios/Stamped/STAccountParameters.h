@@ -22,5 +22,6 @@
 @property (nonatomic, readwrite, copy) NSString* colorSecondary;
 
 - (NSMutableDictionary*)asDictionaryParams;
+- (NSString*)errorStringRequiresEmail:(BOOL)requiresEmail;
 
 @end
