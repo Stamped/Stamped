@@ -994,7 +994,7 @@ a.lightbox {
                     top:  13px;
                     
                     .transform(scale(.8, .8));
-                    .transition(-webkit-transform, 0.3s, ease-out);
+                    .transition-transform(0.3s, ease-out);
                     
                     display: block;
                     width:  30px;
@@ -1028,7 +1028,7 @@ a.lightbox {
                 &:hover, &:active {
                     .icon {
                         .transform(scale(1.0, 1.0));
-                        .transition(-webkit-transform, 0s, linear);
+                        .transition-transform(0s, linear);
                         // TODO
                     }
                     

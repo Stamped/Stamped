@@ -89,12 +89,12 @@
 
 #stamp-category-nav-bar {
     ol {
-        li.default a:active .icon, 
-        li.place a:active .icon, 
-        li.music a:active .icon, 
-        li.book a:active .icon, 
-        li.film a:active .icon, 
-        li.other a:active .icon {
+        li.default  a:active .icon, 
+        li.place    a:active .icon, 
+        li.music    a:active .icon, 
+        li.book     a:active .icon, 
+        li.film     a:active .icon, 
+        li.other    a:active .icon {
             background-color: fade(@secondary, 100%);
         }
     }

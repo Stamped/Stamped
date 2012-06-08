@@ -984,10 +984,10 @@ a.lightbox .zoom {
   -ms-transform: scale(0.8, 0.8);
   transform: scale(0.8, 0.8);
   -webkit-transition: -webkit-transform 0.3s ease-out;
-  -moz-transition: -webkit-transform 0.3s ease-out;
-  -ms-transition: -webkit-transform 0.3s ease-out;
-  -o-transition: -webkit-transform 0.3s ease-out;
-  transition: -webkit-transform 0.3s ease-out;
+  -moz-transition: -moz-transform 0.3s ease-out;
+  -ms-transition: -ms-transform 0.3s ease-out;
+  -o-transition: -o-transform 0.3s ease-out;
+  transition: transform 0.3s ease-out;
   display: block;
   width: 30px;
   height: 30px;
@@ -1028,10 +1028,10 @@ a.lightbox .zoom {
   -ms-transform: scale(1, 1);
   transform: scale(1, 1);
   -webkit-transition: -webkit-transform 0s linear;
-  -moz-transition: -webkit-transform 0s linear;
-  -ms-transition: -webkit-transform 0s linear;
-  -o-transition: -webkit-transform 0s linear;
-  transition: -webkit-transform 0s linear;
+  -moz-transition: -moz-transform 0s linear;
+  -ms-transition: -ms-transform 0s linear;
+  -o-transition: -o-transform 0s linear;
+  transition: transform 0s linear;
 }
 #stamp-category-nav-bar ol li a:hover .desc,
 #stamp-category-nav-bar ol li a:active .desc {
