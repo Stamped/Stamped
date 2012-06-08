@@ -51,35 +51,6 @@ class ImageCollage(object):
         #num_rows = int(math.ceil(num_tiles / 3))
         #num_cols = num_tiles % num_rows
         
-        """
-        size_map = {
-            1  : (1, 1), 
-            2  : (2, 1), 
-            3  : (3, 1), 
-            4  : (3, 2), 
-            5  : (3, 2), 
-            6  : (3, 2), 
-            7  : (4, 2), 
-            8  : (4, 2), 
-            9  : (4, 3), 
-            10 : (4, 3), 
-            11 : (4, 3), 
-            12 : (4, 3), 
-            13 : (5, 3), 
-            14 : (5, 3), 
-            15 : (5, 3), 
-            16 : (5, 4), 
-            17 : (5, 4), 
-            18 : (5, 4), 
-            19 : (5, 4), 
-            20 : (6, 4), 
-            21 : (6, 4), 
-            22 : (6, 4), 
-            23 : (6, 4), 
-            24 : (6, 4), 
-        }
-        """
-        
         num_tiles = len(tiles)
         #num_cols  = size_map[num_tiles][0]
         #num_rows  = size_map[num_tiles][1]

@@ -37,7 +37,11 @@
                     <!-- DEFAULT HEADER -->
                     <div class="profile-header-body header-category-default">
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            {% handlebars_template "profile-image-large" user %}
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
                             
                             <div class="lhs">
                                 <p class='profile-title'>
@@ -65,7 +69,12 @@
                     <div class="profile-header-body header-category-place">
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
-                            {% handlebars_template "profile-image-medium" user %}
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+
                             
                             <div class="lhs">
                                 <p class='name'>{{user.screen_name}}'s</p>
@@ -82,7 +91,11 @@
                     <div class="profile-header-body header-category-music">
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
-                            {% handlebars_template "profile-image-medium" user %}
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
                             
                             <div class="lhs">
                                 <p class='name'>{{user.screen_name}}'s</p>
@@ -99,7 +112,11 @@
                     <div class="profile-header-body header-category-book">
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
-                            {% handlebars_template "profile-image-medium" user %}
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
                             
                             <div class="lhs">
                                 <p class='name'>{{user.screen_name}}'s</p>
@@ -116,7 +133,11 @@
                     <div class="profile-header-body header-category-film">
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
-                            {% handlebars_template "profile-image-medium" user %}
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
                             
                             <div class="lhs">
                                 <p class='name'>{{user.screen_name}}'s</p>
@@ -133,7 +154,11 @@
                     <div class="profile-header-body header-category-other">
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
-                            {% handlebars_template "profile-image-medium" user %}
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
                             
                             <div class="lhs">
                                 <p class='name'>{{user.screen_name}}'s</p>

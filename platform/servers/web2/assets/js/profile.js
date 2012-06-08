@@ -442,23 +442,57 @@ var g_update_stamps = null;
                     href = href.replace('http://www.stamped.com', '');
                     href = href + "?" + new Date().getTime();
                     
-                    //href = '/travis/stamps/4/TEMPORARY';
-                    
-                    /*$.colorbox({
-                        href        : href, 
-                        
-                        width       : "75%", 
-                        transition  : "elastic", 
-                        fixed       : true, 
-                        scrolling   : false, 
-                        
-                        onComplete  : init_sdetail
-                    });*/
-                    
                     $(sdetail_wrapper_sel).remove();
-                    var $target = $("<div class='" + sdetail_wrapper + "'></div>");
+                    var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
                     
                     console.debug("AJAX: " + href);
+                    
+                    // TODO: disable infinite scroll for sdetail popup
+                    destroy_infinite_scroll();
+                    
+                    $(sdetail_wrapper_sel).hide().remove();
+                    $target.insertAfter($('#main-page-content-body').get(0));
+                    $target = $(sdetail_wrapper_sel);
+                    
+                    update_dynamic_header();
+                    
+                    var scroll_top = $window.scrollTop();
+                    
+                    resize_sdetail_wrapper($target, 'opening', function() {
+                        $target.removeClass('animating');
+                    });
+                    
+                    close_sdetail_func = function() {
+                        close_sdetail_func = null;
+                        $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
+                        $window.scrollTop(scroll_top);
+                        
+                        var close_sdetail_inner_func = function() {
+                            init_infinite_scroll();
+                            update_dynamic_header();
+                            update_navbar_layout();
+                            
+                            resize_sdetail_wrapper($target, 'closing', function() {
+                                $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
+                            });
+                        };
+                        
+                        /*if (!!$gallery) {
+                            update_gallery_layout(true, function() {
+                                //$window.scrollTop(scroll_top);
+                                //init_infinite_scroll();
+                                
+                                close_sdetail_inner_func();
+                            });
+                        } else {
+                        }*/
+                        
+                        if (!!$gallery) {
+                            update_gallery_layout(true);
+                        }
+                        
+                        close_sdetail_inner_func();
+                    };
                     
                     // initialize sDetail popup after AJAX load
                     $target.load(href, {}, function(response, status, xhr) {
@@ -471,44 +505,8 @@ var g_update_stamps = null;
                             return;
                         }
                         
-                        // TODO: disable infinite scroll for sdetail popup
-                        destroy_infinite_scroll();
-                        
-                        $(sdetail_wrapper_sel).hide().remove();
-                        $target.insertAfter($('#main-page-content-body').get(0));
-                        $target = $(sdetail_wrapper_sel);
-                        
+                        $target.removeClass('sdetail-loading');
                         init_sdetail($target);
-                        update_dynamic_header();
-                        
-                        var scroll_top = $window.scrollTop();
-                        
-                        resize_sdetail_wrapper($target, 'opening', function() {
-                            $target.removeClass('animating');
-                        });
-                        
-                        close_sdetail_func = function() {
-                            close_sdetail_func = null;
-                            $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                            
-                            var close_sdetail_inner_func = function() {
-                                resize_sdetail_wrapper($target, 'closing', function() {
-                                    $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
-                                    update_dynamic_header();
-                                });
-                            };
-                            
-                            if (!!$gallery) {
-                                update_gallery_layout(false, function() {
-                                    $window.scrollTop(scroll_top);
-                                    init_infinite_scroll();
-                                    
-                                    close_sdetail_inner_func();
-                                });
-                            } else {
-                                close_sdetail_inner_func();
-                            }
-                        };
                         
                         // initialize sDetail close button logic
                         $target.find('.close-button a').click(function(event) {
@@ -647,28 +645,30 @@ var g_update_stamps = null;
         var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
         var init_infinite_scroll = function() {
-            // TODO: customize loading image
-            infinite_scroll = $gallery.infinitescroll({
-                debug           : STAMPED_PRELOAD.DEBUG, 
-                bufferPx        : 200, 
-                
-                navSelector     : "div.stamp-gallery-nav", 
-                nextSelector    : infinite_scroll_next_selector, 
-                itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
-                
-                loading         : {
-                    finishedMsg : "No more stamps to load.", 
-                    msgText     : "<em>Loading more stamps...</em>", 
-                    img         : "/assets/img/loading.gif", 
-                    selector    : "div.stamp-gallery-loading"
-                }
-            }, function(new_elements) {
-                var $elements = $(new_elements);
-                
-                //$elements.emoji();
-                $gallery.isotope('appended', $elements);
-                update_stamps();
-            });
+            if (!!$gallery) {
+                // TODO: customize loading image
+                infinite_scroll = $gallery.infinitescroll({
+                    debug           : STAMPED_PRELOAD.DEBUG, 
+                    bufferPx        : 200, 
+                    
+                    navSelector     : "div.stamp-gallery-nav", 
+                    nextSelector    : infinite_scroll_next_selector, 
+                    itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+                    
+                    loading         : {
+                        finishedMsg : "No more stamps to load.", 
+                        msgText     : "<em>Loading more stamps...</em>", 
+                        img         : "/assets/img/loading.gif", 
+                        selector    : "div.stamp-gallery-loading"
+                    }
+                }, function(new_elements) {
+                    var $elements = $(new_elements);
+                    
+                    //$elements.emoji();
+                    $gallery.isotope('appended', $elements);
+                    update_stamps();
+                });
+            }
         };
         
         // initialize the stamp gallery's layout with isotope and infinite scroll

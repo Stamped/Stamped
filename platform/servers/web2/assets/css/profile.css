@@ -115,17 +115,23 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large,
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-medium {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-column {
+  position: relative;
   float: left;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .floatleft,
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-large,
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-medium {
-  margin: 0 24px 0 0;
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-column a.follow-button {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  margin-left: -43px;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-column .profile-image-large,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .profile-image-column .profile-image-medium {
+  float: none;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs {
   float: left;
+  margin-left: 24px;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs a.screen-name {
   color: #000;
@@ -1288,6 +1294,19 @@ ul.user-category-distribution li .bargraph .value {
   overflow-y: scroll;
   top: 15%;
   z-index: 125;
+}
+.sdetail-loading-content {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  margin-left: -45px;
+  display: none;
+  width: 90px;
+  height: 90px;
+  background: url(/assets/img/sdetail-loading.gif) no-repeat;
+}
+.sdetail-loading .sdetail-loading-content {
+  display: block;
 }
 body.sdetail_popup_animation .post-header,
 body.sdetail_popup .post-header {
