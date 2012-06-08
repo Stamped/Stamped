@@ -89,11 +89,10 @@
 
 #pragma mark - Sign up
 
-- (void)signup {
+- (STAccountParameters*)accountParams {
     
     STAccountParameters *parameters = [[STAccountParameters alloc] init];
     
-    NSString *password = nil;
     NSInteger index = 0;
     for (NSString *key in _dataSource) {
         STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
@@ -108,7 +107,6 @@
                 parameters.screenName = cell.textField.text;
                 break;
             case 3:
-                password = cell.textField.text;
                 break;
             case 4:
                 parameters.phone = cell.textField.text;
@@ -119,16 +117,22 @@
         index++;
     }
     
-    [self setLoading:YES];
+    return [parameters autorelease];
     
+}
+
+- (void)signup {
+    
+    STAccountParameters *parameters = [self accountParams];
+    STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:3 inSection:0]];
+    NSString *password = cell.textField.text;
+    [self setLoading:YES];
     
     if (!password) {
         password = @"";
     }
     
-    NSLog(@"%@", [parameters description]);
     [[STAuth sharedInstance] signupWithPassword:password parameters:parameters];
-    [parameters release];
     
 }
 
@@ -138,6 +142,7 @@
 - (void)signupFinished:(NSNotification*)notification {
     
     SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeEmail];
+    controller.userInfo = [self accountParams];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
 

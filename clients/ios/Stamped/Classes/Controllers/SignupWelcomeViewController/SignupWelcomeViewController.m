@@ -22,7 +22,6 @@
 #import "STS3Uploader.h"
 
 @interface SignupWelcomeViewController ()
-@property(nonatomic,retain) NSDictionary *userInfo;
 @property(nonatomic,readonly) SignupWelcomeType signupType;
 @property(nonatomic,retain) STS3Uploader *avatarUploader;
 @property(nonatomic,retain) NSString *avatarTempPath;
@@ -104,7 +103,16 @@
 
         } else if (_signupType == SignupWelcomeTypeEmail) {
             
-            
+            if (self.userInfo) {
+                
+                if (self.userInfo.name) {
+                    header.titleLabel.text = self.userInfo.name;
+                }
+                if (self.userInfo.screenName) {
+                    header.detailLabel.text = [NSString stringWithFormat:@"@%@", self.userInfo.screenName];
+                }
+
+            }
             
         }
         [header release];
@@ -512,7 +520,6 @@
         }
      
         [self.avatarUploader cancel];
-        SignupCameraTableCell *cell = (SignupCameraTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
         NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 		path = [[path stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"UploadTemp"];
         [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
@@ -522,12 +529,15 @@
         self.avatarUploader.filePath = path;
         [self.avatarUploader startWithProgress:^(float progress) {
             
+            NSLog(@"%f", progress);
+            SignupCameraTableCell *cell = (SignupCameraTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
             if (cell) {
                 [cell setProgress:progress];
             }
             
         } completion:^(NSString *path, BOOL finished) {
            
+            SignupCameraTableCell *cell = (SignupCameraTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
             if (cell) {
                 [cell setProgress:0.0f];
             }
