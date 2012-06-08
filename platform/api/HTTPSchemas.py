@@ -2593,12 +2593,21 @@ class HTTPGuideRequest(Schema):
                 return subsection
             raise StampedInputError("Invalid subsection: %s" % subsection)
 
+        def checkScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            if scope in set(['me', 'inbox', 'everyone']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
+
         cls.addProperty('limit',                            int)
         cls.addProperty('offset',                           int)
         cls.addProperty('section',                          basestring, required=True, cast=checkSection)
         cls.addProperty('subsection',                       basestring, cast=checkSubsection)
         cls.addProperty('viewport',                         basestring) # lat0,lng0,lat1,lng1
-        cls.addProperty('scope',                            basestring)
+        cls.addProperty('scope',                            basestring, required=True, cast=checkScope)
 
     def exportGuideRequest(self):
         data = self.dataExport()

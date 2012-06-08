@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse
+    import os, logs, re, time, urlparse, math
     
     import Blacklist
     import libs.ec2_utils
@@ -1821,7 +1821,8 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             stampIds[stamp.stamp_id] = stamp
 
-        stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
+        stats = self.getStampStats(stampIds.keys())
+        # stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
 
         logs.debug('Time for getStatsForStamps: %s' % (time.time() - t1))
         t1 = time.time()
@@ -1860,7 +1861,7 @@ class StampedAPI(AStampedAPI):
         underlyingStampIds      = {}
         allUnderlyingStampIds   = set()
 
-        for stat in stats:
+        for stat in stats.values():
             if stat.preview_credits is not None:
                 for credit in stat.preview_credits[:previewLength]:
                     allUnderlyingStampIds.add(credit)
@@ -1882,7 +1883,7 @@ class StampedAPI(AStampedAPI):
         allCommentIds   = set()
         commentIds      = {}
 
-        for stat in stats:
+        for stat in stats.values():
             # Comments
             if stat.preview_comments is not None:
                 for commentId in stat.preview_comments[:previewLength]:
@@ -1921,7 +1922,7 @@ class StampedAPI(AStampedAPI):
         for k, v in commentIds.items():
             allUserIds.add(v.user.user_id)
 
-        for stat in stats:
+        for stat in stats.values():
             # Likes
             if stat.preview_likes is not None:
                 for like in stat.preview_likes[:previewLength]:
@@ -1982,10 +1983,9 @@ class StampedAPI(AStampedAPI):
 
                 # Previews
                 previews = Previews()
-                for stat in stats:
-                    if str(stat.stamp_id) == str(stamp.stamp_id):
-                        break
-                else:
+                try:
+                    stat = stats[stamp.stamp_id]
+                except KeyError:
                     stat = None
 
                 if stat is not None:
@@ -2681,12 +2681,33 @@ class StampedAPI(AStampedAPI):
 
         return stamp
 
+    def getStampStats(self, stampIds):
+        if isinstance(stampIds, basestring):
+            # One stampId
+            try:
+                stat = self._stampStatsDB.getStampStats(stampIds)
+            except (StampedUnavailableError, KeyError):
+                stat = self.updateStampStatsAsync(stampIds)
+            return stat
+
+        else:
+            # Multiple stampIds
+            statsList = self._stampStatsDB.getStatsForStamps(stampIds)
+            statsDict = {}
+            for stat in statsList:
+                statsDict[stat.stamp_id] = stat 
+            for stampId in stampIds:
+                if stampId not in statsDict:
+                    statsDict[stampId] = self.updateStampStatsAsync(stampId)
+            return statsDict
+
     def updateStampStatsAsync(self, stampId):
         stats                   = StampStats()
         stats.stamp_id          = stampId
 
         MAX_PREVIEW             = 10
         stamp                   = self._stampDB.getStamp(stampId)
+        stats.last_stamped      = stamp.timestamp.stamped
 
         likes                   = self._stampDB.getStampLikes(stampId)
         stats.num_likes         = len(likes)
@@ -2706,6 +2727,20 @@ class StampedAPI(AStampedAPI):
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
         stats.preview_comments  = map(lambda x: x.comment_id, comments[:MAX_PREVIEW])
+
+        entity                  = self._entityDB.getEntity(stamp.entity.entity_id)
+        stats.entity_id         = entity.entity_id
+        stats.kind              = entity.kind
+        stats.types             = entity.types
+
+        if entity.kind == 'place':
+            stats.lat           = entity.coordinates.lat
+            stats.lng           = entity.coordinates.lng
+
+        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
+        # days = (datetime.utcnow() - stamp.timestamp.stamped).days
+        # score = score - math.floor(days / 10.0)
+        stats.score = int(score)
 
         self._stampStatsDB.saveStampStats(stats)
 
@@ -3422,11 +3457,32 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
+        assert(authUserId is not None) 
 
-        # Hack to return kevin's guide for popular (until we build formula for popular)
-        if guideRequest.scope != 'inbox':
-            user = self._userDB.getUserByScreenName('kevin')
-            authUserId = user.user_id
+        if guideRequest.scope == 'me':
+            try:
+                # Hack to return kevin's guide for popular (until we build formula for popular)
+                user = self._userDB.getUserByScreenName('kevin')
+                guide = self._guideDB.getGuide(user.user_id)
+            except (StampedUnavailableError, KeyError):
+                # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
+                guide = self._buildGuide(authUserId)
+
+        elif guideRequest.scope == 'inbox':
+            try:
+                guide = self._guideDB.getGuide(authUserId)
+            except (StampedUnavailableError, KeyError):
+                # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
+                guide = self._buildGuide(authUserId)
+
+        elif guideRequest.scope == 'everyone':
+            try:
+                # Hack to return kevin's guide for popular (until we build formula for popular)
+                user = self._userDB.getUserByScreenName('kevin')
+                guide = self._guideDB.getGuide(user.user_id)
+            except (StampedUnavailableError, KeyError):
+                # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
+                guide = self._buildGuide(authUserId)
 
         try:
             guide = self._guideDB.getGuide(authUserId)
@@ -3543,9 +3599,6 @@ class StampedAPI(AStampedAPI):
 
         return result
 
-        # Build guide
-        return None
-
     @API_CALL
     def searchGuide(self, guideSearchRequest, authUserId):
         if guideSearchRequest.scope == 'inbox' and authUserId is not None:
@@ -3610,7 +3663,6 @@ class StampedAPI(AStampedAPI):
             else:
                 entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
 
-
         # Results
         result = []
         seenEntities = set()
@@ -3626,19 +3678,6 @@ class StampedAPI(AStampedAPI):
             result.append(entity)
 
         return result
-
-        #_searchStampCollection
-        """
-        @API_CALL
-        def searchStampCollection(self, searchSlice, authUserId=None):
-            t0 = time.time()
-            stampIds    = self._getScopeStampIds(searchSlice.scope, searchSlice.user_id, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
-
-            return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-        """
-        pass
-
 
     @API_CALL
     def buildGuide(self, authUserId):
@@ -4744,7 +4783,7 @@ class StampedAPI(AStampedAPI):
             artistsModified = False
 
             if entity.artists is None:
-                return albumsModified
+                return artistsModified
 
             for stub in entity.artists:
                 artistId = stub.entity_id
