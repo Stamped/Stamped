@@ -15,4 +15,6 @@
 @property (nonatomic, readwrite, copy) NSString* blurb;
 @property (nonatomic, readwrite, copy) NSString* credit;
 
+- (void)addCreditWithScreenName:(NSString*)screenName;
+
 @end

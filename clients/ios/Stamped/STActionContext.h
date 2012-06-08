@@ -17,6 +17,7 @@
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 @property (nonatomic, readwrite, assign) CGRect frame;
 @property (nonatomic, readwrite, retain) id<STUser> user;
+@property (nonatomic, readwrite, retain) NSArray* creditedScreenNames;
 @property (nonatomic, readwrite, copy) void(^completionBlock)(id,NSError*);
 
 + (STActionContext*)context;
