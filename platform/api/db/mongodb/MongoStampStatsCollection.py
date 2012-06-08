@@ -21,6 +21,13 @@ class MongoStampStatsCollection(AMongoCollection):
     def __init__(self):
         AMongoCollection.__init__(self, collection='stampstats', primary_key='stamp_id', obj=StampStats)
     
+        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('last_stamped', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
+                                        ('lng', pymongo.ASCENDING) ])
+
     ### PUBLIC
     
     def addStampStats(self, stats):
@@ -52,17 +59,55 @@ class MongoStampStatsCollection(AMongoCollection):
         documentIds = map(self._getObjectIdFromString, stampIds)
         return self._removeMongoDocuments(documentIds)
 
-    # def updateNumStamps(self, entityId, numStamps):
-    #     self._collection.update(
-    #         { '_id' : self._getObjectIdFromString(entityId) }, 
-    #         { '$set' : { 'num_stamps' : numStamps } }
-    #     )
-    #     return True
+    def findPopularStamps(self, **kwargs):
+        kinds = kwargs.pop('kinds', None)
+        types = kwargs.pop('types', None)
+        viewport = kwargs.pop('viewport', None)
+        since = kwargs.pop('since', None)
+        limit = kwargs.pop('limit', 50)
 
-    # def setPopular(self, entityId, userIds):
-    #     self._collection.update(
-    #         { '_id' : self._getObjectIdFromString(entityId) }, 
-    #         { '$set' : { 'popular_users' : userIds } }
-    #     )
-    #     return True
+        query = {}
+
+        if kinds is not None:
+            query['kinds'] = {'$in': list(kinds)}
+
+        if types is not None:
+            query['types'] = {'$in': list(types)}
+
+        if viewport is not None:
+            pass
+            query["lat"] = {
+                "$gte" : viewport.lowerRight.lat, 
+                "$lte" : viewport.upperLeft.lat, 
+            }
+            
+            if viewport.upperLeft.lng <= viewport.lowerRight.lng:
+                query["lng"] = { 
+                    "$gte" : viewport.upperLeft.lng, 
+                    "$lte" : viewport.lowerRight.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                query["$or"] = [{
+                        "lng" : {
+                            "$gte" : viewport.upperLeft.lng, 
+                        }, 
+                    }, 
+                    {
+                        "lng" : {
+                            "$lte" : viewport.lowerRight.lng, 
+                        }, 
+                    }, 
+                ]
+
+        if since is not None:
+            query['last_stamped'] = {'$gte': since}
+
+        results = self._collection.find(query) \
+                      .sort([('score', pymongo.DESCENDING)]) \
+                      .limit(limit)
+
+        return map(self._convertFromMongo, results)
+
+
 
