@@ -2416,17 +2416,11 @@ class HTTPActivitySlice(Schema):
     def setSchema(cls):
         # Paging
         cls.addProperty('distance',             int)
-        cls.addProperty('before',               int)
         cls.addProperty('limit',                int)
         cls.addProperty('offset',               int)
 
     def exportActivitySlice(self):
-        slice = ActivitySlice().dataImport(self.dataExport(), overflow=True)
-
-        if self.before is not None:
-            slice.before = datetime.utcfromtimestamp(self.before)
-
-        return slice
+        return ActivitySlice().dataImport(self.dataExport(), overflow=True)
 
 class HTTPGenericSlice(Schema):
     @classmethod
