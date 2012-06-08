@@ -95,6 +95,9 @@ class StampedAPI(AStampedAPI):
         self.lite_mode = kwargs.pop('lite_mode', False)
         self._cache    = libs.Memcache.StampedMemcache()
 
+        self.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
         # Enable / Disable Functionality
         self._activity = True
         self._rollback = []
@@ -337,6 +340,8 @@ class StampedAPI(AStampedAPI):
         #  and require uniqueness
         if account.email is None:
             account.email = 'fb_%s' % user['id']
+        elif not utils.validate_email(account.email):
+            raise StampedInputError("Invalid format for email address")
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
@@ -349,6 +354,8 @@ class StampedAPI(AStampedAPI):
 
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
+
+
 
         return self.addAccount(account, tempImageUrl=tempImageUrl)
 
@@ -367,6 +374,8 @@ class StampedAPI(AStampedAPI):
         #  and require uniqueness
         if account.email is None:
             account.email = 'tw_%s' % user['id']
+        elif not utils.validate_email(account.email):
+            raise StampedInputError("Invalid format for email address")
 
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
@@ -2345,7 +2354,7 @@ class StampedAPI(AStampedAPI):
                     size            = ImageSizeSchema()
                     size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
-                    size.height     = v[1]
+                    size.height     = v[1] if v[1] is not None else v[0]
                     sizes.append(size)
                 image.sizes = sizes
                 images += (image,)
@@ -3692,7 +3701,7 @@ class StampedAPI(AStampedAPI):
         if stamp is None and rawTodo.complete and rawTodo.stamp_id is None and authUserId:
             stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
             if stamp is not None:
-                todo.stamp_id = stamp.stamp_id
+                rawTodo.stamp_id = stamp.stamp_id
 
         previews = None
         if friendIds is not None:
@@ -4046,35 +4055,25 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) > 0:
             self._userDB.updateUserStats(recipientIds, 'num_unread_news', increment=1)
 
-    @API_CALL
-    def getActivity(self, authUserId, **kwargs):
-        quality = kwargs.pop('quality', 3)
+    def _createActivityCacheKey(self, authUserId, distance, offset):
+        return str("ActivityCacheKey::%s::%s::%s" % (authUserId, distance, offset))
 
-        # Set quality
-        if quality == 1:
-            stampCap    = 50
-            commentCap  = 20
-        elif quality == 2:
-            stampCap    = 30
-            commentCap  = 10
-        else:
-            stampCap    = 20
-            commentCap  = 4
-
-        kwargs['sort'] = 'created'
-
-        # Limit slice of data returned
-        params = self._setSliceParams(kwargs, stampCap)
-
-        distance = kwargs.pop('distance', 0)
+    def _getActivityFromDB(self, authUserId, distance, before, limit):
+        final = False
         if distance > 0:
             personal = False
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
+            params = {}
             params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
+            if before is not None:
+                params['before'] = before
+            params['limit'] = limit
 
             # Get activities where friends are a subject member
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
+            if len(dirtyActivityData) < limit:
+                final = True
             activityItemIds = [item.activity_id for item in dirtyActivityData]
             # Find activity items for friends that also appear in personal feed
             personalActivityIds = self._activityDB.getActivityIdsForUser(authUserId, **params)
@@ -4100,6 +4099,107 @@ class StampedAPI(AStampedAPI):
         else:
             personal = True
             activityData = self._activityDB.getActivity(authUserId, **params)
+            if len(activityData) < limit:
+                final = True
+
+        return activityData, final
+
+    def _pruneActivityItems(self, activityItems):
+        prunedItems = []
+        for item in activityItems:
+#            if item.verb == 'follow':
+#                continue
+            prunedItems.append(item)
+        return prunedItems
+
+    def _updateActivityCache(self, authUserId, distance, offset):
+
+        prevBlockOffset = offset - self.ACTIVITY_CACHE_BLOCK_SIZE
+        if prevBlockOffset < 0:
+            prevBlockOffset = None
+
+        # get the modified time of the last item of the previous activity cache block.  We use it for the slice
+        before = None
+        logs.info('### prevBlockOffset %s' % prevBlockOffset)
+        if prevBlockOffset is not None:
+            prevBlockKey = self._createActivityCacheKey(authUserId, distance, prevBlockOffset)
+            logs.info('### type(prevBlockKey): %s   prevBlockKey: %s' % (type(prevBlockKey),prevBlockKey))
+            try:
+                prevBlock = self._cache[prevBlockKey]
+                logs.info('### SUCCESSFULLY LOADED PREVBLOCK')
+            except KeyError:
+                # recursively fill previous blocks if they have expired
+                logs.info('### LOADING PREVBLOCK')
+                prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
+            except Exception as e:
+                logs.info('### Hit generic exception: %s' % e)
+                logs.error('Error retrieving activity items from memcached.  Is memcached running?')
+                prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
+            if len(prevBlock) < self.ACTIVITY_CACHE_BLOCK_SIZE:
+                raise Exception("previous activity block was final")
+            assert(len(prevBlock) > 0)
+            lastItem = prevBlock[-1]
+            before = lastItem.timestamp.modified - timedelta(microseconds=1)
+
+        # Pull the data from the database and prune it.
+        limit = self.ACTIVITY_CACHE_BLOCK_SIZE + self.ACTIVITY_CACHE_BUFFER_SIZE
+        activityData = []
+        while len(activityData) < self.ACTIVITY_CACHE_BLOCK_SIZE:
+            newData, final = self._getActivityFromDB(authUserId, distance, before, limit)
+            newData = self._pruneActivityItems(newData)
+            activityData += newData
+            if final:
+                break
+            before = newData[-1].timestamp.modified - timedelta(microseconds=1)
+
+        key = self._createActivityCacheKey(authUserId, distance, offset)
+        activityData = activityData[:self.ACTIVITY_CACHE_BLOCK_SIZE]
+        try:
+            self._cache[key] = activityData
+        except Exception:
+            logs.error('Error storing activity items to memcached.  Is memcached running?')
+        return activityData
+
+    def _clearActivityCacheForUser(self, authUserId, distance):
+        curOffset = 0
+        key = self._createActivityCacheKey(authUserId, distance, curOffset)
+        while key in self._cache:
+            del(self._cache[key])
+            curOffset += self.ACTIVITY_CACHE_BLOCK_SIZE
+            key = self._createActivityCacheKey(authUserId, distance, curOffset)
+
+    def _getActivityFromCache(self, authUserId, distance, offset, limit):
+        """
+        Pull the requested activity data from cache, if exists in cache, otherwise pull the data from db
+        """
+        if offset == 0:
+            self._clearActivityCacheForUser(authUserId, distance)
+
+        activity = []
+        while len(activity) < limit:
+            curOffset = ((offset + len(activity)) // self.ACTIVITY_CACHE_BLOCK_SIZE) * self.ACTIVITY_CACHE_BLOCK_SIZE
+            key = self._createActivityCacheKey(authUserId, distance, curOffset)
+            try:
+                newActivity = self._cache[key]
+            except KeyError:
+                newActivity = self._updateActivityCache(authUserId, distance, curOffset)
+            except Exception:
+                logs.error('Error retrieving activity from memcached.  Is memcached running?')
+                newActivity = self._updateActivityCache(authUserId, distance, curOffset)
+            start = (offset+len(activity)) % self.ACTIVITY_CACHE_BLOCK_SIZE
+            activity += newActivity[start:start+limit]
+            if len(newActivity) < self.ACTIVITY_CACHE_BLOCK_SIZE:
+                break
+
+        return activity[:limit]
+
+
+    @API_CALL
+    def getActivity(self, authUserId, actSlice):
+        logs.info('#### self.ACTIVITY_CACHE_BLOCK_SIZE: %s' % self.ACTIVITY_CACHE_BLOCK_SIZE)
+        logs.info('#### self.ACTIVITY_CACHE_BUFFER_SIZE: %s' % self.ACTIVITY_CACHE_BUFFER_SIZE)
+
+        activityData = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
 
         # Append user objects
         userIds     = {}
@@ -4127,6 +4227,8 @@ class StampedAPI(AStampedAPI):
                 if item.objects.comment_ids is not None:
                     for commentId in item.objects.comment_ids:
                         commentIds[str(commentId)] = None
+
+        personal = actSlice.distance == 0
 
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
@@ -4159,12 +4261,11 @@ class StampedAPI(AStampedAPI):
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
 
+        ### TEMP CODE FOR LOCAL COPY THAT DOESN"T ENRICH PROPERLY
+        return activityData
         activity = []
         for item in activityData:
             try:
-                if item.verb in ['invite_received', 'invite_sent']:
-                    continue
-
                 activity.append(item.enrich(authUserId  = authUserId,
                                             users       = userIds,
                                             stamps      = stampIds,
@@ -4180,7 +4281,7 @@ class StampedAPI(AStampedAPI):
 
 
         # Reset activity count
-        if personal:
+        if personal == 0:
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)

@@ -2361,7 +2361,22 @@ class HTTPCommentSlice(Schema):
 
         return slc
 
+class HTTPActivitySlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('distance',             int)
+        cls.addProperty('before',               int)
+        cls.addProperty('limit',                int)
+        cls.addProperty('offset',               int)
 
+    def exportActivitySlice(self):
+        slice = ActivitySlice().dataImport(self.dataExport(), overflow=True)
+
+        if self.before is not None:
+            slice.before = datetime.utcfromtimestamp(self.before)
+
+        return slice
 
 class HTTPGenericSlice(Schema):
     @classmethod
@@ -2882,8 +2897,6 @@ class HTTPTodo(Schema):
         cls.addProperty('todo_id',              basestring, required=True)
         cls.addProperty('user_id',              basestring, required=True)
         cls.addNestedProperty('source',         HTTPTodoSource, required=True)
-        #cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        #cls.addNestedProperty('stamp',          HTTPStamp)
         cls.addProperty('stamp_id',             basestring) # set if the user has stamped this todo item
         cls.addNestedProperty('previews',       HTTPPreviews)
         cls.addProperty('created',              basestring)
@@ -3387,11 +3400,6 @@ class HTTPActivity(Schema):
             raise Exception("Uncrecognized verb: %s" % self.verb)
 
         return self
-
-class HTTPActivitySlice(HTTPGenericSlice):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('distance',             int)
 
 class HTTPLinkedURL(Schema):
     @classmethod
