@@ -227,6 +227,7 @@
                         font-size: 3em;
                         letter-spacing: .05em;
                         margin: 0 0 -.2em;
+                        text-shadow: 2px 2px #d2d2d2;
                     }
                     
                     p {
@@ -443,6 +444,12 @@ body.other {
         .item:first-child {
             position: relative;
         }
+    }
+}
+
+body.music, body.book, body.film, body.other {
+    .stamp-gallery-view-map {
+        display: none;
     }
 }
 
@@ -697,7 +704,8 @@ a.lightbox {
     
     .preview-image {
         position: relative;
-        display: none;
+        display:  none;
+        
         .sized(@preview-width);
     }
     
@@ -722,6 +730,7 @@ a.lightbox {
     }
     
     .stamp-icon {
+        .sized(@preview-width);
         z-index: 22;
     }
     
@@ -730,19 +739,34 @@ a.lightbox {
         .rounded(4px);
     }
     
-    .stamp-category-book  .icon, 
-    .stamp-category-film  .icon, 
-    .stamp-category-food  .icon, 
-    .stamp-category-music .icon, 
-    .stamp-category-other .icon {
-        .sized(@preview-width);
+    .stamp-category-music .stamp-subcategory-artist .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/artist.png) no-repeat;
         height: 140px;
-        margin: 0 4px;
-        
-        /* TEMP */
-        text-align: center;
-        color: red;
-        font-weight: bold;
+    }
+    
+    .stamp-category-music .stamp-subcategory-album .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/album.png) no-repeat;
+        height: 132px;
+    }
+    
+    .stamp-category-music .stamp-subcategory-song .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/song.png) no-repeat;
+        height: 118px;
+    }
+    
+    .stamp-category-film .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/film.png) no-repeat;
+        height: 209px;
+    }
+    
+    .stamp-category-book .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/book.png) no-repeat;
+        height: 208px;
+    }
+    
+    .stamp-category-other .stamp-subcategory-app .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/book.png) no-repeat;
+        height: 212px;
     }
 }
 

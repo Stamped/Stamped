@@ -262,6 +262,7 @@ footer,
   font-size: 3em;
   letter-spacing: .05em;
   margin: 0 0 -0.2em;
+  text-shadow: 2px 2px #d2d2d2;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp p {
   margin: 0 0 .5em;
@@ -453,6 +454,12 @@ body.other .stamp-count-other {
 }
 .stamp-gallery-header .expanded .item:first-child {
   position: relative;
+}
+body.music .stamp-gallery-view-map,
+body.book .stamp-gallery-view-map,
+body.film .stamp-gallery-view-map,
+body.other .stamp-gallery-view-map {
+  display: none;
 }
 /* **************************************************************************
                               CORE STAMP GALLERY
@@ -699,6 +706,11 @@ a.lightbox .zoom {
 }
 .stamp-preview .stamp-icon,
 .stamp-preview-raw .stamp-icon {
+  display: block;
+  background-size: 100% 100%;
+  max-width: 140px;
+  width: 140px;
+  height: auto;
   z-index: 22;
 }
 .stamp-preview img,
@@ -715,28 +727,35 @@ a.lightbox .zoom {
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-.stamp-preview .stamp-category-book .icon,
-.stamp-preview-raw .stamp-category-book .icon,
-.stamp-preview .stamp-category-film .icon,
-.stamp-preview-raw .stamp-category-film .icon,
-.stamp-preview .stamp-category-food .icon,
-.stamp-preview-raw .stamp-category-food .icon,
-.stamp-preview .stamp-category-music .icon,
-.stamp-preview-raw .stamp-category-music .icon,
-.stamp-preview .stamp-category-other .icon,
-.stamp-preview-raw .stamp-category-other .icon {
-  display: block;
-  background-size: 100% 100%;
-  max-width: 140px;
-  width: 140px;
-  height: auto;
+.stamp-preview .stamp-category-music .stamp-subcategory-artist .stamp-icon,
+.stamp-preview-raw .stamp-category-music .stamp-subcategory-artist .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/artist.png) no-repeat;
   height: 140px;
-  margin: 0 4px;
-  /* TEMP */
-
-  text-align: center;
-  color: red;
-  font-weight: bold;
+}
+.stamp-preview .stamp-category-music .stamp-subcategory-album .stamp-icon,
+.stamp-preview-raw .stamp-category-music .stamp-subcategory-album .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/album.png) no-repeat;
+  height: 132px;
+}
+.stamp-preview .stamp-category-music .stamp-subcategory-song .stamp-icon,
+.stamp-preview-raw .stamp-category-music .stamp-subcategory-song .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/song.png) no-repeat;
+  height: 118px;
+}
+.stamp-preview .stamp-category-film .stamp-icon,
+.stamp-preview-raw .stamp-category-film .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/film.png) no-repeat;
+  height: 209px;
+}
+.stamp-preview .stamp-category-book .stamp-icon,
+.stamp-preview-raw .stamp-category-book .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/book.png) no-repeat;
+  height: 208px;
+}
+.stamp-preview .stamp-category-other .stamp-subcategory-app .stamp-icon,
+.stamp-preview-raw .stamp-category-other .stamp-subcategory-app .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/book.png) no-repeat;
+  height: 212px;
 }
 .blurb,
 .normal_blurb {
