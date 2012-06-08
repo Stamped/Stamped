@@ -228,48 +228,44 @@ var g_update_stamps = null;
         };
         
         var last_layout = null;
+        var gallery_is_visible = false;
         
         // lazily relayout the stamp gallery using isotope
         // NOTE: we apply time-based coalescing here s.t. if this function is 
         // called several times, it will attempt to only update the layout once
         // to avoid doing extra, unnecessary work / rendering that could result 
         // in a choppier end-user experience.
-        var update_gallery_layout = function(force, callback) {
-            update_gallery(function() {
-                update_navbar_layout(false);
-                last_layout = new Date().getTime();
-                
+        var update_gallery_layout = function(is_visible, callback) {
+            is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
+            gallery_is_visible |= is_visible;
+            
+            var set_gallery_visible = function() {
                 var style = {
                     visibility : 'visible'
                 };
                 
                 $('#main-content').css(style);
                 $('#stamp-category-nav-bar').css(style);
+            };
+            
+            update_gallery(function() {
+                update_navbar_layout(false);
+                last_layout = new Date().getTime();
+                
+                if (gallery_is_visible) {
+                    set_gallery_visible();
+                }
                 
                 if (_.isFunction(callback)) {
                     callback();
                 }
             });
-            return;
-
-            force   = (typeof(force) === 'undefined' ? false : force);
-            var now = new Date().getTime();
             
-            if (force || last_layout === null || now - last_layout > 100) {
-                last_layout = now;
-                
-                update_gallery(function() {
-                    update_navbar_layout(false);
-                    last_layout = new Date().getTime();
-                    
-                    var style = {
-                        visibility : 'visible'
-                    };
-                    
-                    $('#main-content').css(style);
-                    $('#stamp-category-nav-bar').css(style);
-                });
+            if (gallery_is_visible && !!last_layout) {
+                set_gallery_visible();
             }
+            
+            return;
         };
         
         var get_fancybox_options = function(options) {
@@ -1397,7 +1393,6 @@ var g_update_stamps = null;
             
             if (!force_no_update) {
                 if (update || last_nav_pos !== pos) {
-                    
                     if (!gallery) {
                         var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
                         var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
@@ -1687,7 +1682,9 @@ var g_update_stamps = null;
             // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
                 if (typeof(close_sdetail_func) !== 'undefined' && !!close_sdetail_func) {
-                    close_sdetail_func();
+                    if ($('.fancybox-opened').length <= 0) {
+                        close_sdetail_func();
+                    }
                 }
                 
                 if (typeof(g_close_map_popup) !== 'undefined' && !!g_close_map_popup) {
@@ -1708,6 +1705,17 @@ var g_update_stamps = null;
         init_gallery();
         update_navbar_layout();
         
+        var __init = false;
+        var show_initial_gallery = function() {
+            if (!__init || $('#main-content').css('visibility') !== 'visible') {
+                __init = true;
+                
+                update_gallery_layout(true);
+                setTimeout(show_initial_gallery, 150);
+            }
+        };
+        
+        setTimeout(show_initial_gallery, 150);
         return;
         
         var userP = client.get_user_by_screen_name(screen_name);

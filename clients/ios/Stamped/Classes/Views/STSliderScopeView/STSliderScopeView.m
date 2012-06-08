@@ -248,7 +248,7 @@
             string = NSLocalizedString(@"you + friends", @"you + friends");
             break;
         case STStampedAPIScopeEveryone:
-            string = NSLocalizedString(@"everyone", @"everyone");
+            string = NSLocalizedString(@"tastemakers", @"tastemakers");
             break;
         default:
             break;

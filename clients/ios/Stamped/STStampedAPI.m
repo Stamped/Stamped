@@ -530,7 +530,7 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)untodoWithStampID:(NSString*)stampID 
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block {
-    NSString* path = @"/favorites/remove.json";
+    NSString* path = @"/todos/remove.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:entityID forKey:@"entity_id"];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
@@ -546,6 +546,24 @@ static STStampedAPI* _sharedInstance;
                                                                                   andCredit:nil];
                                                      }
                                                      block(error == nil, error, cancellation);
+                                                 }];
+}
+
+- (STCancellation*)setTodoCompleteWithEntityID:(NSString*)entityID 
+                                      complete:(BOOL)complete
+                                   andCallback:(void(^)(id<STTodo>,NSError*,STCancellation*))block {
+    NSString* path = @"/todos/complete.json";
+    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                            entityID, @"entity_id",
+                            [NSNumber numberWithBool:complete], @"complete",
+                            nil];
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:params
+                                                     mapping:[STSimpleTodo mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation);
                                                  }];
 }
 

@@ -61,12 +61,10 @@ class MongoActivityCollection(AActivityDB):
     def getActivity(self, userId, **kwargs):
         activityIds = self.getActivityIdsForUser(userId, **kwargs)
 
-        sort = {
-            'sort'      : 'timestamp.modified',
-            'sortOrder' : pymongo.DESCENDING,
-            }
+        kwargs['sort'] = 'timestamp.modified'
+        kwargs['sortOrder'] = pymongo.DESCENDING
 
-        activity    = self.activity_items_collection.getActivityItems(activityIds, **sort)
+        activity    = self.activity_items_collection.getActivityItems(activityIds, **kwargs)
         return activity
 
     def getActivityForUsers(self, userIds, **kwargs):

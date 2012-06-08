@@ -437,5 +437,37 @@
     
 }
 
+/*
+- (void)drawRect:(CGRect)rect {
+    CGContextRef ctx = UIGraphicsGetCurrentContext(); //get the graphics context
+    CGContextSetRGBStrokeColor(ctx, 1.0, 0, 0, 1); //there are two relevant color states, "Stroke" -- used in Stroke drawing functions and "Fill" - used in fill drawing functions
+    //now we build a "path"
+    CGFloat lineHeight = 20;
+    CGContextMoveToPoint(ctx, 0, lineHeight);
+    //add a line from 0,0 to the point 100,100
+    CGContextAddLineToPoint( ctx, 100, lineHeight);
+    //"stroke" the path
+    CGContextStrokePath(ctx);
+
+    // An attributed string containing the text to render
+    UIFont* font = [UIFont stampedFontWithSize:20];
+    NSAttributedString* attString = [Util attributedStringForString:@"This is a test 1 2 3 asklfadsk lfklja " 
+                                                               font:font
+                                                              color:[UIColor blueColor]
+                                                         lineHeight:lineHeight
+                                                             indent:0];
+    NSLog(@"Descender:%f",font.descender);
+    NSLog(@"End:%f", [Util endForString:attString withSize:CGSizeMake(100, CGFLOAT_MAX)] );
+    [Util drawAttributedString:attString atPoint:CGPointMake(0, floorf(-font.descender))];
+    NSAttributedString* attString2 = [Util attributedStringForString:@"This is a test 1 2 3 asklfadsklfklja akfdskldfasklfd" 
+                                                               font:[UIFont stampedFontWithSize:12]
+                                                              color:[UIColor blueColor]
+                                                         lineHeight:16 
+                                                             indent:5];
+    [Util drawAttributedString:attString2 atPoint:CGPointMake(0, 26)];
+    
+}
+*/
+
 @end
 

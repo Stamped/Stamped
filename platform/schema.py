@@ -89,9 +89,9 @@ class Schema(object):
                 def __castBool(x):
                     if x is None:
                         return None 
-                    if x in set([True, 'true', 'True', 1]):
+                    if x in set([True, 'true', 'True', 1, '1']):
                         return True 
-                    if x in set([False, 'false', 'False', 0]):
+                    if x in set([False, 'false', 'False', 0, '0']):
                         return False
                     raise Exception("Cannot cast %s as bool" % x)
                 kwargs['cast'] = __castBool
