@@ -2248,31 +2248,38 @@ class HTTPTimeSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('before',               int)
-        cls.addProperty('limit',                int)
-        cls.addProperty('offset',               int)
+        cls.addProperty('before',                           int)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
 
         # Filtering
-        cls.addProperty('category',             basestring)
-        cls.addProperty('subcategory',          basestring)
-        # cls.addProperty('properties',           basestring) # comma-separated list
-        cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
+        cls.addProperty('category',                         basestring)
+        cls.addProperty('subcategory',                      basestring)
+        cls.addProperty('viewport',                         basestring) # lat0,lng0,lat1,lng1
 
         # Scope
-        cls.addProperty('user_id',              basestring)
-        cls.addProperty('scope',                basestring) # me, inbox, friends, fof, popular
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular
 
     def exportTimeSlice(self):
         data                = self.dataExport()
         beforeData          = data.pop('before', None)
         viewportData        = data.pop('viewport', None)
-        propertiesData      = data.pop('properties', None)
+        categoryData        = data.pop('category', None)
+        subcategoryData     = data.pop('subcategory', None)
 
         slc                 = TimeSlice()
         slc.dataImport(data)
 
         if self.before is not None:
             slc.before          = datetime.utcfromtimestamp(int(self.before))
+
+        if self.subcategory is not None:
+            slc.kinds = list(mapSubcategoryToKinds(self.subcategory))
+            slc.types = list(mapSubcategoryToTypes(self.subcategory))
+        elif self.category is not None:
+            slc.kinds = list(mapCategoryToKinds(self.category))
+            slc.types = list(mapCategoryToTypes(self.category))
 
         if self.viewport is not None:
             viewportData        = self.viewport.split(',')
@@ -2290,9 +2297,6 @@ class HTTPTimeSlice(Schema):
             viewport.lowerRight = coordinates1
 
             slc.viewport        = viewport 
-
-        # if self.properties is not None:
-        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2305,7 +2309,6 @@ class HTTPSearchSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        # cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
@@ -2317,10 +2320,18 @@ class HTTPSearchSlice(Schema):
         data                = self.dataExport()
         beforeData          = data.pop('before', None)
         viewportData        = data.pop('viewport', None)
-        propertiesData      = data.pop('properties', None)
+        categoryData        = data.pop('category', None)
+        subcategoryData     = data.pop('subcategory', None)
 
         slc                 = SearchSlice()
         slc.dataImport(data)
+
+        if self.subcategory is not None:
+            slc.kinds = list(mapSubcategoryToKinds(self.subcategory))
+            slc.types = list(mapSubcategoryToTypes(self.subcategory))
+        elif self.category is not None:
+            slc.kinds = list(mapCategoryToKinds(self.category))
+            slc.types = list(mapCategoryToTypes(self.category))
 
         if self.viewport is not None:
             viewportData        = self.viewport.split(',')
@@ -2339,9 +2350,6 @@ class HTTPSearchSlice(Schema):
 
             slc.viewport        = viewport 
 
-        # if self.properties is not None:
-        #     slc.properties      = self.properties.split(',')
-
         return slc
 
 class HTTPRelevanceSlice(Schema):
@@ -2350,7 +2358,6 @@ class HTTPRelevanceSlice(Schema):
         # Filtering
         cls.addProperty('category',             basestring)
         cls.addProperty('subcategory',          basestring)
-        cls.addProperty('properties',           basestring) # comma-separated list
         cls.addProperty('viewport',             basestring) # lat0,lng0,lat1,lng1
 
         # Scope
@@ -2361,10 +2368,18 @@ class HTTPRelevanceSlice(Schema):
         data                = self.dataExport()
         beforeData          = data.pop('before', None)
         viewportData        = data.pop('viewport', None)
-        propertiesData      = data.pop('properties', None)
+        categoryData        = data.pop('category', None)
+        subcategoryData     = data.pop('subcategory', None)
 
         slc                 = RelevanceSlice()
         slc.dataImport(data)
+
+        if self.subcategory is not None:
+            slc.kinds = list(mapSubcategoryToKinds(self.subcategory))
+            slc.types = list(mapSubcategoryToTypes(self.subcategory))
+        elif self.category is not None:
+            slc.kinds = list(mapCategoryToKinds(self.category))
+            slc.types = list(mapCategoryToTypes(self.category))
 
         if self.viewport is not None:
             viewportData        = self.viewport.split(',')
@@ -2382,9 +2397,6 @@ class HTTPRelevanceSlice(Schema):
             viewport.lowerRight = coordinates1
 
             slc.viewport        = viewport 
-
-        # if self.properties is not None:
-        #     slc.properties      = self.properties.split(',')
 
         return slc
 
@@ -2585,8 +2597,6 @@ class HTTPGuideRequest(Schema):
         cls.addProperty('scope',                            basestring)
 
     def exportGuideRequest(self):
-        # return GuideRequest().dataImport(self.dataExport(), overflow=True)
-
         data = self.dataExport()
         if 'viewport' in data:
             del(data['viewport'])
@@ -2620,7 +2630,31 @@ class HTTPGuideSearchRequest(HTTPGuideRequest):
     def __init__(self):
         HTTPGuideRequest.__init__(self)
 
+    def exportGuideSearchRequest(self):
+        data = self.dataExport()
+        if 'viewport' in data:
+            del(data['viewport'])
+        guideSearchRequest = GuideSearchRequest()
+        guideSearchRequest.dataImport(data)
 
+        if self.viewport is not None:
+            viewportData            = self.viewport.split(',')
+            
+            coordinates0            = CoordinatesSchema()
+            coordinates0.lat        = viewportData[0]
+            coordinates0.lng        = viewportData[1]
+            
+            coordinates1            = CoordinatesSchema()
+            coordinates1.lat        = viewportData[2]
+            coordinates1.lng        = viewportData[3]
+
+            viewport                = ViewportSchema()
+            viewport.upperLeft      = coordinates0
+            viewport.lowerRight     = coordinates1
+
+            guideSearchRequest.viewport   = viewport 
+
+        return guideSearchRequest
 
 
 # ###### #
@@ -2630,41 +2664,41 @@ class HTTPGuideSearchRequest(HTTPGuideRequest):
 class HTTPStampContent(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('blurb',                        basestring)
-        cls.addNestedPropertyList('blurb_references',   HTTPTextReference)
-        cls.addProperty('blurb_formatted',              basestring)
-        cls.addNestedPropertyList('images',             HTTPImageSchema)
-        cls.addProperty('created',                      basestring)
-        cls.addProperty('modified',                     basestring)
+        cls.addProperty('blurb',                            basestring)
+        cls.addNestedPropertyList('blurb_references',       HTTPTextReference)
+        cls.addProperty('blurb_formatted',                  basestring)
+        cls.addNestedPropertyList('images',                 HTTPImageSchema)
+        cls.addProperty('created',                          basestring)
+        cls.addProperty('modified',                         basestring)
 
 class HTTPBadge(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',              basestring, required=True)
-        cls.addProperty('genre',                basestring, required=True)
+        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('genre',                            basestring, required=True)
 
 class HTTPStampMini(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',             basestring, required=True)
-        cls.addNestedProperty('entity',         HTTPEntityMini, required=True)
-        cls.addNestedProperty('user',           HTTPUserMini, required=True)
-        cls.addNestedPropertyList('contents',   HTTPStampContent)
-        cls.addNestedPropertyList('credit',     HTTPStampPreview)
-        cls.addNestedPropertyList('badges',     HTTPBadge)
-        cls.addProperty('via',                  basestring)
-        cls.addProperty('url',                  basestring)
-        cls.addProperty('created',              basestring)
-        cls.addProperty('modified',             basestring)
-        cls.addProperty('stamped',              basestring)
+        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addNestedProperty('entity',                     HTTPEntityMini, required=True)
+        cls.addNestedProperty('user',                       HTTPUserMini, required=True)
+        cls.addNestedPropertyList('contents',               HTTPStampContent)
+        cls.addNestedPropertyList('credit',                 HTTPStampPreview)
+        cls.addNestedPropertyList('badges',                 HTTPBadge)
+        cls.addProperty('via',                              basestring)
+        cls.addProperty('url',                              basestring)
+        cls.addProperty('created',                          basestring)
+        cls.addProperty('modified',                         basestring)
+        cls.addProperty('stamped',                          basestring)
         
-        cls.addProperty('num_comments',         int)
-        cls.addProperty('num_likes',            int)
-        cls.addProperty('num_todos',            int)
-        cls.addProperty('num_credits',          int)
+        cls.addProperty('num_comments',                     int)
+        cls.addProperty('num_likes',                        int)
+        cls.addProperty('num_todos',                        int)
+        cls.addProperty('num_credits',                      int)
 
-        cls.addProperty('is_liked',             bool)
-        cls.addProperty('is_todo',               bool)
+        cls.addProperty('is_liked',                         bool)
+        cls.addProperty('is_todo',                          bool)
 
     def __init__(self):
         Schema.__init__(self)
@@ -2846,14 +2880,14 @@ class HTTPStampNew(HTTPImageUpload):
         cls.addProperty('entity_id',            basestring)
         cls.addProperty('search_id',            basestring)
         cls.addProperty('blurb',                basestring)
-        cls.addProperty('credit',               basestring) #delimiter=','
+        cls.addProperty('credit',               basestring) # comma-separated screen names
 
 class HTTPStampEdit(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',             basestring, required=True)
         cls.addProperty('blurb',                basestring)
-        cls.addPropertyList('credit',           basestring) #delimiter=','
+        cls.addPropertyList('credit',           basestring) # comma-separated screen names
 
 class HTTPStampId(Schema):
     @classmethod

@@ -13,6 +13,8 @@
 #import "STDebug.h"
 #import "Util.h"
 #import <QuartzCore/QuartzCore.h>
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 typedef enum STTodoState {
 STTodoStateDone,
@@ -308,7 +310,18 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 #pragma mark - UIActionSheetDelegate
 
 - (void)_stampIt:(id<STTodo>)todo {
-    
+    NSMutableArray* credits = [NSMutableArray array];
+    if (todo.previews.credits.count) {
+        for (id<STStampPreview> credit in todo.previews.credits) {
+            NSString* screenName = credit.user.screenName;
+            if (screenName) {
+                [credits addObject:screenName];
+            }
+        }
+    }
+    STActionContext* context = [STActionContext context];
+    id<STAction> action = [STStampedActions actionViewCreateStamp:todo.source.entity.entityID creditScreenNames:credits withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
 - (void)_setComplete:(id<STTodo>)todo value:(BOOL)complete {
@@ -341,7 +354,8 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     else if (state == STTodoStateStamped) {
         //otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
         if (buttonIndex == 0) {
-            
+            NSString* stampID = todo.stampID;
+            [[STStampedActions sharedInstance] viewStampWithStampID:stampID];
         }
     }
     else {

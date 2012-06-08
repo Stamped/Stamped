@@ -20,4 +20,6 @@ typedef enum {
 
 - (id)initWithType:(SignupWelcomeType)type;
 
+@property(nonatomic,retain) STAccountParameters *userInfo;
+
 @end

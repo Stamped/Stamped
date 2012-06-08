@@ -3424,7 +3424,7 @@ class StampedAPI(AStampedAPI):
     def getGuide(self, guideRequest, authUserId):
 
         # Hack to return kevin's guide for popular (until we build formula for popular)
-        if guideRequest != 'inbox':
+        if guideRequest.scope != 'inbox':
             user = self._userDB.getUserByScreenName('kevin')
             authUserId = user.user_id
 
@@ -3448,7 +3448,6 @@ class StampedAPI(AStampedAPI):
             offset = guideRequest.offset
 
         entityIds = {}
-        stampIds = {}
         userIds = {}
         items = []
 
@@ -3548,8 +3547,96 @@ class StampedAPI(AStampedAPI):
         return None
 
     @API_CALL
-    def searchGuide(self, guideRequest, authUserId):
+    def searchGuide(self, guideSearchRequest, authUserId):
+        if guideSearchRequest.scope == 'inbox' and authUserId is not None:
+            stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
+        else:
+            # Hack to return kevin's guide for popular (until we build formula for popular)
+            user = self._userDB.getUserByScreenName('kevin')
+            stampIds = self._getScopeStampIds(scope='inbox', authUserId=user.user_id)
+
+        searchSlice             = SearchSlice()
+        searchSlice.limit       = 100
+        searchSlice.viewport    = guideSearchRequest.viewport
+        searchSlice.query       = guideSearchRequest.query
+
+        # Subsection conversion
+        if guideSearchRequest.subsection is not None:
+            searchSlice.types = [ guideSearchRequest.subsection ]
+        elif guideSearchRequest.section is not None:
+            if guideSearchRequest.section == 'food':
+                searchSlice.types = [ 'restaurant', 'bar', 'cafe', 'food' ]
+            else:
+                searchSlice.types = list(Entity.mapCategoryToTypes(guideSearchRequest.section))
+
+        stamps = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+        entityIds = {}
+        userIds = {}
+
+        for stamp in stamps:
+            userIds[stamp.user.user_id] = None 
+            if stamp.entity.entity_id in entityIds:
+                continue 
+            entityIds[stamp.entity.entity_id] = None 
+
+        # Entities
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            if entity.sources.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                ### TODO: Async process to replace reference
+            else:
+                entityIds[entity.entity_id] = entity
+
+        # Users
+        users = self._userDB.lookupUsers(list(userIds.keys()))
+
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Build previews
+        entityStampPreviews = {}
+        for stamp in stamps:
+            stampPreview = StampPreview()
+            stampPreview.user = userIds[stamp.user.user_id]
+            stampPreview.stamp_id = stamp.stamp_id
+
+            if stamp.entity.entity_id in entityStampPreviews:
+                entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
+            else:
+                entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+
+
+        # Results
+        result = []
+        seenEntities = set()
+        for stamp in stamps:
+            if stamp.entity.entity_id in seenEntities:
+                continue 
+            entity = entityIds[stamp.entity.entity_id]
+            seenEntities.add(stamp.entity.entity_id)
+
+            previews = Previews()
+            previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+            entity.previews = previews
+            result.append(entity)
+
+        return result
+
         #_searchStampCollection
+        """
+        @API_CALL
+        def searchStampCollection(self, searchSlice, authUserId=None):
+            t0 = time.time()
+            stampIds    = self._getScopeStampIds(searchSlice.scope, searchSlice.user_id, authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
+
+            return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+        """
         pass
 
 

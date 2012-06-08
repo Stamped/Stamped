@@ -16,6 +16,7 @@
 #import "STActionManager.h"
 #import "STUserViewController.h"
 #import "STPhotoViewController.h"
+#import "STCreateStampViewController.h"
 
 @interface STStampedActions ()
 
@@ -174,6 +175,13 @@ static STStampedActions* _sharedInstance;
           [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }
     }
+    else if ([action isEqualToString:@"stamped_view_create_stamp"] && source.sourceID != nil) {
+        handled = YES;
+        if (flag) {
+            STCreateStampViewController* controller = [[[STCreateStampViewController alloc] initWithEntityID:source.sourceID] autorelease];
+            [[Util sharedNavigationController] pushViewController:controller animated:YES];
+        }
+    }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
       handled = YES;
       if (flag) {
@@ -258,6 +266,13 @@ static STStampedActions* _sharedInstance;
 + (id<STAction>)actionViewImage:(NSString*)imageURL withOutputContext:(STActionContext*)context {
   return [STSimpleAction actionWithType:@"stamped_view_image" 
                               andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:imageURL]];
+}
+
++ (id<STAction>)actionViewCreateStamp:(NSString*)entityID creditScreenNames:(NSArray*)screenNames withOutputContext:(STActionContext*)context {
+    context.creditedScreenNames = [screenNames copy];
+    return [STSimpleAction actionWithType:@"stamped_view_create_stamp" 
+                                andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:entityID]];
+    
 }
 
 @end

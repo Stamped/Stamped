@@ -122,6 +122,23 @@ def guide(request, authUserId, schema, **kwargs):
     return transformOutput(result)
 
 
+# Search Guide
+@handleHTTPRequest(http_schema=HTTPGuideSearchRequest, conversion=HTTPGuideSearchRequest.exportGuideSearchRequest)
+@require_http_methods(["GET"])
+def searchGuide(request, authUserId, schema, **kwargs):
+    entities = stampedAPI.searchGuide(schema, authUserId)
+    result = []
+
+    for entity in entities:
+        try:
+            result.append(HTTPEntity().importEntity(entity).dataExport())
+        except Exception:
+            raise
+            # logs.warning(utils.getFormattedException())
+
+    return transformOutput(result)
+
+
 
 
 

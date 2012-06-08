@@ -23,6 +23,7 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 #import "STMenuController.h"
+#import "STNavigationItem.h"
 #import "STBadgeBarButtonItem.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";

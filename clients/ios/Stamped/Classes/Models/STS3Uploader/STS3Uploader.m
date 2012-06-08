@@ -35,7 +35,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
     if (_uploading || !filePath) return;
     _uploading = YES;
     
-    NSString *key = [NSString stringWithFormat:@"%@-%.0f.jpg", [self.filePath MD5], [[NSDate date] timeIntervalSince1970]];
+    NSString *key = [NSString stringWithFormat:@"%@-%.0f.jpg", [[self.filePath dataUsingEncoding:NSUTF8StringEncoding] MD5], [[NSDate date] timeIntervalSince1970]];
     NSString *tempPath = [NSString stringWithFormat:@"http://s3.amazonaws.com/stamped.com.static.temp/%@", key];
     ASIS3ObjectRequest *request = [ASIS3ObjectRequest PUTRequestForFile:self.filePath withBucket:kS3Bucket key:key];
     request.secretAccessKey = kS3SecretAccessKey;
