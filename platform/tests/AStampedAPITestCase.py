@@ -350,13 +350,11 @@ class AStampedAPITestCase(AStampedTestCase):
             }
         return self.handleGET(path, data)
 
-    def showActivity(self, token, coordinates=None):
+    def showActivity(self, token):
         path = "activity/show.json"
         data = {
             'oauth_token'       : token['access_token'],
             }
-        if coordinates is not None:
-            data['coordinates'] = coordinates
         return self.handleGET(path, data)
 
     def showFriendsActivity(self, token):

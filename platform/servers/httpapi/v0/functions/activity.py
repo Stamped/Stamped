@@ -9,33 +9,27 @@ from httpapi.v0.helpers import *
 
 @handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
-def show(request, authUserId, data, **kwargs):
-    data['distance'] = 0
+def show(request, authUserId, http_schema, **kwargs):
+    actSlice = http_schema.exportActivitySlice()
+    actSlice.distance = 0
+    activity = stampedAPI.getActivity(authUserId, actSlice)
 
-    # Hack for python < 2.6.5 (doesn't support unicode as keyword args?!?)
-    newData = {}
-    for k, v in data.items():
-        newData[str(k)] = v
-
-    activity = stampedAPI.getActivity(authUserId, **newData)
-    
+    from pprint import pformat
+    logs.info('### activity: \n%s' % pformat(activity))
     result = []
     for item in activity:
-        result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+        enriched = HTTPActivity().importEnrichedActivity(item)
+        logs.info('### enriched:\n%s' % enriched)
+        result.append(enriched.dataExport())
     
     return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
-def friends(request, authUserId, data, **kwargs):
-    data['distance'] = 1
-
-    # Hack for python < 2.6.5 (doesn't support unicode as keyword args?!?)
-    newData = {}
-    for k, v in data.items():
-        newData[str(k)] = v
-
-    activity = stampedAPI.getActivity(authUserId, **newData)
+def friends(request, authUserId, http_schema, **kwargs):
+    actSlice = http_schema.exportActivitySlice()
+    actSlice.distance = 1
+    activity = stampedAPI.getActivity(authUserId, actSlice)
     
     result = []
     for item in activity:

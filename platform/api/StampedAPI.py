@@ -4084,15 +4084,17 @@ class StampedAPI(AStampedAPI):
 
     def _getActivityFromDB(self, authUserId, distance, before, limit):
         final = False
+
+        params = {}
+        params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
+        if before is not None:
+            params['before'] = before
+        params['limit'] = limit
+
         if distance > 0:
             personal = False
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
-            params = {}
-            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
-            if before is not None:
-                params['before'] = before
-            params['limit'] = limit
 
             # Get activities where friends are a subject member
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
@@ -4286,7 +4288,6 @@ class StampedAPI(AStampedAPI):
             commentIds[str(comment.comment_id)] = comment
 
         ### TEMP CODE FOR LOCAL COPY THAT DOESN"T ENRICH PROPERLY
-        return activityData
         activity = []
         for item in activityData:
             try:
