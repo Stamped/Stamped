@@ -3461,32 +3461,92 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
-        assert(authUserId is not None) 
-
         if guideRequest.scope == 'me':
-            try:
-                # Hack to return kevin's guide for popular (until we build formula for popular)
-                user = self._userDB.getUserByScreenName('kevin')
-                guide = self._guideDB.getGuide(user.user_id)
-            except (StampedUnavailableError, KeyError):
-                # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
-                guide = self._buildGuide(authUserId)
+            ### TODO: Put something here
+            return []
 
-        elif guideRequest.scope == 'inbox':
-            try:
-                guide = self._guideDB.getGuide(authUserId)
-            except (StampedUnavailableError, KeyError):
-                # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
-                guide = self._buildGuide(authUserId)
+        if guideRequest.scope == 'inbox':
+            return self.getUserGuide(guideRequest, authUserId)
 
-        elif guideRequest.scope == 'everyone':
-            try:
-                # Hack to return kevin's guide for popular (until we build formula for popular)
-                user = self._userDB.getUserByScreenName('kevin')
-                guide = self._guideDB.getGuide(user.user_id)
-            except (StampedUnavailableError, KeyError):
-                # Temporarily build the full guide synchronously. Can't do this in prod (obviously..)
-                guide = self._buildGuide(authUserId)
+        if guideRequest.scope == 'everyone':
+            types = None 
+
+            # Subsection conversion
+            if guideSearchRequest.subsection is not None:
+                types = [ guideSearchRequest.subsection ]
+            elif guideSearchRequest.section is not None:
+                if guideSearchRequest.section == 'food':
+                    types = [ 'restaurant', 'bar', 'cafe', 'food' ]
+                else:
+                    types = list(Entity.mapCategoryToTypes(guideSearchRequest.section))
+
+            since = datetime.utcnow() - timedelta(days=90)
+
+            stampIds = self._stampStatsDB.getPopularStampIds(types=types, viewport=guideRequest.viewport, since=since)
+
+            stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+            stamps.sort(key=lambda x: stampIds.index(x.stamp_id))
+
+            entityIds = {}
+            userIds = {}
+
+            for stamp in stamps:
+                userIds[stamp.user.user_id] = None 
+                if stamp.entity.entity_id in entityIds:
+                    continue 
+                entityIds[stamp.entity.entity_id] = None 
+
+            # Entities
+            entities = self._entityDB.getEntities(entityIds.keys())
+
+            for entity in entities:
+                if entity.sources.tombstone_id is not None:
+                    # Convert to newer entity
+                    replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                    entityIds[entity.entity_id] = replacement
+                    ### TODO: Async process to replace reference
+                else:
+                    entityIds[entity.entity_id] = entity
+
+            # Users
+            users = self._userDB.lookupUsers(list(userIds.keys()))
+
+            for user in users:
+                userIds[user.user_id] = user.minimize()
+
+            # Build previews
+            entityStampPreviews = {}
+            for stamp in stamps:
+                stampPreview = StampPreview()
+                stampPreview.user = userIds[stamp.user.user_id]
+                stampPreview.stamp_id = stamp.stamp_id
+
+                if stamp.entity.entity_id in entityStampPreviews:
+                    entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
+                else:
+                    entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+
+            # Results
+            result = []
+            seenEntities = set()
+            for stamp in stamps:
+                if stamp.entity.entity_id in seenEntities:
+                    continue 
+                entity = entityIds[stamp.entity.entity_id]
+                seenEntities.add(stamp.entity.entity_id)
+
+                previews = Previews()
+                previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+                entity.previews = previews
+                result.append(entity)
+
+            return result
+
+
+
+    @API_CALL
+    def getUserGuide(self, guideRequest, authUserId):
+        assert(authUserId is not None) 
 
         try:
             guide = self._guideDB.getGuide(authUserId)
