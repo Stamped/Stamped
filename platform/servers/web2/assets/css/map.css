@@ -156,8 +156,6 @@ footer {
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .entity-header {
   float: left;
-  position: relative;
-  top: -2px;
   margin-left: 0;
   max-width: 228px;
   width: 228px;
