@@ -937,6 +937,10 @@ class HTTPStampPreview(Schema):
         cls.addProperty('stamp_id',                         basestring)
         cls.addNestedProperty('user',                       HTTPUserMini)
 
+    def importStamp(self, stamp):
+        return self.importStampPreview(stamp)
+
+
     def importStampPreview(self, stampPreview):
         self.stamp_id = stampPreview.stamp_id
         self.user = HTTPUserMini().importUserMini(stampPreview.user)
@@ -2987,9 +2991,11 @@ class HTTPTodo(Schema):
         self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
         if todo.stamp is not None:
             self.source.stamp_ids   = [ todo.stamp.stamp_id ]
+        self.previews               = HTTPPreviews()
         if todo.previews is not None and todo.previews.todos is not None:
-            self.previews           = HTTPPreviews()
             self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
+        if todo.source_stamps is not None:
+            self.previews.stamps    = [HTTPStampPreview().importStamp(s) for s in todo.source_stamps]
         self.created                = todo.timestamp.created
         self.complete               = todo.complete
 
