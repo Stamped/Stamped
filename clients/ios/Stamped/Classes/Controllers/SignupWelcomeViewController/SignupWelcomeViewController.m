@@ -17,6 +17,8 @@
 #import "STAvatarView.h"
 #import "FindFriendsViewController.h"
 #import "SignupCameraTableCell.h"
+#import "STAccountParameters.h"
+#import "LoginLoadingView.h"
 
 @interface SignupWelcomeViewController ()
 @end
@@ -30,6 +32,8 @@
         self.title = NSLocalizedString(@"Welcome", @"Welcome");
         _signupType = type;
         [STEvents addObserver:self selector:@selector(signupFinished:) event:EventTypeSignupFinished];
+        [STEvents addObserver:self selector:@selector(signupFailed:) event:EventTypeSignupFailed];
+        self.navigationItem.hidesBackButton = YES;
     }
     return self;
 }
@@ -45,7 +49,6 @@
     self.tableView.showsVerticalScrollIndicator = NO;
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
-    self.navigationItem.hidesBackButton = YES;
     
     if (!self.tableView.tableHeaderView) {
         
@@ -58,6 +61,7 @@
         UIColor *color2 =  [UIColor colorWithRed:0.0f green:0.3411f blue:0.819f alpha:1.000];
         NSArray *colors = [[NSArray alloc] initWithObjects:color1, color2, nil];
         [header.stampView setupWithColors:colors];
+        [colors release];
         
         if (_signupType == SignupWelcomeTypeTwitter) {
             
@@ -134,6 +138,56 @@
 }
 
 
+#pragma mark - Setters
+
+- (void)setLoading:(BOOL)loading {
+    
+    if (loading) {
+        
+        if (!_loadingView) {
+            
+            STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.view.bounds];
+            background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+                drawGradient([UIColor colorWithRed:0.961f green:0.961f blue:0.957f alpha:1.0f].CGColor, [UIColor colorWithRed:0.898f green:0.898f blue:0.898f alpha:1.0f].CGColor, ctx);
+            }];
+            [self.view addSubview:background];
+            _loadingView = background;
+            [background release];
+            _loadingView.layer.zPosition = 100;
+            _loadingView.alpha = 0.0f;
+            
+            STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+            LoginLoadingView *view = [[LoginLoadingView alloc] initWithFrame:CGRectMake(0.0f, (_loadingView.bounds.size.height-60.0f)/2, _loadingView.bounds.size.width, 60.0f)];
+            view.titleLabel.text = cell.textField.text;
+            [_loadingView addSubview:view];
+            [view release];
+            
+            [UIView animateWithDuration:0.2f animations:^{
+                _loadingView.alpha = 1.0f;
+            }];
+            
+        }
+        
+    } else {
+        
+        if (_loadingView) {
+            
+            UIView *view = _loadingView;
+            _loadingView = nil;
+            [UIView animateWithDuration:0.2f animations:^{
+                view.alpha = 1.0f;
+            } completion:^(BOOL finished) {
+                [view removeFromSuperview];
+            }];
+            
+        }
+        
+    }
+    
+}
+
+
 #pragma mark - Notifications
 
 - (void)signupFinished:(NSNotification*)notification {
@@ -144,47 +198,106 @@
         
 }
 
+- (void)signupFailed:(NSNotification*)notification {
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sign up failed" message:@"waiting on api error messages here.." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show];
+    [self setLoading:NO];
+    [alert release];
+    
+}
+
 
 #pragma mark - Actions
 
 - (void)next:(id)sender {
-        
+    
+    [self setLoading:YES];
+    
     STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
 
     if (_signupType == SignupWelcomeTypeTwitter) {
         
-        NSDictionary *userDic = [[STTwitter sharedInstance] twitterUser];
-        [params setObject:cell.textField.text forKey:@"username"];
-        [params setObject:[[STTwitter sharedInstance] twitterToken] forKey:@"user_token"];
-        [params setObject:[[STTwitter sharedInstance] twitterTokenSecret] forKey:@"user_secret"];
-
-        NSString *name = [userDic objectForKey:@"name"];
-        if (name != nil && ![name isEqual:[NSNull null]]) {
-            [params setObject:name forKey:@"name"];
-        } else {
-            [params setObject:cell.textField.text forKey:@"name"];
+        STAccountParameters *parameters = [[STAccountParameters alloc] init];
+        parameters.screenName = cell.textField.text;
+        
+        if (self.tableView.tableFooterView) {
+            
+            StampColorPickerView *view = (StampColorPickerView*)self.tableView.tableFooterView;
+            NSArray *colors = [view colors];
+            UIColor *color = [colors objectAtIndex:0];
+            parameters.colorPrimary = [color hexString];
+            color = [colors objectAtIndex:1];
+            parameters.colorSecondary = [color hexString];
+            
         }
         
-        [[STAuth sharedInstance] twitterSignupWithParams:params];
-        NSLog(@"twitter signing up with params %@", params);
+        NSDictionary *userDic = [[STTwitter sharedInstance] twitterUser];
         
+        NSString *name = [userDic objectForKey:@"name"];
+        if (name != nil && ![name isEqual:[NSNull null]]) {
+            parameters.name = name;
+        } else {
+            parameters.name = parameters.screenName;
+        }
+        
+        NSString *location = [userDic objectForKey:@"location"];
+        if (location != nil && ![location isEqual:[NSNull null]]) {
+            parameters.location = location;
+        }
+        
+        NSString *description = [userDic objectForKey:@"description"];
+        if (description != nil && ![description isEqual:[NSNull null]]) {
+            parameters.bio = description;
+        }
+        
+        NSString *link = [userDic objectForKey:@"url"];
+        if (link != nil && ![link isEqual:[NSNull null]]) {
+            parameters.website = link;
+        }
+        
+        NSString *avatar = [[userDic objectForKey:@"profile_image_url"] stringByReplacingOccurrencesOfString:@"photo_normal.jpg" withString:@"photo_bigger.jpg"] ;
+        parameters.tempImageURL = avatar;
+        [[STAuth sharedInstance] twitterSignupWithToken:[[STTwitter sharedInstance] twitterToken] secretToken:[[STTwitter sharedInstance] twitterTokenSecret] params:parameters];
+        [parameters release];
+
     } else if (_signupType == SignupWelcomeTypeFacebook) {
         
+        STAccountParameters *parameters = [[STAccountParameters alloc] init];
+        parameters.screenName = cell.textField.text;
         NSDictionary *dictionary = [[STFacebook sharedInstance] userData];
-        [params setObject:cell.textField.text forKey:@"username"];
-        [params setObject:[[[STFacebook sharedInstance] facebook] accessToken] forKey:@"user_token"];
         
         NSString *name = [dictionary objectForKey:@"name"];
         if (name != nil && ![name isEqual:[NSNull null]]) {
-            [params setObject:name forKey:@"name"];
+            parameters.name = name;
         } else {
-            [params setObject:cell.textField.text forKey:@"name"];
+            parameters.name = parameters.screenName;
         }
-        //TODO Fix
-        //[[STAuth sharedInstance] facebookSignupWithParams:params];
-        NSLog(@"facebook signing up with params %@", params);
 
+        NSString *email = [dictionary objectForKey:@"email"];
+        if (email != nil && ![email isEqual:[NSNull null]]) {
+            parameters.email = email;
+        }
+        
+        NSString *link = [dictionary objectForKey:@"link"];
+        if (link != nil && ![link isEqual:[NSNull null]]) {
+            parameters.website = link;
+        }
+        
+        if (self.tableView.tableFooterView) {
+            
+            StampColorPickerView *view = (StampColorPickerView*)self.tableView.tableFooterView;
+            NSArray *colors = [view colors];
+            UIColor *color = [colors objectAtIndex:0];
+            parameters.colorPrimary = [color hexString];
+            color = [colors objectAtIndex:1];
+            parameters.colorSecondary = [color hexString];
+            
+        }
+        
+        [[STAuth sharedInstance] facebookSignupWithToken:[[[STFacebook sharedInstance] facebook] accessToken] params:parameters];
+        [parameters release];
+        
     } else if (_signupType == SignupWelcomeTypeEmail) {
         
      
@@ -400,6 +513,7 @@
     actionSheet.cancelButtonIndex = [actionSheet numberOfButtons]-1;
     actionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
     [actionSheet showInView:self.view];
+    [actionSheet release];
     
 }
 

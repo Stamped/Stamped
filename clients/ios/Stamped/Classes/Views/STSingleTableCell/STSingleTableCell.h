@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STSingleTableCell : UITableViewCell
+@interface STSingleTableCell : UITableViewCell {
+    UIActivityIndicatorView *_activityView;
+}
 
 @property(nonatomic,strong) UILabel *titleLabel;
+@property(nonatomic,assign,getter = isLoading) BOOL loading;
 
 + (CGFloat)height;
 

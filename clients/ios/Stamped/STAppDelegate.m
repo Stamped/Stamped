@@ -81,10 +81,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-//#if defined (CONFIGURATION_Beta)
-  //  [[BWHockeyManager sharedHockeyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
+    //#if defined (CONFIGURATION_Beta)
+    //  [[BWHockeyManager sharedHockeyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
     //[[BWHockeyManager sharedHockeyManager] setDelegate:self];
-//#endif
+    //#endif
     
 #if defined (CONFIGURATION_Beta)
 #warning QuincyKit Beta (Ad Hoc) is configured for this build
@@ -177,9 +177,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     /* NSLog(@"Going to background");
-    [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-        NSLog(@"Saved"); 
-    }];
+     [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+     NSLog(@"Saved"); 
+     }];
      */
 }
 

@@ -22,7 +22,9 @@ typedef enum {
 }
 
 @property(nonatomic,assign) id <STWelcomeViewControllerDelegate> delegate;
+
 - (void)animateIn;
+- (void)popIn;
 
 @end
 @protocol STWelcomeViewControllerDelegate

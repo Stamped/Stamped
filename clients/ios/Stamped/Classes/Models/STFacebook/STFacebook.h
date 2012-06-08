@@ -23,7 +23,6 @@ typedef void(^FacebookMeRequestHandler)(NSDictionary *);
 
 - (void)auth;
 - (BOOL)isSessionValid;
-- (NSString*)username;
 - (void)invalidate;
 
 // requests

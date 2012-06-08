@@ -15,5 +15,6 @@
 @property (nonatomic, readonly, copy) NSString* subtitle;
 @property (nonatomic, readonly, copy) NSString* category;
 @property (nonatomic, readonly, copy) NSNumber* distance;
+@property (nonatomic, readonly, copy) NSString* icon;
 
 @end

@@ -93,6 +93,27 @@
     
 }
 
+- (void)popIn {
+    
+    CGFloat duration = 0.55f;
+    CAKeyframeAnimation *scale = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+    scale.duration = duration;
+    scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:.6f], [NSNumber numberWithFloat:1.15f], [NSNumber numberWithFloat:.85f], [NSNumber numberWithFloat:1.f], nil];
+    
+    CABasicAnimation *fadeIn = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    fadeIn.duration = duration * .4f;
+    fadeIn.fromValue = [NSNumber numberWithFloat:0.f];
+    fadeIn.toValue = [NSNumber numberWithFloat:1.f];
+    fadeIn.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+    fadeIn.fillMode = kCAFillModeForwards;
+    
+    CAAnimationGroup *group = [CAAnimationGroup animation];
+    [group setAnimations:[NSArray arrayWithObjects:scale, fadeIn, nil]];
+    group.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    [_popoverView.layer addAnimation:group forKey:nil];
+    
+}
+
 
 #pragma mark - WelcomePopoverViewDelegate
 

@@ -11,14 +11,23 @@
         // ---------------------------------------------------------------------
         
         
-        var canvas  = $(".stamp-map .stamp-map-canvas")[0];
-        var $canvas = $(canvas);
+        var canvas   = $(".stamp-map .stamp-map-canvas")[0];
+        var $canvas  = $(canvas);
         
         // TODO: load in preloaded stamps
         
-        var center  = new google.maps.LatLng(40.707913, -74.013696);
+        var center   = new google.maps.LatLng(40.707913, -74.013696);
+        var user_pos = null;
         
-        var map     = new google.maps.Map(canvas, {
+        /*if (typeof(google.loader.ClientLocation) !== 'undefined') {
+            var lat  = google.loader.ClientLocation.latitude;
+            var lng  = google.loader.ClientLocation.longitude;
+            var pos  = new google.maps.LatLng(lat, lng);
+            
+            center   = position;
+        }*/
+        
+        var map      = new google.maps.Map(canvas, {
 	        mapTypeId           : google.maps.MapTypeId.ROADMAP, 
             center              : center, 
             zoom                : 8, 
@@ -28,7 +37,7 @@
             
             zoomControl         : true,
             zoomControlOptions  : {
-                style           : google.maps.ZoomControlStyle.LARGE,
+                style           : google.maps.ZoomControlStyle.DEFAULT, 
                 position        : google.maps.ControlPosition.TOP_RIGHT
             }, 
             
@@ -38,26 +47,58 @@
             }
         });
         
+        var update_map_center = function(pos) {
+            // TODO: only use user_pos or update center on resize if we're still at the default center
+            if (user_pos !== null) {
+                map.setCenter(user_pos);
+                map.setZoom(14);
+            } else {
+                map.setCenter(pos);
+            }
+        };
+        
         var image   = new google.maps.MarkerImage('/assets/img/pin.png',
-                                                 new google.maps.Size(26, 36),
-                                                 new google.maps.Point(0,0),
-                                                 new google.maps.Point(13, 30));
+                                                  new google.maps.Size(26, 36),
+                                                  new google.maps.Point(0,0),
+                                                  new google.maps.Point(13, 30));
         
         var shadow  = new google.maps.MarkerImage('/assets/img/pin_shadow.png',
-                                                 new google.maps.Size(24, 18),
-                                                 new google.maps.Point(0,0),
-                                                 new google.maps.Point(2, 17));
+                                                  new google.maps.Size(24, 18),
+                                                  new google.maps.Point(0,0),
+                                                  new google.maps.Point(2, 17));
         
-        var client = new StampedClient();
-        var stamps = STAMPED_PRELOAD.stamps;
+        var stamps  = STAMPED_PRELOAD.stamps;
+        var stamps_ = {};
+        var markers = [];
+        
+        // build dict of stamp_id => stamp for fast lookups
+        $.each(stamps, function(i, stamp) {
+            stamps_[stamp.stamp_id] = stamp;
+        });
+        
+        var get_stamp = function(stamp_id) {
+            if (stamps_.hasOwnProperty(stamp_id)) {
+                return stamps_[stamp_id];
+            } else {
+                return null;
+            }
+        };
+        
+        var stamp_map_popups            = {};
+        var marker_clusterer            = null;
+        var marker_clusterer_enabled    = false;
+        
+        /*var popup  = new google.maps.InfoWindow({
+            maxWidth : 340
+        });*/
         
         var popup  = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
-            pixelOffset: new google.maps.Size(-140, -25), 
+            pixelOffset: new google.maps.Size(-48, -32), 
             zIndex: null, 
             boxStyle: {
-                width: "280px"
+                width: "340px"
             }, 
             closeBoxMargin: "16px 6px 2px 2px", 
             closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif", 
@@ -68,6 +109,50 @@
             alignBottom: true
         });
         
+        var init_marker_clusterer = function() {
+            if (!!marker_clusterer) {
+                return;
+            }
+            
+            var minimumClusterSize = 4;
+            var gridSize = 20;
+            
+            // only enable marker clustering if there are enough stamps
+            if (stamps.length > minimumClusterSize) {
+                marker_clusterer = new MarkerClusterer(map, markers, {
+                    minimumClusterSize  : minimumClusterSize, 
+                    gridSize            : gridSize, 
+                    averageCenter       : true, 
+                    maxZoom             : 12, 
+                    title               : "Expand Stamp Cluster"
+                });
+                
+                marker_clusterer_enabled = true;
+                
+                google.maps.event.addListener(marker_clusterer, "clusteringend", function() {
+                    if (!centered_main_cluster) {
+                        center_main_cluster  = true;
+                        resize_map();
+                    }
+                });
+            }
+        };
+        
+        // enable or disable the marker clusterer
+        var toggle_marker_clusterer = function() {
+            if (!marker_clusterer) {
+                init_marker_clusterer();
+            } else if (marker_clusterer_enabled) {
+                marker_clusterer.setMap(null);
+                marker_clusterer = null;
+                marker_clusterer_enabled = false;
+            } else {
+                marker_clusterer.setMap(map);
+                marker_clusterer.resetViewport();
+                marker_clusterer_enabled = true;
+            }
+        };
+        
         if (stamps.length > 0) {
             var coords0     = (stamps[0]['entity']['coordinates']).split(",");
             var lat0        = parseFloat(coords0[0]);
@@ -75,18 +160,17 @@
             var pos0        = new google.maps.LatLng(lat0, lng0);
             var bounds      = new google.maps.LatLngBounds(pos0, pos0);
             
-            var markers     = []
-            
             var close_popup = function() {
                 if (!!popup.selected) {
                     popup.close();
                     popup.selected = null;
                 }
             };
+            
             window.g_close_map_popup = close_popup;
             
-            google.maps.event.addListener(map, 'click',        close_popup);
-            google.maps.event.addListener(map, 'zoom_changed', close_popup);
+            google.maps.event.addListener(map, 'click',          close_popup);
+            google.maps.event.addListener(map, 'zoom_changed',   close_popup);
             
             var partial_templates = {}
             
@@ -98,16 +182,17 @@
                 partial_templates[key] = val;
             });
             
-            // TODO: this doesn't currently work!
+            // TODO: this Handlebars template helper doesn work
             var user_profile_image = function(size) {
                 size = (typeof(size) === 'undefined' ? 144 : size);
                 
-                var name = this.name;
-                var screen_name = this.screen_name;
+                var multires_image  = this.image;
+                var screen_name     = this.screen_name;
+                var name            = this.name;
+                
                 var alt  = screen_name;
                 var url  = "http://static.stamped.com/users/default.jpg";
                 var okay = false;
-                var multires_image = this.image;
                 
                 if (!!name) {
                     alt  = name + "(" + alt + ")";
@@ -118,7 +203,7 @@
                         if (image.width === size) {
                             url  = image.url;
                             okay = true;
-                            break
+                            break;
                         }
                     }
                     
@@ -163,43 +248,34 @@
                 bounds.extend(pos);
                 markers.push(marker);
                 
-                // create the html content for the popup InfoBox
-                /*var info = "<div class='marker stamp-category-" + stamp['entity']['category'] + "'><div class='top-wave'></div><div class='marker-content'><p class='pronounced-title'><a href='" + stamp['url'] + "'>" + title + "</a></p>";
+                stamp.pos = pos;
                 
-                info += "<p class='subtitle-line'>" + 
-                            "<span class='icon'></span>" + 
-                            "<span class='subtitle'>" + 
-                                stamp['entity']['subtitle'] + 
-                            "</span>" + 
-                        "</p>";
-                
-                // stamps may have more than one blurb associated with them, so add each one
-                // in turn to this marker's InfoBox content
-                for (var i = 0; i < stamp['contents'].length; ++i) {
-                    var content = stamp['contents'][i];
-                    var blurb   = content['blurb'];
-                    
-                    if (blurb.length > 0) {
-                        info += "<p class='blurb'>" + blurb + "</p>";
-                    }
-                }
-                
-                info += "</div><div class='bottom-wave'></div></div>";*/
-                
-                var info = template(stamp, {
+                var popup_content = template(stamp, {
                     partials : partial_templates
                 });
                 
-                //info = "<div class='stamp-map-item'>" + stamp.entity.title + "</div>";
-                //console.debug(stamp.entity.title + ":");
-                //console.debug(info);
+                var dLat = 0.05;
+                var dLng = 0.1;
                 
-                var open_popup = function(e) {
+                var stamp_bounds = new google.maps.LatLngBounds(new google.maps.LatLng(lat - dLat, lng - dLng), 
+                                                                new google.maps.LatLng(lat + dLat, lng + dLng));
+                
+                var open_popup = function(e, should_center) {
                     // guard to only display a single marker InfoBox at a time
                     if (popup.selected === marker) {
                         close_popup();
                     } else {
-                        popup.setContent(info);
+                        if (typeof(should_center) !== 'undefined' && !!should_center) {
+                            
+                            // only adjust map bounds / center if we're not already zoomed 
+                            // in on the desired marker
+                            if (!map.getBounds().contains(pos) || map.getZoom() < 12) {
+                                map.fitBounds(stamp_bounds);
+                                map.setCenter(pos);
+                            }
+                        }
+                        
+                        popup.setContent(popup_content);
                         popup.open(map, marker);
                         
                         if (!!g_update_stamps) {
@@ -212,23 +288,27 @@
                         popup.selected = marker;
                     }
                     
-                    e.stop();
+                    if (!!e) {
+                        e.stop();
+                    }
                 }
                 
+                stamp_map_popups[stamp.stamp_id] = open_popup;
                 google.maps.event.addListener(marker, 'click', open_popup);
             });
-            
-            var minimumClusterSize = 3;
-            var gridSize = 20;
-            
-            // only enable marker clustering if there are enough stamps
-            if (stamps.length > minimumClusterSize) {
-                new MarkerClusterer(map, markers, {
-                    minimumClusterSize : minimumClusterSize, 
-                    gridSize : gridSize
-                });
-            }
         }
+        
+        var open_stamp_map_popup = function(stamp_id) {
+            console.debug("open_stamp_map_popup: " + stamp_id);
+            
+            if (!stamp_map_popups.hasOwnProperty(stamp_id)) {
+                console.debug("ERROR: couldn't find stamp-list-view-item for stamp_id " + stamp_id);
+                
+                return;
+            } else {
+                stamp_map_popups[stamp_id](null, true);
+            }
+        };
         
         
         // ---------------------------------------------------------------------
@@ -237,15 +317,18 @@
         
         
         var $stamp_map_nav_wrapper  = $('.stamp-map-nav-wrapper');
-        var $list = $stamp_map_nav_wrapper.find('.stamp-list-view');
+        var $list                   = $stamp_map_nav_wrapper.find('.stamp-list-view');
+        
+        var min_cls                 = 'stamp-map-nav-wrapper-collapsed';
         var list_height_expanded_px = 0;
-        var min_cls = 'stamp-map-nav-wrapper-collapsed';
-        var footer_height = 0;
+        var footer_height           = 0;
+        var center_main_cluster     = false;
+        var centered_main_cluster   = false;
         
         var update_stamp_list_scrollbars = function($elem) {
             if (!!$elem) {
                 $elem.jScrollPane({
-                    contentWidth : "0"
+                    contentWidth : "0", 
                 });
             }
         };
@@ -253,13 +336,46 @@
         // resize map to fit viewport without scrolling page and also reset map bounds
         var resize_map = function() {
             var header_height = $canvas.offset().top || 0;
-            var height = (window.innerHeight - header_height);
-            var height_px = height + 'px';
+            var height        = (window.innerHeight - header_height);
+            var height_px     = height + 'px';
             
             $canvas.height(height_px);
             
-            map.fitBounds(bounds);
-            map.setCenter(bounds.getCenter());
+            if (!!center_main_cluster && !centered_main_cluster) {
+                if (!!marker_clusterer) {
+                    var clusters = marker_clusterer.getClusters();
+                    var max_mark = null;
+                    var max_size = -1;
+                    var resized  = false;
+                    
+                    $.each(clusters, function(i, cluster) {
+                        var size = cluster.getSize();
+                        
+                        if (size > max_size) {
+                            max_size = size;
+                            max_mark = cluster.getMarkers();
+                        }
+                    });
+                    
+                    if (max_size > 0) {
+                        var max_cluster_bounds = new google.maps.LatLngBounds();
+                        
+                        $.each(max_mark, function(i, marker) {
+                            max_cluster_bounds.extend(marker.getPosition());
+                        });
+                        
+                        map.fitBounds(max_cluster_bounds);
+                        resized = true;
+                    }
+                    
+                    center_main_cluster   = false;
+                    centered_main_cluster = true;
+                    
+                    if (resized) {
+                        marker_clusterer.repaint();
+                    }
+                }
+            }
             
             var nav_header_height = $stamp_map_nav_wrapper.find('.nav-header').height();
             var list_height       = (height - footer_height - 64 - nav_header_height);
@@ -291,17 +407,20 @@
             }
         });
         
+        // initialize collapsable stamp list view behavior
         $('.list-view-nav a').click(function(event) {
             event.preventDefault();
             
-            var $this   = $(this);
-            var $nav    = $this.parents('.stamp-map-nav-wrapper');
-            var $list   = $nav.find('.stamp-list-view').stop(true, false);
+            var $this    = $(this);
+            var $nav     = $this.parents('.stamp-map-nav-wrapper');
+            var $list    = $nav.find('.stamp-list-view').stop(true, false);
+            
+            var duration = 600;
+            var easing   = 'easeOutCubic';
             
             $nav.toggleClass(min_cls);
             
             if ($nav.hasClass(min_cls)) { // collapsing animation
-                
                 $nav.parent().css({
                     'pointer-events' : 'none', 
                 });
@@ -309,20 +428,20 @@
                 $list.animate({
                     height : "0"
                 }, {
-                    duration : 600, 
+                    duration : duration, 
                     specialEasing : { 
-                        width  : 'easeOutCubic', 
-                        height : 'easeOutCubic'
+                        width  : easing, 
+                        height : easing
                     }
                 });
             } else { // expanding animation
                 $list.animate({
                     height : list_height_expanded_px
                 }, {
-                    duration : 600, 
+                    duration : duration, 
                     specialEasing : { 
-                        width  : 'easeOutCubic', 
-                        height : 'easeOutCubic'
+                        width  : easing, 
+                        height : easing
                     }, 
                     complete : function() {
                         update_stamp_list_scrollbars($list);
@@ -333,17 +452,154 @@
             return false;
         });
         
+        var $stamp_list_view_items = $list.find('.stamp-list-view-item');
+        
+        var get_stamp_list_view_item_id = function($elem) {
+            var stamp_id = g_extract_data($elem, 'stamp-id-', null);
+            
+            if (stamp_id === null) {
+                console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
+            }
+            
+            return stamp_id;
+        };
+        
+        // initialize stamp-list-view functionality
+        $stamp_list_view_items.click(function(event) {
+            event.preventDefault();
+            
+            var $this       = $(this);
+            var stamp_id    = get_stamp_list_view_item_id($this);
+            
+            if (stamp_id !== null) {
+                open_stamp_map_popup(stamp_id);
+            }
+            
+            return false;
+        });
+        
+        // filter stamp-list-view contents w.r.t. current viewport
+        var bounds_changed = function(event) {
+            var bounds = map.getBounds();
+            /*var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            
+            var dLat = 0.05 * (ne.latitude  - sw.latitude);
+            var dLng = 0.05 * (ne.longitude - sw.longitude);
+            
+            // enlarge the bounds slightly to provide a small cushion
+            bounds = new google.maps.LatLngBounds(new google.maps.LatLng(sw.latitude - dLat, sw.longitude - dLng), 
+                                                  new google.maps.LatLng(ne.latitude + dLat, ne.longitude + dLng));*/
+            
+            var $to_hide = $([]);
+            var $to_show = $([]);
+            
+            $stamp_list_view_items.each(function(i, elem) {
+                var $elem    = $(elem);
+                var stamp_id = get_stamp_list_view_item_id($elem);
+                var visible  = false;
+                
+                if (stamp_id !== null) {
+                    var stamp   = get_stamp(stamp_id);
+                    
+                    if (!!stamp) {
+                        visible = bounds.contains(stamp.pos);
+                    }
+                }
+                
+                if (visible) {
+                    $to_show = $to_show.add($elem);
+                } else {
+                    $to_hide = $to_hide.add($elem);
+                }
+            });
+            
+            var duration = 100;
+            var done = 0;
+             
+            var complete = function() {
+                if (++done >= 2) {
+                    update_stamp_list_scrollbars($list);
+                }
+            };
+            
+            // TODO: animate only height and opacity
+            $to_show.stop(true, false).show(duration, 'easeOutCubic', complete);
+            $to_hide.stop(true, false).hide(duration, 'easeOutCubic', complete);
+        };
+        
+        
+        // ---------------------------------------------------------------------
+        // Initialize the 'jump to my location' control
+        // ---------------------------------------------------------------------
+        
+        
+        if (navigator.geolocation) {
+            $('a.my-location')
+                .css('display', 'block')
+                .click(function(event) {
+                    event.stopPropagation();
+                    
+                    if (user_pos !== null) {
+                        update_map_center(user_pos);
+                    } else {
+                        var $this = $(this);
+                        $this.addClass('my-location-loading');
+                        
+                        var finally_func = function() {
+                            $this.removeClass('my-location-loading');
+                        };
+                        
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            if (!!position) {
+                                var lat  = position.coords.latitude;
+                                var lng  = position.coords.longitude;
+                                user_pos = new google.maps.LatLng(lat, lng);
+                                
+                                console.debug("user_pos: " + user_pos);
+                                update_map_center(user_pos);
+                            }
+                            
+                            finally_func();
+                        }, function() {
+                            console.debug("ERROR: navigator.geolocation.getCurrentPosition failed!");
+                            
+                            finally_func();
+                        });
+                    }
+                    
+                    return false;
+                });
+        }
+        
+
         
         // ---------------------------------------------------------------------
         // Misc bindings and base page initialization
         // ---------------------------------------------------------------------
         
         
-        // TODO: put this in a generic page initialization handler
-        resize_map();
-        setTimeout(resize_map, 150);
+        $(document).bind('keydown', 'ctrl+t', function() {
+            toggle_marker_clusterer();
+        });
         
         window.addEventListener('resize', resize_map, false);
+        
+        google.maps.event.addListener(map, 'idle', bounds_changed);
+        
+        var update_map_bounds = function() {
+            map.fitBounds(bounds);
+            update_map_center(bounds.getCenter());
+        };
+        
+        // TODO: put this in a generic page initialization handler
+        // note: ordering of initialization is important here
+        
+        update_map_bounds();
+        resize_map();
+        init_marker_clusterer();
+        
+        setTimeout(resize_map, 150);
         
         setTimeout(function() {
             if (typeof(g_init_social_sharing) !== 'undefined') {

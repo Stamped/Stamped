@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STAccountParameters.h"
 
 typedef void(^STAuthRequestFinished)(NSError *);
 
@@ -14,9 +15,24 @@ typedef void(^STAuthRequestFinished)(NSError *);
 
 + (id)sharedInstance;
 
-- (void)facebookSignupWithParams:(NSDictionary*)params;
-- (void)twitterSignupWithParams:(NSDictionary*)params;
-- (void)twitterAuthWithToken:(NSString*)token secretToken:(NSString*)secretToken;
-- (void)facebookAuthWithToken:(NSString*)token;
+
+/*
+ * Sign up
+ */
+- (void)signupWithPassword:(NSString*)password parameters:(STAccountParameters*)params;
+- (void)facebookSignupWithToken:(NSString*)token params:(STAccountParameters*)params;
+- (void)twitterSignupWithToken:(NSString*)token secretToken:(NSString*)secretToken params:(STAccountParameters*)params;
+
+/*
+ * Login
+ */
+- (void)twitterAuthWithToken:(NSString*)token secretToken:(NSString*)secretToken completion:(STAuthRequestFinished)completion;
+- (void)facebookAuthWithToken:(NSString*)token completion:(STAuthRequestFinished)completion;
+
+/*
+ * Updates
+ */
+
+
 
 @end

@@ -69,7 +69,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
         UIViewController *prevController = [self.viewControllers objectAtIndex:index-1];
         STNavigationItem *button = [[STNavigationItem alloc] initWithBackButtonTitle:prevController.title style:UIBarButtonItemStyleBordered target:self action:@selector(pop:)];
         viewController.navigationItem.leftBarButtonItem = button;
-        
+        [button release];
     }
     
     [self.navigationBar setNeedsDisplay];

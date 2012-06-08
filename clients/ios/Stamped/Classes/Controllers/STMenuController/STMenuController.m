@@ -29,7 +29,7 @@
     [super viewDidLoad];
     
     if (!LOGGED_IN || YES) {
-        [self showWelcome];
+        [self showWelcome:YES];
     }
     
 }
@@ -39,13 +39,17 @@
 
 #pragma mark - Welcome
 
-- (void)showWelcome {
+- (void)showWelcome:(BOOL)animated {
     
     STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
     welcomeController.delegate = (id<STWelcomeViewControllerDelegate>)self;
     [self.view addSubview:welcomeController.view];
     welcomeController.view.frame = self.view.bounds;
-    [welcomeController animateIn];
+    if (animated) {
+        [welcomeController animateIn];
+    } else {
+        [welcomeController popIn];
+    }
     
 }
 
@@ -89,6 +93,7 @@
         } else {
             
             STSocialAuthViewController *controller = [[STSocialAuthViewController alloc] initWithAuthType:SocialAuthTypeTwitter];
+            controller.delegate = (id<SocialAuthViewControllerDelegate>)self;
             STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
             [self presentModalViewController:navController animated:YES];
             [controller release];
@@ -108,6 +113,7 @@
     } else if (option == STWelcomeViewControllerOptionFacebook) {
         
         STSocialAuthViewController *controller = [[STSocialAuthViewController alloc] initWithAuthType:SocialAuthTypeFacebook];
+        controller.delegate = (id<SocialAuthViewControllerDelegate>)self;
         STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
         [self presentModalViewController:navController animated:YES];
         [controller release];
@@ -133,12 +139,37 @@
     
 }
 
+- (void)twitterAccountsViewControllerSuccessful:(TwitterAccountsViewController*)controller {
+    
+    [self dismissModalViewControllerAnimated:YES];
+    
+}
+
 
 #pragma mark - LoginViewControllerDelegate
 
 - (void)loginViewControllerDidDismiss:(LoginViewController*)controller {
     [controller.view removeFromSuperview];
     self.loginController = nil;
+}
+
+
+#pragma mark - SocialAuthViewControllerDelegate
+
+- (void)socialAuthViewControllerFinished:(STSocialAuthViewController*)controller {
+    
+    [self dismissModalViewControllerAnimated:YES];
+    
+}
+
+- (void)socialAuthViewControllerFailed:(STSocialAuthViewController*)controller {
+    
+    [self dismissModalViewControllerAnimated:YES];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.4f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+        [self showWelcome:NO];
+    });
+    
 }
 
 

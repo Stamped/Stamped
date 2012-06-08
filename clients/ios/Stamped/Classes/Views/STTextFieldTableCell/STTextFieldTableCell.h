@@ -12,4 +12,7 @@
 @property(nonatomic,readonly,strong) UITextField *textField;
 @property(nonatomic,readonly,strong) UILabel *titleLabel;
 
+- (void)disable;
+- (void)enable;
+
 @end

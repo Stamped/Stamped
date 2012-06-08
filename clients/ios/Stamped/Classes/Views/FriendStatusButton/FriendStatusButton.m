@@ -46,6 +46,7 @@
     
     // reset button states
     [self setTitle:nil forState:UIControlStateNormal];
+    [self setImage:nil forState:UIControlStateNormal];
     [self setBackgroundImage:nil forState:UIControlStateNormal];
     [self setBackgroundImage:nil forState:UIControlStateHighlighted];
     self.enabled = YES;

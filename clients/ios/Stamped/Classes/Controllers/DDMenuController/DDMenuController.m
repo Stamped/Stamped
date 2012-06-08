@@ -340,6 +340,10 @@
         animation.fillMode = kCAFillModeForwards;
         [_root.view.layer addAnimation:animation forKey:nil];
         
+        [keyTimes release];
+        [values release];
+        [timingFunctions release];
+        
         if (_shadowView) {
             [_shadowView.layer addAnimation:animation forKey:nil];
         }
@@ -441,6 +445,7 @@
     if (_menuFlags.canShowLeft) {
         UIBarButtonItem *button = [[barButtonItemClass alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(showLeft:)];
         topController.navigationItem.leftBarButtonItem = button;
+        [button release];
     } else {
 		if(topController.navigationItem.leftBarButtonItem.target == self) {
 			topController.navigationItem.leftBarButtonItem = nil;
@@ -450,6 +455,7 @@
     if (_menuFlags.canShowRight) {
         UIBarButtonItem *button = [[barButtonItemClass alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered  target:self action:@selector(showRight:)];
         topController.navigationItem.rightBarButtonItem = button;
+        [button release];
     } else {
 		if(topController.navigationItem.rightBarButtonItem.target == self) {
 			topController.navigationItem.rightBarButtonItem = nil;

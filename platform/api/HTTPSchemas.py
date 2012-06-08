@@ -280,6 +280,22 @@ def _initialize_comment_html(comment):
     """
     pass
 
+def _phoneToInt(string):
+    if string is None:
+        return None 
+
+    try:
+        return int(string)
+    except ValueError:
+        pass 
+
+    try:
+        digits = re.findall(r'\d+', string)
+        return int("".join(digits))
+    except Exception as e:
+        logs.warning("Unable to convert phone number to int (%s): %s" % (string, e))
+        return None
+
 
 
 
@@ -406,7 +422,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -418,7 +434,12 @@ class HTTPAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToAccount(self):
-        return Account().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return Account().dataImport(data, overflow=True)
 
 class HTTPFacebookAccountNew(Schema):
     @classmethod
@@ -427,7 +448,7 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('screen_name',                      basestring, required=True)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -438,7 +459,12 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToFacebookAccountNew(self):
-        return FacebookAccountNew().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return FacebookAccountNew().dataImport(data, overflow=True)
 
 class HTTPTwitterAccountNew(Schema):
     @classmethod
@@ -448,7 +474,7 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            int)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -459,7 +485,12 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('temp_image_url',                   basestring)
 
     def convertToTwitterAccountNew(self):
-        return TwitterAccountNew().dataImport(self.dataExport(), overflow=True)
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return TwitterAccountNew().dataImport(data, overflow=True)
 
 
 
@@ -1217,7 +1248,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item                = HTTPImageSchema().dataImport(image)
+                    item                = HTTPImageSchema().dataImport(image.dataExport())
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
@@ -1228,7 +1259,7 @@ class HTTPEntity(Schema):
                     item.action         = action
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                self.galleries = [gallery]
 
             # Actions: Reservation
 
@@ -1295,18 +1326,18 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 images = []
                 for image in entity.gallery:
-                    item = HTTPImageSchema().dataImport(image, overflow = True)
+                    item = HTTPImageSchema().dataImport(image.dataExport(), overflow=True)
                     source              = HTTPActionSource()
                     source.source_id    = item.sizes[0].url
                     source.source       = 'stamped'
                     source.link         = item.sizes[0].url
                     action              = HTTPAction()
                     action.type         = 'stamped_view_image'
-                    action.sources.append(source)
-                    item.action     = action
+                    action.sources      = [ source ]
+                    item.action         = action
                     images.append(item)
                 gallery.images = images
-                self.galleries += (gallery,)
+                self.galleries = [gallery]
 
         # Book
         elif entity.kind == 'media_item' and entity.isType('book'):
@@ -2145,17 +2176,36 @@ class HTTPEntitySuggested(Schema):
 class HTTPEntitySearchResultsItem(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('search_id',                    basestring, required=True)
-        cls.addProperty('title',                        basestring, required=True)
-        cls.addProperty('subtitle',                     basestring)
-        cls.addProperty('category',                     basestring, required=True)
-        cls.addProperty('distance',                     float)
+        cls.addProperty('search_id',                        basestring, required=True)
+        cls.addProperty('title',                            basestring, required=True)
+        cls.addProperty('subtitle',                         basestring)
+        cls.addProperty('category',                         basestring, required=True)
+        cls.addProperty('icon',                             basestring)
+        cls.addProperty('distance',                         float)
 
     def importEntity(self, entity, distance=None):
         self.search_id          = entity.search_id
         self.title              = entity.title
         self.subtitle           = entity.subtitle
         self.category           = entity.category
+
+        # Build icon
+        if entity.isType('food'):
+            self.icon = _getIconURL('search_food')
+        elif entity.isType('bar'):
+            self.icon = _getIconURL('search_bar')
+        elif entity.kind == 'place':
+            self.icon = _getIconURL('search_place')
+        elif entity.isType('tv'):
+            self.icon = _getIconURL('search_tv')
+        elif entity.isType('movie'):
+            self.icon = _getIconURL('search_movie')
+        elif entity.isType('artist'):
+            self.icon = _getIconURL('search_artist')
+        elif entity.isType('album'):
+            self.icon = _getIconURL('search_album')
+        elif entity.isType('track'):
+            self.icon = _getIconURL('search_track')
 
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance
@@ -2167,27 +2217,27 @@ class HTTPEntitySearchResultsItem(Schema):
 class HTTPEntitySearchResultsGroup(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedPropertyList('entities',           HTTPEntitySearchResultsItem)
-        cls.addProperty('title',                        basestring)
-        cls.addProperty('subtitle',                     basestring)
-        cls.addProperty('image_url',                    basestring)
+        cls.addNestedPropertyList('entities',               HTTPEntitySearchResultsItem)
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('subtitle',                         basestring)
+        cls.addProperty('image_url',                        basestring)
 
 class HTTPEntityActionEndpoint(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('status',                       basestring)
-        cls.addProperty('message',                      basestring)
-        cls.addProperty('redirect',                     basestring)
+        cls.addProperty('status',                           basestring)
+        cls.addProperty('message',                          basestring)
+        cls.addProperty('redirect',                         basestring)
 
 class HTTPActionComplete(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('action',                       basestring)
-        cls.addProperty('source',                       basestring)
-        cls.addProperty('source_id',                    basestring)
-        cls.addProperty('entity_id',                    basestring)
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('stamp_id',                     basestring)
+        cls.addProperty('action',                           basestring)
+        cls.addProperty('source',                           basestring)
+        cls.addProperty('source_id',                        basestring)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('stamp_id',                         basestring)
 
 
 # ###### #

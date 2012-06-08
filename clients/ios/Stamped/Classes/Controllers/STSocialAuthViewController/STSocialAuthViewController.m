@@ -20,6 +20,7 @@
 @implementation STSocialAuthViewController
 @synthesize authType=_authType;
 @synthesize loading=_loading;
+@synthesize delegate;
 
 - (id)initWithAuthType:(SocialAuthType)type {
     
@@ -124,12 +125,13 @@
 }
 
 
-#pragma mark - Twitter Notifications 
+#pragma mark - Sign up
 
-- (void)twitterAuthFinished:(NSNotification*)notification {
-
+- (void)signupTwitter {
+    
+    [STEvents removeObserver:self];
     [[STTwitter sharedInstance] getTwitterUser:^(id user, NSError *error) {
-                
+        
         if (user && !error) {
             [[STTwitter sharedInstance] setTwitterUser:user];
             SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeTwitter];
@@ -146,20 +148,13 @@
     
 }
 
-- (void)twitterAuthFailed:(NSNotification*)notification {
+- (void)signupFacebook {
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Twitter Failed" message:@"Twitter auth failed" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];
-    
-}
-
-
-#pragma mark - Facebook Notifications
-
-- (void)facebookAuthFinished:(NSNotification*)notification {
-    
+    [STEvents removeObserver:self];
     [[STFacebook sharedInstance] loadMe];
     [[STFacebook sharedInstance] setHandler:^(NSDictionary *dictionary) {
+        
+        NSLog(@"user finished : %@", [dictionary description]);
         
         SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeFacebook];
         controller.navigationItem.hidesBackButton = YES;
@@ -174,10 +169,76 @@
     
 }
 
+
+#pragma mark - Twitter Notifications 
+
+- (void)twitterAuthFinished:(NSNotification*)notification {
+
+    [[STAuth sharedInstance] twitterAuthWithToken:[[STTwitter sharedInstance] twitterToken] secretToken:[[STTwitter sharedInstance] twitterTokenSecret] completion:^(NSError *error) {
+    
+        if (error) {
+                        
+            [self signupTwitter];
+            
+        } else {
+            
+            if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFinished:)]) {
+                [self.delegate socialAuthViewControllerFinished:self];
+            }
+            
+        }
+        
+    }];
+    
+}
+
+- (void)twitterAuthFailed:(NSNotification*)notification {
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Twitter Failed" message:@"Twitter auth failed" delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show];
+    [alert release];
+    
+}
+
+
+#pragma mark - Facebook Notifications
+
+- (void)facebookAuthFinished:(NSNotification*)notification {
+    
+    [[STAuth sharedInstance] facebookAuthWithToken:[[[STFacebook sharedInstance] facebook] accessToken] completion:^(NSError *error) {
+        
+        if (error) {
+            
+            [self signupFacebook];
+            
+        } else {
+            
+            if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFinished:)]) {
+                [self.delegate socialAuthViewControllerFinished:self];
+            }
+            
+        }
+        
+    }];
+    
+}
+
 - (void)facebookAuthFailed:(NSNotification*)notification {
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Facebook Failed" message:@"Facebook auth failed" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Facebook Failed" message:@"Facebook auth failed" delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];
+    [alert release];
+
+}
+
+
+#pragma mark - UIAlertViewDelegate 
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    
+    if ([(id)delegate respondsToSelector:@selector(socialAuthViewControllerFailed:)]) {
+        [self.delegate socialAuthViewControllerFailed:self];
+    }
     
 }
 

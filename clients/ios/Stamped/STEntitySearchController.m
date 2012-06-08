@@ -20,6 +20,9 @@
 #import "STEntityAutoCompleteResult.h"
 #import <CoreLocation/CoreLocation.h>
 #import "SearchEntitiesAutoSuggestCell.h"
+#import "STTextChunk.h"
+#import "STChunksView.h"
+#import "STImageCache.h"
 
 static const CGFloat _innerBorderHeight = 40;
 static const CGFloat _offscreenCancelPadding = 5;
@@ -28,28 +31,88 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 + (NSString*)reuseIdentifier;
 
-- (id)initWithEntitySearchResult:(id<STEntitySearchResult>)searchResult;
+@property (nonatomic, readwrite, retain) id<STEntitySearchResult> searchResult;
+@property (nonatomic, readwrite, retain) UIView* chunksView;
+@property (nonatomic, readwrite, retain) STCancellation* iconCancellation;
+@property (nonatomic, readwrite, retain) UIImageView* iconView;
 
 @end
 
 @implementation STEntitySearchTableViewCell
 
+@synthesize searchResult = _searchResult;
+@synthesize chunksView = _chunksView;
+@synthesize iconCancellation = _iconCancellation;
+@synthesize iconView = _iconView;
+
 + (NSString*)reuseIdentifier {
     return @"searchCell";
 }
 
-- (id)initWithEntitySearchResult:(id<STEntitySearchResult>)result {
-    self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:[STEntitySearchTableViewCell reuseIdentifier]];
+- (id)init {
+    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[STEntitySearchTableViewCell reuseIdentifier]];
     if (self) {
-        self.textLabel.text = result.title;
-        self.textLabel.font = [UIFont stampedTitleFont];
-        self.textLabel.textColor = [UIColor stampedDarkGrayColor];
-        self.detailTextLabel.text = result.subtitle;
-        self.detailTextLabel.font = [UIFont stampedSubtitleFont];
-        self.detailTextLabel.textColor = [UIColor stampedGrayColor];
-        self.imageView.image = [Util imageForCategory:result.category];
+        _iconView = [[UIImageView alloc] initWithFrame:CGRectMake(15, 17, 16, 16)];
+        [self.contentView addSubview:_iconView];
     }
     return self;
+}
+
+- (void)dealloc {
+    [_searchResult release];
+    [_chunksView release];
+    [_iconCancellation cancel];
+    [_iconCancellation release];
+    [_iconView release];
+    [super dealloc];
+}
+
+- (void)setSearchResult:(id<STEntitySearchResult>)searchResult {
+    [_iconCancellation cancel];
+    self.iconView.image = nil;
+    NSMutableArray* chunks = [NSMutableArray array];
+    
+    STChunk* startChunk = [[[STChunk alloc] initWithLineHeight:16 start:0 end:0 width:200 lineCount:1 lineLimit:1] autorelease];
+    UIFont* titleFont = [UIFont stampedTitleFontWithSize:24];
+    startChunk.bottomLeft = CGPointMake(38, 32);
+    STTextChunk* titleChunk = [[[STTextChunk alloc] initWithPrev:startChunk
+                                                            text:searchResult.title
+                                                            font:titleFont
+                                                           color:[UIColor stampedBlackColor]] autorelease];
+    [chunks addObject:titleChunk];
+    
+    [startChunk offset:CGPointMake(0, startChunk.lineHeight)];
+    STTextChunk* subtitleChunk = [[[STTextChunk alloc] initWithPrev:startChunk
+                                                               text:searchResult.subtitle
+                                                               font:[UIFont stampedFontWithSize:12]
+                                                              color:[UIColor stampedGrayColor]] autorelease];
+    [chunks addObject:subtitleChunk];
+    
+    [self.chunksView removeFromSuperview];
+    self.chunksView = [[[STChunksView alloc] initWithChunks:chunks] autorelease];
+    [self.contentView addSubview:self.chunksView];
+    
+    [self.iconCancellation cancel];
+    self.iconCancellation = nil;
+    NSString* iconURL = searchResult.icon;
+    if (iconURL) {
+        void (^setupImageView)(UIImage* image) = ^(UIImage* image) {
+            self.iconView.image = image;
+        };
+        UIImage* icon = [[STImageCache sharedInstance] cachedImageForImageURL:iconURL];
+        if (icon) {
+            setupImageView(icon);
+        }
+        else {
+            [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                if (image) {
+                    setupImageView(icon);
+                }
+                self.iconCancellation = nil;
+            }];
+        }
+    }
+    
 }
 
 @end
@@ -198,11 +261,12 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.cancelFrameNormal = cancelButton.frame;
     [header addSubview:cancelButton];
     self.cancelButton = cancelButton;
+    self.cancelButton.hidden = YES;
     
     tableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 
                                                                CGRectGetMaxY(header.frame), 
                                                                self.view.frame.size.width, 
-                                                               self.view.frame.size.height + [Util sharedNavigationController].navigationBar.frame.size.height - CGRectGetMaxY(header.frame))];
+                                                               self.view.frame.size.height - CGRectGetMaxY(header.frame))];
     tableView_.delegate = self;
     tableView_.dataSource = self;
     tableView_.rowHeight = 64;
@@ -222,6 +286,10 @@ static const CGFloat _offscreenCancelPadding = 5;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldDidChange:) name:UITextFieldTextDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     //[[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
+    NSIndexPath* indexPath = [self.tableView indexPathForSelectedRow];
+    if (indexPath) {
+        [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -234,7 +302,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     
     [UIView animateWithDuration:.25 animations:^{
-        [Util reframeView:self.tableView withDeltas:CGRectMake(0, 0, 0, -keyboardSize.height)];
+        [Util reframeView:self.tableView withDeltas:CGRectMake(0, 0, 0, -keyboardSize.height + 40)];
     }];
 }
 
@@ -294,7 +362,12 @@ static const CGFloat _offscreenCancelPadding = 5;
             result = [section.entities objectAtIndex:indexPath.row];
         }
         if (result) {
-            return [[[STEntitySearchTableViewCell alloc] initWithEntitySearchResult:result] autorelease];
+            STEntitySearchTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:[STEntitySearchTableViewCell reuseIdentifier]];
+            if (!cell) {
+                cell = [[[STEntitySearchTableViewCell alloc] init] autorelease];
+            }
+            cell.searchResult = result;
+            return cell;
         }
         else {
             return nil;
@@ -351,6 +424,8 @@ static const CGFloat _offscreenCancelPadding = 5;
         self.tableView.frame = self.tableFrameNormal;
         self.cancelButton.frame = self.cancelFrameNormal;
         self.searchField.frame = self.searchFieldFrameNormal;
+    } completion:^(BOOL finished) {
+        self.cancelButton.hidden = YES;
     }];
     if (textField.text && ![textField.text isEqualToString:@""]) {
         STEntitySearch* search = [[[STEntitySearch alloc] init] autorelease];
@@ -396,6 +471,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
     //Override collapsing behavior
     [[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
+    self.cancelButton.hidden = NO;
     [UIView animateWithDuration:.25 animations:^{
         CGFloat delta = 256 - self.cancelFrameNormal.origin.x;
         [Util reframeView:self.searchField withDeltas:CGRectMake(0, 0, delta + _offscreenCancelPadding, 0)];

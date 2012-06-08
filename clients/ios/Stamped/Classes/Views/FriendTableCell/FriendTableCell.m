@@ -26,8 +26,8 @@
         [view release];
         _avatarView = view;
         
-        view.backgroundView.layer.shadowRadius = 3.0f;
-        view.backgroundView.layer.shadowOpacity = 0.3f;
+        view.backgroundView.layer.shadowRadius = 1.0f;
+        view.backgroundView.layer.shadowOpacity = 0.2f;
         
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(70.0f, 10.0f, 0.0f, 0.0f)];
         label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
