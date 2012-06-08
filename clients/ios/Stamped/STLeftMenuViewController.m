@@ -290,7 +290,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     
-    if (self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
+    if (!_anchorSelected && self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
         
         // controller is already root, lets just pop it to root like a tab bar
         STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
@@ -320,6 +320,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     
+    _anchorSelected = (self.anchorTableView == tableView);
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     

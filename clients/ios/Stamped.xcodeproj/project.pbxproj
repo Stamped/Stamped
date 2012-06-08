@@ -292,6 +292,18 @@
 		031F0E96156D88F7007C1C03 /* welcome_popover_images@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 031F0E94156D88F7007C1C03 /* welcome_popover_images@2x.png */; };
 		031F0E97156D88F7007C1C03 /* welcome_popover_images@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 031F0E94156D88F7007C1C03 /* welcome_popover_images@2x.png */; };
 		031F0E98156D88F7007C1C03 /* welcome_popover_images@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 031F0E94156D88F7007C1C03 /* welcome_popover_images@2x.png */; };
+		0324B8721581B11A00977C09 /* STProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B8711581B11A00977C09 /* STProgressView.m */; };
+		0324B8731581B11A00977C09 /* STProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B8711581B11A00977C09 /* STProgressView.m */; };
+		0324B8741581B11A00977C09 /* STProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B8711581B11A00977C09 /* STProgressView.m */; };
+		0324B8751581B11A00977C09 /* STProgressView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B8711581B11A00977C09 /* STProgressView.m */; };
+		0324B879158238CC00977C09 /* STS3Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B878158238CC00977C09 /* STS3Uploader.m */; };
+		0324B87A158238CC00977C09 /* STS3Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B878158238CC00977C09 /* STS3Uploader.m */; };
+		0324B87B158238CC00977C09 /* STS3Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B878158238CC00977C09 /* STS3Uploader.m */; };
+		0324B87C158238CC00977C09 /* STS3Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B878158238CC00977C09 /* STS3Uploader.m */; };
+		0324B8801582411600977C09 /* EditProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B87F1582411600977C09 /* EditProfileViewController.m */; };
+		0324B8811582411600977C09 /* EditProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B87F1582411600977C09 /* EditProfileViewController.m */; };
+		0324B8821582411600977C09 /* EditProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B87F1582411600977C09 /* EditProfileViewController.m */; };
+		0324B8831582411600977C09 /* EditProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0324B87F1582411600977C09 /* EditProfileViewController.m */; };
 		034BDF9F1562F6980008F160 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178213C3754300ABE6E2 /* main.m */; };
 		034BDFA01562F6980008F160 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		034BDFA11562F6980008F160 /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
@@ -1267,6 +1279,10 @@
 		0379DF42157FD9C900DEBCD2 /* slider_track_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */; };
 		0379DF43157FD9C900DEBCD2 /* slider_track_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */; };
 		0379DF44157FD9C900DEBCD2 /* slider_track_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */; };
+		0383EADD15825460009E5045 /* STBadgeBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0383EADC15825460009E5045 /* STBadgeBarButtonItem.m */; };
+		0383EADE15825460009E5045 /* STBadgeBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0383EADC15825460009E5045 /* STBadgeBarButtonItem.m */; };
+		0383EADF15825460009E5045 /* STBadgeBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0383EADC15825460009E5045 /* STBadgeBarButtonItem.m */; };
+		0383EAE015825460009E5045 /* STBadgeBarButtonItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0383EADC15825460009E5045 /* STBadgeBarButtonItem.m */; };
 		0387CDB2157962C90044A2D3 /* FriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0387CDB1157962C90044A2D3 /* FriendsViewController.m */; };
 		0387CDB3157962C90044A2D3 /* FriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0387CDB1157962C90044A2D3 /* FriendsViewController.m */; };
 		0387CDB4157962C90044A2D3 /* FriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0387CDB1157962C90044A2D3 /* FriendsViewController.m */; };
@@ -4746,6 +4762,12 @@
 		031F0E73156D5C98007C1C03 /* no_data_magnify@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "no_data_magnify@2x.png"; sourceTree = "<group>"; };
 		031F0E8F156D6B6D007C1C03 /* refresh_sticky_end@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "refresh_sticky_end@2x.png"; sourceTree = "<group>"; };
 		031F0E94156D88F7007C1C03 /* welcome_popover_images@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_popover_images@2x.png"; sourceTree = "<group>"; };
+		0324B8701581B11A00977C09 /* STProgressView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STProgressView.h; sourceTree = "<group>"; };
+		0324B8711581B11A00977C09 /* STProgressView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STProgressView.m; sourceTree = "<group>"; };
+		0324B877158238CC00977C09 /* STS3Uploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STS3Uploader.h; sourceTree = "<group>"; };
+		0324B878158238CC00977C09 /* STS3Uploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STS3Uploader.m; sourceTree = "<group>"; };
+		0324B87E1582411600977C09 /* EditProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditProfileViewController.h; sourceTree = "<group>"; };
+		0324B87F1582411600977C09 /* EditProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditProfileViewController.m; sourceTree = "<group>"; };
 		034BE3441562F6980008F160 /* StampedEther copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StampedEther copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0358C8FE15746E8100FD1597 /* STPagedImageViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPagedImageViewer.h; sourceTree = "<group>"; };
 		0358C8FF15746E8100FD1597 /* STPagedImageViewer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPagedImageViewer.m; sourceTree = "<group>"; };
@@ -4790,6 +4812,8 @@
 		036C133B1580F9C200FB9880 /* STSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSettingsViewController.h; sourceTree = "<group>"; };
 		036C133C1580F9C200FB9880 /* STSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSettingsViewController.m; sourceTree = "<group>"; };
 		0379DF40157FD9C900DEBCD2 /* slider_track_3@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "slider_track_3@2x.png"; sourceTree = "<group>"; };
+		0383EADB15825460009E5045 /* STBadgeBarButtonItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STBadgeBarButtonItem.h; sourceTree = "<group>"; };
+		0383EADC15825460009E5045 /* STBadgeBarButtonItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STBadgeBarButtonItem.m; sourceTree = "<group>"; };
 		0387CDB0157962C90044A2D3 /* FriendsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendsViewController.h; sourceTree = "<group>"; };
 		0387CDB1157962C90044A2D3 /* FriendsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendsViewController.m; sourceTree = "<group>"; };
 		0387CDB61579647E0044A2D3 /* nav_button_green_hi@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_button_green_hi@2x.png"; sourceTree = "<group>"; };
@@ -6358,6 +6382,7 @@
 		0301372015668BAF00B55B47 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				0324B876158238BE00977C09 /* STS3Uploader */,
 				036C13111580082100FB9880 /* STUnreadActivity */,
 				03A64CB0157F074D00934ABC /* STUserStamps */,
 				0387CDD11579677D0044A2D3 /* Friends */,
@@ -6380,6 +6405,8 @@
 		0301378015668DB300B55B47 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0383EADA15825451009E5045 /* STBadgeBarButtonItem */,
+				0324B86F1581B10B00977C09 /* STProgressView */,
 				039A6A89158151600061B73F /* SettingsTableCell */,
 				036C13331580F5D300FB9880 /* LoginLoadingView */,
 				036C1301157FEEE900FB9880 /* SignupCameraTableCell */,
@@ -6556,6 +6583,33 @@
 			path = STUserStatsView;
 			sourceTree = "<group>";
 		};
+		0324B86F1581B10B00977C09 /* STProgressView */ = {
+			isa = PBXGroup;
+			children = (
+				0324B8701581B11A00977C09 /* STProgressView.h */,
+				0324B8711581B11A00977C09 /* STProgressView.m */,
+			);
+			path = STProgressView;
+			sourceTree = "<group>";
+		};
+		0324B876158238BE00977C09 /* STS3Uploader */ = {
+			isa = PBXGroup;
+			children = (
+				0324B877158238CC00977C09 /* STS3Uploader.h */,
+				0324B878158238CC00977C09 /* STS3Uploader.m */,
+			);
+			path = STS3Uploader;
+			sourceTree = "<group>";
+		};
+		0324B87D1582409100977C09 /* STEditProfileViewController */ = {
+			isa = PBXGroup;
+			children = (
+				0324B87E1582411600977C09 /* EditProfileViewController.h */,
+				0324B87F1582411600977C09 /* EditProfileViewController.m */,
+			);
+			path = STEditProfileViewController;
+			sourceTree = "<group>";
+		};
 		0358C8FD15746E6B00FD1597 /* STPagedImageViewer */ = {
 			isa = PBXGroup;
 			children = (
@@ -6595,6 +6649,7 @@
 		0364C0E11564867B00EE18C1 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				0324B87D1582409100977C09 /* STEditProfileViewController */,
 				036C133A1580F9B200FB9880 /* STSettingsViewController */,
 				031AD932157EC92B00C435B5 /* STUserViewController */,
 				0387CDAF157962B40044A2D3 /* FriendsViewController */,
@@ -6704,6 +6759,15 @@
 				036C133C1580F9C200FB9880 /* STSettingsViewController.m */,
 			);
 			path = STSettingsViewController;
+			sourceTree = "<group>";
+		};
+		0383EADA15825451009E5045 /* STBadgeBarButtonItem */ = {
+			isa = PBXGroup;
+			children = (
+				0383EADB15825460009E5045 /* STBadgeBarButtonItem.h */,
+				0383EADC15825460009E5045 /* STBadgeBarButtonItem.m */,
+			);
+			path = STBadgeBarButtonItem;
 			sourceTree = "<group>";
 		};
 		0387CDAF157962B40044A2D3 /* FriendsViewController */ = {
@@ -12867,6 +12931,10 @@
 				036C13391580F5E100FB9880 /* LoginLoadingView.m in Sources */,
 				036C13401580F9C200FB9880 /* STSettingsViewController.m in Sources */,
 				039A6A8F1581516B0061B73F /* SettingsTableCell.m in Sources */,
+				0324B8751581B11A00977C09 /* STProgressView.m in Sources */,
+				0324B87C158238CC00977C09 /* STS3Uploader.m in Sources */,
+				0324B8831582411600977C09 /* EditProfileViewController.m in Sources */,
+				0383EAE015825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13188,6 +13256,10 @@
 				036C13381580F5E100FB9880 /* LoginLoadingView.m in Sources */,
 				036C133F1580F9C200FB9880 /* STSettingsViewController.m in Sources */,
 				039A6A8E1581516B0061B73F /* SettingsTableCell.m in Sources */,
+				0324B8741581B11A00977C09 /* STProgressView.m in Sources */,
+				0324B87B158238CC00977C09 /* STS3Uploader.m in Sources */,
+				0324B8821582411600977C09 /* EditProfileViewController.m in Sources */,
+				0383EADF15825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13508,6 +13580,10 @@
 				036C13371580F5E100FB9880 /* LoginLoadingView.m in Sources */,
 				036C133E1580F9C200FB9880 /* STSettingsViewController.m in Sources */,
 				039A6A8D1581516B0061B73F /* SettingsTableCell.m in Sources */,
+				0324B8731581B11A00977C09 /* STProgressView.m in Sources */,
+				0324B87A158238CC00977C09 /* STS3Uploader.m in Sources */,
+				0324B8811582411600977C09 /* EditProfileViewController.m in Sources */,
+				0383EADE15825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13840,6 +13916,10 @@
 				036C13361580F5E100FB9880 /* LoginLoadingView.m in Sources */,
 				036C133D1580F9C200FB9880 /* STSettingsViewController.m in Sources */,
 				039A6A8C1581516B0061B73F /* SettingsTableCell.m in Sources */,
+				0324B8721581B11A00977C09 /* STProgressView.m in Sources */,
+				0324B879158238CC00977C09 /* STS3Uploader.m in Sources */,
+				0324B8801582411600977C09 /* EditProfileViewController.m in Sources */,
+				0383EADD15825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

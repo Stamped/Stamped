@@ -143,7 +143,7 @@
     if (!first) {
         if (!_bottomBorder) {
             
-            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(19.0f, 0.0f, self.bounds.size.width-38.0f, 1.0f)];
+            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(18.5f, 0.0f, self.bounds.size.width-37.0f, 1.0f)];
             view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
             [self addSubview:view];
             view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.1f];

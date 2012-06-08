@@ -16,6 +16,8 @@
     NSDictionary *_anchorControllerStore;
     
     NSIndexPath *_selectedIndexPath;
+    BOOL _anchorSelected;
+    
 }
 
 + (void)setupConfigurations;

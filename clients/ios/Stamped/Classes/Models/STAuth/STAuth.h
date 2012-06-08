@@ -32,6 +32,9 @@ typedef void(^STAuthRequestFinished)(NSError *);
 /*
  * Updates
  */
+- (void)checkUserName:(NSString*)username completion:(STAuthRequestFinished)completion;
+- (void)updateStampWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary completion:(STAuthRequestFinished)completion;
+- (void)updateProfileImageWithPath:(NSString*)tempPath completion:(STAuthRequestFinished)completion;
 
 
 

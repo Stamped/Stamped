@@ -34,6 +34,7 @@
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, 3.0f, 3.0f)];
         imageView.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
         imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
         [self addSubview:imageView];
         _imageView = [imageView retain];
         [imageView release];
