@@ -82,8 +82,8 @@
             CGFloat inset = 6.0f;
             CGFloat corner = 2.0f;
             
-            UIColor *topColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:0.6f];
-            UIColor *bottomColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.8f];
+            UIColor *bottomColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:0.6f];
+            UIColor *topColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.8f];
             
             CGPathRef path = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(rect, inset, 2) cornerRadius:corner].CGPath;
 
@@ -116,8 +116,8 @@
             CGContextRestoreGState(ctx);
             
             // gradient stroke
-            topColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:0.6f];
-            bottomColor = [UIColor colorWithRed:0.8f green:0.8f blue:0.8f alpha:0.8f];
+            bottomColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:0.6f];
+            topColor = [UIColor colorWithRed:0.8f green:0.8f blue:0.8f alpha:0.8f];
             CGContextAddPath(ctx, path);
             CGContextReplacePathWithStrokedPath(ctx);
             CGContextClip(ctx);
