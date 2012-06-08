@@ -3472,13 +3472,13 @@ class StampedAPI(AStampedAPI):
             types = None 
 
             # Subsection conversion
-            if guideSearchRequest.subsection is not None:
-                types = [ guideSearchRequest.subsection ]
-            elif guideSearchRequest.section is not None:
-                if guideSearchRequest.section == 'food':
+            if guideRequest.subsection is not None:
+                types = [ guideRequest.subsection ]
+            elif guideRequest.section is not None:
+                if guideRequest.section == 'food':
                     types = [ 'restaurant', 'bar', 'cafe', 'food' ]
                 else:
-                    types = list(Entity.mapCategoryToTypes(guideSearchRequest.section))
+                    types = list(Entity.mapCategoryToTypes(guideRequest.section))
 
             since = datetime.utcnow() - timedelta(days=90)
 
