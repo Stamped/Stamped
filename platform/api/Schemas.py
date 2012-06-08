@@ -1679,8 +1679,8 @@ class TimeSlice(Schema):
         cls.addProperty('offset',                           int)
 
         # Filtering
-        cls.addProperty('category',                         basestring)
-        cls.addProperty('subcategory',                      basestring)
+        cls.addPropertyList('kinds',                        basestring)
+        cls.addPropertyList('types',                        basestring)
         # cls.addPropertyList('properties',                   basestring)
         cls.addNestedProperty('viewport',                   ViewportSchema) 
 
@@ -1695,8 +1695,8 @@ class SearchSlice(Schema):
         cls.addProperty('limit',                            int) # Max 50
 
         # Filtering
-        cls.addProperty('category',                         basestring)
-        cls.addProperty('subcategory',                      basestring)
+        cls.addPropertyList('kinds',                        basestring)
+        cls.addPropertyList('types',                        basestring)
         # cls.addPropertyList('properties',                   basestring)
         cls.addNestedProperty('viewport',                   ViewportSchema) 
 
@@ -1709,8 +1709,8 @@ class RelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Filtering
-        cls.addProperty('category',                         basestring)
-        cls.addProperty('subcategory',                      basestring)
+        cls.addPropertyList('kinds',                        basestring)
+        cls.addPropertyList('types',                        basestring)
         cls.addPropertyList('properties',                   basestring)
         cls.addNestedProperty('viewport',                   ViewportSchema) 
 
