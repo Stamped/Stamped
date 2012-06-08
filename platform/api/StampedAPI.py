@@ -3605,6 +3605,7 @@ class StampedAPI(AStampedAPI):
             if stamp.entity.entity_id in seenEntities:
                 continue 
             entity = entityIds[stamp.entity.entity_id]
+            seenEntities.add(stamp.entity.entity_id)
             stampPreview = StampPreview()
             stampPreview.user = userIds[stamp.user.user_id]
             stampPreview.stamp_id = stamp.stamp_id
