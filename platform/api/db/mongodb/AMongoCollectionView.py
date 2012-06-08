@@ -51,7 +51,7 @@ class AMongoCollectionView(AMongoCollection):
 
         # handle category / subcategory filters
         # -------------------------------------
-        if timeSlice.category is not None:
+        if timeSlice.kinds is not None:
             raise NotImplementedError("NEED TO BUILD TIMESLICE CATEGORIES")
             # kinds           = deriveKindFromCategory(timeSlice.category) 
             # types           = deriveTypesFromCategory(timeSlice.category)
@@ -74,7 +74,7 @@ class AMongoCollectionView(AMongoCollection):
                 add_or_query([ { "entity.category" : str(timeSlice.category).lower() }, 
                                { "entity.subcategory" : {"$in": list(subcategories)} } ])
         
-        if timeSlice.subcategory is not None:
+        if timeSlice.types is not None:
             raise NotImplementedError("NEED TO BUILD TIMESLICE SUBCATEGORIES")
             query['entity.subcategory'] = str(timeSlice.subcategory).lower()
         
@@ -138,7 +138,7 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle category / subcategory filters
         # -------------------------------------
-        if searchSlice.category is not None:
+        if searchSlice.kinds is not None:
             raise NotImplementedError("NEED TO BUILD searchSlice CATEGORIES")
             # kinds           = deriveKindFromCategory(searchSlice.category) 
             # types           = deriveTypesFromCategory(searchSlice.category)
@@ -161,7 +161,7 @@ class AMongoCollectionView(AMongoCollection):
                 add_or_query([ { "entity.category" : str(searchSlice.category).lower() }, 
                                { "entity.subcategory" : {"$in": list(subcategories)} } ])
         
-        if searchSlice.subcategory is not None:
+        if searchSlice.types is not None:
             raise NotImplementedError("NEED TO BUILD searchSlice SUBCATEGORIES")
             query['entity.subcategory'] = str(searchSlice.subcategory).lower()
 

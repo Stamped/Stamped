@@ -193,7 +193,7 @@ def handleHTTPRequest(requires_auth=True,
                 logs.error(e.code)
 
                 error = {'error': e.msg}
-                return transformOutput(error, status=409)
+                return transformOutput(error, status=e.code)
             
             except StampedAuthError as e:
                 logs.warning("401 Error: %s" % (e.msg))

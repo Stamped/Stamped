@@ -153,9 +153,7 @@
     [STEvents removeObserver:self];
     [[STFacebook sharedInstance] loadMe];
     [[STFacebook sharedInstance] setHandler:^(NSDictionary *dictionary) {
-        
-        NSLog(@"user finished : %@", [dictionary description]);
-        
+                
         SignupWelcomeViewController *controller = [[SignupWelcomeViewController alloc] initWithType:SignupWelcomeTypeFacebook];
         controller.navigationItem.hidesBackButton = YES;
         double delayInSeconds = 0.1f;

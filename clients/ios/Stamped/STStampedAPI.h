@@ -38,6 +38,7 @@
 #import "STEntityAutoCompleteResult.h"
 #import "STHybridCacheSource.h"
 #import "STAccountParameters.h"
+#import "STRestKitLoader.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
