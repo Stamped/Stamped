@@ -206,8 +206,20 @@ extern NSString* const kKeychainTwitterToken;
 
 + (void)launchFirstRun;
 
-+ (CGSize)sizeForString:(NSAttributedString *)inString thatFits:(CGSize)inSize;
++ (CGSize)sizeForString:(NSAttributedString*)inString thatFits:(CGSize)inSize;
 
-+ (NSAttributedString *)attributedStringForString:(NSString *)aString font:(UIFont *)aFont color:(UIColor *)aColor lineHeight:(CGFloat)lineHeight;
++ (NSAttributedString *)attributedStringForString:(NSString *)aString 
+                                             font:(UIFont *)aFont 
+                                            color:(UIColor *)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent;
+
++ (CGFloat)endForString:(NSAttributedString*)string withSize:(CGSize)bounds;
+
++ (void)drawAttributedString:(NSAttributedString*)string atPoint:(CGPoint)origin withWidth:(CGFloat)width andMaxHeight:(CGFloat)height;
+
++ (void)setTopRightForView:(UIView*)view toPoint:(CGPoint)point;
+
++ (void)setBottomLeftForView:(UIView*)view toPoint:(CGPoint)point;
 
 @end

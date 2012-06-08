@@ -101,13 +101,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [self addConfigurations];
     [self customizeAppearance];
     
-    CGSize textSize = [Util sizeForString:[Util attributedStringForString:@"This is a test\nasd basdf\na" 
-                                                                     font:[UIFont stampedFontWithSize:10] 
-                                                                    color:[UIColor blackColor] 
-                                                               lineHeight:16]
-                                 thatFits:CGSizeMake(100, CGFLOAT_MAX)];
-    NSLog(@"%f,%f",textSize.width, textSize.height);
-    
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];
     [[STRestKitLoader sharedInstance] authenticate];

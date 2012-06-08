@@ -1164,19 +1164,50 @@ static Rdio* _rdio;
     
     if (inSize.width < CGFLOAT_MAX && inSize.height == CGFLOAT_MAX)
     {
-        theSize.width = inSize.width;
+        //theSize.width = inSize.width;
     }
     
     // On iOS 5.0 the function `CTFramesetterSuggestFrameSizeWithConstraints` returns rounded float values (e.g. "15.0").
     // Prior to iOS 5.0 the function returns float values (e.g. "14.7").
     // Make sure the return value for `sizeForString:thatFits:" is equal for both versions:
-    theSize = (CGSize){ .width = roundf(theSize.width), .height = roundf(theSize.height) };
+    theSize = (CGSize){ .width = ceilf(theSize.width), .height = ceilf(theSize.height) };
     
     return(theSize);
 }
 
-+ (NSAttributedString *)attributedStringForString:(NSString *)aString font:(UIFont *)aFont color:(UIColor *)aColor lineHeight:(CGFloat)lineHeight {
++ (CGFloat)endForString:(NSAttributedString*)string withSize:(CGSize)bounds {
     
+    // Create a path to render text in
+    // create the framesetter and render text
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string); 
+    CGSize size = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, (CFRange){}, NULL, bounds, NULL);
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, size.width, size.height) );
+    
+    CTFrameRef frame = CTFramesetterCreateFrame(framesetter,
+                                                CFRangeMake(0, [string length]), path, NULL);
+    CFArrayRef lines = CTFrameGetLines(frame);
+    CGFloat result = 0;
+    if (CFArrayGetCount(lines) != 0 ) {
+        CTLineRef lastLine = CFArrayGetValueAtIndex(lines, CFArrayGetCount(lines)-1);
+        NSLog(@"trailing:%f", CTLineGetTrailingWhitespaceWidth(lastLine));
+        CFRange range = CTLineGetStringRange(lastLine);
+        if (range.length > 0) {
+            result = [self sizeForString:[string attributedSubstringFromRange:NSMakeRange(range.location, range.length)] thatFits:bounds].width;
+        }
+    }
+    // Clean up
+    CFRelease(frame);
+    CFRelease(path);
+    CFRelease(framesetter);
+    return result;
+}
+
++ (NSAttributedString *)attributedStringForString:(NSString *)aString 
+                                             font:(UIFont *)aFont 
+                                            color:(UIColor *)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent {    
     if (!aString)
         return nil;
     
@@ -1191,7 +1222,8 @@ static Rdio* _rdio;
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierFirstLineHeadIndent, sizeof(float_t), (float_t[]){ 10 } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierFirstLineHeadIndent, sizeof(float_t), (float_t[]){ indent } },
+            //(CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineBreakMode, sizeof(CTLineBreakMode), (CTLineBreakMode[]){ kCTLineBreakByTruncatingTail } },
         };
         
         CTParagraphStyleRef paragraphStyleRef = CTParagraphStyleCreate(paragraphStyles, sizeof(paragraphStyles) / sizeof(CTParagraphStyleSetting));
@@ -1203,11 +1235,53 @@ static Rdio* _rdio;
                                                                                                          fontAttr, kCTFontAttributeName,
                                                                                                          foregroundColorAttr, kCTForegroundColorAttributeName,
                                                                                                          paragraphStyleAttr, kCTParagraphStyleAttributeName,
-                                                                                                         [NSNumber numberWithInt:kCTUnderlineStyleSingle], kCTUnderlineStyleAttributeName,
                                                                                                          nil]] autorelease];
     
     return returnedString;
     
+}
+
++ (void)drawAttributedString:(NSAttributedString*)string atPoint:(CGPoint)origin withWidth:(CGFloat)width andMaxHeight:(CGFloat)height {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSaveGState(context);
+    CGSize size = [Util sizeForString:string thatFits:CGSizeMake(width, height)];
+    size.width = width;
+    // Flip the coordinate system
+    CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+    CGContextTranslateCTM(context, origin.x, origin.y + size.height);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    
+    // Create a path to render text in
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, size.width, size.height) );
+    
+    // create the framesetter and render text
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string); 
+    CTFrameRef frame = CTFramesetterCreateFrame(framesetter,
+                                                CFRangeMake(0, [string length]), path, NULL);
+    
+    CTFrameDraw(frame, context);
+    
+    // Clean up
+    CFRelease(frame);
+    CFRelease(path);
+    CFRelease(framesetter);
+    CGContextRestoreGState(context);
+}
+
+
++ (void)setTopRightForView:(UIView*)view toPoint:(CGPoint)point {
+    CGRect frame = view.frame;
+    frame.origin.x = point.x - frame.size.width;
+    frame.origin.y = point.y;
+    view.frame = frame;
+}
+
++ (void)setBottomLeftForView:(UIView*)view toPoint:(CGPoint)point {
+    CGRect frame = view.frame;
+    frame.origin.x = point.x;
+    frame.origin.y = point.y - frame.size.height;
+    view.frame = frame;
 }
 
 @end

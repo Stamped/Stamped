@@ -20,10 +20,21 @@
 #import "STRippleBar.h"
 #import "STUserViewController.h"
 #import "STPreviewsView.h"
+#import "STChunksView.h"
+#import "STTextChunk.h"
+#import "STImageCache.h"
+#import "STPhotoViewController.h"
+#import "STActionManager.h"
+#import "STStampedActions.h"
 
 static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
 static const CGFloat _imagePaddingY = _imagePaddingX;
+
+static const CGFloat _imageMaxX = 54;
+static const CGFloat _bodyX = 64;
+static const CGFloat _minimumCellHeight = 64;
+static const CGFloat _bodyWidth = 214;
 
 @interface STStampDetailCommentsView ()
 
@@ -170,7 +181,7 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @end
 
-@interface STStampDetailCommentView : STAStampDetailCommentWithText
+@interface STStampDetailCommentView : UIView
 
 -(id)initWithComment:(id<STComment>)comment;
 
@@ -179,21 +190,43 @@ andProfileImageSize:(STProfileImageSize)size {
 @implementation STStampDetailCommentView
 
 - (id)initWithComment:(id<STComment>)comment {
-    self = [super initWithUser:comment.user 
-                       created:comment.created 
-                          text:comment.blurb
-           andProfileImageSize:STProfileImageSize31];
+    self = [super initWithFrame:CGRectMake(0, 0, 290, 48)];
     if (self) {
-        //Nothing
+        UIView* userImage = [Util profileImageViewForUser:comment.user withSize:STProfileImageSize31];
+        [Util setTopRightForView:userImage toPoint:CGPointMake(_imageMaxX, 6)];
+        [self addSubview:userImage];
+        UIView* userButton = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:comment.user];
+        [self addSubview:userButton];
+        
+        UIView* chunks = [STStampDetailCommentsView viewWithUser:comment.user
+                                                          header:nil
+                                                            date:[comment created]
+                                                         andBody:[comment blurb]];
+        
+        if (chunks.frame.size.height < self.frame.size.height) {
+            chunks.frame = [Util centeredAndBounded:chunks.frame.size inFrame:CGRectMake(0, 0, chunks.frame.size.width, self.frame.size.height)];
+        }
+        [Util reframeView:chunks withDeltas:CGRectMake(_bodyX, 0, 0, 0)];
+        [self addSubview:chunks];
+        
+        CGRect finalFrame = self.frame;
+        finalFrame.size.height = MAX(finalFrame.size.height, CGRectGetMaxY(chunks.frame) + 12);
+        self.frame = finalFrame;
     }
     return self;
 }
 
+- (void)userImageClicked:(id<STUser>)user {
+    STActionContext* context = [STActionContext contextInView:self];
+    id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
 @end
 
-@interface STStampDetailBlurbView : STAStampDetailCommentWithText
+@interface STStampDetailBlurbView : STViewContainer
 
-- (id)initWithStamp:(id<STStamp>)stamp;
+- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate;
 
 @property (nonatomic, readonly, copy) NSString* imageURL;
 
@@ -203,39 +236,120 @@ andProfileImageSize:(STProfileImageSize)size {
 
 @synthesize imageURL = imageURL_;
 
-- (id)initWithStamp:(id<STStamp>)stamp {
-    id<STContentItem> item = [stamp.contents objectAtIndex:0];
-    self = [super initWithUser:stamp.user created:item.created text:item.blurb andProfileImageSize:STProfileImageSize46];
+- (void)viewURL:(NSString*)url {
+    STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:url]] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+}
+
+- (void)userImageClicked:(id<STUser>)user {
+    STActionContext* context = [STActionContext contextInView:self];
+    id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
+- (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate {
+    self = [super initWithDelegate:delegate andFrame:CGRectMake(0, 0, 290, 0)];
     if (self) {
-        if (item.images) {
-            id<STImageList> imageList = [item.images objectAtIndex:0];
-            if (imageList.sizes.count > 0) {
-                id<STImage> image = [imageList.sizes objectAtIndex:0];
-                if (image.width && image.height && image.url) {
-                    CGSize imageSize = CGSizeMake(image.width.integerValue * [Util legacyImageScale], image.height.integerValue * [Util legacyImageScale]);
-                    UIView* imageView = [Util imageViewWithURL:[NSURL URLWithString:image.url]
-                                                      andFrame:CGRectMake(0, 0, imageSize.width, imageSize.height)];
-                    imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, MIN(200,imageSize.height))];
-                    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, imageView.frame.size.height + 10)];
-                    [self addSubview:imageView];
-                    [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageClicked:)]];
+        UIView* userImage = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize46];
+        [Util setTopRightForView:userImage toPoint:CGPointMake(_imageMaxX, 6)];
+        [self addSubview:userImage];
+        UIView* userButton = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stamp.user];
+        [self addSubview:userButton];
+        
+        NSInteger blurbCount = stamp.contents.count;
+        if (blurbCount > 0) {
+            BOOL first = YES;
+            for (NSInteger i = blurbCount - 1; i >= 0; i--) {
+                NSString* header;
+                if (!first) {
+                    [self insertDots];
+                    header = @" added";
+                }
+                else {
+                    NSString* subcategory = stamp.entity.subcategory;
+                    NSString* formatString;
+                    NSSet* vowels = [NSSet setWithObjects:@"a", @"e", @"i", @"o", @"u", nil];
+                    if ([vowels containsObject:[subcategory substringToIndex:1]]) {
+                        formatString = @" stamped an %@";
+                    }
+                    else {
+                        formatString = @" stamped a %@";
+                    }
+                    header = [NSString stringWithFormat:formatString, subcategory];
+                    first = NO;
+                }
+                id<STContentItem> item = [stamp.contents objectAtIndex:i];
+                UIView* chunks = [STStampDetailCommentsView viewWithUser:stamp.user
+                                                                  header:header
+                                                                    date:[item created]
+                                                                 andBody:[item blurb]];
+                [Util reframeView:chunks withDeltas:CGRectMake(_bodyX, 0, 0, 0)];
+                [self appendChildView:chunks];
+                if (item.images.count) {
+                    id<STImageList> imageList = [item.images objectAtIndex:0];
+                    NSArray* sizes = imageList.sizes;
+                    if (sizes.count) {
+                        CGSize size;
+                        NSString* url = nil;
+                        for (id<STImage> image in sizes) {
+                            if (image.height && image.width && image.url) {
+                                CGSize curSize = CGSizeMake(image.width.floatValue, image.height.floatValue);
+                                if (!url || curSize.width > size.width) {
+                                    size = curSize;
+                                    url = image.url;   
+                                }
+                            }
+                        }
+                        if (url) {
+                            size.width /= [Util imageScale];
+                            size.height /= [Util imageScale];
+                            CGRect imageFrame = [Util centeredAndBounded:size inFrame:CGRectMake(_bodyX, 0, _bodyWidth, size.height)];
+                            imageFrame.origin.y = 0;
+                            UIImageView* imageView = [[[UIImageView alloc] initWithFrame:imageFrame] autorelease];
+                            CALayer* gradient = [Util addGradientToLayer:imageView.layer withColors:[UIColor stampedDarkGradient] vertical:YES];
+                            [[STImageCache sharedInstance] imageForImageURL:url andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                                imageView.image = image;
+                                [gradient removeFromSuperlayer];
+                            }];
+                            UIView* imageButton = [Util tapViewWithFrame:CGRectMake(0, 0, imageFrame.size.width, imageFrame.size.height) 
+                                                                  target:self 
+                                                                selector:@selector(viewURL:)
+                                                              andMessage:url];
+                            imageView.userInteractionEnabled = YES;
+                            [imageView addSubview:imageButton];
+                            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 12)];
+                            [self appendChildView:imageView];
+                        }
+                    }
                 }
             }
         }
         CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
         if ( previewHeight > 0) {
-            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 8)];
+            [self insertDots];
+            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 5)];
             STPreviewsView *view = [[[STPreviewsView alloc] initWithFrame:CGRectZero] autorelease];
             [view setupWithStamp:stamp maxRows:2];
             CGRect frame = view.frame;
-            frame.origin.x = 60.0f;
+            frame.origin.x = _bodyX;
             //frame.origin.y = self.frame.size.height;
             //frame.size.height += previewHeight;
             view.frame = frame;
-            [Util appendView:view toParentView:self];
+            [self appendChildView:view];
         }
+        
+        CGRect finalFrame = self.frame;
+        finalFrame.size.height = MAX(finalFrame.size.height, _minimumCellHeight);
+        self.frame = finalFrame;
     }
     return self;
+}
+
+- (void)insertDots {
+    UIImageView* dotsView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_sDetail_dots"]] autorelease];
+    [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 14 - dotsView.frame.size.height)];
+    [Util reframeView:dotsView withDeltas:CGRectMake(_bodyX, 0, 0, 0)];
+    [self appendChildView:dotsView];
 }
 
 - (void)imageClicked:(id)notImportant {
@@ -255,7 +369,6 @@ andProfileImageSize:(STProfileImageSize)size {
 @implementation STStampDetailCommentsView
 
 @synthesize stamp = stamp_;
-@synthesize delegate = delegate_;
 
 - (void)setStamp:(id<STStamp>)stamp {
     if (!stamp_ || ![stamp_.modified isEqualToDate:stamp.modified]) {
@@ -270,22 +383,27 @@ andProfileImageSize:(STProfileImageSize)size {
         [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];
         
         STRippleBar* topBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:YES] autorelease];
-        [Util appendView:topBar toParentView:self];
+        [self appendChildView:topBar];
         
-        UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp] autorelease];
-        [Util appendView:blurbView toParentView:self];
+        UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp andDelegate:self] autorelease];
+        [self appendChildView:blurbView];
         if (index == 0 || YES) {
             NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
             for (NSInteger i = 0; i < limit; i++) {
                 NSInteger index = limit - (i + 1);
                 id<STComment> comment = [stamp.previews.comments objectAtIndex:index];
-                [Util appendView:[[[STStampDetailBarView alloc] init] autorelease] toParentView:self];
+                if (i == 0) {
+                    [self appendChildView:[[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_blurbView_keyline"]] autorelease]];
+                }
+                else {
+                    [self appendChildView:[[[STStampDetailBarView alloc] init] autorelease]];
+                }
                 STStampDetailCommentView* commentView = [[[STStampDetailCommentView alloc] initWithComment:comment] autorelease];
-                [Util appendView:commentView toParentView:self];
+                [self appendChildView:commentView];
             }
         }
         STRippleBar* bottomBar = [[[STRippleBar alloc] initWithPrimaryColor:stamp.user.primaryColor andSecondaryColor:stamp.user.secondaryColor isTop:NO] autorelease];
-        [Util appendView:bottomBar toParentView:self];
+        [self appendChildView:bottomBar];
         [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 2)];
         
         if (!first) {
@@ -302,9 +420,8 @@ andProfileImageSize:(STProfileImageSize)size {
 {
     CGFloat width = _totalWidth;
     CGFloat padding_x = 5;
-    self = [super initWithFrame:CGRectMake(padding_x, 0, width, 0)];
+    self = [super initWithDelegate:delegate andFrame:CGRectMake(padding_x, 0, width, 0)];
     if (self) {
-        delegate_ = delegate;
         self.backgroundColor = [UIColor whiteColor];
         
         self.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -333,50 +450,49 @@ andProfileImageSize:(STProfileImageSize)size {
 }
 
 + (UIView*)viewWithUser:(id<STUser>)user header:(NSString*)header date:(NSDate*)date andBody:(NSString*)body {
-    UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 240, 0)] autorelease];
+    
+    CGFloat width = _bodyWidth;
+    CGFloat lineHeight = 16;
+    
+    STChunk* startChunk = [[[STChunk alloc] initWithLineHeight:lineHeight start:0 end:0 width:width lineCount:1 lineLimit:NSIntegerMax] autorelease];
+    NSMutableArray* chunks = [NSMutableArray array];
     
     UIFont* userFont = [UIFont stampedBoldFontWithSize:10];
-    UIView* userView = [Util viewWithText:user.screenName
-                                     font:userFont
-                                    color:[UIColor stampedGrayColor] 
-                               lineHeight:12
-                                     mode:UILineBreakModeTailTruncation
-                               andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    [Util appendView:userView toParentView:view];
+    STTextChunk* userChunk = [[[STTextChunk alloc] initWithPrev:startChunk 
+                                                           text:user.screenName
+                                                           font:userFont
+                                                          color:[UIColor stampedGrayColor]] autorelease];
+    [chunks addObject:userChunk];
     
     if (header) {
         UIFont* headerFont = [UIFont stampedFontWithSize:10];
-        UIView* headerView = [Util viewWithText:header 
-                                           font:headerFont
-                                          color:[UIColor stampedLightGrayColor]
-                                     lineHeight:12
-                                           mode:UILineBreakModeTailTruncation
-                                     andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-        [Util reframeView:headerView withDeltas:CGRectMake(CGRectGetMaxX(userView.frame),
-                                                           0,
-                                                           0,
-                                                           0)];
-        [view addSubview:headerView];
+        STTextChunk* headerChunk = [[[STTextChunk alloc] initWithPrev:userChunk
+                                                                 text:header
+                                                                 font:headerFont
+                                                                color:[UIColor stampedLightGrayColor]] autorelease];
+        [chunks addObject:headerChunk];
     }
     
     UIFont* dateFont = [UIFont stampedFontWithSize:10];
-    UIView* dateView = [Util viewWithText:[Util shortUserReadableTimeSinceDate:date]
-                                     font:dateFont
-                                    color:[UIColor stampedLightGrayColor]
-                                     mode:UILineBreakModeTailTruncation
-                               andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    [Util reframeView:dateView withDeltas:CGRectMake(view.frame.size.width - dateView.frame.size.width, 0, 0, 0)];
-    [view addSubview:dateView];
     
-    UIFont* bodyFont = [UIFont stampedFontWithSize:10];
-    UIView* bodyView = [Util viewWithText:body
-                                     font:bodyFont
-                                    color:[UIColor stampedBlackColor]
-                                     mode:UILineBreakModeWordWrap
-                               andMaxSize:CGSizeMake(240, CGFLOAT_MAX)];
-    [view addSubview:bodyView];
-    [Util appendView:bodyView toParentView:view];
+    STTextChunk* dateChunk = [[[STTextChunk alloc] initWithPrev:startChunk 
+                                                           text:[Util shortUserReadableTimeSinceDate:date]
+                                                           font:dateFont
+                                                          color:[UIColor stampedLightGrayColor]] autorelease];
+    dateChunk.topLeft = CGPointMake(235 - dateChunk.end, 0);
+    [chunks addObject:dateChunk];
     
+    STChunk* bodyStart = [STChunk newlineChunkWithPrev:startChunk];
+    
+    UIFont* bodyFont = [UIFont stampedFontWithSize:12];
+    STTextChunk* bodyChunk = [[[STTextChunk alloc] initWithPrev:bodyStart
+                                                           text:body
+                                                           font:bodyFont
+                                                          color:[UIColor stampedDarkGrayColor]] autorelease];
+    [chunks addObject:bodyChunk];
+    
+    STChunksView* view = [[[STChunksView alloc] initWithChunks:chunks] autorelease];
+    NSLog(@"ChunkHeight:%f",view.frame.size.height);
     return view;
 }
 

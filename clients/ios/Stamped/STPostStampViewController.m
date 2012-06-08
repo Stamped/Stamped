@@ -68,10 +68,11 @@
     STStampedBySlice* slice = [[[STStampedBySlice alloc] init] autorelease];
     slice.entityID = self.stamp.entity.entityID;
     slice.limit = [NSNumber numberWithInteger:10];
-    [[STStampedAPI sharedInstance] stampedByForStampedBySlice:slice 
-                                         andCallback:^(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation) {
-                                           [self handleStampedBy:stampedBy withError:error];
-                                         }];
+      
+      [[STStampedAPI sharedInstance] stampedByForEntityID:self.stamp.entity.entityID
+                                              andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
+                                                  [self handleStampedBy:stampedBy withError:error]; 
+                                              }];
   }
   else {
     [Util warnWithMessage:@"Created post stamp with no stamp; CreateStamp bug" andBlock:^{
