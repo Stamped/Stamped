@@ -19,7 +19,7 @@ class StampedAPITodoTest(AStampedAPITestCase):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.entity = self.createEntity(self.tokenA)
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
-        self.todo = self.createTodo(self.tokenB, self.entity['entity_id'])
+        self.todo = self.createTodo(self.tokenB, self.entity['entity_id'], self.stamp['stamp_id'])
 
     def tearDown(self):
         self.deleteTodo(self.tokenB, self.entity['entity_id'])
@@ -81,6 +81,9 @@ class StampedAPITodosPreviews(StampedAPITodoTest):
         result = self.handleGET(path, data)
 
         self.assertEqual(len(result[0]['previews']['todos']), 2)
+        self.assertEqual(len(result[0]['previews']['stamps']), 1)
+        self.assertEqual(result[0]['previews']['stamps'][0]['stamp_id'], self.stamp['stamp_id'])
+        self.assertEqual(result[0]['previews']['stamps'][0]['user']['user_id'], self.userA['user_id'])
 
         self.deleteTodo(self.tokenD, self.entity['entity_id'])
         self.deleteTodo(self.tokenC, self.entity['entity_id'])

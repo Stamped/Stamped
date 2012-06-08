@@ -14,13 +14,9 @@ def show(request, authUserId, http_schema, **kwargs):
     actSlice.distance = 0
     activity = stampedAPI.getActivity(authUserId, actSlice)
 
-    from pprint import pformat
-    logs.info('### activity: \n%s' % pformat(activity))
     result = []
     for item in activity:
-        enriched = HTTPActivity().importEnrichedActivity(item)
-        logs.info('### enriched:\n%s' % enriched)
-        result.append(enriched.dataExport())
+        result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
     
     return transformOutput(result)
 
