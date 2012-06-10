@@ -385,7 +385,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 #pragma mark - Configurations
 
 + (void)setupConfigurations {
-    [STConfiguration addString:@"The Feed" forKey:_inboxNameKey];
+    [STConfiguration addString:@"Feed" forKey:_inboxNameKey];
     [STConfiguration addString:@"The Guide" forKey:_iWantToNameKey];
     [STConfiguration addString:@"Activity" forKey:_newsNameKey];
     [STConfiguration addString:@"Debug" forKey:_debugNameKey];

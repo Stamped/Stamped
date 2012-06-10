@@ -17,7 +17,7 @@
 @synthesize stamp = _stamp;
 @synthesize user = _user;
 @synthesize completionBlock = _completionBlock;
-@synthesize creditedScreenNames = _creditedScreenNames;
+@synthesize creditedUsers = _creditedUsers;
 
 - (void)dealloc
 {
@@ -25,7 +25,7 @@
     [_stamp release];
     [_user release];
     [_completionBlock release];
-    [_creditedScreenNames release];
+    [_creditedUsers release];
     [super dealloc];
 }
 

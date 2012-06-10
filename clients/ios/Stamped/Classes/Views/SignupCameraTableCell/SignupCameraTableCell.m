@@ -12,6 +12,7 @@
 @implementation SignupCameraTableCell
 @synthesize delegate;
 @synthesize progress=_progress;
+@synthesize titleLabel=_titleLabel;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {

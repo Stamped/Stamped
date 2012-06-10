@@ -19,6 +19,15 @@
 @interface STSliderScopeView (Internal)
 - (UIImageView*)imageViewForScope:(STStampedAPIScope)scope;
 - (void)setUserImageViewImage:(UIImage*)image;
+
+
+@end
+
+@interface STSliderScopeView ()
+
+
+@property (nonatomic, readwrite, retain) NSTimer* timer;
+
 @end
 
 @implementation STSliderScopeView
@@ -27,6 +36,7 @@
 @synthesize delegate;
 @synthesize dataSource;
 @synthesize selectedIndex=_selectedIndex;
+@synthesize timer = _timer;
 
 - (void)commonInit {
     
@@ -129,6 +139,8 @@
     if (_userImage) {
         [_userImage release], _userImage = nil;
     }
+    [_timer invalidate];
+    [_timer release];
     _textCallout = nil;
     [super dealloc];
 }
@@ -356,6 +368,8 @@
 }
 
 - (void)pan:(UIPanGestureRecognizer*)gesture {
+    [_timer invalidate];
+    self.timer = nil;
     
     CGPoint position = [gesture locationInView:self];
     
@@ -415,7 +429,8 @@
             viewPosition.x = MIN(position.x, maxX);
             viewPosition.x = MAX(minX, viewPosition.x);
             view.layer.position = viewPosition;
-            
+            self.timer = [NSTimer timerWithTimeInterval:.3 target:self selector:@selector(snapToClosest:) userInfo:nil repeats:NO];
+            [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
         }
         
     }
@@ -442,10 +457,8 @@
     
 }
 
-- (void)tap:(UITapGestureRecognizer*)gesture {
+- (void)tappedPoint:(CGPoint)position {
     
-    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideTextPopover) object:nil];
-    CGPoint position = [gesture locationInView:self];
     STStampedAPIScope scope = [self scopeForPosition:position];
     if (_scope != scope) {
         
@@ -496,9 +509,29 @@
         [CATransaction commit];
         
     }
-
 }
 
+- (void)tap:(UITapGestureRecognizer*)gesture {
+    
+    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideTextPopover) object:nil];
+    CGPoint position = [gesture locationInView:self];
+    [self tappedPoint:position];
+}
+
+- (void)snapToClosest:(id)notImportant {
+    NSLog(@"Snapped to closest");
+    [self.timer invalidate];
+    self.timer = nil;
+    //CGPoint position = CGPointMake(CGRectGetMidX(_draggingView.frame), CGRectGetMidY(_draggingView.frame));
+    
+    //self tappedPoint:position];
+    CGPoint position = [self positionForScope:_scope];
+    [UIView animateWithDuration:.1 animations:^{
+        CGRect frame = _draggingView.frame;
+        frame.origin.x = position.x - frame.size.width / 2 ;
+        _draggingView.frame = frame;
+    }];
+}
 
 #pragma mark -  UIGestureRecognizerDelegate
 
