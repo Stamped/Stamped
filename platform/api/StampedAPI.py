@@ -1246,7 +1246,6 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity
         self._activityDB.removeFollowActivity(authUserId, userId)
-        self._activityDB.remo
 
     @API_CALL
     def approveFriendship(self, data, auth):
