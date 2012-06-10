@@ -3068,7 +3068,7 @@ class HTTPActivity(Schema):
     def importEnrichedActivity(self, activity):
         data = activity.dataExport()
         data.pop('subjects')
-        data.pop('objects')
+        data.pop('objects', None)
 
         self.dataImport(data, overflow=True)
 

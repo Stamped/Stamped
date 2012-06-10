@@ -17,12 +17,12 @@ class MongoUserLinkedAlertsHistoryCollection(AMongoCollection):
     ### PUBLIC
 
     def addLinkedAlert(self, userId, serviceName, serviceId):
-        reference = '%s_%s' % serviceName, serviceId
+        reference = '%s_%s' % (serviceName, serviceId)
         self._createRelationship(keyId=userId, refId=reference)
         return True
 
     def checkLinkedAlert(self, userId, serviceName, serviceId):
-        reference = '%s_%s' % serviceName, serviceId
+        reference = '%s_%s' % (serviceName, serviceId)
         return self._checkRelationship(userId, reference)
 
     def getLinkedAlerts(self, userId, limit=None):

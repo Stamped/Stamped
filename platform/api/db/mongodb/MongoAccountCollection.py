@@ -15,6 +15,7 @@ from pymongo.errors             import DuplicateKeyError
 
 from AMongoCollection           import AMongoCollection
 from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
+from MongoUserLinkedAlertsHistoryCollection import MongoUserLinkedAlertsHistoryCollection
 from AAccountDB                 import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
@@ -214,12 +215,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return accounts
 
     def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
-        return user_linked_alerts_history_collection.addLinkedAlert(userId, serviceName, serviceId)
+        return self.user_linked_alerts_history_collection.addLinkedAlert(userId, serviceName, serviceId)
 
     def checkLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
-        result = user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
+        result = self.user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
         if result:
-            return result
+            return True
         # Check for deprecated alerts sent flag and update database if exists
         account = self.getAccount(userId)
         documentId = self._getObjectIdFromString(userId)
@@ -232,9 +233,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                     self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['twitter_id'])
                 elif k == 'netflix':
                     self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['netflix_user_id'])
+        return False
 
     def removeLinkedAccountAlertHistory(self, userId):
-        return user_linked_alerts_history_collection.removeLinkedAlerts(userId)
+        return self.user_linked_alerts_history_collection.removeLinkedAlerts(userId)
 
     def addLinkedAccount(self, userId, linkedAccount):
 

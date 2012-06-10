@@ -240,22 +240,22 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alerts                          = AccountAlertSettings()
-        alerts.ios_alert_credit         = True
-        alerts.ios_alert_like           = True
-        alerts.ios_alert_todo           = True
-        alerts.ios_alert_mention        = True
-        alerts.ios_alert_comment        = True
-        alerts.ios_alert_reply          = True
-        alerts.ios_alert_follow         = True
-        alerts.email_alert_credit       = True
-        alerts.email_alert_like         = False
-        alerts.email_alert_todo         = False
-        alerts.email_alert_mention      = True
-        alerts.email_alert_comment      = True
-        alerts.email_alert_reply        = True
-        alerts.email_alert_follow       = True
-        account.alerts                  = alerts
+        alert_settings                         = AccountAlertSettings()
+        alert_settings.ios_alert_credit         = True
+        alert_settings.ios_alert_like           = True
+        alert_settings.ios_alert_todo           = True
+        alert_settings.ios_alert_mention        = True
+        alert_settings.ios_alert_comment        = True
+        alert_settings.ios_alert_reply          = True
+        alert_settings.ios_alert_follow         = True
+        alert_settings.email_alert_credit       = True
+        alert_settings.email_alert_like         = False
+        alert_settings.email_alert_todo         = False
+        alert_settings.email_alert_mention      = True
+        alert_settings.email_alert_comment      = True
+        alert_settings.email_alert_reply        = True
+        alert_settings.email_alert_follow       = True
+        account.alert_settings                  = alert_settings
 
         # Validate screen name
         account.screen_name = account.screen_name.strip()
@@ -362,7 +362,9 @@ class StampedAPI(AStampedAPI):
 
 
 
-        return self.addAccount(account, tempImageUrl=tempImageUrl)
+        account = self.addAccount(account, tempImageUrl=tempImageUrl)
+        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, new_fb_account.user_token])
+        return account
 
     @API_CALL
     def addTwitterAccount(self, new_tw_account, tempImageUrl=None):
@@ -394,7 +396,10 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = user['profile_background_image_url']
 
-        return self.addAccount(account, tempImageUrl=tempImageUrl)
+        account = self.addAccount(account, tempImageUrl=tempImageUrl)
+        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                     args=[account.user_id, new_tw_account.user_token, new_tw_account.user_secret])
+        return account
 
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -508,7 +513,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamps(stampIds)
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
-        self._stampDB.removeStatsForStamps(stampIds)
+        self._stampStatsDB.removeStatsForStamps(stampIds)
         ### TODO: If restamp, remove from credited stamps' comment list?
 
         # Remove comments
@@ -836,9 +841,6 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
-
-        ### TODO: Deprecate passing parameter "twitterIds"
-
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Twitter)
@@ -848,61 +850,47 @@ class StampedAPI(AStampedAPI):
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
 #            return False
 
-        users = []
-
         # Grab friend list from Twitter API
-        users = self._getTwitterFollowers(twitterKey, twitterSecret)
+        tw_followers = self._getTwitterFollowers(twitterKey, twitterSecret)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
-        for user in users:
+        for user in tw_followers:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
 
         # Generate activity item
-        self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
-                                             body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
-
-        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
-
-#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
+        if len(userIds) > 0:
+            self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
+                                                 body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
 
         return True
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-
-        ### TODO: Deprecate passing parameter "facebookIds"
-
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Facebook)
         if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id):
             return False
-#        if account.facebook_alerts_sent == True or not account.facebook_name:
-#            return
-
-        users = []
 
         # Grab friend list from Facebook API
-        users = self._getFacebookFriends(facebookToken)
+        fb_friends = self._getFacebookFriends(facebookToken)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
-        for user in users:
+        for user in fb_friends:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
 
         # Generate activity item
-        self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
-                                             body = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
-
-        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
-#        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
+        if len(userIds) > 0:
+            self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
+                                          body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
 
     @API_CALL
     def addToNetflixInstant(self, authUserId, netflixId):
