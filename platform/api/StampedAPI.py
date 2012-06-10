@@ -810,13 +810,14 @@ class StampedAPI(AStampedAPI):
         # Verify account is valid and
         self.verifyLinkedAccount(linkedAccount)
 
-        self._accountDB.addLinkedAccount(authUserId, linkedAccount)
+        linkedAccount = self._accountDB.addLinkedAccount(authUserId, linkedAccount)
 
         # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, linkedAccount.token])
         elif linkedAccount.service_name == 'twitter':
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                         args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
@@ -834,7 +835,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId):
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
 
         ### TODO: Deprecate passing parameter "twitterIds"
 
@@ -850,7 +851,7 @@ class StampedAPI(AStampedAPI):
         users = []
 
         # Grab friend list from Twitter API
-        users = self._getTwitterFollowers(twitterKye, twitterSecret)
+        users = self._getTwitterFollowers(twitterKey, twitterSecret)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)

@@ -300,14 +300,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             if k in valid_fields and k is not None:
                 setattr(newLinkedAccount, k, v)
 
-        logs.info('### newLinkedAccount: %s' % newLinkedAccount)
-
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
             {'$set': { 'linked.%s' % newLinkedAccount.service_name : newLinkedAccount.dataExport() } }
         )
 
-        return True
+        return newLinkedAccount
 
     def removeLinkedAccount(self, userId, linkedAccount):
         fields = {}

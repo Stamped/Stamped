@@ -33,7 +33,7 @@ def add(request, authUserId, http_schema, **kwargs):
     linkedAccount = http_schema.exportLinkedAccount()
     result = stampedAPI.addLinkedAccount(authUserId, linkedAccount)
 
-    return transformOutput(result)
+    return transformOutput(True)
 
 @handleHTTPRequest(http_schema=HTTPRemoveLinkedAccountForm)
 @require_http_methods(["POST"])
