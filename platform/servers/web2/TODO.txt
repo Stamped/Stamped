@@ -59,10 +59,9 @@ TODO:
         * DONE - Collapsable stamp list
         * DONE - sDetail overlay
         * DONE - Autocentering based on user's location
-        * ALPHA - Customize stamp popup
-        * ALPHA - Share this map button
-            * large z-index -- nuance positioning behavior on hover
-        * Incorporate geocoded metropolitan area or into marker cluster hover
+        * DONE - Share this map widget
+        * BETA - Customize stamp popup
+        * Incorporate closest geocoded metropolitan area in marker cluster hover
     * Profile Page:
         * header:
             * DONE - Dynamic, category-dependent header titles
@@ -92,7 +91,6 @@ TODO:
     * maps
         * animate pin click and/or hover?
         * customize google maps style
-        * customize google maps UI controls
         * need a way to pop back once you jump into a stack
         * animation for when you click on a marker cluster
     

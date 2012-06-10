@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse
+    import os, logs, re, time, urlparse, math
     
     import Blacklist
     import libs.ec2_utils
@@ -508,6 +508,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamps(stampIds)
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
+        self._stampDB.removeStatsForStamps(stampIds)
         ### TODO: If restamp, remove from credited stamps' comment list?
 
         # Remove comments
@@ -809,13 +810,14 @@ class StampedAPI(AStampedAPI):
         # Verify account is valid and
         self.verifyLinkedAccount(linkedAccount)
 
-        self._accountDB.addLinkedAccount(authUserId, linkedAccount)
+        linkedAccount = self._accountDB.addLinkedAccount(authUserId, linkedAccount)
 
         # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, linkedAccount.token])
         elif linkedAccount.service_name == 'twitter':
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                         args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
@@ -833,7 +835,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId):
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
 
         ### TODO: Deprecate passing parameter "twitterIds"
 
@@ -849,7 +851,7 @@ class StampedAPI(AStampedAPI):
         users = []
 
         # Grab friend list from Twitter API
-        users = self._getTwitterFollowers(twitterKye, twitterSecret)
+        users = self._getTwitterFollowers(twitterKey, twitterSecret)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
@@ -1245,7 +1247,6 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity
         self._activityDB.removeFollowActivity(authUserId, userId)
-        self._activityDB.remo
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -1821,7 +1822,8 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             stampIds[stamp.stamp_id] = stamp
 
-        stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
+        stats = self.getStampStats(stampIds.keys())
+        # stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
 
         logs.debug('Time for getStatsForStamps: %s' % (time.time() - t1))
         t1 = time.time()
@@ -1860,7 +1862,7 @@ class StampedAPI(AStampedAPI):
         underlyingStampIds      = {}
         allUnderlyingStampIds   = set()
 
-        for stat in stats:
+        for stat in stats.values():
             if stat.preview_credits is not None:
                 for credit in stat.preview_credits[:previewLength]:
                     allUnderlyingStampIds.add(credit)
@@ -1882,7 +1884,7 @@ class StampedAPI(AStampedAPI):
         allCommentIds   = set()
         commentIds      = {}
 
-        for stat in stats:
+        for stat in stats.values():
             # Comments
             if stat.preview_comments is not None:
                 for commentId in stat.preview_comments[:previewLength]:
@@ -1921,7 +1923,7 @@ class StampedAPI(AStampedAPI):
         for k, v in commentIds.items():
             allUserIds.add(v.user.user_id)
 
-        for stat in stats:
+        for stat in stats.values():
             # Likes
             if stat.preview_likes is not None:
                 for like in stat.preview_likes[:previewLength]:
@@ -1982,10 +1984,9 @@ class StampedAPI(AStampedAPI):
 
                 # Previews
                 previews = Previews()
-                for stat in stats:
-                    if str(stat.stamp_id) == str(stamp.stamp_id):
-                        break
-                else:
+                try:
+                    stat = stats[stamp.stamp_id]
+                except KeyError:
                     stat = None
 
                 if stat is not None:
@@ -2584,6 +2585,9 @@ class StampedAPI(AStampedAPI):
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
 
+        # Remove from stats
+        self._stampStatsDB.removeStampStats(stampId)
+
         ### TODO: Remove from activity? To do? Anything else?
 
         # Remove comments
@@ -2681,12 +2685,33 @@ class StampedAPI(AStampedAPI):
 
         return stamp
 
+    def getStampStats(self, stampIds):
+        if isinstance(stampIds, basestring):
+            # One stampId
+            try:
+                stat = self._stampStatsDB.getStampStats(stampIds)
+            except (StampedUnavailableError, KeyError):
+                stat = self.updateStampStatsAsync(stampIds)
+            return stat
+
+        else:
+            # Multiple stampIds
+            statsList = self._stampStatsDB.getStatsForStamps(stampIds)
+            statsDict = {}
+            for stat in statsList:
+                statsDict[stat.stamp_id] = stat 
+            for stampId in stampIds:
+                if stampId not in statsDict:
+                    statsDict[stampId] = self.updateStampStatsAsync(stampId)
+            return statsDict
+
     def updateStampStatsAsync(self, stampId):
         stats                   = StampStats()
         stats.stamp_id          = stampId
 
         MAX_PREVIEW             = 10
         stamp                   = self._stampDB.getStamp(stampId)
+        stats.last_stamped      = stamp.timestamp.stamped
 
         likes                   = self._stampDB.getStampLikes(stampId)
         stats.num_likes         = len(likes)
@@ -2706,6 +2731,20 @@ class StampedAPI(AStampedAPI):
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
         stats.preview_comments  = map(lambda x: x.comment_id, comments[:MAX_PREVIEW])
+
+        entity                  = self._entityDB.getEntity(stamp.entity.entity_id)
+        stats.entity_id         = entity.entity_id
+        stats.kind              = entity.kind
+        stats.types             = entity.types
+
+        if entity.kind == 'place':
+            stats.lat           = entity.coordinates.lat
+            stats.lng           = entity.coordinates.lng
+
+        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
+        # days = (datetime.utcnow() - stamp.timestamp.stamped).days
+        # score = score - math.floor(days / 10.0)
+        stats.score = int(score)
 
         self._stampStatsDB.saveStampStats(stats)
 
@@ -3422,11 +3461,98 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
+        if guideRequest.scope == 'me':
+            ### TODO: Put something here
+            return []
 
-        # Hack to return kevin's guide for popular (until we build formula for popular)
-        if guideRequest.scope != 'inbox':
-            user = self._userDB.getUserByScreenName('kevin')
-            authUserId = user.user_id
+        if guideRequest.scope == 'inbox':
+            return self.getUserGuide(guideRequest, authUserId)
+
+        if guideRequest.scope == 'everyone':
+            types = None 
+
+            # Subsection conversion
+            if guideRequest.subsection is not None:
+                types = [ guideRequest.subsection ]
+            elif guideRequest.section is not None:
+                if guideRequest.section == 'food':
+                    types = [ 'restaurant', 'bar', 'cafe', 'food' ]
+                else:
+                    types = list(Entity.mapCategoryToTypes(guideRequest.section))
+
+            since = datetime.utcnow() - timedelta(days=90)
+
+            stampIds = self._stampStatsDB.getPopularStampIds(types=types, viewport=guideRequest.viewport, since=since)
+
+            stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+            stamps.sort(key=lambda x: stampIds.index(x.stamp_id))
+
+            entityIds = {}
+            userIds = {}
+
+            for stamp in stamps:
+                userIds[stamp.user.user_id] = None 
+                if stamp.entity.entity_id in entityIds:
+                    continue 
+                entityIds[stamp.entity.entity_id] = None 
+
+            # Entities
+            entities = self._entityDB.getEntities(entityIds.keys())
+
+            for entity in entities:
+                if entity.sources.tombstone_id is not None:
+                    # Convert to newer entity
+                    replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                    entityIds[entity.entity_id] = replacement
+                    ### TODO: Async process to replace reference
+                else:
+                    entityIds[entity.entity_id] = entity
+
+            # Users
+            users = self._userDB.lookupUsers(list(userIds.keys()))
+
+            for user in users:
+                userIds[user.user_id] = user.minimize()
+
+            # Build previews
+            entityStampPreviews = {}
+            for stamp in stamps:
+                stampPreview = StampPreview()
+                stampPreview.user = userIds[stamp.user.user_id]
+                stampPreview.stamp_id = stamp.stamp_id
+
+                if stamp.entity.entity_id in entityStampPreviews:
+                    entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
+                else:
+                    entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+
+            # Results
+            result = []
+            seenEntities = set()
+            for stamp in stamps:
+                if stamp.entity.entity_id in seenEntities:
+                    continue 
+                entity = entityIds[stamp.entity.entity_id]
+                seenEntities.add(stamp.entity.entity_id)
+
+                previews = Previews()
+                previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+                entity.previews = previews
+                result.append(entity)
+                
+            limit = 20
+            if guideRequest.limit is not None:
+                limit = guideRequest.limit
+            offset = 0
+            if guideRequest.offset is not None:
+                offset = guideRequest.offset
+
+            return result[offset:][:limit]
+
+
+    @API_CALL
+    def getUserGuide(self, guideRequest, authUserId):
+        assert(authUserId is not None) 
 
         try:
             guide = self._guideDB.getGuide(authUserId)
@@ -3543,9 +3669,6 @@ class StampedAPI(AStampedAPI):
 
         return result
 
-        # Build guide
-        return None
-
     @API_CALL
     def searchGuide(self, guideSearchRequest, authUserId):
         if guideSearchRequest.scope == 'inbox' and authUserId is not None:
@@ -3610,7 +3733,6 @@ class StampedAPI(AStampedAPI):
             else:
                 entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
 
-
         # Results
         result = []
         seenEntities = set()
@@ -3626,19 +3748,6 @@ class StampedAPI(AStampedAPI):
             result.append(entity)
 
         return result
-
-        #_searchStampCollection
-        """
-        @API_CALL
-        def searchStampCollection(self, searchSlice, authUserId=None):
-            t0 = time.time()
-            stampIds    = self._getScopeStampIds(searchSlice.scope, searchSlice.user_id, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
-
-            return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
-        """
-        pass
-
 
     @API_CALL
     def buildGuide(self, authUserId):
@@ -4736,7 +4845,7 @@ class StampedAPI(AStampedAPI):
             artistsModified = False
 
             if entity.artists is None:
-                return albumsModified
+                return artistsModified
 
             for stub in entity.artists:
                 artistId = stub.entity_id

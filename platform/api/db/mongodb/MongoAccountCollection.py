@@ -143,7 +143,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
                 raise StampedDuplicationError("An account already exists with screen name '%s'" % user.screen_name)
             else:
-                raise StampedDuplicationError("Account information already exists")
+                raise StampedDuplicationError("Account information already exists: %s" % e)
     
     def getAccount(self, userId):
         documentId = self._getObjectIdFromString(userId)
@@ -301,14 +301,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             if k in valid_fields and k is not None:
                 setattr(newLinkedAccount, k, v)
 
-        logs.info('### newLinkedAccount: %s' % newLinkedAccount)
-
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
             {'$set': { 'linked.%s' % newLinkedAccount.service_name : newLinkedAccount.dataExport() } }
         )
 
-        return True
+        return newLinkedAccount
 
     def removeLinkedAccount(self, userId, linkedAccount):
         fields = {}

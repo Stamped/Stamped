@@ -71,16 +71,25 @@
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .profile-image-large, .profile-image-medium {
+                    .profile-image-column {
+                        position: relative;
                         float: left;
-                    }
-                    
-                    .floatleft, .profile-image-large, .profile-image-medium {
-                        margin: 0 24px 0 0;
+                        
+                        a.follow-button {
+                            position: absolute;
+                            bottom: -15px;
+                            left: 50%;
+                            margin-left: -43px;
+                        }
+                        
+                        .profile-image-large, .profile-image-medium {
+                            float: none;
+                        }
                     }
                     
                     .lhs {
                         float: left;
+                        margin-left: 24px;
                         
                         a.screen-name {
                             color: #000;
@@ -1264,6 +1273,26 @@ ul.user-category-distribution {
     
     top: 15%;
     z-index: 125;
+}
+
+.sdetail-loading-content {
+    position: absolute;
+    top:  35%;
+    left: 50%;
+    
+    margin-left: -45px;
+    
+    display: none;
+    width:  90px;
+    height: 90px;
+    
+    background: url(/assets/img/sdetail-loading.gif) no-repeat;
+}
+
+.sdetail-loading {
+    .sdetail-loading-content {
+        display: block;
+    }
 }
 
 

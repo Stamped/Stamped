@@ -310,17 +310,17 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 #pragma mark - UIActionSheetDelegate
 
 - (void)_stampIt:(id<STTodo>)todo {
-    NSMutableArray* credits = [NSMutableArray array];
+    NSMutableArray<STUser>* credits = [NSMutableArray array];
     if (todo.previews.credits.count) {
         for (id<STStampPreview> credit in todo.previews.credits) {
-            NSString* screenName = credit.user.screenName;
-            if (screenName) {
-                [credits addObject:screenName];
+            if (credit.user) {
+                [credits addObject:credit.user];
+                NSLog(@"Has a credit: %@", credit.user.screenName);
             }
         }
     }
     STActionContext* context = [STActionContext context];
-    id<STAction> action = [STStampedActions actionViewCreateStamp:todo.source.entity.entityID creditScreenNames:credits withOutputContext:context];
+    id<STAction> action = [STStampedActions actionViewCreateStampWithEntity:todo.source.entity creditedUsers:credits withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 

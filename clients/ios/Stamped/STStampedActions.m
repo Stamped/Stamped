@@ -175,10 +175,11 @@ static STStampedActions* _sharedInstance;
           [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }
     }
-    else if ([action isEqualToString:@"stamped_view_create_stamp"] && source.sourceID != nil) {
+    else if ([action isEqualToString:@"stamped_view_create_stamp"] && source.sourceID != nil && context.entity) {
         handled = YES;
         if (flag) {
-            STCreateStampViewController* controller = [[[STCreateStampViewController alloc] initWithEntityID:source.sourceID] autorelease];
+            STCreateStampViewController* controller = [[[STCreateStampViewController alloc] initWithEntity:context.entity] autorelease];
+            controller.creditedUsers = context.creditedUsers;
             [[Util sharedNavigationController] pushViewController:controller animated:YES];
         }
     }
@@ -268,10 +269,11 @@ static STStampedActions* _sharedInstance;
                               andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:imageURL]];
 }
 
-+ (id<STAction>)actionViewCreateStamp:(NSString*)entityID creditScreenNames:(NSArray*)screenNames withOutputContext:(STActionContext*)context {
-    context.creditedScreenNames = [screenNames copy];
++ (id<STAction>)actionViewCreateStampWithEntity:(id<STEntity>)entity creditedUsers:(NSArray<STUser>*)users withOutputContext:(STActionContext*)context {
+    context.creditedUsers = users;
+    context.entity = entity;
     return [STSimpleAction actionWithType:@"stamped_view_create_stamp" 
-                                andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:entityID]];
+                                andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:entity.entityID]];
     
 }
 
