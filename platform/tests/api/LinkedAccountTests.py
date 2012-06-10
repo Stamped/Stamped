@@ -54,7 +54,6 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
 
 
     def setUp(self):
-        print('###### TESTING')
         (self.user, self.token) = self.createAccount(name='UserA')
 
     def tearDown(self):
@@ -63,7 +62,6 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
 class StampedAPILinkedAccountAdd(StampedAPILinkedAccountTest):
 
     def setUp(self):
-        print('#### TESTING')
         StampedAPILinkedAccountTest.setUp(self)
         (self.fb_user_token_a, self.fb_user_id_a)     = self._createFacebookTestUser(name='fbusera')
 
@@ -98,6 +96,7 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountTest):
             'service_name'   : 'facebook',
             'user_id'        : 'fbusera',
             'screen_name'    : 'fbusera',
+            'name'           : 'Test User',
             'token'          : self.fb_user_token_a,
             }
         self.addLinkedAccount(self.token, **data)

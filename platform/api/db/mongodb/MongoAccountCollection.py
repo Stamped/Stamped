@@ -102,12 +102,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # TODO: Eventually remove all instances of alerts.ios_alert_fav and alerts.email_alert_fav and replace them
         #  with the their equivalent "_todo" fields  For now, we convert for the sake of backward compatability
 
-        if 'alerts' in document and 'alert_settings' not in document:
-            document['alert_settings'] = document['alerts']
+        if 'alerts' in document:
             if 'ios_alert_fav' in document['alerts']:
                 document['alert_settings']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
+                del(document['alerts']['ios_alert_fav'])
             if 'email_alert_fav' in document['alerts']:
                 document['alert_settings']['email_alert_todo'] = document['alerts']['email_alert_fav']
+                del(document['alerts']['email_alert_fav'])
+            document['alert_settings'] = document['alerts']
             del(document['alerts'])
 
         if 'stats' in document and 'num_faves' in document['stats']:
@@ -243,13 +245,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # Verify that the linked account service does not already exist in the account
         #documents = self._collection.find({'linked_accounts.service_name' : linkedAccount.service_name })
         document = self._collection.find_one({ "linked.service_name" : linkedAccount.service_name })
-        logs.info('### documents: %s' % document)
         if document is not None:
             raise StampedDuplicationError("Linked '%s' account already exists for user." % linkedAccount.service_name)
         #documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
 
 
-        # create a dict of all twitter fields and bools for required fields
+        # create a dict of all twitter fields and bools indicating if required
         valid_twitter = {
             'service_name'      : True,
             'user_id'           : True,
@@ -264,7 +265,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'name'              : True,
             'screen_name'       : False,
             'token'             : True,
-            'token_expire'      : True,
+            'token_expiration'  : False,
         }
 
         valid_netflix = {
@@ -289,8 +290,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # Check for all required fields
         missing_fields = []
         valid = True
-        for k, v in valid_twitter.iteritems():
-            if v == True and k not in linkedDict or linkedDict[k] is None:
+        for k, v in valid_fields.iteritems():
+            if v == True and (k not in linkedDict or linkedDict[k] is None):
                 valid = False
                 missing_fields.append(k)
 
