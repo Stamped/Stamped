@@ -240,7 +240,7 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alerts                          = AccountAlerts()
+        alerts                          = AccountAlertSettings()
         alerts.ios_alert_credit         = True
         alerts.ios_alert_like           = True
         alerts.ios_alert_todo           = True
@@ -758,9 +758,9 @@ class StampedAPI(AStampedAPI):
     def updateAlerts(self, authUserId, alerts):
         account = self._accountDB.getAccount(authUserId)
 
-        accountAlerts = account.alerts
+        accountAlerts = account.alert_settings
         if accountAlerts is None:
-            accountAlerts = AccountAlerts()
+            accountAlerts = AccountAlertSettings()
 
         for k, v in alerts.dataExport().iteritems():
             if v:
@@ -768,7 +768,7 @@ class StampedAPI(AStampedAPI):
             else:
                 setattr(accountAlerts, k, False)
 
-        account.alerts = accountAlerts
+        account.alert_settings = accountAlerts
 
         self._accountDB.updateAccount(account)
         return account
@@ -4233,19 +4233,14 @@ class StampedAPI(AStampedAPI):
 
         # get the modified time of the last item of the previous activity cache block.  We use it for the slice
         before = None
-        logs.info('### prevBlockOffset %s' % prevBlockOffset)
         if prevBlockOffset is not None:
             prevBlockKey = self._createActivityCacheKey(authUserId, distance, prevBlockOffset)
-            logs.info('### type(prevBlockKey): %s   prevBlockKey: %s' % (type(prevBlockKey),prevBlockKey))
             try:
                 prevBlock = self._cache[prevBlockKey]
-                logs.info('### SUCCESSFULLY LOADED PREVBLOCK')
             except KeyError:
                 # recursively fill previous blocks if they have expired
-                logs.info('### LOADING PREVBLOCK')
                 prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
             except Exception as e:
-                logs.info('### Hit generic exception: %s' % e)
                 logs.error('Error retrieving activity items from memcached.  Is memcached running?')
                 prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
             if len(prevBlock) < self.ACTIVITY_CACHE_BLOCK_SIZE:
@@ -4309,9 +4304,6 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getActivity(self, authUserId, actSlice):
-        logs.info('#### self.ACTIVITY_CACHE_BLOCK_SIZE: %s' % self.ACTIVITY_CACHE_BLOCK_SIZE)
-        logs.info('#### self.ACTIVITY_CACHE_BUFFER_SIZE: %s' % self.ACTIVITY_CACHE_BUFFER_SIZE)
-
         activityData = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
 
         # Append user objects

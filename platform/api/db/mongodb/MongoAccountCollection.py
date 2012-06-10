@@ -101,12 +101,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # TODO: Eventually remove all instances of alerts.ios_alert_fav and alerts.email_alert_fav and replace them
         #  with the their equivalent "_todo" fields  For now, we convert for the sake of backward compatability
 
-        if 'alerts' in document and 'ios_alert_fav' in document['alerts']:
-            document['alerts']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
-            del(document['alerts']['ios_alert_fav'])
-        if 'alerts' in document and 'email_alert_fav' in document['alerts']:
-            document['alerts']['email_alert_todo'] = document['alerts']['email_alert_fav']
-            del(document['alerts']['email_alert_fav'])
+        if 'alerts' in document and 'alert_settings' not in document:
+            document['alert_settings'] = document['alerts']
+            if 'ios_alert_fav' in document['alerts']:
+                document['alert_settings']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
+            if 'email_alert_fav' in document['alerts']:
+                document['alert_settings']['email_alert_todo'] = document['alerts']['email_alert_fav']
+            del(document['alerts'])
 
         if 'stats' in document and 'num_faves' in document['stats']:
             document['stats']['num_todos'] = document['stats']['num_faves']
