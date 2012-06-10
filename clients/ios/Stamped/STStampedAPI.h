@@ -104,8 +104,8 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 - (STCancellation*)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice 
                                andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
-                                 andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+- (STCancellation*)entitiesForConsumptionSlice:(STConsumptionSlice*)slice 
+                                   andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
                                andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;

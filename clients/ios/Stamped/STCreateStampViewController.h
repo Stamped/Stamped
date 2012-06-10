@@ -14,4 +14,6 @@
 
 + (void)setupConfigurations;
 
+@property (nonatomic, readwrite, copy) NSArray<STUser>* creditedUsers;
+
 @end

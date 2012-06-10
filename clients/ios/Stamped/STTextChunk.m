@@ -29,7 +29,6 @@
     CGFloat end;
     NSInteger lineCount;
     NSInteger lineLimit = chunk.lineLimit - (chunk.lineCount - 1);
-    NSLog(@"%d", lineLimit);
     NSAttributedString* string = [Util attributedStringForString:text font:font color:color lineHeight:chunk.lineHeight indent:chunk.end];
     CGSize size = [Util sizeForString:string thatFits:CGSizeMake(chunk.frame.size.width, chunk.lineHeight * lineLimit)];
     lineCount = roundf(size.height / chunk.lineHeight);

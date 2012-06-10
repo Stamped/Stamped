@@ -209,7 +209,7 @@
             return @"friends";
             break;
         case STStampedAPIScopeEveryone:
-            return @"everyone";
+            return @"tastemakers";
             break;
         default:
             break;

@@ -128,7 +128,7 @@ static const NSInteger _cellsPerRow = 7;
             
             STActionContext *context = [STActionContext context];
             context.user = user;
-            id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+            id<STAction> action = [STStampedActions actionViewStamp:preview.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
             [view setupWithUser:user];
