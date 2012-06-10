@@ -937,6 +937,10 @@ class HTTPStampPreview(Schema):
         cls.addProperty('stamp_id',                         basestring)
         cls.addNestedProperty('user',                       HTTPUserMini)
 
+    def importStamp(self, stamp):
+        return self.importStampPreview(stamp)
+
+
     def importStampPreview(self, stampPreview):
         self.stamp_id = stampPreview.stamp_id
         self.user = HTTPUserMini().importUserMini(stampPreview.user)
@@ -2589,16 +2593,23 @@ class HTTPGuideRequest(Schema):
                 return subsection
             raise StampedInputError("Invalid subsection: %s" % subsection)
 
+        def checkScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            if scope in set(['me', 'inbox', 'everyone']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
+
         cls.addProperty('limit',                            int)
         cls.addProperty('offset',                           int)
         cls.addProperty('section',                          basestring, required=True, cast=checkSection)
         cls.addProperty('subsection',                       basestring, cast=checkSubsection)
         cls.addProperty('viewport',                         basestring) # lat0,lng0,lat1,lng1
-        cls.addProperty('scope',                            basestring)
+        cls.addProperty('scope',                            basestring, required=True, cast=checkScope)
 
     def exportGuideRequest(self):
-        # return GuideRequest().dataImport(self.dataExport(), overflow=True)
-
         data = self.dataExport()
         if 'viewport' in data:
             del(data['viewport'])
@@ -2633,9 +2644,30 @@ class HTTPGuideSearchRequest(HTTPGuideRequest):
         HTTPGuideRequest.__init__(self)
 
     def exportGuideSearchRequest(self):
-        result = GuideSearchRequest()
-        result.dataImport(HTTPGuideRequest.exportGuideRequest(self).dataExport())
-        return result 
+        data = self.dataExport()
+        if 'viewport' in data:
+            del(data['viewport'])
+        guideSearchRequest = GuideSearchRequest()
+        guideSearchRequest.dataImport(data)
+
+        if self.viewport is not None:
+            viewportData            = self.viewport.split(',')
+            
+            coordinates0            = CoordinatesSchema()
+            coordinates0.lat        = viewportData[0]
+            coordinates0.lng        = viewportData[1]
+            
+            coordinates1            = CoordinatesSchema()
+            coordinates1.lat        = viewportData[2]
+            coordinates1.lng        = viewportData[3]
+
+            viewport                = ViewportSchema()
+            viewport.upperLeft      = coordinates0
+            viewport.lowerRight     = coordinates1
+
+            guideSearchRequest.viewport   = viewport 
+
+        return guideSearchRequest
 
 
 # ###### #
@@ -2968,9 +3000,11 @@ class HTTPTodo(Schema):
         self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
         if todo.stamp is not None:
             self.source.stamp_ids   = [ todo.stamp.stamp_id ]
+        self.previews               = HTTPPreviews()
         if todo.previews is not None and todo.previews.todos is not None:
-            self.previews           = HTTPPreviews()
             self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
+        if todo.source_stamps is not None:
+            self.previews.stamps    = [HTTPStampPreview().importStamp(s) for s in todo.source_stamps]
         self.created                = todo.timestamp.created
         self.complete               = todo.complete
 

@@ -128,55 +128,63 @@ class ClientLogsEntry(Schema):
 class CategoryDistributionSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('category',                 basestring)
-        cls.addProperty('count',                    int)
+        cls.addProperty('category',                         basestring)
+        cls.addProperty('count',                            int)
 
 class UserStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_stamps',               int)
-        cls.addProperty('num_stamps_left',          int)
-        cls.addProperty('num_stamps_total',         int)
-        cls.addProperty('num_friends',              int)
-        cls.addProperty('num_followers',            int)
-        cls.addProperty('num_todos',                int)
-        cls.addProperty('num_credits',              int)
-        cls.addProperty('num_credits_given',        int)
-        cls.addProperty('num_likes',                int)
-        cls.addProperty('num_likes_given',          int)
-        cls.addProperty('num_unread_news',          int)
-        cls.addNestedPropertyList('distribution', CategoryDistributionSchema)
+        cls.addProperty('num_stamps',                       int)
+        cls.addProperty('num_stamps_left',                  int)
+        cls.addProperty('num_stamps_total',                 int)
+        cls.addProperty('num_friends',                      int)
+        cls.addProperty('num_followers',                    int)
+        cls.addProperty('num_todos',                        int)
+        cls.addProperty('num_credits',                      int)
+        cls.addProperty('num_credits_given',                int)
+        cls.addProperty('num_likes',                        int)
+        cls.addProperty('num_likes_given',                  int)
+        cls.addProperty('num_unread_news',                  int)
+        cls.addNestedPropertyList('distribution',           CategoryDistributionSchema)
 
 class StampStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_comments',             int) # DEPRECATED
-        cls.addProperty('num_todos',                int) # DEPRECATED
-        cls.addProperty('num_credit',               int) # DEPRECATED
-        cls.addProperty('num_likes',                int) # DEPRECATED
-        cls.addProperty('like_threshold_hit',       bool)
-        cls.addProperty('stamp_num',                int)
-        cls.addProperty('num_blurbs',               int)
+        cls.addProperty('num_comments',                     int) # DEPRECATED
+        cls.addProperty('num_todos',                        int) # DEPRECATED
+        cls.addProperty('num_credit',                       int) # DEPRECATED
+        cls.addProperty('num_likes',                        int) # DEPRECATED
+        cls.addProperty('like_threshold_hit',               bool)
+        cls.addProperty('stamp_num',                        int)
+        cls.addProperty('num_blurbs',                       int)
 
 class StampStats(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',                 basestring, required=True)
-        cls.addProperty('num_todos',                int)
-        cls.addProperty('num_likes',                int)
-        cls.addProperty('num_credits',              int)
-        cls.addProperty('num_comments',             int)
-        cls.addPropertyList('preview_todos',        basestring) # UserIds
-        cls.addPropertyList('preview_likes',        basestring) # UserIds
-        cls.addPropertyList('preview_credits',      basestring) # StampIds
-        cls.addPropertyList('preview_comments',     basestring) # CommentIds
+        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('kind',                             basestring)
+        cls.addPropertyList('types',                        basestring)
+        cls.addProperty('lat',                              float)
+        cls.addProperty('lng',                              float)
+        cls.addProperty('last_stamped',                     datetime)
+
+        cls.addProperty('score',                            int)
+        cls.addProperty('num_todos',                        int)
+        cls.addProperty('num_likes',                        int)
+        cls.addProperty('num_credits',                      int)
+        cls.addProperty('num_comments',                     int)
+        cls.addPropertyList('preview_todos',                basestring) # UserIds
+        cls.addPropertyList('preview_likes',                basestring) # UserIds
+        cls.addPropertyList('preview_credits',              basestring) # StampIds
+        cls.addPropertyList('preview_comments',             basestring) # CommentIds
 
 class EntityStats(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',  basestring, required=True)
-        cls.addProperty('num_stamps',  int)
-        cls.addPropertyList('popular_users',      basestring)
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addProperty('num_stamps',                       int)
+        cls.addPropertyList('popular_users',                basestring)
 
 
 

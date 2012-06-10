@@ -92,7 +92,7 @@
             maxWidth : 340
         });*/
         
-        var popup  = new InfoBox({
+        var popup = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
             pixelOffset: new google.maps.Size(-48, -32), 
@@ -519,6 +519,8 @@
              
             var complete = function() {
                 if (++done >= 2) {
+                    // update the stamp-list-view's scrollbar once we're done hiding & 
+                    // showing the relevant stamp-list-view-item's
                     update_stamp_list_scrollbars($list);
                 }
             };

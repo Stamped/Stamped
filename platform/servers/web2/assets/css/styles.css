@@ -176,6 +176,21 @@ header .header-body p.login a.button:hover {
 header .header-body p.login a.button:active {
   background-position: -176px -33px;
 }
+a.follow-button {
+  display: block;
+  width: 86px;
+  height: 31px;
+  background: url(/assets/img/join_signup_sprite.png) no-repeat;
+  background-position: 0 -66px;
+}
+a.follow-button:hover {
+  background-position: -88px -66px;
+  cursor: pointer;
+}
+a.follow-button:active {
+  background-position: -176px -66px;
+  cursor: pointer;
+}
 .post-header {
   position: relative;
   width: 100%;
@@ -190,9 +205,9 @@ header .header-body p.login a.button:active {
 }
 .user-logo-large {
   position: absolute;
-  display: block;
   top: -60px;
   left: -110px;
+  display: block;
   width: 210px;
   height: 210px;
   z-index: 160;
@@ -236,6 +251,12 @@ header .header-body p.login a.button:active {
   display: block;
   width: 136px;
   height: 136px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-large img {
   width: 128px;
@@ -246,12 +267,24 @@ header .header-body p.login a.button:active {
   -ms-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-large-ish {
   float: left;
   display: block;
   width: 102px;
   height: 102px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-large-ish img {
   width: 96px;
@@ -262,12 +295,24 @@ header .header-body p.login a.button:active {
   -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-medium-ish {
   float: left;
   display: block;
   width: 78px;
   height: 78px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-medium-ish img {
   width: 72px;
@@ -278,12 +323,24 @@ header .header-body p.login a.button:active {
   -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-medium {
   float: left;
   display: block;
   width: 58px;
   height: 58px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-medium img {
   width: 54px;
@@ -294,12 +351,24 @@ header .header-body p.login a.button:active {
   -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-small {
   float: left;
   display: block;
   width: 48px;
   height: 48px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-small img {
   width: 44px;
@@ -310,12 +379,24 @@ header .header-body p.login a.button:active {
   -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-tiny {
   float: left;
   display: block;
   width: 28px;
   height: 28px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .profile-image-tiny img {
   width: 24px;
@@ -326,6 +407,12 @@ header .header-body p.login a.button:active {
   -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 /* **************************************************************************
                                 USER GALLERY
@@ -387,10 +474,6 @@ header .header-body p.login a.button:active {
 
 }
 .static-map-small .static-map-inner .r0 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: 0px;
   position: absolute;
@@ -398,19 +481,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 0px;
+  left: 2px;
   border-width: 2px 0 2px 2px;
   -webkit-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
   -moz-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
@@ -419,10 +496,6 @@ header .header-body p.login a.button:active {
   transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r1 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -35px;
   position: absolute;
@@ -430,19 +503,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 37px;
+  left: 39px;
   border-width: 2px 0;
   -webkit-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
@@ -451,10 +518,6 @@ header .header-body p.login a.button:active {
   transform: perspective(200px) translate(7px, 0) rotatey(35deg);
 }
 .static-map-small .static-map-inner .r2 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -70px;
   position: absolute;
@@ -462,19 +525,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 72px;
+  left: 74px;
   border-width: 2px 0;
   -webkit-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
   -moz-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
@@ -483,10 +540,6 @@ header .header-body p.login a.button:active {
   transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r3 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -105px;
   position: absolute;
@@ -494,19 +547,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 107px;
+  left: 109px;
   border-width: 2px 2px 2px 0;
   -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
@@ -519,12 +566,12 @@ header .header-body p.login a.button:active {
   width: 100%;
   height: 100%;
   background: #333;
+  opacity: 0.10;
   -webkit-transition: opacity 0.1s ease-in-out;
   -moz-transition: opacity 0.1s ease-in-out;
   -ms-transition: opacity 0.1s ease-in-out;
   -o-transition: opacity 0.1s ease-in-out;
   transition: opacity 0.1s ease-in-out;
-  opacity: 0.10;
 }
 .static-map-small .static-map-inner .pin {
   background: url(/assets/img/pin_shadow.png);

@@ -139,6 +139,25 @@ header {
     }
 }
 
+a.follow-button {
+    display: block;
+    width:  86px;
+    height: 31px;
+    
+    background: url(/assets/img/join_signup_sprite.png) no-repeat;
+    background-position: 0 -66px;
+    
+    &:hover {
+        background-position: -88px  -66px;
+        cursor: pointer;
+    }
+    
+    &:active {
+        background-position: -176px -66px;
+        cursor: pointer;
+    }
+}
+
 .post-header {
     .fullwidth;
     .box-shadow(0, 3px, 3px, 0, @shadow);
@@ -151,11 +170,10 @@ header {
 
 .user-logo-large {
     position: absolute;
-    
-    display: block;
     top:  -60px;
     left: -110px;
     
+    display: block;
     width:  210px;
     height: 210px;
     
@@ -164,7 +182,6 @@ header {
 
 .user-logo-small {
     position: absolute;
-    
     top:   -0px;
     right: -22px;
     
@@ -177,7 +194,6 @@ header {
 
 .user-logo-tiny {
     position: absolute;
-    
     top:   -0px;
     right: -12px;
     
@@ -222,11 +238,13 @@ header {
     width:  @size + @border * 2;
     height: @size + @border * 2;
     
+    .unselectable();
     img {
         width:  @size;
         height: @size;
         
         .profile-image-border(@border);
+        .unselectable();
     }
 }
 
@@ -319,8 +337,6 @@ header {
         .backface-visibility(hidden);
         
         ._section(@x) {
-            /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-            /* TODO: remove this static background image */
             background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
             background-position: -(@x * @colsize);
             
@@ -332,19 +348,20 @@ header {
             
             top:  0;
             
-            border: @b solid rgba(0,0,0,0.9);
-            /*outline: 1px solid transparent;*/
-            /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-            /*.transform-style(preserve-3d);*/
+            border: @b solid #fff;
+            
+            //.box-shadow(0, 0, @b * 2, 0, @shadow);
+            //.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));
+            //.transform-style(preserve-3d);
             
             .transition(all, .1s, linear);
         }
         
         .__section(@x) when (@x > 0) {
-            left: @x * @colsize + @b;
+            left: @x * @colsize + @b * 2;
         }
         .__section(@x) when (@x = 0) {
-            left: @x * @colsize;
+            left: @x * @colsize + @b;
         }
         
         .section(@x) {
@@ -359,29 +376,34 @@ header {
             border-width: @b 0 @b @b;
             .transform(perspective(@perspective) translate(12px, 0) rotateY(-@angle));
         }
+        
         .r1 {
             .section(1);
             border-width: @b 0;
             .transform(perspective(@perspective) translate(7px,  0) rotateY(@angle));
+
         }
+        
         .r2 {
             .section(2);
             border-width: @b 0;
             .transform(perspective(@perspective) translate(-1px, 0) rotateY(-@angle));
         }
+        
         .r3 {
             .section(3);
             border-width: @b @b @b 0;
             .transform(perspective(@perspective) translate(-6px, 0) rotateY(@angle));
         }
+        
         .dark-layer {
             display: block;
             width:  100%;
             height: 100%;
             background: #333;
+            opacity: 0.10;
             
             .transition(opacity, .1s, ease-in-out);
-            opacity: 0.10;
         }
         
         .pin {

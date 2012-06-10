@@ -290,6 +290,9 @@ def map(request, schema, **kwargs):
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
     
+    #import time
+    #time.sleep(2)
+    
     logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':

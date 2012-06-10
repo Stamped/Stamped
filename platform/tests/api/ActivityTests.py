@@ -83,11 +83,6 @@ class StampedAPIActivityShow(StampedAPIActivityTest):
         result = self.showActivity(self.tokenA)
         self.assertEqual(len(result), 2)
 
-    def test_show_coordinates(self):
-        result = self.showActivity(self.tokenA, coordinates="40.745498,-73.977612")
-        self.assertEqual(len(result), 2)
-
-
 class StampedAPIActivityFriendship(StampedAPIActivityTest):
     def test_show_friendship(self):
         # Default (1 follower)
@@ -334,9 +329,6 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
         (self.userD, self.tokenD) = self.createAccount('UserD')
-        (self.userE, self.tokenE) = self.createAccount('UserE')
-
-        self.createFriendship(self.tokenE, self.userA)
 
         # User D friends User A
         self.createFriendship(self.tokenD, self.userA)
@@ -380,11 +372,11 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
         self.deleteAccount(self.tokenD)
-        self.deleteAccount(self.tokenE)
 
     def test_follow_activity(self):
         # There should be 1 personal activity item for User A - User D followed User A:
         results = self.showActivity(self.tokenA)
+        logs.info('### results %s' % results)
         self.assertEqual(len(results), 1)
         self._assertBody(results, ['UserD is now following you.'])
 
