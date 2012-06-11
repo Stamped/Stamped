@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """
+    # DEPRECATED (travis)
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -52,5 +53,4 @@ class SourceController(object):
 
 if __name__ == '__main__':
     pass
-    
-    
+
