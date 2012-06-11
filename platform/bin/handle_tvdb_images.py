@@ -16,6 +16,7 @@ from MongoStampedAPI    import MongoStampedAPI
 
 if __name__ == '__main__':
     import argparse
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('image_urls', nargs='*', action="append")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
@@ -31,6 +32,7 @@ if __name__ == '__main__':
         args.image_urls = args.image_urls[0]
     
     if args.image_urls is not None and len(args.image_urls) > 0:
+        # example url:  http://thetvdb.com/banners/_cache/posters/211751-2.jpg
         db.addEntityImages(args.image_urls)
     else:
         api  = MongoStampedAPI()
@@ -65,11 +67,9 @@ if __name__ == '__main__':
             pool.spawn(_process_entity, entity)
             
             if 0 == (index % (count / progress_count)):
-                utils.log("%s" % (utils.getStatusStr(index, count)))
+                utils.log("\n\nPROGRESS: %s\n\n" % (utils.getStatusStr(index, count)))
             
             index += 1
         
         pool.join()
-
-#http://thetvdb.com/banners/_cache/posters/211751-2.jpg
 
