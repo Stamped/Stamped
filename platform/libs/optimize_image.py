@@ -40,10 +40,10 @@ if __name__ == '__main__':
             modified = False
             
             for image in entity.images:
-                image_url    = image.sizes[0]
-                image_url    = db.addWebEntityImage(image_url)
+                image_url   = image.sizes[0].url
+                image_url   = db.addWebEntityImage(image_url)
                 
-                modified     = True
+                modified    = True
                 image.sizes[0].url = image_url
             
             if modified:
