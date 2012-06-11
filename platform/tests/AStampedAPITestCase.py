@@ -351,16 +351,18 @@ class AStampedAPITestCase(AStampedTestCase):
         return self.handleGET(path, data)
 
     def showActivity(self, token):
-        path = "activity/show.json"
+        path = "activity/collection.json"
         data = {
             'oauth_token'       : token['access_token'],
+            'scope'             : 'me',
             }
         return self.handleGET(path, data)
 
     def showFriendsActivity(self, token):
-        path = "activity/friends.json"
+        path = "activity/collection.json"
         data = {
             'oauth_token'       : token['access_token'],
+            'scope'             : 'friends',
             }
         return self.handleGET(path, data)
 
@@ -426,7 +428,7 @@ class AStampedAPITestCase(AStampedTestCase):
             data['oauth_token'] = token['access_token']
 
         if credit:
-            data['credit'] = credit
+            data['credits'] = credit
         
         stamp = self.handlePOST(path, data)
         self.assertValidKey(stamp['stamp_id'])

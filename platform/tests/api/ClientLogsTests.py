@@ -28,7 +28,7 @@ class StampedAPIClientLogsTests(AStampedAPITestCase):
         }
         
         result = self.handlePOST(path, data)
-        self.assertEqual(result, True)
+        self.assertEqual(result['result'], True)
 
 if __name__ == '__main__':
     main()

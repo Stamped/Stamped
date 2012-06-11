@@ -33,7 +33,7 @@ class MongoActivityLinkCollection(AMongoCollection):
             item                = ActivityLink()
             item.activity_id    = activityId 
             item.user_id        = userId
-            timestamp           = TimestampSchema()
+            timestamp           = BasicTimestamp()
             timestamp.created   = now
             timestamp.modified  = now
             item.timestamp      = timestamp

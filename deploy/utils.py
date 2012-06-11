@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, pickle, sys, threading, traceback
+import datetime, os, pickle, sys, threading, traceback
 
 from subprocess import Popen, PIPE
 from functools  import wraps
@@ -292,4 +292,12 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
                 return option[0]
         
         print "invalid input"
+
+def is_ec2():
+    """ returns whether or not this python program is running on EC2 """
+    
+    return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
+
+def get_modified_time(filename):
+    return datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 

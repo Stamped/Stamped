@@ -101,10 +101,10 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             logs.warning("Cannot get document")
             raise Exception
 
-    def getTodos(self, userId, genericCollectionSlice):
+    def getTodos(self, userId, timeSlice):
         query = { 'user_id' : userId }
 
-        return self._getSlice(query, genericCollectionSlice)
+        return self._getTimeSlice(query, timeSlice)
 
     def countTodos(self, userId):
         n = self._collection.find({'user_id': userId}).count()

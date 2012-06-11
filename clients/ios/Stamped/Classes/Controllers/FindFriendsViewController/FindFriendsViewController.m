@@ -117,7 +117,7 @@
     
     if (type == FindFriendsSelectionTypeContacts) {
         
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Allow Stamped to access your Address Book?" message:@"Contacts are sent securly and never stored." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Don't Allow" otherButtonTitles:@"OK", nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Allow Stamped to access your Address Book?" message:@"Contacts are sent securely and never stored." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Don't Allow" otherButtonTitles:@"OK", nil];
         [alert show];
         [alert release];
         

@@ -13,11 +13,13 @@
     UISwipeGestureRecognizer *_swipe;
     UIView *_welcomeView;
     UIView *_optionsView;
-    UIView *_container;
+    UIScrollView *_container;
     UIButton *_closeButton;
 }
 
 @property(nonatomic,assign) id <WelcomePopoverViewDelegate> delegate;
+
+- (void)showOptionsView;
 
 @end
 

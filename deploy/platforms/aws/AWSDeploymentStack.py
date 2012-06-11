@@ -12,6 +12,7 @@ import AWSDeploymentPlatform
 from ADeploymentStack       import ADeploymentStack
 from AWSInstance            import AWSInstance
 from errors                 import Fail
+from utils                  import lazy_property
 
 from boto.ec2.elb           import ELBConnection
 from boto.ec2.connection    import EC2Connection
@@ -26,6 +27,7 @@ from fabric.api             import *
 import fabric.contrib.files as fabricfiles
 
 class AWSDeploymentStack(ADeploymentStack):
+    
     def __init__(self, name, system, instances=None):
         ADeploymentStack.__init__(self, name, system)
         
@@ -974,4 +976,10 @@ class AWSDeploymentStack(ADeploymentStack):
                     break
                 
                 num_retries -= 1
+    
+    @lazy_property
+    def is_prod(self):
+        prod_stack_name = self.system.prod_stack
+        
+        return prod_stack_name is not None and prod_stack_name == self.name
 

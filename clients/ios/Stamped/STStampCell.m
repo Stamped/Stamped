@@ -51,21 +51,18 @@
       
       // user image view
       STAvatarView *imageView = [[STAvatarView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
+      imageView.delegate = (id<STAvatarViewDelegate>)self;
       [self addSubview:imageView];
       _userImageView = imageView;
       [imageView release];
-      
-      UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
-      [imageView addGestureRecognizer:tap];
-      [tap release];
-      
+            
       UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
       longPress.minimumPressDuration = 1.5f;
       [self addGestureRecognizer:longPress];
       [longPress release];
       
       // cell text
-      STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, originY, 200, 70.0f)];
+      STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, originY, self.bounds.size.width - 88.0f, 70.0f)];
       view.backgroundColor = [UIColor whiteColor];
       [self addSubview:view];
       [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
@@ -110,25 +107,29 @@
               UIFont *font = [UIFont stampedTitleLightFontWithSize:36];
               CGContextSetFillColorWithColor(ctx, [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.149f green:0.149f blue:0.149f alpha:1.0f] CGColor]);
               
-              CGFloat x = 0.0f;
-              CGFloat y = 18.0f;
+              CGPoint point = CGPointMake(0.0f, 18.0f);
+              CGFloat maxWidth = rect.size.width - 36.0f;
               BOOL _drawn = NO;
+              BOOL truncate = NO;
 
               for (NSInteger i = 0; i < _title.length; i++) {
-                
-                  BOOL truncate = (x > rect.size.width - 26.0f);
-                  NSString *subString = truncate ? @"." : [_title substringWithRange:NSMakeRange(i, 1)];
-                  CGSize size = [subString sizeWithFont:font];
-                  CGPoint point = CGPointMake(x, y);
-                  x += floorf(size.width + 1.5);
 
-                  truncate = (x > rect.size.width - 26.0f);
-                 
-                  // draw stamp
+                  NSString *subString = [_title substringWithRange:NSMakeRange(i, 1)];
+                  CGSize size = [subString sizeWithFont:font];
+                  CGFloat originX = floorf(point.x + (size.width + 1.5));
+                  
+                  // draw stamp at the last shown char
                   if (!_drawn && (truncate || i == _title.length-1)) {
                       _drawn = YES;
                       
-                      CGRect imageRect = CGRectMake(MIN(floorf(x - 7), rect.size.width-14.0f), 17.0f, 14.0f, 14.0f);
+                      CGFloat imageOrigin = MIN(floorf(originX - 7), rect.size.width-14.0f);
+                      if (truncate && i < _title.length-1) {
+                          if ([[_title substringWithRange:NSMakeRange(i, 1)] isEqualToString:@" "]) {
+                              imageOrigin -= size.width;
+                          }
+                      }
+                      
+                      CGRect imageRect = CGRectMake(imageOrigin, 17.0f, 14.0f, 14.0f);
                       imageRect.origin.y = floorf(rect.size.height - (17.0f+14.0f));
                       CGContextSaveGState(ctx);
                       CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
@@ -161,10 +162,17 @@
                   }
 
                   [subString drawAtPoint:point withFont:font];
+                  point.x = originX;
 
-                  if (x >= rect.size.width) {
+                  if (truncate) {
+                      if ([subString isEqualToString:@" "]) {
+                          point.x -= size.width;
+                      }
+                      [@"..." drawAtPoint:point withFont:font];
                       break;
                   }
+                  
+                  truncate = (point.x >= maxWidth && i != _title.length-2);
                   
               }
          
@@ -390,15 +398,18 @@
 }
 
 
-#pragma mark - Actions
+#pragma mark - STAvatarViewDelegate
 
-- (void)avatarTapped:(UITapGestureRecognizer*)gesture {
+- (void)stAvatarViewTapped:(STAvatarView*)view {
     
     if ([(id)delegate respondsToSelector:@selector(stStampCellAvatarTapped:)]) {
         [self.delegate stStampCellAvatarTapped:self];
     }
     
 }
+
+
+#pragma mark - Actions
 
 - (void)longPress:(UILongPressGestureRecognizer*)gesture {
     
@@ -436,38 +447,6 @@
      
     
 }
-
-/*
-- (void)drawRect:(CGRect)rect {
-    CGContextRef ctx = UIGraphicsGetCurrentContext(); //get the graphics context
-    CGContextSetRGBStrokeColor(ctx, 1.0, 0, 0, 1); //there are two relevant color states, "Stroke" -- used in Stroke drawing functions and "Fill" - used in fill drawing functions
-    //now we build a "path"
-    CGFloat lineHeight = 20;
-    CGContextMoveToPoint(ctx, 0, lineHeight);
-    //add a line from 0,0 to the point 100,100
-    CGContextAddLineToPoint( ctx, 100, lineHeight);
-    //"stroke" the path
-    CGContextStrokePath(ctx);
-
-    // An attributed string containing the text to render
-    UIFont* font = [UIFont stampedFontWithSize:20];
-    NSAttributedString* attString = [Util attributedStringForString:@"This is a test 1 2 3 asklfadsk lfklja " 
-                                                               font:font
-                                                              color:[UIColor blueColor]
-                                                         lineHeight:lineHeight
-                                                             indent:0];
-    NSLog(@"Descender:%f",font.descender);
-    NSLog(@"End:%f", [Util endForString:attString withSize:CGSizeMake(100, CGFLOAT_MAX)] );
-    [Util drawAttributedString:attString atPoint:CGPointMake(0, floorf(-font.descender))];
-    NSAttributedString* attString2 = [Util attributedStringForString:@"This is a test 1 2 3 asklfadsklfklja akfdskldfasklfd" 
-                                                               font:[UIFont stampedFontWithSize:12]
-                                                              color:[UIColor blueColor]
-                                                         lineHeight:16 
-                                                             indent:5];
-    [Util drawAttributedString:attString2 atPoint:CGPointMake(0, 26)];
-    
-}
-*/
 
 @end
 

@@ -79,21 +79,21 @@ class StampedAPIUsersSearch(StampedAPIUserTest):
         path = "users/search.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": "%s" % self.userC['screen_name'][:3]
+            "query": "%s" % self.userC['screen_name'][:3]
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 1)
         
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": "%s" % self.userC['screen_name'][:3], 
+            "query": "%s" % self.userC['screen_name'][:3], 
             'relationship' : 'followers', 
         }
         result = self.handlePOST(path, data)
         
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": "%s" % self.userC['screen_name'][:3], 
+            "query": "%s" % self.userC['screen_name'][:3], 
             'relationship' : 'following', 
         }
         result = self.handlePOST(path, data)
@@ -134,7 +134,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
                     '%s@stamped.com' % self.userB['screen_name']]
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": ','.join(emails)
+            "query": ','.join(emails)
         }
         result = self.handlePOST(path, data)
         self.assertLength(result, 2)
@@ -160,7 +160,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         path = "users/find/phone.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": ','.join(numbers)
+            "query": ','.join(numbers)
         }
         result = self.handlePOST(path, data)
         self.assertLength(result, 2)
@@ -186,7 +186,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         path = "users/find/phone.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": number
+            "query": number
         }
         result = self.handlePOST(path, data)
         self.assertLength(result, 2)
@@ -207,7 +207,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         path = "users/find/phone.json"
         data = { 
             "oauth_token": self.tokenC['access_token'],
-            "q": ','.join(numbers)
+            "query": ','.join(numbers)
         }
         result = self.handlePOST(path, data)
 
@@ -255,7 +255,6 @@ class StampedAPISuggested(StampedAPIUserTest):
         path = "users/suggested.json"
         data = { 
             "oauth_token"  : self.tokenA['access_token'], 
-            "personalized" : True, 
         }
         result = self.handleGET(path, data)
         self.assertIsInstance(result, list)

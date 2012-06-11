@@ -332,6 +332,11 @@ class AWSInstance(AInstance):
         for role in self.roles:
             security_groups.append(role.lower())
         
+        utils.log("IS_PROD: %s" % self.stack.is_prod)
+        
+        if not self.stack.is_prod:
+            security_groups.append('dev')
+        
         return security_groups
     
     def _get_user_data(self):

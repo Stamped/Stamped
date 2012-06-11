@@ -43,10 +43,10 @@ def sxsw(request):
         cSlice.sort = 'relevance'
         cSlice.unique = True
         cSlice.quality = 1
-        cSlice.viewport.upperLeft.lat   = 30.309242
-        cSlice.viewport.upperLeft.lng   = -97.792286
-        cSlice.viewport.lowerRight.lat  = 30.226775
-        cSlice.viewport.lowerRight.lng  = -97.697689
+        cSlice.viewport.upper_left.lat   = 30.309242
+        cSlice.viewport.upper_left.lng   = -97.792286
+        cSlice.viewport.lower_right.lat  = 30.226775
+        cSlice.viewport.lower_Right.lng  = -97.697689
 
         stamps = stampedAPI.getSuggestedStamps(None, cSlice)
         

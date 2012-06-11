@@ -53,7 +53,7 @@ static GTMOAuthKeychain* sDefaultKeychain = nil;
    label = [self performSelector:@selector(titleLabel)];
   }
   // OK to send to button in 2.0, but prefer sending to label.
-  [label setFont:font];
+  [(UILabel*)label setFont:font];
 }
 
 - (void)oauthCompatibilitySetTitleShadowOffset:(CGSize)offset {
