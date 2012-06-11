@@ -4373,7 +4373,8 @@ class StampedAPI(AStampedAPI):
 
     def _getActivityFromCache(self, authUserId, distance, offset, limit):
         """
-        Pull the requested activity data from cache, if exists in cache, otherwise pull the data from db
+        Pull the requested activity data from cache if it exists there, otherwise pull the data from db
+        Returns a tuple of (the activity data list, bool indicating if the end of the activity stream was reached)
         """
         if offset == 0:
             self._clearActivityCacheForUser(authUserId, distance)
@@ -4394,12 +4395,12 @@ class StampedAPI(AStampedAPI):
             if len(newActivity) < self.ACTIVITY_CACHE_BLOCK_SIZE:
                 break
 
-        return activity[:limit]
+        return activity[:limit], len(activity) < limit
 
 
     @API_CALL
     def getActivity(self, authUserId, actSlice):
-        activityData = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
+        activityData, final = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
 
         # Append user objects
         userIds     = {}
