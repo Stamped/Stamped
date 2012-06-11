@@ -39,9 +39,9 @@ if __name__ == '__main__':
         pool = Pool(8)
         
         def _process_entity(entity):
-            image_url = entity['image']
-            image_url = db.addWebEntityImage(image_url)
-            entity['image'] = image_url
+            image_url    = entity.image
+            image_url    = db.addWebEntityImage(image_url)
+            entity.image = image_url
             
             api._entityDB.updateEntity(entity)
         
