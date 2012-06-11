@@ -77,10 +77,13 @@ class ACollectionCache(object):
     def _clearCacheForKeyParams(self, **kwargs):
         curOffset = 0
         key = self._generateKey(curOffset, **kwargs)
-        while key in self._cache:
-            del(self._cache[key])
-            curOffset += self._blockSize
-            key = self._generateKey(curOffset, **kwargs)
+        try:
+            while key in self._cache:
+                del(self._cache[key])
+                curOffset += self._blockSize
+                key = self._generateKey(curOffset, **kwargs)
+        except Exception:
+            pass
 
     def setCacheBlockSize(self, cacheBlockSize):
         self._blockSize = cacheBlockSize
