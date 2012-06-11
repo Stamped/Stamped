@@ -14,9 +14,12 @@ typedef enum {
     SignupWelcomeTypeFacebook,
 } SignupWelcomeType;
 
-@interface SignupWelcomeViewController : UITableViewController
+@interface SignupWelcomeViewController : UITableViewController {
+    UIView *_loadingView;
+}
 
 - (id)initWithType:(SignupWelcomeType)type;
 
-@property(nonatomic,readonly) SignupWelcomeType signupType;
+@property(nonatomic,retain) STAccountParameters *userInfo;
+
 @end

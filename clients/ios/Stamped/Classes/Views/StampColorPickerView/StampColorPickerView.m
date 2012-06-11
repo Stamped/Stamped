@@ -179,6 +179,20 @@
 }
 
 
+#pragma mark - Setters
+
+- (void)setSelectedColors:(NSArray*)colors {
+    
+    for (StampPickerView *view in _views) {
+        if ([view isKindOfClass:[StampPickerView class]] && view.selected) {
+            [view setTopColor:[colors objectAtIndex:0] bottomColor:[colors objectAtIndex:1]];
+            break;
+        }
+    }
+    
+}
+
+
 #pragma mark - Actions
 
 - (void)stampPicked:(StampPickerView*)sender {
@@ -428,14 +442,14 @@
     
     [self.titleLabel sizeToFit];
     CGRect frame = self.titleLabel.frame;
-    frame.origin.x = (self.bounds.size.width-frame.size.width)/2;
+    frame.origin.x = floorf(((self.bounds.size.width-frame.size.width)/2) + 6.0f);
     frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
     self.titleLabel.frame = frame;
     
     [self.imageView sizeToFit];
     frame = self.imageView.frame;
-    frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
-    frame.origin.x = (CGRectGetMinX(self.titleLabel.frame) - self.imageView.bounds.size.width);
+    frame.origin.y = floorf((self.bounds.size.height-frame.size.height)/2) - 1.0f;
+    frame.origin.x = (CGRectGetMinX(self.titleLabel.frame) - (self.imageView.bounds.size.width+4.0f));
     self.imageView.frame = frame;
     
 }

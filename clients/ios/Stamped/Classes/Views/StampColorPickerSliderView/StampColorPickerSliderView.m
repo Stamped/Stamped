@@ -137,34 +137,6 @@
 
 }
 
-- (void)convertToString {
-    
-    /*
-    NSInteger redIntValue = primaryRed_ * 255.99999f;
-    NSInteger greenIntValue = primaryGreen_ * 255.99999f;
-    NSInteger blueIntValue = primaryBlue_ * 255.99999f;
-    
-    NSString* redHexValue = [NSString stringWithFormat:@"%02x", redIntValue]; 
-    NSString* greenHexValue = [NSString stringWithFormat:@"%02x", greenIntValue];
-    NSString* blueHexValue = [NSString stringWithFormat:@"%02x", blueIntValue];
-    
-    NSString* primaryColor = [NSString stringWithFormat:@"%@%@%@", redHexValue, greenHexValue, blueHexValue];
-    
-    redIntValue = secondaryRed_ * 255.99999f;
-    greenIntValue = secondaryGreen_ * 255.99999f;
-    blueIntValue = secondaryBlue_ * 255.99999f;
-    
-    redHexValue = [NSString stringWithFormat:@"%02x", redIntValue]; 
-    greenHexValue = [NSString stringWithFormat:@"%02x", greenIntValue];
-    blueHexValue = [NSString stringWithFormat:@"%02x", blueIntValue];
-    
-    NSString* secondaryColor = [NSString stringWithFormat:@"%@%@%@", redHexValue, greenHexValue, blueHexValue];
-    
-    [delegate_ stampCustomizer:self chosePrimaryColor:primaryColor secondaryColor:secondaryColor];
-    */
-    
-}
-
 
 #pragma mark - Actions
 

@@ -1,9 +1,9 @@
 /*jslint browser: true, confusion: true, sloppy: true, vars: true, nomen: false, plusplus: false, indent: 2 */
-/*global window,google,$ */
+/*global window,google */
 
 /**
  * @name MarkerClustererPlus for Google Maps V3
- * @version 2.0 [July 20, 2011]
+ * @version 2.0.9 [February 20, 2012]
  * @author Gary Little
  * @fileoverview
  * The library creates and manages per-zoom-level clusters for large amounts of markers.
@@ -55,6 +55,11 @@
  *  and less than <code>height</code> and the <code>xoffset</code> must be positive and less
  *  than <code>width</code>. The default is to anchor the label text so that it is centered
  *  on the icon.
+ * @property {Array} [anchorIcon] The anchor position (in pixels) of the cluster icon. This is the
+ *  spot on the cluster icon that is to be aligned with the cluster position. The format is
+ *  <code>[yoffset, xoffset]</code> where <code>yoffset</code> increases as you go down and
+ *  <code>xoffset</code> increases to the right. The default anchor position is the center of the
+ *  cluster icon.
  * @property {string} [textColor="black"] The color of the label text shown on the
  *  cluster icon.
  * @property {number} [textSize=11] The size (in pixels) of the label text shown on the
@@ -111,6 +116,8 @@ function ClusterIcon(cluster, styles) {
  */
 ClusterIcon.prototype.onAdd = function () {
   var cClusterIcon = this;
+  var cMouseDownInCluster;
+  var cDraggingMapByCluster;
 
   this.div_ = document.createElement("div");
   if (this.visible_) {
@@ -119,108 +126,70 @@ ClusterIcon.prototype.onAdd = function () {
 
   this.getPanes().overlayMouseTarget.appendChild(this.div_);
 
-  google.maps.event.addDomListener(this.div_, "click", function () {
-    var mc = cClusterIcon.cluster_.getMarkerClusterer();
-    /**
-     * This event is fired when a cluster marker is clicked.
-     * @name MarkerClusterer#click
-     * @param {Cluster} c The cluster that was clicked.
-     * @event
-     */
-    google.maps.event.trigger(mc, "click", cClusterIcon.cluster_);
-    google.maps.event.trigger(mc, "clusterclick", cClusterIcon.cluster_); // deprecated name
+  // Fix for Issue 157
+  google.maps.event.addListener(this.getMap(), "bounds_changed", function () {
+    cDraggingMapByCluster = cMouseDownInCluster;
+  });
 
-    // The default click handler follows. Disable it by setting
-    // the zoomOnClick property to false.
-    var mz = mc.getMaxZoom();
-    if (mc.getZoomOnClick()) {
-      // Zoom into the cluster.
-      mc.getMap().fitBounds(cClusterIcon.cluster_.getBounds());
-      // Don't zoom beyond the max zoom level
-      if (mz && (mc.getMap().getZoom() > mz)) {
-        mc.getMap().setZoom(mz + 1);
+  google.maps.event.addDomListener(this.div_, "mousedown", function () {
+    cMouseDownInCluster = true;
+    cDraggingMapByCluster = false;
+  });
+
+  google.maps.event.addDomListener(this.div_, "click", function (e) {
+    cMouseDownInCluster = false;
+    if (!cDraggingMapByCluster) {
+      var mz;
+      var mc = cClusterIcon.cluster_.getMarkerClusterer();
+      /**
+       * This event is fired when a cluster marker is clicked.
+       * @name MarkerClusterer#click
+       * @param {Cluster} c The cluster that was clicked.
+       * @event
+       */
+      google.maps.event.trigger(mc, "click", cClusterIcon.cluster_);
+      google.maps.event.trigger(mc, "clusterclick", cClusterIcon.cluster_); // deprecated name
+
+      // The default click handler follows. Disable it by setting
+      // the zoomOnClick property to false.
+      if (mc.getZoomOnClick()) {
+        // Zoom into the cluster.
+        mz = mc.getMaxZoom();
+        mc.getMap().fitBounds(cClusterIcon.cluster_.getBounds());
+        // Don't zoom beyond the max zoom level
+        if (mz !== null && (mc.getMap().getZoom() > mz)) {
+          mc.getMap().setZoom(mz + 1);
+        }
+      }
+
+      // Prevent event propagation to the map:
+      e.cancelBubble = true;
+      if (e.stopPropagation) {
+        e.stopPropagation();
       }
     }
   });
-  
-  var $div_ = $(this.div_);
-  
-  $div_.mouseenter(function(e) {
+
+  google.maps.event.addDomListener(this.div_, "mouseover", function () {
     var mc = cClusterIcon.cluster_.getMarkerClusterer();
-    
     /**
      * This event is fired when the mouse moves over a cluster marker.
      * @name MarkerClusterer#mouseover
      * @param {Cluster} c The cluster that the mouse moved over.
      * @event
      */
-    google.maps.event.trigger(mc, "mouseenter", cClusterIcon.cluster_);
-    
-    var $previews = $(cClusterIcon.div_).find('.marker-preview');
-    $previews.show();
-    
-    $.each($previews, function(i, preview) {
-        var $preview = $(preview);
-        
-        if ($preview.attr('pos-top') === undefined) {
-            var pos = $preview.position();
-            
-            $preview.attr('pos-top',  "" + pos.top);
-            $preview.attr('pos-left', "" + pos.left);
-        }
-        
-        var t = parseFloat($preview.attr('pos-top'));
-        var l = parseFloat($preview.attr('pos-left'));
-        
-        //console.debug('opacity: ' + $preview.css('opacity'));
-        if ($preview.css('opacity') >= .99) {
-            $preview.css({
-                opacity : 0, 
-                top     : 0, 
-                left    : 0
-            });
-        }
-        
-        $preview.stop(true, false).animate({
-            opacity : 1, 
-            top     : t, 
-            left    : l
-        }, {
-            duration : 1000, 
-            specialEasing : {
-                opacity : 'easeOutQuint', 
-                top     : 'easeOutBounce', 
-                left    : 'easeOutBounce'
-            }
-        });
-    });
+    google.maps.event.trigger(mc, "mouseover", cClusterIcon.cluster_);
   });
-  
-  $div_.mouseleave(function (e) {
+
+  google.maps.event.addDomListener(this.div_, "mouseout", function () {
     var mc = cClusterIcon.cluster_.getMarkerClusterer();
-    
     /**
      * This event is fired when the mouse moves out of a cluster marker.
      * @name MarkerClusterer#mouseout
      * @param {Cluster} c The cluster that the mouse moved out of.
      * @event
      */
-    google.maps.event.trigger(mc, "mouseleave", cClusterIcon.cluster_);
-    
-    var $previews = $(cClusterIcon.div_).find('.marker-preview');
-    
-    $previews.stop(true, false).animate({
-        opacity : 0, 
-        top     : 0, 
-        left    : 0
-    }, {
-        duration : 1000, 
-        specialEasing : {
-            opacity : 'easeOutCubic', 
-            top     : 'easeOutBounce', 
-            left    : 'easeOutBounce'
-        }
-    });
+    google.maps.event.trigger(mc, "mouseout", cClusterIcon.cluster_);
   });
 };
 
@@ -268,47 +237,11 @@ ClusterIcon.prototype.show = function () {
   if (this.div_) {
     var pos = this.getPosFromLatLng_(this.center_);
     this.div_.style.cssText = this.createCss(pos);
-    
-    var markers = this.cluster_.getMarkers();
-    var preview = "";
-    var num_markers = markers.length;
-    
-    // add hidden preview markers arranged in a circle around this cluster's icon
-    $.each(markers, function(i, marker) {
-        var offset = 360 * (i / num_markers) * Math.PI / 180;
-        var radius = 80 + 10 * Math.max(0, num_markers - 6);
-        var x = radius * Math.cos(offset);
-        var y = radius * Math.sin(offset);
-        var style = "top: " + y + "px; left: " + x + "px;";
-        
-        /*if (x > 0) {
-            style += "left: " + x + "px; "
-        } else {
-            style += "right: " + x + "px; "
-        }
-        
-        if (y > 0) {
-            style += "bottom: " + x + "px; "
-        } else {
-            style += "top: " + x + "px; "
-        }*/
-        
-        preview += "<div class='marker-preview' style='" + style + "'>" + 
-                        "<span>" + 
-                            marker.title + 
-                        "</span>" + 
-                   "</div>";
-    });
-    
-    if (this.cluster_.printable_ || true) {
+    if (this.cluster_.printable_) {
       // (Would like to use "width: inherit;" below, but doesn't work with MSIE)
-      this.div_.innerHTML = "<img src='" + this.url_ + "'>" + 
-                            "<div style='position: absolute; top: 0px; left: 0px; width: " + this.width_ + "px;'>" + 
-                                preview + 
-                                this.sums_.text + 
-                            "</div>";
+      this.div_.innerHTML = "<img src='" + this.url_ + "'><div style='position: absolute; top: 0px; left: 0px; width: " + this.width_ + "px;'>" + this.sums_.text + "</div>";
     } else {
-      this.div_.innerHTML = preview + this.sums_.text;
+      this.div_.innerHTML = this.sums_.text;
     }
     this.div_.title = this.cluster_.getMarkerClusterer().getTitle();
     this.div_.style.display = "";
@@ -331,6 +264,7 @@ ClusterIcon.prototype.useStyle = function (sums) {
   this.height_ = style.height;
   this.width_ = style.width;
   this.anchor_ = style.anchor;
+  this.anchorIcon_ = style.anchorIcon || [parseInt(this.height_ / 2, 10), parseInt(this.width_ / 2, 10)];
   this.textColor_ = style.textColor || "black";
   this.textSize_ = style.textSize || 11;
   this.textDecoration_ = style.textDecoration || "none";
@@ -390,6 +324,7 @@ ClusterIcon.prototype.createCss = function (pos) {
       this.textSize_ + 'px; font-family:' + this.fontFamily_ + '; font-weight:' +
       this.fontWeight_ + '; font-style:' + this.fontStyle_ + '; text-decoration:' +
       this.textDecoration_ + ';');
+
   return style.join("");
 };
 
@@ -402,8 +337,8 @@ ClusterIcon.prototype.createCss = function (pos) {
  */
 ClusterIcon.prototype.getPosFromLatLng_ = function (latlng) {
   var pos = this.getProjection().fromLatLngToDivPixel(latlng);
-  pos.x -= parseInt(this.width_ / 2, 10);
-  pos.y -= parseInt(this.height_ / 2, 10);
+  pos.x -= this.anchorIcon_[1];
+  pos.y -= this.anchorIcon_[0];
   return pos;
 };
 
@@ -526,6 +461,7 @@ Cluster.prototype.remove = function () {
 Cluster.prototype.addMarker = function (marker) {
   var i;
   var mCount;
+  var mz;
 
   if (this.isMarkerAlreadyAdded_(marker)) {
     return false;
@@ -548,15 +484,23 @@ Cluster.prototype.addMarker = function (marker) {
   this.markers_.push(marker);
 
   mCount = this.markers_.length;
-  if (mCount < this.minClusterSize_ && marker.getMap() !== this.map_) {
+  mz = this.markerClusterer_.getMaxZoom();
+  if (mz !== null && this.map_.getZoom() > mz) {
+    // Zoomed in past max zoom, so show the marker.
+    if (marker.getMap() !== this.map_) {
+      marker.setMap(this.map_);
+    }
+  } else if (mCount < this.minClusterSize_) {
     // Min cluster size not reached so show the marker.
-    marker.setMap(this.map_);
+    if (marker.getMap() !== this.map_) {
+      marker.setMap(this.map_);
+    }
   } else if (mCount === this.minClusterSize_) {
     // Hide the markers that were showing.
     for (i = 0; i < mCount; i++) {
       this.markers_[i].setMap(null);
     }
-  } else if (mCount > this.minClusterSize_) {
+  } else {
     marker.setMap(null);
   }
 
@@ -590,14 +534,10 @@ Cluster.prototype.calculateBounds_ = function () {
  * Updates the cluster icon.
  */
 Cluster.prototype.updateIcon_ = function () {
-  var i;
   var mCount = this.markers_.length;
+  var mz = this.markerClusterer_.getMaxZoom();
 
-  if (this.map_.getZoom() > this.markerClusterer_.getMaxZoom()) {
-    // The zoom is greater than our max zoom so show all the markers in cluster.
-    for (i = 0; i < mCount; i++) {
-      this.markers_[i].setMap(this.map_);
-    }
+  if (mz !== null && this.map_.getZoom() > mz) {
     this.clusterIcon_.hide();
     return;
   }
@@ -682,6 +622,9 @@ Cluster.prototype.isMarkerAlreadyAdded_ = function (marker) {
  *  The default is an array of {@link ClusterIconStyle} elements whose properties are derived
  *  from the values for <code>imagePath</code>, <code>imageExtension</code>, and
  *  <code>imageSizes</code>.
+ * @property {number} [batchSize=MarkerClusterer.BATCH_SIZE] Set this property to the
+ *  number of markers to be processed in a single batch when using a browser other than
+ *  Internet Explorer (for Internet Explorer, use the batchSizeIE property instead).
  * @property {number} [batchSizeIE=MarkerClusterer.BATCH_SIZE_IE] When Internet Explorer is
  *  being used, markers are processed in several batches with a small delay inserted between
  *  each batch in an attempt to avoid Javascript timeout errors. Set this property to the
@@ -750,13 +693,12 @@ function MarkerClusterer(map, opt_markers, opt_options) {
   this.imageExtension_ = opt_options.imageExtension || MarkerClusterer.IMAGE_EXTENSION;
   this.imageSizes_ = opt_options.imageSizes || MarkerClusterer.IMAGE_SIZES;
   this.calculator_ = opt_options.calculator || MarkerClusterer.CALCULATOR;
+  this.batchSize_ = opt_options.batchSize || MarkerClusterer.BATCH_SIZE;
   this.batchSizeIE_ = opt_options.batchSizeIE || MarkerClusterer.BATCH_SIZE_IE;
 
   if (navigator.userAgent.toLowerCase().indexOf("msie") !== -1) {
     // Try to avoid IE timeout when processing a huge number of markers:
     this.batchSize_ = this.batchSizeIE_;
-  } else {
-    this.batchSize_ = MarkerClusterer.BATCH_SIZE;
   }
 
   this.setupStyles_();
@@ -782,6 +724,14 @@ MarkerClusterer.prototype.onAdd = function () {
   this.listeners_ = [
     google.maps.event.addListener(this.getMap(), "zoom_changed", function () {
       cMarkerClusterer.resetViewport_(false);
+      // Workaround for this Google bug: when map is at level 0 and "-" of
+      // zoom slider is clicked, a "zoom_changed" event is fired even though
+      // the map doesn't zoom out any further. In this situation, no "idle"
+      // event is triggered so the cluster markers that have been removed
+      // do not get redrawn.
+      if (this.getZoom() === 0) {
+        google.maps.event.trigger(this, "idle");
+      }
     }),
     google.maps.event.addListener(this.getMap(), "idle", function () {
       cMarkerClusterer.redraw_();
@@ -908,7 +858,7 @@ MarkerClusterer.prototype.setMinimumClusterSize = function (minimumClusterSize) 
  *  @return {number} The maximum zoom level.
  */
 MarkerClusterer.prototype.getMaxZoom = function () {
-  return this.maxZoom_ || this.getMap().mapTypes[this.getMap().getMapTypeId()].maxZoom;
+  return this.maxZoom_;
 };
 
 
@@ -1160,6 +1110,16 @@ MarkerClusterer.prototype.getMarkers = function () {
  */
 MarkerClusterer.prototype.getTotalMarkers = function () {
   return this.markers_.length;
+};
+
+
+/**
+ * Returns the current array of clusters formed by the clusterer.
+ *
+ * @return {Array} The array of clusters formed by the clusterer.
+ */
+MarkerClusterer.prototype.getClusters = function () {
+  return this.clusters_;
 };
 
 
@@ -1479,6 +1439,7 @@ MarkerClusterer.prototype.addToClosestCluster_ = function (marker) {
  */
 MarkerClusterer.prototype.createClusters_ = function (iFirst) {
   var i, marker;
+  var mapBounds;
   var cMarkerClusterer = this;
   if (!this.ready_) {
     return;
@@ -1503,8 +1464,14 @@ MarkerClusterer.prototype.createClusters_ = function (iFirst) {
 
   // Get our current map view bounds.
   // Create a new bounds object so we don't affect the map.
-  var mapBounds = new google.maps.LatLngBounds(this.getMap().getBounds().getSouthWest(),
+  //
+  // See Comments 9 & 11 on Issue 3651 relating to this workaround for a Google Maps bug:
+  if (this.getMap().getZoom() > 3) {
+    mapBounds = new google.maps.LatLngBounds(this.getMap().getBounds().getSouthWest(),
       this.getMap().getBounds().getNorthEast());
+  } else {
+    mapBounds = new google.maps.LatLngBounds(new google.maps.LatLng(85.02070771743472, -178.48388434375), new google.maps.LatLng(-85.08136444384544, 178.00048865625));
+  }
   var bounds = this.getExtendedBounds(mapBounds);
 
   var iLast = Math.min(iFirst + this.batchSize_, this.markers_.length);
@@ -1560,7 +1527,7 @@ MarkerClusterer.prototype.extend = function (obj1, obj2) {
  * The default function for determining the label text and style
  * for a cluster icon.
  *
- * @param {Array.<google.maps.Marker>} markers The array of represented by the cluster.
+ * @param {Array.<google.maps.Marker>} markers The array of markers represented by the cluster.
  * @param {number} numStyles The number of marker styles available.
  * @return {ClusterIconInfo} The information resource for the cluster.
  * @constant

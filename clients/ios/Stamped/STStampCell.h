@@ -29,6 +29,7 @@
     UIColor *_primaryColor;
     UIColor *_secondarayColor;
     
+    float r, g, b, r1, g1, b1;
     
 }
 @property(nonatomic,readonly) NSString *username;

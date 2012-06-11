@@ -139,8 +139,8 @@ header .header-body p .desc {
 header .header-body p a.button {
   background: url(/assets/img/join_signup_sprite.png) no-repeat;
   display: inline-block;
-  width: 82px;
-  height: 27px;
+  width: 86px;
+  height: 31px;
   margin-left: .5em;
   position: relative;
   top: .5em;
@@ -155,10 +155,10 @@ header .header-body p.join a.button {
   background-position: 0 0;
 }
 header .header-body p.join a.button:hover {
-  background-position: -84px 0;
+  background-position: -88px 0;
 }
 header .header-body p.join a.button:active {
-  background-position: -168px 0;
+  background-position: -176px 0;
 }
 header .header-body p.login {
   z-index: 26;
@@ -168,13 +168,28 @@ header .header-body p.login span.desc {
   color: #bbb;
 }
 header .header-body p.login a.button {
-  background-position: 0 -29px;
+  background-position: 0 -33px;
 }
 header .header-body p.login a.button:hover {
-  background-position: -84px -29px;
+  background-position: -88px -33px;
 }
 header .header-body p.login a.button:active {
-  background-position: -168px -29px;
+  background-position: -176px -33px;
+}
+a.follow-button {
+  display: block;
+  width: 86px;
+  height: 31px;
+  background: url(/assets/img/join_signup_sprite.png) no-repeat;
+  background-position: 0 -66px;
+}
+a.follow-button:hover {
+  background-position: -88px -66px;
+  cursor: pointer;
+}
+a.follow-button:active {
+  background-position: -176px -66px;
+  cursor: pointer;
 }
 .post-header {
   position: relative;
@@ -190,12 +205,12 @@ header .header-body p.login a.button:active {
 }
 .user-logo-large {
   position: absolute;
-  display: block;
   top: -60px;
   left: -110px;
+  display: block;
   width: 210px;
   height: 210px;
-  z-index: 101;
+  z-index: 160;
 }
 .user-logo-small {
   position: absolute;
@@ -204,6 +219,15 @@ header .header-body p.login a.button:active {
   display: inline-block;
   width: 44px;
   height: 44px;
+  z-index: 101;
+}
+.user-logo-tiny {
+  position: absolute;
+  top: 0px;
+  right: -12px;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
   z-index: 101;
 }
 .ribbon-top {
@@ -378,10 +402,6 @@ header .header-body p.login a.button:active {
 
 }
 .static-map-small .static-map-inner .r0 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: 0px;
   position: absolute;
@@ -389,19 +409,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 0px;
+  left: 2px;
   border-width: 2px 0 2px 2px;
   -webkit-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
   -moz-transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
@@ -410,10 +424,6 @@ header .header-body p.login a.button:active {
   transform: perspective(200px) translate(12px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r1 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -35px;
   position: absolute;
@@ -421,19 +431,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 37px;
+  left: 39px;
   border-width: 2px 0;
   -webkit-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(7px, 0) rotatey(35deg);
@@ -442,10 +446,6 @@ header .header-body p.login a.button:active {
   transform: perspective(200px) translate(7px, 0) rotatey(35deg);
 }
 .static-map-small .static-map-inner .r2 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -70px;
   position: absolute;
@@ -453,19 +453,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 72px;
+  left: 74px;
   border-width: 2px 0;
   -webkit-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
   -moz-transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
@@ -474,10 +468,6 @@ header .header-body p.login a.button:active {
   transform: perspective(200px) translate(-1px, 0) rotatey(-35deg);
 }
 .static-map-small .static-map-inner .r3 {
-  /* TODO: how to dynamically change this URL depending on per-map lat, lng, and possibly zoom / size */
-
-  /* TODO: remove this static background image */
-
   background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
   background-position: -105px;
   position: absolute;
@@ -485,19 +475,13 @@ header .header-body p.login a.button:active {
   width: 35px;
   height: 140px;
   top: 0;
-  border: 2px solid rgba(0, 0, 0, 0.9);
-  /*outline: 1px solid transparent;*/
-
-  /*.box-shadow(2px, 2px, 2px, 0, rgba(0, 0, 0, 0.15));*/
-
-  /*.transform-style(preserve-3d);*/
-
+  border: 2px solid #ffffff;
   -webkit-transition: all 0.1s linear;
   -moz-transition: all 0.1s linear;
   -ms-transition: all 0.1s linear;
   -o-transition: all 0.1s linear;
   transition: all 0.1s linear;
-  left: 107px;
+  left: 109px;
   border-width: 2px 2px 2px 0;
   -webkit-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
   -moz-transform: perspective(200px) translate(-6px, 0) rotatey(35deg);
@@ -510,12 +494,12 @@ header .header-body p.login a.button:active {
   width: 100%;
   height: 100%;
   background: #333;
+  opacity: 0.10;
   -webkit-transition: opacity 0.1s ease-in-out;
   -moz-transition: opacity 0.1s ease-in-out;
   -ms-transition: opacity 0.1s ease-in-out;
   -o-transition: opacity 0.1s ease-in-out;
   transition: opacity 0.1s ease-in-out;
-  opacity: 0.10;
 }
 .static-map-small .static-map-inner .pin {
   background: url(/assets/img/pin_shadow.png);
@@ -1311,8 +1295,69 @@ header .header-body p.login a.button:active {
   filter: none;
 }
 /* **************************************************************************
+                            SOCIAL SHARING WIDGET
+   ************************************************************************** */
+.share-widget {
+  background-color: #fff;
+  padding: 0.25em 0.5em;
+  -webkit-border-radius: 1em;
+  -moz-border-radius: 1em;
+  border-radius: 1em;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  /* NOTE: because social sharing requires JS, sharing widgets are hidden 
+       by default in CSS and only displayed on page load via JS if JS is 
+       supported.
+    */
+
+  display: none;
+  -webkit-transition: -webkit-border-radius 0.3s ease-out;
+  -moz-transition: -moz-border-radius 0.3s ease-out;
+  -ms-transition: -ms-border-radius 0.3s ease-out;
+  -o-transition: -o-border-radius 0.3s ease-out;
+  transition: border-radius 0.3s ease-out;
+  overflow: hidden;
+}
+.share-widget .desc {
+  font-size: 80%;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #333;
+}
+.share-widget .share-buttons {
+  display: none;
+  white-space: nowrap;
+  margin: 4px auto;
+}
+.share-widget .share-buttons .share-button {
+  display: inline-block;
+}
+.share-widget:hover {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.share-widget:hover .share-buttons {
+  display: block;
+}
+/* **************************************************************************
                               MISC / DEPRECATED
    ************************************************************************** */
+a.sdetail:hover,
+.pronounced-title a:hover,
+a.sdetail:active,
+.pronounced-title a:active {
+  text-decoration: none;
+}
 .bold {
   color: #333;
   font-weight: bold;

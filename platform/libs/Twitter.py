@@ -88,6 +88,7 @@ class Twitter(object):
             if 'next_cursor' not in result or result['next_cursor'] == 0:
                 break
             cursor = result['next_cursor']
+        twitterIds = map(lambda id: str(id), twitterIds)
         return twitterIds
 
 

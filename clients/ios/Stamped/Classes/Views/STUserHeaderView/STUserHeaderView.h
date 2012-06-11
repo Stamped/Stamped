@@ -35,7 +35,7 @@ typedef enum {
 
 - (void)setupWithUser:(id)user;
 @property(nonatomic,assign) STUserHeaderTab selectedTab;
-@property(nonatomic,assign) id <STUserHeaderViewDelegate> delegate;
+@property(nonatomic, readwrite, assign) id <STUserHeaderViewDelegate> delegate;
 @property(nonatomic,readonly,getter = isShowingStats) BOOL showingStats;
 
 @end

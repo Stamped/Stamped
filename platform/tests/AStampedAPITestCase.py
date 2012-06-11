@@ -47,7 +47,7 @@ class AStampedAPITestCase(AStampedTestCase):
     
     _opener = StampedAPIURLOpener()
 
-    def handleGET(self, path, data):
+    def handleGET(self, path, data, handleExceptions=True):
         global _baseurl
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (_baseurl, path, params)
@@ -59,10 +59,13 @@ class AStampedAPITestCase(AStampedTestCase):
             result = json.loads(raw)
         except:
             raise StampedAPIException(raw)
+
+        if handleExceptions and 'error' in result:
+            raise Exception("GET failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
         
         return result
     
-    def handlePOST(self, path, data):
+    def handlePOST(self, path, data, handleExceptions=True):
         global _baseurl
         params = urllib.urlencode(data)
         url    = "%s/%s" % (_baseurl, path)
@@ -76,6 +79,9 @@ class AStampedAPITestCase(AStampedTestCase):
             result = json.loads(raw)
         except:
             raise StampedAPIException(raw)
+
+        if handleExceptions and 'error' in result:
+            raise Exception("POST failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
         
         return result
     
@@ -351,6 +357,13 @@ class AStampedAPITestCase(AStampedTestCase):
             }
         return self.handleGET(path, data)
 
+    def showFriendsActivity(self, token):
+        path = "activity/friends.json"
+        data = {
+            'oauth_token'       : token['access_token'],
+            }
+        return self.handleGET(path, data)
+
     def createEntity(self, token, data=None):
         path = "entities/create.json"
         if data == None:
@@ -482,6 +495,30 @@ class AStampedAPITestCase(AStampedTestCase):
             "complete":     complete,
         }
         return self.handlePOST(path, data)
+
+    def createLike(self, token, stampId):
+        path = "stamps/likes/create.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
+        }
+        return self.handlePOST(path, data)
+
+    def deleteLike(self, token, stampId):
+        path = "stamps/likes/remove.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
+        }
+        return self.handlePOST(path, data)
+
+    def showLikes(self, token, stampId):
+        path = "stamps/likes/show.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
+        }
+        return self.handleGET(path, data)
 
     def _loadCollection(self, collection, filename=None, drop=True):
         if filename is None:

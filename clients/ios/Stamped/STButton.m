@@ -13,8 +13,6 @@
 
 @property (nonatomic, readonly, retain) UIView* normalView;
 @property (nonatomic, readonly, retain) UIView* activeView;
-@property (nonatomic, readonly, assign) id target;
-@property (nonatomic, readonly, assign) SEL action;
 @property (nonatomic, readonly, assign) BOOL touched;
 
 @end

@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse
+    import os, logs, re, time, urlparse, math
     
     import Blacklist
     import libs.ec2_utils
@@ -58,6 +58,7 @@ try:
     from Facebook               import *
     from Twitter                import *
     from GooglePlaces           import *
+    from Rdio                   import *
 except Exception:
     report()
     raise
@@ -90,10 +91,17 @@ class StampedAPI(AStampedAPI):
     def _googlePlaces(self):
         return globalGooglePlaces()
 
+    @lazyProperty
+    def _rdio(self):
+        return globalRdio()
+
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
         self.lite_mode = kwargs.pop('lite_mode', False)
         self._cache    = libs.Memcache.StampedMemcache()
+
+        self.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
         # Enable / Disable Functionality
         self._activity = True
@@ -232,22 +240,22 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alerts                          = AccountAlerts()
-        alerts.ios_alert_credit         = True
-        alerts.ios_alert_like           = True
-        alerts.ios_alert_todo           = True
-        alerts.ios_alert_mention        = True
-        alerts.ios_alert_comment        = True
-        alerts.ios_alert_reply          = True
-        alerts.ios_alert_follow         = True
-        alerts.email_alert_credit       = True
-        alerts.email_alert_like         = False
-        alerts.email_alert_todo         = False
-        alerts.email_alert_mention      = True
-        alerts.email_alert_comment      = True
-        alerts.email_alert_reply        = True
-        alerts.email_alert_follow       = True
-        account.alerts                  = alerts
+        alert_settings                         = AccountAlertSettings()
+        alert_settings.ios_alert_credit         = True
+        alert_settings.ios_alert_like           = True
+        alert_settings.ios_alert_todo           = True
+        alert_settings.ios_alert_mention        = True
+        alert_settings.ios_alert_comment        = True
+        alert_settings.ios_alert_reply          = True
+        alert_settings.ios_alert_follow         = True
+        alert_settings.email_alert_credit       = True
+        alert_settings.email_alert_like         = False
+        alert_settings.email_alert_todo         = False
+        alert_settings.email_alert_mention      = True
+        alert_settings.email_alert_comment      = True
+        alert_settings.email_alert_reply        = True
+        alert_settings.email_alert_follow       = True
+        account.alert_settings                  = alert_settings
 
         # Validate screen name
         account.screen_name = account.screen_name.strip()
@@ -266,7 +274,7 @@ class StampedAPI(AStampedAPI):
 
         # Add image timestamp if exists
         if tempImageUrl is not None:
-            account.image_cache = now
+            account.timestamp.image_cache = now
 
         # Create account
         ### TODO: Add intelligent error message
@@ -337,6 +345,8 @@ class StampedAPI(AStampedAPI):
         #  and require uniqueness
         if account.email is None:
             account.email = 'fb_%s' % user['id']
+        elif not utils.validate_email(account.email):
+            raise StampedInputError("Invalid format for email address")
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
@@ -350,7 +360,11 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
-        return self.addAccount(account, tempImageUrl=tempImageUrl)
+
+
+        account = self.addAccount(account, tempImageUrl=tempImageUrl)
+        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, new_fb_account.user_token])
+        return account
 
     @API_CALL
     def addTwitterAccount(self, new_tw_account, tempImageUrl=None):
@@ -367,6 +381,8 @@ class StampedAPI(AStampedAPI):
         #  and require uniqueness
         if account.email is None:
             account.email = 'tw_%s' % user['id']
+        elif not utils.validate_email(account.email):
+            raise StampedInputError("Invalid format for email address")
 
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
@@ -380,14 +396,17 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = user['profile_background_image_url']
 
-        return self.addAccount(account, tempImageUrl=tempImageUrl)
+        account = self.addAccount(account, tempImageUrl=tempImageUrl)
+        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                     args=[account.user_id, new_tw_account.user_token, new_tw_account.user_secret])
+        return account
 
     @API_CALL
     def addAccountAsync(self, user_id):
         account = self._accountDB.getAccount(user_id)
 
         # Add activity if invitations were sent
-        if account.email is not None:
+        if account.email is not None and account.auth_service == 'stamped':
             invites = self._inviteDB.getInvitations(account.email)
             invitedBy = {}
 
@@ -482,11 +501,11 @@ class StampedAPI(AStampedAPI):
 
         for stamp in stamps:
             if stamp.credit is not None and len(stamp.credit) > 0:
-                for creditedUser in stamp.credit:
-                    self._stampDB.removeCredit(creditedUser.user_id, stamp)
+                for stampPreview in stamp.credit:
+                    self._stampDB.removeCredit(stampPreview.user.user_id, stamp)
 
                     # Decrement user stats by one
-                    self._userDB.updateUserStats(creditedUser.user_id, 'num_credits', increment=-1)
+                    self._userDB.updateUserStats(stampPreview.user.user_id, 'num_credits', increment=-1)
 
             # Remove activity on stamp
             self._activityDB.removeActivityForStamp(stamp.stamp_id)
@@ -494,6 +513,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamps(stampIds)
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
+        self._stampStatsDB.removeStatsForStamps(stampIds)
         ### TODO: If restamp, remove from credited stamps' comment list?
 
         # Remove comments
@@ -682,7 +702,7 @@ class StampedAPI(AStampedAPI):
         screen_name = user.screen_name
 
         image_cache = datetime.utcnow()
-        user.image_cache = image_cache
+        user.timestamp.image_cache = image_cache
         self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, schema.temp_image_url])
@@ -706,7 +726,7 @@ class StampedAPI(AStampedAPI):
 
         if user is not None:
             image_cache = datetime.utcnow()
-            user.image_cache = image_cache
+            user.timestamp.image_cache = image_cache
             self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
         tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
@@ -744,9 +764,9 @@ class StampedAPI(AStampedAPI):
     def updateAlerts(self, authUserId, alerts):
         account = self._accountDB.getAccount(authUserId)
 
-        accountAlerts = account.alerts
+        accountAlerts = account.alert_settings
         if accountAlerts is None:
-            accountAlerts = AccountAlerts()
+            accountAlerts = AccountAlertSettings()
 
         for k, v in alerts.dataExport().iteritems():
             if v:
@@ -754,7 +774,7 @@ class StampedAPI(AStampedAPI):
             else:
                 setattr(accountAlerts, k, False)
 
-        account.alerts = accountAlerts
+        account.alert_settings = accountAlerts
 
         self._accountDB.updateAccount(account)
         return account
@@ -795,13 +815,14 @@ class StampedAPI(AStampedAPI):
         # Verify account is valid and
         self.verifyLinkedAccount(linkedAccount)
 
-        self._accountDB.addLinkedAccount(authUserId, linkedAccount)
+        linkedAccount = self._accountDB.addLinkedAccount(authUserId, linkedAccount)
 
         # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, linkedAccount.token])
         elif linkedAccount.service_name == 'twitter':
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                         args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
@@ -819,10 +840,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId):
-
-        ### TODO: Deprecate passing parameter "twitterIds"
-
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Twitter)
@@ -832,61 +850,47 @@ class StampedAPI(AStampedAPI):
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
 #            return False
 
-        users = []
-
         # Grab friend list from Twitter API
-        users = self._getTwitterFollowers(twitterKye, twitterSecret)
+        tw_followers = self._getTwitterFollowers(twitterKey, twitterSecret)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
-        for user in users:
+        for user in tw_followers:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
 
         # Generate activity item
-        self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
-                                             body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
-
-        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
-
-#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
+        if len(userIds) > 0:
+            self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
+                                                 body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
 
         return True
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-
-        ### TODO: Deprecate passing parameter "facebookIds"
-
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Facebook)
         if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id):
             return False
-#        if account.facebook_alerts_sent == True or not account.facebook_name:
-#            return
-
-        users = []
 
         # Grab friend list from Facebook API
-        users = self._getFacebookFriends(facebookToken)
+        fb_friends = self._getFacebookFriends(facebookToken)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
-        for user in users:
+        for user in fb_friends:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
 
         # Generate activity item
-        self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
-                                             body = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
-
-        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
-#        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
+        if len(userIds) > 0:
+            self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
+                                          body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
 
     @API_CALL
     def addToNetflixInstant(self, authUserId, netflixId):
@@ -1190,7 +1194,7 @@ class StampedAPI(AStampedAPI):
             self._addFollowActivity(authUserId, userId)
 
             # Remove 'friend' activity item
-            self._activityDB.removeFriendActivity('friend', authUserId, userId)
+            self._activityDB.removeFriendActivity(authUserId, userId)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
@@ -1231,7 +1235,6 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity
         self._activityDB.removeFollowActivity(authUserId, userId)
-        self._activityDB.remo
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -1433,7 +1436,7 @@ class StampedAPI(AStampedAPI):
                 albums = []
 
             for album in albums:
-                albumIds[album.entity_id] = album
+                albumIds[album.entity_id] = album.minimize()
 
             enrichedAlbums = []
             for album in entity.albums:
@@ -1536,6 +1539,17 @@ class StampedAPI(AStampedAPI):
 
         return results
 
+    def _orderedUnique(self, theList):
+        known = set()
+        newlist = []
+
+        for d in theList:
+            if d in known: continue
+            newlist.append(d)
+            known.add(d)
+
+        return newlist
+
     @API_CALL
     def getEntityAutoSuggestions(self, authUserId, autosuggestForm):
         if autosuggestForm.category == 'film':
@@ -1549,14 +1563,21 @@ class StampedAPI(AStampedAPI):
                 latLng,
                 autosuggestForm.query,
                 {'radius': 500, 'types' : 'establishment'})
-            logs.info(results)
             #make list of names from results, remove duplicate entries, limit to 10
-            names = list(set([place['terms'][0]['value'] for place in results]))[:10]
+            names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
             completions = []
             for name in names:
                 completions.append( { 'completion' : name } )
-
-
+            return completions
+        elif autosuggestForm.category == 'music':
+            result = self._rdio.searchSuggestions(autosuggestForm.query, types="Artist,Album,Track")
+            if 'result' not in result:
+                return []
+            #names = list(set([i['name'] for i in result['result']]))[:10]
+            names = self._orderedUnique([i['name'] for i in result['result']])[:10]
+            completions = []
+            for name in names:
+                completions.append( { 'completion' : name})
             return completions
         return []
 
@@ -1750,9 +1771,8 @@ class StampedAPI(AStampedAPI):
                 if userId == user_id or userId in creditedUserIds:
                     continue
 
-                result              = CreditSchema()
-                result.user_id      = creditedUser.user_id
-                result.screen_name  = creditedUser.screen_name
+                result              = StampPreview()
+                result.user         = creditedUser.minimize()
 
                 # Add to user ids
                 userIds[userId] = creditedUser.minimize()
@@ -1763,7 +1783,7 @@ class StampedAPI(AStampedAPI):
                     result.stamp_id = creditedStamp.stamp_id
 
                 credit.append(result)
-                creditedUserIds.add(result.user_id)
+                creditedUserIds.add(userId)
 
         ### TODO: How do we handle credited users that have not yet joined?
         if len(credit) > 0:
@@ -1790,7 +1810,8 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             stampIds[stamp.stamp_id] = stamp
 
-        stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
+        stats = self.getStampStats(stampIds.keys())
+        # stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
 
         logs.debug('Time for getStatsForStamps: %s' % (time.time() - t1))
         t1 = time.time()
@@ -1829,7 +1850,7 @@ class StampedAPI(AStampedAPI):
         underlyingStampIds      = {}
         allUnderlyingStampIds   = set()
 
-        for stat in stats:
+        for stat in stats.values():
             if stat.preview_credits is not None:
                 for credit in stat.preview_credits[:previewLength]:
                     allUnderlyingStampIds.add(credit)
@@ -1851,7 +1872,7 @@ class StampedAPI(AStampedAPI):
         allCommentIds   = set()
         commentIds      = {}
 
-        for stat in stats:
+        for stat in stats.values():
             # Comments
             if stat.preview_comments is not None:
                 for commentId in stat.preview_comments[:previewLength]:
@@ -1885,12 +1906,12 @@ class StampedAPI(AStampedAPI):
             # Credit given
             if stamp.credit is not None:
                 for credit in stamp.credit:
-                    allUserIds.add(credit.user_id)
+                    allUserIds.add(credit.user.user_id)
 
         for k, v in commentIds.items():
             allUserIds.add(v.user.user_id)
 
-        for stat in stats:
+        for stat in stats.values():
             # Likes
             if stat.preview_likes is not None:
                 for like in stat.preview_likes[:previewLength]:
@@ -1943,23 +1964,17 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credit is not None:
                     for credit in stamp.credit:
-                        user                    = userIds[credit.user_id]
-                        item                    = CreditSchema()
-                        item.user_id            = credit.user_id
+                        item                    = StampPreview()
+                        item.user               = userIds[str(credit.user.user_id)]
                         item.stamp_id           = credit.stamp_id
-                        item.screen_name        = user.screen_name
-                        item.color_primary      = user.color_primary
-                        item.color_secondary    = user.color_secondary
-                        item.privacy            = user.privacy
                         credits.append(item)
                     stamp.credit = credits
 
                 # Previews
                 previews = Previews()
-                for stat in stats:
-                    if str(stat.stamp_id) == str(stamp.stamp_id):
-                        break
-                else:
+                try:
+                    stat = stats[stamp.stamp_id]
+                except KeyError:
                     stat = None
 
                 if stat is not None:
@@ -2058,6 +2073,7 @@ class StampedAPI(AStampedAPI):
 
     def getStampBadges(self, stamp):
         userId = stamp.user.user_id
+        entityId = stamp.entity.entity_id
         badges  = []
 
         if stamp.stats.stamp_num == 1:
@@ -2066,18 +2082,21 @@ class StampedAPI(AStampedAPI):
             badge.genre     = "user_first_stamp"
             badges.append(badge)
 
-        stamps = self._stampDB.getStampsForEntity(stamp.entity.entity_id)
+        try:
+            stats = self._entityStatsDB.getEntityStats(entityId)
+        except StampedUnavailableError:
+            stats = self.updateEntityStatsAsync(entityId)
 
-        if len(stamps) == 0:
+        if stats.num_stamps == 0:
             badge           = Badge()
             badge.user_id   = userId
             badge.genre     = "entity_first_stamp"
             badges.append(badge)
         else:
-            friendIds       = set(self._friendshipDB.getFriends(stamp.user.user_id))
-            stampUserIds    = set(map(lambda s: s.user.user_id, stamps))
+            friendUserIds = self._friendshipDB.getFriends(userId)
+            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
 
-            if friendIds.intersection(stampUserIds) == 0:
+            if len(friendStamps) == 0:
                 badge           = Badge()
                 badge.user_id   = userId
                 badge.genre     = "friends_first_stamp"
@@ -2266,12 +2285,12 @@ class StampedAPI(AStampedAPI):
         # Give credit
         if stamp.credit is not None and len(stamp.credit) > 0:
             for item in stamp.credit:
-                if item.user_id == authUserId:
+                if item.user.user_id == authUserId:
                     continue
 
                 friendship              = Friendship()
                 friendship.user_id      = authUserId
-                friendship.friend_id    = item.user_id
+                friendship.friend_id    = item.user.user_id
 
                 # Check if block exists between user and credited user
                 if self._friendshipDB.blockExists(friendship) == True:
@@ -2285,15 +2304,15 @@ class StampedAPI(AStampedAPI):
                 # unblocked), but for now we're not going to do anything.
 
                 # Assign credit
-                self._stampDB.giveCredit(item.user_id, stamp)
-                creditedUserIds.add(item.user_id)
+                self._stampDB.giveCredit(item.user.user_id, stamp)
+                creditedUserIds.add(item.user.user_id)
 
                 # Add stats
                 self._statsSink.increment('stamped.api.stamps.credit')
 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits',     increment=1)
-                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
+                self._userDB.updateUserStats(item.user.user_id, 'num_credits',     increment=1)
+                self._userDB.updateUserStats(item.user.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -2347,7 +2366,7 @@ class StampedAPI(AStampedAPI):
                     size            = ImageSizeSchema()
                     size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
-                    size.height     = v[1]
+                    size.height     = v[1] if v[1] is not None else v[0]
                     sizes.append(size)
                 image.sizes = sizes
                 images += (image,)
@@ -2412,8 +2431,8 @@ class StampedAPI(AStampedAPI):
             stamp.credit = None
         else:
             previouslyCredited = []
-            for creditedUser in stamp.credit:
-                previouslyCredited.append(creditedUser.user_id)
+            for stampPreview in stamp.credit:
+                previouslyCredited.append(stampPreview.user.user_id)
 
             ### TODO: Filter out non-ASCII data for credit
             creditedScreenNames = []
@@ -2479,7 +2498,7 @@ class StampedAPI(AStampedAPI):
                     continue
 
                 # Assign credit
-                self._stampDB.giveCredit(item.user_id, stamp)
+                self._stampDB.giveCredit(item.user.user_id, stamp)
 
                 # # Add restamp as comment (if prior stamp exists)
                 # if 'stamp_id' in item and item['stamp_id'] is not None:
@@ -2554,6 +2573,9 @@ class StampedAPI(AStampedAPI):
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
 
+        # Remove from stats
+        self._stampStatsDB.removeStampStats(stampId)
+
         ### TODO: Remove from activity? To do? Anything else?
 
         # Remove comments
@@ -2585,14 +2607,14 @@ class StampedAPI(AStampedAPI):
         if stamp.credit is not None and len(stamp.credit) > 0:
             for item in stamp.credit:
                 # Only run if user is flagged as credited
-                if item.user_id is None:
+                if item.user.user_id is None:
                     continue
 
                 # Assign credit
-                self._stampDB.removeCredit(item.user_id, stamp)
+                self._stampDB.removeCredit(item.user.user_id, stamp)
 
                 # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits', increment=-1)
+                self._userDB.updateUserStats(item.user.user_id, 'num_credits', increment=-1)
 
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
@@ -2651,12 +2673,33 @@ class StampedAPI(AStampedAPI):
 
         return stamp
 
+    def getStampStats(self, stampIds):
+        if isinstance(stampIds, basestring):
+            # One stampId
+            try:
+                stat = self._stampStatsDB.getStampStats(stampIds)
+            except (StampedUnavailableError, KeyError):
+                stat = self.updateStampStatsAsync(stampIds)
+            return stat
+
+        else:
+            # Multiple stampIds
+            statsList = self._stampStatsDB.getStatsForStamps(stampIds)
+            statsDict = {}
+            for stat in statsList:
+                statsDict[stat.stamp_id] = stat 
+            for stampId in stampIds:
+                if stampId not in statsDict:
+                    statsDict[stampId] = self.updateStampStatsAsync(stampId)
+            return statsDict
+
     def updateStampStatsAsync(self, stampId):
         stats                   = StampStats()
         stats.stamp_id          = stampId
 
         MAX_PREVIEW             = 10
         stamp                   = self._stampDB.getStamp(stampId)
+        stats.last_stamped      = stamp.timestamp.stamped
 
         likes                   = self._stampDB.getStampLikes(stampId)
         stats.num_likes         = len(likes)
@@ -2676,6 +2719,20 @@ class StampedAPI(AStampedAPI):
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
         stats.preview_comments  = map(lambda x: x.comment_id, comments[:MAX_PREVIEW])
+
+        entity                  = self._entityDB.getEntity(stamp.entity.entity_id)
+        stats.entity_id         = entity.entity_id
+        stats.kind              = entity.kind
+        stats.types             = entity.types
+
+        if entity.kind == 'place':
+            stats.lat           = entity.coordinates.lat
+            stats.lng           = entity.coordinates.lng
+
+        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
+        # days = (datetime.utcnow() - stamp.timestamp.stamped).days
+        # score = score - math.floor(days / 10.0)
+        stats.score = int(score)
 
         self._stampStatsDB.saveStampStats(stats)
 
@@ -2741,8 +2798,8 @@ class StampedAPI(AStampedAPI):
         # Add full user object back
         comment.user = user.minimize()
 
-        self.addCommentAsync(user.user_id, stampId, comment.comment_id)
-        #tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
+        # self.addCommentAsync(user.user_id, stampId, comment.comment_id)
+        tasks.invoke(tasks.APITasks.addComment, args=[user.user_id, stampId, comment.comment_id])
 
         return comment
 
@@ -3381,7 +3438,6 @@ class StampedAPI(AStampedAPI):
 
 
     """
-
      #####
     #     # #    # # #####  ######
     #       #    # # #    # #
@@ -3393,11 +3449,98 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
+        if guideRequest.scope == 'me':
+            ### TODO: Put something here
+            return []
 
-        # Hack to return kevin's guide for popular (until we build formula for popular)
-        if guideRequest != 'inbox':
-            user = self._userDB.getUserByScreenName('kevin')
-            authUserId = user.user_id
+        if guideRequest.scope == 'inbox':
+            return self.getUserGuide(guideRequest, authUserId)
+
+        if guideRequest.scope == 'everyone':
+            types = None 
+
+            # Subsection conversion
+            if guideRequest.subsection is not None:
+                types = [ guideRequest.subsection ]
+            elif guideRequest.section is not None:
+                if guideRequest.section == 'food':
+                    types = [ 'restaurant', 'bar', 'cafe', 'food' ]
+                else:
+                    types = list(Entity.mapCategoryToTypes(guideRequest.section))
+
+            since = datetime.utcnow() - timedelta(days=90)
+
+            stampIds = self._stampStatsDB.getPopularStampIds(types=types, viewport=guideRequest.viewport, since=since)
+
+            stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+            stamps.sort(key=lambda x: stampIds.index(x.stamp_id))
+
+            entityIds = {}
+            userIds = {}
+
+            for stamp in stamps:
+                userIds[stamp.user.user_id] = None 
+                if stamp.entity.entity_id in entityIds:
+                    continue 
+                entityIds[stamp.entity.entity_id] = None 
+
+            # Entities
+            entities = self._entityDB.getEntities(entityIds.keys())
+
+            for entity in entities:
+                if entity.sources.tombstone_id is not None:
+                    # Convert to newer entity
+                    replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                    entityIds[entity.entity_id] = replacement
+                    ### TODO: Async process to replace reference
+                else:
+                    entityIds[entity.entity_id] = entity
+
+            # Users
+            users = self._userDB.lookupUsers(list(userIds.keys()))
+
+            for user in users:
+                userIds[user.user_id] = user.minimize()
+
+            # Build previews
+            entityStampPreviews = {}
+            for stamp in stamps:
+                stampPreview = StampPreview()
+                stampPreview.user = userIds[stamp.user.user_id]
+                stampPreview.stamp_id = stamp.stamp_id
+
+                if stamp.entity.entity_id in entityStampPreviews:
+                    entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
+                else:
+                    entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+
+            # Results
+            result = []
+            seenEntities = set()
+            for stamp in stamps:
+                if stamp.entity.entity_id in seenEntities:
+                    continue 
+                entity = entityIds[stamp.entity.entity_id]
+                seenEntities.add(stamp.entity.entity_id)
+
+                previews = Previews()
+                previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+                entity.previews = previews
+                result.append(entity)
+                
+            limit = 20
+            if guideRequest.limit is not None:
+                limit = guideRequest.limit
+            offset = 0
+            if guideRequest.offset is not None:
+                offset = guideRequest.offset
+
+            return result[offset:][:limit]
+
+
+    @API_CALL
+    def getUserGuide(self, guideRequest, authUserId):
+        assert(authUserId is not None) 
 
         try:
             guide = self._guideDB.getGuide(authUserId)
@@ -3419,7 +3562,6 @@ class StampedAPI(AStampedAPI):
             offset = guideRequest.offset
 
         entityIds = {}
-        stampIds = {}
         userIds = {}
         items = []
 
@@ -3510,16 +3652,103 @@ class StampedAPI(AStampedAPI):
                 entity.previews = previews
             result.append(entity)
 
+        # Refresh guide
+        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
+
         return result
 
-        # Build guide
-        return None
+    @API_CALL
+    def searchGuide(self, guideSearchRequest, authUserId):
+        if guideSearchRequest.scope == 'inbox' and authUserId is not None:
+            stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
+        else:
+            # Hack to return kevin's guide for popular (until we build formula for popular)
+            user = self._userDB.getUserByScreenName('kevin')
+            stampIds = self._getScopeStampIds(scope='inbox', authUserId=user.user_id)
 
+        searchSlice             = SearchSlice()
+        searchSlice.limit       = 100
+        searchSlice.viewport    = guideSearchRequest.viewport
+        searchSlice.query       = guideSearchRequest.query
+
+        # Subsection conversion
+        if guideSearchRequest.subsection is not None:
+            searchSlice.types = [ guideSearchRequest.subsection ]
+        elif guideSearchRequest.section is not None:
+            if guideSearchRequest.section == 'food':
+                searchSlice.types = [ 'restaurant', 'bar', 'cafe', 'food' ]
+            else:
+                searchSlice.types = list(Entity.mapCategoryToTypes(guideSearchRequest.section))
+
+        stamps = self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
+
+        entityIds = {}
+        userIds = {}
+
+        for stamp in stamps:
+            userIds[stamp.user.user_id] = None 
+            if stamp.entity.entity_id in entityIds:
+                continue 
+            entityIds[stamp.entity.entity_id] = None 
+
+        # Entities
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            if entity.sources.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                ### TODO: Async process to replace reference
+            else:
+                entityIds[entity.entity_id] = entity
+
+        # Users
+        users = self._userDB.lookupUsers(list(userIds.keys()))
+
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        # Build previews
+        entityStampPreviews = {}
+        for stamp in stamps:
+            stampPreview = StampPreview()
+            stampPreview.user = userIds[stamp.user.user_id]
+            stampPreview.stamp_id = stamp.stamp_id
+
+            if stamp.entity.entity_id in entityStampPreviews:
+                entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
+            else:
+                entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+
+        # Results
+        result = []
+        seenEntities = set()
+        for stamp in stamps:
+            if stamp.entity.entity_id in seenEntities:
+                continue 
+            entity = entityIds[stamp.entity.entity_id]
+            seenEntities.add(stamp.entity.entity_id)
+
+            previews = Previews()
+            previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+            entity.previews = previews
+            result.append(entity)
+
+        return result
+
+    @API_CALL
+    def buildGuide(self, authUserId):
+        """
+        Pass if happening synchronously. The Guide only needs to be regenerated async, so it can fail if this is
+        called directly.
+        """
+        pass
 
     @API_CALL
     def buildGuideAsync(self, authUserId):
         try:
-            guide = self._guideDB.getGuide(guideRequest, authUserId)
+            guide = self._guideDB.getGuide(authUserId)
             if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
                 return
         except (StampedUnavailableError, KeyError):
@@ -3680,7 +3909,7 @@ class StampedAPI(AStampedAPI):
         if stamp is None and rawTodo.complete and rawTodo.stamp_id is None and authUserId:
             stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
             if stamp is not None:
-                todo.stamp_id = stamp.stamp_id
+                rawTodo.stamp_id = stamp.stamp_id
 
         previews = None
         if friendIds is not None:
@@ -4034,39 +4263,144 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) > 0:
             self._userDB.updateUserStats(recipientIds, 'num_unread_news', increment=1)
 
-    @API_CALL
-    def getActivity(self, authUserId, **kwargs):
-        quality = kwargs.pop('quality', 3)
+    def _createActivityCacheKey(self, authUserId, distance, offset):
+        return str("ActivityCacheKey::%s::%s::%s" % (authUserId, distance, offset))
 
-        # Set quality
-        if quality == 1:
-            stampCap    = 50
-            commentCap  = 20
-        elif quality == 2:
-            stampCap    = 30
-            commentCap  = 10
-        else:
-            stampCap    = 20
-            commentCap  = 4
+    def _getActivityFromDB(self, authUserId, distance, before, limit):
+        final = False
 
-        kwargs['sort'] = 'created'
+        params = {}
+        if before is not None:
+            params['before'] = before
+        params['limit'] = limit
 
-        # Limit slice of data returned
-        params = self._setSliceParams(kwargs, stampCap)
-
-        distance = kwargs.pop('distance', 0)
         if distance > 0:
-            personal = False
+            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
-            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
+
+            # Get activities where friends are a subject member
             dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
+            if len(dirtyActivityData) < limit:
+                final = True
+            activityItemIds = [item.activity_id for item in dirtyActivityData]
+            # Find activity items for friends that also appear in personal feed
+            personalActivityIds = self._activityDB.getActivityIdsForUser(authUserId, **params)
+            overlappingActivityIds =  list(set(personalActivityIds).intersection(set(activityItemIds)))
+
             for item in dirtyActivityData:
+                # Exclude the item if it is in the user's personal feed, unless it is a 'follow' item.  In that case,
+                #  remove the user as an object and ensure there are still other users targeted by the item
+                isInPersonalFeed = item.activity_id in overlappingActivityIds
+                if isInPersonalFeed and item.verb in ['comment', 'like',  'todo', 'restamp' ]:
+                    continue
+                elif isInPersonalFeed and item.verb in ['follow']:
+                    assert(item.objects is not None and authUserId in item.objects.user_ids)
+                    newUserIds = list(item.objects.user_ids)
+                    newUserIds.remove(authUserId)
+                    item.objects.user_ids = newUserIds
+                    if len(item.objects.user_ids) == 0:
+                        continue
+
                 item.subjects = list(set(item.subjects).intersection(set(friends)))
+                assert(len(item.subjects) > 0)
                 activityData.append(item)
         else:
-            personal = True
             activityData = self._activityDB.getActivity(authUserId, **params)
+            if len(activityData) < limit:
+                final = True
+
+        return activityData, final
+
+    def _pruneActivityItems(self, activityItems):
+        prunedItems = []
+        for item in activityItems:
+#            if item.verb == 'follow':
+#                continue
+            prunedItems.append(item)
+        return prunedItems
+
+    def _updateActivityCache(self, authUserId, distance, offset):
+
+        prevBlockOffset = offset - self.ACTIVITY_CACHE_BLOCK_SIZE
+        if prevBlockOffset < 0:
+            prevBlockOffset = None
+
+        # get the modified time of the last item of the previous activity cache block.  We use it for the slice
+        before = None
+        if prevBlockOffset is not None:
+            prevBlockKey = self._createActivityCacheKey(authUserId, distance, prevBlockOffset)
+            try:
+                prevBlock = self._cache[prevBlockKey]
+            except KeyError:
+                # recursively fill previous blocks if they have expired
+                prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
+            except Exception as e:
+                logs.error('Error retrieving activity items from memcached.  Is memcached running?')
+                prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
+            if len(prevBlock) < self.ACTIVITY_CACHE_BLOCK_SIZE:
+                raise Exception("previous activity block was final")
+            assert(len(prevBlock) > 0)
+            lastItem = prevBlock[-1]
+            before = lastItem.timestamp.modified - timedelta(microseconds=1)
+
+        # Pull the data from the database and prune it.
+        limit = self.ACTIVITY_CACHE_BLOCK_SIZE + self.ACTIVITY_CACHE_BUFFER_SIZE
+        activityData = []
+        while len(activityData) < self.ACTIVITY_CACHE_BLOCK_SIZE:
+            newData, final = self._getActivityFromDB(authUserId, distance, before, limit)
+            newData = self._pruneActivityItems(newData)
+            activityData += newData
+            if final:
+                break
+            before = newData[-1].timestamp.modified - timedelta(microseconds=1)
+
+        key = self._createActivityCacheKey(authUserId, distance, offset)
+        activityData = activityData[:self.ACTIVITY_CACHE_BLOCK_SIZE]
+        try:
+            self._cache[key] = activityData
+        except Exception:
+            logs.error('Error storing activity items to memcached.  Is memcached running?')
+        return activityData
+
+    def _clearActivityCacheForUser(self, authUserId, distance):
+        curOffset = 0
+        key = self._createActivityCacheKey(authUserId, distance, curOffset)
+        while key in self._cache:
+            del(self._cache[key])
+            curOffset += self.ACTIVITY_CACHE_BLOCK_SIZE
+            key = self._createActivityCacheKey(authUserId, distance, curOffset)
+
+    def _getActivityFromCache(self, authUserId, distance, offset, limit):
+        """
+        Pull the requested activity data from cache if it exists there, otherwise pull the data from db
+        Returns a tuple of (the activity data list, bool indicating if the end of the activity stream was reached)
+        """
+        if offset == 0:
+            self._clearActivityCacheForUser(authUserId, distance)
+
+        activity = []
+        while len(activity) < limit:
+            curOffset = ((offset + len(activity)) // self.ACTIVITY_CACHE_BLOCK_SIZE) * self.ACTIVITY_CACHE_BLOCK_SIZE
+            key = self._createActivityCacheKey(authUserId, distance, curOffset)
+            try:
+                newActivity = self._cache[key]
+            except KeyError:
+                newActivity = self._updateActivityCache(authUserId, distance, curOffset)
+            except Exception:
+                logs.error('Error retrieving activity from memcached.  Is memcached running?')
+                newActivity = self._updateActivityCache(authUserId, distance, curOffset)
+            start = (offset+len(activity)) % self.ACTIVITY_CACHE_BLOCK_SIZE
+            activity += newActivity[start:start+limit]
+            if len(newActivity) < self.ACTIVITY_CACHE_BLOCK_SIZE:
+                break
+
+        return activity[:limit], len(activity) < limit
+
+
+    @API_CALL
+    def getActivity(self, authUserId, actSlice):
+        activityData, final = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
 
         # Append user objects
         userIds     = {}
@@ -4094,6 +4428,8 @@ class StampedAPI(AStampedAPI):
                 if item.objects.comment_ids is not None:
                     for commentId in item.objects.comment_ids:
                         commentIds[str(commentId)] = None
+
+        personal = actSlice.distance == 0
 
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
@@ -4126,12 +4462,10 @@ class StampedAPI(AStampedAPI):
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
 
+        ### TEMP CODE FOR LOCAL COPY THAT DOESN"T ENRICH PROPERLY
         activity = []
         for item in activityData:
             try:
-                if item.verb in ['invite_received', 'invite_sent']:
-                    continue
-
                 activity.append(item.enrich(authUserId  = authUserId,
                                             users       = userIds,
                                             stamps      = stampIds,
@@ -4147,7 +4481,7 @@ class StampedAPI(AStampedAPI):
 
 
         # Reset activity count
-        if personal:
+        if personal == True:
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
@@ -4498,7 +4832,7 @@ class StampedAPI(AStampedAPI):
             artistsModified = False
 
             if entity.artists is None:
-                return albumsModified
+                return artistsModified
 
             for stub in entity.artists:
                 artistId = stub.entity_id

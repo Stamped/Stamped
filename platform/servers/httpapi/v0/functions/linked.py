@@ -33,7 +33,7 @@ def add(request, authUserId, http_schema, **kwargs):
     linkedAccount = http_schema.exportLinkedAccount()
     result = stampedAPI.addLinkedAccount(authUserId, linkedAccount)
 
-    return transformOutput(result)
+    return transformOutput(True)
 
 @handleHTTPRequest(http_schema=HTTPRemoveLinkedAccountForm)
 @require_http_methods(["POST"])
@@ -103,7 +103,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     linked.user_id                  = result['user_id']
     linked.token                    = result['oauth_token']
     linked.secret                   = result['oauth_token_secret']
-    stampedAPI.addlinked(authUserId, linked)
+    stampedAPI.addLinkedAccount(authUserId, linked)
 
     return createNetflixLoginResponse(authUserId)
 

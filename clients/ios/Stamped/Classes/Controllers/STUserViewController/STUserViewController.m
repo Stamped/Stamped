@@ -21,6 +21,7 @@
 #import "STUserCollectionSlice.h"
 #import "STUserSource.h"
 #import "STNavigationBar.h"
+#import "STSimpleSource.h"
 
 @interface STUserViewController ()
 @property(nonatomic,readonly) BOOL loadingUser;
@@ -64,11 +65,23 @@
     
     if (self = [super init]) {
         _user = [user retain];
-        self.userIdentifier = user.userID;
-        self.title = user.screenName;
+        
+        if ([user isKindOfClass:NSClassFromString(@"STSimpleSource")]) {
+            
+            STSimpleSource *source = (STSimpleSource*)_user;
+            self.userIdentifier = source.sourceID;
+            self.title = source.name;
+            
+        } else {
+            
+            self.userIdentifier = user.userID;
+            self.title = user.screenName;
+       
+        }
         _stamps = [[STUserStamps alloc] init];
         _stamps.userIdentifier = self.userIdentifier;
         [STEvents addObserver:self selector:@selector(stampsFinished:) event:EventTypeUserStampsFinished identifier:self.userIdentifier];
+
     }
     return self;
     
@@ -99,7 +112,7 @@
     
     [self reloadDataSource];
     
-    if ([self.navigationController.navigationBar isKindOfClass:[STNavigationBar class]]) {
+    if (_user && [self.navigationController.navigationBar isKindOfClass:[STNavigationBar class]] && [_user respondsToSelector:@selector(primaryColor)]) {
         [(STNavigationBar*)self.navigationController.navigationBar showUserStrip:YES forUser:_user];
     }
     
@@ -134,8 +147,14 @@
 
 - (void)stampsFinished:(NSNotification*)notification {
     
+    NSInteger sections = [self.tableView numberOfSections];
     [self.tableView reloadData];
     [self dataSourceDidFinishLoading];
+    
+    if (sections == 0 && [self selectedTab] == STUserHeaderTabStamps) {
+        [self animateIn];
+    }
+    
     
 }
 
@@ -317,8 +336,7 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
     
     if ([self selectedTab] != STUserHeaderTabStamps) return 0;
-    
-    return 1;
+    return [_stamps isEmpty] ? 0 : 1;
     
 }
 
@@ -364,8 +382,7 @@
     id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
-   // [[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
-    
+    [controller release];
 }
 
 
@@ -406,6 +423,11 @@
                 self.navigationItem.rightBarButtonItem = barButton;
                 [button release];
                 [barButton release];
+                
+                CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+                animation.fromValue = [NSNumber numberWithFloat:0.0f];
+                animation.duration = 0.3f;
+                [button.layer addAnimation:animation forKey:nil];
                 
             }];
         }

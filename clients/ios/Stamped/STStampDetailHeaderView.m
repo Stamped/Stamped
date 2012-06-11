@@ -55,7 +55,7 @@
             stampImage = [Util invertedStampImageForUser:self.stamp.user withSize:STStampImageSize42];
             titleColor = [UIColor whiteColor];
             subtitleColor = [UIColor whiteColor];
-            view.backgroundColor = [UIColor blueColor];
+            [Util addGradientToLayer:view.layer withColors:[UIColor stampedBlueGradient] vertical:YES];
         }
         
         UIFont* titleFont = [UIFont stampedTitleFontWithSize:32];
@@ -63,7 +63,7 @@
                                            font:titleFont
                                           color:titleColor 
                                            mode:UILineBreakModeTailTruncation
-                                     andMaxSize:CGSizeMake(280, CGFLOAT_MAX)];
+                                     andMaxSize:CGSizeMake(280, titleFont.lineHeight)];
         [titleView sizeToFit];
         [Util reframeView:titleView withDeltas:CGRectMake(13,
                                                           36 - titleFont.ascender,

@@ -14,8 +14,9 @@
 #import "STStampedAPI.h"
 #import "STMenuPopUp.h"
 #import "STActionManager.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 #import "STPhotoViewController.h"
+#import "STCreateStampViewController.h"
 
 @interface STStampedActions ()
 
@@ -90,12 +91,10 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
       UIViewController* controller = nil;
       if (context.user) {
-        STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
-        controller = profileViewController;
+        controller = [[[STUserViewController alloc] initWithUser:source] autorelease];
       }
       else {
-        STProfileViewController* profileViewController = [[[STProfileViewController alloc] initWithUserID:source.sourceID] autorelease];
-        controller = profileViewController;
+        controller = [[[STUserViewController alloc] initWithUser:source] autorelease];
       }
       if (controller) {
         [[Util sharedNavigationController] pushViewController:controller animated:YES];
@@ -175,6 +174,14 @@ static STStampedActions* _sharedInstance;
           STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:source.sourceID]];
           [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }
+    }
+    else if ([action isEqualToString:@"stamped_view_create_stamp"] && source.sourceID != nil && context.entity) {
+        handled = YES;
+        if (flag) {
+            STCreateStampViewController* controller = [[[STCreateStampViewController alloc] initWithEntity:context.entity] autorelease];
+            controller.creditedUsers = context.creditedUsers;
+            [[Util sharedNavigationController] pushViewController:controller animated:YES];
+        }
     }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
       handled = YES;
@@ -260,6 +267,14 @@ static STStampedActions* _sharedInstance;
 + (id<STAction>)actionViewImage:(NSString*)imageURL withOutputContext:(STActionContext*)context {
   return [STSimpleAction actionWithType:@"stamped_view_image" 
                               andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:imageURL]];
+}
+
++ (id<STAction>)actionViewCreateStampWithEntity:(id<STEntity>)entity creditedUsers:(NSArray<STUser>*)users withOutputContext:(STActionContext*)context {
+    context.creditedUsers = users;
+    context.entity = entity;
+    return [STSimpleAction actionWithType:@"stamped_view_create_stamp" 
+                                andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:entity.entityID]];
+    
 }
 
 @end

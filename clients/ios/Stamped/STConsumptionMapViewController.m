@@ -15,6 +15,9 @@
 #import "Util.h"
 #import "STStampedActions.h"
 #import "UserImageView.h"
+#import "STActionManager.h"
+#import "STEntityAnnotation.h"
+#import "STPreviewsView.h"
 
 static NSString* const _cacheOverlayKey = @"Consumption.food.cacheOverlay";
 
@@ -52,7 +55,7 @@ NSInteger zoom;
 @property (nonatomic, readonly, assign) NSInteger x;
 @property (nonatomic, readonly, assign) NSInteger y;
 @property (nonatomic, readonly, assign) NSInteger zoom;
-@property (nonatomic, readonly, retain) NSMutableDictionary* stamps;
+@property (nonatomic, readonly, retain) NSMutableDictionary* entities;
 @property (nonatomic, readonly, copy) NSString* key;
 
 @end
@@ -65,14 +68,6 @@ NSInteger zoom;
 
 @end
 
-@interface STConsumptionAnnotation : NSObject <MKAnnotation, NSCoding>
-
-- (id)initWithStamp:(id<STStamp>)stamp;
-
-@property (nonatomic, readonly, retain) id<STStamp> stamp;
-
-@end
-
 @interface STConsumptionMapCache : NSObject
 
 - (id)initWithSubcategory:(NSString*)subcategory 
@@ -82,8 +77,8 @@ NSInteger zoom;
 
 - (NSArray*)cachedTilesForRegion:(MKCoordinateRegion)region;
 
-- (STCancellation*)stampsForRegion:(MKCoordinateRegion)region
-                       andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+- (STCancellation*)entitiesForRegion:(MKCoordinateRegion)region
+                         andCallback:(void (^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block;
 
 + (NSString*)keyForSubcategory:(NSString*)subcategory
                          scope:(STStampedAPIScope)scope 
@@ -111,6 +106,8 @@ NSInteger zoom;
 
 @property (nonatomic, readonly, retain) STConsumptionToolbar* consumptionToolbar;
 @property (nonatomic, readonly, retain) STSearchField* searchField;
+@property (nonatomic, readonly, retain) UIView* previewContainer;
+@property (nonatomic, readonly, retain) STPreviewsView* previews;
 @property (nonatomic, readonly, retain) MKMapView* mapView;
 @property (nonatomic, readwrite, assign) BOOL zoomToUserLocation;
 @property (nonatomic, readwrite, assign) MKMapRect lastMapRect;
@@ -123,6 +120,8 @@ NSInteger zoom;
 @property (nonatomic, readonly, retain) NSMutableArray* cancellations;
 @property (nonatomic, readonly, retain) NSMutableArray* tileOverlays;
 @property (nonatomic, readwrite, assign) BOOL cachingDisabled;
+@property (nonatomic, readonly, assign) CGRect previewContainerFrameHidden;
+@property (nonatomic, readonly, assign) CGRect previewContainerFrameShown;
 
 @end
 
@@ -142,6 +141,10 @@ NSInteger zoom;
 @synthesize cancellations = cancellations_;
 @synthesize cachingDisabled = cachingDisabled_;
 @synthesize tileOverlays = tileOverlays_;
+@synthesize previewContainer = _previewContainer;
+@synthesize previews = _previews;
+@synthesize previewContainerFrameShown = _previewContainerFrameShown;
+@synthesize previewContainerFrameHidden = _previewContainerFrameHidden;
 
 - (STConsumptionToolbarItem*)rootItem {
     STConsumptionToolbarItem* item = [[STConsumptionToolbarItem alloc] init];
@@ -205,6 +208,8 @@ NSInteger zoom;
     [tileOverlays_ release];
     [cancellations_ release];
     [annotations_ release];
+    [_previews release];
+    [_previewContainer release];
     [super dealloc];
 }
 
@@ -216,7 +221,7 @@ NSInteger zoom;
     self.zoomToUserLocation = YES;
     UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
     searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
-    searchField_.placeholder = @"Search for stamps";
+    searchField_.placeholder = @"Search for places";
     searchField_.enablesReturnKeyAutomatically = NO;
     searchField_.delegate = self;
     [searchBar addSubview:searchField_];
@@ -228,8 +233,15 @@ NSInteger zoom;
                                                            self.scrollView.frame.size.width,
                                                            self.scrollView.contentSize.height - CGRectGetMaxY(searchBar.frame))];
     [self.scrollView appendChildView:mapView_];
+    _previewContainerFrameHidden = CGRectMake(0, CGRectGetMaxY(mapView_.frame), 320, 44);
+    _previewContainerFrameShown = CGRectOffset(_previewContainerFrameHidden, 0, -_previewContainerFrameHidden.size.height);
+    _previewContainer = [[UIView alloc] initWithFrame:_previewContainerFrameHidden];
+    [Util addGradientToLayer:_previewContainer.layer withColors:[UIColor stampedLightGradient] vertical:YES];
+    _previews = [[STPreviewsView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [_previewContainer addSubview:_previews];
+    [self.scrollView addSubview:_previewContainer];
     mapView_.delegate = self;
-    [Util addConfigurationButtonToController:self];
+    //[Util addConfigurationButtonToController:self];
     [self update];
 }
 
@@ -387,43 +399,38 @@ NSInteger zoom;
     if (!view)
         return;
     
-    /*
-     TODO FIX
-    STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
-    UIViewController* vc = nil;
-    if (annotation.stamp) {
-        [[STStampedActions sharedInstance] viewStampWithStampID:annotation.stamp.stampID];
-    } else if (annotation.entityObject) {
-        vc = [Util detailViewControllerForEntity:annotation.entityObject];
+    STEntityAnnotation* annotation = (STEntityAnnotation*)[(MKPinAnnotationView*)view annotation];
+    id<STEntityDetail> entityDetail = annotation.entityDetail;
+    if (entityDetail) {
+        STActionContext* context = [STActionContext context];
+        id<STAction> action = [STStampedActions actionViewEntity:entityDetail.entityID withOutputContext:context];
+        context.entityDetail = entityDetail;
+        [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
     }
-    if (!vc)
-        return;
-    
-    [self.navigationController pushViewController:vc animated:YES];
-     */
 }
-
-- (void)viewUser:(id<STUser>)user {
-    //NSLog(@"view user");
-    [[STStampedActions sharedInstance] viewUserWithUserID:user.userID];
-}
-
-
-- (void)mapUserTapped:(id)sender {
-    UserImageView* userImage = sender;
-    UIView* view = [userImage superview];
-    while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
-        view = [view superview];
-    
-    if (!view)
-        return;
-    
-    STConsumptionAnnotation* annotation = (STConsumptionAnnotation*)[(MKPinAnnotationView*)view annotation];
-    [[STStampedActions sharedInstance] viewUserWithUserID:annotation.stamp.user.userID];
-}
+/*
+ - (void)viewUser:(id<STUser>)user {
+ //NSLog(@"view user");
+ [[STStampedActions sharedInstance] viewUserWithUserID:user.userID];
+ }
+ */
+/*
+ - (void)mapUserTapped:(id)sender {
+ UserImageView* userImage = sender;
+ UIView* view = [userImage superview];
+ while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
+ view = [view superview];
+ 
+ if (!view)
+ return;
+ 
+ STEntityAnnotation* annotation = (STConsumptionAnnotation*)[(MKPinAnnotationView*)view annotation];
+ [[STStampedActions sharedInstance] viewUserWithUserID:annotation.stamp.user.userID];
+ }
+ */
 
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-    if (![annotation isKindOfClass:[STConsumptionAnnotation class]])
+    if (![annotation isKindOfClass:[STEntityAnnotation class]])
         return nil;
     
     MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
@@ -435,19 +442,48 @@ NSInteger zoom;
     pinView.pinColor = MKPinAnnotationColorRed;
     pinView.canShowCallout = YES;
     
-    id<STStamp> stamp = [(STConsumptionAnnotation*)annotation stamp];
-    if (stamp) {
-        
-        UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, STProfileImageSize31, STProfileImageSize31)];
-        userImageView.enabled = YES;
-        [userImageView addTarget:self
-                          action:@selector(mapUserTapped:)
-                forControlEvents:UIControlEventTouchUpInside];
-        userImageView.imageURL = [Util profileImageURLForUser:stamp.user withSize:STProfileImageSize31];
-        pinView.leftCalloutAccessoryView = userImageView;
+    id<STEntityDetail> entity = [(STEntityAnnotation*)annotation entityDetail];
+    if (entity) {
+        /*
+         UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, STProfileImageSize31, STProfileImageSize31)];
+         userImageView.enabled = YES;
+         [userImageView addTarget:self
+         action:@selector(mapUserTapped:)
+         forControlEvents:UIControlEventTouchUpInside];
+         userImageView.imageURL = [Util profileImageURLForUser:stamp.user withSize:STProfileImageSize31];
+         pinView.leftCalloutAccessoryView = userImageView;
+         */
     }
     
     return pinView;
+}
+
+- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view {
+    if (![view.annotation isKindOfClass:[STEntityAnnotation class]])
+        return;
+    STEntityAnnotation* annotation = (id)view.annotation;
+    id<STPreviews> preview = annotation.entityDetail.previews;
+    if (preview) {
+        [self.previews setupWithPreview:preview maxRows:1];
+        self.previews.frame = [Util centeredAndBounded:self.previews.frame.size 
+                                               inFrame:CGRectMake(0, 0, self.previewContainer.frame.size.width, self.previewContainer.frame.size.height)];
+        [UIView animateWithDuration:.25 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+            self.previewContainer.frame = self.previewContainerFrameShown; 
+        } completion:^(BOOL finished) {
+            
+        }];
+        [UIView animateWithDuration:.25 animations:^{
+        }];
+    }
+}
+
+- (void)mapView:(MKMapView *)mapView didDeselectAnnotationView:(MKAnnotationView *)view {
+    //STEntityAnnotation* annotation = (id)view.annotation;
+    [UIView animateWithDuration:.25 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+        self.previewContainer.frame = self.previewContainerFrameHidden;
+    } completion:^(BOOL finished) {
+        
+    }];
 }
 
 - (MKOverlayView*)mapView:(MKMapView *)mapView viewForOverlay:(id<MKOverlay>)overlay {
@@ -485,17 +521,30 @@ NSInteger zoom;
         [c cancel];
     }
     [self.cancellations removeAllObjects];
-    STCancellation* cancellation = [cache stampsForRegion:self.mapView.region
-                                              andCallback:^(NSArray<STStamp> *stamps, NSError *error, STCancellation *cancellation2) {
-                                                  [self.cancellations removeObject:cancellation2];
-                                                  [self.mapView removeAnnotations:self.annotations];
-                                                  [self.annotations removeAllObjects];
-                                                  for (id<STStamp> stamp in stamps) {
-                                                      STConsumptionAnnotation* annotation = [[[STConsumptionAnnotation alloc] initWithStamp:stamp] autorelease];
-                                                      [self.annotations addObject:annotation];
-                                                      [self.mapView addAnnotation:annotation];
-                                                  }
-                                              }];
+    STCancellation* cancellation = [cache entitiesForRegion:self.mapView.region
+                                                andCallback:^(NSArray<STEntityDetail> *entities, NSError *error, STCancellation *cancellation2) {
+                                                    [self.cancellations removeObject:cancellation2];
+                                                    NSMutableDictionary* doomed = [NSMutableDictionary dictionary];
+                                                    for (STEntityAnnotation* annotation in self.annotations) {
+                                                        [doomed setObject:annotation forKey:annotation.entityDetail.entityID];
+                                                    }
+                                                    [self.annotations removeAllObjects];
+                                                    for (id<STEntityDetail> entity in entities) {
+                                                        NSString* entityID = entity.entityID;
+                                                        STEntityAnnotation* annotation = [doomed objectForKey:entityID];
+                                                        if (annotation) {
+                                                            [doomed removeObjectForKey:entityID];
+                                                        }
+                                                        else {
+                                                            annotation = [[[STEntityAnnotation alloc] initWithEntityDetail:entity] autorelease];
+                                                            [self.mapView addAnnotation:annotation];
+                                                        }
+                                                        [self.annotations addObject:annotation];
+                                                    }
+                                                    for (STEntityAnnotation* annotation in doomed.allValues) {
+                                                        [self.mapView removeAnnotation:annotation];
+                                                    }
+                                                }];
     [self.cancellations addObject:cancellation];
 }
 
@@ -608,12 +657,12 @@ NSInteger zoom;
     return self;
 }
 
-- (void)handleResponseWithStamps:(NSArray<STStamp>*)stamps 
-                           error:(NSError*)error 
-                    cancellation:(STCancellation*)cancellation 
-                           frame:(STTileRect)frame
-                     andCallback:(void (^)(NSArray<STStamp>*, NSError*, STCancellation*))block {
-    if (stamps) {
+- (void)handleResponseWithEntities:(NSArray<STEntityDetail>*)entities
+                             error:(NSError*)error 
+                      cancellation:(STCancellation*)cancellation 
+                             frame:(STTileRect)frame
+                       andCallback:(void (^)(NSArray<STEntityDetail>*, NSError*, STCancellation*))block {
+    if (entities) {
         for (NSInteger x = frame.x; x < frame.x + frame.width; x++) {
             for (NSInteger y = frame.y; y < frame.y + frame.height; y++) {
                 NSString* tileKey = [STConsumptionMapTile keyForX:x y:y andZoom:frame.zoom];
@@ -625,8 +674,8 @@ NSInteger zoom;
                 }
             }
         }
-        for (id<STStamp> stamp in stamps) {
-            NSArray* coordinates = [stamp.entity.coordinates componentsSeparatedByString:@","];
+        for (id<STEntityDetail> entity in entities) {
+            NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","];
             CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
             CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
             CGPoint lonLat =CGPointMake(longitude, latitude);
@@ -637,10 +686,10 @@ NSInteger zoom;
                 tile = [[[STConsumptionMapTile alloc] initWithX:origin.x y:origin.y andZoom:frame.zoom] autorelease];
                 [self.cache setObject:tile forKey:tileKey];
             }
-            [tile.stamps setObject:stamp forKey:stamp.stampID];
+            [tile.entities setObject:entity forKey:entity.entityID];
         }
     }
-    block(stamps, error, cancellation);
+    block(entities, error, cancellation);
 }
 
 - (NSArray*)cachedTilesForRegion:(MKCoordinateRegion)region {
@@ -656,8 +705,8 @@ NSInteger zoom;
     return tiles;
 }
 
-- (STCancellation*)stampsForRegion:(MKCoordinateRegion)region
-                       andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+- (STCancellation*)entitiesForRegion:(MKCoordinateRegion)region
+                         andCallback:(void (^)(NSArray<STEntityDetail>*, NSError* error, STCancellation* cancellation))block {
     STTileRect frame = [STConsumptionMapViewController tileFrameWithRegion:region];
     NSSet* tileKeys = [STConsumptionMapViewController tileKeysForTileFrame:frame];
     NSMutableArray* tiles = [NSMutableArray array];
@@ -673,14 +722,14 @@ NSInteger zoom;
     }
     if (tileKeys.count == tiles.count) {
         NSLog(@"\n\n\nServing from Cache\n\n\n");
-        NSMutableArray<STStamp>* stamps = [NSMutableArray array];
+        NSMutableArray<STEntityDetail>* entities = [NSMutableArray array];
         for (STConsumptionMapTile* tile in tiles) {
-            [stamps addObjectsFromArray:tile.stamps.allValues];
+            [entities addObjectsFromArray:tile.entities.allValues];
         }
         STCancellation* cancellation = [STCancellation cancellation];
         [Util executeOnMainThread:^{
             if (!cancellation.cancelled) {
-                block(stamps, nil, cancellation);
+                block(entities, nil, cancellation);
             }
         }];
         return cancellation;
@@ -698,19 +747,16 @@ NSInteger zoom;
         slice.category = @"food";
         NSString* scope = @"you";
         if (self.scope == STStampedAPIScopeYou) {
-            scope = @"you";
+            scope = @"me";
         }
         else if (self.scope == STStampedAPIScopeFriends) {
-            scope = @"friends";
-        }
-        else if (self.scope == STStampedAPIScopeFriendsOfFriends) {
-            scope = @"fof";
+            scope = @"inbox";
         }
         else if (self.scope == STStampedAPIScopeEveryone) {
             scope = @"everyone";
         }
         slice.scope = scope;
-        slice.subcategory = self.subcategory;
+        //slice.subcategory = self.subcategory;
         slice.filter = self.filter;
         slice.query = self.query;
         if (slice.query) {
@@ -721,10 +767,10 @@ NSInteger zoom;
                           actualFrame.origin.x,
                           actualFrame.origin.y,
                           actualFrame.origin.x + actualFrame.size.width];
-        return [[STStampedAPI sharedInstance] stampsForConsumptionSlice:slice 
-                                                            andCallback:^(NSArray<STStamp> *stamps, NSError *error, STCancellation *cancellation) {
-                                                                [self handleResponseWithStamps:stamps error:error cancellation:cancellation frame:frame andCallback:block];
-                                                            }];
+        return [[STStampedAPI sharedInstance] entitiesForConsumptionSlice:slice 
+                                                              andCallback:^(NSArray<STEntityDetail> *entities, NSError *error, STCancellation *cancellation) {
+                                                                  [self handleResponseWithEntities:entities error:error cancellation:cancellation frame:frame andCallback:block];
+                                                              }];
     }
 }
 
@@ -756,7 +802,7 @@ NSInteger zoom;
 @synthesize x = x_;
 @synthesize y = y_;
 @synthesize zoom = zoom_;
-@synthesize stamps = stamps_;
+@synthesize entities = _entities;
 @synthesize key = key_;
 
 - (id)initWithX:(NSInteger)x y:(NSInteger)y andZoom:(NSInteger)zoom
@@ -766,8 +812,8 @@ NSInteger zoom;
         x_ = x;
         y_ = y;
         zoom_ = zoom;
-        stamps_ = [[NSMutableDictionary alloc] init];
-        key_ = [STConsumptionMapTile keyForX:x_ y:y_ andZoom:zoom_];
+        _entities = [[NSMutableDictionary alloc] init];
+        key_ = [[STConsumptionMapTile keyForX:x_ y:y_ andZoom:zoom_] retain];
     }
     return self;
 }
@@ -778,15 +824,15 @@ NSInteger zoom;
         x_ = [decoder decodeIntegerForKey:@"x"];
         y_ = [decoder decodeIntegerForKey:@"y"];
         zoom_ = [decoder decodeIntegerForKey:@"zoom"];
-        stamps_ = [decoder decodeObjectForKey:@"stamps"];
-        key_ = [decoder decodeObjectForKey:@"key"];
+        _entities = [[decoder decodeObjectForKey:@"entities"] retain];
+        key_ = [[decoder decodeObjectForKey:@"key"] retain];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [stamps_ release];
+    [_entities release];
     [key_ release];
     [super dealloc];
 }
@@ -795,7 +841,7 @@ NSInteger zoom;
     [encoder encodeInteger:self.x forKey:@"x"];
     [encoder encodeInteger:self.y forKey:@"y"];
     [encoder encodeInteger:self.zoom forKey:@"zoom"];
-    [encoder encodeObject:self.stamps forKey:@"stamps"];
+    [encoder encodeObject:self.entities forKey:@"entities"];
     [encoder encodeObject:self.key forKey:@"key"];
 }
 
@@ -833,54 +879,6 @@ NSInteger zoom;
     
     MKMapRect bounds = MKMapRectMake(topLeft.x, topLeft.y, width, height);
     return bounds;
-}
-
-@end
-
-@implementation STConsumptionAnnotation
-
-@synthesize stamp = stamp_;
-@synthesize coordinate = coordinate_;
-
-- (id)initWithStamp:(id<STStamp>)stamp {
-    self = [super init];
-    if (self) {
-        stamp_ = [stamp retain];
-        NSArray* coordinates = [stamp.entity.coordinates componentsSeparatedByString:@","];
-        CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
-        CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-        coordinate_ = CLLocationCoordinate2DMake(latitude, longitude);
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)decoder {
-    id<STStamp> stamp = [decoder decodeObjectForKey:@"stamp"];
-    return [self initWithStamp:stamp];
-}
-
-- (void)dealloc
-{
-    [stamp_ release];
-    [super dealloc];
-}
-
-- (void)encodeWithCoder:(NSCoder *)encoder {
-    [encoder encodeObject:self.stamp forKey:@"stamp"];
-}
-
-- (NSString *)title {
-    return self.stamp.entity.title;
-}
-
-- (NSString *)subtitle {
-    if (stamp_) {
-        if (stamp_.via.length > 0)
-            return stamp_.via;
-        
-        return [NSString stringWithFormat:@"@%@", stamp_.user.screenName];
-    }
-    return self.stamp.entity.subtitle;
 }
 
 @end

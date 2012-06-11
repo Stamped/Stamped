@@ -61,15 +61,6 @@
         CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
         CGGradientRelease(gradient);
         
-        /*
-        if (_color1 && _color2) {
-            
-            drawStampGradient([_color1 CGColor], [_color2 CGColor], ctx);
-        } else {
-            CGContextFillRect(ctx, rect);
-        }
-         */
-        
     }
     
 }
@@ -79,30 +70,26 @@
 
 - (void)setupWithUser:(id<STUser>)user {
    
-    //float r,g,b;
     [Util splitHexString:user.primaryColor toRed:&r green:&g blue:&b];
-    //[_color1 release], _color1=nil;
-    //_color1 = [[UIColor colorWithRed:r green:g blue:b alpha:1.0f] retain];
-    
-    [Util splitHexString:user.secondaryColor toRed:&r1 green:&g1 blue:&b1];
-    //[_color2 release], _color2=nil;
-    //_color2 = [[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0f] retain];
- 
+    [Util splitHexString:user.secondaryColor toRed:&r1 green:&g1 blue:&b1]; 
     [self setNeedsDisplay];
     
 }
 
 - (void)setupWithColors:(NSArray*)colors {
-    /*
-    if (!colors || [colors count] < 2) return;
+    if (!colors || [colors count] < 2) return; // invalid colors
+
+    const CGFloat *top = CGColorGetComponents([[colors objectAtIndex:0] CGColor]);
+    const CGFloat *bottom = CGColorGetComponents([[colors objectAtIndex:1] CGColor]);
     
-    [_color1 release], _color1=nil;
-    _color1 = [[colors objectAtIndex:0] retain];
+    r = top[0];
+    g = top[1];
+    b = top[2];
     
-    [_color2 release], _color2=nil;
-    _color2 = [[colors objectAtIndex:1] retain];
-     */
-    
+    r1 = bottom[0];
+    g1 = bottom[1];
+    b1 = bottom[2];
+
     [self setNeedsDisplay];
 
 }

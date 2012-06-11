@@ -26,27 +26,6 @@
 @synthesize moreData=_moreData;
 @synthesize requestParameters;
 
-/*
- 'v0/users/suggested.json'
- 'v0/users/find/email.json
- 'v0/users/find/phone.json
- 'v0/users/find/twitter.json
- 'v0/users/find/facebook.json
- 
- Find email and find phone take one arg a comma separated list of phone numbers or email addresses: 
- 
- q, basestring
- 
- find/twitter.json:
- 
- user_token, basestring
- user_secret, basestring
- 
- find/facebook.json:
- 
- user_token, basestring
- */
-
 - (id)init {
     if ((self = [super init])) {
         _data = [[NSArray alloc] init];
@@ -58,6 +37,7 @@
     
     if (_cancellation) {
         [_cancellation cancel];
+        [_cancellation release];
         _cancellation = nil;
     }
     
@@ -70,10 +50,8 @@
 #pragma mark Loading
 
 - (void)loadWithPath:(NSString*)path params:(NSDictionary*)params {
-    
-    NSLog(@"%@", params);
-    
-    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:YES params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping] andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
+            
+    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:(params!=nil) authenticated:YES params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping] andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
 
         _moreData = NO;
         if (users) {
@@ -94,7 +72,6 @@
             
             _data = [array retain];
             _identifiers = [identifiers retain];
-            [_cancellation release], _cancellation=nil;
             
             [array release];
             [identifiers release];
@@ -156,6 +133,7 @@
     switch (_requestType) {
         case FriendsRequestTypeContacts:{
             NSString *addresses = [[self emailAddresses] componentsJoinedByString:@","];
+            addresses = [addresses stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
             self.requestParameters = [NSDictionary dictionaryWithObject:addresses forKey:@"q"];
         }
             break;

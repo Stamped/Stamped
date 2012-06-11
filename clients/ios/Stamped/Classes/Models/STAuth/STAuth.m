@@ -10,6 +10,7 @@
 #import "STSimpleLoginResponse.h"
 #import "STRestKitLoader.h"
 #import "STDebug.h"
+#import "STStampedAPI.h"
 
 static id __instance;
 
@@ -61,17 +62,74 @@ static id __instance;
  
  'user_token',           basestring, required=True
  'user_secret',          basestring, required=True
+ 
+ 
+ ADDITIONS
+ 
+ cls.addProperty('bio',                              basestring)
+ cls.addProperty('website',                          basestring)
+ cls.addProperty('location',                         basestring)
+ cls.addProperty('color_primary',                    basestring)
+ cls.addProperty('color_secondary',                  basestring)
+ 
  */
 
-- (void)facebookSignupWithParams:(NSDictionary*)params {
+
+/*
+ 
+ - (STCancellation*)loginWithScreenName:(NSString*)screenName 
+ password:(NSString*)password 
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)loginWithFacebookUserToken:(NSString*)userToken
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)loginWithTwitterUserToken:(NSString*)userToken 
+ userSecret:(NSString*)userSecret
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)createAccountWithPassword:(NSString*)password
+ accountParameters:(STAccountParameters*)accountParameters
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)createAccountWithFacebookUserToken:(NSString*)userToken 
+ accountParameters:(STAccountParameters*)accountParameters
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ - (STCancellation*)createAccountWithTwitterUserToken:(NSString*)userToken 
+ userSecret:(NSString*)userSecret 
+ accountParameters:(STAccountParameters*)accountParameters
+ andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+ 
+ 
+ */
+
+
+#pragma mark - Signup
+
+- (void)signupWithPassword:(NSString*)password parameters:(STAccountParameters*)params {
     
-    NSString *path = @"/account/create/facebook.json";
-    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+    [[STStampedAPI sharedInstance] createAccountWithPassword:password accountParameters:params andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+        if (error) {
+            [STEvents postEvent:EventTypeSignupFailed];
+            [[STDebug sharedInstance] log:[error localizedDescription]];
+            NSLog(@"email signup error %@", [error localizedDescription]);
+        } else {
+            [STEvents postEvent:EventTypeSignupFinished];
+        }
+    }];
+    
+}
+
+- (void)facebookSignupWithToken:(NSString*)token params:(STAccountParameters*)params {
+    
+    [[STStampedAPI sharedInstance] createAccountWithFacebookUserToken:token accountParameters:params andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
         
         if (error) {
             
+            [STEvents postEvent:EventTypeSignupFailed];
             [[STDebug sharedInstance] log:[error localizedDescription]];
-            [Util warnWithMessage:[NSString stringWithFormat:@"%@\n\n%@\n\n%@\n", [error localizedDescription], path, params] andBlock:nil];
+            NSLog(@"facebook signup error %@", [error localizedDescription]);
 
         } else {
             
@@ -83,55 +141,97 @@ static id __instance;
     
 }
 
-- (void)twitterSignupWithParams:(NSDictionary*)params {
-    
-    NSString *path = @"/account/create/twitter.json";
-    [[STRestKitLoader sharedInstance] loadWithPath:path post:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+- (void)twitterSignupWithToken:(NSString*)token secretToken:(NSString*)secretToken params:(STAccountParameters*)params {
+        
+    [[STStampedAPI sharedInstance] createAccountWithTwitterUserToken:token userSecret:secretToken accountParameters:params andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
         
         if (error) {
             
+            [STEvents postEvent:EventTypeSignupFailed];
             [[STDebug sharedInstance] log:[error localizedDescription]];
-            [Util warnWithMessage:[NSString stringWithFormat:@"%@\n\n%@\n\n%@\n", [error localizedDescription], path, params] andBlock:nil];
-            
+            NSLog(@"twitter signup error %@", [error localizedDescription]);
+
         } else {
             
             [STEvents postEvent:EventTypeSignupFinished];
 
-            
         }
                 
     }];
     
 }
 
-- (void)facebookAuthWithToken:(NSString*)token {
+
+#pragma mark - Auth
+
+- (void)facebookAuthWithToken:(NSString*)token completion:(STAuthRequestFinished)completion {
     
-    NSString *path = @"/oauth2/login/facebook.json";
-    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:token, @"user_token", nil];
-    
-    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
-        
-        if (error) {
-            NSLog(@"error %@", [error localizedDescription]);
-        }
-        
+    [[STStampedAPI sharedInstance] loginWithFacebookUserToken:token andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+
+        completion(error);
         
     }];
     
 }
 
-- (void)twitterAuthWithToken:(NSString*)token secretToken:(NSString*)secretToken {
+- (void)twitterAuthWithToken:(NSString*)token secretToken:(NSString*)secretToken completion:(STAuthRequestFinished)completion {
     
-    NSString *path = @"/oauth2/login/twitter.json";
-    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:token, @"user_token", secretToken, @"user_secret", nil];
+    [[STStampedAPI sharedInstance] loginWithTwitterUserToken:(NSString*)token userSecret:(NSString*)secretToken andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+        
+        completion(error);
+        
+    }];
     
-    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+}
+
+
+#pragma mark - Updates
+
+- (void)checkUserName:(NSString*)username completion:(STAuthRequestFinished)completion {
+    
+    /*
+     GET /v0/account/check.json 
+     Takes one field (login) and returns a 200 plus user object if it exists, otherwise returns a 404 if available and a 400 if invalid (e.g. if it's a blacklisted screen name).
+     */
+    
+    NSString *path = @"/account/check.json";
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:NO params:[NSDictionary dictionaryWithObject:username forKey:@"login"] mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
         
-        if (error) {
-            NSLog(@"error %@", [error localizedDescription]);
-        }
+        completion(error);
         
-        NSLog(@"result %@", results);
+    }];
+    
+}
+
+- (void)updateStampWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary completion:(STAuthRequestFinished)completion {
+    
+    /*
+     POST /v0/account/customize_stamp.json
+     Takes two fields (color_primary and color_secondary) that are the hex values of the two colors. Returns the full user object.
+     */
+    
+    NSString *path = @"/account/customize_stamp.json";
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary", secondary, @"color_secondary", nil];
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+        
+        completion(error);
+        
+    }];
+    
+}
+
+- (void)updateProfileImageWithPath:(NSString*)tempPath completion:(STAuthRequestFinished)completion {
+    
+    /*
+     POST /v0/account/update_profile_image.json
+     Takes one field (temp_image_url) that has the url of the image. Returns the full user object.
+     */
+    
+    NSString *path = @"/account/update_profile_image.json";
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:tempPath, @"temp_image_url", nil];
+    [[STRestKitLoader sharedInstance] loadWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+        
+        completion(error);
         
     }];
     

@@ -128,55 +128,63 @@ class ClientLogsEntry(Schema):
 class CategoryDistributionSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('category',                 basestring)
-        cls.addProperty('count',                    int)
+        cls.addProperty('category',                         basestring)
+        cls.addProperty('count',                            int)
 
 class UserStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_stamps',               int)
-        cls.addProperty('num_stamps_left',          int)
-        cls.addProperty('num_stamps_total',         int)
-        cls.addProperty('num_friends',              int)
-        cls.addProperty('num_followers',            int)
-        cls.addProperty('num_todos',                int)
-        cls.addProperty('num_credits',              int)
-        cls.addProperty('num_credits_given',        int)
-        cls.addProperty('num_likes',                int)
-        cls.addProperty('num_likes_given',          int)
-        cls.addProperty('num_unread_news',          int)
-        cls.addNestedPropertyList('distribution', CategoryDistributionSchema)
+        cls.addProperty('num_stamps',                       int)
+        cls.addProperty('num_stamps_left',                  int)
+        cls.addProperty('num_stamps_total',                 int)
+        cls.addProperty('num_friends',                      int)
+        cls.addProperty('num_followers',                    int)
+        cls.addProperty('num_todos',                        int)
+        cls.addProperty('num_credits',                      int)
+        cls.addProperty('num_credits_given',                int)
+        cls.addProperty('num_likes',                        int)
+        cls.addProperty('num_likes_given',                  int)
+        cls.addProperty('num_unread_news',                  int)
+        cls.addNestedPropertyList('distribution',           CategoryDistributionSchema)
 
 class StampStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_comments',             int) # DEPRECATED
-        cls.addProperty('num_todos',                int) # DEPRECATED
-        cls.addProperty('num_credit',               int) # DEPRECATED
-        cls.addProperty('num_likes',                int) # DEPRECATED
-        cls.addProperty('like_threshold_hit',       bool)
-        cls.addProperty('stamp_num',                int)
-        cls.addProperty('num_blurbs',               int)
+        cls.addProperty('num_comments',                     int) # DEPRECATED
+        cls.addProperty('num_todos',                        int) # DEPRECATED
+        cls.addProperty('num_credit',                       int) # DEPRECATED
+        cls.addProperty('num_likes',                        int) # DEPRECATED
+        cls.addProperty('like_threshold_hit',               bool)
+        cls.addProperty('stamp_num',                        int)
+        cls.addProperty('num_blurbs',                       int)
 
 class StampStats(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',                 basestring, required=True)
-        cls.addProperty('num_todos',                int)
-        cls.addProperty('num_likes',                int)
-        cls.addProperty('num_credits',              int)
-        cls.addProperty('num_comments',             int)
-        cls.addPropertyList('preview_todos',        basestring) # UserIds
-        cls.addPropertyList('preview_likes',        basestring) # UserIds
-        cls.addPropertyList('preview_credits',      basestring) # StampIds
-        cls.addPropertyList('preview_comments',     basestring) # CommentIds
+        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('kind',                             basestring)
+        cls.addPropertyList('types',                        basestring)
+        cls.addProperty('lat',                              float)
+        cls.addProperty('lng',                              float)
+        cls.addProperty('last_stamped',                     datetime)
+
+        cls.addProperty('score',                            int)
+        cls.addProperty('num_todos',                        int)
+        cls.addProperty('num_likes',                        int)
+        cls.addProperty('num_credits',                      int)
+        cls.addProperty('num_comments',                     int)
+        cls.addPropertyList('preview_todos',                basestring) # UserIds
+        cls.addPropertyList('preview_likes',                basestring) # UserIds
+        cls.addPropertyList('preview_credits',              basestring) # StampIds
+        cls.addPropertyList('preview_comments',             basestring) # CommentIds
 
 class EntityStats(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',  basestring, required=True)
-        cls.addProperty('num_stamps',  int)
-        cls.addPropertyList('popular_users',      basestring)
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addProperty('num_stamps',                       int)
+        cls.addPropertyList('popular_users',                basestring)
 
 
 
@@ -268,7 +276,7 @@ class DevicesSchema(Schema):
     def setSchema(cls):
         cls.addPropertyList('ios_device_tokens',            basestring)
 
-class AccountAlerts(Schema):
+class AccountAlertSettings(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('ios_alert_credit',                 bool)
@@ -327,7 +335,7 @@ class Account(Schema):
         cls.addNestedProperty('devices',                    DevicesSchema)
         cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
         cls.addNestedProperty('timestamp',                  UserTimestampSchema, required=True)
-        cls.addNestedProperty('alerts',                     AccountAlerts)
+        cls.addNestedProperty('alert_settings',             AccountAlertSettings)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1411,7 +1419,7 @@ class StampMini(Schema):
         cls.addProperty('stamp_id',                     basestring)
         cls.addNestedProperty('entity',                 BasicEntity, required=True)
         cls.addNestedProperty('user',                   UserMini, required=True)
-        cls.addNestedPropertyList('credit',             CreditSchema)
+        cls.addNestedPropertyList('credit',             StampPreview)
         cls.addNestedPropertyList('contents',           StampContent, required=True)
         cls.addNestedProperty('timestamp',              StampTimestampSchema, required=True)
         cls.addNestedProperty('stats',                  StampStatsSchema, required=True)
@@ -1432,7 +1440,7 @@ class Stamp(Schema):
         cls.addProperty('stamp_id',                 basestring)
         cls.addNestedProperty('entity',             BasicEntity, required=True)
         cls.addNestedProperty('user',               UserMini, required=True)
-        cls.addNestedPropertyList('credit',         CreditSchema)
+        cls.addNestedPropertyList('credit',         StampPreview)
         cls.addNestedPropertyList('contents',       StampContent, required=True)
         cls.addNestedProperty('timestamp',          StampTimestampSchema, required=True)
         cls.addNestedProperty('stats',              StampStatsSchema, required=True)
@@ -1667,115 +1675,135 @@ class EnrichedActivity(Schema):
 class ViewportSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addNestedProperty('upperLeft',              CoordinatesSchema)
-        cls.addNestedProperty('lowerRight',             CoordinatesSchema)
+        cls.addNestedProperty('upperLeft',                  CoordinatesSchema)
+        cls.addNestedProperty('lowerRight',                 CoordinatesSchema)
 
 class TimeSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('before',                       datetime)
-        cls.addProperty('limit',                        int)
-        cls.addProperty('offset',                       int)
+        cls.addProperty('before',                           datetime)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
 
         # Filtering
-        cls.addProperty('category',                     basestring)
-        cls.addProperty('subcategory',                  basestring)
-        # cls.addPropertyList('properties',               basestring)
-        cls.addNestedProperty('viewport',               ViewportSchema) 
+        cls.addPropertyList('kinds',                        basestring)
+        cls.addPropertyList('types',                        basestring)
+        # cls.addPropertyList('properties',                   basestring)
+        cls.addNestedProperty('viewport',                   ViewportSchema) 
 
         # Scope
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('scope',                        basestring) # me, friends, fof, popular
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
 
 class SearchSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('limit',                        int) # Max 50
+        cls.addProperty('limit',                            int) # Max 50
 
         # Filtering
-        cls.addProperty('category',                     basestring)
-        cls.addProperty('subcategory',                  basestring)
-        # cls.addPropertyList('properties',               basestring)
-        cls.addNestedProperty('viewport',               ViewportSchema) 
+        cls.addPropertyList('kinds',                        basestring)
+        cls.addPropertyList('types',                        basestring)
+        # cls.addPropertyList('properties',                   basestring)
+        cls.addNestedProperty('viewport',                   ViewportSchema) 
 
         # Scope
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('scope',                        basestring) # me, friends, fof, popular
-        cls.addProperty('query',                        basestring, required=True) 
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
+        cls.addProperty('query',                            basestring, required=True) 
 
 class RelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Filtering
-        cls.addProperty('category',                     basestring)
-        cls.addProperty('subcategory',                  basestring)
-        cls.addPropertyList('properties',               basestring)
-        cls.addNestedProperty('viewport',               ViewportSchema) 
+        cls.addPropertyList('kinds',                        basestring)
+        cls.addPropertyList('types',                        basestring)
+        cls.addPropertyList('properties',                   basestring)
+        cls.addNestedProperty('viewport',                   ViewportSchema) 
 
         # Scope
-        cls.addProperty('user_id',                      basestring)
-        cls.addProperty('scope',                        basestring) # me, friends, fof, popular
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
 
 class CommentSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('before',                       datetime)
-        cls.addProperty('limit',                        int)
-        cls.addProperty('offset',                       int)
+        cls.addProperty('before',                           datetime)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
 
         # Scope
-        cls.addProperty('stamp_id',                     basestring, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True)
 
     def __init__(self):
         Schema.__init__(self)
         self.limit = 20
         self.offset = 0
 
+class ActivitySlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('distance',                     int, required=True)
+        cls.addProperty('before',                       datetime)
+        cls.addProperty('limit',                        int)
+        cls.addProperty('offset',                       int)
+
+    def __init__(self):
+        Schema.__init__(self)
+        self.limit = 20
+        self.offset = 0
 
 class GuideRequest(Schema):
     @classmethod
     def setSchema(cls):
         # Paging
-        cls.addProperty('limit',                        int)
-        cls.addProperty('offset',                       int)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
         
         # Filtering
-        cls.addProperty('section',                      basestring, required=True)
-        cls.addProperty('subsection',                   basestring)
-        cls.addNestedProperty('viewport',               ViewportSchema) 
+        cls.addProperty('section',                          basestring, required=True)
+        cls.addProperty('subsection',                       basestring)
+        cls.addNestedProperty('viewport',                   ViewportSchema) 
 
         # Scope
-        cls.addProperty('scope',                        basestring)
+        cls.addProperty('scope',                            basestring)
 
     def __init__(self):
         Schema.__init__(self)
         self.limit = 20
         self.offset = 0
 
+class GuideSearchRequest(GuideRequest):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('query',                            basestring, required=True)
+
+    def __init__(self):
+        GuideRequest.__init__(self)
 
 class GuideCacheItem(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id',                    basestring, required=True)
-        cls.addNestedPropertyList('stamps',             StampPreview)
-        cls.addPropertyList('todo_user_ids',            basestring)
-        cls.addPropertyList('tags',                     basestring)
-        cls.addNestedProperty('coordinates',            CoordinatesSchema)
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addNestedPropertyList('stamps',                 StampPreview)
+        cls.addPropertyList('todo_user_ids',                basestring)
+        cls.addPropertyList('tags',                         basestring)
+        cls.addNestedProperty('coordinates',                CoordinatesSchema)
 
 class GuideCache(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                      basestring, required=True)
-        cls.addNestedPropertyList('music',              GuideCacheItem)
-        cls.addNestedPropertyList('film',               GuideCacheItem)
-        cls.addNestedPropertyList('book',               GuideCacheItem)
-        cls.addNestedPropertyList('food',               GuideCacheItem)
-        cls.addNestedPropertyList('app',                GuideCacheItem)
-        cls.addNestedPropertyList('other',              GuideCacheItem)
-        cls.addProperty('updated',                      datetime)
+        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addNestedPropertyList('music',                  GuideCacheItem)
+        cls.addNestedPropertyList('film',                   GuideCacheItem)
+        cls.addNestedPropertyList('book',                   GuideCacheItem)
+        cls.addNestedPropertyList('food',                   GuideCacheItem)
+        cls.addNestedPropertyList('app',                    GuideCacheItem)
+        cls.addNestedPropertyList('other',                  GuideCacheItem)
+        cls.addProperty('updated',                          datetime)
 
 
 

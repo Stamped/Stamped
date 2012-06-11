@@ -18,5 +18,9 @@
 + (NSArray*)stampedLightGradient;
 + (NSArray*)stampedGradient;
 + (NSArray*)stampedDarkGradient;
++ (NSArray*)stampedBlueGradient;
++ (NSArray*)stampedButtonGradient;
+
+- (NSString*)hexString;
 
 @end

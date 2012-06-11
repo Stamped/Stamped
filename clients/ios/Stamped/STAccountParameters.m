@@ -21,8 +21,7 @@
 @synthesize colorPrimary = _colorPrimary;
 @synthesize colorSecondary = _colorSecondary;
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_screenName release];
     [_name release];
     [_email release];
@@ -31,16 +30,15 @@
     [_bio release];
     [_website release];
     [_location release];
-    [_location release];
     [_colorPrimary release];
     [_colorSecondary release];
     [super dealloc];
 }
 
 - (NSMutableDictionary *)asDictionaryParams {
-    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    NSMutableDictionary* params = [[NSMutableDictionary alloc] init];
     NSDictionary* mapping = [NSDictionary dictionaryWithObjectsAndKeys:
-                             @"screenName", @"screenName",
+                             @"screen_name", @"screenName",
                              @"name", @"name",
                              @"email", @"email",
                              @"phone", @"phone",
@@ -53,11 +51,31 @@
                              nil];
     for (NSString* key in mapping.allKeys) {
         id object = [self valueForKey:key];
-        if (object) {
+        if (object != nil) {
             [params setObject:object forKey:[mapping objectForKey:key]];
         }
     }
-    return params;
+    return [params autorelease];
+}
+
+- (NSString*)errorStringRequiresEmail:(BOOL)requiresEmail {
+    
+    if (!_screenName || [_screenName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length==0) {
+        return @"No username.";
+    } else if (!_name || [_name stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length==0) {
+        return @"No name.";
+    } else if (requiresEmail && (!_email || [_email stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length==0)) {
+        return @"No email.";
+    }
+    
+    return nil;
+    
+}
+
+- (NSString*)description {
+    
+    return [NSString stringWithFormat:@"%@ name: %@ screenname: %@ email: %@ phone: %@ bio: %@ imageurl : %@ colors: %@ %@", [super description], _name, _screenName, _email, _phone, _bio, _tempImageURL, _colorPrimary, _colorSecondary];
+    
 }
 
 @end

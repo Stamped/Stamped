@@ -298,7 +298,7 @@ class EntitySearch(object):
             else:
                 coords = None
         except Exception as e:
-            logs.warning("Exception (%e) - setting coords to None" % e)
+            logs.warning("Exception (%s) - setting coords to None" % e)
             coords = None
         
         search  = self.search(query, 

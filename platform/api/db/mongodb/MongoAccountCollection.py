@@ -7,13 +7,15 @@ __license__   = "TODO"
 
 import Globals, utils, logs
 
-from datetime   import datetime
-from utils      import lazyProperty
-from api.Schemas    import *
-from errors     import *
+from datetime                   import datetime
+from utils                      import lazyProperty
+from api.Schemas                import *
+from errors                     import *
+from pymongo.errors             import DuplicateKeyError
 
 from AMongoCollection           import AMongoCollection
 from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
+from MongoUserLinkedAlertsHistoryCollection import MongoUserLinkedAlertsHistoryCollection
 from AAccountDB                 import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
@@ -100,16 +102,22 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # TODO: Eventually remove all instances of alerts.ios_alert_fav and alerts.email_alert_fav and replace them
         #  with the their equivalent "_todo" fields  For now, we convert for the sake of backward compatability
 
-        if 'alerts' in document and 'ios_alert_fav' in document['alerts']:
-            document['alerts']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
-            del(document['alerts']['ios_alert_fav'])
-        if 'alerts' in document and 'email_alert_fav' in document['alerts']:
-            document['alerts']['email_alert_todo'] = document['alerts']['email_alert_fav']
-            del(document['alerts']['email_alert_fav'])
+        if 'alerts' in document:
+            if 'ios_alert_fav' in document['alerts']:
+                document['alert_settings']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
+                del(document['alerts']['ios_alert_fav'])
+            if 'email_alert_fav' in document['alerts']:
+                document['alert_settings']['email_alert_todo'] = document['alerts']['email_alert_fav']
+                del(document['alerts']['email_alert_fav'])
+            document['alert_settings'] = document['alerts']
+            del(document['alerts'])
 
         if 'stats' in document and 'num_faves' in document['stats']:
             document['stats']['num_todos'] = document['stats']['num_faves']
             del(document['stats']['num_faves'])
+
+        if 'auth_service' not in document:
+            document['auth_service'] = 'stamped'
 
         self._upgradeLinkedAccounts(document)
 
@@ -129,7 +137,16 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return MongoUserLinkedAlertsHistoryCollection()
     
     def addAccount(self, user):
-        return self._addObject(user)
+        try:
+            return self._addObject(user)
+        except DuplicateKeyError as e:
+            logs.warning("Unable to add account: %s" % e)
+            if self._collection.find_one({"email": user.email}) is not None:
+                raise StampedDuplicationError("An account already exists with email '%s'" % user.email)
+            elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
+                raise StampedDuplicationError("An account already exists with screen name '%s'" % user.screen_name)
+            else:
+                raise StampedDuplicationError("Account information already exists: %s" % e)
     
     def getAccount(self, userId):
         documentId = self._getObjectIdFromString(userId)
@@ -200,12 +217,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return accounts
 
     def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
-        return user_linked_alerts_history_collection.addLinkedAlert(userId, serviceName, serviceId)
+        return self.user_linked_alerts_history_collection.addLinkedAlert(userId, serviceName, serviceId)
 
     def checkLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
-        result = user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
+        result = self.user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
         if result:
-            return result
+            return True
         # Check for deprecated alerts sent flag and update database if exists
         account = self.getAccount(userId)
         documentId = self._getObjectIdFromString(userId)
@@ -218,22 +235,22 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                     self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['twitter_id'])
                 elif k == 'netflix':
                     self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['netflix_user_id'])
+        return False
 
     def removeLinkedAccountAlertHistory(self, userId):
-        return user_linked_alerts_history_collection.removeLinkedAlerts(userId)
+        return self.user_linked_alerts_history_collection.removeLinkedAlerts(userId)
 
     def addLinkedAccount(self, userId, linkedAccount):
 
         # Verify that the linked account service does not already exist in the account
         #documents = self._collection.find({'linked_accounts.service_name' : linkedAccount.service_name })
         document = self._collection.find_one({ "linked.service_name" : linkedAccount.service_name })
-        logs.info('### documents: %s' % document)
         if document is not None:
             raise StampedDuplicationError("Linked '%s' account already exists for user." % linkedAccount.service_name)
         #documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
 
 
-        # create a dict of all twitter fields and bools for required fields
+        # create a dict of all twitter fields and bools indicating if required
         valid_twitter = {
             'service_name'      : True,
             'user_id'           : True,
@@ -248,7 +265,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'name'              : True,
             'screen_name'       : False,
             'token'             : True,
-            'token_expire'      : True,
+            'token_expiration'  : False,
         }
 
         valid_netflix = {
@@ -273,8 +290,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # Check for all required fields
         missing_fields = []
         valid = True
-        for k, v in valid_twitter.iteritems():
-            if v == True and k not in linkedDict or linkedDict[k] is None:
+        for k, v in valid_fields.iteritems():
+            if v == True and (k not in linkedDict or linkedDict[k] is None):
                 valid = False
                 missing_fields.append(k)
 
@@ -287,14 +304,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             if k in valid_fields and k is not None:
                 setattr(newLinkedAccount, k, v)
 
-        logs.info('### newLinkedAccount: %s' % newLinkedAccount)
-
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
             {'$set': { 'linked.%s' % newLinkedAccount.service_name : newLinkedAccount.dataExport() } }
         )
 
-        return True
+        return newLinkedAccount
 
     def removeLinkedAccount(self, userId, linkedAccount):
         fields = {}

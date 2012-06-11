@@ -9,9 +9,13 @@
 #import <UIKit/UIKit.h>
 
 @protocol SignupFooterViewDelegate;
-@interface SignupFooterView : UIView
+@interface SignupFooterView : UIView {
+    UIActivityIndicatorView *_activityView;
+    UIButton *_button;
+}
 
 @property(nonatomic,assign) id <SignupFooterViewDelegate> delegate;
+@property(nonatomic,assign,getter = isLoading) BOOL loading;
 
 @end
 

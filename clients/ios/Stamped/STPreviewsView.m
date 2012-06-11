@@ -82,7 +82,7 @@ static const NSInteger _cellsPerRow = 7;
 - (STPreviewView*)dequeuePreviewViewAtIndex:(NSInteger)index {
     
     if (index < [self.views count]) {
-        STPreviewView *view = [[self.views objectAtIndex:index] retain];
+        STPreviewView *view = [self.views objectAtIndex:index];
         [view removeTargets];
         return view;
     }
@@ -128,7 +128,7 @@ static const NSInteger _cellsPerRow = 7;
             
             STActionContext *context = [STActionContext context];
             context.user = user;
-            id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+            id<STAction> action = [STStampedActions actionViewStamp:preview.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
             [view setupWithUser:user];
@@ -238,10 +238,10 @@ static const NSInteger _cellsPerRow = 7;
     if (total > 0) {
         NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
         NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
-        BOOL continuedFlag = NO;
+        //BOOL continuedFlag = NO;
         if (limit < total) {
             // TODO add support for continued button
-            continuedFlag = YES;
+            //continuedFlag = YES;
         }
         
         for (id<STStampPreview> credit in previews.credits) {

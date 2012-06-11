@@ -51,8 +51,12 @@ class Memcache(object):
             logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
             self._client = None
             return False
-        
+
         return True
+
+    def flush_all(self):
+        if self._client:
+            self._client.flush_all()
     
     def set(self, key, value, *args, **kwargs):
         value = self._import_value(value)
@@ -74,8 +78,12 @@ class Memcache(object):
     def __getitem__(self, key):
         if self._client:
             return self._export_value(self._client[key])
-        
+
         raise KeyError(key)
+
+    def __delitem__(self, key):
+        if self._client:
+            del(self._client[key])
     
     def __contains__(self, key):
         if self._client:
@@ -110,11 +118,12 @@ class Memcache(object):
         if isinstance(value, dict):
             if '__schema__' in value and '__value__' in value:
                 # reinstantiate the Schema subclass with its prior data
-                return value['__schema__']().importData(value['__value__'])
+                return value['__schema__']().dataImport(value['__value__'])
             else:
                 return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
         elif isinstance(value, (list, tuple)):
             value = map(self._export_value, value)
+            return value
         else:
             return value
     
@@ -150,8 +159,11 @@ def __global_memcache():
 def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
+
+        ### 6/7/12 (Kevin): Disabling this for now, since it's causing issues with iTunes. 
+        """
         key_prefix = user_function.func_name
-        
+
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
             # note: treat args[0] specially (self)
@@ -185,6 +197,7 @@ def memcached_function(time=0, min_compress_len=0):
                 compute = False
                 
                 wrapper.hits += 1
+                logs.debug("Cache hit: %s" % key)
             except KeyError:
                 store = True
             except Exception:
@@ -215,6 +228,13 @@ def memcached_function(time=0, min_compress_len=0):
         wrapper.hits  = wrapper.misses = 0
         wrapper.clear = clear
         
+        return wrapper
+        """
+
+        @functools.wraps(user_function)
+        def wrapper(*args, **kwargs):
+            return user_function(*args, **kwargs)
+
         return wrapper
     
     return decorating_function

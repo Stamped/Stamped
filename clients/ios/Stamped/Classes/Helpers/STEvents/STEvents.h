@@ -22,12 +22,17 @@ enum EventType {
     
     // signup
     EventTypeSignupFinished,
+    EventTypeSignupFailed,
     
     // friend finding
     EventTypeFriendsFinished,
     
     // user
+    EventTypeUserFollowToggleFinished,
     EventTypeUserStampsFinished,
+    
+    // activity unread count
+    EventTypeUnreadCountUpdated,
 
 	
 }; typedef int EventType;

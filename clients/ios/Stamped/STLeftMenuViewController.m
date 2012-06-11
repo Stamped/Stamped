@@ -9,7 +9,6 @@
 #import "STLeftMenuViewController.h"
 #import "Util.h"
 #import "STMenuController.h"
-#import "STProfileViewController.h"
 #import "DDMenuController.h"
 #import "STUniversalNewsController.h"
 #import "STTodoViewController.h"
@@ -77,13 +76,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
-        if (count && count.numberUnread.integerValue > 0) {
-            _unreadCount = count.numberUnread.integerValue;
-            [self.tableView reloadData];
-        }
-    }];
     
     if (!_tableView) {
         
@@ -259,12 +251,13 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
             cell.delegate = (id<LeftMenuTableCellDelegate>)self;
         }
         
+        [STEvents removeObserver:cell];
         cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
         cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
         [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
         
         if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
-            [cell setBadgeCount:_unreadCount];
+            [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
         } 
         
         if ([indexPath isEqual:_selectedIndexPath]) {
@@ -297,7 +290,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     
-    if (self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
+    if (!_anchorSelected && self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
         
         // controller is already root, lets just pop it to root like a tab bar
         STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
@@ -316,10 +309,9 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     
     UIViewController *controller = nil;
 
-    if ([[STConfiguration value:value] isEqual:[STProfileViewController class]]) {
+    if ([[STConfiguration value:value] isEqual:[STUserViewController class]]) {
         
         id user = [[STStampedAPI sharedInstance] currentUser];
-        //controller = [[STProfileViewController alloc] initWithUserID:[user userID]];
         controller = [[STUserViewController alloc] initWithUser:(STSimpleUserDetail*)user];
 
     } else {
@@ -328,6 +320,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     
+    _anchorSelected = (self.anchorTableView == tableView);
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     
@@ -392,7 +385,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 #pragma mark - Configurations
 
 + (void)setupConfigurations {
-    [STConfiguration addString:@"The Feed" forKey:_inboxNameKey];
+    [STConfiguration addString:@"Feed" forKey:_inboxNameKey];
     [STConfiguration addString:@"The Guide" forKey:_iWantToNameKey];
     [STConfiguration addString:@"Activity" forKey:_newsNameKey];
     [STConfiguration addString:@"Debug" forKey:_debugNameKey];

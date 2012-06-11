@@ -32,6 +32,7 @@
         [self addSubview:view];
         [view release];
         _avatarView = view;
+        [view setDefault];
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
         [_avatarView addGestureRecognizer:tap];
@@ -107,6 +108,12 @@
 #pragma mark - Setters
 
 - (void)setupWithUser:(STSimpleUserDetail*)user {
+    
+    if ([user isKindOfClass:NSClassFromString(@"STSimpleSource")]) {
+        _titleLabel.text = user.name;
+        [_titleLabel sizeToFit];
+        return;
+    }
         
     [_avatarView setImageURL:[NSURL URLWithString:[user imageURL]]];
     _titleLabel.text = user.name;
@@ -120,6 +127,7 @@
     if (_statsView) {
         [_statsView setupWithUser:user];
     }
+    [self setNeedsLayout];
     
 }
 
@@ -202,6 +210,8 @@
 #pragma mark - UserHeaderTabView 
 
 @implementation UserHeaderTabView
+
+@synthesize delegate = _delegate;
 
 - (id)initWithFrame:(CGRect)frame {
     

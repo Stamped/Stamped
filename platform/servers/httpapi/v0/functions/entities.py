@@ -148,7 +148,11 @@ def completeAction(request, http_schema, **kwargs):
     
     #schema      = parseRequest(HTTPActionComplete(), request)
     logs.info('http_schema: %s' % http_schema)
-    result      = stampedAPI.completeAction(authUserId, **http_schema.dataExport())
+    data = {}
+    # Hack for Python 2.6 where unicode keys aren't valid...
+    for k, v in http_schema.dataExport().items():
+        data[str(k)] = v
+    result      = stampedAPI.completeAction(authUserId, **data)
 
     return transformOutput(result)
 

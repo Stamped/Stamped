@@ -247,22 +247,22 @@ static STStampedAPI* _sharedInstance;
     return [self stampsForSlice:slice withPath:@"/collections/suggested.json" andCallback:block];
 }
 
-- (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
-                                 andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
-    return [self stampsForSlice:slice withPath:@"/collections/consumption.json" andCallback:block];
-}
-
-- (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
-                                  andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/entities/stamped_by.json";
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
-                                                        post:NO 
-                                               authenticated:YES
-                                                      params:[slice asDictionaryParams] 
-                                                     mapping:[STSimpleStampedBy mapping]
-                                                 andCallback:^(id stampedBy, NSError* error, STCancellation* cancellation) {
-                                                     block(stampedBy, block, cancellation);
-                                                 }];
+- (STCancellation*)entitiesForConsumptionSlice:(STConsumptionSlice*)slice 
+                                   andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/stamps/guide.json";
+    NSMutableDictionary* params = slice.asDictionaryParams;
+    if ([params objectForKey:@"category"]) {
+        [params setObject:[params objectForKey:@"category"] forKey:@"section"];
+        [params removeObjectForKey:@"category"];
+    }
+    return [[STRestKitLoader sharedInstance] loadWithPath:path
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:params
+                                                  mapping:[STSimpleEntityDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block(results, error, cancellation);
+                                              }];
 }
 
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
@@ -543,7 +543,7 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)untodoWithStampID:(NSString*)stampID 
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block {
-    NSString* path = @"/favorites/remove.json";
+    NSString* path = @"/todos/remove.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:entityID forKey:@"entity_id"];
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
@@ -559,6 +559,24 @@ static STStampedAPI* _sharedInstance;
                                                                                   andCredit:nil];
                                                      }
                                                      block(error == nil, error, cancellation);
+                                                 }];
+}
+
+- (STCancellation*)setTodoCompleteWithEntityID:(NSString*)entityID 
+                                      complete:(BOOL)complete
+                                   andCallback:(void(^)(id<STTodo>,NSError*,STCancellation*))block {
+    NSString* path = @"/todos/complete.json";
+    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                            entityID, @"entity_id",
+                            [NSNumber numberWithBool:complete], @"complete",
+                            nil];
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:params
+                                                     mapping:[STSimpleTodo mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation);
                                                  }];
 }
 

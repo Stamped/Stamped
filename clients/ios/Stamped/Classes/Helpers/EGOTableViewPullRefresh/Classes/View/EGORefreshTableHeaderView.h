@@ -34,7 +34,6 @@ typedef enum{
 } EGOPullRefreshState;
 
 @protocol EGORefreshTableHeaderDelegate;
-@class EGORefreshArrowView, GiftureActivityView, GiftureRefreshPatternView;
 @interface EGORefreshTableHeaderView : UIView {
 	    
 	EGOPullRefreshState _state;

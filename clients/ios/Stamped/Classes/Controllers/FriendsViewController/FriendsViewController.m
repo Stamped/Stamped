@@ -7,12 +7,14 @@
 //
 
 #import "FriendsViewController.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 #import "STNavigationItem.h"
 #import "FriendTableCell.h"
 #import "STTwitter.h"
 #import "STFacebook.h"
-#import "STWelcomeViewController.h"
+#import "SignupWelcomeViewController.h"
+#import "STSimpleUser.h"
+#import "FindFriendsViewController.h"
 
 @interface FriendsViewController ()
 @property(nonatomic,retain,readonly) Friends *friends;
@@ -75,14 +77,11 @@
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
     
     BOOL addDoneButton = NO;
-    if (!self.navigationItem.rightBarButtonItem) {
-        if (self.navigationController) {
-            NSInteger index = [[self.navigationController viewControllers] indexOfObject:self];
-            if (index > 0) {
-                UIViewController *prevController = [[self.navigationController viewControllers] objectAtIndex:index-1];
-                if ([prevController isKindOfClass:[STWelcomeViewController class]]) {
-                    addDoneButton = YES;
-                }
+    if (!self.navigationItem.rightBarButtonItem && self.navigationController) {
+        for (UIViewController *controller in self.navigationController.viewControllers) {
+            if ([controller isKindOfClass:[SignupWelcomeViewController class]]) {
+                addDoneButton = YES;
+                break;
             }
         }
     }
@@ -114,7 +113,7 @@
             _performingAuth = YES;
             dispatch_after( dispatch_time(DISPATCH_TIME_NOW, 0.3f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void) {
                 
-                if (NSClassFromString(@"TWTweetComposeViewController")) {
+                if (NSClassFromString(@"TWTweetComposeViewController") && [TWTweetComposeViewController canSendTweet]) {
                     [[STTwitter sharedInstance] requestAccess:^(BOOL granted) {
                         if (granted) {
                             [self presentTwitterAccounts];
@@ -194,9 +193,19 @@
 
 - (void)friendsFinished:(NSNotification*)notification {
     
+    NSInteger sections = [self.tableView numberOfSections];
     [self.tableView reloadData];
     [self dataSourceDidFinishLoading];
-    [self animateIn];
+    
+    if ([self isKindOfClass:[FindFriendsViewController class]]) {
+        if (sections == 1) {
+            [self animateIn];
+        }
+    } else {
+        if (sections == 0) {
+            [self animateIn];
+        }
+    }
     
 }
 
@@ -252,6 +261,7 @@
     [actionSheet addButtonWithTitle:NSLocalizedString(@"Cancel", nil)];
     actionSheet.cancelButtonIndex = [actionSheet numberOfButtons] - 1;
     [actionSheet showInView:self.view];
+    [actionSheet release];
     
 }
 
@@ -279,7 +289,7 @@
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return [_friends isEmpty] ? 0 : 1;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
@@ -292,6 +302,7 @@
     FriendTableCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[FriendTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        cell.delegate = (id<FriendTableCellDelegate>)self;
     }
     
     id<STUser> user = [_friends objectAtIndex:indexPath.row];
@@ -362,9 +373,23 @@
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     id<STUser> user = [_friends objectAtIndex:indexPath.row];
-    STProfileViewController *controller = [[STProfileViewController alloc] initWithUserID:user.userID];
+    STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
+    
+}
+
+
+#pragma mark - FriendTableCellDelegate
+
+- (void)friendTableCellToggleFollowing:(FriendTableCell*)cell {
+    
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    
+    if (indexPath) {
+        STSimpleUser *user = [_friends objectAtIndex:indexPath.row];
+        [user toggleFollowing];
+    }
     
 }
 
@@ -396,7 +421,22 @@
 
 - (void)setupNoDataView:(NoDataView*)view {
  
-    [view setupWithTitle:@"No Friends" detailTitle:@"No friends found."];
+    NSString *string = @"";
+    switch (_friends.requestType) {
+        case FriendsRequestTypeContacts:
+            string = @" from your Address Book";
+            break;
+        case FriendsRequestTypeTwitter:
+            string = @" from Twitter";
+            break;
+        case FriendsRequestTypeFacebook:
+            string = @" from Facebook";
+            break;
+        default:
+            break;
+    }
+    
+    [view setupWithTitle:@"No Friends" detailTitle:[NSString stringWithFormat:@"No friends found%@.", string]];
     
 }
 

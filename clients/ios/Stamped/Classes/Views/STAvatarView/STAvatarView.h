@@ -12,4 +12,7 @@
 @property(nonatomic,retain) NSURL *imageURL;
 @property(nonatomic,retain,readonly) UIImageView *imageView;
 @property(nonatomic,retain,readonly) UIView *backgroundView;
+
+- (void)setDefault;
+
 @end

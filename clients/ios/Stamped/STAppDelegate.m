@@ -35,10 +35,11 @@
 #import "STTwitter.h"
 #import "STFacebook.h"
 #import "STRestKitLoader.h"
+#import "STUnreadActivity.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
-#import "STProfileViewController.h"
+#import "STUserViewController.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -80,10 +81,16 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    //#if defined (CONFIGURATION_Beta)
+    //  [[BWHockeyManager sharedHockeyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
+    //[[BWHockeyManager sharedHockeyManager] setDelegate:self];
+    //#endif
+    
 #if defined (CONFIGURATION_Beta)
 #warning QuincyKit Beta (Ad Hoc) is configured for this build
-    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"3999903c72892bb98e58f843990bba66"];
+    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
 #endif
+    
     
 #if defined (CONFIGURATION_Release)
 #warning QuincyKit Distribution is configured for this build
@@ -127,6 +134,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [Util executeAsync:^{
         [Util removeOldCacheDirectories];
     }];
+    
+    [[STUnreadActivity sharedInstance] update];
+    
     return YES;
 }
 
@@ -167,9 +177,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     /* NSLog(@"Going to background");
-    [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-        NSLog(@"Saved"); 
-    }];
+     [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+     NSLog(@"Saved"); 
+     }];
      */
 }
 
@@ -273,7 +283,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addValue:[STIWantToViewController class] forKey:@"Root.iWantTo"];
     [STConfiguration addValue:[STUniversalNewsController class] forKey:@"Root.news"];
     [STConfiguration addValue:[FindFriendsViewController class] forKey:@"Root.findFriends"];
-    [STConfiguration addValue:[STProfileViewController class] forKey:@"Root.user"];
+    [STConfiguration addValue:[STUserViewController class] forKey:@"Root.user"];
     [STConfiguration addValue:[STTodoViewController class] forKey:@"Root.todo"];
     [STConfiguration addValue:[STDebugViewController class] forKey:@"Root.debug"];
     [STConfiguration addValue:[STSettingsViewController class] forKey:@"Root.settings"];
@@ -311,6 +321,20 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addColor:[UIColor colorWithRed:.85 green:.85 blue:.85 alpha:1] forKey:@"UIColor.stampedDarkGradientStart" inSection:@"UIColor"];
     [STConfiguration addColor:[UIColor colorWithRed:.7 green:.7 blue:.7 alpha:1] forKey:@"UIColor.stampedDarkGradientEnd" inSection:@"UIColor"];
     
+    CGFloat rgbTop[3];
+    CGFloat rgbBottom[3];
+    [Util splitHexString:@"498ff2" toRGB:rgbTop];
+    [Util splitHexString:@"0b61d9" toRGB:rgbBottom];
+    [STConfiguration addColor:[UIColor colorWithRed:rgbTop[0] green:rgbTop[1] blue:rgbTop[2] alpha:1] forKey:@"UIColor.stampedBlueGradientStart"];
+    [STConfiguration addColor:[UIColor colorWithRed:rgbBottom[0] green:rgbBottom[1] blue:rgbBottom[2] alpha:1] forKey:@"UIColor.stampedBlueGradientEnd"];
+    
+    [STConfiguration addChoices:[NSDictionary dictionaryWithObjectsAndKeys:
+                                 [UIColor stampedBlueGradient], @"Blue",
+                                 [UIColor stampedDarkGradient], @"Dark Gray",
+                                 [UIColor stampedGradient], @"Gray",
+                                 nil]
+                    originalKey:@"Blue"
+                         forKey:@"UIColor.buttonGradient"];
     // Comments
     [STConfiguration addFont:[UIFont stampedBoldFontWithSize:12] forKey:@"Comments.font"];
     

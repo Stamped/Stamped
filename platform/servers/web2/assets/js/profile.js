@@ -4,7 +4,7 @@
  */
 
 /*jslint plusplus: true */
-/*global STAMPED_PRELOAD, StampedClient, debugger, jQuery, $, History, moment */
+/*global STAMPED_PRELOAD, StampedClient, jQuery, $, History, moment */
 
 var g_update_stamps = null;
 
@@ -56,6 +56,7 @@ var g_update_stamps = null;
             
             return value;
         };
+        window.g_extract_data = extract_data;
         
         
         // ---------------------------------------------------------------------
@@ -227,48 +228,44 @@ var g_update_stamps = null;
         };
         
         var last_layout = null;
+        var gallery_is_visible = false;
         
         // lazily relayout the stamp gallery using isotope
         // NOTE: we apply time-based coalescing here s.t. if this function is 
         // called several times, it will attempt to only update the layout once
         // to avoid doing extra, unnecessary work / rendering that could result 
         // in a choppier end-user experience.
-        var update_gallery_layout = function(force, callback) {
-            update_gallery(function() {
-                update_navbar_layout(false);
-                last_layout = new Date().getTime();
-                
+        var update_gallery_layout = function(is_visible, callback) {
+            is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
+            gallery_is_visible |= is_visible;
+            
+            var set_gallery_visible = function() {
                 var style = {
                     visibility : 'visible'
                 };
                 
                 $('#main-content').css(style);
                 $('#stamp-category-nav-bar').css(style);
+            };
+            
+            update_gallery(function() {
+                update_navbar_layout(false);
+                last_layout = new Date().getTime();
+                
+                if (gallery_is_visible) {
+                    set_gallery_visible();
+                }
                 
                 if (_.isFunction(callback)) {
                     callback();
                 }
             });
-            return;
-
-            force   = (typeof(force) === 'undefined' ? false : force);
-            var now = new Date().getTime();
             
-            if (force || last_layout === null || now - last_layout > 100) {
-                last_layout = now;
-                
-                update_gallery(function() {
-                    update_navbar_layout(false);
-                    last_layout = new Date().getTime();
-                    
-                    var style = {
-                        visibility : 'visible'
-                    };
-                    
-                    $('#main-content').css(style);
-                    $('#stamp-category-nav-bar').css(style);
-                });
+            if (gallery_is_visible && !!last_layout) {
+                set_gallery_visible();
             }
+            
+            return;
         };
         
         var get_fancybox_options = function(options) {
@@ -316,6 +313,83 @@ var g_update_stamps = null;
             return options;
         };
         
+        var find_valid_image = function($elem, selector, is_sdetail) {
+            var $elements = $elem.find(selector);
+            $elements     = $elements.filter(function() {
+                var $this = $(this);
+                
+                if (is_blacklisted_image($this.attr('src'))) {
+                    $this.addClass('hidden').parent().addClass('hidden');
+                    return false;
+                } else {
+                    return !$this.hasClass('hidden');
+                }
+            });
+            
+            $elements.each(function(i, element) {
+                element.onerror = function() {
+                    var $element = $(element);
+                    $element.addClass('hidden').parent().addClass('hidden');
+                    
+                    // TODO: what to update here?
+                    //update_images();
+                    init_stamp_preview_images($elem, is_sdetail);
+                };
+            });
+            
+            return $elements;
+        };
+        
+        // enforce precedence of stamp preview images
+        var init_stamp_preview_images = function($elem, is_sdetail) {
+            var images = [];
+            
+            var $stamp_user_images   = find_valid_image($elem, '.stamp-user-image   img', is_sdetail);
+            var $stamp_entity_images = find_valid_image($elem, '.stamp-entity-image img', is_sdetail);
+            
+            var $map  = $elem.find('.stamp-map');
+            var $icon = $elem.find('.stamp-icon');
+            
+            if (is_sdetail) {
+                images.push.apply(images, $map);
+                images.push.apply(images, $stamp_entity_images);
+                images.push.apply(images, $icon);
+                
+                // note: user image is included in stamp-card
+                images.push.apply(images, $stamp_user_images);
+            } else {
+                images.push.apply(images, $stamp_user_images);
+                images.push.apply(images, $stamp_entity_images);
+                images.push.apply(images, $map);
+                images.push.apply(images, $icon);
+            }
+            
+            if (images.length > 0) {
+                var preview  = images[0];
+                var $preview = $(preview);
+                var i;
+                
+                if ($preview.is("img")) {
+                    // ensure gallery's layout is updated whenever this 
+                    preview.onload = function() {
+                        update_gallery_layout();
+                        //setTimeout(update_gallery_layout, 100);
+                    };
+                }
+                
+                $preview.removeClass('hidden').parent().removeClass('hidden');
+                $preview.show();
+                
+                for (i = 1; i < images.length; i++) {
+                    var $image = $(images[i]);
+                    
+                    $image.hide().addClass('hidden').parent().addClass('hidden');
+                }
+            }
+            
+            update_gallery_layout();
+        };
+        
         // post-processing of newly added stamps, including:
         //   1) using moment.js to make the stamp's timestamp human-readable and 
         //      relative to now (e.g., '2 weeks ago' instead of 'May 5th, 2012')
@@ -323,6 +397,10 @@ var g_update_stamps = null;
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function($scope) {
             var $items = $scope;
+            
+            /*if (!!$items) {
+                console.debug("update_stamps: " + $items.length);
+            }*/
             
             if (typeof($scope) === 'undefined') {
                 $scope = $(document);
@@ -333,88 +411,18 @@ var g_update_stamps = null;
             
             update_timestamps($scope);
             
-            $scope.find('.stamp-preview').each(function(i, elem) {
+            $scope.find('.stamp-preview-raw').each(function(i, elem) {
                 var $this       = $(this);
                 var is_sdetail  = ($this.parents('.sdetail_body').length >= 1);
+                
+                $this.removeClass('stamp-preview-raw').addClass('stamp-preview');
                 
                 //var category    = extract_data($this, 'stamp-category-', 'other');
                 //console.debug("CATEGORY: " + category + "; is_sdetail: " + is_sdetail);
                 
                 // enforce precedence of stamp preview images
-                var update_images = function() {
-                    var images = [];
-                    
-                    var find = function(selector) {
-                        var $elements = $this.find(selector);
-                        $elements     = $elements.filter(function() {
-                            var $this = $(this);
-                            
-                            if (is_blacklisted_image($this.attr('src'))) {
-                                $this.addClass('hidden').parent().addClass('hidden');
-                                return false;
-                            } else {
-                                return !$this.hasClass('hidden');
-                            }
-                        });
-                        
-                        $elements.each(function(i, element) {
-                            element.onerror = function() {
-                                var $element = $(element);
-                                $element.addClass('hidden').parent().addClass('hidden');
-                                
-                                update_images();
-                            };
-                        });
-                        
-                        return $elements;
-                    };
-                    
-                    var $stamp_user_images   = find('.stamp-user-image   img');
-                    var $stamp_entity_images = find('.stamp-entity-image img');
-                    var $map  = $this.find('.stamp-map');
-                    var $icon = $this.find('.stamp-icon');
-                    
-                    if (is_sdetail) {
-                        images.push.apply(images, $map);
-                        images.push.apply(images, $stamp_entity_images);
-                        images.push.apply(images, $icon);
-                        
-                        // note: user image is included in stamp-card
-                        images.push.apply(images, $stamp_user_images);
-                    } else {
-                        images.push.apply(images, $stamp_user_images);
-                        images.push.apply(images, $stamp_entity_images);
-                        images.push.apply(images, $map);
-                        images.push.apply(images, $icon);
-                    }
-                    
-                    if (images.length > 0) {
-                        var preview  = images[0];
-                        var $preview = $(preview);
-                        var i;
-                        
-                        if ($preview.is("img")) {
-                            // ensure gallery's layout is updated whenever this 
-                            preview.onload = function() {
-                                update_gallery_layout();
-                                //setTimeout(update_gallery_layout, 100);
-                            };
-                        }
-                        
-                        $preview.removeClass('hidden').parent().removeClass('hidden');
-                        $preview.show();
-                        
-                        for (i = 1; i < images.length; i++) {
-                            var $image = $(images[i]);
-                            
-                            $image.hide().addClass('hidden').parent().addClass('hidden');
-                        }
-                    }
-                    
-                    update_gallery_layout();
-                };
-                
-                update_images();
+                init_stamp_preview_images($this, is_sdetail);
+                //update_images();
             });
             
             if (!!$items) {
@@ -434,21 +442,57 @@ var g_update_stamps = null;
                     href = href.replace('http://www.stamped.com', '');
                     href = href + "?" + new Date().getTime();
                     
-                    //href = '/travis/stamps/4/TEMPORARY';
-                    
-                    /*$.colorbox({
-                        href        : href, 
-                        
-                        width       : "75%", 
-                        transition  : "elastic", 
-                        fixed       : true, 
-                        scrolling   : false, 
-                        
-                        onComplete  : init_sdetail
-                    });*/
-                    
                     $(sdetail_wrapper_sel).remove();
-                    var $target = $("<div class='" + sdetail_wrapper + "'></div>");
+                    var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
+                    
+                    console.debug("AJAX: " + href);
+                    
+                    // TODO: disable infinite scroll for sdetail popup
+                    destroy_infinite_scroll();
+                    
+                    $(sdetail_wrapper_sel).hide().remove();
+                    $target.insertAfter($('#main-page-content-body').get(0));
+                    $target = $(sdetail_wrapper_sel);
+                    
+                    update_dynamic_header();
+                    
+                    var scroll_top = $window.scrollTop();
+                    
+                    resize_sdetail_wrapper($target, 'opening', function() {
+                        $target.removeClass('animating');
+                    });
+                    
+                    close_sdetail_func = function() {
+                        close_sdetail_func = null;
+                        $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
+                        $window.scrollTop(scroll_top);
+                        
+                        var close_sdetail_inner_func = function() {
+                            init_infinite_scroll();
+                            update_dynamic_header();
+                            update_navbar_layout();
+                            
+                            resize_sdetail_wrapper($target, 'closing', function() {
+                                $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
+                            });
+                        };
+                        
+                        /*if (!!$gallery) {
+                            update_gallery_layout(true, function() {
+                                //$window.scrollTop(scroll_top);
+                                //init_infinite_scroll();
+                                
+                                close_sdetail_inner_func();
+                            });
+                        } else {
+                        }*/
+                        
+                        if (!!$gallery) {
+                            update_gallery_layout(true);
+                        }
+                        
+                        close_sdetail_inner_func();
+                    };
                     
                     // initialize sDetail popup after AJAX load
                     $target.load(href, {}, function(response, status, xhr) {
@@ -461,39 +505,8 @@ var g_update_stamps = null;
                             return;
                         }
                         
-                        // TODO: disable infinite scroll for sdetail popup
-                        destroy_infinite_scroll();
-                        
-                        $(sdetail_wrapper_sel).hide().remove();
-                        $target.insertAfter($('#main-page-content-body').get(0));
-                        $target = $(sdetail_wrapper_sel);
-                        
+                        $target.removeClass('sdetail-loading');
                         init_sdetail($target);
-                        update_dynamic_header();
-                        
-                        var scroll_top = $window.scrollTop();
-                        
-                        resize_sdetail_wrapper($target, 'opening', function() {
-                            $target.removeClass('animating');
-                        });
-                        
-                        close_sdetail_func = function() {
-                            close_sdetail_func = null;
-                            $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                            
-                            update_gallery_layout(false, function() {
-                                $window.scrollTop(scroll_top);
-                                init_infinite_scroll();
-                                
-                                resize_sdetail_wrapper($target, 'closing', function() {
-                                    $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
-                                    update_dynamic_header();
-                                    
-                                    //update_gallery_layout(true);
-                                    //init_infinite_scroll();
-                                });
-                            });
-                        };
                         
                         // initialize sDetail close button logic
                         $target.find('.close-button a').click(function(event) {
@@ -549,8 +562,14 @@ var g_update_stamps = null;
             }
             
             if ($sdetail_wrapper.length === 1) {
-                var offset = (cur_header_height + 16) + "px";
+                var offset = cur_header_height + 16;
                 var hidden = window.innerHeight + "px";
+                
+                if (!!$body && $body.hasClass('map')) {
+                    offset += 0;
+                }
+                
+                offset += "px";
                 
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 16));
@@ -626,45 +645,51 @@ var g_update_stamps = null;
         var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
         var init_infinite_scroll = function() {
-            // TODO: customize loading image
-            infinite_scroll = $gallery.infinitescroll({
-                debug           : STAMPED_PRELOAD.DEBUG, 
-                bufferPx        : 200, 
-                
-                navSelector     : "div.stamp-gallery-nav", 
-                nextSelector    : infinite_scroll_next_selector, 
-                itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
-                
-                loading         : {
-                    finishedMsg : "No more stamps to load.", 
-                    msgText     : "<em>Loading more stamps...</em>", 
-                    img         : "/assets/img/loading.gif", 
-                    selector    : "div.stamp-gallery-loading"
-                }
-            }, function(new_elements) {
-                var $elements = $(new_elements);
-                
-                //$elements.emoji();
-                $gallery.isotope('appended', $elements);
-                update_stamps();
-            });
+            if (!!$gallery) {
+                // TODO: customize loading image
+                infinite_scroll = $gallery.infinitescroll({
+                    debug           : STAMPED_PRELOAD.DEBUG, 
+                    bufferPx        : window.innerHeight * .8, 
+                    
+                    navSelector     : "div.stamp-gallery-nav", 
+                    nextSelector    : infinite_scroll_next_selector, 
+                    itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+                    
+                    loading         : {
+                        finishedMsg : "No more stamps to load.", 
+                        msgText     : "<em>Loading more stamps...</em>", 
+                        img         : "/assets/img/loading.gif", 
+                        selector    : "div.stamp-gallery-loading"
+                    }
+                }, function(new_elements) {
+                    var $elements = $(new_elements);
+                    
+                    //$elements.emoji();
+                    $gallery.isotope('appended', $elements);
+                    update_stamps();
+                });
+            }
         };
         
         // initialize the stamp gallery's layout with isotope and infinite scroll
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
             
-            $gallery.isotope({
-                itemSelector        : '.stamp-gallery-item', 
-                layoutMode          : "masonry"/*, 
-                animationOptions    : {
-                    duration        : 800,
-                    easing          : 'easeOut',
-                    queue           : true
-                }*/
-            });
-            
-            init_infinite_scroll();
+            if ($gallery.length <= 0) {
+                $gallery = null;
+            } else {
+                $gallery.isotope({
+                    itemSelector        : '.stamp-gallery-item', 
+                    layoutMode          : "masonry"/*, 
+                    animationOptions    : {
+                        duration        : 800,
+                        easing          : 'easeOut',
+                        queue           : true
+                    }*/
+                });
+                
+                init_infinite_scroll();
+            }
         };
         
         
@@ -936,7 +961,11 @@ var g_update_stamps = null;
         var update_dynamic_header = function() {
             // note: if sdetail's up, we round the dynamic header's size ratio to the 
             // nearest value s.t. it's either at maximum size or minimum size
-            var cur_ratio = Math.round(last_ratio);
+            var cur_ratio = 0.0;
+            
+            if (last_ratio !== null) {
+                cur_ratio = Math.round(last_ratio);
+            }
             
             if (!($body.hasClass(sdetail_popup) || 
                 $body.hasClass('sdetail_popup_animation') || 
@@ -1276,6 +1305,10 @@ var g_update_stamps = null;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
+            if (!$nav_bar || $nav_bar.length !== 1) {
+                return;
+            }
+            
             should_update_gallery = (typeof(should_update_gallery) !== 'boolean' ? true : should_update_gallery);
             
             var nav_bar_width   = $nav_bar.width();
@@ -1360,7 +1393,6 @@ var g_update_stamps = null;
             
             if (!force_no_update) {
                 if (update || last_nav_pos !== pos) {
-                    
                     if (!gallery) {
                         var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
                         var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
@@ -1646,10 +1678,17 @@ var g_update_stamps = null;
         $window.resize(update_navbar_layout);
         
         $(document).bind('keydown', function(e) {
-            // close all lightboxes and sDetail if the user presses ESC
+            // close lightboxes, sDetail, and/or map popups when the user presses ESC
+            // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
-                if (!!close_sdetail_func) {
-                    close_sdetail_func();
+                if (typeof(close_sdetail_func) !== 'undefined' && !!close_sdetail_func) {
+                    if ($('.fancybox-opened').length <= 0) {
+                        close_sdetail_func();
+                    }
+                }
+                
+                if (typeof(g_close_map_popup) !== 'undefined' && !!g_close_map_popup) {
+                    g_close_map_popup();
                 }
             }
         });
@@ -1666,6 +1705,17 @@ var g_update_stamps = null;
         init_gallery();
         update_navbar_layout();
         
+        var __init = false;
+        var show_initial_gallery = function() {
+            if (!__init || $('#main-content').css('visibility') !== 'visible') {
+                __init = true;
+                
+                update_gallery_layout(true);
+                setTimeout(show_initial_gallery, 150);
+            }
+        };
+        
+        setTimeout(show_initial_gallery, 150);
         return;
         
         var userP = client.get_user_by_screen_name(screen_name);

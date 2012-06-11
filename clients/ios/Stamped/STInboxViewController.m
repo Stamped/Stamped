@@ -62,6 +62,8 @@
 - (id)init {
   if (self = [super init]) {
       
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILoginNotification object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
@@ -105,13 +107,16 @@
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;
+        _slider.dataSource = (id<STSliderScopeViewDataSource>)self;
         self.footerView = _slider;
         _slider.scope = self.scope;
     }
+    
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self.tableView reloadData];
     [self updateCache];
+    
     
 }
 
@@ -189,6 +194,29 @@
     if (self.showsSearchBar) {
         [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
     }
+}
+
+
+#pragma mark - STSliderScopeViewDataSource
+
+- (NSString*)sliderScopeView:(STSliderScopeView*)slider titleForScope:(STStampedAPIScope)scope {
+    
+    switch (scope) {
+        case STStampedAPIScopeYou:
+            return @"you";
+            break;
+        case STStampedAPIScopeFriends:
+            return @"friends";
+            break;
+        case STStampedAPIScopeEveryone:
+            return @"tastemakers";
+            break;
+        default:
+            break;
+    }
+    
+    return @"";
+    
 }
 
 
@@ -466,7 +494,7 @@
     if (!LOGGED_IN) {
         
         STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-        [controller showWelcome];
+        [controller showWelcome:NO];
         
     } else {
         
@@ -541,6 +569,24 @@
     
 }
 
+
+#pragma mark - Login Notifications 
+
+- (void)logginStatusChanged:(NSNotification*)notification {
+    
+    if (!LOGGED_IN) {
+        
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        self.navigationItem.rightBarButtonItem = button;
+        [button release];
+        
+    } else {
+        
+        [Util addCreateStampButtonToController:self];
+        
+    }
+    
+}
 
 
 @end

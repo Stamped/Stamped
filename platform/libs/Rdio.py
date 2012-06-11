@@ -111,6 +111,18 @@ class Rdio(object):
         
         return json.loads(response[1])
 
+    def searchSuggestions(self, query, types="Artist,Album,Track", extras=None):
+        """
+        query:  required - the search prefix
+        types:  optional - object types to include in results - a comma separated list of: "Artist", "Album", "Track", "Playlist" or "User"
+        extras: optional - a list of additional fields to return - a list, comma separated
+        """
+        params = { 'query' : query, 'types': types }
+        if extras is not None:
+            params['extras'] = extras
+        return self.method('searchSuggestions', **params)
+
+
 __globalRdio = None
 
 def globalRdio():

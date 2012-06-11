@@ -38,12 +38,13 @@
 #import "STEntityAutoCompleteResult.h"
 #import "STHybridCacheSource.h"
 #import "STAccountParameters.h"
+#import "STRestKitLoader.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
     STStampedAPIScopeFriends,
+    STStampedAPIScopeEveryone,
     STStampedAPIScopeFriendsOfFriends,
-    STStampedAPIScopeEveryone
 } STStampedAPIScope;
 
 typedef enum {
@@ -103,11 +104,8 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 - (STCancellation*)stampsForSuggestedSlice:(STGenericCollectionSlice*)slice 
                                andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
 
-- (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
-                                 andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
-
-- (STCancellation*)stampedByForStampedBySlice:(STStampedBySlice*)slice 
-                                  andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
+- (STCancellation*)entitiesForConsumptionSlice:(STConsumptionSlice*)slice 
+                                   andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 
                                andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
@@ -164,6 +162,10 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 - (STCancellation*)untodoWithStampID:(NSString*)stampID 
                             entityID:(NSString*)entityID
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block;
+
+- (STCancellation*)setTodoCompleteWithEntityID:(NSString*)entityID 
+                                      complete:(BOOL)complete
+                                   andCallback:(void(^)(id<STTodo> todo, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)entityAutocompleteResultsForQuery:(NSString*)query 
                                          coordinates:(NSString*)coordinates
@@ -229,6 +231,7 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                                           userSecret:(NSString*)userSecret 
                                    accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 

@@ -15,8 +15,9 @@
     NSDictionary *_controllerStore;
     NSDictionary *_anchorControllerStore;
     
-    NSInteger _unreadCount;
     NSIndexPath *_selectedIndexPath;
+    BOOL _anchorSelected;
+    
 }
 
 + (void)setupConfigurations;

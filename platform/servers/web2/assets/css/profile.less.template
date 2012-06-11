@@ -89,12 +89,12 @@
 
 #stamp-category-nav-bar {
     ol {
-        li.default a:active .icon, 
-        li.place a:active .icon, 
-        li.music a:active .icon, 
-        li.book a:active .icon, 
-        li.film a:active .icon, 
-        li.other a:active .icon {
+        li.default  a:active .icon, 
+        li.place    a:active .icon, 
+        li.music    a:active .icon, 
+        li.book     a:active .icon, 
+        li.film     a:active .icon, 
+        li.other    a:active .icon {
             background-color: fade(@secondary, 100%);
         }
     }
@@ -111,25 +111,55 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
 
 .user-logo-large {
     {{#user}}
-    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png);
+    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png) no-repeat;
     {{/user}}
+    background-size: 100% 100%;
 }
 
 .user-logo-small {
     {{#user}}
-    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png);
+    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
+    background-size: 100% 100%;
     
     width:  36px;
     height: 36px;
 }
 
-.stamp-gallery-item:hover {
-    background-color: fade(@primary, 15%);
+.user-logo-tiny {
+    {{#user}}
+    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
+    {{/user}}
+    background-size: 100% 100%;
+    
+    width:  24px;
+    height: 24px;
 }
 
-.stamp-gallery-item:active {
-    background-color: fade(@primary, 25%);
+.transition(@target: all, @duration: 0.2s, @ease: ease-out) {
+    -webkit-transition: @target @duration @ease !important;
+    -moz-transition:    @target @duration @ease !important;
+    -ms-transition:     @target @duration @ease !important;
+    -o-transition:      @target @duration @ease !important;
+    transition:         @target @duration @ease !important;
+}
+
+.user-primary-selection {
+    background-color: #fff;
+}
+
+.user-primary-selection:hover, .stamp-map .stamp-map-canvas .stamp-map-item:hover .stamp-map-item-overlay {
+    background-color: fade(@primary, 15%) !important;
+    cursor: pointer;
+    
+    .transition(background-color, 0s, ease-out);
+}
+
+.user-primary-selection:active, .stamp-map .stamp-map-canvas .stamp-map-item:active .stamp-map-item-overlay {
+    background-color: fade(@primary, 25%) !important;
+    cursor: pointer;
+    
+    .transition(background-color, 0s, ease-out);
 }
 
 /*
@@ -159,11 +189,11 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
 
     
 @media screen and (-webkit-min-device-pixel-ratio:0) {
-    .user-logo-large {
+    .user-logo(@url) {
         background-image: none;
         .user-gradient-func(135deg, 80%);
         
-        @mask-image: url(/assets/img/stamped_logo_mask.png);
+        @mask-image: @url;
         
         -webkit-mask: @mask-image no-repeat;
         -webkit-mask-size: 100% 100%;
@@ -172,15 +202,12 @@ body.other      #stamp-category-nav-bar ol li.other .icon {
         mask: @mask-image no-repeat;
     }
     
-    .user-logo-small {
-        background-image: none;
-        .user-gradient-func(135deg, 80%);
-        @mask-image: url(/assets/img/stamped_email_mask.png);
-        
-        -webkit-mask: @mask-image no-repeat;
-        -moz-mask: @mask-image no-repeat;
-        -o-mask: @mask-image no-repeat;
-        mask: @mask-image no-repeat;
+    .user-logo-large {
+        .user-logo(url(/assets/img/stamped_logo_mask.png));
+    }
+    
+    .user-logo-small, .user-logo-tiny {
+        .user-logo(url(/assets/img/stamped_email_mask.png));
     }
 }
 

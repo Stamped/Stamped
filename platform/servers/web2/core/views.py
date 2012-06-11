@@ -232,7 +232,7 @@ def map(request, schema, **kwargs):
     # TODO: enforce stricter validity checking on offset and limit
     
     schema.offset = schema.offset or 0
-    schema.limit  = None
+    schema.limit  = 1000 # TODO: customize this
     #schema.limit  or 25
     
     if ENABLE_TRAVIS_TEST:
@@ -289,6 +289,9 @@ def map(request, schema, **kwargs):
 @stamped_view(schema=HTTPStampDetail)
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
+    
+    #import time
+    #time.sleep(2)
     
     logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
