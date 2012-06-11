@@ -57,6 +57,15 @@
 }
 
 
+#pragma mark - Sign In
+
+- (void)showSignIn {
+    
+    [_popoverView showOptionsView];
+    
+}
+
+
 #pragma mark - Animations
 
 - (void)animateIn {

@@ -53,6 +53,18 @@
     
 }
 
+- (void)showSignIn {
+    
+    STWelcomeViewController *welcomeController = [[STWelcomeViewController alloc] init];
+    welcomeController.delegate = (id<STWelcomeViewControllerDelegate>)self;
+    [self.view addSubview:welcomeController.view];
+    welcomeController.view.frame = self.view.bounds;
+    [welcomeController showSignIn];
+    [welcomeController popIn];
+    
+    
+}
+
 
 #pragma mark - STWelcomeViewControllerDelegate
 

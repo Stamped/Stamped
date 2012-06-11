@@ -106,6 +106,7 @@
             
         }
     }
+    _scope=-1;
     
 }
 
@@ -171,6 +172,7 @@
 #pragma mark - Setters
 
 - (void)setScope:(STStampedAPIScope)scope animated:(BOOL)animated {
+    if (_scope == scope) return;
     _scope = scope;
     
     if (!_dragging) {
@@ -317,6 +319,78 @@
     
 }
 
+- (STTextCalloutView*)textCallout {
+    
+    @synchronized(self) {
+        if (!_textCallout) {
+            STTextCalloutView *view = [[STTextCalloutView alloc] init];
+            [self.superview addSubview:view];
+            _textCallout = view;
+            [view release];
+        }
+    }
+ 
+    return _textCallout;
+    
+}
+
+- (void)hideTextCallout {
+    
+    if (_textCallout) {
+        [_textCallout hide:YES];
+        _textCallout = nil;
+    }
+    
+}
+
+
+#pragma mark - Panning Animations
+
+- (void)moveToScope:(STStampedAPIScope)scope animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion {
+    
+    __block UIView *view = _draggingView;
+    __block STTextCalloutView *callout = _textCallout;
+    
+    CGPoint fromPos = view.layer.position;
+    CGPoint toPos = [self positionForScope:scope];
+    if (CGPointEqualToPoint(fromPos, toPos)) return;
+    
+    view.layer.position = toPos;
+
+    if (callout) {
+        CGPoint pos = view.layer.position;
+        pos.y -= 20.0f;
+        [callout showFromPosition:[self convertPoint:pos toView:self.superview] animated:NO];
+    }
+
+    BOOL disabled = [CATransaction disableActions];
+    [CATransaction setDisableActions:!animated];
+    
+    [CATransaction begin];
+    [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+    [CATransaction setAnimationDuration:duration];
+    [CATransaction setCompletionBlock:^{
+        completion();        
+    }];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position.x"];
+    animation.fromValue = [NSNumber numberWithFloat:fromPos.x];
+    [view.layer addAnimation:animation forKey:nil];
+    
+    if (callout) {
+        
+        fromPos = [self convertPoint:fromPos toView:self.superview];
+        animation = [CABasicAnimation animationWithKeyPath:@"position.x"];
+        animation.fromValue = [NSNumber numberWithFloat:fromPos.x];
+        [callout.layer addAnimation:animation forKey:nil];
+        
+    }
+    
+    [CATransaction commit];
+    [CATransaction setDisableActions:disabled];
+    
+}
+
 
 #pragma mark - Gestures
 
@@ -328,17 +402,13 @@
        
         _firstPress = YES;
         _beginPress = position;
-        if (!_textCallout) {
+        if ([self textCallout]) {
             
             STStampedAPIScope scope = [self scopeForPosition:position];
             CGPoint viewPosition = [self positionForScope:scope];
-            STTextCalloutView *view = [[STTextCalloutView alloc] init];
-            [view setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
-            [self.superview addSubview:view];
+            [_textCallout setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
             viewPosition.y -= 20.0f;
-            [view showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:YES];
-            [view release];
-            _textCallout = view;
+            [_textCallout showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:YES];
             
         }
         
@@ -347,9 +417,7 @@
     if (!_dragging && (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled)) {
         
         _firstPress = NO;
-        if (_textCallout) {
-            [_textCallout removeFromSuperview], _textCallout = nil;
-        }
+        [self hideTextCallout];
         
     }
     
@@ -358,7 +426,8 @@
 - (void)pan:(UIPanGestureRecognizer*)gesture {
     
     CGPoint position = [gesture locationInView:self];
-    
+    STStampedAPIScope scope = [self scopeForPosition:position];
+
     if (gesture.state == UIGestureRecognizerStateBegan) {
         _dragging = YES;
         _prevScope = _scope;
@@ -366,135 +435,107 @@
         if (!_firstPress) {
             _firstPan = YES;
         }
-                
-        if (!_textCallout) {
-            STTextCalloutView *view = [[STTextCalloutView alloc] init];
-            [self.superview addSubview:view];
-            _textCallout = view;
-            [view release];
-        }
         
-    }
-    
-    STStampedAPIScope scope = [self scopeForPosition:position];
-    if (_scope != scope) {
-        _firstPan = NO;
-    }
-    
-    if (_textCallout) {
-        
-        [_textCallout setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
-        if (_prevScope != scope) {
-            _draggingView.image = [self imageForScope:scope];
-            _prevScope = scope;
-        }
+        [[self textCallout] setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
 
-        if (!_firstPan && (gesture.state == UIGestureRecognizerStateBegan || gesture.state == UIGestureRecognizerStateChanged)) {
+    } else {
+        
+        if (_scope != scope) {
+            _firstPan = NO;
+        }
+        
+    }
+    
+    if (_prevScope != scope) {
+        _draggingView.image = [self imageForScope:scope];
+        [[self textCallout] setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
+        _prevScope = scope;
+    }
+    
+    if ((gesture.state == UIGestureRecognizerStateBegan || gesture.state == UIGestureRecognizerStateChanged)) {
+        
+        if (!_firstPan) {
             
-            __block UIImageView *view = _draggingView;
-            __block CGPoint viewPosition = view.layer.position;
-            viewPosition.y -= 20.0f;
-
-            [UIView animateWithDuration:0.1f animations:^{
-                [_textCallout showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:NO];
-                viewPosition = view.layer.position;
-                viewPosition.x = [self positionForScope:scope].x;
-                view.layer.position = viewPosition;
-            }];
+            [self moveToScope:scope animated:YES duration:0.1f completion:^{}];
             
         } else {
             
             CGFloat maxX = [self positionForScope:STStampedAPIScopeEveryone].x;
             CGFloat minX = [self positionForScope:STStampedAPIScopeYou].x;
-
+            
             UIImageView *view = _draggingView;
             CGPoint viewPosition = view.layer.position;
-            viewPosition.y -= 20.0f;
-            [_textCallout showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:NO];
             viewPosition = view.layer.position;
             viewPosition.x = MIN(position.x, maxX);
             viewPosition.x = MAX(minX, viewPosition.x);
             view.layer.position = viewPosition;
             
+            viewPosition.y -= 20.0f;
+            [[self textCallout] showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:NO];
+            
         }
         
-    }
-    
-    if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
+    } else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
+        
+        CGPoint fromPos = _draggingView.layer.position;
+        CGPoint toPos = [self positionForScope:scope];
+
+        if (!CGPointEqualToPoint(fromPos, toPos)) {
+            
+            _draggingView.layer.position = toPos;
+
+            CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position.x"];
+            animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+            animation.duration = 0.1f;
+            animation.fromValue = [NSNumber numberWithFloat:fromPos.x];
+            [_draggingView.layer addAnimation:animation forKey:nil];
+            
+            if (_textCallout) {
+                CGPoint pos = _textCallout.layer.position;
+                fromPos = [self convertPoint:fromPos toView:self.superview];
+                toPos = [self convertPoint:toPos toView:self.superview];
+                pos.x = toPos.x;
+                _textCallout.layer.position = pos;
+                animation = [CABasicAnimation animationWithKeyPath:@"position.x"];
+                animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                animation.duration = 0.1f;
+                animation.fromValue = [NSNumber numberWithFloat:fromPos.x];
+                [_textCallout.layer addAnimation:animation forKey:nil];
+            }
+            
+        }
         
         if (_scope != scope) {
             [self setScopeExplicit:scope];
-        }
+        }      
         
         _dragging = NO;
-        if (_textCallout) {
-            [_textCallout removeFromSuperview], _textCallout=nil;
-        }
+        [self hideTextCallout];
         
     }    
 }
 
-- (void)hideTextPopover {
-    
-    if (_textCallout) {
-        [_textCallout removeFromSuperview], _textCallout=nil;
-    }
-    
-}
-
 - (void)tap:(UITapGestureRecognizer*)gesture {
     
-    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideTextPopover) object:nil];
-    CGPoint position = [gesture locationInView:self];
-    STStampedAPIScope scope = [self scopeForPosition:position];
+    [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideTextCallout) object:nil];
+    STStampedAPIScope scope = [self scopeForPosition:[gesture locationInView:self]];
+
     if (_scope != scope) {
         
-        STStampedAPIScope currentScope = _scope;
-        [self setScopeExplicit:scope];
-        
-        UIView *view = _draggingView;
-        NSInteger diff = currentScope - _scope;
+        NSInteger diff = _scope - scope;
         if (diff < 0) {
             diff *= -1;
-        }
-        
+        }        
         float fDiff = ((float)diff)/10.0f;
-        CGPoint fromPos = [self positionForScope:currentScope];
-        
-        if (!_textCallout) {
-            STTextCalloutView *view = [[STTextCalloutView alloc] init];
-            [self.superview addSubview:view];
-            _textCallout = view;
-            [view release];
-        }
-        
-        [_textCallout setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];
-        CGPoint viewPosition = view.layer.position;
-        viewPosition.y -= 20.0f;
-        [_textCallout showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:NO];
-        [self performSelector:@selector(hideTextPopover) withObject:nil afterDelay:1.5f];
-        
-        [CATransaction begin];
-        [CATransaction setAnimationDuration:0.3f];
-        
-        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-        animation.fromValue = [NSValue valueWithCGPoint:fromPos];
-        animation.duration = fDiff;
-        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        [view.layer addAnimation:animation forKey:nil];
-        
-        if (_textCallout) {
-            
-            animation = [CABasicAnimation animationWithKeyPath:@"position.x"];
-            animation.fromValue = [NSNumber numberWithFloat:fromPos.x];
-            animation.duration = fDiff;
-            animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-            [_textCallout.layer addAnimation:animation forKey:nil];
-            
-        }
-        
-        [CATransaction commit];
-        
+
+        CGPoint pos = [_draggingView.layer position];
+        pos.y -= 20.0f;
+        [[self textCallout] setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];        
+        [self moveToScope:scope animated:YES duration:fDiff completion:^{
+            [self setScopeExplicit:scope];
+        }];
+        [self performSelector:@selector(hideTextCallout) withObject:nil afterDelay:1.5f];
+
     }
 
 }

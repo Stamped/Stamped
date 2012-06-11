@@ -130,20 +130,25 @@
     callout.category = cell.category;
     [callout release];
     
+    _calloutView = view;
+    
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     
     UIView *subview = [[gestureRecognizer.view subviews] lastObject];
     CGRect frame = subview.frame;
-    frame.size.height -= 10.0f; // remove shadow
+    frame.size.height -= 10.0f; // remove drop shadow
     return !CGRectContainsPoint(frame, [gestureRecognizer locationInView:gestureRecognizer.view]);
     
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
     
-    [gesture.view removeFromSuperview];
+    if (_calloutView) {
+        [_calloutView removeFromSuperview], _calloutView=nil;
+    }
+
     CGPoint point = [gesture locationInView:_graphContainer];
     for (STUserGraphCell *view in _graphContainer.subviews) {
         if (CGRectContainsPoint(view.frame, point)) {
@@ -242,7 +247,7 @@
     
     if (_icon) {
 
-        BOOL highlight = _barHeight > _icon.size.height+6.0f;
+        BOOL highlight = (_barHeight/2) > _icon.size.height+4.0f;
         
         CGFloat originY = (_icon.size.height+4.0f);
         if (!highlight && _barHeight > 4.0f) {

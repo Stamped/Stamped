@@ -25,6 +25,7 @@ typedef enum {
 
 - (void)animateIn;
 - (void)popIn;
+- (void)showSignIn;
 
 @end
 @protocol STWelcomeViewControllerDelegate

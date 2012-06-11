@@ -113,6 +113,12 @@
     
 }
 
+- (void)showOptionsView {
+    
+    _container.contentOffset = CGPointMake(_container.frame.size.width, 0.0f);
+    
+}
+
 
 #pragma mark - Actions
 
