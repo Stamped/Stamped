@@ -40,7 +40,7 @@ if __name__ == '__main__':
         
         def _process_entity(entity):
             image_url = entity['image']
-            image_url = db.addEntityImage(image_url)
+            image_url = db.addWebEntityImage(image_url)
             entity['image'] = image_url
             
             api._entityDB.updateEntity(entity)
