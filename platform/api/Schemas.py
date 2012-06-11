@@ -1290,17 +1290,6 @@ class Badge(Schema):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('genre',                            basestring, required=True)
 
-class CreditSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_id',                          basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('stamp_id',                         basestring)
-        ### TEMP?
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
-        cls.addProperty('privacy',                          bool)
-
 class StampAttributesSchema(Schema):
     @classmethod
     def setSchema(cls):
