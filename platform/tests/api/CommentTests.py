@@ -38,7 +38,7 @@ class StampedAPICommentTest(AStampedAPITestCase):
 
 class StampedAPICommentsShow(StampedAPICommentTest):
     def test_show(self):
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -77,7 +77,7 @@ class StampedAPICommentsMentions(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -93,7 +93,7 @@ class StampedAPICommentsMentions(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -110,7 +110,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -125,7 +125,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -140,7 +140,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -155,7 +155,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -170,7 +170,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -186,7 +186,7 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -201,7 +201,7 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -216,7 +216,7 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
@@ -231,7 +231,7 @@ class StampedAPICommentsText(StampedAPICommentTest):
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             blurb)
 
-        path = "comments/list.json"
+        path = "comments/collection.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']

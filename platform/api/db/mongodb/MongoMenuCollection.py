@@ -23,7 +23,7 @@ except:
 class MongoMenuCollection(AMongoCollection, AMenuDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='menus', primary_key='entity_id', obj=MenuSchema)
+        AMongoCollection.__init__(self, collection='menus', primary_key='entity_id', obj=Menu)
         AMenuDB.__init__(self)
 
     ### PUBLIC

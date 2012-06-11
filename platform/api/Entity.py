@@ -476,7 +476,7 @@ def upgradeEntityData(entityData):
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
-    new.timestamp           = TimestampSchema().dataImport(timestamp)
+    new.timestamp           = BasicTimestamp().dataImport(timestamp)
 
     # Images
     netflixImages = netflix.pop('images', {})
@@ -566,7 +566,7 @@ def upgradeEntityData(entityData):
     if kind == 'place':
         coordinates = old.pop('coordinates', None)
         if coordinates is not None:
-            new.coordinates = CoordinatesSchema().dataImport(coordinates)
+            new.coordinates = Coordinates().dataImport(coordinates)
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents, seed=False)
