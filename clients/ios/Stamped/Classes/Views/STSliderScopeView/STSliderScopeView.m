@@ -19,6 +19,15 @@
 @interface STSliderScopeView (Internal)
 - (UIImageView*)imageViewForScope:(STStampedAPIScope)scope;
 - (void)setUserImageViewImage:(UIImage*)image;
+
+
+@end
+
+@interface STSliderScopeView ()
+
+
+@property (nonatomic, readwrite, retain) NSTimer* timer;
+
 @end
 
 @implementation STSliderScopeView
@@ -27,6 +36,7 @@
 @synthesize delegate;
 @synthesize dataSource;
 @synthesize selectedIndex=_selectedIndex;
+@synthesize timer = _timer;
 
 - (void)commonInit {
     
@@ -130,6 +140,8 @@
     if (_userImage) {
         [_userImage release], _userImage = nil;
     }
+    [_timer invalidate];
+    [_timer release];
     _textCallout = nil;
     [super dealloc];
 }
@@ -424,6 +436,8 @@
 }
 
 - (void)pan:(UIPanGestureRecognizer*)gesture {
+    [_timer invalidate];
+    self.timer = nil;
     
     CGPoint position = [gesture locationInView:self];
     STStampedAPIScope scope = [self scopeForPosition:position];
@@ -469,12 +483,10 @@
             viewPosition.x = MIN(position.x, maxX);
             viewPosition.x = MAX(minX, viewPosition.x);
             view.layer.position = viewPosition;
-            
             viewPosition.y -= 20.0f;
             [[self textCallout] showFromPosition:[self convertPoint:viewPosition toView:self.superview] animated:NO];
-            
         }
-        
+    
     } else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
         
         CGPoint fromPos = _draggingView.layer.position;
@@ -537,7 +549,6 @@
         [self performSelector:@selector(hideTextCallout) withObject:nil afterDelay:1.5f];
 
     }
-
 }
 
 

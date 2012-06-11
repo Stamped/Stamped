@@ -8,66 +8,57 @@ __license__   = "TODO"
 import Globals
 import colorsys, math, os, sys, urllib2, utils
 
+from abc            import ABCMeta, abstractmethod, abstractproperty
 from StringIO       import StringIO
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
+from api.S3ImageDB  import S3ImageDB
 
-class ImageCollage(object):
+"""
+
+TODO: 
+    * AImageCollage
+        * GenericImageCollage
+        * MusicImageCollage
+        * BookImageCollage
+        * FilmImageCollage
+        * AppImageCollage
+        * (Place header is generated separately and doesn't require a collage)
+
+"""
+
+class AImageCollage(object):
     
-    def __init__(self, *image_urls):
-        pool  = Pool(8)
-        tiles = []
+    __metaclass__ = ABCMeta
+    
+    def __init__(self, image_urls):
+        self._pool  = Pool(8)
+        self._db    = S3ImageDB()
+        self._tiles = []
         
-        def _add_image(i, image_url):
+        def _add_image(image_url):
             utils.log("downloading '%s'" % image_url)
             
-            try:
-                data = utils.getFile(image_url)
-            except urllib2.HTTPError:
-                logs.warn("unable to download image '%s'" % image_url)
-                raise
-            
-            image = self._get_image(data)
-            tiles.append(image)
+            image = self._db.getWebImage(url, "collage"):
+            self._tiles.append(image)
             
             #image.save("image%d.jpg" % i, 'JPEG')
         
-        for i in xrange(len(image_urls)):
-            image_url = image_urls[i]
-            pool.spawn(_add_image, i, image_url)
+        for image_url in image_urls:
+            self._pool.spawn(_add_image, image_url)
         
-        pool.join()
-        
-        sizes  = [
-            (940, 256), 
-            (512, 128), 
-            (256, 64), 
-        ]
-        
-        # 6  => 3x2
-        # 12 => 5x3
-        # num_tiles * aspect_ratio_num_cols / aspect_ratio_num_rows
-        
-        #num_rows = int(math.ceil(num_tiles / 3))
-        #num_cols = num_tiles % num_rows
-        
-        num_tiles = len(tiles)
-        #num_cols  = size_map[num_tiles][0]
-        #num_rows  = size_map[num_tiles][1]
-        
-        #num_cols  = 5
-        #num_rows  = math.ceil(((float) num_tiles) / num_cols)
-        
-        aspect_ratio_num_cols = 5 # 9 to 12
-        aspect_ratio_num_rows = 2 # 9 to 12
-        
-        num_cols0 = int(math.ceil(aspect_ratio_num_cols * num_tiles / 9))
-        num_cols1 = int(math.floor(aspect_ratio_num_cols * num_tiles / 12))
-        
-        num_cols  = max(num_cols0, num_cols1)
+        self._pool.join()
+        self._sizes = self._get_output_sizes()
+    
+    @abstractmethod
+    def process(self):
+        raise NotImplementedError
+    
+    def _create_collage(self, num_cols):
+        num_tiles = len(self._tiles)
         num_rows  = int(math.ceil(num_tiles / num_cols))
         
-        for size in sizes:
+        for size in self._sizes:
             filename = "collage.%sx%s.jpg" % size
             utils.log("creating collage '%s'" % filename)
             
@@ -94,7 +85,7 @@ class ImageCollage(object):
                 
                 # wrap around if necessary to fill last row
                 index = (i * num_cols + j) % num_tiles
-                tile  = tiles[index]
+                tile  = self._tiles[index]
                 
                 if tile.size[0] / cell_size[0] < tile.size[1] / cell_size[1]:
                     width  = cell_size[0]
@@ -112,99 +103,33 @@ class ImageCollage(object):
                 cell   = tile.resize((width, height), Image.ANTIALIAS)
                 
                 canvas.paste(cell, (x0, y0))
-                #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
             
-            '''
-            for i in xrange(num_rows):
-                y0 = i * cell_size[1]
-                
-                for j in xrange(num_cols):
-                    x0 = j * cell_size[0]
-                    
-                    # wrap around if necessary to fill last row
-                    index  = (i * num_cols + j) % num_tiles
-                    tile   = tiles[index]
-                    
-                    if tile.size[0] / cell_size[0] < tile.size[1] / cell_size[1]:
-                        width  = cell_size[0]
-                        height = (width * tile.size[1]) / tile.size[0]
-                        
-                        if height > cell_size[1]:
-                            height = int((height + cell_size[1]) * (1.5 / 3.0))
-                    else:
-                        height = cell_size[1]
-                        width  = (height * tile.size[0]) / tile.size[1]
-                        
-                        if width > cell_size[0]:
-                            width = int((width + cell_size[0]) * (1.5 / 3.0))
-                    
-                    cell   = tile.resize((width, height), Image.ANTIALIAS)
-                    
-                    canvas.paste(cell, (x0, y0))
-                    #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
-            '''
-            
-            utils.log("blurring collage '%s'" % filename)
-            
-            num_blurs = 3
-            pad       = 8
-            
-            canvas2 = Image.new("RGB", (size[0] + pad * 2, size[1] + pad * 2), (255, 255, 255, 0))
-            canvas2.paste(canvas, (pad, pad))
-            
-            width, height = canvas2.size
-            
-            # TODO: revisit image filter
-            for y in xrange(height):
-                for x in xrange(width):
-                    r, g, b = canvas2.getpixel((x, y))
-                    
-                    r /= 255.0
-                    g /= 255.0
-                    b /= 255.0
-                    
-                    h, l, s = colorsys.rgb_to_hls(r, g, b)
-                    r, g, b = colorsys.hls_to_rgb(h, min(1.0, l * 1.2), s * 0.6)
-                    
-                    r = int(r * 255.0)
-                    g = int(g * 255.0)
-                    b = int(b * 255.0)
-                    
-                    canvas2.putpixel((x, y), (r, g, b))
-            
-            for i in xrange(num_blurs):
-                canvas2 = canvas2.filter(ImageFilter.BLUR)
-            
-            offset0 = pad + 2
-            offset1 = pad - 2
-            canvas  = canvas2.crop((offset0, offset0, size[0] + offset1, size[1] + offset1))
-            
-            '''
-            def dodge(a, b, alpha):
-                return min(int(a*255/(256-b*alpha)), 255)
-            
-            width, height = canvas.size
-            alpha = 1.5;
-            
-            for x in xrange(width):
-                for y in xrange(height):
-                    a = canvas.getpixel((x, y))
-                    b = canvas.getpixel((x, y))
-                    canvas.putpixel((x, y), dodge(a, b, alpha))
-            '''
-            
-            canvas.save(filename, 'JPEG')
+            self._apply_postprocessing(canvas)
+            canvas.save(filename)
     
-    def _get_image(self, data):
-        assert isinstance(data, basestring)
-        
-        io = StringIO(data)
-        im = Image.open(io)
-        
-        return im
+    def _get_output_sizes(self):
+        return [
+            (940, 256), 
+            (512, 128), 
+            (256, 64), 
+        ]
+    
+    def _apply_postprocessing(self, image):
+        # TODO: apply built-in grayscale filter and possibly blur
+        pass
 
-def main(*images):
-    collage = ImageCollage(*images)
+class BasicImageCollage(object):
+    
+    def process(self):
+        num_tiles   = len(self._tiles)
+        # TODO: dependent on num_tiles
+        num_cols    = num_tiles
+        
+        # TODO: some image collages will have num_rows and num_cols dependent on num_tiles
+        AImageCollage._create_collage(num_cols)
+
+def main(images):
+    collage = BasicImageCollage(images)
 
 if __name__ == '__main__':
     import argparse
@@ -229,5 +154,5 @@ if __name__ == '__main__':
         'http://ia.media-imdb.com/images/M/MV5BMTMwODg0NDY1Nl5BMl5BanBnXkFtZTcwMjkwNTgyMg@@._V1._SY317_.jpg', 
     ]
     
-    main(*movies)
+    main(movies)
 

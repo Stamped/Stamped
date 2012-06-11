@@ -595,7 +595,7 @@ def sendPushNotifications(queue, options):
                     message.token(binascii.unhexlify(deviceId))
                     payload = msg['payload'].encode('ascii', 'ignore')
                     message.alert(payload)
-                    #message.badge(num_unread_count)
+                    #message.badge(queue.count())
                     
                     # add message to tuple and send it to APNS server
                     apns_wrapper.append(message)

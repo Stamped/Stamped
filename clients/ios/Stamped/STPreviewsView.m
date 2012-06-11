@@ -63,19 +63,15 @@ static const NSInteger _cellsPerRow = 7;
     [_views release], _views=nil;
     [super dealloc];
 }
-
+/*
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    NSLog(@"touches began");
-    
+    //NSLog(@"touches began");
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    NSLog(@"touches moved");
-    
+    //NSLog(@"touches moved");
 }
-
+*/
 
 #pragma mark - Reuse
 
@@ -128,7 +124,7 @@ static const NSInteger _cellsPerRow = 7;
             
             STActionContext *context = [STActionContext context];
             context.user = user;
-            id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];
+            id<STAction> action = [STStampedActions actionViewStamp:preview.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
             [view setupWithUser:user];

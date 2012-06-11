@@ -188,6 +188,7 @@ class iTunesGroup(AKindTypeGroup):
 
         self.addField(['sources', 'itunes_id'])
         self.addField(['sources', 'itunes_url'])
+        self.addField(['sources', 'itunes_preview'])
 
 class FormattedAddressGroup(APlaceGroup):
 

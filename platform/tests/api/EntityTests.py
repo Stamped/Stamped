@@ -69,7 +69,8 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
         path = "entities/search.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "q": self.entity['title'], 
+            "query": self.entity['title'], 
+            "category": "music",
         }
         result = self.handleGET(path, data)
         
@@ -151,7 +152,7 @@ class StampedAPIEntitiesAutoSuggest(StampedAPIEntityTest):
 #         path = "entities/search.json"
 #         data = {
 #             "oauth_token": self.token['access_token'],
-#             "q": self.entity['title'], 
+#             "query": self.entity['title'], 
 #         }
 #         result = self.handleGET(path, data)
         

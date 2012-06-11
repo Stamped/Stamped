@@ -135,7 +135,6 @@
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  NSLog(@"Selected Cell: %d inRow: %d", indexPath.row, indexPath.section);
   if (self.selectedCallback) {
     self.selectedCallback(self, tableView, indexPath);
   }

@@ -26,7 +26,6 @@
   STUserCollectionSlice* friendsSlice = [[[STUserCollectionSlice alloc] init] autorelease];
   [friendsSlice importDictionaryParams:[slice asDictionaryParams]];
   friendsSlice.userID = self.userID;
-  NSLog(@"userID:%@",self.userID);
   [super setSlice:friendsSlice];
 }
 

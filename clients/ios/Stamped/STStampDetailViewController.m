@@ -212,7 +212,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     _addCommentShading = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, self.view.frame.size.height)];
     _addCommentShading.backgroundColor = [UIColor colorWithWhite:0 alpha:.3];
     [_addCommentShading addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitComment:)] autorelease]];

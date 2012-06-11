@@ -16,11 +16,11 @@ import datetime, logs, sys, time
 from pprint         import pprint
 from LRUCache       import lru_cache
 from Memcache       import memcached_function
-from api.Schemas    import MenuSchema
-from api.Schemas    import SubmenuSchema
-from api.Schemas    import MenuSectionSchema
-from api.Schemas    import MenuItemSchema
-from api.Schemas    import MenuPriceSchema
+from api.Schemas    import Menu
+from api.Schemas    import Submenu
+from api.Schemas    import MenuSection
+from api.Schemas    import MenuItem
+from api.Schemas    import MenuPrice
 from urllib2        import HTTPError
 from threading      import Lock
 from gevent         import sleep
@@ -42,7 +42,7 @@ def _parse_spicy(entry):
 def _parse_prices(entry):
     prices = []
     for p in entry['prices']:
-        p2 = MenuPriceSchema()
+        p2 = MenuPrice()
         p2.title = p['title']
         p2.price = p['price']
         p2.unit = p['unit']
@@ -52,7 +52,7 @@ def _parse_prices(entry):
 
 
 def _parseMenu(menu):
-    m = SubmenuSchema()
+    m = Submenu()
     m.title = menu['title']
     # TODO times
     m.footnote = menu['footnote']
@@ -66,12 +66,12 @@ def _parseMenu(menu):
             if cur_section:
                 cur_section.items = cur_items
                 cur_items = []
-            cur_section = MenuSectionSchema()
+            cur_section = MenuSection()
             sections.append(cur_section)
             cur_section.title = entry['title']
             cur_section.desc = entry['desc']
         elif t == 'item':
-            item = MenuItemSchema()
+            item = MenuItem()
             item.title = entry['title']
             item.desc = entry['desc']
             item.spicy = _parse_spicy(entry)
@@ -81,15 +81,15 @@ def _parseMenu(menu):
             item.prices = _parse_prices(entry)
             cur_items.append(item)
     if not cur_section:
-        cur_section =  MenuSectionSchema()
+        cur_section =  MenuSection()
     cur_section.items = cur_items
     m.sections = sections
     return m
 
-def toMenuSchema(menu):
+def toMenu(menu):
     if not menu:
         return None
-    schema = MenuSchema()
+    schema = Menu()
     schema.source = 'singleplatform'
     schema.source_id = menu['location']['id']
     schema.timestamp = datetime.datetime.utcnow()
@@ -142,7 +142,7 @@ class SinglePlatform(object):
         return self._get_uri('/restaurants/%s/menu' % location_id)
 
     def get_menu_schema(self, location_id):
-        return toMenuSchema(self.get_menu(location_id))
+        return toMenu(self.get_menu(location_id))
     
     def get_short_menu(self, location_id):
         return self._get_uri('/restaurants/%s/shortmenu' % location_id)
@@ -202,7 +202,7 @@ if __name__ == '__main__':
         print(sp_id)
         results = sp.get_menu(sp_id)
         #pprint(results)
-        results = toMenuSchema(results)
+        results = toMenu(results)
         pprint(results)
     else:
         # Search for Nobu NY by its phone number

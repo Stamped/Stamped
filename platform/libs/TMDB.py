@@ -19,12 +19,12 @@ try:
     import urllib2
     import logs
     
-    from urllib2        import HTTPError
-    from gevent         import sleep
-    from pprint         import pprint
-    from RateLimiter    import RateLimiter, RateException
-    from LRUCache       import lru_cache
-    from Memcache       import memcached_function
+    from urllib2         import HTTPError
+    from gevent          import sleep
+    from pprint          import pprint
+    from RateLimiter     import RateLimiter, RateException
+    from LRUCache        import lru_cache
+    from CachedFunction  import cachedFn
 except:
     report()
     raise
@@ -82,12 +82,12 @@ class TMDB(object):
     
     def collection_info(self, tmdb_id):
         return self.__tmdb('collection/%s' %(tmdb_id,))
-    
+
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
+    @cachedFn()
     def __tmdb(self, service, max_retries=3, **params):
         if 'api_key' not in params:
             params['api_key'] = self.__key

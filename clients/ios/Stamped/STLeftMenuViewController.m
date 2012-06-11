@@ -258,6 +258,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
         if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
             [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
+            [cell countUpdated:nil];
         } 
         
         if ([indexPath isEqual:_selectedIndexPath]) {
@@ -327,7 +328,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     if (self.tableView == tableView || YES) {
         
         [menuController setRootController:navController animated:YES];
-        [Util addHomeButtonToController:controller withBadge:[controller isKindOfClass:[STInboxViewController class]]];
+        [Util addHomeButtonToController:controller withBadge:![controller isKindOfClass:[STUniversalNewsController class]]];
         
     } else {
         
@@ -385,7 +386,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 #pragma mark - Configurations
 
 + (void)setupConfigurations {
-    [STConfiguration addString:@"The Feed" forKey:_inboxNameKey];
+    [STConfiguration addString:@"Feed" forKey:_inboxNameKey];
     [STConfiguration addString:@"The Guide" forKey:_iWantToNameKey];
     [STConfiguration addString:@"Activity" forKey:_newsNameKey];
     [STConfiguration addString:@"Debug" forKey:_debugNameKey];

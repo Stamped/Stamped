@@ -153,7 +153,6 @@
     STCache* fastCache = [STSharedCaches cacheForInboxScope:self.scope];
     if (!fastCache) {
         [STSharedCaches cacheForInboxScope:self.scope withCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
-            NSLog(@"hereafdsa:%@",cache);
             if (cache) {
                 //Fast cache will be set this time
                 [self updateCache];
@@ -180,10 +179,8 @@
 }
 
 - (void)cacheUpdate:(NSNotification *)notification {
-    NSLog(@"Got cache notification");
     if (self.cache) {
         self.snapshot = self.cache.snapshot;
-        NSLog(@"New count is %d", self.snapshot.count);
         [self.tableView reloadData];
     }
 }
@@ -212,7 +209,7 @@
             return @"friends";
             break;
         case STStampedAPIScopeEveryone:
-            return @"everyone";
+            return @"tastemakers";
             break;
         default:
             break;

@@ -21,6 +21,7 @@ try:
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
+    from search.ScoringUtils        import *
 except:
     report()
     raise
@@ -98,12 +99,13 @@ class RdioArtist(_RdioObject, ResolverPerson):
     """
     Rdio artist proxy
     """
-    def __init__(self, data=None, rdio_id=None, rdio=None):
+    def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='albumCount')  
-        ResolverPerson.__init__(self, types=['artist'])
+        ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
 
     @lazyProperty
     def albums(self):
+        self.countLookupCall('albums')
         album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
         return [ 
             {
@@ -116,6 +118,7 @@ class RdioArtist(_RdioObject, ResolverPerson):
 
     @lazyProperty
     def tracks(self):
+        self.countLookupCall('tracks')
         track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
         return [ 
             {
@@ -130,9 +133,9 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
     """
     Rdio album proxy
     """
-    def __init__(self, data=None, rdio_id=None, rdio=None):
+    def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
-        ResolverMediaCollection.__init__(self, types=['album'])
+        ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
 
     @lazyProperty
     def artists(self):
@@ -148,6 +151,7 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
     @lazyProperty
     def tracks(self):
         keys = ','.join(self.data['trackKeys'])
+        self.countLookupCall('tracks')
         track_dict = self.rdio.method('get',keys=keys)['result']
         return [ 
             {
@@ -163,9 +167,9 @@ class RdioTrack(_RdioObject, ResolverMediaItem):
     """
     Rdio track proxy
     """
-    def __init__(self, data=None, rdio_id=None, rdio=None):
+    def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
-        ResolverMediaItem.__init__(self, types=['track'])
+        ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
 
     @lazyProperty
     def artists(self):
@@ -194,23 +198,24 @@ class RdioTrack(_RdioObject, ResolverMediaItem):
         return float(self.data['duration'])
 
 
+def rdioJsonToResolverObject(rdioJson):
+    t = rdioJson['type']
+    if t == 't':
+        return RdioTrack(data=rdioJson)
+    elif t == 'a':
+        return RdioAlbum(data=rdioJson)
+    elif t == 'r':
+        return RdioArtist(data=rdioJson)
+    raise ValueError("bad type for Rdio data: %s" % data)
+
 class RdioSearchAll(ResolverProxy, ResolverSearchAll):
 
     def __init__(self, data):
-        target = None
-        t = data['type']
-        if t == 't':
-            target = RdioTrack(data=data)
-        elif t == 'a':
-            target = RdioAlbum(data=data)
-        elif t == 'r':
-            target = RdioArtist(data=data)
-        else:
-            raise ValueError("bad type for Rdio data: %s" % data)
+        target = rdioJsonToResolverObject(data)
         ResolverProxy.__init__(self, target)
         ResolverSearchAll.__init__(self)
 
-class RdioSource(GenericSource):
+class   RdioSource(GenericSource):
     """
     """
     def __init__(self):
@@ -354,6 +359,23 @@ class RdioSource(GenericSource):
             except GeneratorExit:
                 pass
         return gen()
+
+    class RequestFailedError(Exception):
+        pass
+
+    def searchLite(self, queryCategory, queryText, pool=None, timeout=None):
+        if queryCategory != 'music':
+            raise Exception('Rdio only supports music!')
+        response = self.__rdio.method('search', query=queryText, count=25, types='Artist,Album,Track',
+            extras='albumCount,label,isCompilation')
+        if response['status'] != 'ok':
+            # TODO: Proper error handling here. Tracking of how often this happens.
+            print "Rdio error; see response:"
+            from pprint import pprint
+            pprint(response)
+            return []
+        resolverObjects = [rdioJsonToResolverObject(result) for result in response['result']['results']]
+        return scoreResultsWithBasicDropoffScoring(resolverObjects, sourceScore=0.7)
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')

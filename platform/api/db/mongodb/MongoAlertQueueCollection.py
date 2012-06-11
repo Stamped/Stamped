@@ -32,16 +32,15 @@ class MongoAlertQueueCollection(AMongoCollection):
     def getAlerts(self, **kwargs):
         limit       = kwargs.pop('limit', 5)
         
-        documents = self._collection.find().sort('timestamp.created', \
-            pymongo.ASCENDING).limit(limit)
+        documents = self._collection.find().sort('timestamp.created', pymongo.ASCENDING).limit(limit)
 
-        alert = []
+        alerts = [self._convertFromMongo(doc) for doc in documents]
+        return alerts
 
-        for document in documents:
-            alert.append(self._convertFromMongo(document))
-
-        return alert
-    
+    def getAlertsForUser(self, userId):
+        documents = self._collection.find({'recipient_id' : userId }).sort('timestamp.created', pymongo.ASCENDING)
+        alerts = [self._convertFromMongo(doc) for doc in documents]
+        return alerts
 
     def addAlert(self, alert):
         result = self._collection.insert_one(alert.dataExport())

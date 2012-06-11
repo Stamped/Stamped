@@ -247,9 +247,22 @@ static STStampedAPI* _sharedInstance;
     return [self stampsForSlice:slice withPath:@"/collections/suggested.json" andCallback:block];
 }
 
-- (STCancellation*)stampsForConsumptionSlice:(STConsumptionSlice*)slice 
-                                 andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
-    return [self stampsForSlice:slice withPath:@"/collections/consumption.json" andCallback:block];
+- (STCancellation*)entitiesForConsumptionSlice:(STConsumptionSlice*)slice 
+                                   andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
+    NSString* path = @"/stamps/guide.json";
+    NSMutableDictionary* params = slice.asDictionaryParams;
+    if ([params objectForKey:@"category"]) {
+        [params setObject:[params objectForKey:@"category"] forKey:@"section"];
+        [params removeObjectForKey:@"category"];
+    }
+    return [[STRestKitLoader sharedInstance] loadWithPath:path
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:params
+                                                  mapping:[STSimpleEntityDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block(results, error, cancellation);
+                                              }];
 }
 
 - (STCancellation*)createStampWithStampNew:(STStampNew*)stampNew 

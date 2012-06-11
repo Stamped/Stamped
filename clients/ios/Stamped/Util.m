@@ -223,68 +223,128 @@ static Rdio* _rdio;
 }
 
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened {
-    NSTimeInterval timeSince = fmaxf(0, [[NSDate date] timeIntervalSinceDate:date]);
-    if (timeSince > 31556926) {
-        CGFloat numYears = floorf(timeSince / 31556926);
-        if (shortened)
-            return [NSString stringWithFormat:@"%.0fy", numYears];
-        
-        if (numYears < 2) {
-            return @"a year ago";
-        } else {
-            return [NSString stringWithFormat:@"%.0f years ago", numYears];
+    if (date == nil) {
+        if (shortened) {
+            return @"?";
         }
-    } else if (timeSince > 2629743.83 && !shortened) {  // Don't include months in shortened version.
-        CGFloat numMonths = floorf(timeSince / 2629743.83);
-        if (numMonths < 2) {
-            return @"a month ago";
-        } else {
-            return [NSString stringWithFormat:@"%.0f months ago", numMonths];
+        else {
+            return @"no timestamp";
         }
-    } else if (timeSince > 604800) {
-        CGFloat numWeeks = floorf(timeSince / 604800);
-        if (shortened)
-            return [NSString stringWithFormat:@"%.0fw", numWeeks];
-        
-        if (numWeeks < 2) {
-            return @"a week ago";
-        } else {
-            return [NSString stringWithFormat:@"%.0f weeks ago", numWeeks];
-        }
-    } else if (timeSince > 86400) {
-        CGFloat numDays = floorf(timeSince / 86400);
-        if (shortened)
-            return [NSString stringWithFormat:@"%.0fd", numDays];
-        
-        if (numDays < 2) {
-            return [NSString stringWithFormat:@"%.0f day ago", numDays];
-        } else {
-            return [NSString stringWithFormat:@"%.0f days ago", numDays];
-        }
-    } else if (timeSince > 3600) {
-        CGFloat numHours = floorf(timeSince / 3600);
-        if (shortened)
-            return [NSString stringWithFormat:@"%.0fh", numHours];
-        
-        if (numHours < 2) {
-            return [NSString stringWithFormat:@"%.0f hr ago", numHours];
-        } else {
-            return [NSString stringWithFormat:@"%.0f hrs ago", numHours];
-        }
-    } else if (timeSince > 60) {
-        CGFloat numMin = floorf(timeSince / 60);
-        
-        if (shortened)
-            return [NSString stringWithFormat:@"%.0fm", numMin];
-        
-        return [NSString stringWithFormat:@"%.0f min ago", numMin];
-    } else {
-        if (shortened)
-            return [NSString stringWithFormat:@"%.0fs", timeSince];
-        
-        return @"just now";
     }
-    return nil;
+    NSInteger timeSince = [[NSDate date] timeIntervalSinceDate:date];
+    if (timeSince < 56) {
+        if (shortened) {
+            return [NSString stringWithFormat:@"%ds", timeSince];
+        }
+        else {
+            if (timeSince < 10) {
+                if (timeSince < 0) {
+                    return @"%d seconds!";
+                }
+                else {
+                    return @"just now";
+                }
+            }
+            else {
+                return [NSString stringWithFormat:@"%d seconds ago", timeSince];
+            }
+        }
+    }
+    else {
+        NSInteger minutes = roundf(timeSince / 60.0);
+        NSAssert1(minutes > 0, @"minutes should be > 0, was %d", minutes);
+        if (minutes < 56) {
+            if (shortened) {
+                return [NSString stringWithFormat:@"%dm", minutes];
+            }
+            else {
+                if (minutes == 1) {
+                    return @"a minute ago";
+                }
+                else {
+                    return [NSString stringWithFormat:@"%d minutes ago", minutes];
+                }
+            }
+        }
+        else {
+            NSInteger hours = (NSInteger) roundf(minutes / 60.0);
+            if (hours < 23) {
+                if (shortened) {
+                    return [NSString stringWithFormat:@"%dh", hours];
+                }
+                else {
+                    if (hours == 1) {
+                        return @"an hour ago";
+                    }
+                    else {
+                        return [NSString stringWithFormat:@"%d hours ago", hours];
+                    }
+                }
+            }
+            else {
+                NSInteger days = (NSInteger) roundf(hours / 24.0);
+                if (days < 7) {
+                    if (shortened) {
+                        return [NSString stringWithFormat:@"%dd", days];
+                    }
+                    else {
+                        if (days == 1) {
+                            return @"a day ago";
+                        }
+                        else {
+                            return [NSString stringWithFormat:@"%d days ago", days];
+                        }
+                    }
+                }
+                else {
+                    NSInteger weeks = (NSInteger) roundf(days / 7.0);
+                    if (weeks < 4) {
+                        if (shortened) {
+                            return [NSString stringWithFormat:@"%dw", weeks];
+                        }
+                        else {
+                            if (weeks == 1) {
+                                return @"a week ago";
+                            }
+                            else {
+                                return [NSString stringWithFormat:@"%d weeks ago", weeks];
+                            }
+                        }
+                    }
+                    else {
+                        NSInteger months = (NSInteger) roundf(days / 30.0);
+                        if (months < 12) {
+                            if (shortened) {
+                                return [NSString stringWithFormat:@"%dw", weeks];
+                            }
+                            else {
+                                if (months == 1) {
+                                    return @"a month ago";
+                                }
+                                else {
+                                    return [NSString stringWithFormat:@"%d months ago", months];
+                                }
+                            }
+                        }
+                        else {
+                            NSInteger years = (NSInteger) roundf(days / 365.0);
+                            if (shortened) {
+                                return [NSString stringWithFormat:@"%dy", years];
+                            }
+                            else {
+                                if (years == 1) {
+                                    return @"a year ago";
+                                }
+                                else {
+                                    return [NSString stringWithFormat:@"%d years ago", years];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 + (NSString*)shortUserReadableTimeSinceDate:(NSDate*)date {
@@ -512,7 +572,7 @@ static Rdio* _rdio;
 }
 
 + (void)globalLoadingLock {
-    NSLog(@"GlobalLoadingLock");
+    //NSLog(@"GlobalLoadingLock");
     UIWindow* window = [[UIApplication sharedApplication] keyWindow];
     UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] 
                                               initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
@@ -540,7 +600,7 @@ static Rdio* _rdio;
 }
 
 + (void)globalLoadingUnlock {
-    NSLog(@"GlobalLoadingUnlock");
+    //NSLog(@"GlobalLoadingUnlock");
     UIWindow* window = [[UIApplication sharedApplication] keyWindow];
     [[window.subviews lastObject] removeFromSuperview];
     window.userInteractionEnabled = YES;
@@ -991,7 +1051,7 @@ static Rdio* _rdio;
     
     STBadgeBarButtonItem *button = [[STBadgeBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"menu_list_icon.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(_homeButtonClicked:)];
     controller.navigationItem.leftBarButtonItem = button;
-
+    
     [button release];
     
 }
@@ -1117,11 +1177,11 @@ static Rdio* _rdio;
     for (NSString* item in items) {
         if ([item hasPrefix:[self _cachePrefix]] && ![item isEqualToString:current]) {
             NSURL* url = [[NSURL fileURLWithPath:[self _baseCache]] URLByAppendingPathComponent:item];
-            NSLog(@"Removing old cached: %@", item);
+            //NSLog(@"Removing old cached: %@", item);
             NSError* error = nil;
             [[NSFileManager defaultManager] removeItemAtURL:url error:&error];
             if (error) {
-                NSLog(@"Removal failed!: %@", error);
+                //NSLog(@"Removal failed!: %@", error);
             }
         }
     }
@@ -1187,7 +1247,6 @@ static Rdio* _rdio;
     CGFloat result = 0;
     if (CFArrayGetCount(lines) != 0 ) {
         CTLineRef lastLine = CFArrayGetValueAtIndex(lines, CFArrayGetCount(lines)-1);
-        NSLog(@"trailing:%f", CTLineGetTrailingWhitespaceWidth(lastLine));
         CFRange range = CTLineGetStringRange(lastLine);
         if (range.length > 0) {
             result = [self sizeForString:[string attributedSubstringFromRange:NSMakeRange(range.location, range.length)] thatFits:bounds].width;

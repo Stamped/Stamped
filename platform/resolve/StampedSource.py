@@ -897,7 +897,10 @@ class StampedSource(GenericSource):
             return self.generatorSource(generator, lambda x: constructor_proxy(constructor(x)), unique=True, tolerant=True)
         else:
             return self.generatorSource(generator, constructor=constructor, unique=True, tolerant=True)
-    
+
+    def entityProxyFromKey(self, entity_id, **kwargs):
+        return self.proxyFromEntity(self.__entityDB.getEntity(entity_id))
+
     @property
     def urlField(self):
         return None

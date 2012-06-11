@@ -38,18 +38,6 @@ class StampedAPIStampsShow(StampedAPIStampTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 
-# class StampedAPIStampsUpdate(StampedAPIStampTest):
-#     def test_show(self):
-#         path = "stamps/update.json"
-#         blurb = "Really, really delicious."
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
-
 class StampedAPIStampsRestamp(StampedAPIStampTest):
     def test_restamp(self):
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], blurb='ASDF')
@@ -96,7 +84,7 @@ class StampedAPIStampsUserDetails(StampedAPIStampTest):
 #             "oauth_token": self.tokenA['access_token'],
 #             "entity_id": self.entity['entity_id'],
 #             "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
-#             "credit": self.userB['screen_name']
+#             "credits": self.userB['screen_name']
 #         }
 #         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], \
 #             self.stampData)
@@ -119,8 +107,8 @@ class StampedAPIStampsUserDetails(StampedAPIStampTest):
 #         result = self.handleGET(path, data)
 #         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 #         self.assertEqual(
-#             result['credit'][0]['screen_name'], 
-#             self.stampData['credit']
+#             result['credits'][0]['screen_name'], 
+#             self.stampData['credits']
 #             )
 #         self.assertTrue(len(result['mentions']) == 1)
 
@@ -157,24 +145,24 @@ class StampedAPIStampsUserDetails(StampedAPIStampTest):
 #         data = { 
 #             "oauth_token": self.tokenA['access_token'],
 #             "stamp_id": self.stamp['stamp_id'],
-#             "credit": None
+#             "credits": None
 #         }
 #         result = self.handlePOST(path, data)
-#         # self.assertTrue(len(result['credit']) == 0)
-#         self.assertTrue('credit' not in result)
+#         # self.assertTrue(len(result['credits']) == 0)
+#         self.assertTrue('credits' not in result)
 
 #     def test_two_credits(self):
 #         path = "stamps/update.json"
 #         data = { 
 #             "oauth_token": self.tokenA['access_token'],
 #             "stamp_id": self.stamp['stamp_id'],
-#             "credit": "%s,%s" % (
+#             "credits": "%s,%s" % (
 #                 self.userB['screen_name'],
 #                 self.userC['screen_name']
 #             )
 #         }
 #         result = self.handlePOST(path, data)
-#         self.assertTrue(len(result['credit']) == 2)
+#         self.assertTrue(len(result['credits']) == 2)
 
 class StampedAPIStampsLimits(StampedAPIStampTest):
     def test_show(self):
@@ -253,7 +241,7 @@ class StampedAPIStampCreditTest(AStampedAPITestCase):
             "oauth_token": self.tokenA['access_token'],
             "entity_id": self.entity['entity_id'],
             "blurb": "Great spot.",
-            "credit": self.userB['screen_name']
+            "credits": self.userB['screen_name']
         }
         self.stampB = self.createStamp(self.tokenA, self.entity['entity_id'], \
             self.stampData)
@@ -275,13 +263,13 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
         }
         result = self.handleGET(path, data)
         
-        self.assertTrue(len(result['credit']) == 1)
+        self.assertTrue(len(result['credits']) == 1)
         self.assertEqual(
-            result['credit'][0]['user']['screen_name'], 
-            self.stampData['credit']
+            result['credits'][0]['user']['screen_name'], 
+            self.stampData['credits']
             )
         self.assertEqual(
-            result['credit'][0]['stamp_id'], 
+            result['credits'][0]['stamp_id'], 
             self.stampA['stamp_id']
             )
 

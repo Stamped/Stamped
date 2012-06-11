@@ -2105,6 +2105,10 @@
 		6380A7AE1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7AF1507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
 		6380A7B01507BAC8003087EF /* STSimpleEntityDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */; };
+		6381C5E715826E290087899E /* STImageChunk.m in Sources */ = {isa = PBXBuildFile; fileRef = 6381C5E615826E290087899E /* STImageChunk.m */; };
+		6381C5E815826E290087899E /* STImageChunk.m in Sources */ = {isa = PBXBuildFile; fileRef = 6381C5E615826E290087899E /* STImageChunk.m */; };
+		6381C5E915826E290087899E /* STImageChunk.m in Sources */ = {isa = PBXBuildFile; fileRef = 6381C5E615826E290087899E /* STImageChunk.m */; };
+		6381C5EA15826E290087899E /* STImageChunk.m in Sources */ = {isa = PBXBuildFile; fileRef = 6381C5E615826E290087899E /* STImageChunk.m */; };
 		63865A80152A13C000FE8A68 /* STContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63865A7F152A13C000FE8A68 /* STContainerViewController.m */; };
 		63865A81152A13C000FE8A68 /* STContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63865A7F152A13C000FE8A68 /* STContainerViewController.m */; };
 		6386EE9515081D050019F1DC /* STSimpleSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EE9415081D040019F1DC /* STSimpleSource.m */; };
@@ -3228,6 +3232,14 @@
 		63F27E6C151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		63F27E6D151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
 		63F27E6E151CE91000DA7001 /* STAEntityDetailComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */; };
+		63F69466158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F69464158587E200D2215C /* TEMP_friends_icon@2x.png */; };
+		63F69467158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F69464158587E200D2215C /* TEMP_friends_icon@2x.png */; };
+		63F69468158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F69464158587E200D2215C /* TEMP_friends_icon@2x.png */; };
+		63F69469158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F69464158587E200D2215C /* TEMP_friends_icon@2x.png */; };
+		63F6946F1585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F6946E1585895200D2215C /* TEMP_everyone_icon@2x.png */; };
+		63F694701585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F6946E1585895200D2215C /* TEMP_everyone_icon@2x.png */; };
+		63F694711585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F6946E1585895200D2215C /* TEMP_everyone_icon@2x.png */; };
+		63F694721585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63F6946E1585895200D2215C /* TEMP_everyone_icon@2x.png */; };
 		63F890DC1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
 		63F890DD1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
 		63F890DE1579484E00ECD501 /* STSimpleOAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */; };
@@ -5238,6 +5250,8 @@
 		6380A7AD1507BAC8003087EF /* STSimpleEntityDetail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntityDetail.m; sourceTree = "<group>"; };
 		6380A7B11507D0CC003087EF /* STSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSource.h; sourceTree = "<group>"; };
 		6380A7B21507E63C003087EF /* STPlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistItem.h; sourceTree = "<group>"; };
+		6381C5E515826E290087899E /* STImageChunk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageChunk.h; sourceTree = "<group>"; };
+		6381C5E615826E290087899E /* STImageChunk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageChunk.m; sourceTree = "<group>"; };
 		63865A7E152A13C000FE8A68 /* STContainerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STContainerViewController.h; sourceTree = "<group>"; };
 		63865A7F152A13C000FE8A68 /* STContainerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STContainerViewController.m; sourceTree = "<group>"; };
 		6386EE92150819270019F1DC /* STAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAction.h; sourceTree = "<group>"; };
@@ -5479,6 +5493,8 @@
 		63F27E69151CE41E00DA7001 /* STEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailComponentFactory.h; sourceTree = "<group>"; };
 		63F27E6A151CE90F00DA7001 /* STAEntityDetailComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAEntityDetailComponentFactory.h; sourceTree = "<group>"; };
 		63F27E6B151CE91000DA7001 /* STAEntityDetailComponentFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAEntityDetailComponentFactory.m; sourceTree = "<group>"; };
+		63F69464158587E200D2215C /* TEMP_friends_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_friends_icon@2x.png"; sourceTree = "<group>"; };
+		63F6946E1585895200D2215C /* TEMP_everyone_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_everyone_icon@2x.png"; sourceTree = "<group>"; };
 		63F890D91579481900ECD501 /* STOAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthToken.h; sourceTree = "<group>"; };
 		63F890DA1579484E00ECD501 /* STSimpleOAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleOAuthToken.h; sourceTree = "<group>"; };
 		63F890DB1579484E00ECD501 /* STSimpleOAuthToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleOAuthToken.m; sourceTree = "<group>"; };
@@ -7255,6 +7271,8 @@
 				634DAC98158102030004946C /* STTextChunk.m */,
 				63168DA315810ABF00F47E99 /* STChunksView.h */,
 				63168DA415810ABF00F47E99 /* STChunksView.m */,
+				6381C5E515826E290087899E /* STImageChunk.h */,
+				6381C5E615826E290087899E /* STImageChunk.m */,
 			);
 			name = Layout;
 			sourceTree = "<group>";
@@ -8697,6 +8715,8 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				63F6946E1585895200D2215C /* TEMP_everyone_icon@2x.png */,
+				63F69464158587E200D2215C /* TEMP_friends_icon@2x.png */,
 				6370FE1D1581405500A4401A /* TEMP_blurbView_keyline@2x.png */,
 				039A6A9015815F240061B73F /* st_cell_arrow_hi@2x.png */,
 				039A6A9115815F240061B73F /* st_cell_arrow@2x.png */,
@@ -10214,6 +10234,8 @@
 				6370FE211581405500A4401A /* TEMP_blurbView_keyline@2x.png in Resources */,
 				039A6A9515815F240061B73F /* st_cell_arrow_hi@2x.png in Resources */,
 				039A6A9915815F240061B73F /* st_cell_arrow@2x.png in Resources */,
+				63F69469158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */,
+				63F694721585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11001,6 +11023,8 @@
 				6370FE201581405500A4401A /* TEMP_blurbView_keyline@2x.png in Resources */,
 				039A6A9415815F240061B73F /* st_cell_arrow_hi@2x.png in Resources */,
 				039A6A9815815F240061B73F /* st_cell_arrow@2x.png in Resources */,
+				63F69468158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */,
+				63F694711585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11788,6 +11812,8 @@
 				6370FE1F1581405500A4401A /* TEMP_blurbView_keyline@2x.png in Resources */,
 				039A6A9315815F240061B73F /* st_cell_arrow_hi@2x.png in Resources */,
 				039A6A9715815F240061B73F /* st_cell_arrow@2x.png in Resources */,
+				63F69467158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */,
+				63F694701585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12578,6 +12604,8 @@
 				6370FE1E1581405500A4401A /* TEMP_blurbView_keyline@2x.png in Resources */,
 				039A6A9215815F240061B73F /* st_cell_arrow_hi@2x.png in Resources */,
 				039A6A9615815F240061B73F /* st_cell_arrow@2x.png in Resources */,
+				63F69466158587E200D2215C /* TEMP_friends_icon@2x.png in Resources */,
+				63F6946F1585895200D2215C /* TEMP_everyone_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12935,6 +12963,7 @@
 				0324B87C158238CC00977C09 /* STS3Uploader.m in Sources */,
 				0324B8831582411600977C09 /* EditProfileViewController.m in Sources */,
 				0383EAE015825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
+				6381C5EA15826E290087899E /* STImageChunk.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13260,6 +13289,7 @@
 				0324B87B158238CC00977C09 /* STS3Uploader.m in Sources */,
 				0324B8821582411600977C09 /* EditProfileViewController.m in Sources */,
 				0383EADF15825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
+				6381C5E915826E290087899E /* STImageChunk.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13584,6 +13614,7 @@
 				0324B87A158238CC00977C09 /* STS3Uploader.m in Sources */,
 				0324B8811582411600977C09 /* EditProfileViewController.m in Sources */,
 				0383EADE15825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
+				6381C5E815826E290087899E /* STImageChunk.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -13920,6 +13951,7 @@
 				0324B879158238CC00977C09 /* STS3Uploader.m in Sources */,
 				0324B8801582411600977C09 /* EditProfileViewController.m in Sources */,
 				0383EADD15825460009E5045 /* STBadgeBarButtonItem.m in Sources */,
+				6381C5E715826E290087899E /* STImageChunk.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -14048,8 +14080,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Devin Doty (294DDWXTAY)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Devin Doty (294DDWXTAY)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -14077,8 +14109,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B84AE20E-679B-403C-83F0-76D3F6FF6277";
+				PROVISIONING_PROFILE = "D5A0C98D-54AE-4E87-9079-0BFCEF04EA57";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D5A0C98D-54AE-4E87-9079-0BFCEF04EA57";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -14123,8 +14155,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "3071A444-9BE1-40AA-B49A-B7AE492AE41C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3071A444-9BE1-40AA-B49A-B7AE492AE41C";
+				PROVISIONING_PROFILE = "D5A0C98D-54AE-4E87-9079-0BFCEF04EA57";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D5A0C98D-54AE-4E87-9079-0BFCEF04EA57";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -14170,8 +14202,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "3071A444-9BE1-40AA-B49A-B7AE492AE41C";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3071A444-9BE1-40AA-B49A-B7AE492AE41C";
+				PROVISIONING_PROFILE = "D5A0C98D-54AE-4E87-9079-0BFCEF04EA57";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "D5A0C98D-54AE-4E87-9079-0BFCEF04EA57";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
