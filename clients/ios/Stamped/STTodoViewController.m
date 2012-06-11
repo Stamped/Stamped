@@ -315,7 +315,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         for (id<STStampPreview> credit in todo.previews.credits) {
             if (credit.user) {
                 [credits addObject:credit.user];
-                NSLog(@"Has a credit: %@", credit.user.screenName);
+                //NSLog(@"Has a credit: %@", credit.user.screenName);
             }
         }
     }

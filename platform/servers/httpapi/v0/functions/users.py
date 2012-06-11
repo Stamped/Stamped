@@ -44,7 +44,7 @@ def images(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def search(request, authUserId, http_schema, **kwargs):
     users  = stampedAPI.searchUsers(authUserId, 
-                                    http_schema.q, 
+                                    http_schema.query, 
                                     http_schema.limit, 
                                     http_schema.relationship)
     
@@ -56,23 +56,16 @@ def search(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPSuggestedUserRequest, 
-                   conversion=HTTPSuggestedUserRequest.convertToSuggestedUserRequest)
+@handleHTTPRequest(http_schema=HTTPSuggestedUserRequest)
 @require_http_methods(["GET"])
-def suggested(request, authUserId, schema, **kwargs):
-    results = stampedAPI.getSuggestedUsers(authUserId, schema)
+def suggested(request, authUserId, http_schema, **kwargs):
+    users = stampedAPI.getSuggestedUsers(authUserId, limit=http_schema.limit, offset=http_schema.offset)
     output  = []
-    
-    if schema.personalized:
-        for user, explanations in results:
-            user2 = HTTPSuggestedUser().importUser(user).dataExport()
-            user2.explanations = explanations
-            output.append(user2)
-    else:
-        for user in results:
-            user2 = HTTPSuggestedUser().importUser(user).dataExport()
-            output.append(user2)
-    
+
+    for user in users:
+        suggested = HTTPSuggestedUser().importUser(user).dataExport()
+        output.append(suggested)
+
     return transformOutput(output)
 
 
@@ -84,10 +77,10 @@ def privacy(request, authUserId, http_schema, **kwargs):
     return transformOutput(privacy)
 
 
-@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
+@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['query']})
 @require_http_methods(["POST"])
 def findEmail(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.split(',')
+    q = http_schema.query.split(',')
     emails = []
     
     for email in q:
@@ -107,10 +100,10 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['q']})
+@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['query']})
 @require_http_methods(["POST"])
 def findPhone(request, authUserId, http_schema, **kwargs):
-    q = http_schema.q.split(',')
+    q = http_schema.query.split(',')
     phoneNumbers = []
     
     for item in q:

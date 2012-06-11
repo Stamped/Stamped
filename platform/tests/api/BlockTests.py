@@ -46,6 +46,8 @@ class StampedAPIBlockTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
 
+"""
+
 
 class StampedAPICheckBlocks(StampedAPIBlockTest):
     def test_check_block(self):
@@ -66,8 +68,6 @@ class StampedAPICheckBlocks(StampedAPIBlockTest):
         result = self.handleGET(path, data)
         self.assertFalse(result)
 
-"""
-
 class StampedAPIBlocking(StampedAPIBlockTest):
     def test_show_blocks(self):
         path = "friendships/blocking.json"
@@ -86,8 +86,6 @@ class StampedAPIBlockedStamp(StampedAPIBlockTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result['user_ids']), 1)
-
-"""
 
 class StampedAPIBlockComments(StampedAPIBlockTest):
     # A comments on B's stamp
@@ -195,8 +193,6 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
         self.deleteComment(self.tokenA, commentA['comment_id'])
         self.deleteStamp(self.tokenC, stamp['stamp_id'])
         self.deleteEntity(self.tokenC, entity['entity_id'])
-
-"""
 
 class StampedAPIBlockFriendships(StampedAPIBlockTest):
     # A friends B

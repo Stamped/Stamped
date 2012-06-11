@@ -258,6 +258,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
         if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
             [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
+            [cell countUpdated:nil];
         } 
         
         if ([indexPath isEqual:_selectedIndexPath]) {
@@ -327,7 +328,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     if (self.tableView == tableView || YES) {
         
         [menuController setRootController:navController animated:YES];
-        [Util addHomeButtonToController:controller withBadge:[controller isKindOfClass:[STInboxViewController class]]];
+        [Util addHomeButtonToController:controller withBadge:![controller isKindOfClass:[STUniversalNewsController class]]];
         
     } else {
         

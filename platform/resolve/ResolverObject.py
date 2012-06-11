@@ -31,7 +31,11 @@ except:
     raise
 
 
-
+class LookupRequiredError(Exception):
+    def __init__(self, sourceName, entityDescription, fieldName):
+        super(LookupRequiredError, self).__init__(
+            'Error: can\'t retrieve field %s for entity %s from source %s without a lookup call!' %
+            (fieldName, entityDescription, sourceName))
 
 class ResolverObject(object):
     """
@@ -53,11 +57,37 @@ class ResolverObject(object):
     provide meaningful, human-readable output.
     """
 
-    def __init__(self, types=None):
+    def __init__(self, types=None, maxLookupCalls=None):
         if types is not None:
             self.__types = set(types)
-    
+        self.__maxLookupCalls = maxLookupCalls
+        self.__lookupCallsMade = 0
+        self._properties = [ 'name', 'source', 'key', 'kind', 'types', 'url', 'keywords', 'related_terms',
+                             'description', 'priority', 'subcategory', 'images']
+
     __metaclass__ = ABCMeta
+
+    def countLookupCall(self, fieldName):
+        if (self.__maxLookupCalls is not None) and (self.__maxLookupCalls <= self.__lookupCallsMade):
+            raise LookupRequiredError(self.source, self.name, fieldName)
+
+    def __str__(self):
+        # Temporary disable lookup calls because we don't want to make them just for printing.
+        # There are some obvious concurrency issues here.
+        oldMax = self.__maxLookupCalls
+        self.__maxLookupCalls = 0
+
+        lines = []
+        for property in self._properties:
+            try:
+                propertyValue = getattr(self, property)
+                if propertyValue is not None and propertyValue != [] and propertyValue != '':
+                    lines.append('%s\t:%s' % (property, unicode(propertyValue).encode('utf-8')))
+            except LookupRequiredError:
+                pass
+
+        self.__maxLookupCalls = oldMax
+        return '\n'.join(lines)
 
     @abstractproperty
     def name(self):
@@ -133,6 +163,13 @@ class ResolverPlace(ResolverObject):
     Generic interface for Place objects.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(ResolverPlace, self).__init__(*args, **kwargs)
+        self._properties = self._properties + [
+            'coordinates', 'address', 'address_string', 'neighborhoods', 'gallery', 'phone', 'email', 'has_food',
+            'has_drinks', 'cuisines'
+        ]
+
     @property 
     def kind(self):
         return 'place'
@@ -194,7 +231,13 @@ class ResolverPerson(ResolverObject):
     Generic interface for Person objects.
     """
 
-    @property 
+    def __init__(self, *args, **kwargs):
+        super(ResolverPerson, self).__init__(*args, **kwargs)
+        self._properties = self._properties + [
+            'albums', 'tracks', 'movies', 'books', 'genres'
+        ]
+
+    @property
     def kind(self):
         return 'person'
 
@@ -235,6 +278,13 @@ class ResolverMediaCollection(ResolverObject):
     """
     Generic interface for Media Collection objects.
     """
+
+    def __init__(self, *args, **kwargs):
+        super(ResolverMediaCollection, self).__init__(*args, **kwargs)
+        self._properties = self._properties + [
+            'artists', 'authors', 'tracks', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date',
+            'genres', 'length', 'mpaa_rating'
+        ]
 
     @property 
     def kind(self):
@@ -310,7 +360,14 @@ class ResolverMediaItem(ResolverObject):
     Generic interface for Media Item objects.
     """
 
-    @property 
+    def __init__(self, *args, **kwargs):
+        super(ResolverMediaItem, self).__init__(*args, **kwargs)
+        self._properties = self._properties + [
+            'artists', 'authors', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date', 'genres',
+            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number'
+        ]
+
+    @property
     def kind(self):
         return 'media_item'
 
@@ -392,7 +449,13 @@ class ResolverSoftware(ResolverObject):
     Generic interface for Software objects.
     """
 
-    @property 
+    def __init__(self, *args, **kwargs):
+        super(ResolverMediaItem, self).__init__(*args, **kwargs)
+        self._properties = self._properties + [
+            'authors', 'publishers', 'genres', 'screenshots', 'release_date', 'platform'
+        ]
+
+    @property
     def kind(self):
         return 'software'
 

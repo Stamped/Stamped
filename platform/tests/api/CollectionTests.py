@@ -210,19 +210,6 @@ class StampedAPICollectionsSuggested(StampedAPICollectionTest):
                    lambda x: self.assertIsInstance(x, list), 
         ])
 
-class StampedAPICollectionsConsumption(StampedAPICollectionTest):
-    def test_consumption(self):
-        path = "collections/consumption.json"
-        data = {
-            "oauth_token": self.tokenA['access_token'],
-        }
-
-        for scope in ['you', 'friends', 'fof', 'everyone']:
-            data['scope'] = scope
-            self.async(lambda: self.handleGET(path, data), [
-                lambda x: self.assertIsInstance(x, list),
-                ])
-
 
 if __name__ == '__main__':
     main()

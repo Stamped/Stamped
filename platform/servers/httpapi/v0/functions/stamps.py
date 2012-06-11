@@ -33,8 +33,8 @@ def create(request, authUserId, data, **kwargs):
         'search_id' : data.pop('search_id', None)
     }
     
-    if 'credit' in data and data['credit'] is not None:
-        data['credit'] = data['credit'].split(',')
+    if 'credits' in data and data['credits'] is not None:
+        data['credits'] = data['credits'].split(',')
     
     stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
     stamp = HTTPStamp().importStamp(stamp)
@@ -62,15 +62,6 @@ def update(request, authUserId, http_schema, data, **kwargs):
             data[k] = None
     
     stamp = stampedAPI.updateStamp(authUserId, http_schema.stamp_id, data)
-    stamp = HTTPStamp().importStamp(stamp)
-    
-    return transformOutput(stamp.dataExport())
-
-@handleHTTPRequest(http_schema=HTTPStampImage, upload='image')
-@require_http_methods(["POST"])
-def update_image(request, authUserId, http_schema, **kwargs):
-    ret   = stampedAPI.updateStampImage(authUserId, http_schema.stamp_id, 
-                                        http_schema.image)
     stamp = HTTPStamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())

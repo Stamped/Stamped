@@ -156,7 +156,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
             result = [[[STCache alloc] initWithName:name andConfiguartion:config] autorelease];
         }
         else {
-            NSLog(@"\n\nUnarchived Cache\n\n");
+           // NSLog(@"\n\nUnarchived Cache\n\n");
         }
         [Util executeOnMainThread:^{
             if (!cancellation.cancelled) {

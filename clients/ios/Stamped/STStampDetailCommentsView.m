@@ -492,7 +492,7 @@ andProfileImageSize:(STProfileImageSize)size {
     [chunks addObject:bodyChunk];
     
     STChunksView* view = [[[STChunksView alloc] initWithChunks:chunks] autorelease];
-    NSLog(@"ChunkHeight:%f",view.frame.size.height);
+    //NSLog(@"ChunkHeight:%f",view.frame.size.height);
     return view;
 }
 

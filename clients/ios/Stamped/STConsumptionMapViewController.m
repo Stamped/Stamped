@@ -487,12 +487,10 @@ NSInteger zoom;
 }
 
 - (MKOverlayView*)mapView:(MKMapView *)mapView viewForOverlay:(id<MKOverlay>)overlay {
-    NSLog(@"getting View");
     if (![overlay isKindOfClass:[STConsumptionMapTile class]]) {
         return nil;
     }
     else {
-        NSLog(@"adfs");
         return [[[STConsumptionMapTileView alloc] initWithMapTile:(id)overlay] autorelease];
     }
 }
@@ -542,7 +540,16 @@ NSInteger zoom;
                                                         [self.annotations addObject:annotation];
                                                     }
                                                     for (STEntityAnnotation* annotation in doomed.allValues) {
-                                                        [self.mapView removeAnnotation:annotation];
+                                                        if(self.annotations.count < 100 &&
+                                                           !MKMapRectContainsPoint(self.mapView.visibleMapRect, MKMapPointForCoordinate(annotation.coordinate))
+                                                           )
+                                                        {
+                                                            
+                                                            [self.mapView removeAnnotation:annotation];
+                                                        }
+                                                        else {
+                                                            [self.annotations addObject:annotation];
+                                                        }
                                                     }
                                                 }];
     [self.cancellations addObject:cancellation];
@@ -721,7 +728,6 @@ NSInteger zoom;
         }
     }
     if (tileKeys.count == tiles.count) {
-        NSLog(@"\n\n\nServing from Cache\n\n\n");
         NSMutableArray<STEntityDetail>* entities = [NSMutableArray array];
         for (STConsumptionMapTile* tile in tiles) {
             [entities addObjectsFromArray:tile.entities.allValues];

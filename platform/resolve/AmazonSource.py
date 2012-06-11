@@ -22,9 +22,11 @@ try:
     from libs.LibUtils              import months, parseDateString, xp
     from libs.AmazonAPI             import AmazonAPI
     from libs.Amazon                import Amazon, globalAmazon
-    from utils                      import lazyProperty
+    from utils                      import lazyProperty, basicNestedObjectToString
     from json                       import loads
     from pprint                     import pprint, pformat
+    from search.ScoringUtils        import *
+    from gevent.pool                import Pool
 except:
     report()
     raise
@@ -32,7 +34,8 @@ except:
 
 class _AmazonObject(object):
 
-    def __init__(self, amazon_id, **params):
+    def __init__(self, amazon_id, data=None, **params):
+        self.__data = data
         params['ItemId'] = amazon_id
         if 'ResponseGroup' not in params:
             params['ResponseGroup'] = 'Large'
@@ -41,10 +44,17 @@ class _AmazonObject(object):
     
     @lazyProperty
     def data(self):
+        if self.__data is None:
+            self._issueLookup()
+        return self.__data
+
+    def _issueLookup(self):
+        # Slightly ugly -- calling ResolverObject method just because we know all _AmazonObject implementations also
+        # inherit from ResolverObject.
+        self.countLookupCall('base data')
         raw = globalAmazon().item_lookup(**self.__params)
-        
-        return xp(raw, 'ItemLookupResponse','Items','Item')
-    
+        self.__data = xp(raw, 'ItemLookupResponse','Items','Item')
+
     @lazyProperty
     def name(self):
         return xp(self.attributes, 'Title')['v']
@@ -68,13 +78,21 @@ class _AmazonObject(object):
     def underlying(self):
         return self
 
+    @property
+    def salesRank(self):
+        try:
+            return int(xp(self.data, 'SalesRank')['v'])
+        except KeyError:
+            return None
+
 
 class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
     """
     """
-    def __init__(self, amazon_id):
-        _AmazonObject.__init__(self, amazon_id, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
-        ResolverMediaCollection.__init__(self, types=['album'])
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+        _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
+        ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
+        self._properties = self._properties + ['salesRank']
 
     @lazyProperty
     def artists(self):
@@ -88,11 +106,18 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
 
     @lazyProperty
     def tracks(self):
+        # We might be missing related items data entirely, in which case we start by issuing a lookup there.
+        # TODO: This probably could be done as part of one lookup with the one about to be made.
+        try:
+            tracks = list(xp(self.data, 'RelatedItems')['c']['RelatedItem'])
+        except KeyError:
+            self._issueLookup()
         try:
             tracks = list(xp(self.data, 'RelatedItems')['c']['RelatedItem'])
             page_count = int(xp(self.data, 'RelatedItems', 'RelatedItemPageCount')['v'])
             for i in range(1,page_count):
                 page = i+1
+                self.countLookupCall('tracks')
                 data = globalAmazon().item_lookup(ItemId=self.key, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks', RelatedItemPage=str(page))
                 tracks.extend( xp(data, 'ItemLookupResponse', 'Items', 'Item', 'RelatedItems')['c']['RelatedItem'] )
             track_d = {}
@@ -109,26 +134,41 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
 
 class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
-    def __init__(self, amazon_id):
-        _AmazonObject.__init__(self, amazon_id, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
-        ResolverMediaItem.__init__(self, types=['track'])
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+        _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
+        ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
+        self._properties = self._properties + ['salesRank']
 
     @lazyProperty
     def artists(self):
-        album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
-        key = xp(album,'ASIN')['v']
-        attributes = xp(album, 'ItemAttributes')
         try:
+            return [ { 'name' : xp(self.attributes, 'Artist')['v'] } ]
+        except Exception:
+            pass
+
+        try:
+            return [ { 'name' : xp(self.attributes, 'Creator')['v'] } ]
+        except Exception:
+            pass
+
+        try:
+            album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
+            key = xp(album,'ASIN')['v']
+            attributes = xp(album, 'ItemAttributes')
             return [ { 'name' : xp(attributes, 'Creator')['v'] } ]
         except Exception:
             return []
 
     @lazyProperty
     def albums(self):
-        album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
-        key = xp(album, 'ASIN')['v']
-        attributes = xp(album, 'ItemAttributes')
         try:
+            album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
+        except KeyError:
+            self._issueLookup()
+        try:
+            album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
+            key = xp(album, 'ASIN')['v']
+            attributes = xp(album, 'ItemAttributes')
             return [{
                 'name' : xp(attributes, 'Title')['v'],
                 'source' : 'amazon',
@@ -163,9 +203,10 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
 class AmazonBook(_AmazonObject, ResolverMediaItem):
 
-    def __init__(self, amazon_id):
-        _AmazonObject.__init__(self, amazon_id,  ResponseGroup='AlternateVersions,Large')
-        ResolverMediaItem.__init__(self, types=['book'])
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+        _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='AlternateVersions,Large')
+        ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
+        self._properties = self._properties + ['salesRank']
 
     @lazyProperty
     def authors(self):
@@ -276,9 +317,10 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
 
 class AmazonVideoGame(_AmazonObject, ResolverSoftware):
     
-    def __init__(self, amazon_id):
-        _AmazonObject.__init__(self, amazon_id,  ResponseGroup='Large')
-        ResolverSoftware.__init__(self, types=['video_game'])
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+        _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large')
+        ResolverSoftware.__init__(self, types=['video_game'], maxLookupCalls=maxLookupCalls)
+        self._properties = self._properties + ['salesRank']
     
     @lazyProperty
     def authors(self):
@@ -420,7 +462,7 @@ class AmazonSource(GenericSource):
                                 pass
             except GeneratorExit:
                 pass
-        
+
         return self.generatorSource(gen(), constructor=lambda x: proxy( x ), unique=True)
     
     def albumSource(self, query=None, query_string=None):
@@ -520,6 +562,192 @@ class AmazonSource(GenericSource):
             sources,
             constructor=AmazonSearchAll
         )
+
+    def __searchIndexLite(self, searchIndex, queryText, constructor, results, responseGroup='Medium,Reviews,Tracks'):
+        searchResults = globalAmazon().item_search(SearchIndex=searchIndex,
+            ResponseGroup=responseGroup, Keywords=queryText)
+        # pprint(searchResults)
+        items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
+
+        if 'Item' in items:
+            items = items['Item']
+            indexResults = []
+            for item in items:
+                parsedItem = constructor(item, maxLookupCalls=0)
+                if parsedItem:
+                    indexResults.append(parsedItem)
+            results[searchIndex] = indexResults
+
+    def __searchIndexesLite(self, searchIndexes, queryText, constructors=None, constructor=None):
+        """
+        Issues searches for the given SearchIndexes and creates ResolverObjects from the types using the constructors.
+        Callers can either pass a list with one constructor per searchIndex, or a single constructor to be used for
+        all searches. The one ugly piece here right now is that constructor must take both the raw result and a
+        'maxLookupCalls' kwarg. It was either this, or make a bunch of lambda functions for the callers since the
+        constructors are mostly just Amazon_____ class constructors and for lite search we always want to pass
+        maxLookupCalls=0.
+        """
+        if constructors is None and constructor is None:
+            raise Exception("One of kwargs 'constructor' and 'constructors' must be passed to __searchIndexesLite!")
+        if constructors is not None and constructor is not None:
+            raise Exception("Only one of kwargs 'constructor' and 'constructors' can be passed to __searchIndexesLite!")
+        if constructor is not None:
+            constructors = [constructor] * len(searchIndexes)
+        if len(constructors) != len(searchIndexes):
+            raise Exception("__searchIndexesLite must have exactly one constructor per search index!")
+
+        resultsBySearchIndex = {}
+        pool = Pool(len(searchIndexes))
+        for (searchIndex, constructor) in zip(searchIndexes, constructors):
+            pool.spawn(self.__searchIndexLite, searchIndex, queryText, constructor, resultsBySearchIndex)
+        pool.join()
+
+        return resultsBySearchIndex
+
+    class UnknownTypeError(Exception):
+        def __init__(self, details):
+            super(AmazonSource.UnknownTypeError, self).__init__(details)
+
+    def __constructMusicObjectFromResult(self, rawResult, maxLookupCalls=None):
+        """
+        Determines whether the raw result is an album or a track and constructs an _AmazonObject appropriately.
+        """
+        productTypeName = xp(rawResult, 'ItemAttributes', 'ProductTypeName')['v']
+        try:
+            binding = xp(rawResult, 'ItemAttributes', 'Binding')['v']
+        except KeyError:
+            binding = None
+
+        asin = xp(rawResult, 'ASIN')['v']
+        if productTypeName == 'DOWNLOADABLE_MUSIC_TRACK':
+            return AmazonTrack(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
+        elif productTypeName == 'DOWNLOADABLE_MUSIC_ALBUM':
+            return AmazonAlbum(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
+        elif productTypeName in ['CONTRIBUTOR_AUTHORITY_SET', 'ABIS_DVD', 'VIDEO_VHS']:
+            return None
+        elif binding in ['Audio CD', 'Vinyl']:
+            return AmazonAlbum(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
+
+        raise AmazonSource.UnknownTypeError('Unknown product type %s seen on result with ASIN %s!' % (productTypeName, asin))
+
+    def __interleaveAndCombineDupesBasedOnAsin(self, scoredResultLists):
+        """
+        Takes in multiple lists of results of the same type and de-dupes based solely on ASIN. Note that the results of
+        this function will not be sorted.
+        """
+        asinsToResults = {}
+        for scoredResultList in scoredResultLists:
+            for scoredResult in scoredResultList:
+                if scoredResult.resolverObject.key not in asinsToResults:
+                    asinsToResults[scoredResult.resolverObject.key] = [scoredResult]
+                else:
+                    asinsToResults[scoredResult.resolverObject.key].append(scoredResult)
+
+        dedupedResults = []
+        for asin, results in asinsToResults.items():
+            if len(results) == 1:
+                dedupedResults.append(results[0])
+                continue
+            scores = [ result.score for result in results ]
+            scores.sort(reverse=True)
+            # Flat sum would be too unbalancing.
+            totalScore = scores[0] + (0.5 * sum(scores[1:]))
+            results[0].score = totalScore
+            dedupedResults.append(results[0])
+
+        return dedupedResults
+
+    def __scoreMusicResults(self, *unscoredResultsLists):
+        if not unscoredResultsLists:
+            return []
+
+        scoredAlbums = []
+        scoredTracks = []
+        for unscoredResultList in unscoredResultsLists:
+            scoredList = scoreResultsWithBasicDropoffScoring(unscoredResultList, sourceScore=0.6)
+            albums = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonAlbum)]
+            tracks = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonTrack)]
+
+            scoredAlbums.append(albums)
+            scoredTracks.append(tracks)
+
+        print "scoredAlbums contains lengths:", [str(len(lst)) for lst in scoredAlbums]
+        print "scoredTracks contains lengths:", [str(len(lst)) for lst in scoredTracks]
+
+        # We don't really expect any album dupes, but it's very possible that a track will show up for both search
+        # indexes. So we do a really simple combination based on ASIN, leaving full de-duping to the EntitySearch
+        # object.
+        albums = self.__interleaveAndCombineDupesBasedOnAsin(scoredAlbums)
+        tracks = self.__interleaveAndCombineDupesBasedOnAsin(scoredTracks)
+
+        for searchResult in albums + tracks:
+            salesRank = searchResult.resolverObject.salesRank
+            if salesRank:
+                # TODO: TWEAK THIS MATH. This will be fucking ridiculous with something with salesRank=1. It needs to be
+                # a lot smoother.
+                searchResult.score *= (5000 / searchResult.resolverObject.salesRank) ** 0.2
+            else:
+                # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
+                searchResult.score *= 0.6
+        self.__augmentAlbumResultsWithSongs(albums, tracks)
+
+        return interleaveResultsByScore([albums, tracks])
+
+    def __augmentAlbumResultsWithSongs(self, albums, tracks):
+        """
+        Boosts the ranks of albums in search if we also see tracks from those albums in the same search results.
+        This part is admittedly pretty heinous. Unlike, say, iTunes, Amazon does not tell us the ID or even the name
+        of the album for a track, but we can get it through comparing cover art URLs. Ugh.
+
+        Note that albums and tracks are both SearchResult objects. TODO: Should probably change naming to reflect that.
+
+        TODO: We can get tracks now! Use tracks instead.
+        """
+        picUrlsToAlbums = {}
+        for album in albums:
+            try:
+                largeImageUrl = xp(album.resolverObject.data, 'ImageSets', 'ImageSet', 'LargeImage', 'URL')['v']
+                if largeImageUrl in picUrlsToAlbums:
+                    logs.warning('Found multiple albums in Amazon results with identical cover art!')
+                picUrlsToAlbums[largeImageUrl] = album
+            except KeyError:
+                pass
+
+        # If there are dupes in the tracks side, we don't want to double-increment artist scores on that basis.
+        seenTitlesAndArtists = set()
+        for track in tracks:
+            simpleTitle = trackSimplify(track.resolverObject.name)
+            simpleArtist = ''
+            print "HANDLING", track.resolverObject.key
+            if track.resolverObject.artists:
+                simpleArtist = artistSimplify(track.resolverObject.artists[0])
+            if (simpleTitle, simpleArtist) in seenTitlesAndArtists:
+                continue
+            seenTitlesAndArtists.add((simpleTitle, simpleArtist))
+
+            try:
+                largeImageUrl = xp(track.resolverObject.data, 'ImageSets', 'ImageSet', 'LargeImage', 'URL')['v']
+                if largeImageUrl not in picUrlsToAlbums:
+                    continue
+                scoreBoost = track.score / 5
+                album = picUrlsToAlbums[largeImageUrl]
+                album.addScoreComponentDebugInfo('boost from song %s' % track.resolverObject.name, scoreBoost)
+                album.score += scoreBoost
+
+            except KeyError:
+                pass
+
+    def searchLite(self, queryCategory, queryText):
+        if queryCategory == 'music':
+            # We're not passing a constructor, so this will return the raw results. This is because we're not sure if
+            # they're songs or albums yet, so there's no straightforward constructor we can pass.
+            resultSets = self.__searchIndexesLite(['Music', 'DigitalMusic'], queryText,
+                constructor=self.__constructMusicObjectFromResult)
+            return self.__scoreMusicResults(resultSets.items())
+        elif queryCategory == 'book':
+            searchIndexes = [ 'Books' ]
+        elif queryCategory == 'film':
+            searchIndexes = [ 'Video' ] #TODO: Is this right?
     
     @lazyProperty
     def __amazon_api(self):

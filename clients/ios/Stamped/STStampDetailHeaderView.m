@@ -63,8 +63,7 @@
                                            font:titleFont
                                           color:titleColor 
                                            mode:UILineBreakModeTailTruncation
-                                     andMaxSize:CGSizeMake(280, titleFont.lineHeight)];
-        [titleView sizeToFit];
+                                     andMaxSize:CGSizeMake(270, titleFont.lineHeight)];
         [Util reframeView:titleView withDeltas:CGRectMake(13,
                                                           36 - titleFont.ascender,
                                                           0, 0)];
@@ -75,8 +74,7 @@
                                              font:subtitleFont
                                             color:subtitleColor
                                              mode:UILineBreakModeTailTruncation
-                                       andMaxSize:CGSizeMake(280, CGFLOAT_MAX)];
-        [subtitleView sizeToFit];
+                                       andMaxSize:CGSizeMake(270, subtitleFont.lineHeight)];
         [Util reframeView:subtitleView withDeltas:CGRectMake(31,
                                                              52 - subtitleFont.ascender,
                                                              0, 0)];

@@ -61,7 +61,7 @@ class StampedAPISendAlertsTest(StampedAPIAlertsTest):
         self.assertTrue(len(result) == 14)
 
     def test_ios_alert_sent(self):
-
+        pass
 
 
 
