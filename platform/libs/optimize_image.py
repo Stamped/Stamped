@@ -47,7 +47,7 @@ if __name__ == '__main__':
         
         # TODO: handle new-style entity images
         docs = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
-        utils.log("processing %d entity images" % entities.count())
+        utils.log("processing %d entity images" % docs.count())
         
         count = 0
         for doc in docs:
