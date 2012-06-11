@@ -20,6 +20,7 @@
     if ((self = [super initWithFrame:frame])) {
     
         STAvatarView *imageView = [[STAvatarView alloc] initWithFrame:CGRectMake(15.0f, 12.0f, 78.0f, 78.0f)];
+        imageView.userInteractionEnabled = NO;
         imageView.imageView.frame = CGRectInset(imageView.bounds, 4.0f, 4.0f);
         [self addSubview:imageView];
         _imageView = [imageView retain];

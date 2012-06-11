@@ -15,7 +15,7 @@ from helpers        import *
 
 import travis_test
 
-ENABLE_TRAVIS_TEST = (True and not IS_PROD)
+ENABLE_TRAVIS_TEST = (False and not IS_PROD)
 
 def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
@@ -71,7 +71,7 @@ def index(request):
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 
-@stamped_view(schema=HTTPUserCollectionSlice)
+@stamped_view(schema=WebTimeSlice)
 def profile(request, schema, **kwargs):
     url_format = "/{screen_name}"
     prev_url   = None
@@ -223,7 +223,7 @@ def profile(request, schema, **kwargs):
         'main_stamp_cluster'    : main_cluster, 
     }, preload=[ 'user' ])
 
-@stamped_view(schema=HTTPUserCollectionSlice)
+@stamped_view(schema=WebTimeSlice)
 def map(request, schema, **kwargs):
     url_format = "/{screen_name}/map"
     prev_url   = None

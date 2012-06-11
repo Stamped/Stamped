@@ -8,14 +8,16 @@ __license__   = "TODO"
 import Globals
 import re, os, time, utils
 
-from ..DeploymentPlatform     import DeploymentPlatform
-from errors                 import Fail
+from ..DeploymentPlatform       import DeploymentPlatform
+from errors                     import Fail
+from utils                      import lazy_property
 
-from datetime               import datetime
-from AWSInstance            import AWSInstance
-from AWSDeploymentStack     import AWSDeploymentStack
-from boto.ec2.connection    import EC2Connection
-from boto.exception         import EC2ResponseError
+from datetime                   import datetime, timedelta
+from AWSInstance                import AWSInstance
+from AWSDeploymentStack         import AWSDeploymentStack
+from boto.route53.connection    import Route53Connection
+from boto.ec2.connection        import EC2Connection
+from boto.exception             import EC2ResponseError
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY    = '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'
@@ -55,6 +57,13 @@ class AWSDeploymentPlatform(DeploymentPlatform):
             'ip_protocol' : 'tcp', 
             'from_port'   : 8649, 
             'to_port'     : 8649, 
+            'cidr_ip'     : '0.0.0.0/0', 
+        }
+        
+        dev_rule = {
+            'ip_protocol' : 'tcp', 
+            'from_port'   : 27017, 
+            'to_port'     : 27017, 
             'cidr_ip'     : '0.0.0.0/0', 
         }
         
@@ -139,6 +148,11 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                 ], 
             }, 
             {
+                'name' : 'dev', 
+                'desc' : 'Dev security group', 
+                'rules' : [ dev_rule ], 
+            }, 
+            {
                 'name' : 'search', 
                 'desc' : 'ElasticSearch security group', 
                 'rules' : [
@@ -196,7 +210,6 @@ class AWSDeploymentPlatform(DeploymentPlatform):
     
     def _init_env(self):
         self.conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
-        self._init_security_groups()
         
         self.env = utils.AttributeDict(os.environ)
         reservations = self.conn.get_all_instances()
@@ -211,6 +224,8 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                         stacks[stackName].append(instance)
                     else:
                         stacks[stackName] = [ instance ]
+        
+        self._init_security_groups()
         
         #sl = len(stacks)
         #utils.log("found %d stack%s:" % (sl, "s" if sl != 1 else ""))
@@ -303,4 +318,46 @@ class AWSDeploymentPlatform(DeploymentPlatform):
         
         utils.log("[%s] cleaning up temp instance %s" % (self, instance))
         instance.terminate()
+    
+    @lazy_property
+    def prod_stack(self):
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.prod_stack.txt')
+        
+        if os.path.exists(path):
+            modified = utils.get_modified_time(path)
+            current  = datetime.utcnow() - timedelta(hours=24)
+            
+            # only try to use the cached config if it's recent enough
+            if modified >= current:
+                f = open(path, 'r')
+                name = f.read().strip()
+                f.close()
+                
+                if len(name) >= 1:
+                    return name
+        
+        conn  = Route53Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+        zones = conn.get_all_hosted_zones()
+        name  = None
+        host  = None
+        
+        for zone in zones['ListHostedZonesResponse']['HostedZones']:
+            if zone['Name'] == u'stamped.com.':
+                host = zone
+                break
+        
+        if host is not None:
+            records = conn.get_all_rrsets(host['Id'][12:])
+            
+            for record in records:
+                if record.name == 'api.stamped.com.':
+                    name = record.alias_dns_name.split('-')[0].strip()
+                    break
+        
+        if name is not None:
+            f = open(path, 'w')
+            f.write(name)
+            f.close()
+        
+        return name
 

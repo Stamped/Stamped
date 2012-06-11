@@ -87,7 +87,7 @@ def suggested(request, authUserId, http_schema, **kwargs):
                                                   category=http_schema.category,
                                                   subcategory=http_schema.subcategory,
                                                   coordinates=http_schema.exportCoordinates(),
-                                                  limit=http_schema.limit)
+                                                  limit=20)
 
     convert     = lambda e: HTTPEntitySearchResultsItem().importEntity(e)
     result      = []

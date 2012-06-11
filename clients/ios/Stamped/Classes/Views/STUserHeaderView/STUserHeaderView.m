@@ -28,16 +28,13 @@
         self.clipsToBounds = YES;
         
         STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 76.0f, 76.0f)];
+        view.delegate = (id<STAvatarViewDelegate>)self;
         view.backgroundColor = [UIColor whiteColor];
         [self addSubview:view];
         [view release];
         _avatarView = view;
         [view setDefault];
-        
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarTapped:)];
-        [_avatarView addGestureRecognizer:tap];
-        [tap release];
-        
+                
         view.imageView.frame = CGRectInset(view.imageView.frame, 1, 1);
         view.backgroundView.layer.shadowRadius = 1.0f;
         view.backgroundView.layer.shadowOpacity = 0.2f;
@@ -185,12 +182,14 @@
     
 }
 
-- (void)avatarTapped:(UITapGestureRecognizer*)gesture {
+
+#pragma mark - STAvatarViewDelegate
+
+- (void)stAvatarViewTapped:(STAvatarView*)view {
     
     if ([(id)delegate respondsToSelector:@selector(stUserHeaderViewAvatarTapped:)]) {
         [self.delegate stUserHeaderViewAvatarTapped:self];
     }
-    
 }
 
 

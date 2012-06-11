@@ -8,11 +8,20 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STAvatarView : UIView
+@protocol STAvatarViewDelegate;
+@interface STAvatarView : UIView {
+    UIView *highlightView;
+}
+
 @property(nonatomic,retain) NSURL *imageURL;
 @property(nonatomic,retain,readonly) UIImageView *imageView;
 @property(nonatomic,retain,readonly) UIView *backgroundView;
+@property(nonatomic,assign) id <STAvatarViewDelegate> delegate;
 
 - (void)setDefault;
 
+@end
+
+@protocol STAvatarViewDelegate
+- (void)stAvatarViewTapped:(STAvatarView*)view;
 @end

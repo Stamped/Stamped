@@ -152,6 +152,12 @@
     
     cell.layer.opacity = 0.0f;
     
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:^{
+        cell.layer.opacity = 1.0f;
+        [cell.layer removeAllAnimations];
+    }];
+    
     CAAnimationGroup *animation = [CAAnimationGroup animation];
     animation.duration = 0.3f;
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
@@ -161,13 +167,14 @@
     
     CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
     position.fromValue = [NSValue valueWithCGPoint:CGPointMake(cell.layer.position.x, cell.layer.position.y + self.tableView.frame.size.height)];
-
+    
     CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
     opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
     opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
     
     [animation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
     [cell.layer addAnimation:animation forKey:nil];
+    [CATransaction commit];
     
 }
 

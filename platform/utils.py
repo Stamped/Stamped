@@ -566,19 +566,19 @@ def is_ec2():
     
     return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
-def get_db_config(conf):
+def get_db_config(config_desc):
     """ returns MongoDB host configuration """
     
-    if ':' in conf:
-        host, port = conf.split(':')
+    if ':' in config_desc:
+        host, port = config_desc.split(':')
         port = int(port)
     else:
-        host, port = (conf, 27017)
+        host, port = (config_desc, 27017)
         
-        if '.' in conf and not conf.endswith('.com'):
+        if '.' in config_desc and not config_desc.endswith('.com'):
             # attempt to resolve the (possible) semantic EC2 instance name to 
             # a valid DNS name or associated IP address
-            instance = getInstance(conf)
+            instance = getInstance(config_desc)
             
             if instance:
                 if is_ec2():
@@ -588,10 +588,10 @@ def get_db_config(conf):
     
     return host, port
 
-def init_db_config(conf):
+def init_db_config(config_desc):
     """ initializes MongoDB with proper host configuration """
     
-    host, port = get_db_config(conf)
+    host, port = get_db_config(config_desc)
     config = {
         'mongodb' : {
             'host' : host, 
@@ -969,24 +969,33 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
         print "invalid input"
 
 def indentText(text, n):
-    """Takes a multi-line string of text and indents each line by n spaces."""
-    lines = text.split('\n')
-    indent = ' ' * n
-    indentedLines = [indent + line for line in lines]
-    return '\n'.join(indentedLines)
+    """ Takes a multi-line string of text and indents each line by n spaces. """
+    
+    lines    = text.split('\n')
+    indent   = ' ' * n
+    indented = [indent + line for line in lines]
+    
+    return '\n'.join(indented)
 
-def basicNestedObjectToString(object):
-    if isinstance(object, unicode):
-        return object.encode('utf-8')
-    if any(isinstance(object, type_) for type_ in [basestring, int, float]):
-        return str(object)
-    if isinstance(object, list):
-        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in object]
+def basicNestedObjectToString(obj):
+    if isinstance(obj, unicode):
+        return obj.encode('utf-8')
+    
+    if any(isinstance(obj, type_) for type_ in [basestring, int, float]):
+        return str(obj)
+    
+    if isinstance(obj, list):
+        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in obj]
         return '[\n' + ('\n'.join(elementStrings)) + '\n]'
-    if isinstance(object, tuple):
-        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in object]
+    
+    if isinstance(obj, tuple):
+        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in obj]
         return '(\n' + ('\n'.join(elementStrings)) + '\n)'
-    if isinstance(object, dict):
-        elementStrings = [indentText('%s : %s,' % (str(key), basicNestedObjectToString(value)), 2) for (key, value) in object.items()]
+    
+    if isinstance(obj, dict):
+        elementStrings = [indentText('%s : %s,' % (str(key), basicNestedObjectToString(value)), 2) for (key, value) in obj.items()]
         return '{\n' + ('\n'.join(elementStrings)) +'\n}'
-    raise Exception('Can\'t string-ify object of type: ' + type(object))
+    
+    # TODO: should fallback to a simple str(obj)?
+    raise Exception('Can\'t string-ify object of type: ' + type(obj))
+

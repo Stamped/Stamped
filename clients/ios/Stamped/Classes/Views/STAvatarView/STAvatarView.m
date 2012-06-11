@@ -13,6 +13,7 @@
 @synthesize imageURL=_imageURL;
 @synthesize imageView=_imageView;
 @synthesize backgroundView=_background;
+@synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -50,6 +51,9 @@
     [super dealloc];
 }
 
+
+#pragma mark - Setters
+
 - (void)setDefault {
     
     self.imageView.image = [UIImage imageNamed:@"st_default_avatar.png"];
@@ -77,5 +81,73 @@
     }];
     
 }
+
+- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
+    
+
+    if (highlighted) {
+        
+        if (!highlightView) {
+            UIView *view = [[UIView alloc] initWithFrame:_imageView.frame];
+            view.backgroundColor = [UIColor blackColor];
+            view.layer.masksToBounds = YES;
+            [view setAlpha: 0.5];
+            [self addSubview:view];
+            [view release];
+            highlightView = view;
+        }
+        
+    } else {
+        
+        if (highlightView) {
+            __block UIView *view = highlightView;
+            highlightView = nil;
+            BOOL _enabled = [UIView areAnimationsEnabled];
+            [UIView setAnimationsEnabled:YES];
+            [UIView animateWithDuration:0.25f animations:^{
+                view.alpha = 0.0f;
+            } completion:^(BOOL finished) {
+                [view removeFromSuperview];
+            }];
+            [UIView setAnimationsEnabled:_enabled];
+            
+        }
+        
+    }
+    
+}
+
+
+#pragma mark - Touches
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self setHighlighted:YES animated:NO];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self setHighlighted:NO animated:YES];
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    if ([(id)delegate respondsToSelector:@selector(stAvatarViewTapped:)]) {
+        [self.delegate stAvatarViewTapped:self];
+        
+        dispatch_after( dispatch_time(DISPATCH_TIME_NOW, 0.3f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+            [self setHighlighted:NO animated:NO];
+        });
+        
+    } else {
+        
+        [self setHighlighted:NO animated:NO];
+
+    }
+
+}
+
 
 @end

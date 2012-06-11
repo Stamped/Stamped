@@ -104,7 +104,6 @@
 
 #pragma mark - Setters
 
-
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
     
@@ -130,7 +129,7 @@
             UIView *view = [[UIView alloc] initWithFrame:CGRectMake(18.5f, self.bounds.size.height-1.0f, self.bounds.size.width-37.0f, 1.0f)];
             view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
             [self addSubview:view];
-            view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.4f];
+            view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.1f];
             _topBorder = view;
             [view release];
         }
@@ -145,8 +144,8 @@
             
             UIView *view = [[UIView alloc] initWithFrame:CGRectMake(18.5f, 0.0f, self.bounds.size.width-37.0f, 1.0f)];
             view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+            view.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.4f];
             [self addSubview:view];
-            view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.1f];
             _bottomBorder = view;
             [view release];
             

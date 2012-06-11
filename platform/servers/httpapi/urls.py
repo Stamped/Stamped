@@ -17,7 +17,9 @@ __license__   = "TODO"
 from django.conf.urls.defaults import patterns, include, url
 
 """
+------------------
 NAMING CONVENTIONS
+------------------
 
 create.json         Create a new object. Should return the created object.
 
@@ -36,8 +38,8 @@ collection.json     Return a list of objects based on a specified scope. Takes a
 
 search.json         Return a list of objects based on a sepcified scope and a text query. Typically builds upon the 
                     collection endpoint to overlay search on top of other filtering.
-
 """
+
 urlpatterns = patterns('',
     
     ### OAUTH

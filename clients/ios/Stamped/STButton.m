@@ -63,7 +63,7 @@
     [super dealloc];
 }
 
-static CGFloat _duration = .4; 
+static CGFloat _duration = .25; 
 
 - (void)setTouched:(BOOL)touched {
     if (touched != touched_) {

@@ -9,6 +9,8 @@ import Globals
 import keys.aws, logs, utils
 import os, time, zlib, struct, array, random, urllib2
 
+from gevent.pool    import Pool
+
 try:
     import Image, ImageFile
 except:
@@ -272,10 +274,10 @@ class S3ImageDB(AImageDB):
         
         return self.addImage(filename, image)
     
-    def addEntityImages(image_urls):
+    def addEntityImages(self, image_urls):
         pool = Pool(8)
         
-        for url in image_urls:
+        for image_url in image_urls:
             pool.spawn(self.addWebEntityImage, image_url)
         
         pool.join()

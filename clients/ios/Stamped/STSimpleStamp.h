@@ -31,7 +31,7 @@
 @property (nonatomic, readwrite, retain) id<STUser> user;
 @property (nonatomic, readwrite, retain) id<STPreviews> previews;
 @property (nonatomic, readwrite, copy) NSArray<STMention>* mentions;
-@property (nonatomic, readwrite, copy) NSArray<STCredit>* credits;
+@property (nonatomic, readwrite, copy) NSArray<STStampPreview>* credits;
 @property (nonatomic, readwrite, copy) NSArray<STBadge>* badges;
 @property (nonatomic, readwrite, copy) NSArray<STContentItem>* contents;
 
