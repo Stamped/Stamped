@@ -206,21 +206,25 @@ def _phoneToInt(string):
         return None
 
 def _convertViewport(string):
-    viewportData            = self.viewport.split(',')
+    try:
+        viewportData            = string.split(',')
 
-    coordinates0            = Coordinates()
-    coordinates0.lat        = viewportData[0]
-    coordinates0.lng        = viewportData[1]
+        coordinates0            = Coordinates()
+        coordinates0.lat        = viewportData[0]
+        coordinates0.lng        = viewportData[1]
 
-    coordinates1            = Coordinates()
-    coordinates1.lat        = viewportData[2]
-    coordinates1.lng        = viewportData[3]
+        coordinates1            = Coordinates()
+        coordinates1.lat        = viewportData[2]
+        coordinates1.lng        = viewportData[3]
 
-    viewport                = Viewport()
-    viewport.upper_left     = coordinates0
-    viewport.lower_right    = coordinates1
+        viewport                = Viewport()
+        viewport.upper_left     = coordinates0
+        viewport.lower_right    = coordinates1
 
-    return viewport
+        return viewport
+    except Exception as e:
+        logs.warning("Unable to convert viewport (%s): %s" % (string, e))
+        raise StampedInputError("Invalid viewport: %s" % string)
 
 
 # ########## #
