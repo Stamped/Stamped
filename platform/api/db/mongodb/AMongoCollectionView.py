@@ -51,6 +51,7 @@ class AMongoCollectionView(AMongoCollection):
 
         # handle category / subcategory filters
         # -------------------------------------
+        ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
         if timeSlice.types is not None and len(timeSlice.types) > 0:
             add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
                             {'entity.subcategory': {'$in': list(timeSlice.types)}} ])
@@ -118,6 +119,7 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle category / subcategory filters
         # -------------------------------------
+        ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
         if timeSlice.types is not None and len(timeSlice.types) > 0:
             add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
                             {'entity.subcategory': {'$in': list(timeSlice.types)}} ])
