@@ -54,6 +54,10 @@ class MongoSuggestedEntities(ASuggestedEntities):
         
         if category != 'place':
             coords = None
+
+        if coords is not None:
+            # Convert from Coordinates object
+            coords = (coords.lat, coords.lng)
         
         suggested    = self._getGlobalSuggestedEntities(coords, category, subcategory)
         num_sections = len(suggested)

@@ -159,9 +159,10 @@ class StampedAPIActivityMentions(StampedAPIActivityTest):
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
 
-        path = "activity/show.json"
+        path = "activity/collection.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
+            "scope" : "me",
         }
         
         result = self.handleGET(path, data)
@@ -178,7 +179,7 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
             "oauth_token": self.tokenA['access_token'],
             "entity_id": entity['entity_id'],
             "blurb": "Great spot!",
-            "credit": self.userB['screen_name'],
+            "credits": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
         
@@ -196,7 +197,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
             "oauth_token": self.tokenA['access_token'],
             "entity_id": entity['entity_id'],
             "blurb": "Thanks @%s!" % self.userB['screen_name'],
-            "credit": self.userB['screen_name'],
+            "credits": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
         
@@ -484,54 +485,51 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         self.deleteAccount(self.tokenH)
 
     def test_offset(self):
-        slice = ActivitySlice()
-        slice.distance = 1
-        slice.offset = 0
-        slice.limit = 4
+        scope = 'friends'
+        offset = 0
+        limit = 4
 
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
-        results = self.api.getActivity(self.userA['user_id'], slice)
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 4)
 
 
 
         # Test offset
-        slice.offset = 1
-        slice.limit = 1
-        results2 = self.api.getActivity(self.userA['user_id'], slice)
+        offset = 1
+        limit = 1
+        results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results2), 1)
         self.assertEqual(results2[0].activity_id, results[1].activity_id)
 
     def test_limit_greater_than_items_in_cache(self):
-        slice = ActivitySlice()
-        slice.distance = 1
-        slice.offset = 0
-        slice.limit = 10
+        scope = 'friends'
+        offset = 0
+        limit = 10
 
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
-        results = self.api.getActivity(self.userA['user_id'], slice)
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
 
     def test_limit_larger_than_cache_block(self):
-        slice = ActivitySlice()
-        slice.distance = 1
-        slice.offset = 0
-        slice.limit = 6
+        scope = 'friends'
+        offset = 0
+        limit = 6
 
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
-        results = self.api.getActivity(self.userA['user_id'], slice)
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
 
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
 
-        results2 = self.api.getActivity(self.userA['user_id'], slice)
+        results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results2), 6)
         for i, result in enumerate(results2):
             self.assertEqual(result.activity_id, results[i].activity_id)
@@ -539,93 +537,89 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
-#    def test_prev_cache_block_expired(self):
-#        slice = ActivitySlice()
-#        slice.distance = 1
-#        slice.offset = 0
-#        slice.limit = 6
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
-#
-#        results = self.api.getActivity(self.userA['user_id'], slice)
-#        self.assertEqual(len(results), 6)
-#
-#        slice = ActivitySlice()
-#        slice.distance = 1
-#        slice.offset = 5
-#        slice.limit = 6
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
-#
-#        try:
-#            api._cache.flush_all()
-#        except:
-#            pass
-#        results = self.api.getActivity(self.userA['user_id'], slice)
-#        self.assertEqual(len(results), 1)
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
-#
-#    def test_clear_activity_cache(self):
-#        slice = ActivitySlice()
-#        slice.distance = 1
-#        slice.offset = 0
-#        slice.limit = 6
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
-#
-#        results = self.api.getActivity(self.userA['user_id'], slice)
-#        self.assertEqual(len(results), 6)
-#
-#        key = api._createActivityCacheKey(self.userA['user_id'], slice.distance, 0)
-#        key2 = api._createActivityCacheKey(self.userA['user_id'], slice.distance, 5)
-#        self.assertEqual(key in api._cache, True)
-#        self.assertEqual(key2 in api._cache, True)
-#        api._clearActivityCacheForUser(self.userA['user_id'], slice.distance)
-#        self.assertEqual(key in api._cache, False)
-#        self.assertEqual(key2 in api._cache, False)
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
-#
-#
-#    def test_cache_clear_on_offset_0(self):
-#        slice = ActivitySlice()
-#        slice.distance = 1
-#        slice.offset = 0
-#        slice.limit = 10
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
-#
-#        results = self.api.getActivity(self.userA['user_id'], slice)
-#        self.assertEqual(len(results), 6)
-#
-#        # Create a new activity item that will appear for User A
-#        (user, token) = self.createAccount('tempUser')
-#        self.createFriendship(self.tokenB, user)
-#
-#        # First test that this new item will not be retrieved if we pull from offset != 0
-#        slice.offset = 5
-#        results2 = self.api.getActivity(self.userA['user_id'], slice)
-#        self.assertEqual(len(results2), 1)
-#        self.assertEqual(results2[0].activity_id, results[5].activity_id)
-#
-#        # Now test that the new item is retrieved when we pull from offset 0
-#        slice.offset = 0
-#        results2 = self.api.getActivity(self.userA['user_id'], slice)
-#        self.assertEqual(len(results2), 7)
-#        self.assertEqual(results2[1].activity_id, results[0].activity_id)
-#
-#        self.deleteFriendship(self.tokenB, user)
-#        self.deleteAccount(token)
-#
-#        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-#        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+    def test_prev_cache_block_expired(self):
+        scope = 'friends'
+        offset = 0
+        limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        self.assertEqual(len(results), 6)
+
+        scope = 'friends'
+        offset = 5
+        limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        try:
+            api._cache.flush_all()
+        except:
+            pass
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        self.assertEqual(len(results), 1)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+    def test_clear_activity_cache(self):
+        scope = 'friends'
+        offset = 0
+        limit = 6
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        self.assertEqual(len(results), 6)
+
+        key = api._createActivityCacheKey(self.userA['user_id'], scope, 0)
+        key2 = api._createActivityCacheKey(self.userA['user_id'], scope, 5)
+        self.assertEqual(key in api._cache, True)
+        self.assertEqual(key2 in api._cache, True)
+        api._clearActivityCacheForUser(self.userA['user_id'], scope)
+        self.assertEqual(key in api._cache, False)
+        self.assertEqual(key2 in api._cache, False)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+
+    def test_cache_clear_on_offset_0(self):
+        scope = 'friends'
+        offset = 0
+        limit = 10
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+
+        results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        self.assertEqual(len(results), 6)
+
+        # Create a new activity item that will appear for User A
+        (user, token) = self.createAccount('tempUser')
+        self.createFriendship(self.tokenB, user)
+
+        # First test that this new item will not be retrieved if we pull from offset != 0
+        offset = 5
+        results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        self.assertEqual(len(results2), 1)
+        self.assertEqual(results2[0].activity_id, results[5].activity_id)
+
+        # Now test that the new item is retrieved when we pull from offset 0
+        offset = 0
+        results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        self.assertEqual(len(results2), 7)
+        self.assertEqual(results2[1].activity_id, results[0].activity_id)
+
+        self.deleteFriendship(self.tokenB, user)
+        self.deleteAccount(token)
+
+        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
 if __name__ == '__main__':
     main()
