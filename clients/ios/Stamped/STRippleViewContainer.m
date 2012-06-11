@@ -61,7 +61,6 @@
     g2 = g1;
     b2 = b1;
   }
-  NSLog(@"hrere:%@,%@",primaryColor,secondaryColor);
   gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.9].CGColor,
                      (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.9].CGColor,
                      nil];

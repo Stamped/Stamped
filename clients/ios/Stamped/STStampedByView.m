@@ -43,7 +43,7 @@
 
 - (void)userImageClicked:(id<STStampPreview>)stampPreview {
     STActionContext* context = [STActionContext contextInView:self];
-    id<STAction> action = [STStampedActions actionViewUser:stampPreview.user.userID withOutputContext:context];
+    id<STAction> action = [STStampedActions actionViewStamp:stampPreview.stampID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
@@ -55,6 +55,7 @@
                  andDelegate:(id<STViewDelegate>)delegate {
     self = [super initWithFrame:CGRectMake(0, 0, 290, 0)];
     if (self) {
+        BOOL shouldShowArrow = YES;
         entityID_ = [entityID retain];
         group_ = [group retain];
         scope_ = scope;
@@ -64,11 +65,11 @@
         NSString* imagePath = nil;
         if (scope == STStampedAPIScopeFriends) {
             formatString = @"%@ friends";
-            imagePath = @"scope_drag_inner_friends";
+            imagePath = @"TEMP_friends_icon";
         }
         else if (scope == STStampedAPIScopeEveryone) {
             formatString = @"%@ users on Stamped";
-            imagePath = @"scope_drag_inner_all";
+            imagePath = @"TEMP_everyone_icon";
         }
         UIImageView* iconView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imagePath]] autorelease];
         iconView.frame = [Util centeredAndBounded:iconView.frame.size inFrame:CGRectMake(xOffset, yOffset, 15, 15)];
@@ -96,16 +97,14 @@
                 if (![blacklist containsObject:stampPreview.user.userID]) {
                     if (i >= limit) break;
                     if (i == limit - 1) {
-                        
+                        shouldShowArrow = NO;
                     }
-                    else {
-                        UIView* userImage = [Util profileImageViewForUser:stampPreview.user withSize:STProfileImageSize37];
-                        [Util reframeView:userImage withDeltas:CGRectMake(i * imageSpacing, 0, 0, 0)];
-                        [images addSubview:userImage];
-                        UIView* buttonView = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stampPreview];
-                        [images addSubview:buttonView];
-                        hasImages = YES;
-                    }
+                    UIView* userImage = [Util profileImageViewForUser:stampPreview.user withSize:STProfileImageSize37];
+                    [Util reframeView:userImage withDeltas:CGRectMake(i * imageSpacing, 0, 0, 0)];
+                    [images addSubview:userImage];
+                    UIView* buttonView = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stampPreview];
+                    [images addSubview:buttonView];
+                    hasImages = YES;
                     i++;
                 }
             }
@@ -133,6 +132,10 @@
         button.layer.cornerRadius = 2;
         button.clipsToBounds = YES;
         [self insertSubview:button atIndex:0];
+        
+        UIImageView* arrowView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_eDetailBox_arrow_right"]] autorelease];
+        arrowView.frame = [Util centeredAndBounded:arrowView.frame.size inFrame:CGRectMake(268, 0, arrowView.frame.size.width, self.frame.size.height)];
+        [self addSubview:arrowView];
     }
     return self;
 }

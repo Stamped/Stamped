@@ -9,6 +9,7 @@
 #import "LeftMenuTableCell.h"
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
+#import "STUnreadActivity.h"
 
 @implementation LeftMenuTableCell
 
@@ -72,7 +73,6 @@
         }];
         _iconView = view;
         [view release];
-        
     }
     return self;
 }
@@ -311,9 +311,8 @@
 
 #pragma mark - Notifications 
 
-- (void)countUpdated:(NSNotification*)notification {
-    if (![notification object]) return;
-    [self setBadgeCount:[[notification object] integerValue]];
+- (void)countUpdated:(id)notImportant {
+    [self setBadgeCount:[STUnreadActivity sharedInstance].count];
 }
 
 @end

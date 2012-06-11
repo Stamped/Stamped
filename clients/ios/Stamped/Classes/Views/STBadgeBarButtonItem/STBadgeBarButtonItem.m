@@ -8,12 +8,14 @@
 
 #import "STBadgeBarButtonItem.h"
 #import "STNavigationItem.h"
+#import "STUnreadActivity.h"
 
 @implementation STBadgeBarButtonItem
 
 - (id)initWithImage:(UIImage *)image style:(UIBarButtonItemStyle)style target:(id)target action:(SEL)action {
     if (self = [super initWithImage:image style:style target:target action:action]) {
         [STEvents addObserver:self selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
+        [self countUpdated:nil];
     }
     return self;
 }
@@ -26,15 +28,14 @@
 
 #pragma mark - Notifications 
 
-- (void)countUpdated:(NSNotification*)notification {
-    if (![notification object]) return;
-    
-    if ([[notification object] integerValue] > 0) {
+- (void)countUpdated:(id)notImportant {
+    NSInteger activityCount = [STUnreadActivity sharedInstance].count;
+    if (activityCount > 0) {
         
         if (!_countView) {
             UIView *countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 19, 19)] autorelease];
             countView.userInteractionEnabled = NO;
-            UILabel *label = [Util viewWithText:[NSString stringWithFormat:@"%d", [[notification object] integerValue]]
+            UILabel *label = [Util viewWithText:[NSString stringWithFormat:@"%d", activityCount]
                                            font:[UIFont boldSystemFontOfSize:10]
                                           color:[UIColor whiteColor]
                                            mode:UILineBreakModeTailTruncation
@@ -69,7 +70,7 @@
             _countLabel = label;
         }
        
-        _countLabel.text = [NSString stringWithFormat:@"%d", [[notification object] integerValue]];
+        _countLabel.text = [NSString stringWithFormat:@"%d", activityCount];
         [_countLabel sizeToFit];
         _countLabel.frame = CGRectMake(ceilf((_countView.bounds.size.width-_countLabel.bounds.size.width)/2), floorf((_countView.bounds.size.height-_countLabel.bounds.size.height)/2), _countLabel.bounds.size.width, _countLabel.bounds.size.height);
 

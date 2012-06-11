@@ -223,7 +223,7 @@ static STRestKitLoader* _sharedInstance;
     NSAssert1(mapping, @"Mapping must not be nil %@", mapping);
     RKClient* client = [RKClient sharedClient];
     if (client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable) {
-        NSLog(@"Offline");
+        //NSLog(@"Offline");
         STCancellation* cancellation = [STCancellation cancellation];
         [Util executeOnMainThread:^{
             if (!cancellation.cancelled) {
@@ -548,17 +548,17 @@ static STRestKitLoader* _sharedInstance;
     NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:_tokenExpirationUserDefaultsKey];
     // Fresh install.
     if (!tokenExpirationDate) {
-        NSLog(@"tokenExpirationDate not found");
+        //NSLog(@"tokenExpirationDate not found");
         [[UIApplication sharedApplication] unregisterForRemoteNotifications];
         [self clearAuthState];
         [Util launchFirstRun];
     }
     else {
-        NSLog(@"tokenExpirationDate found");
+        //NSLog(@"tokenExpirationDate found");
         NSData* userData = [[NSUserDefaults standardUserDefaults] objectForKey:_userDataUserDefaultsKey];
         NSString* refreshToken = [_refreshTokenKeychainItem objectForKey:(id)kSecValueData];
         if (userData && refreshToken) {
-            NSLog(@"user and refresh token found");
+            //NSLog(@"user and refresh token found");
             self.authToken.refreshToken = refreshToken;
             self.currentUser = [NSKeyedUnarchiver unarchiveObjectWithData:userData];
             NSTimeInterval timeUntilTokenRefresh = [tokenExpirationDate timeIntervalSinceNow];
@@ -575,7 +575,7 @@ static STRestKitLoader* _sharedInstance;
                 [self refreshToken];
             }
         } else {
-            NSLog(@"user and refresh token not found: %@, %@", userData, refreshToken);
+            //NSLog(@"user and refresh token not found: %@, %@", userData, refreshToken);
             [self clearAuthState];
             [Util launchFirstRun];
         }

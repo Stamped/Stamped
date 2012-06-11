@@ -22,7 +22,7 @@
     if (self) {
         _pageSource = nil;
         _directory = [[Util cacheDirectory] copy];
-        NSLog(@"Cache dir: %@", _directory.path);
+        //NSLog(@"Cache dir: %@", _directory.path);
         _pageFaultAge = 1 * 24 * 60 * 60;
         _preferredPageSize = 20;
         _minimumPageSize = 20;

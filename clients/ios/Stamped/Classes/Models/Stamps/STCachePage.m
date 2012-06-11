@@ -213,7 +213,7 @@
         return self;
     }
     if (self.created.timeIntervalSince1970 > page.created.timeIntervalSince1970) {
-        NSLog(@"Tried to add a page older than current page,%@,%@",page.created, self.created);
+        //NSLog(@"Tried to add a page older than current page,%@,%@",page.created, self.created);
         return self;
     }
     if (self.count == 0) {

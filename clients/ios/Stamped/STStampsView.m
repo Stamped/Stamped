@@ -173,7 +173,6 @@ static const NSInteger _batchSize = 20;
 - (BOOL)shouldLoadMore {
   if ([self.stamps count] < self.slice.limit.integerValue && !self.waiting) {
     if (self.maxRow + _batchSize * 2 > [self.stamps count]) {
-      NSLog(@"%d", self.noMoreStamps);
       return !self.noMoreStamps;
     }
   }

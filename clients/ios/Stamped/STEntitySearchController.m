@@ -394,7 +394,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         if (result) {
             EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithSearchID:result.searchID] autorelease];
             [[Util sharedNavigationController] pushViewController:controller animated:YES];
-            NSLog(@"Chose %@, %@", result.title, result.searchID);
+            //NSLog(@"Chose %@, %@", result.title, result.searchID);
         }
     }
 }

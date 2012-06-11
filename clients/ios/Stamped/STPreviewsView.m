@@ -63,19 +63,15 @@ static const NSInteger _cellsPerRow = 7;
     [_views release], _views=nil;
     [super dealloc];
 }
-
+/*
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    NSLog(@"touches began");
-    
+    //NSLog(@"touches began");
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    NSLog(@"touches moved");
-    
+    //NSLog(@"touches moved");
 }
-
+*/
 
 #pragma mark - Reuse
 
