@@ -11,7 +11,6 @@
 #import "STUser.h"
 #import "STComment.h"
 #import "STMention.h"
-#import "STCredit.h"
 #import "STBadge.h"
 #import "STContentItem.h"
 #import "STPreviews.h"
@@ -40,7 +39,7 @@
 @property (nonatomic, readonly, retain) id<STUser> user;
 @property (nonatomic, readonly, retain) id<STPreviews> previews;
 @property (nonatomic, readonly, copy) NSArray<STMention>* mentions;
-@property (nonatomic, readonly, copy) NSArray<STCredit>* credits;
+@property (nonatomic, readonly, copy) NSArray<STStampPreview>* credits;
 @property (nonatomic, readonly, copy) NSArray<STBadge>* badges;
 @property (nonatomic, readonly, copy) NSArray<STContentItem>* contents;
 
