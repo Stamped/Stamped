@@ -39,8 +39,9 @@ if __name__ == '__main__':
         pool = Pool(8)
         
         def _process_entity(entity):
-            url = db.addEntityImage(entity.image)
-            entity.image = url
+            image_url = entity['image']
+            image_url = db.addEntityImage(image_url)
+            entity['image'] = image_url
             
             api._entityDB.updateEntity(entity)
         
@@ -51,6 +52,7 @@ if __name__ == '__main__':
         count = 0
         for entity in entities:
             pool.spawn(_process_entity, entity)
+            count += 1
             if count > 10:
                 break
         
