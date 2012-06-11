@@ -96,11 +96,11 @@ class StampedAPIActivityFriendship(StampedAPIActivityTest):
         self.assertEqual(len(result), 2)
         self._assertFollowSubjects(result, 2)
 
-        # Remove friend (1 follower)
+        # Remove friend (1 follower), but activity item remains
         self.deleteFriendship(self.tokenC, self.userA)
         result = self.showActivity(self.tokenA)
         self.assertEqual(len(result), 2)
-        self._assertFollowSubjects(result, 1)
+        self._assertFollowSubjects(result, 2)
 
     def test_show_friendship_universal(self):
         self.createFriendship(self.tokenC, self.userB)
@@ -164,10 +164,12 @@ class StampedAPIActivityMentions(StampedAPIActivityTest):
             "oauth_token": self.tokenB['access_token'],
             "scope" : "me",
         }
-        
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 2)
-        
+
+
+        self.async(lambda: self.handleGET(path, data), [
+            lambda x: self.assertEqual(len(x), 2),
+        ])
+
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
@@ -182,11 +184,13 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
             "credits": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-        
-        result = self.showActivity(self.tokenB)
-        self.assertEqual(len(result), 2)
-        self._assertBenefit(result)
-        
+
+        self.async(lambda: self.showActivity(self.tokenB), [
+            lambda x: self.assertEqual(len(x), 2),
+            lambda x: self._assertBenefit(x),
+            ])
+
+
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
@@ -200,11 +204,12 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
             "credits": self.userB['screen_name'],
         }
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
-        
-        result = self.showActivity(self.tokenB)
-        self.assertEqual(len(result), 2)
-        self.assertTrue(result[0]['verb'] == 'restamp')
-        
+
+        self.async(lambda: self.showActivity(self.tokenB), [
+            lambda x: self.assertEqual(len(x), 2),
+            lambda x:self.assertTrue(x[0]['verb'] == 'restamp'),
+        ])
+
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
@@ -255,15 +260,18 @@ class StampedAPIActivityTodos(StampedAPIActivityTest):
         result = self.showActivity(self.tokenE)
         self.assertEqual(len(result), 2)
 
-        # Unfriend UserE from UserF
+        # Unfriend UserE from UserF, make sure that the activity item remains
         self.deleteFriendship(self.tokenF, self.userE)
         result = self.showActivity(self.tokenE)
+        self.assertEqual(len(result), 2)
 
-        self.assertEqual(len(result), 1)
+        # UserF follows UserE again.  Make sure no new activity item appears
+        self.createFriendship(self.tokenF, self.userE)
+        result = self.showActivity(self.tokenE)
+        self.assertEqual(len(result), 2)
 
+        # Assert that deleting UserF's account also removed the 'follow' activity item from User A's feed
         self.deleteAccount(self.tokenF)
-
-        # Assert that deleting the account removed the activity item from User A's feed
         result = self.showActivity(self.tokenE)
 
         self.assertEqual(len(result), 0)
@@ -509,8 +517,8 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         offset = 0
         limit = 10
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
@@ -520,30 +528,36 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         offset = 0
         limit = 6
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        from pprint import pformat
+
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
+        for r in results:
+            logs.info(r.activity_id)
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+        self.api._activityCache.setCacheBlockSize(2)
+        self.api._activityCache.setCacheBlockBufferSize(0)
 
         results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        for r in results2:
+            logs.info(r.activity_id)
         self.assertEqual(len(results2), 6)
-        for i, result in enumerate(results2):
-            self.assertEqual(result.activity_id, results[i].activity_id)
+        for i,r in enumerate(results2):
+            self.assertEqual(r.activity_id, results[i].activity_id)
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
     def test_prev_cache_block_expired(self):
         scope = 'friends'
         offset = 0
         limit = 6
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
@@ -552,8 +566,8 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         offset = 5
         limit = 6
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 2
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+        self.api._activityCache.setCacheBlockSize(2)
+        self.api._activityCache.setCacheBlockBufferSize(0)
 
         try:
             api._cache.flush_all()
@@ -562,30 +576,30 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 1)
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
     def test_clear_activity_cache(self):
         scope = 'friends'
         offset = 0
         limit = 6
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+        self.api._activityCache.setCacheBlockSize(5)
+        self.api._activityCache.setCacheBlockBufferSize(0)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
 
-        key = api._createActivityCacheKey(self.userA['user_id'], scope, 0)
-        key2 = api._createActivityCacheKey(self.userA['user_id'], scope, 5)
+        key = api._activityCache._generateKey(0, authUserId=self.userA['user_id'], scope=scope)
+        key2 = api._activityCache._generateKey(5, authUserId=self.userA['user_id'], scope=scope)
         self.assertEqual(key in api._cache, True)
         self.assertEqual(key2 in api._cache, True)
-        api._clearActivityCacheForUser(self.userA['user_id'], scope)
+        api._activityCache._clearCacheForKeyParams(authUserId=self.userA['user_id'], scope=scope)
         self.assertEqual(key in api._cache, False)
         self.assertEqual(key2 in api._cache, False)
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
 
     def test_cache_clear_on_offset_0(self):
@@ -593,8 +607,8 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         offset = 0
         limit = 10
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 5
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 0
+        self.api._activityCache.setCacheBlockSize(5)
+        self.api._activityCache.setCacheBlockBufferSize(0)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
         self.assertEqual(len(results), 6)
@@ -618,8 +632,8 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         self.deleteFriendship(self.tokenB, user)
         self.deleteAccount(token)
 
-        self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
-        self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
+        self.api._activityCache.setCacheBlockSize(50)
+        self.api._activityCache.setCacheBlockBufferSize(20)
 
 if __name__ == '__main__':
     main()

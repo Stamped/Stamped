@@ -5,8 +5,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped, Inc."
 __license__   = "TODO"
 
-import Globals
+import Globals, logs
 from utils import abstract
+from datetime import timedelta
 from Memcache import globalMemcache
 
 class ACollectionCache(object):
@@ -82,7 +83,7 @@ class ACollectionCache(object):
             key = self._generateKey(curOffset, **kwargs)
 
     def setCacheBlockSize(self, cacheBlockSize):
-        self._blockSize = cacheblockSize
+        self._blockSize = cacheBlockSize
 
     def setCacheBlockBufferSize(self, cacheBlockBufferSize):
         self._blockBufferSize = cacheBlockBufferSize

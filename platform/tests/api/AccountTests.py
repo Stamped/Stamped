@@ -20,7 +20,7 @@ class StampedAPIAccountTest(AStampedAPITestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='devbot') 
         self.privacy = False
-    
+
     def tearDown(self):
         self.deleteAccount(self.token)
 
@@ -36,13 +36,33 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['privacy'], False)
         self.privacy = result['privacy']
-    
+
+    def test_invalid_post(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "screen_name": "UserA2",
+            "privacy": False,
+            "phone": 1235551234,
+            }
+        with expected_exception():
+            data["phone"] = "not a phone number"
+            result = self.handlePOST(path, data)
+        data["phone"] = 1235551234
+
+        with expected_exception():
+            data['privacy'] = 5
+            result = self.handlePOST(path, data)
+        data['privacy'] = False
+
+
     def test_get(self):
         path = "account/show.json"
         data = {
             "oauth_token": self.token['access_token'],
         }
         result = self.handleGET(path, data)
+        self.assertEqual(result['screen_name'], "devbot")
         self.assertEqual(result['privacy'], self.privacy)
 
 class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
@@ -56,6 +76,26 @@ class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['bio'], bio)
 
+class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
+    def test_update_profile_image(self):
+        path = "account/update_profile_image.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "temp_image_url": "http://static.stamped.com/users/default.jpg",
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['screen_name'], "devbot")
+
+    def test_update_profile_image_invalid(self):
+        path = "account/update_profile_image.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "temp_image_url": "not a valid url",
+            }
+        with expected_exception():
+            result = self.handlePOST(path, data)
+
+
 class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
     def test_customize_stamp(self):
         path = "account/customize_stamp.json"
@@ -67,6 +107,25 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['color_primary'], '333333')
         self.assertEqual(result['color_secondary'], '999999')
+
+    def test_customize_stamp_invalid(self):
+        path = "account/customize_stamp.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "color_primary": '333333',
+            "color_secondary": '999999',
+        }
+        with expected_exception():
+            del(data['color_primary'])
+            result = self.handlePOST(path, data)
+        data["color_primary"] = '333333'
+
+        with expected_exception():
+            del(data['color_secondary'])
+            result = self.handlePOST(path, data)
+        data["color_secondary"] = '999999'
+
+
 
 class StampedAPIAccountInvalid(StampedAPIAccountTest):
     def test_blacklist(self):
