@@ -26,7 +26,10 @@ if __name__ == '__main__':
     
     if args.db is not None:
         utils.init_db_config(args.db)
-        
+    
+    if args.image_urls is not None and len(args.image_urls) > 0:
+        db.addEntityImages(args.image_urls)
+    else:
         api  = MongoStampedAPI()
         pool = Pool(8)
         
@@ -47,8 +50,6 @@ if __name__ == '__main__':
                 break
         
         pool.join()
-    else:
-        db.addEntityImages(args.image_urls)
 
 #http://thetvdb.com/banners/_cache/posters/211751-2.jpg
 
