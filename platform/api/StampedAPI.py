@@ -4288,7 +4288,6 @@ class StampedAPI(AStampedAPI):
         params['limit'] = limit
 
         if distance > 0:
-            personal = False
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
 
@@ -4319,7 +4318,6 @@ class StampedAPI(AStampedAPI):
                 assert(len(item.subjects) > 0)
                 activityData.append(item)
         else:
-            personal = True
             activityData = self._activityDB.getActivity(authUserId, **params)
             if len(activityData) < limit:
                 final = True
