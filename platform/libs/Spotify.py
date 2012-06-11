@@ -20,7 +20,7 @@ try:
     from urllib2                import HTTPError
     from errors                 import StampedHTTPError
     from LRUCache               import lru_cache
-    from Memcache               import memcached_function
+    from CachedFunction         import cachedFn
     
     try:
         import json
@@ -33,13 +33,13 @@ except:
 class Spotify(object):
 
     def __init__(self):
-        self.__limiter = RateLimiter(cps=10)
-    
+        self.__limiter = RateLimiter(cps=4)
+
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
+    @cachedFn()
     def method(self, service, method, **params):
         with self.__limiter:
             try:

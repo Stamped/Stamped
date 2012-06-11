@@ -276,7 +276,7 @@ class DevicesSchema(Schema):
     def setSchema(cls):
         cls.addPropertyList('ios_device_tokens',            basestring)
 
-class AccountAlerts(Schema):
+class AccountAlertSettings(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('ios_alert_credit',                 bool)
@@ -335,7 +335,7 @@ class Account(Schema):
         cls.addNestedProperty('devices',                    DevicesSchema)
         cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
         cls.addNestedProperty('timestamp',                  UserTimestampSchema, required=True)
-        cls.addNestedProperty('alerts',                     AccountAlerts)
+        cls.addNestedProperty('alert_settings',             AccountAlertSettings)
 
     def __init__(self):
         Schema.__init__(self)

@@ -317,7 +317,8 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
         self.handlePOST(path, data)
         result = self.showActivity(self.tokenA)
         self.assertEqual(len(result), 3)
-        self._assertBody(result, ['UserB and UserC listened to Call Your Girlfriend - Single.'])
+        self._assertBody(result, ['UserB and UserC listened to Call Your Girlfriend - Single.',
+                                  'UserC and UserB listened to Call Your Girlfriend - Single.'])
 
         # cleanup
         self.deleteStamp(self.tokenA, stampNew['stamp_id'])
@@ -376,7 +377,6 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
     def test_follow_activity(self):
         # There should be 1 personal activity item for User A - User D followed User A:
         results = self.showActivity(self.tokenA)
-        logs.info('### results %s' % results)
         self.assertEqual(len(results), 1)
         self._assertBody(results, ['UserD is now following you.'])
 
@@ -445,6 +445,15 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         self.createFriendship(self.tokenB, self.userG)
         self.createFriendship(self.tokenB, self.userH)
 
+        self.createFriendship(self.tokenA, self.userB)
+        self.createFriendship(self.tokenC, self.userB)
+        self.createFriendship(self.tokenD, self.userB)
+        self.createFriendship(self.tokenE, self.userB)
+        self.createFriendship(self.tokenF, self.userB)
+        self.createFriendship(self.tokenG, self.userB)
+        self.createFriendship(self.tokenH, self.userB)
+
+
 
     def tearDown(self):
         self.deleteFriendship(self.tokenA, self.userB)
@@ -456,6 +465,14 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         self.deleteFriendship(self.tokenB, self.userF)
         self.deleteFriendship(self.tokenB, self.userG)
         self.deleteFriendship(self.tokenB, self.userH)
+
+        self.deleteFriendship(self.tokenA, self.userB)
+        self.deleteFriendship(self.tokenC, self.userB)
+        self.deleteFriendship(self.tokenD, self.userB)
+        self.deleteFriendship(self.tokenE, self.userB)
+        self.deleteFriendship(self.tokenF, self.userB)
+        self.deleteFriendship(self.tokenG, self.userB)
+        self.deleteFriendship(self.tokenH, self.userB)
 
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
@@ -477,6 +494,8 @@ class StampedAPIActivityCache(AStampedAPITestCase):
 
         results = self.api.getActivity(self.userA['user_id'], slice)
         self.assertEqual(len(results), 4)
+
+
 
         # Test offset
         slice.offset = 1
@@ -550,9 +569,6 @@ class StampedAPIActivityCache(AStampedAPITestCase):
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
 
-        from pprint import pprint
-        pprint(results)
-
     def test_clear_activity_cache(self):
         slice = ActivitySlice()
         slice.distance = 1
@@ -610,17 +626,6 @@ class StampedAPIActivityCache(AStampedAPITestCase):
 
         self.api.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.api.ACTIVITY_CACHE_BUFFER_SIZE = 20
-
-
-#        results = api.getActivity(userId, slice)
-#        pprint(results)
-#        print('\n\n%d' % len(results))
-#
-#        slice.offset=1
-#        slice.limit=10
-#        results = api.getActivity(userId, slice)
-#        pprint(results)
-#        print('\n\n%d' % len(results))
 
 if __name__ == '__main__':
     main()

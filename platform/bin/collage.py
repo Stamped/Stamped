@@ -8,36 +8,54 @@ __license__   = "TODO"
 import Globals
 import colorsys, math, os, sys, urllib2, utils
 
+from abc            import ABCMeta, abstractmethod, abstractproperty
 from StringIO       import StringIO
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
+from api.S3ImageDB  import S3ImageDB
 
-class ImageCollage(object):
+"""
+
+TODO: 
+    * AImageCollage
+        * GenericImageCollage
+        * MusicImageCollage
+        * BookImageCollage
+        * FilmImageCollage
+        * AppImageCollage
+        * (Place header is generated separately and doesn't require a collage)
+
+"""
+
+class AImageCollage(object):
     
-    def __init__(self, *image_urls):
-        pool  = Pool(8)
-        tiles = []
+    __metaclass__ = ABCMeta
+    
+    def __init__(self, image_urls):
+        self._pool  = Pool(8)
+        self._db    = S3ImageDB()
+        self._tiles = []
         
-        def _add_image(i, image_url):
+        def _add_image(image_url):
             utils.log("downloading '%s'" % image_url)
             
-            try:
-                data = utils.getFile(image_url)
-            except urllib2.HTTPError:
-                logs.warn("unable to download image '%s'" % image_url)
-                raise
-            
-            image = self._get_image(data)
-            tiles.append(image)
+            image = self._db.getWebImage(url, "collage"):
+            self._tiles.append(image)
             
             #image.save("image%d.jpg" % i, 'JPEG')
         
-        for i in xrange(len(image_urls)):
-            image_url = image_urls[i]
-            pool.spawn(_add_image, i, image_url)
+        for image_url in image_urls:
+            self._pool.spawn(_add_image, image_url)
         
-        pool.join()
-        
+        self._pool.join()
+    
+    @abstractmethod
+    def process(self):
+        raise NotImplementedError
+
+class BasicImageCollage(object):
+    
+    def process(self):
         sizes  = [
             (940, 256), 
             (512, 128), 
@@ -51,7 +69,7 @@ class ImageCollage(object):
         #num_rows = int(math.ceil(num_tiles / 3))
         #num_cols = num_tiles % num_rows
         
-        num_tiles = len(tiles)
+        num_tiles = len(self._tiles)
         #num_cols  = size_map[num_tiles][0]
         #num_rows  = size_map[num_tiles][1]
         
@@ -94,7 +112,7 @@ class ImageCollage(object):
                 
                 # wrap around if necessary to fill last row
                 index = (i * num_cols + j) % num_tiles
-                tile  = tiles[index]
+                tile  = self._tiles[index]
                 
                 if tile.size[0] / cell_size[0] < tile.size[1] / cell_size[1]:
                     width  = cell_size[0]
@@ -123,7 +141,7 @@ class ImageCollage(object):
                     
                     # wrap around if necessary to fill last row
                     index  = (i * num_cols + j) % num_tiles
-                    tile   = tiles[index]
+                    tile   = self._tiles[index]
                     
                     if tile.size[0] / cell_size[0] < tile.size[1] / cell_size[1]:
                         width  = cell_size[0]
@@ -144,6 +162,8 @@ class ImageCollage(object):
                     #canvas.paste(cell, (x0, y0, x0 + cell.size[0], y0 + cell.size[1]))
             '''
             
+            
+            '''
             utils.log("blurring collage '%s'" % filename)
             
             num_blurs = 3
@@ -178,6 +198,7 @@ class ImageCollage(object):
             offset0 = pad + 2
             offset1 = pad - 2
             canvas  = canvas2.crop((offset0, offset0, size[0] + offset1, size[1] + offset1))
+            '''
             
             '''
             def dodge(a, b, alpha):
@@ -194,17 +215,9 @@ class ImageCollage(object):
             '''
             
             canvas.save(filename, 'JPEG')
-    
-    def _get_image(self, data):
-        assert isinstance(data, basestring)
-        
-        io = StringIO(data)
-        im = Image.open(io)
-        
-        return im
 
-def main(*images):
-    collage = ImageCollage(*images)
+def main(images):
+    collage = BasicImageCollage(images)
 
 if __name__ == '__main__':
     import argparse
@@ -229,5 +242,5 @@ if __name__ == '__main__':
         'http://ia.media-imdb.com/images/M/MV5BMTMwODg0NDY1Nl5BMl5BanBnXkFtZTcwMjkwNTgyMg@@._V1._SY317_.jpg', 
     ]
     
-    main(*movies)
+    main(movies)
 

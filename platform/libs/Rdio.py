@@ -35,7 +35,7 @@ try:
     
     from RateLimiter            import RateLimiter, RateException
     from LRUCache               import lru_cache
-    from Memcache               import memcached_function
+    from CachedFunction         import cachedFn
     from urlparse               import parse_qsl
     from urllib2                import HTTPError
     from errors                 import StampedHTTPError
@@ -66,12 +66,12 @@ class Rdio(object):
         self.__secret   = secret
         self.__consumer = oauth.Consumer(self.__key, self.__secret)
         self.__limiter  = RateLimiter(cps=cps, cpd=cpd)
-    
+
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
+    @cachedFn()
     def method(self, method, **kwargs):
         # create the OAuth consumer credentials
         client = oauth.Client(self.__consumer)

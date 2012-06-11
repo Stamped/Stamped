@@ -649,7 +649,7 @@ var g_update_stamps = null;
                 // TODO: customize loading image
                 infinite_scroll = $gallery.infinitescroll({
                     debug           : STAMPED_PRELOAD.DEBUG, 
-                    bufferPx        : 200, 
+                    bufferPx        : window.innerHeight * .8, 
                     
                     navSelector     : "div.stamp-gallery-nav", 
                     nextSelector    : infinite_scroll_next_selector, 

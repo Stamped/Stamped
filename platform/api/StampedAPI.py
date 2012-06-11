@@ -240,22 +240,22 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alerts                          = AccountAlerts()
-        alerts.ios_alert_credit         = True
-        alerts.ios_alert_like           = True
-        alerts.ios_alert_todo           = True
-        alerts.ios_alert_mention        = True
-        alerts.ios_alert_comment        = True
-        alerts.ios_alert_reply          = True
-        alerts.ios_alert_follow         = True
-        alerts.email_alert_credit       = True
-        alerts.email_alert_like         = False
-        alerts.email_alert_todo         = False
-        alerts.email_alert_mention      = True
-        alerts.email_alert_comment      = True
-        alerts.email_alert_reply        = True
-        alerts.email_alert_follow       = True
-        account.alerts                  = alerts
+        alert_settings                         = AccountAlertSettings()
+        alert_settings.ios_alert_credit         = True
+        alert_settings.ios_alert_like           = True
+        alert_settings.ios_alert_todo           = True
+        alert_settings.ios_alert_mention        = True
+        alert_settings.ios_alert_comment        = True
+        alert_settings.ios_alert_reply          = True
+        alert_settings.ios_alert_follow         = True
+        alert_settings.email_alert_credit       = True
+        alert_settings.email_alert_like         = False
+        alert_settings.email_alert_todo         = False
+        alert_settings.email_alert_mention      = True
+        alert_settings.email_alert_comment      = True
+        alert_settings.email_alert_reply        = True
+        alert_settings.email_alert_follow       = True
+        account.alert_settings                  = alert_settings
 
         # Validate screen name
         account.screen_name = account.screen_name.strip()
@@ -362,7 +362,9 @@ class StampedAPI(AStampedAPI):
 
 
 
-        return self.addAccount(account, tempImageUrl=tempImageUrl)
+        account = self.addAccount(account, tempImageUrl=tempImageUrl)
+        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, new_fb_account.user_token])
+        return account
 
     @API_CALL
     def addTwitterAccount(self, new_tw_account, tempImageUrl=None):
@@ -394,7 +396,10 @@ class StampedAPI(AStampedAPI):
         # TODO: might want to get rid of this profile_image business, or figure out if it's the default image and ignore it
         #profile_image = user['profile_background_image_url']
 
-        return self.addAccount(account, tempImageUrl=tempImageUrl)
+        account = self.addAccount(account, tempImageUrl=tempImageUrl)
+        tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                     args=[account.user_id, new_tw_account.user_token, new_tw_account.user_secret])
+        return account
 
     @API_CALL
     def addAccountAsync(self, user_id):
@@ -508,7 +513,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamps(stampIds)
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
-        self._stampDB.removeStatsForStamps(stampIds)
+        self._stampStatsDB.removeStatsForStamps(stampIds)
         ### TODO: If restamp, remove from credited stamps' comment list?
 
         # Remove comments
@@ -759,9 +764,9 @@ class StampedAPI(AStampedAPI):
     def updateAlerts(self, authUserId, alerts):
         account = self._accountDB.getAccount(authUserId)
 
-        accountAlerts = account.alerts
+        accountAlerts = account.alert_settings
         if accountAlerts is None:
-            accountAlerts = AccountAlerts()
+            accountAlerts = AccountAlertSettings()
 
         for k, v in alerts.dataExport().iteritems():
             if v:
@@ -769,7 +774,7 @@ class StampedAPI(AStampedAPI):
             else:
                 setattr(accountAlerts, k, False)
 
-        account.alerts = accountAlerts
+        account.alert_settings = accountAlerts
 
         self._accountDB.updateAccount(account)
         return account
@@ -810,13 +815,14 @@ class StampedAPI(AStampedAPI):
         # Verify account is valid and
         self.verifyLinkedAccount(linkedAccount)
 
-        self._accountDB.addLinkedAccount(authUserId, linkedAccount)
+        linkedAccount = self._accountDB.addLinkedAccount(authUserId, linkedAccount)
 
         # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
-            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[authUserId, linkedAccount.token])
         elif linkedAccount.service_name == 'twitter':
-            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter, args=[authUserId])
+            tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
+                         args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
@@ -834,10 +840,7 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def alertFollowersFromTwitterAsync(self, authUserId):
-
-        ### TODO: Deprecate passing parameter "twitterIds"
-
+    def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Twitter)
@@ -847,61 +850,47 @@ class StampedAPI(AStampedAPI):
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
 #            return False
 
-        users = []
-
         # Grab friend list from Twitter API
-        users = self._getTwitterFollowers(twitterKye, twitterSecret)
+        tw_followers = self._getTwitterFollowers(twitterKey, twitterSecret)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
-        for user in users:
+        for user in tw_followers:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
 
         # Generate activity item
-        self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
-                                             body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
-
-        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
-
-#        twitter = TwitterAccountSchema(twitter_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, twitter=twitter)
+        if len(userIds) > 0:
+            self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
+                                                 body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
 
         return True
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-
-        ### TODO: Deprecate passing parameter "facebookIds"
-
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Facebook)
         if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id):
             return False
-#        if account.facebook_alerts_sent == True or not account.facebook_name:
-#            return
-
-        users = []
 
         # Grab friend list from Facebook API
-        users = self._getFacebookFriends(facebookToken)
+        fb_friends = self._getFacebookFriends(facebookToken)
 
         # Send alert to people not already following the user
         followers = self._friendshipDB.getFollowers(authUserId)
         userIds = []
-        for user in users:
+        for user in fb_friends:
             if user.user_id not in followers:
                 userIds.append(user.user_id)
 
         # Generate activity item
-        self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
-                                             body = 'Your Facebook friend %s joined Stamped.' % account.facebook_name)
-
-        self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
-#        facebook = FacebookAccountSchema(facebook_alerts_sent=True)
-#        self._accountDB.updateLinkedAccounts(authUserId, facebook=facebook)
+        if len(userIds) > 0:
+            self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
+                                          body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
 
     @API_CALL
     def addToNetflixInstant(self, authUserId, netflixId):
@@ -4281,13 +4270,12 @@ class StampedAPI(AStampedAPI):
         final = False
 
         params = {}
-        params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
         if before is not None:
             params['before'] = before
         params['limit'] = limit
 
         if distance > 0:
-            personal = False
+            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
 
@@ -4318,7 +4306,6 @@ class StampedAPI(AStampedAPI):
                 assert(len(item.subjects) > 0)
                 activityData.append(item)
         else:
-            personal = True
             activityData = self._activityDB.getActivity(authUserId, **params)
             if len(activityData) < limit:
                 final = True
@@ -4341,19 +4328,14 @@ class StampedAPI(AStampedAPI):
 
         # get the modified time of the last item of the previous activity cache block.  We use it for the slice
         before = None
-        logs.info('### prevBlockOffset %s' % prevBlockOffset)
         if prevBlockOffset is not None:
             prevBlockKey = self._createActivityCacheKey(authUserId, distance, prevBlockOffset)
-            logs.info('### type(prevBlockKey): %s   prevBlockKey: %s' % (type(prevBlockKey),prevBlockKey))
             try:
                 prevBlock = self._cache[prevBlockKey]
-                logs.info('### SUCCESSFULLY LOADED PREVBLOCK')
             except KeyError:
                 # recursively fill previous blocks if they have expired
-                logs.info('### LOADING PREVBLOCK')
                 prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
             except Exception as e:
-                logs.info('### Hit generic exception: %s' % e)
                 logs.error('Error retrieving activity items from memcached.  Is memcached running?')
                 prevBlock = self._updateActivityCache(authUserId, distance, prevBlockOffset)
             if len(prevBlock) < self.ACTIVITY_CACHE_BLOCK_SIZE:
@@ -4391,7 +4373,8 @@ class StampedAPI(AStampedAPI):
 
     def _getActivityFromCache(self, authUserId, distance, offset, limit):
         """
-        Pull the requested activity data from cache, if exists in cache, otherwise pull the data from db
+        Pull the requested activity data from cache if it exists there, otherwise pull the data from db
+        Returns a tuple of (the activity data list, bool indicating if the end of the activity stream was reached)
         """
         if offset == 0:
             self._clearActivityCacheForUser(authUserId, distance)
@@ -4412,15 +4395,12 @@ class StampedAPI(AStampedAPI):
             if len(newActivity) < self.ACTIVITY_CACHE_BLOCK_SIZE:
                 break
 
-        return activity[:limit]
+        return activity[:limit], len(activity) < limit
 
 
     @API_CALL
     def getActivity(self, authUserId, actSlice):
-        logs.info('#### self.ACTIVITY_CACHE_BLOCK_SIZE: %s' % self.ACTIVITY_CACHE_BLOCK_SIZE)
-        logs.info('#### self.ACTIVITY_CACHE_BUFFER_SIZE: %s' % self.ACTIVITY_CACHE_BUFFER_SIZE)
-
-        activityData = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
+        activityData, final = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
 
         # Append user objects
         userIds     = {}
@@ -4501,7 +4481,7 @@ class StampedAPI(AStampedAPI):
 
 
         # Reset activity count
-        if personal == 0:
+        if personal == True:
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)

@@ -15,6 +15,7 @@ from optparse               import OptionParser
 from pprint                 import pprint
 from datetime               import datetime
 from libs.iTunes            import globaliTunes
+import logs
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -58,7 +59,7 @@ def main():
     
     # music feed popularity prioritized by genre
     music_feeds = [
-        { 'limit' : 150,               'name' : 'overall' }, 
+        { 'limit' : 150,               'name' : 'overall' },
         { 'limit' : 50,  'genre' : 18, 'name' : 'hip-hop', }, 
         { 'limit' : 50,  'genre' : 14, 'name' : 'pop', }, 
         { 'limit' : 50,  'genre' : 20, 'name' : 'alternative', }, 
@@ -85,10 +86,10 @@ def main():
         utils.log("processing %d music feeds" % (2 * len(music_feeds), ))
         
         for feed in music_feeds:
-            pool.spawn(handle_music_feed, feed, stampedAPI, appleRSS, itunes_ids, options)
+            handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options)
     
     app_feeds = [
-        { 'limit' : 150,                    'name' : 'overall' }, 
+        { 'limit' : 150,                    'name' : 'overall' },
         { 'limit' : 20,  'genre' : 6018,    'name' : 'books', }, 
         { 'limit' : 20,  'genre' : 6000,    'name' : 'business', }, 
         { 'limit' : 20,  'genre' : 6017,    'name' : 'education', }, 
@@ -140,19 +141,22 @@ def handle_music_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
             return
         
         itunes_ids.add(itunes_id)
-        utils.log("(%s) %s (%s)" % (entity.subcategory, entity.title, entity.sources.itunes_id))
+        utils.log(u"(%s) %s (%s)" % (entity.subcategory, entity.title, entity.sources.itunes_id))
         entity.last_popular = datetime.now()
 
         if options.noop:
             pprint(entity)
         else:
-            print "About to merge music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
+            output = u"About to merge music entity" + entity.title + u"with iTunes ID" + entity.sources.itunes_id
+            logs.info(output)
             stampedAPI.mergeEntity(entity)
-            print "Stored music entity", entity.title, "with iTunes ID", entity.sources.itunes_id
+            output = u"Stored music entity" + entity.title + u"with iTunes ID" + entity.sources.itunes_id
+            logs.info(output)
 
     pool = Pool(16)
     for entity in entities:
         pool.spawn(import_entity, entity)
+    pool.join()
 
 def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
     name = feed['name']
@@ -181,13 +185,16 @@ def handle_app_feed(feed, stampedAPI, appleRSS, itunes_ids, options):
         if options.noop:
             pprint(entity)
         else:
-            print "About to merge app entity", entity.title, "with iTunes ID", entity.sources.itunes_id
+            output = u"About to merge app entity" + entity.title + u"with iTunes ID" +entity.sources.itunes_id
+            logs.info(output)
             stampedAPI.mergeEntity(entity)
-            print "Stored app", entity.title, "with iTunes ID", entity.sources.itunes_id
+            output = u"Stored app entity" + entity.title + u"with iTunes ID" + entity.sources.itunes_id
+            logs.info(output)
 
     pool = Pool(16)
     for entity in apps:
         pool.spawn(import_entity, entity)
+    pool.join()
 
 if __name__ == '__main__':
     main()
