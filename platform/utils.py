@@ -955,3 +955,26 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
                 return option[0]
         
         print "invalid input"
+
+def indentText(text, n):
+    """Takes a multi-line string of text and indents each line by n spaces."""
+    lines = text.split('\n')
+    indent = ' ' * n
+    indentedLines = [indent + line for line in lines]
+    return '\n'.join(indentedLines)
+
+def basicNestedObjectToString(object):
+    if isinstance(object, unicode):
+        return object.encode('utf-8')
+    if any(isinstance(object, type_) for type_ in [basestring, int, float]):
+        return str(object)
+    if isinstance(object, list):
+        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in object]
+        return '[\n' + ('\n'.join(elementStrings)) + '\n]'
+    if isinstance(object, tuple):
+        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in object]
+        return '(\n' + ('\n'.join(elementStrings)) + '\n)'
+    if isinstance(object, dict):
+        elementStrings = [indentText('%s : %s,' % (str(key), basicNestedObjectToString(value)), 2) for (key, value) in object.items()]
+        return '{\n' + ('\n'.join(elementStrings)) +'\n}'
+    raise Exception('Can\'t string-ify object of type: ' + type(object))
