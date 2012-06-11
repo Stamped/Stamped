@@ -38,18 +38,6 @@ class StampedAPIStampsShow(StampedAPIStampTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 
-# class StampedAPIStampsUpdate(StampedAPIStampTest):
-#     def test_show(self):
-#         path = "stamps/update.json"
-#         blurb = "Really, really delicious."
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
-
 class StampedAPIStampsRestamp(StampedAPIStampTest):
     def test_restamp(self):
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], blurb='ASDF')
