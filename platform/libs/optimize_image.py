@@ -17,7 +17,7 @@ from MongoStampedAPI    import MongoStampedAPI
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('image_urls', action="append")
+    parser.add_argument('image_urls', nargs='*', action="append")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     parser.add_argument('-d', '--db', action='store')
     
