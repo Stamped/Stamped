@@ -9,6 +9,8 @@ import Globals
 import keys.aws, logs, utils
 import os, time, zlib, struct, array, random, urllib2
 
+from gevent.pool    import Pool
+
 try:
     import Image, ImageFile
 except:
