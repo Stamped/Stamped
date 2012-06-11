@@ -138,7 +138,10 @@
 #pragma mark - Actions
 
 - (void)login:(id)sender {
-    [Util launchFirstRun];
+
+    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    [controller showSignIn];
+    
 }
 
 

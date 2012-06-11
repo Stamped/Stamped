@@ -21,6 +21,7 @@
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
 
         STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 4.0f, 46.0f, 46.0f)];
+        view.userInteractionEnabled = NO;
         view.backgroundColor = [UIColor whiteColor];
         [self addSubview:view];
         [view release];

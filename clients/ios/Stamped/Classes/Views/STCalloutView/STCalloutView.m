@@ -98,21 +98,39 @@
         scale.duration = 0.45f;
         scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:.5f], [NSNumber numberWithFloat:1.2f], [NSNumber numberWithFloat:.85f], [NSNumber numberWithFloat:1.f], nil];
         
-        CABasicAnimation *fadeIn = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        fadeIn.duration = 0.45f * .4f;
-        fadeIn.fromValue = [NSNumber numberWithFloat:0.f];
-        fadeIn.toValue = [NSNumber numberWithFloat:1.f];
-        fadeIn.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-        fadeIn.fillMode = kCAFillModeForwards;
+        CABasicAnimation *opacity = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        opacity.duration = 0.45f * .4f;
+        opacity.fromValue = [NSNumber numberWithFloat:0.f];
+        opacity.toValue = [NSNumber numberWithFloat:1.f];
+        opacity.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+        opacity.fillMode = kCAFillModeForwards;
         
-        CAAnimationGroup *group = [CAAnimationGroup animation];
-        [group setAnimations:[NSArray arrayWithObjects:scale, fadeIn, nil]];
-        group.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        [self.layer addAnimation:group forKey:nil];
+        CAAnimationGroup *animation = [CAAnimationGroup animation];
+        [animation setAnimations:[NSArray arrayWithObjects:scale, opacity, nil]];
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        [self.layer addAnimation:animation forKey:nil];
         
     }
 
 }
 
+- (void)hide:(BOOL)animated {
+ 
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:^{
+        [self removeFromSuperview];
+    }];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    animation.duration = 0.2f;
+    animation.fromValue = [NSNumber numberWithFloat:1.0f];
+    animation.toValue = [NSNumber numberWithFloat:0.0f];
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+    animation.fillMode = kCAFillModeForwards;
+    [self.layer addAnimation:animation forKey:nil];
+    self.layer.opacity = 0.0f;
+
+    [CATransaction commit];
+}
 
 @end

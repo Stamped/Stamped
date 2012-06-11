@@ -15,5 +15,6 @@
 }
 
 - (void)showFromPosition:(CGPoint)position animated:(BOOL)animated;
+- (void)hide:(BOOL)animated;
 
 @end
