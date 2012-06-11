@@ -4270,12 +4270,12 @@ class StampedAPI(AStampedAPI):
         final = False
 
         params = {}
-        params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
         if before is not None:
             params['before'] = before
         params['limit'] = limit
 
         if distance > 0:
+            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
             friends = self._friendshipDB.getFriends(authUserId)
             activityData = []
 
