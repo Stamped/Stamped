@@ -28,6 +28,7 @@
 @property(nonatomic,assign) id delegate;
 
 - (void)setTop:(BOOL)top bottom:(BOOL)bottom;
+- (void)countUpdated:(id)notImportant;
 
 @end
 @protocol LeftMenuTableCellDelegate

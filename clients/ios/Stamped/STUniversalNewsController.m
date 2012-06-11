@@ -13,6 +13,7 @@
 #import "STActivityCell.h"
 #import "Util.h"
 #import "STSliderScopeView.h"
+#import "STUnreadActivity.h"
 
 @interface STUniversalNewsController ()
 
@@ -37,8 +38,15 @@
     return self;    
 }
 
+- (void)countUpdated:(id)notImportant {
+    if (scope_ == STStampedAPIScopeYou) {
+        [STUnreadActivity sharedInstance].count = 0;
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [STEvents addObserver:self selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
     
     if (!self.tableView.backgroundView) {
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
@@ -61,11 +69,23 @@
     
     [Util addCreateStampButtonToController:self];
     [self reloadDataSource];
-    [STEvents postEvent:EventTypeUnreadCountUpdated object:[NSNumber numberWithInt:0]];
     
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    if (scope_ == STStampedAPIScopeYou) {
+        [STUnreadActivity sharedInstance].count = 0;
+    }
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)viewDidUnload {
+    [STEvents removeObserver:self];
     [_slider release], _slider=nil;
     [super viewDidUnload];
 }
@@ -176,12 +196,8 @@
     if (self.scope == STStampedAPIScopeYou) {
         [[STStampedAPI sharedInstance] activitiesForYouWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
             if (activities) {
-                NSLog(@"activities:%@",activities);
                 newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
                 [self.tableView reloadData];
-            }
-            else {
-                NSLog(@"activity error: %@",error);
             }
             [self dataSourceDidFinishLoading];
         }];
@@ -189,12 +205,8 @@
     else {
         [[STStampedAPI sharedInstance] activitiesForFriendsWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
             if (activities) {
-                NSLog(@"activities:%@",activities);
                 newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
                 [self.tableView reloadData];
-            }
-            else {
-                NSLog(@"activity error: %@",error);
             }
             [self dataSourceDidFinishLoading];
         }];
@@ -239,6 +251,15 @@
     
     [view setupWithTitle:@"No news" detailTitle:@"No news found."];
     
+}
+
+#pragma mark - Notifications 
+
+- (void)didEnterBackground:(NSNotification*)notification {    
+}
+
+- (void)willEnterForeground:(NSNotification*)notification {
+    [self reloadDataSource];
 }
 
 

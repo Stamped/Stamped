@@ -86,7 +86,7 @@
     }];
   }
   else {
-    NSLog(@"Unknown child view (%@) changedHeight in %@", view, self);
+    //NSLog(@"Unknown child view (%@) changedHeight in %@", view, self);
     NSAssert(NO, @"unknown child");
   }
 }

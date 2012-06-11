@@ -62,7 +62,7 @@
 
 - (void)dealloc
 {
-  NSLog(@"dealloc Confirmation");
+  //NSLog(@"dealloc Confirmation");
   [super dealloc];
 }
 

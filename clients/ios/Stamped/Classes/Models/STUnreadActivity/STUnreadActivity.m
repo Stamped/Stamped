@@ -11,9 +11,18 @@
 
 static id __instance;
 
+@interface STUnreadActivity ()
+
+@property (nonatomic, readwrite, retain) STCancellation* cancellation;
+
+@end
+
 @implementation STUnreadActivity
 
-+ (id)sharedInstance {
+@synthesize count = _count;
+@synthesize cancellation = _cancellation;
+
++ (STUnreadActivity*)sharedInstance {
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -30,12 +39,14 @@ static id __instance;
     if ((self = [super init])) {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
-
+        _count = 0;
     }
     return self;
 }
 
 - (void)dealloc {
+    [_cancellation cancel];
+    [_cancellation release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -44,22 +55,30 @@ static id __instance;
 #pragma mark - Updates
 
 - (void)update {
-    if (_updating || !LOGGED_IN) return;
+    if (!LOGGED_IN || self.cancellation) return;
     
-    [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
-        if (count && count.numberUnread.integerValue > 0) {
-            [STEvents postEvent:EventTypeUnreadCountUpdated object:count.numberUnread];
+    self.cancellation = [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
+        self.cancellation = nil;
+        if (count.numberUnread.integerValue > 0) {
+            self.count = count.numberUnread.integerValue;
         }
-        _updating = NO;
     }];
     
 }
 
 
+- (void)setCount:(NSInteger)count {
+    if (count != _count) {
+        _count = count;
+        [STEvents postEvent:EventTypeUnreadCountUpdated object:self];
+    }
+}
+
 #pragma mark - Notifications 
 
 - (void)didEnterBackground:(NSNotification*)notification {
-    
+    [self.cancellation cancel];
+    self.cancellation = nil;
     [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(update) object:nil];
     
 }

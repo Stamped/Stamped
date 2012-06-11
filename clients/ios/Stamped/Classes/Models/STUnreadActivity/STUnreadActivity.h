@@ -8,10 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
-@interface STUnreadActivity : NSObject {
-    BOOL _updating;
-}
-+ (id)sharedInstance ;
+@interface STUnreadActivity : NSObject
+
++ (STUnreadActivity*)sharedInstance ;
 - (void)update;
+
+@property (nonatomic, readwrite, assign) NSInteger count;
 
 @end

@@ -23,6 +23,7 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import <RestKit/NSData+MD5.h>
 #import <QuartzCore/QuartzCore.h>
+#import "STInboxViewController.h"
 
 #import "ASIS3ObjectRequest.h"
 
@@ -137,7 +138,8 @@ static const CGFloat _maxPhotoButtonOffset = 135;
     [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
         if (stamp) {
             STPostStampViewController* controller = [[[STPostStampViewController alloc] initWithStamp:stamp] autorelease];
-            UIViewController* inbox = [[[[STConfiguration value:@"Root.inbox"] alloc] init] autorelease];
+            UIViewController* inbox = [[[STInboxViewController alloc] init] autorelease];
+            [Util addHomeButtonToController:inbox withBadge:YES];
             [[Util sharedNavigationController] setViewControllers:[NSArray arrayWithObjects:inbox, controller, nil]
                                                          animated:YES];
         }

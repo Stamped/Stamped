@@ -181,7 +181,7 @@ NSString* const STConfigurationValueDidChangeNotification = @"STConfigurationVal
 - (NSString *)displayValue {
     for (NSString* key in [self.choices allKeys]) {
         id value = [self.choices objectForKey:key];
-        NSLog(@"Comparing %@ to %@",value, self.value);
+        //NSLog(@"Comparing %@ to %@",value, self.value);
         if ([value isEqual:self.value]) {
             return key;
         }
@@ -364,7 +364,7 @@ static STConfiguration* _sharedInstance;
     };
     item.toString = ^(id value) {
         UIFont* theFont = value;
-        NSLog(@"Font:%@,%@",theFont.familyName, theFont.fontName);
+        //NSLog(@"Font:%@,%@",theFont.familyName, theFont.fontName);
         return [NSString stringWithFormat:@"%@:%.1f", theFont.fontName, theFont.pointSize];
     };
     [[STConfiguration sharedInstance] addConfigurationItem:item];

@@ -143,7 +143,7 @@ static STRdio* _sharedInstance;
     if ([action isEqualToString:@"listen"] && source.sourceID != nil) {
       handled = TRUE;
       if (flag) {
-        NSLog(@"playing song:%@",context.entityDetail);
+        //NSLog(@"playing song:%@",context.entityDetail);
         [self ensureLoginWithCompletionBlock:^{
           if (self.loggedIn) {
             [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
@@ -168,7 +168,7 @@ static STRdio* _sharedInstance;
   self.loggedIn = YES;
   self.accessToken = accessToken;
   [[NSUserDefaults standardUserDefaults] setValue:accessToken forKey:_rdioTokenKey];
-  NSLog(@"Storing:%@",accessToken);
+  //NSLog(@"Storing:%@",accessToken);
   if (self.callback) {
     self.callback();
   }
@@ -243,7 +243,7 @@ static STRdio* _sharedInstance;
 - (void)rdioRequest:(RDAPIRequest *)request didLoadData:(id)data {
   NSString* playlistName = @"From Stamped";
   NSString *method = [request.parameters objectForKey:@"method"];
-  NSLog(@"method:%@:%@",method,data);
+  //NSLog(@"method:%@:%@",method,data);
   if( [method isEqualToString:@"getPlaylists"] ) {
     //TODO reconsider type checking approach for potentially corrupt data
     NSString* stampedPlaylistID = nil;

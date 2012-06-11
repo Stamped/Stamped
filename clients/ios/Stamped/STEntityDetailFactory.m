@@ -51,7 +51,6 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   [STDebug log:[NSString stringWithFormat:@"Entity detail failed to load from %@: %@", objectLoader.URL,error]];
-  NSLog(@"Entity detail failed to load from %@: %@", objectLoader.URL,error);
   dispatch_async(dispatch_get_main_queue(), ^{
     @autoreleasepool {
       self.callback(nil);
