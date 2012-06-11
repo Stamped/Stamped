@@ -40,6 +40,8 @@ try:
     from AFriendshipDB          import AFriendshipDB
     from AActivityDB            import AActivityDB
     from api.Schemas            import *
+    from ActivityCollectionCache import ActivityCollectionCache
+    from Memcache               import globalMemcache
     
     #resolve classes
     from resolve.EntitySource   import EntitySource
@@ -74,7 +76,6 @@ class StampedAPI(AStampedAPI):
         Database-agnostic implementation of the internal API for accessing
         and manipulating all Stamped backend databases.
     """
-
     @lazyProperty
     def _netflix(self):
         return globalNetflix()
@@ -98,10 +99,14 @@ class StampedAPI(AStampedAPI):
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
         self.lite_mode = kwargs.pop('lite_mode', False)
-        self._cache    = libs.Memcache.StampedMemcache()
+        self._cache    = globalMemcache()
 
         self.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        self._activityCache = ActivityCollectionCache(self,
+                                                      cacheBlockSize=self.ACTIVITY_CACHE_BLOCK_SIZE,
+                                                      cacheBufferSize=self.ACTIVITY_CACHE_BUFFER_SIZE)
 
         # Enable / Disable Functionality
         self._activity = True
@@ -4266,7 +4271,7 @@ class StampedAPI(AStampedAPI):
     def _createActivityCacheKey(self, authUserId, distance, offset):
         return str("ActivityCacheKey::%s::%s::%s" % (authUserId, distance, offset))
 
-    def _getActivityFromDB(self, authUserId, distance, before, limit):
+    def _getActivityFromDB(self, authUserId, distance, limit, before=None):
         final = False
 
         params = {}
@@ -4371,7 +4376,7 @@ class StampedAPI(AStampedAPI):
             curOffset += self.ACTIVITY_CACHE_BLOCK_SIZE
             key = self._createActivityCacheKey(authUserId, distance, curOffset)
 
-    def _getActivityFromCache(self, authUserId, distance, offset, limit):
+    def _getActivityFromCache(self, authUserId, distance, limit, offset=0):
         """
         Pull the requested activity data from cache if it exists there, otherwise pull the data from db
         Returns a tuple of (the activity data list, bool indicating if the end of the activity stream was reached)
@@ -4400,7 +4405,9 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getActivity(self, authUserId, actSlice):
-        activityData, final = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
+        activityData, final = self._activityCache.getFromCache(actSlice.limit, actSlice.offset,
+                                                               authUserId=authUserId, distance=actSlice.distance)
+        #activityData, final = self._getActivityFromCache(authUserId, actSlice.distance, actSlice.offset, actSlice.limit)
 
         # Append user objects
         userIds     = {}
