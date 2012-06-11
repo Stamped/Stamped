@@ -234,7 +234,7 @@ class GenericSource(BasicSource):
             setAttribute('formatted_address', 'formatted_address')
 
             if proxy.coordinates is not None:
-                coordinates = CoordinatesSchema()
+                coordinates = Coordinates()
                 coordinates.lat = proxy.coordinates[0]
                 coordinates.lng = proxy.coordinates[1]
                 entity.coordinates = coordinates

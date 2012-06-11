@@ -11,7 +11,7 @@ import time
 
 def transform_stamps(stamps):
     """
-    Convert stamps to HTTPStamp or HTTPDeletedStamps and return as json-formatted HttpResponse
+    Convert stamps to HTTPStamp and return as json-formatted HttpResponse
     """
     result = []
     for stamp in stamps:

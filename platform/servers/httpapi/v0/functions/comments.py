@@ -25,15 +25,17 @@ def remove(request, authUserId, http_schema, **kwargs):
     return transformOutput(comment.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPCommentSlice, conversion=HTTPCommentSlice.exportCommentSlice)
+@handleHTTPRequest(http_schema=HTTPCommentSlice)
 @require_http_methods(["GET"])
-def list(request, authUserId, schema, **kwargs):
-    comments = stampedAPI.getComments(schema, authUserId)
+def collection(request, authUserId, http_schema, **kwargs):
+    comments = stampedAPI.getComments(http_schema.stamp_id, authUserId,
+                                      before=http_schema.exportBefore(),
+                                      limit=http_schema.limit,
+                                      offset=http_schema.offset)
     results  = []
     
     for comment in comments:
         results.append(HTTPComment().importComment(comment).dataExport())
     
-    # results = sorted(results, key=lambda k: k['created'])
     return transformOutput(results)
 

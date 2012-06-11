@@ -65,7 +65,7 @@ class StampedAPIPlacesSearch(StampedAPIPlaceTest):
         path = "entities/search.json"
         data = { 
             "oauth_token": self.token['access_token'],
-            "q": self.entity['title'][:3]
+            "query": self.entity['title'][:3]
         }
         result = self.handleGET(path, data)
         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])

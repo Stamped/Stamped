@@ -78,25 +78,25 @@ class MongoStampStatsCollection(AMongoCollection):
         if viewport is not None:
             pass
             query["lat"] = {
-                "$gte" : viewport.lowerRight.lat, 
-                "$lte" : viewport.upperLeft.lat, 
+                "$gte" : viewport.lower_right.lat, 
+                "$lte" : viewport.upper_left.lat, 
             }
             
-            if viewport.upperLeft.lng <= viewport.lowerRight.lng:
+            if viewport.upper_left.lng <= viewport.lower_right.lng:
                 query["lng"] = { 
-                    "$gte" : viewport.upperLeft.lng, 
-                    "$lte" : viewport.lowerRight.lng, 
+                    "$gte" : viewport.upper_left.lng, 
+                    "$lte" : viewport.lower_right.lng, 
                 }
             else:
                 # handle special case where the viewport crosses the +180 / -180 mark
                 query["$or"] = [{
                         "lng" : {
-                            "$gte" : viewport.upperLeft.lng, 
+                            "$gte" : viewport.upper_left.lng, 
                         }, 
                     }, 
                     {
                         "lng" : {
-                            "$lte" : viewport.lowerRight.lng, 
+                            "$lte" : viewport.lower_right.lng, 
                         }, 
                     }, 
                 ]
