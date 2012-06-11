@@ -31,19 +31,23 @@ if __name__ == '__main__':
         args.image_urls = args.image_urls[0]
     
     if args.image_urls is not None and len(args.image_urls) > 0:
-        utils.log("HARDCODED")
         db.addEntityImages(args.image_urls)
     else:
-        utils.log("USING DB")
         api  = MongoStampedAPI()
         pool = Pool(8)
         
         def _process_entity(entity):
-            image_url    = entity.image
-            image_url    = db.addWebEntityImage(image_url)
-            entity.image = image_url
+            modified = False
             
-            api._entityDB.updateEntity(entity)
+            for image in entity.images:
+                image_url    = image.sizes[0]
+                image_url    = db.addWebEntityImage(image_url)
+                
+                modified     = True
+                image.sizes[0].url = image_url
+            
+            if modified:
+                api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
         docs = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
