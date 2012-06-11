@@ -27,6 +27,9 @@ if __name__ == '__main__':
     if args.db is not None:
         utils.init_db_config(args.db)
     
+    if args.image_urls is not None:
+        args.image_urls = args.image_urls[0]
+    
     if args.image_urls is not None and len(args.image_urls) > 0:
         utils.log("HARDCODED")
         db.addEntityImages(args.image_urls)
