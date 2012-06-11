@@ -4502,7 +4502,7 @@ class StampedAPI(AStampedAPI):
 
 
         # Reset activity count
-        if personal == 0:
+        if personal == True:
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
