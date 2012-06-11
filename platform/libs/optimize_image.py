@@ -34,7 +34,7 @@ if __name__ == '__main__':
         db.addEntityImages(args.image_urls)
     else:
         api  = MongoStampedAPI()
-        pool = Pool(8)
+        pool = Pool(32)
         
         def _process_entity(entity):
             modified = False
@@ -50,17 +50,24 @@ if __name__ == '__main__':
                 api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
-        docs = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
-        utils.log("processing %d entity images" % docs.count())
+        docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
+        count = docs.count()
+        index = 0
         
-        count = 0
+        progress_delta = 5
+        progress_count = 100 / progress_delta
+        
+        utils.log("processing %d entity images" % count)
+        
         for doc in docs:
             entity = api._entityDB._convertFromMongo(doc)
+            
             pool.spawn(_process_entity, entity)
             
-            count += 1
-            if count > 10:
-                break
+            if 0 == (index % (count / progress_count)):
+                utils.log("%s" % (utils.getStatusStr(index, count)))
+            
+            index += 1
         
         pool.join()
 
