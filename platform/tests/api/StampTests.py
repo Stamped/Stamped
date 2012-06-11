@@ -39,16 +39,7 @@ class StampedAPIStampConsumeTest(AStampedAPITestCase):
 # CREATE STAMP
 
 class StampedAPIStampCreate(StampedAPIStampCreateTest):
-    def test_create_basic(self):
-        path = "stamps/create.json"
-        blurb = "This is a sample stamp. A 'stample', if you will."
-        data = { 
-            "oauth_token"   : self.tokenA['access_token'],
-            "entity_id"     : self.entity['entity_id'],
-            "blurb"         : blurb,
-        }
-        result = self.handlePOST(path, data)
-
+    def _validate_basic_stamp(self, result):
         # Verify stamp object has all necessary attributes
         self.assertTrue('stamp_id' in result)
         self.assertTrue('entity' in result)
@@ -66,7 +57,7 @@ class StampedAPIStampCreate(StampedAPIStampCreateTest):
         self.assertTrue(len(result['contents']) == 1)
 
         # Verify 'blurb' is equal to blurb passed
-        self.assertTrue(result['contents'][0]['blurb'] == self.stamp['contents'][0]['blurb'])
+        self.assertTrue(result['contents'][0]['blurb'] == self.blurb)
 
         # Verify 'user' is set up correctly 
         self.assertTrue(result['user']['screen_name'] == self.userA['screen_name'])
@@ -80,7 +71,57 @@ class StampedAPIStampCreate(StampedAPIStampCreateTest):
         self.assertTrue(result['entity']['title'] == self.entity['title'])
         self.assertTrue(result['entity']['category'] == self.entity['category'])
 
+    def _validate_credited_stamp(self, result):
+        # Verify credit is in result
+        self.assertTrue('credits' in result)
+        self.assertTrue(len(result['credits']) == 1)
 
+        # Verify credit is populated correctly
+        self.assertTrue(result['credits'][0]['user']['screen_name'] == self.userB['screen_name'])
+        self.assertTrue(result['credits'][0]['user']['user_id'] == self.userB['user_id'])
+        self.assertTrue(result['credits'][0]['user']['name'] == self.userB['name'])
+        self.assertTrue(result['credits'][0]['user']['color_primary'] == self.userB['color_primary'])
+        self.assertTrue(result['credits'][0]['user']['color_secondary'] == self.userB['color_secondary'])
+        self.assertTrue(result['credits'][0]['user']['image_url'] == self.userB['image_url'])
+
+    def test_create_basic(self):
+        self.blurb = "This is a sample stamp. A 'stample', if you will."
+
+        path = "stamps/create.json"
+        data = { 
+            "oauth_token"   : self.tokenA['access_token'],
+            "entity_id"     : self.entity['entity_id'],
+            "blurb"         : self.blurb,
+        }
+        result = self.handlePOST(path, data)
+
+        # Validate stamp
+        self._validate_basic_stamp(result)
+
+        self.deleteStamp(self.tokenA, result['stamp_id'])
+
+    def test_create_credit(self):
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+
+        self.blurb = "This is a sample stamp with credit. Because everyone likes undeserved credit."
+
+        path = "stamps/create.json"
+        data = { 
+            "oauth_token"   : self.tokenA['access_token'],
+            "entity_id"     : self.entity['entity_id'],
+            "blurb"         : self.blurb,
+            "credits"       : self.userB['screen_name'],
+        }
+        result = self.handlePOST(path, data)
+
+        # Validate stamp
+        self._validate_basic_stamp(result)
+
+        # Validate credit
+        self._validate_credited_stamp(result)
+
+        self.deleteStamp(self.tokenA, result['stamp_id'])
+        self.deleteAccount(self.tokenB)
 
 
 class StampedAPIStampsShow(StampedAPIStampConsumeTest):

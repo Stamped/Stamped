@@ -51,12 +51,13 @@ class AMongoCollectionView(AMongoCollection):
 
         # handle category / subcategory filters
         # -------------------------------------
-        if timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
-            query["entity.kind"] = {'$in': list(timeSlice.kinds)}
-
+        ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
         if timeSlice.types is not None and len(timeSlice.types) > 0:
             add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
                             {'entity.subcategory': {'$in': list(timeSlice.types)}} ])
+
+        elif timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
+            query["entity.kind"] = {'$in': list(timeSlice.kinds)}
         
         # handle viewport filter
         # ----------------------
@@ -118,12 +119,13 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle category / subcategory filters
         # -------------------------------------
-        if searchSlice.kinds is not None and len(searchSlice.kinds) > 0:
-            query["entity.kind"] = {'$in': list(searchSlice.kinds)}
+        ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
+        if timeSlice.types is not None and len(timeSlice.types) > 0:
+            add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
+                            {'entity.subcategory': {'$in': list(timeSlice.types)}} ])
 
-        if searchSlice.types is not None and len(searchSlice.types) > 0:
-            add_or_query([  {'entity.types': {'$in': list(searchSlice.types)}},
-                            {'entity.subcategory': {'$in': list(searchSlice.types)}} ])
+        elif timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
+            query["entity.kind"] = {'$in': list(timeSlice.kinds)}
 
         # Query
         if searchSlice.query is not None:
