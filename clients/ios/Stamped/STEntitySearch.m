@@ -36,7 +36,7 @@
 - (NSMutableDictionary*)asDictionaryParams {
   NSMutableDictionary* dict = [Util sparseDictionaryForObject:self andKeyPaths:[STEntitySearch simpleKeyPaths]];
   if (self.query) {
-    [dict setObject:self.query forKey:@"q"];
+    [dict setObject:self.query forKey:@"query"];
   }
   return dict;
 }
@@ -48,8 +48,8 @@
       [self setValue:value forKeyPath:keyPath];
     }
   }
-  if ([params objectForKey:@"q"]) {
-    self.query = [params objectForKey:@"q"];
+  if ([params objectForKey:@"query"]) {
+    self.query = [params objectForKey:@"query"];
   }
 }
 
