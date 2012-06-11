@@ -37,11 +37,14 @@ if __name__ == '__main__':
             api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
-        entities = api._entityDB._collection.find({'entity.image' : {'$regex' : r'^.*thetvdb.com.*$'}})
+        entities = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
         utils.log("processing %d entity images" % entities.count())
         
+        count = 0
         for entity in entities:
             pool.spawn(_process_entity, entity)
+            if count > 10:
+                break
         
         pool.join()
     else:
