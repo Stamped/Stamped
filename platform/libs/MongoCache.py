@@ -22,7 +22,9 @@ argument "purge" to clean out the mongo cache entirely.
 
 import Globals
 import binascii, bson, datetime, ec2_utils, functools, logs, utils, pylibmc
+from pymongo.errors import AutoReconnect
 from api.db.mongodb.AMongoCollection import MongoDBConfig
+
 
 #####################################################################
 ########################### SERIALIZATION ###########################
@@ -94,6 +96,9 @@ def serializeCall(fnName, args, kwargs):
         kwargs = tuple(zip(map(serializeTerm, keys), map(serializeTerm, values)))
     return hash((fnName, args, kwargs))
 
+
+cacheTableError = None
+
 ONE_WEEK = datetime.timedelta(7)
 def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
     # Don't use Mongo caching in production.
@@ -104,6 +109,11 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
 
         @functools.wraps(userFunction)
         def wrappedFn(*args, **kwargs):
+            global cacheTableError
+            if cacheTableError is not None:
+                # We haven't been able to connect to the cache. MongoDB may not be running. Just issue the call.
+                return userFunction(*args, **kwargs)
+
             now = datetime.datetime.now()
             fullArgs = args
 
@@ -118,9 +128,15 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
             callHash = serializeCall(fnName, args, kwargs)
 
             force_recalculate = kwargs.pop('force_recalculate', False)
-            connection = MongoDBConfig.getInstance().connection
-            table = connection.stamped.cache
-            result = table.find_one({'_id':callHash})
+            try:
+                connection = MongoDBConfig.getInstance().connection
+                table = connection.stamped.cache
+                result = table.find_one({'_id':callHash})
+            except AutoReconnect as exc:
+                cacheTableError = exc
+                logs.warning("Couldn't connect to Mongo cache table; disabling Mongo cache.")
+                return userFunction(*fullArgs, **kwargs)
+
             if result and (result['expiration'] > now) and not force_recalculate:
                 # We hit the cache and the result isn't stale! Woo!
                 return result['value']
