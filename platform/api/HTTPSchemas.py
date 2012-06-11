@@ -598,7 +598,7 @@ class HTTPAccountAlerts(Schema):
         self.email_alert_follow         = False
 
     def importAccount(self, account):
-        alerts = getattr(account, 'alerts', None)
+        alerts = getattr(account, 'alert_settings', None)
         if alerts is not None:
             self.dataImport(alerts.dataExport(), overflow=True)
 
