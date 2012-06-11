@@ -44,6 +44,9 @@
 TODO:
     * generic JS-reliance class w/ display: none and display: block in head initialization if JS is supported
     * align stamp-gallery with profile header
+    * experiment w/ subcategory filters that slide out from category filter navbar
+    * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
+    * fix broken thetvdb images
     
     * sDetail:
         * DONE - "Anatomy of eDetail section" spec
@@ -60,15 +63,26 @@ TODO:
         * DONE - sDetail overlay
         * DONE - Autocentering based on user's location
         * DONE - Share this map widget
-        * BETA - Customize stamp popup
+        * DONE - Customize stamp popup
         * Incorporate closest geocoded metropolitan area in marker cluster hover
     * Profile Page:
         * header:
             * DONE - Dynamic, category-dependent header titles
             * DONE - Separate # STAMPS header from user.num_stamps
             * BETA - Header functionality w/ temp header images
-            * BETA - Share this collection
+            * DONE - Share this collection
             * Customized user-specific, category-dependent header collages
+            * Header images:
+                * Category and user dependent
+                * Offline:
+                    * create collage
+                    * apply grayscale filter
+                    * users/collages/screen_name/category[-subcategory].jpg
+                * Online:
+                    * TODO: when to apply perspective?
+                    * overlay user gradient w/ screen blend mode at .7 opacity
+                    * add perspective transform
+                    * overlay blur that fades out on mouseover
             * View histogram
             * View bio / friends
         * gallery:

@@ -15,9 +15,9 @@ except:
     utils.printException()
     pass
 
-from AImageDB import AImageDB
-from StringIO import StringIO
-from errors   import *
+from AImageDB           import AImageDB
+from StringIO           import StringIO
+from errors             import *
 
 from boto.cloudfront    import CloudFrontConnection
 from boto.s3.connection import S3Connection
@@ -66,7 +66,17 @@ class S3ImageDB(AImageDB):
         im = Image.open(io)
         
         return im
-
+    
+    def getWebImage(self, url, desc=None):
+        try:
+            data = utils.getFile(url)
+        except urllib2.HTTPError:
+            desc = ("%s " % desc if desc is not None else "")
+            logs.warn("unable to download %simage from '%s'" % (url, desc))
+            raise
+        
+        return self.getImage(data)
+    
     @property
     def profileImageMaxSize(self):
         return (500, 500)
@@ -109,7 +119,7 @@ class S3ImageDB(AImageDB):
         }
     
     def addProfileImage(self, screen_name, image):
-        assert isinstance(image, Image.Image)
+        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
         
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
@@ -139,13 +149,7 @@ class S3ImageDB(AImageDB):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
         
-        try:
-            f = utils.getFile(image_url)
-        except urllib2.HTTPError:
-            logs.warn("unable to download profile image from '%s'" % image_url)
-            raise
-        
-        image    = self.getImage(f)
+        image    = getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
         
@@ -167,7 +171,7 @@ class S3ImageDB(AImageDB):
             logs.warning('Warning: Failed to remove file')
     
     def addEntityImage(self, entityId, image):
-        assert isinstance(image, Image.Image)
+        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
         
         prefix   = 'entities/%s' % entityId
         max_size = (960, 960)
@@ -181,7 +185,7 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size, sizes)
     
     def addStampImage(self, stampId, image):
-        assert isinstance(image, Image.Image)
+        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
         
         prefix   = 'stamps/%s' % stampId
         url      = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
@@ -193,19 +197,13 @@ class S3ImageDB(AImageDB):
     
     def addResizedStampImages(self, image_url, imageId, max_size, sizes):
         """
-        image_url is the temp url
+            image_url is the temp url
         """
-        try:
-            f = utils.getFile(image_url)
-        except urllib2.HTTPError:
-            logs.warn("unable to download stamp image from '%s'" % image_url)
-            raise
         
-        image    = self.getImage(f)
+        image    = getWebImage(image_url, "stamp")
         prefix   = 'stamps/%s' % imageId
 
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
-
     
     def changeProfileImageName(self, oldScreenName, newScreenName):
         # Filename is lowercase screen name
@@ -225,7 +223,7 @@ class S3ImageDB(AImageDB):
             self._copyInS3(old, new)
     
     def _addImageSizes(self, prefix, image, max_size, sizes=None, original_url=None):
-        assert isinstance(image, Image.Image)
+        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
         
         def resizeImage(image, size):
             ratio = 1.0
@@ -265,41 +263,66 @@ class S3ImageDB(AImageDB):
                 name = '%s%s' % (prefix, name)
                 self._addJPG(name, resized)
     
+    def addWebEntityImage(self, image_url):
+        utils.log("downloading '%s'" % image_url)
+        
+        image    = self.getWebImage(image_url)
+        suffix   = os.path.basename(image_url)
+        filename = "entities/%s" % suffix
+        
+        return self.addImage(filename, image)
+    
+    def addEntityImages(image_urls):
+        pool = Pool(8)
+        
+        for url in image_urls:
+            pool.spawn(self.addWebEntityImage, image_url)
+        
+        pool.join()
+    
+    def addImage(self, name, image):
+        prefix, suffix = os.path.splitext(name)
+        suffix = suffix.lower()
+        
+        if suffix == '.jpg' or suffix == '.jpeg':
+            self._addJPG(prefix, image)
+        elif suffix == '.png':
+            self._addPNG(prefix, image)
+        else:
+            raise Exception("unsupported image type: '" + suffix + "'")
+    
     def _addJPG(self, name, image):
-        assert isinstance(image, Image.Image)
+        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
         
         name    = "%s.jpg" % name
-
         out     = StringIO()
-
+        
         try:
             image.save(out, 'jpeg', optimize=True, quality=90)
         except IOError as e:
+            # TODO (travis): where does this MAXBLOCK logic coming from? really needs a comment!
             ImageFile.MAXBLOCK = (image.size[0] * image.size[1]) + 1
+            
             image.save(out, 'jpeg', optimize=True, quality=90)
         
-        logs.info('[%s] adding image %s (%dx%d)' % \
-            (self, name, image.size[0], image.size[1]))
-        
+        logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
         self._addDataToS3(name, out, 'image/jpeg')
         
         return name
     
     def _addPNG(self, name, image):
-        assert isinstance(image, Image.Image)
+        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
         
         name    = "%s.png" % name
-
         out     = StringIO()
+        
         image.save(out, 'png')
         
-        logs.info('[%s] adding image %s (%dx%d)' % \
-            (self, name, image.size[0], image.size[1]))
-        
+        logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
         self._addDataToS3(name, out, 'image/png')
         
         return name
-
+    
     def _addDataToS3(self, name, data, contentType):
         num_retries = 0
         max_retries = 5
