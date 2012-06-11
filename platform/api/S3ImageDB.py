@@ -272,7 +272,7 @@ class S3ImageDB(AImageDB):
         
         return self.addImage(filename, image)
     
-    def addEntityImages(image_urls):
+    def addEntityImages(self, image_urls):
         pool = Pool(8)
         
         for url in image_urls:

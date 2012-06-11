@@ -984,5 +984,6 @@ def basicNestedObjectToString(obj):
         elementStrings = [indentText('%s : %s,' % (str(key), basicNestedObjectToString(value)), 2) for (key, value) in obj.items()]
         return '{\n' + ('\n'.join(elementStrings)) +'\n}'
     
+    # TODO: should fallback to a simple str(obj)?
     raise Exception('Can\'t string-ify object of type: ' + type(obj))
 
