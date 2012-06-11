@@ -963,18 +963,21 @@ def indentText(text, n):
     indentedLines = [indent + line for line in lines]
     return '\n'.join(indentedLines)
 
-def basicNestedObjectToString(object):
+def basicNestedObjectToString(object, wrapStrings=False):
+    wrapperFn = str
+    if wrapStrings:
+        wrapperFn = json.dumps
     if isinstance(object, unicode):
-        return object.encode('utf-8')
+        return wrapperFn(object.encode('utf-8'))
     if any(isinstance(object, type_) for type_ in [basestring, int, float]):
-        return str(object)
+        return wrapperFn(object)
     if isinstance(object, list):
-        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in object]
+        elementStrings = [indentText(basicNestedObjectToString(element, wrapStrings=wrapStrings), 2) + ',' for element in object]
         return '[\n' + ('\n'.join(elementStrings)) + '\n]'
     if isinstance(object, tuple):
-        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in object]
+        elementStrings = [indentText(basicNestedObjectToString(element, wrapStrings=wrapStrings), 2) + ',' for element in object]
         return '(\n' + ('\n'.join(elementStrings)) + '\n)'
     if isinstance(object, dict):
-        elementStrings = [indentText('%s : %s,' % (str(key), basicNestedObjectToString(value)), 2) for (key, value) in object.items()]
+        elementStrings = [indentText('%s : %s,' % (wrapperFn(key), basicNestedObjectToString(value, wrapStrings=wrapStrings)), 2) for (key, value) in object.items()]
         return '{\n' + ('\n'.join(elementStrings)) +'\n}'
     raise Exception('Can\'t string-ify object of type: ' + type(object))
