@@ -22,6 +22,11 @@
 #import "STUserSource.h"
 #import "STNavigationBar.h"
 #import "STSimpleSource.h"
+#import "STEditProfileViewController.h"
+
+#import "STDetailTableCell.h"
+#import "STDescriptionTableCell.h"
+#import "STTableViewSectionBackground.h"
 
 @interface STUserViewController ()
 @property(nonatomic,readonly) BOOL loadingUser;
@@ -29,6 +34,7 @@
 @property(nonatomic,retain) id<STUser> user;
 @property(nonatomic,copy) NSString *userIdentifier;
 @property(nonatomic,retain,readonly) STUserGraphView *graphView;
+@property(nonatomic,retain,readonly) UITableView *infoTableView;
 @end
 
 @implementation STUserViewController
@@ -37,25 +43,24 @@
 @synthesize graphView=_graphView;
 @synthesize stamps=_stamps;
 @synthesize loadingUser=_loadingUser;
+@synthesize infoTableView=_infoTableView;
 
-- (id)init {
+- (void)commonInit {
     
-    if ((self = [super init])) {
-        
-        
-        
-    }
-    return self;
-    
+    _sectionViews = [[NSMutableArray alloc] initWithObjects:[NSNull null], [NSNull null], nil];
+    _infoDataSource = [[NSArray array] retain];
+
+    _stamps = [[STUserStamps alloc] init];
+    _stamps.userIdentifier = self.userIdentifier;
+    [STEvents addObserver:self selector:@selector(stampsFinished:) event:EventTypeUserStampsFinished identifier:self.userIdentifier];
+
 }
 
 - (id)initWithUserIdentifier:(NSString*)identifier {
     
     if ((self = [super init])) {
         self.userIdentifier = identifier;
-        _stamps = [[STUserStamps alloc] init];
-        _stamps.userIdentifier = self.userIdentifier;
-        [STEvents addObserver:self selector:@selector(stampsFinished:) event:EventTypeUserStampsFinished identifier:self.userIdentifier];
+        [self commonInit];
     }
     return self;
     
@@ -78,9 +83,8 @@
             self.title = user.screenName;
        
         }
-        _stamps = [[STUserStamps alloc] init];
-        _stamps.userIdentifier = self.userIdentifier;
-        [STEvents addObserver:self selector:@selector(stampsFinished:) event:EventTypeUserStampsFinished identifier:self.userIdentifier];
+
+        [self commonInit];
 
     }
     return self;
@@ -116,6 +120,22 @@
         [(STNavigationBar*)self.navigationController.navigationBar showUserStrip:YES forUser:_user];
     }
     
+    if (!_infoTableView) {
+        
+        UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        if (tableView.backgroundView) {
+            tableView.backgroundView.hidden = YES;
+        }
+        tableView.backgroundColor = [UIColor whiteColor];
+        tableView.delegate = (id<UITableViewDelegate>)self;
+        tableView.dataSource = (id<UITableViewDataSource>)self;
+        [self.view addSubview:tableView];
+        _infoTableView = [tableView retain];
+        [tableView release];
+        _infoTableView.hidden = YES;
+        
+    }    
+    
 }
 
 - (void)viewDidUnload {
@@ -139,6 +159,7 @@
     self.userIdentifier = nil;
     [_user release], _user = nil;    
     [_stamps release], _stamps=nil;
+    [_sectionViews release], _sectionViews=nil;
     [super dealloc];
 }
 
@@ -155,7 +176,6 @@
         [self animateIn];
     }
     
-    
 }
 
 
@@ -163,6 +183,12 @@
 
 - (void)editProfile:(id)sender {
     
+    STEditProfileViewController *controller = [[STEditProfileViewController alloc] init];
+    controller.delegate = (id<STEditProfileViewControllerDelegate>)self;
+    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+    [self presentModalViewController:navController animated:YES];
+    [controller release];
+    [navController release];
     
 }
 
@@ -213,6 +239,60 @@
         [self.graphView setupWithUser:_user];
     }
     
+    
+    if ([_user isKindOfClass:[STSimpleUserDetail class]]) {
+        
+        STSimpleUserDetail *tempuser = (STSimpleUserDetail*)_user;
+        
+        NSMutableArray *dataSource = [[NSMutableArray alloc] init];
+        if (IS_CURRENT_USER(self.userIdentifier)) {
+            
+            // stamps remaining count
+            NSString *remaining = [NSString stringWithFormat:@"%i", [[tempuser numStampsLeft] integerValue]];
+            [dataSource addObject:[NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:remaining, @"detail", @"Stamps remaining", @"title", @"STDetailTableCell", @"class", nil]]];
+            
+        }
+
+        NSMutableArray *array = [[NSMutableArray alloc] init];
+        NSDictionary *dictionary = nil;
+        
+        // bio
+        if (tempuser.bio && tempuser.bio.length > 0) {
+            dictionary = [NSDictionary dictionaryWithObjectsAndKeys:tempuser.bio, @"detail", @"About", @"title", @"STDescriptionTableCell", @"class", nil];
+            [array addObject:dictionary];
+        }
+        
+        // web profile
+        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"stamped.com/%@", tempuser.screenName] , @"detail", @"Web Profile", @"title", @"STDetailTableCell", @"class", nil];
+        [array addObject:dictionary];
+
+        // followers
+        NSString *value = [NSString stringWithFormat:@"%i", [[tempuser numFollowers] integerValue]];
+        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"detail", @"Followers", @"title", @"STDetailTableCell", @"class", nil];
+        [array addObject:dictionary];
+
+        // following
+        value = [NSString stringWithFormat:@"%i", [[tempuser numFriends] integerValue]];
+        dictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"detail", @"Following", @"title", @"STDetailTableCell", @"class", nil];
+        [array addObject:dictionary];
+        [dataSource addObject:array];
+        
+        [_infoDataSource release], _infoDataSource=nil;
+        _infoDataSource = [dataSource retain];
+                
+        [array release];
+        [dataSource release];
+        [self.infoTableView reloadData];
+        
+    }
+    
+    
+}
+
+- (void)setLoading:(BOOL)loading {
+    
+    
+    
 }
 
 
@@ -228,7 +308,17 @@
 
 - (void)stUserHeaderView:(STUserHeaderView*)view selectedTab:(STUserHeaderTab)tab {
         
-    [self.tableView reloadData];
+    if (tab != STUserHeaderTabInfo) {
+        if (self.tableView.tableHeaderView==nil && _infoTableView.tableHeaderView!=nil) {
+            CGPoint offset = self.infoTableView.contentOffset;
+            UIView *header = [self.infoTableView.tableHeaderView retain];
+            self.infoTableView.tableHeaderView = nil;
+            self.tableView.tableHeaderView = header;
+            [self.tableView reloadData];
+            [header release];
+            self.tableView.contentOffset = offset;
+        }        
+    }
     
     if (tab == STUserHeaderTabGraph) {
         
@@ -240,12 +330,31 @@
             [_graphView setupWithUser:self.user];
             [view release];
         }
-        
+        [self.tableView reloadData];
+
     } else if (tab == STUserHeaderTabInfo) {
         
+        CGPoint offset = self.tableView.contentOffset;
+        UIView *header = [self.tableView.tableHeaderView retain];
+        self.tableView.tableHeaderView = nil;
+        _infoTableView.tableHeaderView = header;
+        [_infoTableView reloadData];
+        [header release];
+        self.infoTableView.contentOffset = offset;
+
+    } else {
+        
+        UIView *header = [self.tableView.tableHeaderView retain];
+        self.tableView.tableHeaderView = nil;
+        self.tableView.tableHeaderView = header;
+        [self.tableView reloadData];
+        [header release];
         
     }
- 
+    
+    if (_infoTableView) {
+        _infoTableView.hidden = (tab != STUserHeaderTabInfo);
+    }
     
     if (self.graphView) {
         self.graphView.hidden = (tab != STUserHeaderTabGraph);
@@ -324,9 +433,62 @@
 }
 
 
+#pragma mark - STDescriptionTableCellDelegate
+
+- (void)stDescriptionTableCell:(STDescriptionTableCell*)cell didExpand:(BOOL)expanded {
+    
+    _expanded = expanded;
+    [self.infoTableView beginUpdates];
+    cell.expanded = _expanded;
+    [self.infoTableView endUpdates];
+    [self setupSectionAtIndex:0];
+
+}
+
+
+#pragma mark - Section Styling
+
+- (void)setupSectionAtIndex:(NSInteger)index {
+    
+    UIView *view = [_sectionViews objectAtIndex:index];
+    
+    if ([view isEqual:[NSNull null]]) {
+        
+        STTableViewSectionBackground *background = [[STTableViewSectionBackground alloc] initWithFrame:CGRectMake(12.0f, 0.0f, self.tableView.bounds.size.width-24.0f, 0.0f)];
+        [self.infoTableView insertSubview:background atIndex:0];
+        [_sectionViews replaceObjectAtIndex:index withObject:background];
+        [background release];
+        view = background;
+        
+    }
+    
+    CGRect frame = view.frame;
+    frame.size.height = [self.infoTableView rectForSection:index].size.height;
+    frame.origin.y = [self.infoTableView rectForSection:index].origin.y;    
+    frame.origin.y += 8.0f;
+    frame.size.height -= 16.0f;
+    
+    view.frame = frame;
+    [self.infoTableView sendSubviewToBack:view];
+    
+}
+
+
 #pragma mark - UITableViewDataSource
 
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (tableView == _infoTableView) {
+        
+        NSArray *section = [_infoDataSource objectAtIndex:indexPath.section];
+        NSDictionary *dictionary = [section objectAtIndex:indexPath.row];
+        if ([[dictionary objectForKey:@"class"] isEqualToString:@"STDescriptionTableCell"]) {
+            return [STDescriptionTableCell heightForText:[dictionary objectForKey:@"detail"] expanded:_expanded];
+        }
+
+        return 40.0f;
+
+    }
 
     id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
     return [STStampCell heightForStamp:stamp];
@@ -335,16 +497,74 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
     
+    if (tableView == _infoTableView) {
+        return [_infoDataSource count];
+    }
+    
     if ([self selectedTab] != STUserHeaderTabStamps) return 0;
     return [_stamps isEmpty] ? 0 : 1;
     
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    if (tableView == _infoTableView) {
+        NSArray *array = [_infoDataSource objectAtIndex:section];
+        return [array count];
+    }
+    
     return [self.stamps numberOfObject];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (tableView == _infoTableView) {
+        
+        if (indexPath.row == 0) {
+            [self setupSectionAtIndex:indexPath.section];
+        }
+        
+        NSArray *section = [_infoDataSource objectAtIndex:indexPath.section];
+        NSDictionary *dictionary = [section objectAtIndex:indexPath.row];
+       
+        if ([[dictionary objectForKey:@"class"] isEqualToString:@"STDescriptionTableCell"]) {
+
+            static NSString *DetailCellIdentifier = @"DecriptionIdentifier";
+            STDescriptionTableCell *cell = [tableView dequeueReusableCellWithIdentifier:DetailCellIdentifier];
+            if (cell == nil) {
+                cell = [[[STDescriptionTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:DetailCellIdentifier] autorelease];
+                cell.delegate = (id<STDescriptionTableCellDelegate>)self;
+            }
+            [cell setFirst:YES last:NO];
+            
+            cell.titleLabel.text = [dictionary objectForKey:@"title"];
+            cell.detailTitleLabel.text = [dictionary objectForKey:@"detail"];
+            
+            return cell;
+            
+        }
+        
+        
+        static NSString *CellIdentifier = @"DetailIdentifier";
+        STDetailTableCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        if (cell == nil) {
+            cell = [[[STDetailTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        }
+        
+        [cell setFirst:(indexPath.row==0) last:(indexPath.row==[section count]-1)];
+        cell.titleLabel.text = [dictionary objectForKey:@"title"];
+        cell.detailTitleLabel.text = [dictionary objectForKey:@"detail"];
+        
+        if ([cell.titleLabel.text isEqualToString:@"Web Profile"]) {
+            cell.detailTitleLabel.textColor = [UIColor colorWithRed:0.478f green:0.611f blue:0.8f alpha:1.0f];
+        } else {
+            cell.detailTitleLabel.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
+        }
+
+        return cell;
+        
+    }
+    
     
     static NSString *CellIdentifier = @"CellIdentifier";
     STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -365,6 +585,23 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    if (tableView == _infoTableView) {
+        [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        
+        NSArray *section = [_infoDataSource objectAtIndex:indexPath.section];
+        NSDictionary *dictionary = [section objectAtIndex:indexPath.row];
+        if ([[dictionary objectForKey:@"title"] isEqualToString:@"Web Profile"]) {
+
+            UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:[dictionary objectForKey:@"detail"] delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Copy Link", @"Email Link", nil];
+            actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+            [actionSheet showInView:self.view];
+            [actionSheet release];
+            
+        }
+        return;
+    }
+    
+    
     id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
     STActionContext *context = [STActionContext context];
     context.stamp = stamp;
@@ -383,6 +620,16 @@
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
+}
+
+
+#pragma mark - STEditProfileViewControllerDelegate
+
+- (void)stEditProfileViewControllerCancelled:(STEditProfileViewController*)controller {
+    [self dismissModalViewControllerAnimated:YES];
+}
+- (void)stEditProfileViewControllerSaved:(STEditProfileViewController*)controller {
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 
