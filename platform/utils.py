@@ -972,30 +972,36 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
 
 def indentText(text, n):
     """ Takes a multi-line string of text and indents each line by n spaces. """
-    
+
     lines    = text.split('\n')
     indent   = ' ' * n
     indented = [indent + line for line in lines]
-    
+
     return '\n'.join(indented)
 
-def basicNestedObjectToString(obj):
+def basicNestedObjectToString(obj, wrapStrings=False):
+    recurse = lambda o: basicNestedObjectToString(o, wrapStrings=wrapStrings)
+
+    wrapperFn = str
+    if wrapStrings:
+        wrapperFn = json.dumps
+
     if isinstance(obj, unicode):
-        return obj.encode('utf-8')
+        return wrapperFn(obj.encode('utf-8'))
     
     if any(isinstance(obj, type_) for type_ in [basestring, int, float]):
-        return str(obj)
+        return wrapperFn(obj)
     
     if isinstance(obj, list):
-        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in obj]
+        elementStrings = [indentText(recurse(element,), 2) + ',' for element in obj]
         return '[\n' + ('\n'.join(elementStrings)) + '\n]'
     
     if isinstance(obj, tuple):
-        elementStrings = [indentText(basicNestedObjectToString(element), 2) + ',' for element in obj]
+        elementStrings = [indentText(recurse(element), 2) + ',' for element in obj]
         return '(\n' + ('\n'.join(elementStrings)) + '\n)'
     
     if isinstance(obj, dict):
-        elementStrings = [indentText('%s : %s,' % (str(key), basicNestedObjectToString(value)), 2) for (key, value) in obj.items()]
+        elementStrings = [indentText('%s : %s,' % (wrapperFn(key), recurse(value)), 2) for (key, value) in obj.items()]
         return '{\n' + ('\n'.join(elementStrings)) +'\n}'
     
     # TODO: should fallback to a simple str(obj)?
