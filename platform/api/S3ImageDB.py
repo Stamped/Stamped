@@ -308,9 +308,7 @@ class S3ImageDB(AImageDB):
             image.save(out, 'jpeg', optimize=True, quality=90)
         
         logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
-        self._addDataToS3(name, out, 'image/jpeg')
-        
-        return name
+        return self._addDataToS3(name, out, 'image/jpeg')
     
     def _addPNG(self, name, image):
         assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
@@ -321,9 +319,7 @@ class S3ImageDB(AImageDB):
         image.save(out, 'png')
         
         logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
-        self._addDataToS3(name, out, 'image/png')
-        
-        return name
+        return self._addDataToS3(name, out, 'image/png')
     
     def _addDataToS3(self, name, data, contentType):
         num_retries = 0
@@ -339,7 +335,8 @@ class S3ImageDB(AImageDB):
                 key.set_contents_from_string(data.getvalue(), policy='public-read')
                 #key.set_contents_from_file(data, policy='public-read')
                 key.close()
-                return key
+                
+                return "http://static.stamped.com/%s" % name
 
             except Exception as e:
                 logs.warning('S3 Exception: %s' % e)
