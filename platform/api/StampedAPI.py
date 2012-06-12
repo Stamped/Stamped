@@ -3367,6 +3367,23 @@ class StampedAPI(AStampedAPI):
             else:
                 entityIds[entity.entity_id] = entity
 
+        # Entity Stats
+        stats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
+        ### TEMP CODE: BEGIN
+        # Temporarily force old entity stats to be generated
+        if len(stats) < len(entities):
+            statEntityIds = set()
+            for stat in stats:
+                statEntityIds.add(stat.entity_id)
+            missingEntityIds = set(entityIds.keys()).difference(statEntityIds)
+            for missingEntityId in missingEntityIds:
+                stats.append(self.updateEntityStatsAsync(missingEntityId))
+        ### TEMP CODE: END
+        for stat in stats:
+            if stat.popular_users is not None:
+                for userId in stat.popular_users[:10]:
+                    userIds[userId] = None 
+
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
 
@@ -3375,15 +3392,12 @@ class StampedAPI(AStampedAPI):
 
         # Build previews
         entityStampPreviews = {}
-        for stamp in stamps:
-            stampPreview = StampPreview()
-            stampPreview.user = userIds[stamp.user.user_id]
-            stampPreview.stamp_id = stamp.stamp_id
-
-            if stamp.entity.entity_id in entityStampPreviews:
-                entityStampPreviews[stamp.entity.entity_id].append(stampPreview)
-            else:
-                entityStampPreviews[stamp.entity.entity_id] = [ stampPreview ]
+        for stat in stats:
+            if stat.popular_users is not None:
+                users = []
+                for userId in stat.popular_users[:10]:
+                    users.append(userIds[userId])
+                entityStampPreviews[stat.entity_id] = users 
 
         # Results
         result = []
@@ -3394,9 +3408,10 @@ class StampedAPI(AStampedAPI):
             entity = entityIds[stamp.entity.entity_id]
             seenEntities.add(stamp.entity.entity_id)
 
-            previews = Previews()
-            previews.stamps = entityStampPreviews[stamp.entity.entity_id]
-            entity.previews = previews
+            if stamp.entity.entity_id in entityStampPreviews:
+                previews = Previews()
+                previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+                entity.previews = previews
             result.append(entity)
             
         limit = 20
@@ -3421,12 +3436,13 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def searchGuide(self, guideSearchRequest, authUserId):
-        if guideSearchRequest.scope == 'inbox' and authUserId is not None:
+        if guideSearchRequest.scope == 'inbox':
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
+        elif guideSearchRequest.scope == 'everyone':
+            stampIds = None
         else:
-            # Hack to return kevin's guide for popular (until we build formula for popular)
-            user = self._userDB.getUserByScreenName('kevin')
-            stampIds = self._getScopeStampIds(scope='inbox', authUserId=user.user_id)
+            # TODO: What should we return for other search queries (not inbox and not popular)?
+            stampIds = None
 
         searchSlice             = SearchSlice()
         searchSlice.limit       = 100
