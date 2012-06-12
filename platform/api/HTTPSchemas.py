@@ -2115,6 +2115,50 @@ class HTTPTimeSlice(Schema):
 
         return slc
 
+class HTTPWebTimeSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('before',                           int)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
+
+        # Filtering
+        cls.addProperty('category',                         basestring, cast=_checkCategory)
+        cls.addProperty('subcategory',                      basestring, cast=_checkSubcategory)
+        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
+
+        # Scope
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
+    
+    def exportTimeSlice(self):
+        data                = self.dataExport()
+        beforeData          = data.pop('before', None)
+        viewportData        = data.pop('viewport', None)
+        categoryData        = data.pop('category', None)
+        subcategoryData     = data.pop('subcategory', None)
+
+        slc                 = TimeSlice()
+        slc.dataImport(data)
+
+        if self.before is not None:
+            slc.before          = datetime.utcfromtimestamp(int(self.before))
+
+        if self.subcategory is not None:
+            slc.kinds = list(Entity.mapSubcategoryToKinds(self.subcategory))
+            slc.types = list(Entity.mapSubcategoryToTypes(self.subcategory))
+        elif self.category is not None:
+            slc.kinds = list(Entity.mapCategoryToKinds(self.category))
+            slc.types = list(Entity.mapCategoryToTypes(self.category))
+
+        if self.viewport is not None:
+            slc.viewport = _convertViewport(self.viewport)
+
+        return slc
+
+
 class HTTPSearchSlice(Schema):
     @classmethod
     def setSchema(cls):

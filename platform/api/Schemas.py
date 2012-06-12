@@ -1579,24 +1579,6 @@ class TimeSlice(Schema):
         cls.addProperty('user_id',                          basestring)
         cls.addProperty('scope',                            basestring) # me, friends, fof, popular
 
-class WebTimeSlice(Schema):
-    @classmethod
-    def setSchema(cls):
-        # Paging
-        cls.addProperty('before',                           datetime)
-        cls.addProperty('limit',                            int)
-        cls.addProperty('offset',                           int)
-        
-        # Filtering
-        cls.addPropertyList('kinds',                        basestring)
-        cls.addPropertyList('types',                        basestring)
-        cls.addNestedProperty('viewport',                   Viewport) 
-        
-        # Scope
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
-
 class SearchSlice(Schema):
     @classmethod
     def setSchema(cls):

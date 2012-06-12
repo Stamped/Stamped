@@ -74,7 +74,7 @@ def index(request):
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 
-@stamped_view(schema=WebTimeSlice)
+@stamped_view(schema=HTTPWebTimeSlice)
 def profile(request, schema, **kwargs):
     url_format = "/{screen_name}"
     prev_url   = None
@@ -232,7 +232,7 @@ def profile(request, schema, **kwargs):
         'main_stamp_cluster'    : main_cluster, 
     }, preload=[ 'user' ])
 
-@stamped_view(schema=WebTimeSlice)
+@stamped_view(schema=HTTPWebTimeSlice)
 def map(request, schema, **kwargs):
     # TODO: enforce stricter validity checking on offset and limit
     
