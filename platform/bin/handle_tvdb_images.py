@@ -59,8 +59,8 @@ if __name__ == '__main__':
                     api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
-        #docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
-        docs  = api._entityDB._collection.find({'subcategory' : 'tv'})
+        docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
+        #docs  = api._entityDB._collection.find({'subcategory' : 'tv'})
         count = docs.count()
         index = 0
         
