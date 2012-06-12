@@ -77,7 +77,7 @@ if __name__ == '__main__':
             
             pool.spawn(_process_entity, entity)
             
-            if 0 == (index % (count / progress_count)):
+            if count > 1 and 0 == (index % (count / progress_count)):
                 utils.log("\n\nPROGRESS: %s\n\n" % (utils.getStatusStr(index, count)))
             
             index += 1
