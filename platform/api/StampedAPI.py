@@ -19,48 +19,51 @@ try:
     import tasks.APITasks
     import Entity
     
-    from datetime               import datetime, timedelta
-    from auth                   import convertPasswordForStorage
-    from utils                  import lazyProperty
-    from functools              import wraps
-    from errors                 import *
-    from libs.ec2_utils         import is_prod_stack
-    from pprint                 import pprint, pformat
-    from operator               import itemgetter, attrgetter
+    from datetime                   import datetime, timedelta
+    from auth                       import convertPasswordForStorage
+    from utils                      import lazyProperty
+    from functools                  import wraps
+    from errors                     import *
+    from libs.ec2_utils             import is_prod_stack
+    from pprint                     import pprint, pformat
+    from operator                   import itemgetter, attrgetter
     
-    from AStampedAPI            import AStampedAPI
-    from AAccountDB             import AAccountDB
-    from AEntityDB              import AEntityDB
-    from APlacesEntityDB        import APlacesEntityDB
-    from AUserDB                import AUserDB
-    from AStampDB               import AStampDB
-    from ACommentDB             import ACommentDB
-    from ATodoDB                import ATodoDB
-    from ACollectionDB          import ACollectionDB
-    from AFriendshipDB          import AFriendshipDB
-    from AActivityDB            import AActivityDB
-    from api.Schemas            import *
-    from ActivityCollectionCache import ActivityCollectionCache
-    from Memcache               import globalMemcache
+    from AStampedAPI                import AStampedAPI
+    from AAccountDB                 import AAccountDB
+    from AEntityDB                  import AEntityDB
+    from APlacesEntityDB            import APlacesEntityDB
+    from AUserDB                    import AUserDB
+    from AStampDB                   import AStampDB
+    from ACommentDB                 import ACommentDB
+    from ATodoDB                    import ATodoDB
+    from ACollectionDB              import ACollectionDB
+    from AFriendshipDB              import AFriendshipDB
+    from AActivityDB                import AActivityDB
+    from api.Schemas                import *
+    from ActivityCollectionCache    import ActivityCollectionCache
+    from Memcache                   import globalMemcache
     
     #resolve classes
-    from resolve.EntitySource   import EntitySource
-    from resolve                import FullResolveContainer, EntityProxyContainer
-    from AmazonSource           import AmazonSource
-    from FactualSource          import FactualSource
-    from GooglePlacesSource     import GooglePlacesSource
-    from iTunesSource           import iTunesSource
-    from RdioSource             import RdioSource
-    from SpotifySource          import SpotifySource
-    from TMDBSource             import TMDBSource
-    from TheTVDBSource          import TheTVDBSource
-    from StampedSource          import StampedSource
-
-    from Netflix                import *
-    from Facebook               import *
-    from Twitter                import *
-    from GooglePlaces           import *
-    from Rdio                   import *
+    from resolve.EntitySource       import EntitySource
+    from resolve                    import FullResolveContainer, EntityProxyContainer
+    from AmazonSource               import AmazonSource
+    from FactualSource              import FactualSource
+    from GooglePlacesSource         import GooglePlacesSource
+    from iTunesSource               import iTunesSource
+    from RdioSource                 import RdioSource
+    from SpotifySource              import SpotifySource
+    from TMDBSource                 import TMDBSource
+    from TheTVDBSource              import TheTVDBSource
+    from StampedSource              import StampedSource
+    
+    # TODO (travis): we should NOT be importing * here -- it's okay in limited 
+    # situations, but in general, this is very bad practice.
+    
+    from Netflix                    import *
+    from Facebook                   import *
+    from Twitter                    import *
+    from GooglePlaces               import *
+    from Rdio                       import *
 except Exception:
     report()
     raise

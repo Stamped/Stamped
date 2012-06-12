@@ -35,6 +35,10 @@ if __name__ == '__main__':
         # example url:  http://thetvdb.com/banners/_cache/posters/211751-2.jpg
         db.addEntityImages(args.image_urls)
     else:
+        # perform a bulk conversion of all thetvdb.com entity images, moving each 
+        # image over to our own CDN (via S3 / Cloudfront) and updating the entity 
+        # reference accordingly.
+        
         api  = MongoStampedAPI()
         pool = Pool(32)
         
@@ -56,7 +60,7 @@ if __name__ == '__main__':
         count = docs.count()
         index = 0
         
-        progress_delta = 5
+        progress_delta = 5 # report progress every 5%
         progress_count = 100 / progress_delta
         
         utils.log("processing %d entity images" % count)

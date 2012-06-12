@@ -1,12 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Django url configuration: controls httpapi dispatch
 
-DOCUMENTED SAMPLE PATH MODULE
-prev:   ./settings.py
-next:   ./v0.functions.account.py
-see:   urlpatterns
+"""
+    Django url configuration for the RESTful HTTP API
 """
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -40,7 +35,7 @@ search.json         Return a list of objects based on a sepcified scope and a te
                     collection endpoint to overlay search on top of other filtering.
 """
 
-urlpatterns = patterns('',
+urlpatterns = patterns('', 
     
     ### OAUTH
     (r'v0/oauth2/token.json',                               'v0.functions.oauth2.token'),
@@ -171,5 +166,5 @@ urlpatterns = patterns('',
     
     ### CLIENT LOGGING
     (r'v0/private/logs/create.json',                        'v0.functions.logs.create'),
-
 )
+
