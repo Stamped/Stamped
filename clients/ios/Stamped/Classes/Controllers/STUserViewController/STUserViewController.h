@@ -10,7 +10,11 @@
 #import "STRestViewController.h"
 
 @class STSimpleUserDetail;
-@interface STUserViewController : STRestViewController;
+@interface STUserViewController : STRestViewController {
+    NSMutableArray *_sectionViews;
+    NSArray *_infoDataSource;
+    BOOL _expanded;
+}
 
 - (id)initWithUserIdentifier:(NSString*)identifier;
 - (id)initWithUser:(id)user;

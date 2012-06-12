@@ -21,17 +21,6 @@
 }
 
 - (void)dealloc {
-    
-    /*
-    if (_color1) {
-        [_color1 release], _color1=nil;
-    }
-    
-    if (_color2) {
-        [_color2 release], _color2=nil;
-    }
-    */
-    
     [super dealloc];
 }
 
@@ -100,6 +89,15 @@
 - (void)setHighlighted:(BOOL)highlighted {
     _highlighted = highlighted;
     [self setNeedsDisplay];
+}
+
+
+#pragma mark - Getters
+
+- (NSArray*)colors {
+    
+    return [NSArray arrayWithObjects:[UIColor colorWithRed:r green:g blue:b alpha:1.0f], [UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0f], nil];
+    
 }
 
 @end

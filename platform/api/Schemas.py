@@ -1393,13 +1393,13 @@ class RawTodo(Schema):
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
         cls.addProperty('complete',                         bool)
 
-    def enrich(self, user, entity, previews=None, source_stamps=None, stamp=None):
+    def enrich(self, user, entity, previews=None, sourceStamps=None, stamp=None):
         todo = Todo()
         todo.dataImport(self.dataExport(), overflow=True)
         todo.user   = user
         todo.entity = entity
-        if source_stamps is not None:
-            todo.source_stamps = source_stamps
+        if sourceStamps is not None:
+            todo.source_stamps = sourceStamps
         if stamp is not None:
             todo.stamp  = stamp
         if previews is not None:

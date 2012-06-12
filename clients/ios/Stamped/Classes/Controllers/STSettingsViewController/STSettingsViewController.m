@@ -7,10 +7,12 @@
 //
 
 #import "STSettingsViewController.h"
+#import "STEditProfileViewController.h"
 #import "SettingsTableCell.h"
 #import "STRestKitLoader.h"
 #import "STMenuController.h"
 #import "STAppDelegate.h"
+#import "STDefaultTableCell.h"
 
 @interface STSettingsViewController ()
 
@@ -169,9 +171,10 @@
     
     static NSString *CellIdentifier = @"CellIdentifier";
     
-    SettingsTableCell *cell = (SettingsTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    STDefaultTableCell *cell = (STDefaultTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell =[[[SettingsTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell = [[[STDefaultTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.showsDisclosure = YES;
     }
 
     NSArray *aSection = [_dataSource objectAtIndex:indexPath.section];
@@ -236,8 +239,15 @@
     if (indexPath.section == 0) {
         
         // you
+        if (indexPath.row == 0) {
+            STEditProfileViewController *controller = [[STEditProfileViewController alloc] init];
+            controller.delegate = (id<STEditProfileViewControllerDelegate>)self;
+            [self.navigationController pushViewController:controller animated:YES];
+            [controller release];
+        } else {
+            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        }
         
-        [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     } else if (indexPath.section == 1) {
         
@@ -285,6 +295,16 @@
             }
         }
     }
+}
+
+
+#pragma mark - STEditProfileViewControllerDelegate
+
+- (void)stEditProfileViewControllerCancelled:(STEditProfileViewController*)controller {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+- (void)stEditProfileViewControllerSaved:(STEditProfileViewController*)controller {
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 
