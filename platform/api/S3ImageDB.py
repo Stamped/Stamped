@@ -277,7 +277,7 @@ class S3ImageDB(AImageDB):
     def addEntityImages(self, image_urls):
         pool = Pool(8)
         
-        for url in image_urls:
+        for image_url in image_urls:
             pool.spawn(self.addWebEntityImage, image_url)
         
         pool.join()

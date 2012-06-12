@@ -103,6 +103,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         #  with the their equivalent "_todo" fields  For now, we convert for the sake of backward compatability
 
         if 'alerts' in document:
+            if 'alert_settings' not in document:
+                document['alert_settings'] = {}
             if 'ios_alert_fav' in document['alerts']:
                 document['alert_settings']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
                 del(document['alerts']['ios_alert_fav'])

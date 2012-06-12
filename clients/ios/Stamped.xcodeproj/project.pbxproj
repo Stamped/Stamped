@@ -439,7 +439,6 @@
 		034BE02B1562F6980008F160 /* STSimpleEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7746152BB82A006E4988 /* STSimpleEntity.m */; };
 		034BE02C1562F6980008F160 /* STSimpleComment.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774A152BBB4A006E4988 /* STSimpleComment.m */; };
 		034BE02D1562F6980008F160 /* STSimpleMention.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774E152BBBB7006E4988 /* STSimpleMention.m */; };
-		034BE02E1562F6980008F160 /* STSimpleCredit.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7752152BBBD7006E4988 /* STSimpleCredit.m */; };
 		034BE02F1562F6980008F160 /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
 		034BE0301562F6980008F160 /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
 		034BE0311562F6980008F160 /* STLikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C0152CC6420069B930 /* STLikeButton.m */; };
@@ -2232,8 +2231,6 @@
 		638D774C152BBB4B006E4988 /* STSimpleComment.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774A152BBB4A006E4988 /* STSimpleComment.m */; };
 		638D774F152BBBB8006E4988 /* STSimpleMention.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774E152BBBB7006E4988 /* STSimpleMention.m */; };
 		638D7750152BBBB8006E4988 /* STSimpleMention.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774E152BBBB7006E4988 /* STSimpleMention.m */; };
-		638D7753152BBBD8006E4988 /* STSimpleCredit.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7752152BBBD7006E4988 /* STSimpleCredit.m */; };
-		638D7754152BBBD8006E4988 /* STSimpleCredit.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7752152BBBD7006E4988 /* STSimpleCredit.m */; };
 		638D7757152BBC93006E4988 /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
 		638D7758152BBC93006E4988 /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
 		638D775B152CA018006E4988 /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
@@ -2399,7 +2396,6 @@
 		63BA774A1545F69400EE95DA /* STSimpleEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7746152BB82A006E4988 /* STSimpleEntity.m */; };
 		63BA774B1545F69400EE95DA /* STSimpleComment.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774A152BBB4A006E4988 /* STSimpleComment.m */; };
 		63BA774C1545F69400EE95DA /* STSimpleMention.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D774E152BBBB7006E4988 /* STSimpleMention.m */; };
-		63BA774D1545F69400EE95DA /* STSimpleCredit.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7752152BBBD7006E4988 /* STSimpleCredit.m */; };
 		63BA774E1545F69400EE95DA /* STSimpleUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7756152BBC92006E4988 /* STSimpleUser.m */; };
 		63BA774F1545F69400EE95DA /* STStampDetailCommentsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D775A152CA017006E4988 /* STStampDetailCommentsView.m */; };
 		63BA77501545F69400EE95DA /* STLikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C0152CC6420069B930 /* STLikeButton.m */; };
@@ -5375,15 +5371,12 @@
 		638D773F152BAB41006E4988 /* STSimpleStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleStamp.h; sourceTree = "<group>"; };
 		638D7740152BAB41006E4988 /* STSimpleStamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleStamp.m; sourceTree = "<group>"; };
 		638D7743152BB4EC006E4988 /* STMention.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMention.h; sourceTree = "<group>"; };
-		638D7744152BB5B0006E4988 /* STCredit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCredit.h; sourceTree = "<group>"; };
 		638D7745152BB829006E4988 /* STSimpleEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntity.h; sourceTree = "<group>"; };
 		638D7746152BB82A006E4988 /* STSimpleEntity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntity.m; sourceTree = "<group>"; };
 		638D7749152BBB4A006E4988 /* STSimpleComment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleComment.h; sourceTree = "<group>"; };
 		638D774A152BBB4A006E4988 /* STSimpleComment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleComment.m; sourceTree = "<group>"; };
 		638D774D152BBBB7006E4988 /* STSimpleMention.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleMention.h; sourceTree = "<group>"; };
 		638D774E152BBBB7006E4988 /* STSimpleMention.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleMention.m; sourceTree = "<group>"; };
-		638D7751152BBBD6006E4988 /* STSimpleCredit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleCredit.h; sourceTree = "<group>"; };
-		638D7752152BBBD7006E4988 /* STSimpleCredit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleCredit.m; sourceTree = "<group>"; };
 		638D7755152BBC91006E4988 /* STSimpleUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleUser.h; sourceTree = "<group>"; };
 		638D7756152BBC92006E4988 /* STSimpleUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleUser.m; sourceTree = "<group>"; };
 		638D7759152CA016006E4988 /* STStampDetailCommentsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailCommentsView.h; sourceTree = "<group>"; };
@@ -7506,7 +7499,6 @@
 				638D7723152B4B50006E4988 /* STUser.h */,
 				638D772A152B5157006E4988 /* STComment.h */,
 				638D7743152BB4EC006E4988 /* STMention.h */,
-				638D7744152BB5B0006E4988 /* STCredit.h */,
 				63CC443F152DEE6D0026BB25 /* STTodo.h */,
 				63E5E6A8152E2B1F00579369 /* STImage.h */,
 				633CEF4615386F92009E1C06 /* STStampedBy.h */,
@@ -7596,8 +7588,6 @@
 				638D774A152BBB4A006E4988 /* STSimpleComment.m */,
 				638D774D152BBBB7006E4988 /* STSimpleMention.h */,
 				638D774E152BBBB7006E4988 /* STSimpleMention.m */,
-				638D7751152BBBD6006E4988 /* STSimpleCredit.h */,
-				638D7752152BBBD7006E4988 /* STSimpleCredit.m */,
 				63CC4440152DEF500026BB25 /* STSimpleTodo.h */,
 				63CC4441152DEF500026BB25 /* STSimpleTodo.m */,
 				63E5E6A9152E2B8900579369 /* STSimpleImage.h */,
@@ -12904,7 +12894,6 @@
 				034BE02B1562F6980008F160 /* STSimpleEntity.m in Sources */,
 				034BE02C1562F6980008F160 /* STSimpleComment.m in Sources */,
 				034BE02D1562F6980008F160 /* STSimpleMention.m in Sources */,
-				034BE02E1562F6980008F160 /* STSimpleCredit.m in Sources */,
 				034BE02F1562F6980008F160 /* STSimpleUser.m in Sources */,
 				034BE0301562F6980008F160 /* STStampDetailCommentsView.m in Sources */,
 				034BE0311562F6980008F160 /* STLikeButton.m in Sources */,
@@ -13235,7 +13224,6 @@
 				63BA774A1545F69400EE95DA /* STSimpleEntity.m in Sources */,
 				63BA774B1545F69400EE95DA /* STSimpleComment.m in Sources */,
 				63BA774C1545F69400EE95DA /* STSimpleMention.m in Sources */,
-				63BA774D1545F69400EE95DA /* STSimpleCredit.m in Sources */,
 				63BA774E1545F69400EE95DA /* STSimpleUser.m in Sources */,
 				63BA774F1545F69400EE95DA /* STStampDetailCommentsView.m in Sources */,
 				63BA77501545F69400EE95DA /* STLikeButton.m in Sources */,
@@ -13568,7 +13556,6 @@
 				638D7748152BB82A006E4988 /* STSimpleEntity.m in Sources */,
 				638D774C152BBB4B006E4988 /* STSimpleComment.m in Sources */,
 				638D7750152BBBB8006E4988 /* STSimpleMention.m in Sources */,
-				638D7754152BBBD8006E4988 /* STSimpleCredit.m in Sources */,
 				638D7758152BBC93006E4988 /* STSimpleUser.m in Sources */,
 				638D775C152CA018006E4988 /* STStampDetailCommentsView.m in Sources */,
 				63F016C2152CC6420069B930 /* STLikeButton.m in Sources */,
@@ -13900,7 +13887,6 @@
 				638D7747152BB82A006E4988 /* STSimpleEntity.m in Sources */,
 				638D774B152BBB4B006E4988 /* STSimpleComment.m in Sources */,
 				638D774F152BBBB8006E4988 /* STSimpleMention.m in Sources */,
-				638D7753152BBBD8006E4988 /* STSimpleCredit.m in Sources */,
 				638D7757152BBC93006E4988 /* STSimpleUser.m in Sources */,
 				638D775B152CA018006E4988 /* STStampDetailCommentsView.m in Sources */,
 				63F016C1152CC6420069B930 /* STLikeButton.m in Sources */,

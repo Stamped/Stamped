@@ -9,11 +9,18 @@ __license__   = "TODO"
 import Globals, utils
 from AStampedAPITestCase import *
 
-# ##### #
-# STAMP #
-# ##### #
+# GENERIC CLASSES
 
-class StampedAPIStampTest(AStampedAPITestCase):
+class StampedAPIStampCreateTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        self.entity = self.createEntity(self.tokenA)
+
+    def tearDown(self):
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteAccount(self.tokenA)
+
+class StampedAPIStampConsumeTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -28,7 +35,96 @@ class StampedAPIStampTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPIStampsShow(StampedAPIStampTest):
+
+# CREATE STAMP
+
+class StampedAPIStampCreate(StampedAPIStampCreateTest):
+    def _validate_basic_stamp(self, result):
+        # Verify stamp object has all necessary attributes
+        self.assertTrue('stamp_id' in result)
+        self.assertTrue('entity' in result)
+        self.assertTrue('user' in result)
+        self.assertTrue('contents' in result)
+        self.assertTrue('created' in result)
+        self.assertTrue('stamped' in result)
+        self.assertTrue('is_liked' in result)
+        self.assertTrue('is_todo' in result)
+
+        # Verify entity_ids match
+        self.assertTrue(result['entity']['entity_id'] == self.entity['entity_id'])
+
+        # Verify 'contents' only has one blurb
+        self.assertTrue(len(result['contents']) == 1)
+
+        # Verify 'blurb' is equal to blurb passed
+        self.assertTrue(result['contents'][0]['blurb'] == self.blurb)
+
+        # Verify 'user' is set up correctly 
+        self.assertTrue(result['user']['screen_name'] == self.userA['screen_name'])
+        self.assertTrue(result['user']['user_id'] == self.userA['user_id'])
+        self.assertTrue(result['user']['name'] == self.userA['name'])
+        self.assertTrue(result['user']['color_primary'] == self.userA['color_primary'])
+        self.assertTrue(result['user']['color_secondary'] == self.userA['color_secondary'])
+        self.assertTrue(result['user']['image_url'] == self.userA['image_url'])
+
+        # Verify 'entity' is set up correctly
+        self.assertTrue(result['entity']['title'] == self.entity['title'])
+        self.assertTrue(result['entity']['category'] == self.entity['category'])
+
+    def _validate_credited_stamp(self, result):
+        # Verify credit is in result
+        self.assertTrue('credits' in result)
+        self.assertTrue(len(result['credits']) == 1)
+
+        # Verify credit is populated correctly
+        self.assertTrue(result['credits'][0]['user']['screen_name'] == self.userB['screen_name'])
+        self.assertTrue(result['credits'][0]['user']['user_id'] == self.userB['user_id'])
+        self.assertTrue(result['credits'][0]['user']['name'] == self.userB['name'])
+        self.assertTrue(result['credits'][0]['user']['color_primary'] == self.userB['color_primary'])
+        self.assertTrue(result['credits'][0]['user']['color_secondary'] == self.userB['color_secondary'])
+        self.assertTrue(result['credits'][0]['user']['image_url'] == self.userB['image_url'])
+
+    def test_create_basic(self):
+        self.blurb = "This is a sample stamp. A 'stample', if you will."
+
+        path = "stamps/create.json"
+        data = { 
+            "oauth_token"   : self.tokenA['access_token'],
+            "entity_id"     : self.entity['entity_id'],
+            "blurb"         : self.blurb,
+        }
+        result = self.handlePOST(path, data)
+
+        # Validate stamp
+        self._validate_basic_stamp(result)
+
+        self.deleteStamp(self.tokenA, result['stamp_id'])
+
+    def test_create_credit(self):
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+
+        self.blurb = "This is a sample stamp with credit. Because everyone likes undeserved credit."
+
+        path = "stamps/create.json"
+        data = { 
+            "oauth_token"   : self.tokenA['access_token'],
+            "entity_id"     : self.entity['entity_id'],
+            "blurb"         : self.blurb,
+            "credits"       : self.userB['screen_name'],
+        }
+        result = self.handlePOST(path, data)
+
+        # Validate stamp
+        self._validate_basic_stamp(result)
+
+        # Validate credit
+        self._validate_credited_stamp(result)
+
+        self.deleteStamp(self.tokenA, result['stamp_id'])
+        self.deleteAccount(self.tokenB)
+
+
+class StampedAPIStampsShow(StampedAPIStampConsumeTest):
     def test_show(self):
         path = "stamps/show.json"
         data = { 
@@ -38,7 +134,7 @@ class StampedAPIStampsShow(StampedAPIStampTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 
-class StampedAPIStampsRestamp(StampedAPIStampTest):
+class StampedAPIStampsRestamp(StampedAPIStampConsumeTest):
     def test_restamp(self):
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], blurb='ASDF')
         path = "stamps/show.json"
@@ -51,7 +147,7 @@ class StampedAPIStampsRestamp(StampedAPIStampTest):
         self.assertEqual(result['contents'][0]['blurb'], 'ASDF')
 
 
-class StampedAPIStampsUserDetails(StampedAPIStampTest):
+class StampedAPIStampsUserDetails(StampedAPIStampConsumeTest):
     def test_user_details(self):
 
         path = "account/customize_stamp.json"
@@ -164,7 +260,7 @@ class StampedAPIStampsUserDetails(StampedAPIStampTest):
 #         result = self.handlePOST(path, data)
 #         self.assertTrue(len(result['credits']) == 2)
 
-class StampedAPIStampsLimits(StampedAPIStampTest):
+class StampedAPIStampsLimits(StampedAPIStampConsumeTest):
     def test_show(self):
         path = "users/show.json"
         data = { 
@@ -405,7 +501,7 @@ class StampedAPILikesFail(StampedAPIStampLikesTest):
             result = self.handlePOST(path, data)
 
 
-class StampedAPIEntitiesStampedBy(StampedAPIStampTest):
+class StampedAPIEntitiesStampedBy(StampedAPIStampConsumeTest):
     def test_stampedby_nogroup(self):
         # User B queries the entity User A created and Stamped
         path = "entities/stamped_by.json"

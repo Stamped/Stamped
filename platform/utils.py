@@ -22,6 +22,8 @@ from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
 
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -682,7 +684,7 @@ def validate_email(email):
 
 def validate_screen_name(screen_name):
     try:
-        if __screen_name_re.match(screen_name):
+        if __screen_name_re.match(screen_name) and isinstance(screen_name, basestring):
             return True
     except:
         pass
@@ -697,6 +699,16 @@ def validate_hex_color(color):
         pass
     
     return False
+
+
+
+def validate_url(url):
+    val = URLValidator(verify_exists=False)
+    try:
+        val(url)
+    except ValidationError, e:
+        return False
+    return True
 
 def getNumLines(f):
     bufferSize = 1024 * 1024
