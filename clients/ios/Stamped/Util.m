@@ -574,6 +574,7 @@ static Rdio* _rdio;
 + (void)globalLoadingLock {
     //NSLog(@"GlobalLoadingLock");
     UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+    UINavigationController* navigationController = [self sharedNavigationController];
     UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] 
                                               initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
     activityView.frame = [Util centeredAndBounded:CGSizeMake(44, 44) inFrame:window.frame];

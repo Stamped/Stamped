@@ -7,13 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "STUserDetail.h"
+#import "STUser.h"
 
 @interface STUserCell : UITableViewCell
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
-@property (nonatomic, readwrite, retain) id<STUserDetail> user;
+@property (nonatomic, readwrite, retain) id<STUser> user;
 @property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* indicator;
 @property (nonatomic, readonly) UIButton* followButton;
