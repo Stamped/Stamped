@@ -21,12 +21,12 @@ class ActivityCollectionCache(ACollectionCache):
         authUserId = kwargs['authUserId']
 
         params = {}
-        if 'before' in kwargs and kwargs['before'] is not None:
-            params['before'] = kwargs['before']
+        if before is not None:
+            params['before'] = before
         params['limit'] = limit
 
-        distance = kwargs.get('distance', 0)
-        if distance > 0:
+        scope = kwargs.get('scope', 'me')
+        if scope == 'friends':
             params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
             friends = self.api._friendshipDB.getFriends(authUserId)
             activityData = []
@@ -63,3 +63,11 @@ class ActivityCollectionCache(ACollectionCache):
                 final = True
 
         return activityData, final
+
+    def _pruneActivityItems(self, activityItems):
+        prunedItems = []
+        for item in activityItems:
+        #            if item.verb == 'follow':
+        #                continue
+            prunedItems.append(item)
+        return prunedItems

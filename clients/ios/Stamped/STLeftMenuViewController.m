@@ -24,6 +24,9 @@
 #import "STStampedAPI.h"
 #import "STUser.h"
 #import "STUserViewController.h"
+#import "STAvatarView.h"
+
+#define kAvatarViewTag 101
 
 static NSString* const _inboxNameKey = @"Root.inboxName";
 static NSString* const _iWantToNameKey = @"Root.iWantToName";
@@ -263,6 +266,36 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
         if ([indexPath isEqual:_selectedIndexPath]) {
             cell.selected = YES;
+        }
+        
+        if (indexPath.row == 4 && LOGGED_IN) {
+            
+            // user row
+            id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
+            cell.titleLabel.text = [user name];
+            
+            if (![cell viewWithTag:kAvatarViewTag]) {
+                
+                cell.icon = nil;
+                
+                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(14.0f, (cell.bounds.size.height-20.0f)/2, 20.0f, 20.0f)];
+                view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+                [cell addSubview:view];
+                view.imageURL = [NSURL URLWithString:[user imageURL]];
+                
+                view.backgroundView.layer.shadowOffset = CGSizeMake(0.0f, -1.0f);
+                view.backgroundView.layer.shadowRadius = 0.0f;
+                view.backgroundView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+                
+                [view release];
+            }
+            
+        } else {
+            
+            if ([cell viewWithTag:kAvatarViewTag]) {
+                [[cell viewWithTag:kAvatarViewTag] removeFromSuperview];
+            }
+            
         }
         
         return cell;

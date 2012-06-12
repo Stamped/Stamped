@@ -7,12 +7,14 @@ prev:   Django?
 next: ./urls.py
 see: ROOT_URLCONF, INSTALLED_APPS
 """
-import Globals, utils
+import Globals
+import logs
+from libs.ec2_utils import is_ec2
 
-DEBUG = (not utils.is_ec2())
+DEBUG = (not is_ec2())
 TEMPLATE_DEBUG = DEBUG
 
-utils.log("Django DEBUG=%s" % DEBUG)
+logs.info("Django DEBUG=%s" % DEBUG)
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),

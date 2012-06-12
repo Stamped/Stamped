@@ -88,7 +88,16 @@
 
 - (void)layoutSubviews {
     [_titleLabel sizeToFit];
+    
+    CGRect frame = _titleLabel.frame;
+    frame.size.width = floorf(MIN(frame.size.width, self.bounds.size.width - (frame.origin.x+10.0f)));
+    _titleLabel.frame = frame;
+    
     [_detailTitleLabel sizeToFit];
+    frame = _detailTitleLabel.frame;
+    frame.size.width = floorf(MIN(frame.size.width, self.bounds.size.width - (frame.origin.x+10.0f)));
+    _detailTitleLabel.frame = frame;
+    
     [super layoutSubviews];
 }
 

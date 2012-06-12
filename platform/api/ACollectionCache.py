@@ -5,8 +5,9 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped, Inc."
 __license__   = "TODO"
 
-import Globals
+import Globals, logs
 from utils import abstract
+from datetime import timedelta
 from Memcache import globalMemcache
 
 class ACollectionCache(object):
@@ -76,13 +77,16 @@ class ACollectionCache(object):
     def _clearCacheForKeyParams(self, **kwargs):
         curOffset = 0
         key = self._generateKey(curOffset, **kwargs)
-        while key in self._cache:
-            del(self._cache[key])
-            curOffset += self._blockSize
-            key = self._generateKey(curOffset, **kwargs)
+        try:
+            while key in self._cache:
+                del(self._cache[key])
+                curOffset += self._blockSize
+                key = self._generateKey(curOffset, **kwargs)
+        except Exception:
+            pass
 
     def setCacheBlockSize(self, cacheBlockSize):
-        self._blockSize = cacheblockSize
+        self._blockSize = cacheBlockSize
 
     def setCacheBlockBufferSize(self, cacheBlockBufferSize):
         self._blockBufferSize = cacheBlockBufferSize
