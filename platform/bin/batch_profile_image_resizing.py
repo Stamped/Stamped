@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import keys.aws, logs, utils
+import keys.aws, logs, utils, time
 
 try:
     import Image, ImageFile
