@@ -73,7 +73,7 @@ static NSString* const _blurbFontKey = @"CreateStamp.blurbFont";
 
 @property (nonatomic, readwrite, retain) ASIS3ObjectRequest* photoUploadRequest;
 @property (nonatomic, readwrite, copy) NSString* tempPhotoURL;
-@property (nonatomic, readwrite, assign) BOOL waitingForPhotoUpload;
+@property (nonatomic, readonly, assign) BOOL waitingForPhotoUpload;
 
 @end
 
@@ -108,7 +108,6 @@ static NSString* const _blurbFontKey = @"CreateStamp.blurbFont";
 @synthesize hasPhoto = hasPhoto_;
 @synthesize photoUploadRequest = photoUploadRequest_;
 @synthesize tempPhotoURL = tempPhotoURL_;
-@synthesize waitingForPhotoUpload = waitingForPhotoUpload_;
 
 static const CGFloat _yOffset = 3;
 static const CGFloat _minPhotoOffset = 75;
@@ -718,15 +717,16 @@ static const CGFloat _maxPhotoButtonOffset = 135;
     [self repositionCommentButton];
     [self repositionImage];
     self.blurbImageView.userInteractionEnabled = YES;
+    if (self.waitingForPhotoUpload) {
+        [self.photoUploadRequest cancel];
+        self.photoUploadRequest = nil;
+    }
     [self uploadPhotoToS3];
 }
 
 - (void)uploadPhotoToS3 {
     if (!self.blurbImageView.image)
         return;
-    [Util globalLoadingLock];
-    self.waitingForPhotoUpload = YES;
-    
     NSData* imageData = UIImageJPEGRepresentation(self.blurbImageView.image, 0.8);
     NSDate* now = [NSDate date];
     NSString* key = [NSString stringWithFormat:@"%@-%.0f.jpg", [imageData MD5], now.timeIntervalSince1970];
@@ -816,7 +816,6 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 #pragma mark - ASIRequestDelegate methods.
 
 - (void)requestFinished:(ASIHTTPRequest*)request {
-    self.waitingForPhotoUpload = NO;
     self.photoUploadRequest = nil;
     [Util globalLoadingUnlock];
 }
@@ -824,7 +823,6 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 - (void)requestFailed:(ASIHTTPRequest*)request {
     self.photoUploadRequest = nil;
     self.tempPhotoURL = nil;
-    self.waitingForPhotoUpload = NO;
     [Util globalLoadingUnlock];
     [Util warnWithMessage:@"Photo upload failed" andBlock:nil];
 }
@@ -832,6 +830,10 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 - (void)setCreditedUsers:(NSArray<STUser> *)creditedUsers {
     [_creditedUsers release];
     _creditedUsers = [creditedUsers retain];
+}
+
+- (BOOL)waitingForPhotoUpload {
+    return self.photoUploadRequest != nil;
 }
 
 @end

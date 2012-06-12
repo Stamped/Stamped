@@ -234,7 +234,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)stampsForUserSlice:(STUserCollectionSlice*)slice 
                           andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
-    return [self stampsForSlice:slice withPath:@"/collections/user.json" andCallback:block];
+    return [self stampsForSlice:slice withPath:@"/stamps/collection.json" andCallback:block];
 }
 
 - (STCancellation*)stampsForFriendsSlice:(STFriendsSlice*)slice 
@@ -249,7 +249,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)entitiesForConsumptionSlice:(STConsumptionSlice*)slice 
                                    andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/stamps/guide.json";
+    NSString* path = @"/guide/collection.json";
     NSMutableDictionary* params = slice.asDictionaryParams;
     if ([params objectForKey:@"category"]) {
         [params setObject:[params objectForKey:@"category"] forKey:@"section"];
@@ -372,12 +372,14 @@ static STStampedAPI* _sharedInstance;
 
 - (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
                              andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    NSString* path = @"/activity/show.json";
+    NSString* path = @"/activity/collection.json";
+    NSMutableDictionary* params = [slice asDictionaryParams];
+    [params setObject:@"me" forKey:@"scope"];
     self.lastCount = nil;
     [[STRestKitLoader sharedInstance] loadWithPath:path 
                                               post:NO
                                      authenticated:YES
-                                            params:slice.asDictionaryParams
+                                            params:params
                                            mapping:[STSimpleActivity mapping]
                                        andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
                                            block((NSArray<STActivity>*)array, error);
@@ -386,12 +388,13 @@ static STStampedAPI* _sharedInstance;
 
 - (void)activitiesForFriendsWithGenericSlice:(STGenericSlice*)slice 
                                  andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    NSString* path = @"/activity/friends.json";
-    
+    NSString* path = @"/activity/collection.json";
+    NSMutableDictionary* params = slice.asDictionaryParams;
+    [params setObject:@"friends" forKey:@"scope"];
     [[STRestKitLoader sharedInstance] loadWithPath:path 
                                               post:NO
                                      authenticated:YES
-                                            params:slice.asDictionaryParams
+                                            params:params
                                            mapping:[STSimpleActivity mapping]
                                        andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
                                            block((NSArray<STActivity>*)array, error);
@@ -964,7 +967,7 @@ static STStampedAPI* _sharedInstance;
                                limit:(NSNumber*)limit
                               offset:(NSNumber*)offset 
                          andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/stamps/guide.json";
+    NSString* path = @"/guide/collection.json";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    [self stringForScope:scope], @"scope",
                                    section, @"section",
