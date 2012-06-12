@@ -336,7 +336,7 @@ class S3ImageDB(AImageDB):
                 #key.set_contents_from_file(data, policy='public-read')
                 key.close()
                 
-                return "http://static.stamped.com/%s" % key
+                return "http://static.stamped.com/%s" % name
 
             except Exception as e:
                 logs.warning('S3 Exception: %s' % e)
