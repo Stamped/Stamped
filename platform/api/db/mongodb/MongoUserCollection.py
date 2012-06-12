@@ -53,10 +53,11 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return userIds
 
     def _getAllScreenNames(self):
-        documents = self._collection.find({}, fields=['screen_name'])
+        documents = self._collection.find({}, fields=['screen_name_lower'])
         screenNames = []
         for document in documents:
-            screenNames.append(document['screen_name'])
+            if 'screen_name_lower' in document:
+                screenNames.append(document['screen_name_lower'])
         return screenNames
     
     ### PUBLIC
