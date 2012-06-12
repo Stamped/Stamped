@@ -45,17 +45,18 @@ if __name__ == '__main__':
         def _process_entity(entity):
             modified = False
             
-            for image in entity.images:
-                image_url       = image.sizes[0].url
-                new_image_url   = db.addWebEntityImage(image_url)
-                modified       |= (image_url != new_image_url)
+            if entity.images is not None and len(entity.images) > 0:
+                for image in entity.images:
+                    image_url       = image.sizes[0].url
+                    new_image_url   = db.addWebEntityImage(image_url)
+                    modified       |= (image_url != new_image_url)
+                    
+                    if image_url != new_image_url:
+                        utils.log("converted '%s' => '%s'" % (image_url, new_image_url))
+                        image.sizes[0].url = new_image_url
                 
-                if image_url != new_image_url:
-                    utils.log("converted '%s' => '%s'" % (image_url, new_image_url))
-                    image.sizes[0].url = new_image_url
-            
-            if modified:
-                api._entityDB.updateEntity(entity)
+                if modified:
+                    api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
         #docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
