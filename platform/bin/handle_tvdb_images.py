@@ -51,7 +51,7 @@ if __name__ == '__main__':
                 modified       |= (image_url != new_image_url)
                 
                 if image_url != new_image_url:
-                    utils.log("converted '%s' => '%s'" % image_url, new_image_url)
+                    utils.log("converted '%s' => '%s'" % (image_url, new_image_url))
                     image.sizes[0].url = new_image_url
             
             if modified:
