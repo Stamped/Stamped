@@ -10,7 +10,7 @@
 #import "STSimpleEntity.h"
 #import "STSimpleUser.h"
 #import "STSimpleComment.h"
-#import "STSimpleCredit.h"
+#import "STSimpleStampPreview.h"
 #import "STSimpleMention.h"
 #import "STSimpleBadge.h"
 #import "STSimpleContentItem.h"
@@ -180,7 +180,7 @@
     [mapping mapRelationship:@"entity" withMapping:[STSimpleEntity mapping]];
     [mapping mapRelationship:@"user" withMapping:[STSimpleUser mapping]];
     [mapping mapRelationship:@"mentions" withMapping:[STSimpleMention mapping]];
-    [mapping mapKeyPath:@"credit" toRelationship:@"credits" withMapping:[STSimpleCredit mapping]];
+    [mapping mapRelationship:@"credits" withMapping:[STSimpleStampPreview mapping]];
     [mapping mapRelationship:@"badges" withMapping:[STSimpleBadge mapping]];
     [mapping mapRelationship:@"contents" withMapping:[STSimpleContentItem mapping]];
     return mapping;

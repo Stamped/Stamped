@@ -148,13 +148,17 @@ class StampedMemcache(Memcache):
 # what keys are we using for memcached entries?
 # object_id => [ dependencies ]
 
-def __global_api():
-    from MongoStampedAPI import globalMongoStampedAPI
-    
-    return globalMongoStampedAPI()
 
-def __global_memcache():
-    return __global_api()._cache
+__globalMemcache = None
+
+def globalMemcache():
+    global __globalMemcache
+
+    if __globalMemcache is None:
+        __globalMemcache = StampedMemcache()
+
+    return __globalMemcache
+
 
 def memcached_function(time=0, min_compress_len=0):
     

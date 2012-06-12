@@ -63,6 +63,7 @@
         view.delegate = (id<STSliderScopeViewDelegate>)self;
         view.dataSource = (id<STSliderScopeViewDataSource>)self;
         self.footerView = view;
+        view.scope = scope_;
         [view release];
         _slider = [view retain];
     }

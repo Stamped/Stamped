@@ -19,5 +19,6 @@
 
 - (void)setupWithUser:(id<STUser>)user;
 - (void)setupWithColors:(NSArray*)colors;
+- (NSArray*)colors;
 
 @end

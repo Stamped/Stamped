@@ -36,29 +36,6 @@ def show(request, authUserId, authClientId, http_schema, **kwargs):
     
     return transformOutput(entity.dataExport())
 
-# @handleHTTPRequest(http_schema=HTTPEntityEdit)
-# @require_http_methods(["POST"])
-# def update(request, authUserId, authClientId, http_schema, data, **kwargs):
-#     ### TEMP: Generate list of changes. Need to do something better eventually...
-#     del(data['entity_id'])
-    
-#     for k, v in data.iteritems():
-#         if v == '':
-#             data[k] = None
-#     if 'address' in data:
-#         data['details.place.address'] = data['address']
-#         del(data['address'])
-#     if 'coordinates' in data and data['coordinates'] != None:
-#         data['coordinates'] = {
-#             'lat': data['coordinates'].split(',')[0],
-#             'lng': data['coordinates'].split(',')[-1]
-#         }
-    
-#     entity = stampedAPI.updateCustomEntity(authUserId, http_schema.entity_id, data)
-#     entity = _convertHTTPEntity(entity, authClientId)
-    
-#     return transformOutput(entity.dataExport())
-
 
 @handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["POST"])
@@ -69,13 +46,24 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySearch, conversion=HTTPEntitySearch.exportEntitySearch)
+@handleHTTPRequest(http_schema=HTTPEntitySearchRequest)
 @require_http_methods(["GET"])
-def search(request, authUserId, schema, **kwargs):
+def autosuggest(request, authUserId, http_schema, **kwargs):
+    result = stampedAPI.getEntityAutoSuggestions(authUserId=authUserId, 
+                                                 query=http_schema.query, 
+                                                 category=http_schema.category,
+                                                 coordinates=http_schema.exportCoordinates())
+
+    return transformOutput(result)
+
+
+@handleHTTPRequest(http_schema=HTTPEntitySearchRequest)
+@require_http_methods(["GET"])
+def search(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.searchEntities(authUserId=authUserId, 
-                                       query=schema.q, 
-                                       coords=schema.coordinates, 
-                                       category=schema.category)
+                                       query=http_schema.query, 
+                                       category=http_schema.category,
+                                       coords=http_schema.exportCoordinates())
     
     group = HTTPEntitySearchResultsGroup()
     group.title = 'Search results'
@@ -92,12 +80,16 @@ def search(request, authUserId, schema, **kwargs):
     return transformOutput(group.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySuggested, conversion=HTTPEntitySuggested.exportEntitySuggested)
+@handleHTTPRequest(http_schema=HTTPEntitySuggestionRequest)
 @require_http_methods(["GET"])
-def suggested(request, authUserId, schema, **kwargs):
-    sections    = stampedAPI.getSuggestedEntities(authUserId=authUserId, suggested=schema)
+def suggested(request, authUserId, http_schema, **kwargs):
+    sections    = stampedAPI.getSuggestedEntities(authUserId=authUserId, 
+                                                  category=http_schema.category,
+                                                  subcategory=http_schema.subcategory,
+                                                  coordinates=http_schema.exportCoordinates(),
+                                                  limit=20)
+
     convert     = lambda e: HTTPEntitySearchResultsItem().importEntity(e)
-    
     result      = []
 
     for section in sections:
@@ -115,20 +107,11 @@ def suggested(request, authUserId, schema, **kwargs):
     return transformOutput(result)
 
 
-
-@handleHTTPRequest(http_schema=HTTPEntityAutoSuggestForm, conversion=HTTPEntityAutoSuggestForm.exportEntityAutoSuggestForm)
-@require_http_methods(["GET"])
-def autosuggest(request, authUserId, http_schema, schema, **kwargs):
-    results     = stampedAPI.getEntityAutoSuggestions(authUserId=authUserId, autosuggestForm=schema)
-
-    return transformOutput(results)
-
-
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityId)
 @require_http_methods(["GET"])
 def menu(request, authUserId, http_schema, **kwargs):
     menu        = stampedAPI.getMenu(http_schema.entity_id)
-    http_menu   = HTTPMenu().importMenuSchema(menu)
+    http_menu   = HTTPMenu().importMenu(menu)
     
     return transformOutput(http_menu.dataExport())
 

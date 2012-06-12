@@ -111,7 +111,7 @@ def update(request, authUserId, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPAccountProfile)
 @require_http_methods(["POST"])
-def update_profile(request, authUserId, data, **kwargs):
+def updateProfile(request, authUserId, data, **kwargs):
     ### TEMP: Generate list of changes. Need to do something better eventually...
     for k, v in data.iteritems():
         if v == '':
@@ -123,10 +123,10 @@ def update_profile(request, authUserId, data, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPAccountProfileImage, upload='profile_image')
+@handleHTTPRequest(http_schema=HTTPAccountProfileImage)
 @require_http_methods(["POST"])
-def update_profile_image(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.updateProfileImage(authUserId, http_schema)
+def updateProfileImage(request, authUserId, http_schema, **kwargs):
+    user = stampedAPI.updateProfileImage(authUserId, http_schema.temp_image_url)
     user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
@@ -134,7 +134,7 @@ def update_profile_image(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp)
 @require_http_methods(["POST"])
-def customize_stamp(request, authUserId, data, **kwargs):
+def customizeStamp(request, authUserId, data, **kwargs):
     account = stampedAPI.customizeStamp(authUserId, data)
     user    = HTTPUser().importUser(account)
     
@@ -170,7 +170,7 @@ def check(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPAccountChangePassword, 
                    parse_request_kwargs={'obfuscate':['old_password', 'new_password']})
 @require_http_methods(["POST"])
-def change_password(request, authUserId, http_schema, **kwargs):
+def changePassword(request, authUserId, http_schema, **kwargs):
     new = http_schema.new_password
     old = http_schema.old_password
     
@@ -182,7 +182,7 @@ def change_password(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPEmail)
 @require_http_methods(["POST"])
-def reset_password(request, client_id, http_schema, **kwargs):
+def resetPassword(request, client_id, http_schema, **kwargs):
     stampedAuth.resetPassword(http_schema.email)
 
     return transformOutput(True)
@@ -190,7 +190,7 @@ def reset_password(request, client_id, http_schema, **kwargs):
 
 @handleHTTPRequest()
 @require_http_methods(["GET"])
-def show_alerts(request, authUserId, **kwargs):
+def showAlerts(request, authUserId, **kwargs):
     account  = stampedAPI.getAccount(authUserId)
     settings = HTTPAccountAlerts().importAccount(account)
 
@@ -199,7 +199,7 @@ def show_alerts(request, authUserId, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPAccountAlerts)
 @require_http_methods(["POST"])
-def update_alerts(request, authUserId, http_schema, **kwargs):
+def updateAlerts(request, authUserId, http_schema, **kwargs):
     account  = stampedAPI.updateAlerts(authUserId, http_schema)
     settings = HTTPAccountAlerts().importAccount(account)
 
@@ -208,7 +208,7 @@ def update_alerts(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPAPNSToken)
 @require_http_methods(["POST"])
-def update_apns(request, authUserId, http_schema, **kwargs):
+def updateApns(request, authUserId, http_schema, **kwargs):
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
     
@@ -218,7 +218,7 @@ def update_apns(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPAPNSToken)
 @require_http_methods(["POST"])
-def remove_apns(request, authUserId, http_schema, **kwargs):
+def removeApns(request, authUserId, http_schema, **kwargs):
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
     

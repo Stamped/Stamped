@@ -21,7 +21,7 @@ class AMongoCollectionView(AMongoCollection):
         # initialize params
         # -----------------
         sort        = [('timestamp.stamped', pymongo.DESCENDING), ('timestamp.created', pymongo.DESCENDING)] # Legacy support
-        viewport    = (timeSlice.viewport and timeSlice.viewport.lowerRight is not None)
+        viewport    = (timeSlice.viewport and timeSlice.viewport.lower_right is not None)
         
         if timeSlice.limit is None:
             timeSlice.limit = 0
@@ -51,56 +51,40 @@ class AMongoCollectionView(AMongoCollection):
 
         # handle category / subcategory filters
         # -------------------------------------
-        if timeSlice.kinds is not None:
-            raise NotImplementedError("NEED TO BUILD TIMESLICE CATEGORIES")
-            # kinds           = deriveKindFromCategory(timeSlice.category) 
-            # types           = deriveTypesFromCategory(timeSlice.category)
-            # subcategories   = deriveSubcategoriesFromCategory(timeSlice.category)
-            kinds           = mapCategoryToKinds(timeSlice.category) 
-            types           = mapCategoryToTypes(timeSlice.category)
-            subcategories   = mapCategoryToSubcategories(timeSlice.category)
-            
-            kinds_and_types = []
-            if len(kinds) > 0:
-                kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
-            if len(types) > 0:
-                kinds_and_types.append({'entity.types': {'$in': list(types)}})
-            
-            if len(kinds_and_types) > 0:
-                add_or_query([ { "entity.category" : str(timeSlice.category).lower() }, 
-                               { "entity.subcategory" : {"$in": list(subcategories)} },
-                               { "$and" : kinds_and_types } ])
-            else:
-                add_or_query([ { "entity.category" : str(timeSlice.category).lower() }, 
-                               { "entity.subcategory" : {"$in": list(subcategories)} } ])
-        
-        if timeSlice.types is not None:
-            raise NotImplementedError("NEED TO BUILD TIMESLICE SUBCATEGORIES")
-            query['entity.subcategory'] = str(timeSlice.subcategory).lower()
+        ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
+        if timeSlice.types is not None and len(timeSlice.types) > 0:
+            subcategories = list(timeSlice.types)
+            if 'track' in timeSlice.types:
+                subcategories.append('song')
+            add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
+                            {'entity.subcategory': {'$in': subcategories}} ])
+
+        elif timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
+            query["entity.kind"] = {'$in': list(timeSlice.kinds)}
         
         # handle viewport filter
         # ----------------------
         if viewport:
             query["entity.coordinates.lat"] = {
-                "$gte" : timeSlice.viewport.lowerRight.lat, 
-                "$lte" : timeSlice.viewport.upperLeft.lat, 
+                "$gte" : timeSlice.viewport.lower_right.lat, 
+                "$lte" : timeSlice.viewport.upper_left.lat, 
             }
             
-            if timeSlice.viewport.upperLeft.lng <= timeSlice.viewport.lowerRight.lng:
+            if timeSlice.viewport.upper_left.lng <= timeSlice.viewport.lower_right.lng:
                 query["entity.coordinates.lng"] = { 
-                    "$gte" : timeSlice.viewport.upperLeft.lng, 
-                    "$lte" : timeSlice.viewport.lowerRight.lng, 
+                    "$gte" : timeSlice.viewport.upper_left.lng, 
+                    "$lte" : timeSlice.viewport.lower_right.lng, 
                 }
             else:
                 # handle special case where the viewport crosses the +180 / -180 mark
                 add_or_query([  {
                         "entity.coordinates.lng" : {
-                            "$gte" : timeSlice.viewport.upperLeft.lng, 
+                            "$gte" : timeSlice.viewport.upper_left.lng, 
                         }, 
                     }, 
                     {
                         "entity.coordinates.lng" : {
-                            "$lte" : timeSlice.viewport.lowerRight.lng, 
+                            "$lte" : timeSlice.viewport.lower_right.lng, 
                         }, 
                     }, 
                 ])
@@ -119,7 +103,7 @@ class AMongoCollectionView(AMongoCollection):
     def _getSearchSlice(self, query, searchSlice):
         # initialize params
         # -----------------
-        viewport    = (searchSlice.viewport and searchSlice.viewport.lowerRight is not None)
+        viewport    = (searchSlice.viewport and searchSlice.viewport.lower_right is not None)
         
         if searchSlice.limit is None:
             searchSlice.limit = 0
@@ -138,40 +122,16 @@ class AMongoCollectionView(AMongoCollection):
         
         # handle category / subcategory filters
         # -------------------------------------
-        if searchSlice.kinds is not None and len(searchSlice.kinds) > 0:
-            query["entity.kind"] = {'$in': list(searchSlice.kinds)}
+        ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
+        if timeSlice.types is not None and len(timeSlice.types) > 0:
+            subcategories = list(timeSlice.types)
+            if 'track' in timeSlice.types:
+                subcategories.append('song')
+            add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
+                            {'entity.subcategory': {'$in': subcategories}} ])
 
-        if searchSlice.types is not None and len(searchSlice.types) > 0:
-            add_or_query([  {'entity.types': {'$in': list(searchSlice.types)}},
-                            {'entity.subcategory': {'$in': list(searchSlice.types)}} ])
-
-        """
-            raise NotImplementedError("NEED TO BUILD searchSlice CATEGORIES")
-            # kinds           = deriveKindFromCategory(searchSlice.category) 
-            # types           = deriveTypesFromCategory(searchSlice.category)
-            # subcategories   = deriveSubcategoriesFromCategory(searchSlice.category)
-            kinds           = mapCategoryToKinds(searchSlice.category) 
-            types           = mapCategoryToTypes(searchSlice.category)
-            subcategories   = mapCategoryToSubcategories(searchSlice.category)
-            
-            kinds_and_types = []
-            if len(kinds) > 0:
-                kinds_and_types.append({'entity.kind': {'$in': list(kinds)}})
-            if len(types) > 0:
-                kinds_and_types.append({'entity.types': {'$in': list(types)}})
-            
-            if len(kinds_and_types) > 0:
-                add_or_query([ { "entity.category" : str(searchSlice.category).lower() }, 
-                               { "entity.subcategory" : {"$in": list(subcategories)} },
-                               { "$and" : kinds_and_types } ])
-            else:
-                add_or_query([ { "entity.category" : str(searchSlice.category).lower() }, 
-                               { "entity.subcategory" : {"$in": list(subcategories)} } ])
-        
-        if searchSlice.types is not None:
-            raise NotImplementedError("NEED TO BUILD searchSlice SUBCATEGORIES")
-            query['entity.subcategory'] = str(searchSlice.subcategory).lower()
-        """
+        elif timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
+            query["entity.kind"] = {'$in': list(timeSlice.kinds)}
 
         # Query
         if searchSlice.query is not None:
@@ -191,25 +151,25 @@ class AMongoCollectionView(AMongoCollection):
         # ----------------------
         if viewport:
             query["entity.coordinates.lat"] = {
-                "$gte" : searchSlice.viewport.lowerRight.lat, 
-                "$lte" : searchSlice.viewport.upperLeft.lat, 
+                "$gte" : searchSlice.viewport.lower_right.lat, 
+                "$lte" : searchSlice.viewport.upper_left.lat, 
             }
             
-            if searchSlice.viewport.upperLeft.lng <= searchSlice.viewport.lowerRight.lng:
+            if searchSlice.viewport.upper_left.lng <= searchSlice.viewport.lower_right.lng:
                 query["entity.coordinates.lng"] = { 
-                    "$gte" : searchSlice.viewport.upperLeft.lng, 
-                    "$lte" : searchSlice.viewport.lowerRight.lng, 
+                    "$gte" : searchSlice.viewport.upper_left.lng, 
+                    "$lte" : searchSlice.viewport.lower_right.lng, 
                 }
             else:
                 # handle special case where the viewport crosses the +180 / -180 mark
                 add_or_query([  {
                         "entity.coordinates.lng" : {
-                            "$gte" : searchSlice.viewport.upperLeft.lng, 
+                            "$gte" : searchSlice.viewport.upper_left.lng, 
                         }, 
                     }, 
                     {
                         "entity.coordinates.lng" : {
-                            "$lte" : searchSlice.viewport.lowerRight.lng, 
+                            "$lte" : searchSlice.viewport.lower_right.lng, 
                         }, 
                     }, 
                 ])
@@ -240,7 +200,7 @@ class AMongoCollectionView(AMongoCollection):
         complexSort = None
         reverse     = genericCollectionSlice.reverse
         user_query  = genericCollectionSlice.query
-        viewport    = (genericCollectionSlice.viewport and genericCollectionSlice.viewport.lowerRight.lat is not None)
+        viewport    = (genericCollectionSlice.viewport and genericCollectionSlice.viewport.lower_right.lat is not None)
         relaxed     = (viewport and genericCollectionSlice.query is not None and genericCollectionSlice.sort == 'relevance')
         orig_coords = True
         
@@ -249,8 +209,8 @@ class AMongoCollectionView(AMongoCollection):
         
         if relaxed:
             center = {
-                'lat' : (genericCollectionSlice.viewport.upperLeft.lat + genericCollectionSlice.viewport.lowerRight.lat) / 2.0,
-                'lng' : (genericCollectionSlice.viewport.upperLeft.lng + genericCollectionSlice.viewport.lowerRight.lng) / 2.0,
+                'lat' : (genericCollectionSlice.viewport.upper_left.lat + genericCollectionSlice.viewport.lower_right.lat) / 2.0,
+                'lng' : (genericCollectionSlice.viewport.upper_left.lng + genericCollectionSlice.viewport.lower_right.lng) / 2.0,
             }
         
         def add_or_query(args):
@@ -367,25 +327,25 @@ class AMongoCollectionView(AMongoCollection):
             query["entity.coordinates.lng"] = { "$exists" : True}
         elif viewport:
             query["entity.coordinates.lat"] = {
-                "$gte" : genericCollectionSlice.viewport.lowerRight.lat, 
-                "$lte" : genericCollectionSlice.viewport.upperLeft.lat, 
+                "$gte" : genericCollectionSlice.viewport.lower_right.lat, 
+                "$lte" : genericCollectionSlice.viewport.upper_left.lat, 
             }
             
-            if genericCollectionSlice.viewport.upperLeft.lng <= genericCollectionSlice.viewport.lowerRight.lng:
+            if genericCollectionSlice.viewport.upper_left.lng <= genericCollectionSlice.viewport.lower_right.lng:
                 query["entity.coordinates.lng"] = { 
-                    "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
-                    "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
+                    "$gte" : genericCollectionSlice.viewport.upper_left.lng, 
+                    "$lte" : genericCollectionSlice.viewport.lower_right.lng, 
                 }
             else:
                 # handle special case where the viewport crosses the +180 / -180 mark
                 add_or_query([  {
                         "entity.coordinates.lng" : {
-                            "$gte" : genericCollectionSlice.viewport.upperLeft.lng, 
+                            "$gte" : genericCollectionSlice.viewport.upper_left.lng, 
                         }, 
                     }, 
                     {
                         "entity.coordinates.lng" : {
-                            "$lte" : genericCollectionSlice.viewport.lowerRight.lng, 
+                            "$lte" : genericCollectionSlice.viewport.lower_right.lng, 
                         }, 
                     }, 
                 ])
@@ -428,8 +388,8 @@ class AMongoCollectionView(AMongoCollection):
                 if relaxed:
                     earthRadius = 3959.0 # miles
                     _viewport   = genericCollectionSlice.viewport
-                    ll0         = (_viewport.upperLeft.lat,  _viewport.upperLeft.lng)
-                    ll1         = (_viewport.lowerRight.lat, _viewport.lowerRight.lng)
+                    ll0         = (_viewport.upper_left.lat,  _viewport.upper_left.lng)
+                    ll1         = (_viewport.lower_right.lat, _viewport.lower_right.lng)
                     
                     # expand viewport filter by 5%
                     lat_diff    = (ll0[0] - ll1[0]) * 0.05
@@ -442,11 +402,11 @@ class AMongoCollectionView(AMongoCollection):
                     ll3_lng     = min(180,  ll1[1] - lng_diff)
                     
                     scope['viewport'] = {
-                        'upperLeft' : {
+                        'upper_left' : {
                             'lat' : ll2_lat, 
                             'lng' : ll2_lng, 
                         }, 
-                        'lowerRight' : {
+                        'lower_right' : {
                             'lat' : ll3_lat, 
                             'lng' : ll3_lng, 
                         }, 
@@ -537,13 +497,13 @@ class AMongoCollectionView(AMongoCollection):
                         var inside = false;
                         
                         try {
-                            if (this.entity.coordinates.lat >= viewport.lowerRight.lat && this.entity.coordinates.lat <= viewport.upperLeft.lat) {
-                                if (viewport.upperLeft.lng <= viewport.lowerRight.lng) {
-                                    if (this.entity.coordinates.lng >= viewport.upperLeft.lng && this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                            if (this.entity.coordinates.lat >= viewport.lower_right.lat && this.entity.coordinates.lat <= viewport.upper_left.lat) {
+                                if (viewport.upper_left.lng <= viewport.lower_right.lng) {
+                                    if (this.entity.coordinates.lng >= viewport.upper_left.lng && this.entity.coordinates.lng <= viewport.lower_right.lng) {
                                         inside = true;
                                     }
                                 } else {
-                                    if (this.entity.coordinates.lng >= viewport.upperLeft.lng || this.entity.coordinates.lng <= viewport.lowerRight.lng) {
+                                    if (this.entity.coordinates.lng >= viewport.upper_left.lng || this.entity.coordinates.lng <= viewport.lower_right.lng) {
                                         inside = true;
                                     }
                                 }
@@ -667,17 +627,17 @@ class AMongoCollectionView(AMongoCollection):
                 
                 def _within_viewport(result):
                     result = AttributeDict(result)
-                    if result.entity.coordinates.lat >= scope.viewport.lowerRight.lat and \
-                        result.entity.coordinates.lat <= scope.viewport.upperLeft.lat:
+                    if result.entity.coordinates.lat >= scope.viewport.lower_right.lat and \
+                        result.entity.coordinates.lat <= scope.viewport.upper_left.lat:
                         
-                        if scope.viewport.upperLeft.lng <= scope.viewport.lowerRight.lng:
-                            if result.entity.coordinates.lng >= scope.viewport.upperLeft.lng and \
-                                result.entity.coordinates.lng <= scope.viewport.lowerRight.lng:
+                        if scope.viewport.upper_left.lng <= scope.viewport.lower_right.lng:
+                            if result.entity.coordinates.lng >= scope.viewport.upper_left.lng and \
+                                result.entity.coordinates.lng <= scope.viewport.lower_right.lng:
                                 return True
                         else:
                             # handle special case where the viewport crosses the +180 / -180 mark
-                            if result.entity.coordinates.lng >= scope.viewport.upperLeft.lng or \
-                                result.entity.coordinates.lng <= scope.viewport.lowerRight.lng:
+                            if result.entity.coordinates.lng >= scope.viewport.upper_left.lng or \
+                                result.entity.coordinates.lng <= scope.viewport.lower_right.lng:
                                 return True
                     
                     return False

@@ -22,7 +22,6 @@ from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
 
-
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
     """
@@ -564,19 +563,19 @@ def is_ec2():
     
     return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
-def get_db_config(conf):
+def get_db_config(config_desc):
     """ returns MongoDB host configuration """
     
-    if ':' in conf:
-        host, port = conf.split(':')
+    if ':' in config_desc:
+        host, port = config_desc.split(':')
         port = int(port)
     else:
-        host, port = (conf, 27017)
+        host, port = (config_desc, 27017)
         
-        if '.' in conf and not conf.endswith('.com'):
+        if '.' in config_desc and not config_desc.endswith('.com'):
             # attempt to resolve the (possible) semantic EC2 instance name to 
             # a valid DNS name or associated IP address
-            instance = getInstance(conf)
+            instance = getInstance(config_desc)
             
             if instance:
                 if is_ec2():
@@ -586,10 +585,10 @@ def get_db_config(conf):
     
     return host, port
 
-def init_db_config(conf):
+def init_db_config(config_desc):
     """ initializes MongoDB with proper host configuration """
     
-    host, port = get_db_config(conf)
+    host, port = get_db_config(config_desc)
     config = {
         'mongodb' : {
             'host' : host, 
@@ -682,7 +681,7 @@ def validate_email(email):
 
 def validate_screen_name(screen_name):
     try:
-        if __screen_name_re.match(screen_name):
+        if __screen_name_re.match(screen_name) and isinstance(screen_name, basestring):
             return True
     except:
         pass
@@ -697,6 +696,21 @@ def validate_hex_color(color):
         pass
     
     return False
+
+
+
+def validate_url(url):
+    from django.core.validators import URLValidator
+    from django.core.exceptions import ValidationError
+    
+    val = URLValidator(verify_exists=False)
+    
+    try:
+        val(url)
+    except ValidationError, e:
+        return False
+    
+    return True
 
 def getNumLines(f):
     bufferSize = 1024 * 1024
@@ -957,27 +971,39 @@ def get_input(msg="Continue %s? ", options=[('y', 'yes'), ('n', 'no'), ('a', 'ab
         print "invalid input"
 
 def indentText(text, n):
-    """Takes a multi-line string of text and indents each line by n spaces."""
-    lines = text.split('\n')
-    indent = ' ' * n
-    indentedLines = [indent + line for line in lines]
-    return '\n'.join(indentedLines)
+    """ Takes a multi-line string of text and indents each line by n spaces. """
 
-def basicNestedObjectToString(object, wrapStrings=False):
+    lines    = text.split('\n')
+    indent   = ' ' * n
+    indented = [indent + line for line in lines]
+
+    return '\n'.join(indented)
+
+def basicNestedObjectToString(obj, wrapStrings=False):
+    recurse = lambda o: basicNestedObjectToString(o, wrapStrings=wrapStrings)
+
     wrapperFn = str
     if wrapStrings:
         wrapperFn = json.dumps
-    if isinstance(object, unicode):
-        return wrapperFn(object.encode('utf-8'))
-    if any(isinstance(object, type_) for type_ in [basestring, int, float]):
-        return wrapperFn(object)
-    if isinstance(object, list):
-        elementStrings = [indentText(basicNestedObjectToString(element, wrapStrings=wrapStrings), 2) + ',' for element in object]
+
+    if isinstance(obj, unicode):
+        return wrapperFn(obj.encode('utf-8'))
+    
+    if any(isinstance(obj, type_) for type_ in [basestring, int, float]):
+        return wrapperFn(obj)
+    
+    if isinstance(obj, list):
+        elementStrings = [indentText(recurse(element,), 2) + ',' for element in obj]
         return '[\n' + ('\n'.join(elementStrings)) + '\n]'
-    if isinstance(object, tuple):
-        elementStrings = [indentText(basicNestedObjectToString(element, wrapStrings=wrapStrings), 2) + ',' for element in object]
+    
+    if isinstance(obj, tuple):
+        elementStrings = [indentText(recurse(element), 2) + ',' for element in obj]
         return '(\n' + ('\n'.join(elementStrings)) + '\n)'
-    if isinstance(object, dict):
-        elementStrings = [indentText('%s : %s,' % (wrapperFn(key), basicNestedObjectToString(value, wrapStrings=wrapStrings)), 2) for (key, value) in object.items()]
+    
+    if isinstance(obj, dict):
+        elementStrings = [indentText('%s : %s,' % (wrapperFn(key), recurse(value)), 2) for (key, value) in obj.items()]
         return '{\n' + ('\n'.join(elementStrings)) +'\n}'
-    raise Exception('Can\'t string-ify object of type: ' + type(object))
+    
+    # TODO: should fallback to a simple str(obj)?
+    raise Exception('Can\'t string-ify object of type: ' + type(obj))
+

@@ -585,7 +585,6 @@
 }
 
 - (void)stampCustomizeViewController:(StampCustomizeViewController*)controller doneWithColors:(NSArray*)colors {
-    [self dismissModalViewControllerAnimated:YES];
     
     if ([self.tableView.tableHeaderView respondsToSelector:@selector(setStampColors:)]) {
         [(SocialSignupHeaderView*)self.tableView.tableHeaderView setStampColors:colors];
@@ -595,6 +594,8 @@
         [(StampColorPickerView*)self.tableView.tableFooterView setSelectedColors:colors];
     }
     
+    [self dismissModalViewControllerAnimated:YES];
+
 }
 
 

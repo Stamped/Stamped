@@ -130,20 +130,25 @@
     callout.category = cell.category;
     [callout release];
     
+    _calloutView = view;
+    
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     
     UIView *subview = [[gestureRecognizer.view subviews] lastObject];
     CGRect frame = subview.frame;
-    frame.size.height -= 10.0f; // remove shadow
+    frame.size.height -= 10.0f; // remove drop shadow
     return !CGRectContainsPoint(frame, [gestureRecognizer locationInView:gestureRecognizer.view]);
     
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
     
-    [gesture.view removeFromSuperview];
+    if (_calloutView) {
+        [_calloutView removeFromSuperview], _calloutView=nil;
+    }
+
     CGPoint point = [gesture locationInView:_graphContainer];
     for (STUserGraphCell *view in _graphContainer.subviews) {
         if (CGRectContainsPoint(view.frame, point)) {
@@ -242,7 +247,7 @@
     
     if (_icon) {
 
-        BOOL highlight = _barHeight > _icon.size.height+6.0f;
+        BOOL highlight = (_barHeight/2) > _icon.size.height+4.0f;
         
         CGFloat originY = (_icon.size.height+4.0f);
         if (!highlight && _barHeight > 4.0f) {
@@ -304,7 +309,7 @@
 
 - (void)setTitle:(NSString*)title boldText:(NSString*)boldText {
     
-    CTFontRef ctFont = CTFontCreateWithName([[UIScreen mainScreen] scale] == 2.0 ? (CFStringRef)@"Helvetica Neue" : (CFStringRef)@"Helvetica", 11, NULL);
+    CTFontRef ctFont = CTFontCreateWithName([[UIScreen mainScreen] scale] == 2.0 ? (CFStringRef)@"HelveticaNeue" : (CFStringRef)@"Helvetica", 11, NULL);
     CTFontRef boldFont = CTFontCreateCopyWithSymbolicTraits(ctFont, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait);
     NSMutableDictionary *boldStyle = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(NSString*)boldFont, kCTFontAttributeName, (id)[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor, kCTForegroundColorAttributeName, nil];
     

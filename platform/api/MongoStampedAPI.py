@@ -305,7 +305,7 @@ class MongoStampedAPI(StampedAPI):
         # https://docs.google.com/a/stamped.com/spreadsheet/ccc?key=0AmEQSQLwlDtTdHoweWRZSjhXTm5Xb3NvSFBCQ0szWlE&hl=en_US#gid=0
         
         """
-        for source in EntitySourcesSchema()._elements:
+        for source in EntitySources()._elements:
             count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()
             source_stats[source] = count
         

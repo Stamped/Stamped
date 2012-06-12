@@ -119,7 +119,7 @@ class MongoActivityCollection(AActivityDB):
             if body is not None:
                 activity.body = body
 
-            timestamp           = TimestampSchema()
+            timestamp           = BasicTimestamp()
             timestamp.created   = now
             timestamp.modified  = now
             activity.timestamp  = timestamp 

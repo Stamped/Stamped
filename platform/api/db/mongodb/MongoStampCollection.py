@@ -81,8 +81,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['timestamp']['stamped'] = created
 
         if 'credit' in document:
+            document['credits'] = document['credit']
+            del(document['credit'])
+
+        if 'credits' in document:
             credit = []
-            for item in document['credit']:
+            for item in document['credits']:
                 if 'user' in item:
                     credit.append(item)
                 elif 'user_id' in item:
@@ -91,7 +95,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     if 'stamp_id' in item:
                         creditItem['stamp_id'] = item['stamp_id']
                     credit.append(creditItem)
-            document['credit'] = credit
+            document['credits'] = credit
 
         entityData = document.pop('entity')
         entity = buildEntity(entityData)

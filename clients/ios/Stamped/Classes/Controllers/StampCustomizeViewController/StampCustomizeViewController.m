@@ -31,7 +31,6 @@
     if ((self = [super init])) {
         
         _colors = [[NSArray arrayWithObjects:[UIColor colorWithRed:0.0f green:0.290f blue:0.698f alpha:1.0f], [UIColor colorWithRed:0.0f green:0.3411f blue:0.819f alpha:1.0], nil] retain];
-
         
     }
     return self;
