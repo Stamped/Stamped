@@ -22,9 +22,6 @@ from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
 
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
-
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
     """
@@ -703,11 +700,16 @@ def validate_hex_color(color):
 
 
 def validate_url(url):
+    from django.core.validators import URLValidator
+    from django.core.exceptions import ValidationError
+    
     val = URLValidator(verify_exists=False)
+    
     try:
         val(url)
     except ValidationError, e:
         return False
+    
     return True
 
 def getNumLines(f):
