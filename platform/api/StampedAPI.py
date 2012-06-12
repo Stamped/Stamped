@@ -3213,7 +3213,7 @@ class StampedAPI(AStampedAPI):
             # Build guide
             result = []
             for item in todos:
-                entity = entityIds[item.entity_id]
+                entity = entityIds[item.entity.entity_id]
                 previews = Previews()
                 previews.todos = [ user ]
                 entity.previews = previews
