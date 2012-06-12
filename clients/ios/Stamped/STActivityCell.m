@@ -140,7 +140,7 @@
 }
 
 - (BOOL)offsetBodyForIcon {
-    return self.hasIcon && self.scope == STStampedAPIScopeFriends;
+    return self.hasIcon && self.scope != STStampedAPIScopeYou;
 }
 
 - (BOOL)hasCredit {

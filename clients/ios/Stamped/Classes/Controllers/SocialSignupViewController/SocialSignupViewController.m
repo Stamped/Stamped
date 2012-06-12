@@ -11,7 +11,6 @@
 #import "SocialSignupHeaderView.h"
 #import "STTextFieldTableCell.h"
 #import "StampCustomizeViewController.h"
-#import "StampCustomizerViewController.h"
 
 @interface SocialSignupViewController ()
 @end

@@ -70,10 +70,11 @@ static NSString* const _blurbFontKey = @"CreateStamp.blurbFont";
 @property (nonatomic, readwrite, assign) BOOL hasBlurbText;
 @property (nonatomic, readwrite, assign) BOOL isEditing;
 @property (nonatomic, readwrite, assign) BOOL hasPhoto;
+@property (nonatomic, readwrite, retain) UIActivityIndicatorView* imageLoadingIndicator;
 
 @property (nonatomic, readwrite, retain) ASIS3ObjectRequest* photoUploadRequest;
 @property (nonatomic, readwrite, copy) NSString* tempPhotoURL;
-@property (nonatomic, readwrite, assign) BOOL waitingForPhotoUpload;
+@property (nonatomic, readonly, assign) BOOL waitingForPhotoUpload;
 
 @end
 
@@ -108,7 +109,7 @@ static NSString* const _blurbFontKey = @"CreateStamp.blurbFont";
 @synthesize hasPhoto = hasPhoto_;
 @synthesize photoUploadRequest = photoUploadRequest_;
 @synthesize tempPhotoURL = tempPhotoURL_;
-@synthesize waitingForPhotoUpload = waitingForPhotoUpload_;
+@synthesize imageLoadingIndicator = _imageLoadingIndicator;
 
 static const CGFloat _yOffset = 3;
 static const CGFloat _minPhotoOffset = 75;
@@ -125,6 +126,7 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 }
 
 - (void)stampButtonPressed:(id)button {
+    if (self.waitingForPhotoUpload) return;
     STStampNew* stampNew = [[[STStampNew alloc] init] autorelease];
     stampNew.blurb = self.blurbTextView.text;
     stampNew.entityID = self.entity.entityID;
@@ -132,10 +134,10 @@ static const CGFloat _maxPhotoButtonOffset = 135;
     NSString* tempURL = self.tempPhotoURL;
     if (image && tempURL) {
         stampNew.tempImageURL = tempURL;
-        stampNew.tempImageWidth = [NSNumber numberWithInteger:image.size.width];
-        stampNew.tempImageHeight = [NSNumber numberWithInteger:image.size.height];
     }
+    [Util globalLoadingLock];
     [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
+        [Util globalLoadingUnlock];
         if (stamp) {
             STPostStampViewController* controller = [[[STPostStampViewController alloc] initWithStamp:stamp] autorelease];
             UIViewController* inbox = [[[STInboxViewController alloc] init] autorelease];
@@ -219,7 +221,11 @@ static const CGFloat _maxPhotoButtonOffset = 135;
     }
     self.stampButton = [[[STButton alloc] initWithFrame:buttonFrame normalView:views[0] activeView:views[1] target:self andAction:@selector(stampButtonPressed:)] autorelease];
     [Util reframeView:self.stampButton withDeltas:CGRectMake(225, 356 + _yOffset, 0, 0)];
+    self.imageLoadingIndicator = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite] autorelease];
+    self.imageLoadingIndicator.frame = self.stampButton.frame;
+    self.imageLoadingIndicator.hidden = YES;
     [self.scrollView addSubview:self.stampButton];
+    [self.scrollView addSubview:self.imageLoadingIndicator];
 }
 
 - (void)addBlurbTextView {
@@ -284,7 +290,7 @@ static const CGFloat _maxPhotoButtonOffset = 135;
     [Util reframeView:self.blurbImageView withDeltas:CGRectMake(71, _minPhotoOffset, 0, 0)];
     self.blurbImageView.hidden = YES;
     self.deletePhotoButton = [[[UIButton alloc] initWithFrame:CGRectMake(-14, -14, 28, 28)] autorelease];
-    [self.deletePhotoButton setImage:[UIImage imageNamed:@"delete_comment_icon"] forState:UIControlStateNormal];
+    [self.deletePhotoButton setImage:[UIImage imageNamed:@"delete_icon"] forState:UIControlStateNormal];
     [self.deletePhotoButton addTarget:self action:@selector(deletePhotoButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
     [self.blurbImageView addSubview:self.deletePhotoButton];
     [self.blurbView addSubview:self.blurbImageView];
@@ -718,15 +724,16 @@ static const CGFloat _maxPhotoButtonOffset = 135;
     [self repositionCommentButton];
     [self repositionImage];
     self.blurbImageView.userInteractionEnabled = YES;
+    if (self.waitingForPhotoUpload) {
+        [self.photoUploadRequest cancel];
+        self.photoUploadRequest = nil;
+    }
     [self uploadPhotoToS3];
 }
 
 - (void)uploadPhotoToS3 {
     if (!self.blurbImageView.image)
         return;
-    [Util globalLoadingLock];
-    self.waitingForPhotoUpload = YES;
-    
     NSData* imageData = UIImageJPEGRepresentation(self.blurbImageView.image, 0.8);
     NSDate* now = [NSDate date];
     NSString* key = [NSString stringWithFormat:@"%@-%.0f.jpg", [imageData MD5], now.timeIntervalSince1970];
@@ -747,6 +754,23 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 
 - (CGFloat)blurbTextMaxY {
     return self.blurbTextView.frame.origin.y + self.blurbTextView.contentSize.height;
+}
+
+- (void)setPhotoUploadRequest:(ASIS3ObjectRequest *)photoUploadRequest {
+    self.tempPhotoURL = nil;
+    [photoUploadRequest_ cancel];
+    [photoUploadRequest_ release];
+    photoUploadRequest_ = [photoUploadRequest retain];
+    if (photoUploadRequest) {
+        self.imageLoadingIndicator.hidden = NO;
+        [self.imageLoadingIndicator startAnimating];
+        self.stampButton.userInteractionEnabled = NO;
+    }
+    else {
+        self.imageLoadingIndicator.hidden = YES;
+        [self.imageLoadingIndicator stopAnimating];
+        self.stampButton.userInteractionEnabled = YES;
+    }
 }
 
 - (void)repositionImage {
@@ -785,6 +809,7 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 }
 
 - (void)deletePhotoButtonClicked:(id)notImportant {
+    self.photoUploadRequest = nil;
     self.blurbImageView.image = nil;
     self.hasPhoto = NO;
     self.blurbImageView.hidden = YES;
@@ -816,22 +841,22 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 #pragma mark - ASIRequestDelegate methods.
 
 - (void)requestFinished:(ASIHTTPRequest*)request {
-    self.waitingForPhotoUpload = NO;
     self.photoUploadRequest = nil;
-    [Util globalLoadingUnlock];
 }
 
 - (void)requestFailed:(ASIHTTPRequest*)request {
     self.photoUploadRequest = nil;
     self.tempPhotoURL = nil;
-    self.waitingForPhotoUpload = NO;
-    [Util globalLoadingUnlock];
     [Util warnWithMessage:@"Photo upload failed" andBlock:nil];
 }
 
 - (void)setCreditedUsers:(NSArray<STUser> *)creditedUsers {
     [_creditedUsers release];
     _creditedUsers = [creditedUsers retain];
+}
+
+- (BOOL)waitingForPhotoUpload {
+    return self.photoUploadRequest != nil;
 }
 
 @end

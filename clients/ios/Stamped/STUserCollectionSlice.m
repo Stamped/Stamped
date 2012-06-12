@@ -22,6 +22,7 @@
 
 - (NSMutableDictionary*)asDictionaryParams {
   NSMutableDictionary* dict = [super asDictionaryParams];
+    [dict setObject:@"user" forKey:@"scope"];
   if (self.userID) {
     [dict setObject:self.userID forKey:@"user_id"];
   }
