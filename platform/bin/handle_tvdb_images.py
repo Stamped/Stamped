@@ -63,7 +63,7 @@ if __name__ == '__main__':
         #query = {'image' : {'$regex' : r'^.*thetvdb.com.*$'}}
         #query = {'subcategory' : 'tv'}
         
-        docs  = api._entityDB._collection.find()
+        docs  = api._entityDB._collection.find(query)
         count = docs.count()
         index = 0
         
