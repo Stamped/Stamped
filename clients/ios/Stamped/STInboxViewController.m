@@ -75,6 +75,7 @@
       }
       _searchQuery = nil;
       _reloading = YES;
+      self.showsSearchBar = NO;
   }
   return self;
 }
@@ -112,7 +113,6 @@
         _slider.scope = self.scope;
     }
     
-    self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self.tableView reloadData];
     [self updateCache];
