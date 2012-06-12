@@ -7,6 +7,28 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+@handleHTTPRequest()
+@require_http_methods(["GET"])
+def show(request, authUserId, **kwargs):
+    activity = stampedAPI.getActivity(authUserId, 'me', limit=kwargs['limit'], offset=kwargs['offset'])
+
+    result = []
+    for item in activity:
+        result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+
+    return transformOutput(result)
+
+@handleHTTPRequest()
+@require_http_methods(["GET"])
+def friends(request, authUserId, **kwargs):
+    activity = stampedAPI.getActivity(authUserId, 'friends', limit=kwargs['limit'], offset=kwargs['offset'])
+
+    result = []
+    for item in activity:
+        result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+
+    return transformOutput(result)
+
 @handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
 def collection(request, authUserId, http_schema, **kwargs):

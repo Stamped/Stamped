@@ -682,12 +682,11 @@ class StampedAPI(AStampedAPI):
         self._imageDB.generateStamp(primary, secondary)
 
     @API_CALL
-    def updateProfileImage(self, authUserId, schema):
-        if schema.profile_image is not None:
-            return self._addProfileImage(schema.profile_image, user_id=authUserId)
-
-        if schema.temp_image_url is None:
-            raise StampedInputError("if no image data is provided, a temp_image_url is required")
+    def updateProfileImage(self, authUserId, tempImageUrl):
+        if tempImageUrl is None:
+            raise StampedInputError("temp_image_url is required")
+        if utils.validate_url(tempImageUrl) == False:
+            raise StampedInputError("malformed url for profile image")
 
         user = self._userDB.getUser(authUserId)
         screen_name = user.screen_name
@@ -696,7 +695,7 @@ class StampedAPI(AStampedAPI):
         user.timestamp.image_cache = image_cache
         self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
 
-        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, schema.temp_image_url])
+        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, tempImageUrl])
 
         return user
 
@@ -1208,7 +1207,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
 
         # Remove activity
-        self._activityDB.removeFollowActivity(authUserId, userId)
+        #self._activityDB.removeFollowActivity(authUserId, userId)
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -2207,6 +2206,7 @@ class StampedAPI(AStampedAPI):
         # Enrich linked user, entity, todos, etc. within the stamp
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
+        logs.info('### stampExists: %s' % stampExists)
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
@@ -3846,7 +3846,8 @@ class StampedAPI(AStampedAPI):
         objects.user_ids = [ friendId ]
         self._addActivity('follow', userId, objects,
                                             group=True,
-                                            groupRange=timedelta(days=1))
+                                            groupRange=timedelta(days=1),
+                                            unique=True)
 
     def _addRestampActivity(self, userId, recipientIds, stamp_id, benefit):
         objects = ActivityObjectIds()
@@ -3974,152 +3975,10 @@ class StampedAPI(AStampedAPI):
         if len(recipientIds) > 0:
             self._userDB.updateUserStats(recipientIds, 'num_unread_news', increment=1)
 
-    def _createActivityCacheKey(self, authUserId, scope, offset):
-        return str("ActivityCacheKey::%s::%s::%s" % (authUserId, scope, offset))
-
-    def _getActivityFromDB(self, authUserId, scope, before, limit):
-        final = False
-
-        params = {}
-        if before is not None:
-            params['before'] = before
-        params['limit'] = limit
-
-        if scope == 'friends':
-            friends = self._friendshipDB.getFriends(authUserId)
-            activityData = []
-
-            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
-
-            # Get activities where friends are a subject member
-            dirtyActivityData = self._activityDB.getActivityForUsers(friends, **params)
-            if len(dirtyActivityData) < limit:
-                final = True
-            activityItemIds = [item.activity_id for item in dirtyActivityData]
-            # Find activity items for friends that also appear in personal feed
-            personalActivityIds = self._activityDB.getActivityIdsForUser(authUserId, **params)
-            overlappingActivityIds =  list(set(personalActivityIds).intersection(set(activityItemIds)))
-
-            for item in dirtyActivityData:
-                # Exclude the item if it is in the user's personal feed, unless it is a 'follow' item.  In that case,
-                #  remove the user as an object and ensure there are still other users targeted by the item
-                isInPersonalFeed = item.activity_id in overlappingActivityIds
-                if isInPersonalFeed and item.verb in ['comment', 'like',  'todo', 'restamp' ]:
-                    continue
-                elif isInPersonalFeed and item.verb in ['follow']:
-                    assert(item.objects is not None and authUserId in item.objects.user_ids)
-                    newUserIds = list(item.objects.user_ids)
-                    newUserIds.remove(authUserId)
-                    item.objects.user_ids = newUserIds
-                    if len(item.objects.user_ids) == 0:
-                        continue
-
-                item.subjects = list(set(item.subjects).intersection(set(friends)))
-                assert(len(item.subjects) > 0)
-                activityData.append(item)
-        elif scope == 'me':
-            activityData = self._activityDB.getActivity(authUserId, **params)
-            if len(activityData) < limit:
-                final = True
-        else:
-            raise StampedInputError("Invalid scope: %s" % scope)
-
-        return activityData, final
-
-    def _pruneActivityItems(self, activityItems):
-        prunedItems = []
-        for item in activityItems:
-#            if item.verb == 'follow':
-#                continue
-            prunedItems.append(item)
-        return prunedItems
-
-    def _updateActivityCache(self, authUserId, scope, offset):
-
-        prevBlockOffset = offset - self.ACTIVITY_CACHE_BLOCK_SIZE
-        if prevBlockOffset < 0:
-            prevBlockOffset = None
-
-        # get the modified time of the last item of the previous activity cache block.  We use it for the slice
-        before = None
-        if prevBlockOffset is not None:
-            prevBlockKey = self._createActivityCacheKey(authUserId, scope, prevBlockOffset)
-            try:
-                prevBlock = self._cache[prevBlockKey]
-            except KeyError:
-                # recursively fill previous blocks if they have expired
-                prevBlock = self._updateActivityCache(authUserId, scope, prevBlockOffset)
-            except Exception as e:
-                logs.error('Error retrieving activity items from memcached.  Is memcached running?')
-                prevBlock = self._updateActivityCache(authUserId, scope, prevBlockOffset)
-            if len(prevBlock) < self.ACTIVITY_CACHE_BLOCK_SIZE:
-                raise Exception("previous activity block was final")
-            assert(len(prevBlock) > 0)
-            lastItem = prevBlock[-1]
-            before = lastItem.timestamp.modified - timedelta(microseconds=1)
-
-        # Pull the data from the database and prune it.
-        limit = self.ACTIVITY_CACHE_BLOCK_SIZE + self.ACTIVITY_CACHE_BUFFER_SIZE
-        activityData = []
-        while len(activityData) < self.ACTIVITY_CACHE_BLOCK_SIZE:
-            newData, final = self._getActivityFromDB(authUserId, scope, before, limit)
-            newData = self._pruneActivityItems(newData)
-            activityData += newData
-            if final:
-                break
-            before = newData[-1].timestamp.modified - timedelta(microseconds=1)
-
-        key = self._createActivityCacheKey(authUserId, scope, offset)
-        activityData = activityData[:self.ACTIVITY_CACHE_BLOCK_SIZE]
-        try:
-            self._cache[key] = activityData
-        except Exception:
-            logs.error('Error storing activity items to memcached.  Is memcached running?')
-        return activityData
-
-    def _clearActivityCacheForUser(self, authUserId, scope):
-        try:
-            curOffset = 0
-            key = self._createActivityCacheKey(authUserId, scope, curOffset)
-            while key in self._cache:
-                del(self._cache[key])
-                curOffset += self.ACTIVITY_CACHE_BLOCK_SIZE
-                key = self._createActivityCacheKey(authUserId, scope, curOffset)
-        except Exception as e:
-            logs.warning("CANNOT CLEAR ACTIVITY CACHE: %s" % e)
-
-    def _getActivityFromCache(self, authUserId, scope, offset, limit):
-        """
-        Pull the requested activity data from cache if it exists there, otherwise pull the data from db
-        Returns a tuple of (the activity data list, bool indicating if the end of the activity stream was reached)
-        """
-        if offset == 0:
-            try:
-                self._clearActivityCacheForUser(authUserId, scope)
-            except pylibmc.ConnectionError:
-                logs.warning("Cannot clear activity (memcached not running)")
-
-        activity = []
-        while len(activity) < limit:
-            curOffset = ((offset + len(activity)) // self.ACTIVITY_CACHE_BLOCK_SIZE) * self.ACTIVITY_CACHE_BLOCK_SIZE
-            key = self._createActivityCacheKey(authUserId, scope, curOffset)
-            try:
-                newActivity = self._cache[key]
-            except KeyError:
-                newActivity = self._updateActivityCache(authUserId, scope, curOffset)
-            except Exception:
-                logs.error('Error retrieving activity from memcached.  Is memcached running?')
-                newActivity = self._updateActivityCache(authUserId, scope, curOffset)
-            start = (offset+len(activity)) % self.ACTIVITY_CACHE_BLOCK_SIZE
-            activity += newActivity[start:start+limit]
-            if len(newActivity) < self.ACTIVITY_CACHE_BLOCK_SIZE:
-                break
-
-        return activity[:limit], len(activity) < limit
-
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
-        activityData, final = self._getActivityFromCache(authUserId, scope, offset, limit)
+        activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
+        #activityData, final = self._getActivityFromCache(authUserId, scope, offset, limit)
 
         # Append user objects
         userIds     = {}

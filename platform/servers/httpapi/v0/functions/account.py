@@ -123,10 +123,10 @@ def updateProfile(request, authUserId, data, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPAccountProfileImage, upload='profile_image')
+@handleHTTPRequest(http_schema=HTTPAccountProfileImage)
 @require_http_methods(["POST"])
 def updateProfileImage(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.updateProfileImage(authUserId, http_schema)
+    user = stampedAPI.updateProfileImage(authUserId, http_schema.temp_image_url)
     user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
