@@ -3503,7 +3503,7 @@ class StampedAPI(AStampedAPI):
     def buildGuideAsync(self, authUserId):
         try:
             guide = self._guideDB.getGuide(authUserId)
-            if guide.updated is not None and datetime.utcnow() > guide.updated + timedelta(days=1):
+            if guide.updated is not None and datetime.utcnow() < guide.updated + timedelta(days=1):
                 return
         except (StampedUnavailableError, KeyError):
             pass
