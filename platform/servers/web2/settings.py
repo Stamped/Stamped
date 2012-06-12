@@ -1,7 +1,7 @@
 # Django settings for www project.
 
 import Globals
-import utils, os, libs.ec2_utils
+import stamped_utils, os, libs.ec2_utils
 
 IS_PROD         = libs.ec2_utils.is_prod_stack()
 DEBUG           = (not IS_PROD)

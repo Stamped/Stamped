@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import keys.aws, utils
+import keys.aws, stamped_utils
 import datetime, json, os, time
 
 from boto.route53.connection    import Route53Connection
@@ -53,7 +53,7 @@ def get_stack(stack=None):
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
     
     if os.path.exists(path):
-        modified = utils.get_modified_time(path)
+        modified = stamped_utils.get_modified_time(path)
         current  = datetime.datetime.utcnow() - datetime.timedelta(minutes=15)
         
         # only try to use the cached config if it's recent enough
@@ -62,13 +62,13 @@ def get_stack(stack=None):
                 f = open(path, 'r')
                 info = json.loads(f.read())
                 f.close()
-                info = utils.AttributeDict(info)
+                info = stamped_utils.AttributeDict(info)
                 if info.instance is not None and len(info.nodes) > 0:
-                    info.nodes = map(utils.AttributeDict, info.nodes)
+                    info.nodes = map(stamped_utils.AttributeDict, info.nodes)
                     return info
             except:
-                utils.log("error getting cached stack info; recomputing")
-                utils.printException()
+                stamped_utils.log("error getting cached stack info; recomputing")
+                stamped_utils.printException()
     
     conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     
@@ -110,8 +110,8 @@ def get_stack(stack=None):
     f.write(json.dumps(info, indent=2))
     f.close()
     
-    info = utils.AttributeDict(info)
-    info.nodes = map(utils.AttributeDict, info.nodes)
+    info = stamped_utils.AttributeDict(info)
+    info.nodes = map(stamped_utils.AttributeDict, info.nodes)
     
     return info
 
@@ -193,7 +193,7 @@ def is_ec2():
     return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
 def _shell(cmd, env=None):
-    utils.log(cmd)
+    stamped_utils.log(cmd)
     pp = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, env=env)
     delay = 0.01
     
@@ -238,7 +238,7 @@ class AWSInstance(object):
                                 pass
                 return cfg
             
-            return utils.AttributeDict(_fix_config(self._instance.tags))
+            return stamped_utils.AttributeDict(_fix_config(self._instance.tags))
         else:
             return None
     
@@ -314,7 +314,7 @@ class AWSInstance(object):
         if desc is None:
             desc = "port %s" % (str(port))
         
-        utils.log("[%s] waiting for %s to come online (this may take a few minutes)..." % (self, desc))
+        stamped_utils.log("[%s] waiting for %s to come online (this may take a few minutes)..." % (self, desc))
         sleepy_time = 2
         
         while True:
@@ -329,12 +329,12 @@ class AWSInstance(object):
                     
                     if timeout <= 0:
                         msg = "[%s] timeout attempting to access port %d (%s)" % (self, port, desc)
-                        utils.log(msg)
+                        stamped_utils.log(msg)
                         raise Exception(msg)
                 
                 time.sleep(sleepy_time)
         
-        utils.log("[%s] %s is online" % (self, desc))
+        stamped_utils.log("[%s] %s is online" % (self, desc))
     
     def _get_security_groups(self):
         return map(role.lower() for role in self.roles)
