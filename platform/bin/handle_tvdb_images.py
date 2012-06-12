@@ -46,17 +46,20 @@ if __name__ == '__main__':
             modified = False
             
             for image in entity.images:
-                image_url   = image.sizes[0].url
-                image_url   = db.addWebEntityImage(image_url)
+                image_url       = image.sizes[0].url
+                new_image_url   = db.addWebEntityImage(image_url)
+                modified       |= (image_url != new_image_url)
                 
-                modified    = True
-                image.sizes[0].url = image_url
+                if image_url != new_image_url:
+                    utils.log("converted '%s' => '%s'" % image_url, new_image_url)
+                    image.sizes[0].url = new_image_url
             
             if modified:
                 api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
-        docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
+        #docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
+        docs  = api._entityDB._collection.find({'subcategory' : 'tv'})
         count = docs.count()
         index = 0
         
