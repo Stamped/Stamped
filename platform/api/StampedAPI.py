@@ -1675,9 +1675,6 @@ class StampedAPI(AStampedAPI):
         return stats
 
 
-
-
-
     """
      #####
     #     # #####   ##   #    # #####   ####
@@ -3039,6 +3036,7 @@ class StampedAPI(AStampedAPI):
 
         return userIds
 
+
     """
      #####
     #     #  ####  #      #      ######  ####  ##### #  ####  #    #  ####
@@ -3159,6 +3157,7 @@ class StampedAPI(AStampedAPI):
 
         return self._searchStampCollection(stampIds, searchSlice, authUserId=authUserId)
 
+
     """
      #####
     #     # #    # # #####  ######
@@ -3168,9 +3167,62 @@ class StampedAPI(AStampedAPI):
     #     # #    # # #    # #
      #####   ####  # #####  ######
     """
+    def _mapGuideSectionToTypes(self, section=None, subsection=None):
+        if subsection is not None:
+            return [ subsection ]
+        elif section is not None:
+            if section == 'food':
+                return [ 'restaurant', 'bar', 'cafe', 'food' ]
+            else:
+                return list(Entity.mapCategoryToTypes(guideRequest.section))
+        else:
+            raise Exception("No section or subsection specified for guide")
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
+        if guideRequest.scope == 'me' and authUserId == '4e570489ccc2175fcd000000':
+            # Testing for Kevin
+            timeSlice = TimeSlice()
+            timeSlice.limit = guideRequest.limit 
+            timeSlice.offset = guideRequest.offset
+            timeSlice.viewport = guideRequest.viewport
+            timeSlice.types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
+
+            todos = self._todoDB.getTodos(authUserId, timeSlice)
+
+            # User
+            user = self._userDB.getUser(authUserId).minimize()
+
+            # Enrich entities
+            entityIds = {}
+
+            for todo in todos:
+                entityIds[str(todo.entity.entity_id)] = None
+
+            entities = self._entityDB.getEntities(entityIds.keys())
+
+            for entity in entities:
+                if entity.sources.tombstone_id is not None:
+                    # Convert to newer entity
+                    replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                    entityIds[entity.entity_id] = replacement
+                    ### TODO: Async process to replace reference
+                else:
+                    entityIds[entity.entity_id] = entity
+
+            # Build guide
+            result = []
+            for item in todos:
+                entity = entityIds[item.entity_id]
+                previews = Previews()
+                previews.todos = [ user ]
+                entity.previews = previews
+                result.append(entity)
+
+            return result
+
+
+
         if guideRequest.scope == 'me':
             ### TODO: Put something here
             return []
@@ -3182,13 +3234,7 @@ class StampedAPI(AStampedAPI):
             types = None 
 
             # Subsection conversion
-            if guideRequest.subsection is not None:
-                types = [ guideRequest.subsection ]
-            elif guideRequest.section is not None:
-                if guideRequest.section == 'food':
-                    types = [ 'restaurant', 'bar', 'cafe', 'food' ]
-                else:
-                    types = list(Entity.mapCategoryToTypes(guideRequest.section))
+            types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
 
             since = datetime.utcnow() - timedelta(days=90)
 
@@ -3612,18 +3658,17 @@ class StampedAPI(AStampedAPI):
         #     ####  #####   ####   ####
     """
 
-
-    def _enrichTodo(self, rawTodo, user=None, entity=None, source_stamps=None, stamp=None, friendIds=None, authUserId=None):
+    def _enrichTodo(self, rawTodo, user=None, entity=None, sourceStamps=None, stamp=None, friendIds=None, authUserId=None):
         if user is None or user.user_id != rawTodo.user_id:
             user = self._userDB.getUser(rawTodo.user_id).minimize()
 
         if entity is None or entity.entity_id != rawTodo.entity.entity_id:
             entity = self._entityDB.getEntity(rawTodo.entity.entity_id)
 
-        if source_stamps is None and rawTodo.source_stamp_ids is not None:
+        if sourceStamps is None and rawTodo.source_stamp_ids is not None:
             # Enrich stamps
-            source_stamps = self._stampDB.getStamps(rawTodo.source_stamp_ids, limit=len(rawTodo.source_stamp_ids))
-            source_stamps = self._enrichStampObjects(source_stamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
+            sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids, limit=len(rawTodo.source_stamp_ids))
+            sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
 
         # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
         # this is necessary only for backward compatability.  The new RawTodo schema includes the stamp_id val
@@ -3645,7 +3690,7 @@ class StampedAPI(AStampedAPI):
             previews.todos = users
 
 
-        return rawTodo.enrich(user, entity, previews, source_stamps, stamp)
+        return rawTodo.enrich(user, entity, previews, sourceStamps, stamp)
 
     @API_CALL
     def addTodo(self, authUserId, entityRequest, stampId=None):
@@ -3747,8 +3792,8 @@ class StampedAPI(AStampedAPI):
             #self._activityDB.removeActivity('todo', authUserId, stampId=todo.stamp.stamp_id)
 
         # Update stamp stats
-#        if todo.source_stamps is not None:
-#            for stamp in todo.source_stamps:
+#        if todo.sourceStamps is not None:
+#            for stamp in todo.sourceStamps:
 #                tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         return todo
@@ -3788,8 +3833,8 @@ class StampedAPI(AStampedAPI):
         todoData = self._todoDB.getTodos(authUserId, timeSlice)
 
         # Extract entities & stamps
-        entityIds   = {}
-        sourceStampIds    = {}
+        entityIds = {}
+        sourceStampIds = {}
 
         for rawTodo in todoData:
             entityIds[str(rawTodo.entity.entity_id)] = None
