@@ -308,15 +308,14 @@
 
 - (void)stUserHeaderView:(STUserHeaderView*)view selectedTab:(STUserHeaderTab)tab {
         
+    CGPoint offset = self.tableView.contentOffset;
     if (tab != STUserHeaderTabInfo) {
         if (self.tableView.tableHeaderView==nil && _infoTableView.tableHeaderView!=nil) {
-            CGPoint offset = self.infoTableView.contentOffset;
+            offset = self.infoTableView.contentOffset;
             UIView *header = [self.infoTableView.tableHeaderView retain];
             self.infoTableView.tableHeaderView = nil;
             self.tableView.tableHeaderView = header;
-            [self.tableView reloadData];
             [header release];
-            self.tableView.contentOffset = offset;
         }        
     }
     
@@ -330,8 +329,8 @@
             [_graphView setupWithUser:self.user];
             [view release];
         }
-        [self.tableView reloadData];
 
+        
     } else if (tab == STUserHeaderTabInfo) {
         
         CGPoint offset = self.tableView.contentOffset;
@@ -347,10 +346,12 @@
         UIView *header = [self.tableView.tableHeaderView retain];
         self.tableView.tableHeaderView = nil;
         self.tableView.tableHeaderView = header;
-        [self.tableView reloadData];
         [header release];
         
     }
+    
+    [self.tableView reloadData];
+    self.tableView.contentOffset = offset;
     
     if (_infoTableView) {
         _infoTableView.hidden = (tab != STUserHeaderTabInfo);
