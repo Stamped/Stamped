@@ -3801,9 +3801,11 @@ class StampedAPI(AStampedAPI):
         if not previouslyTodoed and len(recipientIds) > 0:
             self._addTodoActivity(authUserId, recipientIds, entity.entity_id)
 
-            # Update stamp stats
-            if stampId is not None:
-                tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
+        # Update stamp stats
+        if stampId is not None:
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
+        for friendStamp in friendStamps:
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
 
         return todo
 
