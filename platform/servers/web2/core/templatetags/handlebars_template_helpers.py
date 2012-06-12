@@ -36,11 +36,14 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     name = scope.get('name')
     screen_name = scope.get('screen_name')
     alt  = "@%s" % screen_name
-    url  = "http://static.stamped.com/users/default.jpg"
-    okay = False
+    url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
     
     if name is not None:
         alt  = "%s (%s)" % (name, alt)
+    
+    """
+    url  = "http://static.stamped.com/users/default.jpg"
+    okay = False
     
     multires_image = scope.get('image')
     if multires_image is not None:
@@ -58,6 +61,7 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     
     if not okay:
         logs.warn("no image of size '%s' for user '%s'" % (size, screen_name))
+    """
     
     return pybars.strlist('<img alt="%s" src="%s" />' % (alt, url))
 

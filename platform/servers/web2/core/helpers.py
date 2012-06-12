@@ -45,7 +45,8 @@ class StampedAPIProxy(object):
         if self._prod:
             raise NotImplementedError
         else:
-            return self._handle_get("collections/user.json", params)
+            params['scope'] = 'user'
+            return self._handle_get("stamps/collection.json", params)
     
     def getFriends(self, params):
         if self._prod:

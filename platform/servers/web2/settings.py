@@ -1,16 +1,14 @@
 # Django settings for www project.
 
 import Globals
-import utils
-import os
-import libs.ec2_utils
+import utils, os, libs.ec2_utils
 
 IS_PROD         = libs.ec2_utils.is_prod_stack()
 DEBUG           = (not IS_PROD)
 TEMPLATE_DEBUG  = DEBUG
 PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 
-utils.log("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
+print("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
 
 ADMINS = (
     ('Stamped Dev', 'dev@stamped.com'), 
