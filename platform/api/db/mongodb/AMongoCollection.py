@@ -19,6 +19,7 @@ from MongoCollectionProxy   import MongoCollectionProxy
 class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
+        self.database_name = 'stamped'
         self._connection = None
         self._init()
         
@@ -137,7 +138,7 @@ class AMongoCollection(object):
     def __init__(self, collection, primary_key=None, obj=None, overflow=False):
         self._desc = self.__class__.__name__
         
-        self._init_collection('stamped', collection)
+        self._init_collection(MongoDBConfig.getInstance().database_name, collection)
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow
