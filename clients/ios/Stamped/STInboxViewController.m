@@ -8,7 +8,6 @@
 
 #import "STInboxViewController.h"
 #import "STToolbarView.h"
-#import "STScopeSlider.h"
 #import "STUserStampsSliceList.h"
 #import "STGenericTableDelegate.h"
 #import "STYouStampsList.h"

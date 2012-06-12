@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "STGenericCollectionSlice.h"
 #import "STStamp.h"
-#import "STScopeSlider.h"
 
 @class STStampsViewSource;
 
