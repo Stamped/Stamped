@@ -97,7 +97,13 @@ def serializeCall(fnName, args, kwargs):
     return hash((fnName, args, kwargs))
 
 
+# Globals. Ugh.
+# This one is used to remember whether or not we've had any problems connecting to the mongod instance, so that if we
+# have we won't keep trying each time. (There's a long timeout per attempt.)
 cacheTableError = None
+# This one is used for testing so we know not to use timestamps when we're running in testing mode.
+disableStaleness = False
+
 
 ONE_WEEK = datetime.timedelta(7)
 def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
@@ -130,21 +136,28 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
             force_recalculate = kwargs.pop('force_recalculate', False)
             try:
                 connection = MongoDBConfig.getInstance().connection
-                table = connection.stamped.cache
+                dbname = MongoDBConfig.getInstance().database_name
+                table = getattr(connection, dbname).cache
                 result = table.find_one({'_id':callHash})
             except AutoReconnect as exc:
                 cacheTableError = exc
                 logs.warning("Couldn't connect to Mongo cache table; disabling Mongo cache.")
                 return userFunction(*fullArgs, **kwargs)
 
-            if result and (result['expiration'] > now) and not force_recalculate:
+            if result and result['expiration'] is None and not disableStaleness:
+                raise ValueError('We should never be using non-expiring cache entries outside of test fixtures!')
+            if result and result['expiration'] is not None and disableStaleness:
+                raise ValueError('We should never be using expiring cache entries inside of test fixtures!')
+
+            if result and (disableStaleness or (result['expiration'] > now)) and not force_recalculate:
                 # We hit the cache and the result isn't stale! Woo!
                 return result['value']
 
+            expiration = None if disableStaleness else now + maxStaleness
             result = {'_id':callHash,
                       'func_name': fnName,
                       'value': userFunction(*fullArgs, **kwargs),
-                      'expiration':(now+maxStaleness)}
+                      'expiration':expiration}
             table.update({'_id':callHash}, result, upsert=True)
 
             return result['value']

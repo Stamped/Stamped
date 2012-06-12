@@ -9,7 +9,7 @@ import Globals
 import keys.aws, logs, utils
 import os, time, zlib, struct, array, random, urllib2
 
-from gevent.pool    import Pool
+from gevent.pool import Pool
 
 try:
     import Image, ImageFile
@@ -287,9 +287,9 @@ class S3ImageDB(AImageDB):
         suffix = suffix.lower()
         
         if suffix == '.jpg' or suffix == '.jpeg':
-            self._addJPG(prefix, image)
+            return self._addJPG(prefix, image)
         elif suffix == '.png':
-            self._addPNG(prefix, image)
+            return self._addPNG(prefix, image)
         else:
             raise Exception("unsupported image type: '" + suffix + "'")
     
