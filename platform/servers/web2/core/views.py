@@ -123,8 +123,8 @@ def profile(request, schema, **kwargs):
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))
     
-    utils.log("STAMPS:")
-    utils.log(pprint.pformat(stamps))
+    #utils.log("STAMPS:")
+    #utils.log(pprint.pformat(stamps))
     
     #utils.log("FRIENDS:")
     #utils.log(pprint.pformat(friends))
