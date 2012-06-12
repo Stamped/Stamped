@@ -3596,7 +3596,6 @@ class StampedAPI(AStampedAPI):
                     if userId in friendIds:
                         todosMap[stat.entity_id].add(userId)
 
-
         guide = GuideCache()
         guide.user_id = user.user_id
         guide.updated = now
@@ -3654,8 +3653,10 @@ class StampedAPI(AStampedAPI):
                         preview.append(stampPreview)
                     if len(preview) > 0:
                         item.stamps = preview
-                if entity.entity_id in todosMap:
-                    item.todo_user_ids = list(todosMap[entity.entity_id])
+                if result[0] in todosMap:
+                    userIds = list(todosMap[result[0]])
+                    if len(userIds) > 0:
+                        item.todo_user_ids = userIds
                 cache.append(item)
             setattr(guide, section, cache)
 
