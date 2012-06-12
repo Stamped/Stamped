@@ -3086,7 +3086,7 @@ class HTTPActivity(Schema):
 
             actionMapping = {
                 'listen'    : ('listened to', ''),
-                'playlist'  : ('added', 'to their playlist'),
+                'playlist'  : ('added', 'to a playlist'),
                 'download'  : ('downloaded', ''),
                 'reserve'   : ('made a reservation at', ''),
                 'menu'      : ('viewed the menu for', ''),
