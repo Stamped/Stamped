@@ -287,9 +287,9 @@ class S3ImageDB(AImageDB):
         suffix = suffix.lower()
         
         if suffix == '.jpg' or suffix == '.jpeg':
-            self._addJPG(prefix, image)
+            return self._addJPG(prefix, image)
         elif suffix == '.png':
-            self._addPNG(prefix, image)
+            return self._addPNG(prefix, image)
         else:
             raise Exception("unsupported image type: '" + suffix + "'")
     

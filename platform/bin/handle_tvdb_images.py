@@ -48,10 +48,14 @@ if __name__ == '__main__':
             if entity.images is not None and len(entity.images) > 0:
                 for image in entity.images:
                     image_url       = image.sizes[0].url
+                    image_url = 'http://thetvdb.com/banners/_cache/posters/72173-1.jpg'
                     new_image_url   = db.addWebEntityImage(image_url)
-                    modified       |= (image_url != new_image_url)
                     
-                    if image_url != new_image_url:
+                    if new_image_url is not None:
+                        diff            = (image_url != new_image_url)
+                        modified       |= diff
+                    
+                    if diff:
                         utils.log("converted '%s' => '%s'" % (image_url, new_image_url))
                         image.sizes[0].url = new_image_url
                 
