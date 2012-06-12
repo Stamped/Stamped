@@ -3174,7 +3174,7 @@ class StampedAPI(AStampedAPI):
             if section == 'food':
                 return [ 'restaurant', 'bar', 'cafe', 'food' ]
             else:
-                return list(Entity.mapCategoryToTypes(guideRequest.section))
+                return list(Entity.mapCategoryToTypes(section))
         else:
             raise Exception("No section or subsection specified for guide")
 
