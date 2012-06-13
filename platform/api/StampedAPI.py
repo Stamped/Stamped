@@ -2690,7 +2690,7 @@ class StampedAPI(AStampedAPI):
         followerTodos           = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
         existingTodoIds         = set(map(lambda x: x.todo_id, todos))
         for todo in followerTodos:
-            if len(todos) >= MAX_PREVIEW:
+            if len(todos) >= 100:
                 break
             if todo.todo_id not in existingTodoIds:
                 todos.append(todo)
