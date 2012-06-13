@@ -1388,7 +1388,7 @@ class RawTodo(Schema):
     def setSchema(cls):
         cls.addProperty('todo_id',                          basestring)
         cls.addProperty('user_id',                          basestring, required=True)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addPropertyList('source_stamp_ids',             basestring)
         cls.addProperty('stamp_id',                         basestring)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)

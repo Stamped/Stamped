@@ -3745,7 +3745,7 @@ class StampedAPI(AStampedAPI):
         entity = self._getEntityFromRequest(entityRequest)
 
         todo                    = RawTodo()
-        todo.entity             = entity
+        todo.entity             = entity.minimize()
         todo.user_id            = authUserId
         todo.timestamp          = BasicTimestamp()
         todo.timestamp.created  = datetime.utcnow()
