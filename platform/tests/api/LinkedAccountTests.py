@@ -362,16 +362,19 @@ class StampedAPITwitterCreate(StampedAPITwitterTest):
 
     def test_friend_joined_activity_alert(self):
         result = self.showActivity(self.twUserAToken)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['verb'], 'friend_twitter')
-        self.assertEqual(result[0]['subjects'][0]['user_id'], self.twUserB['user_id'])
+        self.async(lambda: self.showActivity(self.twUserAToken), [
+            lambda x: self.assertEqual(len(x), 1),
+            lambda x: self.assertEqual(x[0]['verb'], 'friend_twitter'),
+            lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.twUserB['user_id']),
+        ])
 
     def test_friend_joined_again(self):
         # Make sure that another activity alert is not sent
         self.deleteAccount(self.twUserBToken)
         (self.twUserB, self.twUserBToken) = self.createTwitterAccount(self.tw_user_b_token, self.tw_user_b_secret, name='twUserB')
-        result = self.showActivity(self.twUserAToken)
-        self.assertEqual(len(result), 1)
+        self.async(lambda: self.showActivity(self.twUserAToken), [
+            lambda x: self.assertEqual(len(x), 1),
+            ])
 
 
 class StampedAPITwitterFind(StampedAPITwitterTest):

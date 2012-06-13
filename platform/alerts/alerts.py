@@ -21,6 +21,7 @@ from db.mongodb.MongoInviteQueueCollection  import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoActivityCollection     import MongoActivityCollection
 from MongoStampedAuth                       import MongoStampedAuth
+from MongoStampedAPI                        import MongoStampedAPI
 
 from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackWrapper
 
@@ -55,6 +56,9 @@ alertDB             = MongoAlertQueueCollection()
 accountDB           = MongoAccountCollection()
 activityDB          = MongoActivityCollection()
 inviteDB            = MongoInviteQueueCollection()
+
+# API
+api                 = MongoStampedAPI()
 
 
 def parseCommandLine():
@@ -170,8 +174,8 @@ def runAlerts(options):
                 send_email  = None
             
             # Raise if no settings
-            if not send_push and not send_email:
-                raise
+            #if not send_push and not send_email:
+            #    raise
             
             # Activity
             activity = activityDB.getActivityItem(alert.activity_id)
@@ -190,6 +194,25 @@ def runAlerts(options):
                     # Send push notification
                     print 'PUSH'
                     
+                    if not recipient.devices.ios_device_tokens:
+                        raise
+                    print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
+
+                    # Build push notification
+                    for token in recipient.devices.ios_device_tokens:
+                        result = buildPushNotification(user, activity, token.dataExport())
+                        if token not in userPushQueue:
+                            userPushQueue[token] = []
+                        userPushQueue[token].append(result)
+
+                    print 'PUSH COMPLETE'
+                except:
+                    print 'PUSH FAILED'
+            else:
+                try:
+                    # Send push notification with badge only
+                    print 'PUSH WITH NO MSG'
+
                     if not recipient.devices.ios_device_tokens:
                         raise
                     print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
@@ -351,8 +374,10 @@ def runInvites(options):
             print 'REMOVED'
             if not options.noop:
                 inviteDB.removeInvite(invite.invite_id)
-            
+
             continue
+
+
 
     print
 
@@ -461,39 +486,40 @@ def buildEmail(user, recipient, activityItem, settingsToken):
     return email
 
 
-def buildPushNotification(user, activityItem, deviceId):
+def buildPushNotification(user, activityItem, deviceId, sendMessage=True):
     genre = activityItem.genre
     
     # Set message
-    if genre == 'restamp':
-        msg = '%s gave you credit' % (user.screen_name)
-    
-    elif genre == 'like':
-        #msg = u'%s \ue057 your stamp' % (user.screen_name)
-        msg = '%s liked your stamp' % (user.screen_name)
-    
-    elif genre == 'todo':
-        msg = '%s added your stamp as a to-do' % (user.screen_name)
+    if sendMessage:
+        if genre == 'restamp':
+            msg = '%s gave you credit' % (user.screen_name)
 
-    elif genre == 'mention':
-        msg = "%s mentioned you" % (user.screen_name)
+        elif genre == 'like':
+            #msg = u'%s \ue057 your stamp' % (user.screen_name)
+            msg = '%s liked your stamp' % (user.screen_name)
 
-    elif genre == 'comment':
-        msg = '%s commented on your stamp' % (user.screen_name)
+        elif genre == 'todo':
+            msg = '%s added your stamp as a to-do' % (user.screen_name)
 
-    elif genre == 'reply':
-        msg = '%s replied' % (user.screen_name)
+        elif genre == 'mention':
+            msg = "%s mentioned you" % (user.screen_name)
 
-    elif genre == 'follower':
-        msg = '%s is now following you' % (user.screen_name)
+        elif genre == 'comment':
+            msg = '%s commented on your stamp' % (user.screen_name)
 
-    elif genre == 'friend':
-        msg = 'Your friend %s joined Stamped' % (user.screen_name)
+        elif genre == 'reply':
+            msg = '%s replied' % (user.screen_name)
 
-    if not IS_PROD:
-        msg = 'DEV: %s' % msg
-    
-    msg = msg.encode('ascii', 'ignore')
+        elif genre == 'follower':
+            msg = '%s is now following you' % (user.screen_name)
+
+        elif genre == 'friend':
+            msg = 'Your friend %s joined Stamped' % (user.screen_name)
+
+        if not IS_PROD:
+            msg = 'DEV: %s' % msg
+
+        msg = msg.encode('ascii', 'ignore')
     
     """
     # Build payload
@@ -516,13 +542,18 @@ def buildPushNotification(user, activityItem, deviceId):
     payload = struct.pack(fmt, command, 32, binascii.unhexlify(deviceId), \
                           len(s_content), s_content)
     """
-    
+
+    # get the number of unread news items for badge count
+    numUnread = api.getUnreadActivityCount(user.user_id)
+
     result = {
         #'payload': payload, 
-        'payload': msg, 
-        'activity_id': activityItem.activity_id, 
-        'device_id': deviceId
+        'activity_id': activityItem.activity_id,
+        'device_id': deviceId,
+        'badge': numUnread,
     }
+    if sendMessage:
+        result['message'] = msg
     
     return result
 
@@ -571,37 +602,40 @@ def sendPushNotifications(queue, options):
             count = 0
             
             pushQueue.reverse()
-            for msg in pushQueue:
+            for notification in pushQueue:
                 count += 1
                 if count > limit:
                     print 'LIMIT EXCEEDED (%s)' % count
                 
                 if options.noop:
                     print 'PUSH MSG (activity_id=%s): device_id = %s ' % \
-                        (msg['activity_id'], msg['device_id'])
+                        (notification['activity_id'], notification['device_id'])
                     
-                    utils.log(msg['payload'])
+                    utils.log(notification['message'])
                     #utils.log(type(msg['payload']))
                     continue
                 
                 try:
-                    # create message
-                    message = APNSNotification()
+                    # create APNS notification
+                    apsnNotification = APNSNotification()
                     
                     #deviceId = 'f02e7b4c384e32404645443203dd0b71750e54fe13b5d0a8a434a12a0f5e7a25' # bart
                     #deviceId = '8b78c702f8c8d5e02c925146d07c28f615283bc862b226343f013b5f8765ba5a' # travis
-                    deviceId = str(msg['device_id'])
-                    
-                    message.token(binascii.unhexlify(deviceId))
-                    payload = msg['payload'].encode('ascii', 'ignore')
-                    message.alert(payload)
-                    #message.badge(queue.count())
-                    
-                    # add message to tuple and send it to APNS server
-                    apns_wrapper.append(message)
+                    deviceId = str(notification['device_id'])
+
+                    apsnNotification.token(binascii.unhexlify(deviceId))
+                    if 'message' in notification:
+                        msg = notification['message'].encode('ascii', 'ignore')
+                        apsnNotification.alert(msg)
+                    if 'badge' in notification:
+                        apsnNotification.badge(notification['badge'])
+                    #apsnNotification.badge(queue.count())
+
+                    # add notification to tuple and send it to APNS server
+                    apns_wrapper.append(apsnNotification)
                 except:
                     print 'PUSH MSG FAILED (activity_id=%s): device_id = %s ' % \
-                        (msg['activity_id'], msg['device_id'])
+                        (notification['activity_id'], notification['device_id'])
                     utils.printException()
             
             apns_wrapper.notify()

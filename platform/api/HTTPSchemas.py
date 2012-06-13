@@ -1663,7 +1663,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                if getattr(entity.sources, 'itunes_url', None) is not None:
+                if entity.sources.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
                 source.setCompletion(
                     action      = actionType,
