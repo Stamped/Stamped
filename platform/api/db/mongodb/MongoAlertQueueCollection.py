@@ -45,7 +45,6 @@ class MongoAlertQueueCollection(AMongoCollection):
     def addAlert(self, alert):
         result = self._collection.insert_one(alert.dataExport())
         return result
-    
 
     def addAlerts(self, alerts):
         objects = []

@@ -157,8 +157,6 @@ urlpatterns = patterns('',
     (r'v0/guide/search.json',                               'v0.functions.stamps.searchGuide'),
     
     ### ACTIVITY
-    (r'v0/activity/show.json',                              'v0.functions.activity.show')
-    (r'v0/activity/friends.json',                           'v0.functions.activity.friends')
     (r'v0/activity/collection.json',                        'v0.functions.activity.collection'),
     (r'v0/activity/unread.json',                            'v0.functions.activity.unread'),
     
