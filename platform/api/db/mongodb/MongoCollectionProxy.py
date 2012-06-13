@@ -225,13 +225,13 @@ class MongoCollectionProxy(object):
                 logs.info("Retrying remove (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
     
-    def ensure_index(self, key_or_list, deprecated_unique=None, ttl=300, **kwargs):
+    def ensure_index(self, key_or_list, **kwargs):
         num_retries = 0
         max_retries = 5
         
         while True:
             try:
-                ret = self._collection.ensure_index(key_or_list, deprecated_unique, ttl, **kwargs)
+                ret = self._collection.ensure_index(key_or_list, **kwargs)
                 return ret
             except AutoReconnect as e:
                 num_retries += 1
