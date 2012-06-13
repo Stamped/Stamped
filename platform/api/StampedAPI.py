@@ -1658,19 +1658,27 @@ class StampedAPI(AStampedAPI):
 
     def updateEntityStatsAsync(self, entityId):
         numStamps = self._stampDB.countStampsForEntity(entityId)
-        popularUserIds = self._stampDB.getPopularityForEntity(entityId)
+
+        popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+        popularStamps = self._stampDB.getStamps(popularStampIds, limit=len(popularStampIds))
+        popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
+        popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+
+        logs.info('Popular User Ids: %s' % popularUserIds)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
+            stats.popular_stamps = popularStampIds
             self._entityStatsDB.updateNumStamps(entityId, numStamps)
-            self._entityStatsDB.setPopular(entityId, popularUserIds)
+            self._entityStatsDB.setPopular(entityId, popularUserIds, popularStampIds)
         except StampedUnavailableError:
             stats = EntityStats()
             stats.entity_id = entityId
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
+            stats.popular_stamps = popularStampIds
             self._entityStatsDB.addEntityStats(stats)
         return stats
 
@@ -3229,6 +3237,8 @@ class StampedAPI(AStampedAPI):
 
         try:
             allItems = getattr(guide, guideRequest.section)
+            if allItems is None:
+                return []
         except AttributeError:
             logs.warning("Guide request for invalid section: %s" % guideRequest.section)
             raise StampedInputError()
@@ -3394,10 +3404,12 @@ class StampedAPI(AStampedAPI):
         entityStampPreviews = {}
         for stat in stats:
             if stat.popular_users is not None:
-                users = []
+                stampPreviews = []
                 for userId in stat.popular_users[:10]:
-                    users.append(userIds[userId])
-                entityStampPreviews[stat.entity_id] = users 
+                    stampPreview = StampPreview()
+                    stampPreview.user = userIds[userId]
+                    stampPreviews.append(stampPreview)
+                entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
         result = []

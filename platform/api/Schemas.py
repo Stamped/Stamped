@@ -184,6 +184,7 @@ class EntityStats(Schema):
         cls.addProperty('entity_id',                        basestring, required=True)
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
+        cls.addPropertyList('popular_stamps',               basestring)
 
 
 # #### #
