@@ -50,10 +50,10 @@ class MongoEntityStatsCollection(AMongoCollection):
         )
         return True
 
-    def setPopular(self, entityId, userIds):
+    def setPopular(self, entityId, userIds, stampIds):
         self._collection.update(
             { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$set' : { 'popular_users' : userIds } }
+            { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
         )
         return True
 

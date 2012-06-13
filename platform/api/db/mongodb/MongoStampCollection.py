@@ -338,18 +338,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return list(self._convertFromMongo(doc) for doc in docs)
         except Exception:
             return []
-
-    def getPopularityForEntity(self, entityId, limit=1000):
-        ### TODO: Stub! Make this better
-        try:
-            query       = { 'entity.entity_id' : entityId }
-            sort        = [ ('stats.num_likes', pymongo.DESCENDING), ('$natural', pymongo.ASCENDING) ]
-            documents   = self._collection.find(query, fields=['_id', 'user.user_id']).sort(sort).limit(limit)
-            # stampIds    = map(lambda x: self._getStringFromObjectId(x['_id']), documents)
-            userIds     = map(lambda x: x['user']['user_id'], documents)
-            return userIds
-        except Exception:
-            return []
     
     def getStampFromUserStampNum(self, userId, stampNum):
         try:

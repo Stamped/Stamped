@@ -112,7 +112,9 @@ class MongoDBConfig(Singleton):
                                                                     read_preference=pymongo.ReadPreference.PRIMARY, 
                                                                     replicaset=replicaset)
                 else:
-                    self._connection = pymongo.Connection(self.host, self.port)
+                    self._connection = pymongo.Connection(self.host,
+                                                          self.port,
+                                                          read_preference=pymongo.ReadPreference.SECONDARY)
                 
                 #self._connection.stamped.read_preference = pymongo.ReadPreference.SECONDARY
                 return self._connection

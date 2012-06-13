@@ -17,6 +17,7 @@ class StampedAPIGuideTest(AStampedAPITestCase):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
+        (self.userD, self.tokenD) = self.createAccount('UserD')
 
         # Build friendships
         self.createFriendship(self.tokenA, self.userB)
@@ -60,9 +61,9 @@ class StampedAPIGuideTest(AStampedAPITestCase):
         Note: The guide's cache only refreshes once every 24 hours currently, so any actions taken
         immediately after the cache creation won't impact the results. 
 
-        A race condition exists within this test where the created to-do does it's work asynchronously, 
-        but calling guide/collection.json can generate the guide cache before the to-do is successful. For 
-        the purposes of this unit test we're pausing for an additional second for the to-do to build.
+        A race condition exists within this test where the created to-do does the work asynchronously, 
+        but calling guide/collection.json can generate the guide cache before the to-do has completed. For 
+        the purposes of this unit test we're pausing for an additional second to wait for the to-do to build.
         """
         time.sleep(1)
 
@@ -74,6 +75,7 @@ class StampedAPIGuideTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
+        self.deleteAccount(self.tokenD)
 
 
 class StampedAPIGuideCollection(StampedAPIGuideTest):
@@ -87,10 +89,8 @@ class StampedAPIGuideCollection(StampedAPIGuideTest):
         
         result = self.handleGET(path, data)
 
-        # import pprint
-        # for r in result:
-        #     print '\n%s.' % (int(result.index(r)) + 1)
-        #     pprint.pprint(r)
+        # Verify all four results are returned
+        self.assertTrue(len(result) == 4)
 
         # Verify first result is Book A
         self.assertTrue(result[0]['title'] == 'Book A')
@@ -119,10 +119,77 @@ class StampedAPIGuideCollection(StampedAPIGuideTest):
         # Verify fourth result has 1 stamp and no to-dos
         self.assertTrue(len(result[3]['previews']['stamps']) == 1)
         self.assertTrue('todos' not in result[3]['previews'] or result[3]['previews']['todos'] == None)
+
+    def test_guide_inbox_empty(self):
+        path = "guide/collection.json"
+        data = { 
+            "oauth_token": self.tokenD['access_token'],
+            "section": "book",
+            "scope" : "inbox",
+        }
         
+        result = self.handleGET(path, data)
 
+        """
+        Note: UserD is not following anyone, so inbox will be empty
+        """
 
+        # Verify no results are returned
+        self.assertTrue(len(result) == 0)
+        
+    def test_guide_tastemakers(self):
+        path = "guide/collection.json"
+        data = { 
+            "oauth_token": self.tokenD['access_token'],
+            "section": "book",
+            "scope" : "everyone",
+        }
+        
+        result = self.handleGET(path, data)
 
+        """
+        Note: UserD is not following anyone, tastemakers should still be populated.
+        """
+
+        # Verify all four results are returned
+        self.assertTrue(len(result) == 4)
+
+        """
+        Note: Right now the internal "popularity" ranking weights individual stamp popularity higher than anything else.
+        Consequently, Book B is weighted higher than Book A (even though Book A has more stamps). This might change
+        going forward, so unit tests right now are not verifying the order of the entities but merely that all four
+        exist.
+        """
+
+    def test_guide_me(self):
+        path = "guide/collection.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "section": "book",
+            "scope" : "me",
+        }
+        
+        result = self.handleGET(path, data)
+
+        # Verify 2 results are returned (one for each to-do).
+        self.assertTrue(len(result) == 2)
+
+    def test_guide_me_empty(self):
+        path = "guide/collection.json"
+        data = { 
+            "oauth_token": self.tokenD['access_token'],
+            "section": "book",
+            "scope" : "me",
+        }
+        
+        result = self.handleGET(path, data)
+
+        """
+        Note: UserD has not to-do'd anything, so 'me' scope will be empty
+        """
+
+        # Verify no results are returned
+        self.assertTrue(len(result) == 0)
 
 
 if __name__ == '__main__':

@@ -323,11 +323,6 @@ def sdetail(request, schema, **kwargs):
         'entity' : entity, 
     })
 
-
-@stamped_view()
-def test_view(request, **kwargs):
-    return stamped_render(request, 'test.html', { })
-
 @stamped_view(schema=HTTPEntityId)
 def menu(request, schema, **kwargs):
     entity  = stampedAPIProxy.getEntity(schema.entity_id)
@@ -339,4 +334,8 @@ def menu(request, schema, **kwargs):
         'menu'   : menu, 
         'entity' : entity, 
     })
+
+@stamped_view()
+def test_view(request, **kwargs):
+    return stamped_render(request, 'test.html', { })
 

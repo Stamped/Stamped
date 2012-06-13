@@ -64,6 +64,7 @@ class MongoStampStatsCollection(AMongoCollection):
         kinds = kwargs.pop('kinds', None)
         types = kwargs.pop('types', None)
         viewport = kwargs.pop('viewport', None)
+        entityId = kwargs.pop('entityId', None)
         since = kwargs.pop('since', None)
         limit = kwargs.pop('limit', 50)
 
@@ -76,7 +77,6 @@ class MongoStampStatsCollection(AMongoCollection):
             query['types'] = {'$in': list(types)}
 
         if viewport is not None:
-            pass
             query["lat"] = {
                 "$gte" : viewport.lower_right.lat, 
                 "$lte" : viewport.upper_left.lat, 
@@ -100,6 +100,9 @@ class MongoStampStatsCollection(AMongoCollection):
                         }, 
                     }, 
                 ]
+
+        if entityId is not None:
+            query['entity_id'] = entityId
 
         if since is not None:
             query['last_stamped'] = {'$gte': since}
