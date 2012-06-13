@@ -2679,8 +2679,22 @@ class StampedAPI(AStampedAPI):
         likes.reverse()
         stats.preview_likes     = likes
 
+        """
+        Note: To-Do preview objects are composed of two sources: users that have to-do'd the entity from
+        the stamp directly ("direct" to-dos) and users that are following you but have also to-do'd the entity
+        ("indirect" to-dos). Direct to-dos are guaranteed and will always show up on the stamp. Indirect to-dos 
+        are recalculated frequently based on your follower list and can change over time. 
+        """
+        todos                   = self._todoDB.getTodosFromStampId(stamp.stamp_id)
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
-        todos                   = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        followerTodos           = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        existingTodoIds         = set(map(lambda x: x.todo_id, todos))
+        for todo in followerTodos:
+            if len(todos) >= MAX_PREVIEW:
+                break
+            if todo.todo_id not in existingTodoIds:
+                todos.append(todo)
+                existingTodoIds.add(todo.todo_id)
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
@@ -2697,7 +2711,7 @@ class StampedAPI(AStampedAPI):
         stats.kind              = entity.kind
         stats.types             = entity.types
 
-        if entity.kind == 'place':
+        if entity.kind == 'place' and entity.coordinates is not None:
             stats.lat           = entity.coordinates.lat
             stats.lng           = entity.coordinates.lng
 

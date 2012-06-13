@@ -20,7 +20,7 @@ from Entity                             import buildEntity
 class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 
     def __init__(self):
-        AMongoCollectionView.__init__(self, collection='favorites', primary_key='favorite_id', obj=RawTodo)
+        AMongoCollectionView.__init__(self, collection='favorites', primary_key='todo_id', obj=RawTodo)
         ATodoDB.__init__(self)
 
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING),\
@@ -47,10 +47,6 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         stampData = document.pop('stamp', None)
         if stampData is not None:
             document['source_stamp_ids'] = [stampData['stamp_id']]
-
-        if 'favorite_id' in document:
-            document['todo_id'] = document['favorite_id']
-            del(document['favorite_id'])
 
         rawtodo = self._obj().dataImport(document, overflow=self._overflow)
         rawtodo.entity = entity
@@ -105,6 +101,9 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         query = { 'user_id' : userId }
 
         return self._getTimeSlice(query, timeSlice)
+
+    def getTodosFromStampId(self, stampId):
+        return self._collection.find({ '$or': [{'source_stamp_ids' : stampId}, {'stamp.stamp_id': stampId}] })
 
     def countTodos(self, userId):
         n = self._collection.find({'user_id': userId}).count()
