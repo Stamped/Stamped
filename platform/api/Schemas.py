@@ -1504,6 +1504,9 @@ class Activity(Schema):
         result.benefit      = self.benefit
         result.timestamp    = self.timestamp
         result.personal     = personal
+        result.header       = self.header
+        result.body         = self.body
+        result.footer       = self.footer
 
         if self.subjects is not None:
             subjects = []
