@@ -16,7 +16,6 @@
 #import "Util.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STButton.h"
-#import "STScopeSlider.h"
 #import "STStampedAPI.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"

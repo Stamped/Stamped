@@ -472,7 +472,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "entity_id": entityId,
         }
         
-        if stampId != None:
+        if stampId is not None:
             data['stamp_id'] = stampId
         
         todo = self.handlePOST(path, data)

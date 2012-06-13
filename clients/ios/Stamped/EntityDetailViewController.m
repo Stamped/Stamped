@@ -13,7 +13,6 @@
 
 #import "UIColor+Stamped.h"
 #import "Notifications.h"
-#import "STToolbar.h"
 #import "STSimpleEntityDetail.h"
 #import "STStampedAPI.h"
 #import "STHeaderViewFactory.h"
