@@ -8,7 +8,6 @@
 
 #import "STInboxViewController.h"
 #import "STToolbarView.h"
-#import "STScopeSlider.h"
 #import "STUserStampsSliceList.h"
 #import "STGenericTableDelegate.h"
 #import "STYouStampsList.h"
@@ -75,6 +74,7 @@
       }
       _searchQuery = nil;
       _reloading = YES;
+      self.showsSearchBar = NO;
   }
   return self;
 }
@@ -112,7 +112,6 @@
         _slider.scope = self.scope;
     }
     
-    self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self.tableView reloadData];
     [self updateCache];

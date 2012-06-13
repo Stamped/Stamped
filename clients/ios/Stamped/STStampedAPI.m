@@ -7,10 +7,7 @@
 //
 
 #import "STStampedAPI.h"
-#import "STMenuFactory.h"
-#import "STEntityDetailFactory.h"
 #import "Util.h"
-#import "STCacheModelSource.h"
 #import "STRestKitLoader.h"
 #import "STSimpleStamp.h"
 #import "STSimpleTodo.h"
@@ -68,7 +65,7 @@ NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedN
 
 @end
 
-@interface STStampedAPI () <STCacheModelSourceDelegate, STPersistentCacheSourceDelegate, STHybridCacheSourceDelegate>
+@interface STStampedAPI () <STPersistentCacheSourceDelegate, STHybridCacheSourceDelegate>
 
 @property (nonatomic, readonly, retain) STPersistentCacheSource* menuCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampCache;
@@ -188,12 +185,20 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
                        andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block {
-    NSAssert(stampID != nil,@"stampID must not be nil");
-    return [self.stampCache objectForKey:stampID forceUpdate:NO cacheAfterCancel:NO withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
-        block((id)model, error, cancellation);
-    }];
+    return [self stampForStampID:stampID forceUpdate:NO andCallback:block];
 }
 
+- (STCancellation*)stampForStampID:(NSString*)stampID 
+                       forceUpdate:(BOOL)forceUpdate
+                       andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block {
+    NSAssert(stampID != nil,@"stampID must not be nil");
+    return [self.stampCache objectForKey:stampID 
+                             forceUpdate:forceUpdate 
+                        cacheAfterCancel:NO 
+                            withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+                                block((id)model, error, cancellation);
+                            }];
+}
 
 - (STCancellation*)stampsForSlice:(STGenericSlice*)slice 
                          withPath:(NSString*)path 
@@ -234,7 +239,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)stampsForUserSlice:(STUserCollectionSlice*)slice 
                           andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
-    return [self stampsForSlice:slice withPath:@"/collections/user.json" andCallback:block];
+    return [self stampsForSlice:slice withPath:@"/stamps/collection.json" andCallback:block];
 }
 
 - (STCancellation*)stampsForFriendsSlice:(STFriendsSlice*)slice 
@@ -249,7 +254,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)entitiesForConsumptionSlice:(STConsumptionSlice*)slice 
                                    andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/stamps/guide.json";
+    NSString* path = @"/guide/collection.json";
     NSMutableDictionary* params = slice.asDictionaryParams;
     if ([params objectForKey:@"category"]) {
         [params setObject:[params objectForKey:@"category"] forKey:@"section"];
@@ -365,46 +370,61 @@ static STStampedAPI* _sharedInstance;
                                    }];
 }
 
-- (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block{
-    NSOperation* operation = [[STEntityDetailFactory sharedFactory] entityDetailCreatorWithSearchId:searchID andCallbackBlock:block];
-    [Util runOperationAsynchronously:operation];
+- (STCancellation*)entityDetailForSearchID:(NSString*)searchID 
+                               andCallback:(void(^)(id<STEntityDetail>, NSError*, STCancellation*))block {
+    NSString* path = @"/v0/entities/show.json";
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:path
+                                                        post:NO
+                                               authenticated:YES
+                                                      params:[NSDictionary dictionaryWithObject:searchID forKey:@"entity_id"]
+                                                     mapping:[STSimpleEntityDetail mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     if (result) {
+                                                         [self.entityDetailCache setObject:result forKey:[result entityID]];
+                                                     }
+                                                     block(result, error, cancellation);
+                                                 }];
+}
+
+- (STCancellation*)_activitiesWithParams:(NSDictionary*)params
+                             andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/activity/collection.json" 
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:params
+                                                  mapping:[STSimpleActivity mapping]
+                                              andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
+                                                  if (array) {
+                                                      for (id<STActivity> activity in array) {
+                                                          if (activity.objects.stamps.count > 0) {
+                                                              for (id<STStamp> stamp in activity.objects.stamps) {
+                                                                  [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                              }
+                                                          }
+                                                      }
+                                                  }
+                                                  block((NSArray<STActivity>*)array, error);
+                                              }];
 }
 
 - (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
                              andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    NSString* path = @"/activity/show.json";
     self.lastCount = nil;
-    [[STRestKitLoader sharedInstance] loadWithPath:path 
-                                              post:NO
-                                     authenticated:YES
-                                            params:slice.asDictionaryParams
-                                           mapping:[STSimpleActivity mapping]
-                                       andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
-                                           block((NSArray<STActivity>*)array, error);
-                                       }];
+    NSMutableDictionary* params = [slice asDictionaryParams];
+    [params setObject:@"me" forKey:@"scope"];
+    [self _activitiesWithParams:params andCallback:block];
 }
 
 - (void)activitiesForFriendsWithGenericSlice:(STGenericSlice*)slice 
                                  andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    NSString* path = @"/activity/friends.json";
-    
-    [[STRestKitLoader sharedInstance] loadWithPath:path 
-                                              post:NO
-                                     authenticated:YES
-                                            params:slice.asDictionaryParams
-                                           mapping:[STSimpleActivity mapping]
-                                       andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
-                                           block((NSArray<STActivity>*)array, error);
-                                       }];
+    NSMutableDictionary* params = slice.asDictionaryParams;
+    [params setObject:@"friends" forKey:@"scope"];
+    [self _activitiesWithParams:params andCallback:block];
 }
 
 - (STCancellation*)menuForEntityID:(NSString*)entityID 
                        andCallback:(void(^)(id<STMenu> menu, NSError* error, STCancellation* cancellation))block {
     return [self.menuCache fetchWithKey:entityID callback:block];
-}
-
-- (void)commentsForSlice:(STCommentSlice*)slice andCallback:(void(^)(NSArray<STComment>*,NSError*))block {
-    //TODO
 }
 
 - (void)_updateLocalStampWithStampID:(NSString*)stampID 
@@ -680,29 +700,15 @@ static STStampedAPI* _sharedInstance;
                            andCurrentObject:(id)object
                                withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
     if (cache == self.menuCache) {
-        STCancellation* cancellation = [STCancellation cancellation];
-        [[STMenuFactory sharedFactory] menuWithEntityId:key andCallbackBlock:^(id<STMenu> menu) {
-            if (!cancellation.cancelled) {
-                if (menu) {
-                    block((STSimpleMenu*)menu, nil, cancellation);
-                }
-                else {
-                    block(nil, [NSError errorWithDomain:[STStampedAPI errorDomain]
-                                                   code:STStampedAPIErrorUnavailable
-                                               userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"key",key, nil]], cancellation);
-                }
-            }
-        }];
-        return cancellation;
+        return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/entities/menu.json"
+                                                            post:NO
+                                                   authenticated:YES
+                                                          params:[NSDictionary dictionaryWithObject:key forKey:@"entity_id"]
+                                                         mapping:[STSimpleMenu mapping]
+                                                     andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                         block(result, error, cancellation);
+                                                     }];
     }
-    return nil;
-}
-
-- (STCancellation*)objectForCache:(STCacheModelSource*)cache 
-                          withKey:(NSString*)key 
-                 andCurrentObject:(id)object 
-                     withCallback:(void(^)(id model, NSInteger cost, NSError* error, STCancellation* cancellation))block {
-    NSAssert2(NO, @"unknown cache (%@) asked for key %@", cache, key);
     return nil;
 }
 
@@ -790,17 +796,17 @@ static STStampedAPI* _sharedInstance;
                 [params addEntriesFromDictionary:source.endpointData];
             }
             [[STRestKitLoader sharedInstance] loadOneWithPath:[NSString stringWithFormat:@"/%@", source.endpoint]
-                                                        post:YES
-                                               authenticated:YES
-                                                      params:params
-                                                     mapping:[STSimpleEndpointResponse mapping]
-                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                     if (error) {
-                                                         [STDebug log:[NSString stringWithFormat:@"Callback error for action %@ and endpoint %@ with data %@",
-                                                                       action, source.source, params]];
-                                                     }
-                                                     [self handleEndpointCallback:result withError:error andCancellation:cancellation];
-                                                 }];
+                                                         post:YES
+                                                authenticated:YES
+                                                       params:params
+                                                      mapping:[STSimpleEndpointResponse mapping]
+                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                      if (error) {
+                                                          [STDebug log:[NSString stringWithFormat:@"Callback error for action %@ and endpoint %@ with data %@",
+                                                                        action, source.source, params]];
+                                                      }
+                                                      [self handleEndpointCallback:result withError:error andCancellation:cancellation];
+                                                  }];
         }
     }
     return handled;
@@ -964,7 +970,7 @@ static STStampedAPI* _sharedInstance;
                                limit:(NSNumber*)limit
                               offset:(NSNumber*)offset 
                          andCallback:(void(^)(NSArray<STEntityDetail>* entities, NSError* error, STCancellation* cancellation))block {
-    NSString* path = @"/stamps/guide.json";
+    NSString* path = @"/guide/collection.json";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    [self stringForScope:scope], @"scope",
                                    section, @"section",

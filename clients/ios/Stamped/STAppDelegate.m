@@ -36,6 +36,7 @@
 #import "STFacebook.h"
 #import "STRestKitLoader.h"
 #import "STUnreadActivity.h"
+#import "STActionManager.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -347,6 +348,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     //Create Stamp
     [STCreateStampViewController setupConfigurations];
+    
+    //Actions
+    [STActionManagerShowAllActionsKey
 }
 
 @end

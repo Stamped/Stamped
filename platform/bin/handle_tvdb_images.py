@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, sys, urllib2, utils
+import bson, os, sys, urllib2, utils
 
 from api.S3ImageDB      import S3ImageDB
 from StringIO           import StringIO
@@ -35,38 +35,54 @@ if __name__ == '__main__':
         # example url:  http://thetvdb.com/banners/_cache/posters/211751-2.jpg
         db.addEntityImages(args.image_urls)
     else:
+        # perform a bulk conversion of all thetvdb.com entity images, moving each 
+        # image over to our own CDN (via S3 / Cloudfront) and updating the entity 
+        # reference accordingly.
+        
         api  = MongoStampedAPI()
         pool = Pool(32)
         
         def _process_entity(entity):
             modified = False
             
-            for image in entity.images:
-                image_url   = image.sizes[0].url
-                image_url   = db.addWebEntityImage(image_url)
+            if entity.images is not None and len(entity.images) > 0:
+                for image in entity.images:
+                    image_url       = image.sizes[0].url
+                    
+                    if 'thetvdb.com' in image_url:
+                        new_image_url   = db.addWebEntityImage(image_url)
+                        
+                        if new_image_url is not None:
+                            diff            = (image_url != new_image_url)
+                            modified       |= diff
+                        
+                        if diff:
+                            utils.log("converted '%s' => '%s'" % (image_url, new_image_url))
+                            image.sizes[0].url = new_image_url
                 
-                modified    = True
-                image.sizes[0].url = image_url
-            
-            if modified:
-                api._entityDB.updateEntity(entity)
+                if modified:
+                    api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
-        docs  = api._entityDB._collection.find({'image' : {'$regex' : r'^.*thetvdb.com.*$'}})
+        #query = {"_id" : bson.objectid.ObjectId("4ea8803cfe4a1d2a4200081f")}
+        query = {'image' : {'$regex' : r'^.*thetvdb.com.*$'}}
+        #query = {'subcategory' : 'tv'}
+        
+        docs  = api._entityDB._collection.find(query)
         count = docs.count()
         index = 0
         
-        progress_delta = 5
+        progress_delta = 5 # report progress every 5%
         progress_count = 100 / progress_delta
         
-        utils.log("processing %d entity images" % count)
+        utils.log("processing %d entities" % count)
         
         for doc in docs:
             entity = api._entityDB._convertFromMongo(doc)
             
             pool.spawn(_process_entity, entity)
             
-            if 0 == (index % (count / progress_count)):
+            if count > 1 and 0 == (index % (count / progress_count)):
                 utils.log("\n\nPROGRESS: %s\n\n" % (utils.getStatusStr(index, count)))
             
             index += 1

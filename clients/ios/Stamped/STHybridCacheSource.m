@@ -226,7 +226,9 @@
                cacheAfterCancel:(BOOL)cacheAfterCancel
                    withCallback:(void (^)(id<NSCoding> model, NSError* error, STCancellation* cancellation))block {
     id<NSCoding> fastResult = nil;
-    [self fastCachedObjectForKey:key];
+    if (!update) {
+        fastResult = [self fastCachedObjectForKey:key];
+    }
     if (fastResult) {
         //NSLog(@"Fast cached %@ for %@", [fastResult title], self.path);
         STCancellation* fastCancellation = [STCancellation cancellation];
@@ -240,7 +242,10 @@
     else {
         STCancellation* slowCancellation = [STCancellation cancellationWithDelegate:self];
         [Util executeAsync:^{
-            id<NSCoding> slowResult = [self cachedObjectForKey:key];
+            id<NSCoding> slowResult = nil;
+            if (!update) {
+                slowResult = [self cachedObjectForKey:key];
+            }
             if (slowResult) {
                 [Util executeOnMainThread:^{
                     if (slowCancellation.finish) {

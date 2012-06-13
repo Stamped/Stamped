@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import keys.aws, logs, utils
+import keys.aws, logs, utils, time
 
 try:
     import Image, ImageFile
@@ -31,7 +31,7 @@ def main():
     screenNames = stampedAPI._userDB._getAllScreenNames()
     print screenNames
 
-    # screenNames = ['kevin', 'robby', 'bart', 'landon']
+    screenNames = ['kevin', 'robby', 'bart', 'landon']
     sizes = [24, 48, 60, 96, 144]
 
     for screenName in screenNames:

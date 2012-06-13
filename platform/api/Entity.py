@@ -471,6 +471,7 @@ def upgradeEntityData(entityData):
     song                    = details.pop('song', {})
     book                    = details.pop('book', {})
     netflix                 = sources.pop('netflix', {})
+    thetvdb                 = sources.pop('thetvdb', {})
     
     # General
     new.schema_version      = 0
@@ -532,6 +533,10 @@ def upgradeEntityData(entityData):
     if netflix:
         setBasicGroup(netflix, new.sources, 'nid', 'netflix', newSuffix='id')
         setBasicGroup(netflix, new.sources, 'nurl', 'netflix', newSuffix='url')
+
+    # TheTVDB
+    if 'thetvdb_id' in thetvdb:
+        setBasicGroup(thetvdb, new.sources, 'thetvdb_id', 'thetvdb', newSuffix='id')
 
     # OpenTable
     setBasicGroup(sources, new.sources, 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])

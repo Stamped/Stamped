@@ -19,6 +19,7 @@ from MongoCollectionProxy   import MongoCollectionProxy
 class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
+        self.database_name = 'stamped'
         self._connection = None
         self._init()
         
@@ -111,7 +112,9 @@ class MongoDBConfig(Singleton):
                                                                     read_preference=pymongo.ReadPreference.PRIMARY, 
                                                                     replicaset=replicaset)
                 else:
-                    self._connection = pymongo.Connection(self.host, self.port)
+                    self._connection = pymongo.Connection(self.host,
+                                                          self.port,
+                                                          read_preference=pymongo.ReadPreference.SECONDARY)
                 
                 #self._connection.stamped.read_preference = pymongo.ReadPreference.SECONDARY
                 return self._connection
@@ -137,7 +140,7 @@ class AMongoCollection(object):
     def __init__(self, collection, primary_key=None, obj=None, overflow=False):
         self._desc = self.__class__.__name__
         
-        self._init_collection('stamped', collection)
+        self._init_collection(MongoDBConfig.getInstance().database_name, collection)
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow

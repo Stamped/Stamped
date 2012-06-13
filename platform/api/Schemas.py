@@ -184,6 +184,7 @@ class EntityStats(Schema):
         cls.addProperty('entity_id',                        basestring, required=True)
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
+        cls.addPropertyList('popular_stamps',               basestring)
 
 
 # #### #
@@ -1393,13 +1394,13 @@ class RawTodo(Schema):
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
         cls.addProperty('complete',                         bool)
 
-    def enrich(self, user, entity, previews=None, source_stamps=None, stamp=None):
+    def enrich(self, user, entity, previews=None, sourceStamps=None, stamp=None):
         todo = Todo()
         todo.dataImport(self.dataExport(), overflow=True)
         todo.user   = user
         todo.entity = entity
-        if source_stamps is not None:
-            todo.source_stamps = source_stamps
+        if sourceStamps is not None:
+            todo.source_stamps = sourceStamps
         if stamp is not None:
             todo.stamp  = stamp
         if previews is not None:
@@ -1577,24 +1578,6 @@ class TimeSlice(Schema):
         
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
-
-class WebTimeSlice(Schema):
-    @classmethod
-    def setSchema(cls):
-        # Paging
-        cls.addProperty('before',                           datetime)
-        cls.addProperty('limit',                            int)
-        cls.addProperty('offset',                           int)
-        
-        # Filtering
-        cls.addPropertyList('kinds',                        basestring)
-        cls.addPropertyList('types',                        basestring)
-        cls.addNestedProperty('viewport',                   Viewport) 
-        
-        # Scope
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
         cls.addProperty('scope',                            basestring) # me, friends, fof, popular
 
 class SearchSlice(Schema):

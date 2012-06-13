@@ -47,7 +47,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [STEvents addObserver:self selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
-    
     if (!self.tableView.backgroundView) {
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -63,6 +62,7 @@
         view.delegate = (id<STSliderScopeViewDelegate>)self;
         view.dataSource = (id<STSliderScopeViewDataSource>)self;
         self.footerView = view;
+        view.scope = scope_;
         [view release];
         _slider = [view retain];
     }

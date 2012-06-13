@@ -28,7 +28,7 @@
         label.backgroundColor = [UIColor clearColor];
         label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         label.font = font;
-        label.textColor = [UIColor colorWithRed:0.690f green:0.690f blue:0.690f alpha:1.0f];
+        label.textColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.6f];
         label.shadowOffset = CGSizeMake(0.0f, -1.0f);
         label.highlightedTextColor = [UIColor whiteColor];
         label.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.3];
@@ -52,7 +52,7 @@
 
                 // draw shadow
                 CGContextSaveGState(ctx);
-                [[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.2f] setFill];
+                CGContextSetFillColorWithColor(ctx, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.2f].CGColor);
                 CGContextTranslateCTM(ctx, 0, 1.0f);
                 CGContextClipToMask(ctx, fillRect, _icon.CGImage);
                 CGContextFillRect(ctx, fillRect);
@@ -61,11 +61,12 @@
                 if (self.highlighted || self.selected) {
                     [[UIColor whiteColor] setFill];
                 } else {
-                    [[UIColor colorWithRed:0.498f green:0.498f blue:0.498f alpha:1.0f] setFill];
+                    [[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.2f] setFill];
                 }
                 
                 // draw icon
                 CGContextClipToMask(ctx, fillRect, _icon.CGImage);
+                CGContextClearRect(ctx, fillRect);
                 CGContextFillRect(ctx, fillRect);
                 
             }
