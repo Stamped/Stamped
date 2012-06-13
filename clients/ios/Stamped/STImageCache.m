@@ -7,7 +7,6 @@
 //
 
 #import "STImageCache.h"
-#import "STCacheModelSource.h"
 #import "Util.h"
 #import "STURLConnection.h"
 #import "STHybridCacheSource.h"

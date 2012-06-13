@@ -145,7 +145,9 @@ static Rdio* _rdio;
               primaryBlue:(CGFloat)pBlue
              secondaryRed:(CGFloat)sRed
            secondaryGreen:(CGFloat)sGreen
-            secondaryBlue:(CGFloat)sBlue {
+            secondaryBlue:(CGFloat)sBlue 
+               startPoint:(CGPoint)start 
+                 endPoint:(CGPoint)end {
     if (!img)
         return nil;
     
@@ -162,18 +164,41 @@ static Rdio* _rdio;
     CGFloat colors[] = {pRed, pGreen, pBlue, 1.0, sRed, sGreen, sBlue, 1.0};
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGGradientRef gradientRef = CGGradientCreateWithColorComponents(colorSpace, colors, NULL, 2);
-    CGPoint gradientStartPoint = CGPointMake(0, height);
-    CGPoint gradientEndPoint = CGPointMake(width, 0);
     CGContextDrawLinearGradient(context,
                                 gradientRef,
-                                gradientStartPoint,
-                                gradientEndPoint,
+                                start,
+                                end,
                                 kCGGradientDrawsAfterEndLocation);
     CGGradientRelease(gradientRef);
     CGColorSpaceRelease(colorSpace);
     UIImage* finalStamp = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return finalStamp;
+}
+
++ (UIImage*)gradientImage:(UIImage*)img
+           withPrimaryRed:(CGFloat)pRed
+             primaryGreen:(CGFloat)pGreen
+              primaryBlue:(CGFloat)pBlue
+             secondaryRed:(CGFloat)sRed
+           secondaryGreen:(CGFloat)sGreen
+            secondaryBlue:(CGFloat)sBlue {
+    if (!img)
+        return nil;
+    
+    CGFloat width = img.size.width;
+    CGFloat height = img.size.height;
+    CGPoint gradientStartPoint = CGPointMake(0, height);
+    CGPoint gradientEndPoint = CGPointMake(width, 0);
+    return [self gradientImage:img
+                withPrimaryRed:pRed
+                  primaryGreen:pBlue
+                   primaryBlue:pGreen
+                  secondaryRed:sRed
+                secondaryGreen:sGreen
+                 secondaryBlue:sBlue
+                    startPoint:gradientStartPoint
+                      endPoint:gradientEndPoint];
 }
 
 + (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img {
@@ -201,7 +226,7 @@ static Rdio* _rdio;
                      secondary:secondary];
 }
 
-+ (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary {
++ (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style {
     CGFloat r1, g1, b1, r2, g2, b2;
     [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
     
@@ -213,14 +238,37 @@ static Rdio* _rdio;
         b2 = b1;
     }
     
+    CGPoint start;
+    CGPoint end;
+    if (style == STGradientStyleHorizontal) {
+        start = CGPointMake(0, image.size.height / 2);
+        end = CGPointMake(image.size.width, image.size.height / 2);
+    }
+    else if (style == STGradientStyleVertical) {
+        start = CGPointMake(image.size.width / 2, image.size.height);
+        end = CGPointMake(image.size.width / 2, 0);
+    }
+    else {
+        start = CGPointMake(0, image.size.height);
+        end = CGPointMake(image.size.width, 0);
+    }
+    
     return [Util gradientImage:image
                 withPrimaryRed:r1
                   primaryGreen:g1
                    primaryBlue:b1
                   secondaryRed:r2
                 secondaryGreen:g2
-                 secondaryBlue:b2];
+                 secondaryBlue:b2 
+                    startPoint:start
+                      endPoint:end];
 }
+
+
++ (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary {
+    return [self gradientImage:image withPrimaryColor:primary secondary:secondary andStyle:STGradientStyleStamp];
+}
+
 
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened {
     if (date == nil) {
@@ -574,7 +622,6 @@ static Rdio* _rdio;
 + (void)globalLoadingLock {
     //NSLog(@"GlobalLoadingLock");
     UIWindow* window = [[UIApplication sharedApplication] keyWindow];
-    UINavigationController* navigationController = [self sharedNavigationController];
     UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] 
                                               initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
     activityView.frame = [Util centeredAndBounded:CGSizeMake(44, 44) inFrame:window.frame];
