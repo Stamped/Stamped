@@ -3406,6 +3406,11 @@ class StampedAPI(AStampedAPI):
         # Build previews
         entityStampPreviews = {}
         for stat in entityStats:
+            if stat.popular_users is not None and stat.popular_stamps is None:
+                # Inconsistency! Regenerate entity stat
+                logs.warning("Missing popular_stamps: entity_id=%s" % stat.entity_id)
+                tasks.invoke(tasks.APITasks.updateEntityStats, args=[stat.entity_id])
+
             if stat.popular_users is not None and stat.popular_stamps is not None:
                 if len(stat.popular_users) != len(stat.popular_stamps):
                     logs.warning("Mismatch between popular_users and popular_stamps: entity_id=%s" % stat.entity_id)
