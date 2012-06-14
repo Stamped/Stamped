@@ -1663,8 +1663,6 @@ class StampedAPI(AStampedAPI):
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
-        logs.info('Popular User Ids: %s' % popularUserIds)
-
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
@@ -3417,10 +3415,19 @@ class StampedAPI(AStampedAPI):
                     continue
                 stampPreviews = []
                 for i in range(min(len(stat.popular_users), 10)):
-                    stampPreview = StampPreview()
-                    stampPreview.user = userIds[stat.popular_users[i]]
-                    stampPreview.stamp_id = stat.popular_stamps[i]
-                    stampPreviews.append(stampPreview)
+                    try:
+                        stampPreview = StampPreview()
+                        user = userIds[stat.popular_users[i]]
+                        stampId = stat.popular_stamps[i]
+                        if user is None or stampId is None:
+                            raise 
+                        stampPreview.user = user
+                        stampPreview.stamp_id = stampId
+                        stampPreviews.append(stampPreview)
+                    except Exception as e:
+                        logs.warning("Failed to add preview to entity_id=%s: user_id=%s, stamp_id=%s" % \
+                            (stat.entity_id, stat.popular_users[i], stat.popular_stamps[i]))
+                        continue 
                 entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
