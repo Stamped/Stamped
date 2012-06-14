@@ -180,7 +180,7 @@
     [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
 
     [CATransaction begin];
-    [CATransaction setAnimationDuration:0.2f];
+    [CATransaction setAnimationDuration:0.15f];
     [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
     [CATransaction setCompletionBlock:^{
         [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
@@ -260,21 +260,37 @@
 }
 
 - (void)buttonHit:(UIButton*)button {
-   
-    NSString *category = [self.categories objectAtIndex:button.tag];
-    //Map to BE category strings
-    category = [self.categoryMapping objectForKey:category];
-    STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
+    
+    CABasicAnimation *opacity = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacity.toValue = [NSNumber numberWithFloat:0.0f];
+    
+    CABasicAnimation *scale = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    scale.toValue = [NSNumber numberWithFloat:4.0f];
+    
+    CAAnimationGroup *animation = [CAAnimationGroup animation];
+    animation.animations = [NSArray arrayWithObjects:opacity, scale, nil];
+    animation.duration = 0.4f;
+    [button.layer addAnimation:animation forKey:nil];
+    
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-    [menuController pushViewController:controller animated:YES];
-    
-    /*
-    if ([menuController.rootViewController isKindOfClass:[UINavigationController class]]) {
-        [(UINavigationController*)menuController.rootViewController setNavigationBarHidden:YES animated:NO];
-    }
-     */
-    
-    [controller release];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+      
+        NSString *category = [self.categories objectAtIndex:button.tag];
+        //Map to BE category strings
+        category = [self.categoryMapping objectForKey:category];
+        STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
+        STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+        [menuController presentModalViewController:navController animated:YES];
+        [navController release];
+        [controller release];
+
+        
+    });
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.6f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+        [menuController showRootController:NO];
+    });
     
 }
 

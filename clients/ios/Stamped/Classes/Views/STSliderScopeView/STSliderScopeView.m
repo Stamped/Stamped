@@ -167,10 +167,10 @@
             pos.x = ((self.bounds.size.width/2) - ((_style == STSliderScopeStyleTwo) ? kSliderTwoTrackGap : kSliderTrackGap));
             break;
         case STStampedAPIScopeFriends:
-            pos.x = (self.bounds.size.width/2);
+            pos.x = _style == STSliderScopeStyleTwo ? ((self.bounds.size.width/2) + kSliderTwoTrackGap) : (self.bounds.size.width/2);;
             break;
         case STStampedAPIScopeEveryone:
-            pos.x = _style == STSliderScopeStyleTwo ? ((self.bounds.size.width/2) + kSliderTwoTrackGap) : ((self.bounds.size.width/2) + kSliderTrackGap);
+            pos.x = ((self.bounds.size.width/2) + kSliderTrackGap);
             break;
         default:
             break;
@@ -288,6 +288,8 @@
         
         if (position.x < (self.bounds.size.width/2)) {
             return STStampedAPIScopeYou;
+        } else {
+            return STStampedAPIScopeFriends;
         }
         
     } else {

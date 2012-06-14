@@ -74,7 +74,7 @@
         UIGraphicsEndImageContext();
         return scaledImage;
         
-    } styleIdentifier:@"st_avatar" completion:^(UIImage *image, NSURL *url) {
+    } styleIdentifier:[NSString stringWithFormat:@"st_ava_%f", floorf(self.bounds.size.width)] completion:^(UIImage *image, NSURL *url) {
         if ([_imageURL isEqual:url]) {
             self.imageView.image = image;
         }

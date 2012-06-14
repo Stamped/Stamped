@@ -1581,7 +1581,7 @@ class TimeSlice(Schema):
         
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular, user
 
 class SearchSlice(Schema):
     @classmethod

@@ -229,20 +229,30 @@ class MongoCollectionProxy(object):
         num_retries = 0
         max_retries = 5
         
+        # NOTE (travis): this method should never throw an error locally if connected to 
+        # a non-master DB node that can't ensure_index because the conn doesn't have 
+        # write permissions
+        
         while True:
             try:
                 ret = self._collection.ensure_index(key_or_list, **kwargs)
                 return ret
             except AutoReconnect as e:
+                if not utils.is_ec2():
+                    return
+                
                 num_retries += 1
+                
                 if num_retries > max_retries:
-                    msg = "Unable to connect after %d retries (%s)" % \
+                    msg = "Unable to ensure_index after %d retries (%s)" % \
                         (max_retries, self._parent.__class__.__name__)
                     logs.warning(msg)
+                    
                     raise
+                
                 logs.info("Retrying ensure_index (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
-
+    
     def inline_map_reduce(self, m, r, full_response=False, **kwargs):
         num_retries = 0
         max_retries = 5

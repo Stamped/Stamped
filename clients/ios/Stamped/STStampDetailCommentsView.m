@@ -336,6 +336,9 @@ andProfileImageSize:(STProfileImageSize)size {
             view.frame = frame;
             [self appendChildView:view];
         }
+        else {
+            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 16)];
+        }
         
         CGRect finalFrame = self.frame;
         finalFrame.size.height = MAX(finalFrame.size.height, _minimumCellHeight);

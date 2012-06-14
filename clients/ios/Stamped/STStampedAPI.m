@@ -67,6 +67,7 @@ NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedN
 
 @interface STStampedAPI () <STPersistentCacheSourceDelegate, STHybridCacheSourceDelegate>
 
+
 @property (nonatomic, readonly, retain) STPersistentCacheSource* menuCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* entityDetailCache;
@@ -90,6 +91,7 @@ NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedN
 @synthesize lastCount = lastCount_;
 @synthesize userCache = _userCache;
 @synthesize entityCache = _entityCache;
+@synthesize currentUserLocation = _currentUserLocation;
 
 static STStampedAPI* _sharedInstance;
 
@@ -266,7 +268,7 @@ static STStampedAPI* _sharedInstance;
                                                    params:params
                                                   mapping:[STSimpleEntityDetail mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
-                                                  block(results, error, cancellation);
+                                                  block((id)results, error, cancellation);
                                               }];
 }
 
@@ -1047,6 +1049,17 @@ static STStampedAPI* _sharedInstance;
                                                            andCallback:block];
 }
 
+- (STCancellation*)registerAPNSToken:(NSString*)token 
+                         andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/alerts/ios/update.json"
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:[NSDictionary dictionaryWithObject:token forKey:@"token"]
+                                                     mapping:[STSimpleUser mapping] //TODO fix
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(YES, error, cancellation); 
+                                                 }];
+}
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];

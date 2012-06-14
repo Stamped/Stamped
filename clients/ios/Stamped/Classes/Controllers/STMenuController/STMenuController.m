@@ -17,6 +17,8 @@
 #import "STFacebook.h"
 #import "STTwitter.h"
 
+#import "CreditPickerViewController.h"
+
 @interface STMenuController ()
 @property(nonatomic,retain) LoginViewController *loginController;
 @end
