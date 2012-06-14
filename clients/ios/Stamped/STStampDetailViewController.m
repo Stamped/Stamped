@@ -13,7 +13,6 @@
 #import "EntityDetailViewController.h"
 #import "Util.h"
 #import "STSynchronousWrapper.h"
-#import "STEntityDetailFactory.h"
 #import "STScrollViewContainer.h"
 #import "STStampedActions.h"
 #import "STActionManager.h"
@@ -59,6 +58,7 @@
 @property (nonatomic, readonly, retain) UITextView* commentTextView;
 @property (nonatomic, readonly, retain) UIActivityIndicatorView* commentActivityView;
 @property (nonatomic, readonly, retain) UIView* addCommentShading;
+@property (nonatomic, readwrite, retain) STCancellation* stampCancellation;
 
 @end
 
@@ -185,6 +185,7 @@
 @synthesize commentTextView = commentTextView_;
 @synthesize commentActivityView = commentActivityView_;
 @synthesize addCommentShading = _addCommentShading;
+@synthesize stampCancellation = _stampCancellation;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stamp.stampID];
@@ -233,6 +234,7 @@
     [addCommentView_ addSubview:userImage];
     
     commentTextView_ = [[UITextView alloc] initWithFrame:CGRectMake(58, 9, 250, 31)];
+    commentTextView_.scrollEnabled = NO;
     commentTextView_.font = [UIFont fontWithName:@"Helvetica" size:14];
     commentTextView_.layer.borderColor = [UIColor colorWithWhite:230/255.0 alpha:1].CGColor;
     commentTextView_.layer.borderWidth = 1;
@@ -291,6 +293,8 @@
 }
 
 - (void)cancelPendingRequests {
+    [self.stampCancellation cancel];
+    self.stampCancellation = nil;
     [self.entityDetailCancellation cancel];
 }
 
@@ -449,6 +453,16 @@
             [Util reframeView:self.commentTextView withDeltas:CGRectMake(0, 0, 0, heightDelta)];
         }];
     }
+}
+
+- (void)reloadStampedData {
+    [self.stampCancellation cancel];
+    self.stampCancellation = [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID
+                                                                forceUpdate:YES 
+                                                                andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
+                                                                    self.stamp = stamp;
+                                                                    [super reloadStampedData];
+                                                                }];
 }
 
 @end

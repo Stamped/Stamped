@@ -14,7 +14,6 @@
 #import <math.h>
 #import "Util.h"
 #import "STStampedActions.h"
-#import "UserImageView.h"
 #import "STActionManager.h"
 #import "STEntityAnnotation.h"
 #import "STPreviewsView.h"
@@ -102,7 +101,7 @@ NSInteger zoom;
 
 @interface STConsumptionMapViewController () <MKMapViewDelegate, STConsumptionToolbarDelegate>
 
-- (void)update;
+- (void)update:(BOOL)clearPins;
 
 @property (nonatomic, readonly, retain) STConsumptionToolbar* consumptionToolbar;
 @property (nonatomic, readonly, retain) STSearchField* searchField;
@@ -232,6 +231,7 @@ NSInteger zoom;
                                                            0,
                                                            self.scrollView.frame.size.width,
                                                            self.scrollView.contentSize.height - CGRectGetMaxY(searchBar.frame))];
+    mapView_.showsUserLocation = YES;
     [self.scrollView appendChildView:mapView_];
     _previewContainerFrameHidden = CGRectMake(0, CGRectGetMaxY(mapView_.frame), 320, 44);
     _previewContainerFrameShown = CGRectOffset(_previewContainerFrameHidden, 0, -_previewContainerFrameHidden.size.height);
@@ -242,7 +242,20 @@ NSInteger zoom;
     [self.scrollView addSubview:_previewContainer];
     mapView_.delegate = self;
     //[Util addConfigurationButtonToController:self];
-    [self update];
+    
+    CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
+    locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+    locationManager.distanceFilter = kCLDistanceFilterNone; 
+    [locationManager startUpdatingLocation];
+    [locationManager stopUpdatingLocation];
+    CLLocation *location = [locationManager location];
+    if (location) {
+        [STStampedAPI sharedInstance].currentUserLocation = location;
+        MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
+        MKCoordinateRegion region = MKCoordinateRegionMake(location.coordinate, mapSpan);
+        [mapView_ setRegion:region animated:NO];
+    }
+    [self update:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -267,17 +280,22 @@ NSInteger zoom;
 
 #pragma mark - MKMapViewDelegate Methods
 
-- (void)zoomToCurrentLocation {
-    CLLocationCoordinate2D currentLocation = mapView_.userLocation.location.coordinate;
-    MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
-    MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
-    [mapView_ setRegion:region animated:YES];
+- (BOOL)zoomToCurrentLocation:(BOOL)animated {
+    if (mapView_.userLocation && !(mapView_.userLocation.coordinate.latitude == 0 && mapView_.userLocation.coordinate.longitude == 0)) {
+        CLLocationCoordinate2D currentLocation = mapView_.userLocation.location.coordinate;
+        MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
+        MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
+        [mapView_ setRegion:region animated:animated];
+        return YES;
+    }
+    else {
+        return NO;
+    }
 }
 
 - (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
     if (self.zoomToUserLocation) {
-        [self zoomToCurrentLocation];
-        self.zoomToUserLocation = NO;
+        self.zoomToUserLocation = ![self zoomToCurrentLocation:YES];
     }
 }
 
@@ -385,7 +403,7 @@ NSInteger zoom;
     ///NSLog(@"frame:%f,%f,%f,%f", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
     //[self resetCaches];
     //[self loadDataFromNetwork];
-    [self update]; 
+    [self update:NO]; 
 }
 
 
@@ -408,27 +426,7 @@ NSInteger zoom;
         [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
     }
 }
-/*
- - (void)viewUser:(id<STUser>)user {
- //NSLog(@"view user");
- [[STStampedActions sharedInstance] viewUserWithUserID:user.userID];
- }
- */
-/*
- - (void)mapUserTapped:(id)sender {
- UserImageView* userImage = sender;
- UIView* view = [userImage superview];
- while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
- view = [view superview];
  
- if (!view)
- return;
- 
- STEntityAnnotation* annotation = (STConsumptionAnnotation*)[(MKPinAnnotationView*)view annotation];
- [[STStampedActions sharedInstance] viewUserWithUserID:annotation.stamp.user.userID];
- }
- */
-
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
     if (![annotation isKindOfClass:[STEntityAnnotation class]])
         return nil;
@@ -441,19 +439,6 @@ NSInteger zoom;
     pinView.rightCalloutAccessoryView = disclosureButton;
     pinView.pinColor = MKPinAnnotationColorRed;
     pinView.canShowCallout = YES;
-    
-    id<STEntityDetail> entity = [(STEntityAnnotation*)annotation entityDetail];
-    if (entity) {
-        /*
-         UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, STProfileImageSize31, STProfileImageSize31)];
-         userImageView.enabled = YES;
-         [userImageView addTarget:self
-         action:@selector(mapUserTapped:)
-         forControlEvents:UIControlEventTouchUpInside];
-         userImageView.imageURL = [Util profileImageURLForUser:stamp.user withSize:STProfileImageSize31];
-         pinView.leftCalloutAccessoryView = userImageView;
-         */
-    }
     
     return pinView;
 }
@@ -495,7 +480,13 @@ NSInteger zoom;
     }
 }
 
-- (void)update {
+- (void)update:(BOOL)clearPins {
+    if (clearPins) {
+        for (STEntityAnnotation* annotation in self.annotations) {
+            [self.mapView removeAnnotation:annotation];
+        }
+        [self.annotations removeAllObjects];
+    }
     NSString* key = [STConsumptionMapCache keyForSubcategory:self.subcategory
                                                        scope:self.scope 
                                                       filter:self.filter 
@@ -592,14 +583,14 @@ NSInteger zoom;
     if (query != query_ && ![query isEqualToString:query_]) {
         [query_ autorelease];
         query_ = [query copy];
-        [self update];
+        [self update:YES];
     }
 }
 
 - (void)setScope:(STStampedAPIScope)scope {
     if (scope_ != scope) {
         scope_ = scope;
-        [self update];
+        [self update:YES];
     }
 }
 
@@ -616,7 +607,7 @@ NSInteger zoom;
         self.filter = nil;
         self.subcategory = nil;
     }
-    [self update];
+    [self update:YES];
 }
 
 #pragma mark - Configuration

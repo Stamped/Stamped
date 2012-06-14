@@ -124,10 +124,16 @@
         
         NSString* imageURL = [Util entityImageURLForEntity:self.entityDetail];
         if (imageURL) {
-            self.entityImageCancellation = [[STImageCache sharedInstance] imageForImageURL:imageURL
-                                                                               andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-                                                                                   [self handleImage:image withError:error];
-                                                                               }];
+            UIImage* image = [[STImageCache sharedInstance] cachedImageForImageURL:imageURL];
+            if (image) {
+                [self handleImage:image withError:nil];
+            }
+            else {
+                self.entityImageCancellation = [[STImageCache sharedInstance] imageForImageURL:imageURL
+                                                                                   andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                                                                                       [self handleImage:image withError:error];
+                                                                                   }];
+            }
         }
         else {
             [self handleImage:[UIImage imageNamed:@"TEMP_noImage"] withError:nil];
@@ -218,12 +224,12 @@
         imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
         [self addSubview:imageView];
         /*
-        UIImageView* stampImage = [[[UIImageView alloc] initWithImage:[Util stampImageForUser:self.stamp.user withSize:STStampImageSize46]] autorelease];
-        [Util reframeView:stampImage withDeltas:CGRectMake(CGRectGetMaxX(imageView.frame) - 40,
-                                                           imageView.frame.origin.y - 8,
-                                                           0,
-                                                           0)];
-        [self addSubview:stampImage];
+         UIImageView* stampImage = [[[UIImageView alloc] initWithImage:[Util stampImageForUser:self.stamp.user withSize:STStampImageSize46]] autorelease];
+         [Util reframeView:stampImage withDeltas:CGRectMake(CGRectGetMaxX(imageView.frame) - 40,
+         imageView.frame.origin.y - 8,
+         0,
+         0)];
+         [self addSubview:stampImage];
          */
         self.imageView = imageView;
         if (self.entityDetail) {

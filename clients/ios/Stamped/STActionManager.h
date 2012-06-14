@@ -10,6 +10,8 @@
 #import "STAction.h"
 #import "STViewDelegate.h"
 
+extern NSString* STActionManagerShowAllActionsKey;
+
 @interface STActionManager : NSObject <STViewDelegate>
 
 + (STActionManager*)sharedActionManager;
@@ -17,5 +19,7 @@
 - (void)setStampContext:(id<STStamp>)stamp;
 
 @property (nonatomic, readwrite, assign) id actionsLocked;
+
++ (void)setupConfigurations;
 
 @end

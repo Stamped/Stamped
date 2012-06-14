@@ -115,7 +115,7 @@ static const CGFloat kUserImageSize = 41.0;
   stampImageView_.image = nil;
 }
 
-- (void)setUser:(id<STUserDetail>)user {
+- (void)setUser:(id<STUser>)user {
   if (user_ != user) {
     [user_ release];
     user_ = [user retain];

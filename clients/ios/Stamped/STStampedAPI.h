@@ -15,7 +15,6 @@
 #import "STGenericCollectionSlice.h"
 #import "STUserCollectionSlice.h"
 #import "STFriendsSlice.h"
-#import "STCommentSlice.h"
 #import "STMenu.h"
 #import "STTodo.h"
 #import "STStampedBySlice.h"
@@ -39,6 +38,7 @@
 #import "STHybridCacheSource.h"
 #import "STAccountParameters.h"
 #import "STRestKitLoader.h"
+#import <CoreLocation/CoreLocation.h>
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -66,6 +66,8 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 
 - (id<STUser>)currentUser;
 
+@property (readwrite, retain) CLLocation* currentUserLocation;
+
 - (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope;
 
 - (id<STStamp>)cachedStampForStampID:(NSString*)stampID;
@@ -90,6 +92,10 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                             andCallback:(void(^)(id<STStampedBy> stampedBy, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)stampForStampID:(NSString*)stampID 
+                       andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)stampForStampID:(NSString*)stampID 
+                       forceUpdate:(BOOL)forceUpdate
                        andCallback:(void(^)(id<STStamp> stamp, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)stampsForInboxSlice:(STGenericCollectionSlice*)slice 
@@ -125,7 +131,8 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 - (STCancellation*)entityResultsForEntitySearch:(STEntitySearch*)entitySearch 
                                     andCallback:(void(^)(NSArray<STEntitySearchSection>* sections, NSError* error, STCancellation* cancellation))block;
 
-- (void)entityDetailForSearchID:(NSString*)searchID andCallback:(void(^)(id<STEntityDetail>))block;
+- (STCancellation*)entityDetailForSearchID:(NSString*)searchID 
+                               andCallback:(void(^)(id<STEntityDetail>, NSError*, STCancellation*))block;
 
 - (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
                              andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block;
@@ -139,8 +146,6 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                              andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error, STCancellation* cancellation))block;
 
 - (void)isFriendForUserID:(NSString*)userID andCallback:(void(^)(BOOL isFriend, NSError* error))block;
-
-- (void)commentsForSlice:(STCommentSlice*)slice andCallback:(void(^)(NSArray<STComment>*,NSError*))block;
 
 - (STCancellation*)createCommentForStampID:(NSString*)stampID 
                                  withBlurb:(NSString*)blurb 
@@ -231,6 +236,9 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                                           userSecret:(NSString*)userSecret 
                                    accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)registerAPNSToken:(NSString*)token 
+                         andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;

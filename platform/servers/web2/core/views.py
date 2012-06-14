@@ -40,6 +40,8 @@ def _get_body_classes(base, schema):
 # appear every page refresh, with preferential treatment always going to users 
 # who have customized their profile image away from the default.
 def _shuffle_split_users(users):
+    return users
+    """
     has_image        = (lambda a: a['image'] and a['image']['sizes'] and len(a['image']['sizes']) > 0)
     has_custom_image = (lambda a: has_image(a) and not _is_static_profile_image(a['image']['sizes'][0]['url']))
     
@@ -58,6 +60,7 @@ def _shuffle_split_users(users):
     a0.extend(a1)
     
     return a0
+    """
 
 @stamped_view()
 def index(request):
@@ -71,7 +74,7 @@ def index(request):
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 
-@stamped_view(schema=WebTimeSlice)
+@stamped_view(schema=HTTPWebTimeSlice)
 def profile(request, schema, **kwargs):
     url_format = "/{screen_name}"
     prev_url   = None
@@ -81,6 +84,7 @@ def profile(request, schema, **kwargs):
     
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
+    screen_name = schema.screen_name
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -101,14 +105,18 @@ def profile(request, schema, **kwargs):
         user_id     = user['user_id']
         
         #utils.log(pprint.pformat(schema.dataExport()))
-        stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
+        s = schema.dataExport()
+        del s['screen_name']
+        s['user_id'] = user_id
+        
+        stamps      = stampedAPIProxy.getUserStamps(s)
     
     if ENABLE_TRAVIS_TEST:
         friends     = travis_test.friends
         followers   = travis_test.followers
     else:
-        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=schema.screen_name))
-        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=schema.screen_name))
+        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=screen_name))
+        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=screen_name))
     
     main_cluster    = { }
     
@@ -124,6 +132,7 @@ def profile(request, schema, **kwargs):
     #utils.log("FOLLOWERS:")
     #utils.log(pprint.pformat(followers))
     
+    """
     if schema.category == 'place':
         earthRadius = 3959.0 # miles
         clusters    = [ ]
@@ -193,6 +202,7 @@ def profile(request, schema, **kwargs):
                 'coordinates' : "%f,%f" % (main_cluster['avg'][0], main_cluster['avg'][1]), 
                 'markers'     : list("%f,%f" % (c[0], c[1]) for c in main_cluster['data']), 
             }
+    """
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)
@@ -223,12 +233,13 @@ def profile(request, schema, **kwargs):
         'main_stamp_cluster'    : main_cluster, 
     }, preload=[ 'user' ])
 
-@stamped_view(schema=WebTimeSlice)
+@stamped_view(schema=HTTPWebTimeSlice)
 def map(request, schema, **kwargs):
     # TODO: enforce stricter validity checking on offset and limit
     
     schema.offset = schema.offset or 0
     schema.limit  = 1000 # TODO: customize this
+    screen_name = schema.screen_name
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -241,7 +252,11 @@ def map(request, schema, **kwargs):
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
         
-        stamps      = stampedAPIProxy.getUserStamps(schema.dataExport())
+        s = schema.dataExport()
+        del s['screen_name']
+        s['user_id'] = user_id
+        
+        stamps      = stampedAPIProxy.getUserStamps(s)
     
     # TODO: bake this into stampedAPIProxy request
     stamps    = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
@@ -308,11 +323,6 @@ def sdetail(request, schema, **kwargs):
         'entity' : entity, 
     })
 
-
-@stamped_view()
-def test_view(request, **kwargs):
-    return stamped_render(request, 'test.html', { })
-
 @stamped_view(schema=HTTPEntityId)
 def menu(request, schema, **kwargs):
     entity  = stampedAPIProxy.getEntity(schema.entity_id)
@@ -324,4 +334,8 @@ def menu(request, schema, **kwargs):
         'menu'   : menu, 
         'entity' : entity, 
     })
+
+@stamped_view()
+def test_view(request, **kwargs):
+    return stamped_render(request, 'test.html', { })
 

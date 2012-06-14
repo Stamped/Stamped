@@ -36,6 +36,7 @@
 #import "STFacebook.h"
 #import "STRestKitLoader.h"
 #import "STUnreadActivity.h"
+#import "STActionManager.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -76,10 +77,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)application:(UIApplication *)application didChangeStatusBarOrientation:(UIInterfaceOrientation)oldStatusBarOrientation {
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    
-}
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     //#if defined (CONFIGURATION_Beta)
     //  [[BWHockeyManager sharedHockeyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
@@ -96,6 +93,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #warning QuincyKit Distribution is configured for this build
     [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
 #endif
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didLogIn:) name:STStampedAPILoginNotification object:nil];
     RKLogConfigureByName("RestKit*", RKLogLevelError);
     RKLogSetAppLoggingLevel(RKLogLevelError);
     [self addConfigurations];
@@ -104,7 +102,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];
     [[STRestKitLoader sharedInstance] authenticate];
-    NSLog(@"USer:%@", [STStampedAPI sharedInstance].currentUser);
+    if ([STStampedAPI sharedInstance].currentUser) {
+        [self didLogIn:nil];
+    }
     STInboxViewController *inboxController = [[STInboxViewController alloc] init];
     STLeftMenuViewController *leftController = [[STLeftMenuViewController alloc] init];
     STRightMenuViewController *rightController = [[STRightMenuViewController alloc] init];
@@ -123,7 +123,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [rightController release];
     [menuController release];
     [navController release];
-    
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
     
@@ -137,8 +136,17 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     
     [[STUnreadActivity sharedInstance] update];
-    
     return YES;
+}
+
+- (void)didLogIn:(id)notImportant {
+    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeAlert | 
+                                                                           UIRemoteNotificationTypeBadge | 
+                                                                           UIRemoteNotificationTypeSound)];
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+    NSLog(@"Did fail to register");
 }
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
@@ -146,11 +154,15 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    
 }
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)devToken {
+    NSString* deviceToken = [NSString stringWithFormat:@"%@", devToken];
+    deviceToken = [deviceToken stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+    deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
+    [[STStampedAPI sharedInstance] registerAPNSToken:deviceToken andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        NSLog(@"Registered %@", deviceToken); 
+    }];
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
@@ -348,6 +360,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     //Create Stamp
     [STCreateStampViewController setupConfigurations];
+    
+    //Actions
 }
 
 @end

@@ -140,7 +140,7 @@
 }
 
 - (BOOL)offsetBodyForIcon {
-    return self.hasIcon && self.scope == STStampedAPIScopeFriends;
+    return self.hasIcon && self.scope != STStampedAPIScopeYou;
 }
 
 - (BOOL)hasCredit {
@@ -152,7 +152,7 @@
 }
 
 - (BOOL)iconOnImages {
-    if (self.scope == STStampedAPIScopeYou) {
+    if (self.scope == STStampedAPIScopeYou && self.hasIcon) {
         return YES;
     }
     else {
@@ -161,7 +161,7 @@
 }
 
 - (BOOL)hasImages {
-    return self.usersForImages.count > 0;
+    return self.usersForImages.count > 0 && !(self.scope != STStampedAPIScopeYou && [self.activity.verb isEqualToString:@"follow"]);
 }
 
 - (BOOL)useUserImage {
@@ -169,7 +169,7 @@
 }
 
 - (BOOL)useStampIcon {
-    return self.activity.icon == nil && self.activity.subjects.count > 0;
+    return self.activity.icon == nil && self.activity.subjects.count > 0 && self.hasIcon;
 }
 
 - (BOOL)hasIcon {

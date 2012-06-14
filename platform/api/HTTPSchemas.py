@@ -1663,7 +1663,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                if getattr(entity.sources, 'itunes_url', None) is not None:
+                if entity.sources.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
                 source.setCompletion(
                     action      = actionType,
@@ -2019,10 +2019,12 @@ class HTTPEntitySearchResultsItem(Schema):
         self.category           = entity.category
 
         # Build icon
-        if entity.isType('food'):
-            self.icon = _getIconURL('search_food')
+        if entity.isType('restaurant'):
+            self.icon = _getIconURL('search_restaurant')
         elif entity.isType('bar'):
             self.icon = _getIconURL('search_bar')
+        elif entity.isType('cafe'):
+            self.icon = _getIconURL('search_cafe')
         elif entity.kind == 'place':
             self.icon = _getIconURL('search_place')
         elif entity.isType('tv'):
@@ -2035,6 +2037,12 @@ class HTTPEntitySearchResultsItem(Schema):
             self.icon = _getIconURL('search_album')
         elif entity.isType('track'):
             self.icon = _getIconURL('search_track')
+        elif entity.isType('app'):
+            self.icon = _getIconURL('search_app')
+        elif entity.isType('book'):
+            self.icon = _getIconURL('search_book')
+        else:
+            self.icon = _getIconURL('search_other')
 
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance
@@ -2114,6 +2122,50 @@ class HTTPTimeSlice(Schema):
             slc.viewport = _convertViewport(self.viewport)
 
         return slc
+
+class HTTPWebTimeSlice(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Paging
+        cls.addProperty('before',                           int)
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
+
+        # Filtering
+        cls.addProperty('category',                         basestring, cast=_checkCategory)
+        cls.addProperty('subcategory',                      basestring, cast=_checkSubcategory)
+        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
+
+        # Scope
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
+    
+    def exportTimeSlice(self):
+        data                = self.dataExport()
+        beforeData          = data.pop('before', None)
+        viewportData        = data.pop('viewport', None)
+        categoryData        = data.pop('category', None)
+        subcategoryData     = data.pop('subcategory', None)
+
+        slc                 = TimeSlice()
+        slc.dataImport(data)
+
+        if self.before is not None:
+            slc.before          = datetime.utcfromtimestamp(int(self.before))
+
+        if self.subcategory is not None:
+            slc.kinds = list(Entity.mapSubcategoryToKinds(self.subcategory))
+            slc.types = list(Entity.mapSubcategoryToTypes(self.subcategory))
+        elif self.category is not None:
+            slc.kinds = list(Entity.mapCategoryToKinds(self.category))
+            slc.types = list(Entity.mapCategoryToTypes(self.category))
+
+        if self.viewport is not None:
+            slc.viewport = _convertViewport(self.viewport)
+
+        return slc
+
 
 class HTTPSearchSlice(Schema):
     @classmethod
@@ -3042,7 +3094,7 @@ class HTTPActivity(Schema):
 
             actionMapping = {
                 'listen'    : ('listened to', ''),
-                'playlist'  : ('added', 'to their playlist'),
+                'playlist'  : ('added', 'to a playlist'),
                 'download'  : ('downloaded', ''),
                 'reserve'   : ('made a reservation at', ''),
                 'menu'      : ('viewed the menu for', ''),

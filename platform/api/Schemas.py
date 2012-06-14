@@ -184,6 +184,7 @@ class EntityStats(Schema):
         cls.addProperty('entity_id',                        basestring, required=True)
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
+        cls.addPropertyList('popular_stamps',               basestring)
 
 
 # #### #
@@ -1387,19 +1388,19 @@ class RawTodo(Schema):
     def setSchema(cls):
         cls.addProperty('todo_id',                          basestring)
         cls.addProperty('user_id',                          basestring, required=True)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addPropertyList('source_stamp_ids',             basestring)
         cls.addProperty('stamp_id',                         basestring)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
         cls.addProperty('complete',                         bool)
 
-    def enrich(self, user, entity, previews=None, source_stamps=None, stamp=None):
+    def enrich(self, user, entity, previews=None, sourceStamps=None, stamp=None):
         todo = Todo()
         todo.dataImport(self.dataExport(), overflow=True)
         todo.user   = user
         todo.entity = entity
-        if source_stamps is not None:
-            todo.source_stamps = source_stamps
+        if sourceStamps is not None:
+            todo.source_stamps = sourceStamps
         if stamp is not None:
             todo.stamp  = stamp
         if previews is not None:
@@ -1503,6 +1504,9 @@ class Activity(Schema):
         result.benefit      = self.benefit
         result.timestamp    = self.timestamp
         result.personal     = personal
+        result.header       = self.header
+        result.body         = self.body
+        result.footer       = self.footer
 
         if self.subjects is not None:
             subjects = []
@@ -1577,25 +1581,7 @@ class TimeSlice(Schema):
         
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
-
-class WebTimeSlice(Schema):
-    @classmethod
-    def setSchema(cls):
-        # Paging
-        cls.addProperty('before',                           datetime)
-        cls.addProperty('limit',                            int)
-        cls.addProperty('offset',                           int)
-        
-        # Filtering
-        cls.addPropertyList('kinds',                        basestring)
-        cls.addPropertyList('types',                        basestring)
-        cls.addNestedProperty('viewport',                   Viewport) 
-        
-        # Scope
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular, user
 
 class SearchSlice(Schema):
     @classmethod

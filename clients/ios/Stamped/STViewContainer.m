@@ -191,7 +191,7 @@ static int _count = 0;
 - (void)reloadStampedData {
   for (id view in self.subviews) {
     if ([view respondsToSelector:@selector(reloadStampedData)]) {
-      NSLog(@"reloading data for %@",view);
+      //NSLog(@"reloading data for %@",view);
       [view reloadStampedData];
     }
   }

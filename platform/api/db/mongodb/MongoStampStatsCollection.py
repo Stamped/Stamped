@@ -60,12 +60,12 @@ class MongoStampStatsCollection(AMongoCollection):
         documentIds = map(self._getObjectIdFromString, stampIds)
         return self._removeMongoDocuments(documentIds)
 
-    def getPopularStampIds(self, **kwargs):
+    def _buildPopularQuery(self, **kwargs):
         kinds = kwargs.pop('kinds', None)
         types = kwargs.pop('types', None)
-        viewport = kwargs.pop('viewport', None)
         since = kwargs.pop('since', None)
-        limit = kwargs.pop('limit', 50)
+        viewport = kwargs.pop('viewport', None)
+        entityId = kwargs.pop('entityId', None)
 
         query = {}
 
@@ -76,7 +76,6 @@ class MongoStampStatsCollection(AMongoCollection):
             query['types'] = {'$in': list(types)}
 
         if viewport is not None:
-            pass
             query["lat"] = {
                 "$gte" : viewport.lower_right.lat, 
                 "$lte" : viewport.upper_left.lat, 
@@ -101,14 +100,35 @@ class MongoStampStatsCollection(AMongoCollection):
                     }, 
                 ]
 
+        if entityId is not None:
+            query['entity_id'] = entityId
+
         if since is not None:
             query['last_stamped'] = {'$gte': since}
 
-        results = self._collection.find(query, fields=['_id']) \
-                      .sort([('score', pymongo.DESCENDING)]) \
-                      .limit(limit)
+        return query
 
-        return map(lambda x: self._getStringFromObjectId(x['_id']), results)
+    def getPopularStampIds(self, **kwargs):
+        limit = kwargs.pop('limit', 1000)
+
+        query = self._buildPopularQuery(**kwargs)
+
+        documents = self._collection.find(query, fields=['_id']) \
+                        .sort([('score', pymongo.DESCENDING)]) \
+                        .limit(limit)
+
+        return map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+
+    def getPopularStampStats(self, **kwargs):
+        limit = kwargs.pop('limit', 1000)
+
+        query = self._buildPopularQuery(**kwargs)
+
+        documents = self._collection.find(query) \
+                        .sort([('score', pymongo.DESCENDING)]) \
+                        .limit(limit)
+
+        return map(self._convertFromMongo, documents)
 
 
 

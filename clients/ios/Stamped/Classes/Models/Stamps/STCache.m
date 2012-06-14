@@ -156,7 +156,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
             result = [[[STCache alloc] initWithName:name andConfiguartion:config] autorelease];
         }
         else {
-           // NSLog(@"\n\nUnarchived Cache\n\n");
+            // NSLog(@"\n\nUnarchived Cache\n\n");
         }
         [Util executeOnMainThread:^{
             if (!cancellation.cancelled) {
@@ -248,7 +248,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         BOOL updated = newPage != self.page;
         self.page = newPage;
         if (updated) {
-            NSLog(@"Old count %d, new count %d", count, self.page.count);
+            //NSLog(@"Old count %d, new count %d", count, self.page.count);
             [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidChangeNotification object:self];
             if (self.autoSaveAge) {
                 
@@ -345,6 +345,25 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 - (BOOL)stale:(NSDate*)date {
     return [date timeIntervalSinceNow] >= self.pageFaultAge;
 }
+
+- (void)updateObjects:(NSArray<STDatum>*)objects {
+}
+
+- (void)clearCache {
+    self.page = [[STCachePage alloc] initWithObjects:[NSArray array]
+                                   start:[NSDate date]
+                                     end:nil 
+                                 created:[NSDate dateWithTimeIntervalSinceNow:-2 * _pageFaultAge]
+                                 andNext:nil];
+    // TODO enable if possible self.saveInProgress = NO;
+    [self.refreshStack removeAllObjects];
+    [self.cancellation cancel];
+    self.cancellation = nil;
+    [self saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        
+    }];
+}
+
 
 @end
 

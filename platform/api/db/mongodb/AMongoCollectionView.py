@@ -53,8 +53,11 @@ class AMongoCollectionView(AMongoCollection):
         # -------------------------------------
         ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
         if timeSlice.types is not None and len(timeSlice.types) > 0:
+            subcategories = list(timeSlice.types)
+            if 'track' in timeSlice.types:
+                subcategories.append('song')
             add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
-                            {'entity.subcategory': {'$in': list(timeSlice.types)}} ])
+                            {'entity.subcategory': {'$in': subcategories}} ])
 
         elif timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
             query["entity.kind"] = {'$in': list(timeSlice.kinds)}
@@ -120,12 +123,15 @@ class AMongoCollectionView(AMongoCollection):
         # handle category / subcategory filters
         # -------------------------------------
         ### TODO: Allow for both kinds and types (once we don't need backwards compatbility for category / subcategory)
-        if timeSlice.types is not None and len(timeSlice.types) > 0:
-            add_or_query([  {'entity.types': {'$in': list(timeSlice.types)}},
-                            {'entity.subcategory': {'$in': list(timeSlice.types)}} ])
+        if searchSlice.types is not None and len(searchSlice.types) > 0:
+            subcategories = list(searchSlice.types)
+            if 'track' in searchSlice.types:
+                subcategories.append('song')
+            add_or_query([  {'entity.types': {'$in': list(searchSlice.types)}},
+                            {'entity.subcategory': {'$in': subcategories}} ])
 
-        elif timeSlice.kinds is not None and len(timeSlice.kinds) > 0:
-            query["entity.kind"] = {'$in': list(timeSlice.kinds)}
+        elif searchSlice.kinds is not None and len(searchSlice.kinds) > 0:
+            query["entity.kind"] = {'$in': list(searchSlice.kinds)}
 
         # Query
         if searchSlice.query is not None:

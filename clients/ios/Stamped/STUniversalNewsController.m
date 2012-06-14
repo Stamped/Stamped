@@ -47,7 +47,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [STEvents addObserver:self selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
-    
     if (!self.tableView.backgroundView) {
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
