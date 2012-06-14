@@ -3345,7 +3345,10 @@ class StampedAPI(AStampedAPI):
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
         since = datetime.utcnow() - timedelta(days=90)
         viewport = guideRequest.viewport
-        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since)
+        limit = 1000
+        if viewport is not None:
+            limit = 100
+        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since, limit=limit)
 
         # Combine stamp scores into grouped entity scores
         entityScores = {}
