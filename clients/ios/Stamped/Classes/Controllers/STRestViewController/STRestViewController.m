@@ -149,32 +149,32 @@
 
 #pragma mark - Cell Animation
 
-- (void)animateCell:(UITableViewCell*)cell withDelay:(float)delay {
+- (void)animateView:(UIView*)view withDelay:(float)delay {
     
-    cell.layer.opacity = 0.0f;
+    view.layer.opacity = 0.0f;
     
     [CATransaction begin];
     [CATransaction setCompletionBlock:^{
-        cell.layer.opacity = 1.0f;
-        [cell.layer removeAllAnimations];
+        view.layer.opacity = 1.0f;
+        [view.layer removeAllAnimations];
     }];
     
     CAAnimationGroup *animation = [CAAnimationGroup animation];
-    animation.duration = 0.3f;
+    animation.duration = 0.25f;
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    animation.beginTime = [cell.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
+    animation.beginTime = [view.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
     animation.removedOnCompletion = NO;
     animation.fillMode = kCAFillModeForwards;
     
     CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
-    position.fromValue = [NSValue valueWithCGPoint:CGPointMake(cell.layer.position.x, cell.layer.position.y + self.tableView.frame.size.height)];
+    position.fromValue = [NSValue valueWithCGPoint:CGPointMake(view.layer.position.x, view.layer.position.y + self.tableView.frame.size.height)];
     
     CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
     opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
     opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
     
     [animation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
-    [cell.layer addAnimation:animation forKey:nil];
+    [view.layer addAnimation:animation forKey:nil];
     [CATransaction commit];
     
 }
@@ -182,8 +182,8 @@
 - (void)animateIn {
     
     float delay = 0.0f;
-    for (UITableViewCell *cell in self.tableView.visibleCells) {        
-        [self animateCell:cell withDelay:delay];
+    for (UITableViewCell *cell in self.tableView.visibleCells) {
+        [self animateView:cell withDelay:delay];
         delay += 0.15f;
     }
     

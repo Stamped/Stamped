@@ -47,7 +47,8 @@
         [self addSubview:scrollView];
         self.scrollView = scrollView;
         
-        UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(68.0f, 12.0f, self.bounds.size.width - 88.0f, 20.0f)];
+        UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(68.0f, 14.0f, self.bounds.size.width - 88.0f, 20.0f)];
+        textView.font = [UIFont systemFontOfSize:12];
         textView.keyboardAppearance = UIKeyboardAppearanceAlert;
         textView.editable = NO;
         textView.delegate = (id<UITextViewDelegate>)self;

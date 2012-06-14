@@ -26,7 +26,6 @@
 @property(nonatomic,retain) CreateEditView *editView;
 @property(nonatomic,retain) STS3Uploader *imageUploader;
 @property(nonatomic,copy) NSString *tempImagePath;
-@property(nonatomic,assign) CGSize tempImageSize;
 @property(nonatomic,retain) id<STEntity> entity;
 @property(nonatomic,retain) id<STEntitySearchResult> searchResult;
 @end
@@ -39,7 +38,6 @@
 @synthesize searchResult=_searchResult;
 @synthesize imageUploader;
 @synthesize tempImagePath;
-@synthesize tempImageSize;
 
 - (void)commonInit {
     
@@ -198,13 +196,8 @@
     stampNew.blurb = self.editView.textView.text;
     stampNew.entityID = self.entity.entityID;
     stampNew.searchID = self.searchResult.searchID;
+    stampNew.tempImageURL = self.tempImagePath;
 
-    if (self.tempImagePath) {
-        stampNew.tempImageURL = self.tempImagePath;
-        stampNew.tempImageWidth = [NSNumber numberWithInteger:self.tempImageSize.width];
-        stampNew.tempImageHeight = [NSNumber numberWithInteger:self.tempImageSize.height];
-    }
-    
     [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
         
         if (stamp) {
@@ -316,9 +309,7 @@
         [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
         [UIImageJPEGRepresentation(image, 0.85) writeToFile:path atomically:NO];
         self.imageUploader.filePath = path;
-      
-        NSLog(@"image size : %@", NSStringFromCGSize(image.size));
-        
+              
         self.editView.imageView.image = image;
         [self.editView.imageView setUploading:YES];
         [self.editView layoutScrollView];

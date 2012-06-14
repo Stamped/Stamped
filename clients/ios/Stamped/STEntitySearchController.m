@@ -58,7 +58,6 @@ static const CGFloat _offscreenCancelPadding = 5;
 @synthesize loading = _loading;
 @synthesize locationManager=_locationManager;
 
-
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
     if (self = [super init]) {
        
@@ -70,26 +69,6 @@ static const CGFloat _offscreenCancelPadding = 5;
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
-
-        BOOL shouldGetSuggested = YES;
-        CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
-        if ([category isEqualToString:@"place"]) {
-            _locationManager = [[CLLocationManager alloc] init];
-            _locationManager.delegate = self; 
-            _locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
-            _locationManager.distanceFilter = kCLDistanceFilterNone; 
-            [_locationManager startUpdatingLocation];
-            location = [_locationManager location];
-            if (location == nil) {
-                shouldGetSuggested = NO;
-            }
-            else {
-                [_locationManager stopUpdatingLocation];
-            }
-        }
-        if (shouldGetSuggested) {
-            [self getSuggestionsWithLocation:location];
-        }
 
     }
     return self;
@@ -115,50 +94,41 @@ static const CGFloat _offscreenCancelPadding = 5;
     [super viewDidLoad];
     
     self.showsSearchBar = YES;
-    [self reloadDataSource];
     
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
     self.navigationItem.leftBarButtonItem = button;
     [button release];
     
-}
-
-
-#pragma mark - Location
-
-- (void)getSuggestionsWithLocation:(CLLocation*)location {
-    [self.requestCancellation cancel];
-    STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
-    suggested.category = _category;
-    if (location) {
-        float longitude=location.coordinate.longitude;
-        float latitude=location.coordinate.latitude;
-        suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
-        self.coordinates = suggested.coordinates;
+    CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
+    if ([_category isEqualToString:@"place"]) {
+        _locationManager = [[CLLocationManager alloc] init];
+        _locationManager.delegate = self; 
+        _locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+        _locationManager.distanceFilter = kCLDistanceFilterNone; 
+        [_locationManager startUpdatingLocation];
+        location = [_locationManager location];
+        if (location) {
+            float longitude = location.coordinate.longitude;
+            float latitude = location.coordinate.latitude;
+            self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+            [_locationManager stopUpdatingLocation];
+        }
     }
-    
-    self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-        
-        if (results) {
-            
-            self.suggestedSections = results;
-            [self.tableView reloadData];
-            
-        }
-        else {
-        
-            [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
-        
-        }
-                                                      
-    }];
+
+    [self reloadDataSource];
     
 }
+
+
+#pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation  fromLocation:(CLLocation *)oldLocation {
    
     if (!self.requestCancellation && !self.suggestedSections && !self.searchSections) {
-        [self getSuggestionsWithLocation:newLocation];
+        float longitude = newLocation.coordinate.longitude;
+        float latitude = newLocation.coordinate.latitude;
+        self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+        [self reloadDataSource];
         [_locationManager stopUpdatingLocation];
     }
     
@@ -239,7 +209,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 
     }
 
-    return self.suggestedSections ? self.suggestedSections.count : 1;
+    return self.suggestedSections ? self.suggestedSections.count : 0;
     
 }
 
@@ -487,8 +457,10 @@ static const CGFloat _offscreenCancelPadding = 5;
     STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
     suggested.coordinates = self.coordinates;
     suggested.category = self.category;
+    
     self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested  andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
                  
+        NSInteger sections = [self.tableView numberOfSections];
         self.requestCancellation = nil;
         if (results) {
             self.suggestedSections = results;
@@ -497,7 +469,9 @@ static const CGFloat _offscreenCancelPadding = 5;
         
         _loading = NO;
         [self dataSourceDidFinishLoading];
-        [self animateIn];
+        if (sections==0) {
+            [self animateIn];
+        }
         
     }];
     [super reloadDataSource];
