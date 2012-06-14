@@ -276,6 +276,11 @@ def _checkSubcategory(subcategory):
         logs.warning("Subcategory check failed for '%s': %s" % (subcategory, e))
         raise StampedInputError("Invalid subcategory: %s" % subcategory)
 
+def _checkScreenName(screen_name):
+    if not utils.validate_screen_name(screen_name):
+        raise StampedInputError("Invalid format for screen name")
+    return screen_name
+
 
 # ######### #
 # OAuth 2.0 #
@@ -383,7 +388,7 @@ class HTTPAccount(Schema):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
         cls.addProperty('email',                            basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=_checkScreenName)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring)
 
@@ -397,7 +402,7 @@ class HTTPAccountNew(Schema):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=_checkScreenName)
         cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
@@ -421,7 +426,7 @@ class HTTPFacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=_checkScreenName)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('email',                            basestring)
         cls.addProperty('phone',                            basestring)
@@ -467,6 +472,30 @@ class HTTPTwitterAccountNew(Schema):
             data['phone'] = phone
 
         return TwitterAccountNew().dataImport(data, overflow=True)
+
+class HTTPAccountUpdateForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('phone',                            basestring)
+
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+
+        cls.addProperty('temp_image_url',                   basestring)
+
+    def convertToAccountUpdateForm(self):
+        data = self.dataExport()
+        phone = _phoneToInt(data.pop('phone', None))
+        if phone is not None:
+            data['phone'] = phone
+
+        return AccountUpdateForm().dataImport(data, overflow=True)
+
 
 class HTTPAccountSettings(Schema):
     @classmethod
