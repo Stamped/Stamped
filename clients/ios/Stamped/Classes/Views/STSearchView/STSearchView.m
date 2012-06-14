@@ -11,7 +11,9 @@
 @implementation STSearchView
 
 @synthesize showCancelButton=_showCancelButton;
+@synthesize loading=_loading;
 @synthesize delegate;
+
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -93,16 +95,51 @@
     
 }
 
-- (void)setPlaceholderTitle:(NSString*)title {
+
+#pragma mark - Getters
+
+- (NSString*)text {
     
-    if (title) {
-        _textField.placeholder = title;
-    }
+    return [_textField text];
     
 }
 
 
 #pragma mark - Setters
+
+- (void)setLoading:(BOOL)loading {
+    _loading = loading;
+    
+    _textField.clearButtonMode = _loading ? UITextFieldViewModeNever : UITextFieldViewModeAlways;
+
+    if (_loading) {
+        
+        if (!_activityView) {
+            
+            UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+            [self addSubview:view];
+            [view startAnimating];
+            _activityView = view;
+            [view release];
+            
+            CGFloat width = 10.0f;
+            CGRect frame = _activityView.frame;
+            frame.origin.x = CGRectGetMaxX(_textField.frame) - 20.0f;
+            frame.size = CGSizeMake(width, width);
+            frame.origin.y = (self.bounds.size.height - width) / 2;
+            _activityView.frame = frame;
+            
+        }
+        
+    } else {
+        
+        if (_activityView) {
+            [_activityView removeFromSuperview], _activityView=nil;
+        }
+        
+    }
+    
+}
 
 - (void)showCancel:(BOOL)show animated:(BOOL)animated {
     
@@ -144,6 +181,18 @@
     [self showCancel:_showCancelButton animated:YES]; // default is animated
 }
 
+- (void)setText:(NSString*)text {
+    _textField.text = text;
+}
+
+- (void)setPlaceholderTitle:(NSString*)title {
+    
+    if (title) {
+        _textField.placeholder = title;
+    }
+    
+}
+
 
 #pragma mark - Actions
 
@@ -174,6 +223,12 @@
 
 
 #pragma mark - UITextFieldDelegate
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    
+    [self setLoading:NO];
+
+}
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
     

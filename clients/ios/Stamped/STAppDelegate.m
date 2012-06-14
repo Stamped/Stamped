@@ -134,6 +134,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
         [Util removeOldCacheDirectories];
     }];
     
+    
     [[STUnreadActivity sharedInstance] update];
     return YES;
 }

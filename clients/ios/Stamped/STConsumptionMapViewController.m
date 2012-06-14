@@ -174,7 +174,7 @@ NSInteger zoom;
                      bars,
                      cafe,
                      nil];
-    return item;
+    return [item autorelease];
 }
 
 - (id)init

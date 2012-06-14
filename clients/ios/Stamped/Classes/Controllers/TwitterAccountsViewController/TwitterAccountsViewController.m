@@ -12,8 +12,6 @@
 #import "QuartzUtils.h"
 #import "STTwitter.h"
 #import "STAuth.h"
-
-#import "SocialSignupViewController.h"
 #import "SignupWelcomeViewController.h"
 
 

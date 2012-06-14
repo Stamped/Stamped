@@ -300,10 +300,8 @@
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
-
-    
-    //[[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
-    
+    [controller release];
+        
 }
 
 

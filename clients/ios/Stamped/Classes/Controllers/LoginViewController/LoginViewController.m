@@ -184,6 +184,8 @@
     NSString* password = [_textView password];
     [[STStampedAPI sharedInstance] loginWithScreenName:login password:password andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
 
+        [self setLoading:NO];
+
         if (error) {
 
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Couldn't Log In" message:@"The username and password do not match." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Reset password" otherButtonTitles:@"      OK      ", nil];

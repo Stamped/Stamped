@@ -66,6 +66,7 @@
     frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
     frame.size.width = self.bounds.size.width;
     background.frame = frame;
+    [background release];
     
 }
 

@@ -361,7 +361,7 @@
 
 
 - (void)signupFooterViewCreate:(SignupFooterView*)view {
-
+    
     [self setLoading:YES];
     [self.tableView endEditing:YES];
 
