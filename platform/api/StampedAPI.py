@@ -1657,19 +1657,27 @@ class StampedAPI(AStampedAPI):
 
     def updateEntityStatsAsync(self, entityId):
         numStamps = self._stampDB.countStampsForEntity(entityId)
-        popularUserIds = self._stampDB.getPopularityForEntity(entityId)
+
+        popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+        popularStamps = self._stampDB.getStamps(popularStampIds, limit=len(popularStampIds))
+        popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
+        popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+
+        logs.info('Popular User Ids: %s' % popularUserIds)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
+            stats.popular_stamps = popularStampIds
             self._entityStatsDB.updateNumStamps(entityId, numStamps)
-            self._entityStatsDB.setPopular(entityId, popularUserIds)
+            self._entityStatsDB.setPopular(entityId, popularUserIds, popularStampIds)
         except StampedUnavailableError:
             stats = EntityStats()
             stats.entity_id = entityId
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
+            stats.popular_stamps = popularStampIds
             self._entityStatsDB.addEntityStats(stats)
         return stats
 
@@ -2670,8 +2678,22 @@ class StampedAPI(AStampedAPI):
         likes.reverse()
         stats.preview_likes     = likes
 
+        """
+        Note: To-Do preview objects are composed of two sources: users that have to-do'd the entity from
+        the stamp directly ("direct" to-dos) and users that are following you but have also to-do'd the entity
+        ("indirect" to-dos). Direct to-dos are guaranteed and will always show up on the stamp. Indirect to-dos 
+        are recalculated frequently based on your follower list and can change over time. 
+        """
+        todos                   = self._todoDB.getTodosFromStampId(stamp.stamp_id)
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
-        todos                   = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        followerTodos           = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        existingTodoIds         = set(map(lambda x: x.todo_id, todos))
+        for todo in followerTodos:
+            if len(todos) >= 100:
+                break
+            if todo.todo_id not in existingTodoIds:
+                todos.append(todo)
+                existingTodoIds.add(todo.todo_id)
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
@@ -2688,7 +2710,7 @@ class StampedAPI(AStampedAPI):
         stats.kind              = entity.kind
         stats.types             = entity.types
 
-        if entity.kind == 'place':
+        if entity.kind == 'place' and entity.coordinates is not None:
             stats.lat           = entity.coordinates.lat
             stats.lng           = entity.coordinates.lng
 
@@ -3228,6 +3250,8 @@ class StampedAPI(AStampedAPI):
 
         try:
             allItems = getattr(guide, guideRequest.section)
+            if allItems is None:
+                return []
         except AttributeError:
             logs.warning("Guide request for invalid section: %s" % guideRequest.section)
             raise StampedInputError()
@@ -3393,10 +3417,12 @@ class StampedAPI(AStampedAPI):
         entityStampPreviews = {}
         for stat in stats:
             if stat.popular_users is not None:
-                users = []
+                stampPreviews = []
                 for userId in stat.popular_users[:10]:
-                    users.append(userIds[userId])
-                entityStampPreviews[stat.entity_id] = users 
+                    stampPreview = StampPreview()
+                    stampPreview.user = userIds[userId]
+                    stampPreviews.append(stampPreview)
+                entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
         result = []
@@ -3732,7 +3758,7 @@ class StampedAPI(AStampedAPI):
         entity = self._getEntityFromRequest(entityRequest)
 
         todo                    = RawTodo()
-        todo.entity             = entity
+        todo.entity             = entity.minimize()
         todo.user_id            = authUserId
         todo.timestamp          = BasicTimestamp()
         todo.timestamp.created  = datetime.utcnow()

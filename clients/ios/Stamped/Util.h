@@ -40,6 +40,12 @@ extern NSString* const kTwitterScope;
 // The key in the kechain which is used to store auth tokens for Twitter.
 extern NSString* const kKeychainTwitterToken;
 
+typedef enum STGradientStyle {
+    STGradientStyleVertical,
+    STGradientStyleHorizontal,
+    STGradientStyleStamp,
+} STGradientStyle;
+
 @interface Util : NSObject
 + (NSString*)floatToHex:(CGFloat)value;
 + (BOOL)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
@@ -54,6 +60,7 @@ extern NSString* const kKeychainTwitterToken;
             secondaryBlue:(CGFloat)sBlue;
 + (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
++ (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style;
 
 + (NSString*)shortUserReadableTimeSinceDate:(NSDate*)date;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
