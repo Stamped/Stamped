@@ -2062,15 +2062,6 @@ class StampedAPI(AStampedAPI):
             badge.user_id   = userId
             badge.genre     = "entity_first_stamp"
             badges.append(badge)
-        else:
-            friendUserIds = self._friendshipDB.getFriends(userId)
-            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
-
-            if len(friendStamps) == 0:
-                badge           = Badge()
-                badge.user_id   = userId
-                badge.genre     = "friends_first_stamp"
-                badges.append(badge)
 
         return badges
 
@@ -2090,7 +2081,6 @@ class StampedAPI(AStampedAPI):
         imageUrl    = data.pop('temp_image_url',    None)
         imageWidth  = data.pop('temp_image_width',  None)
         imageHeight = data.pop('temp_image_height', None)
-        imageExists = False
 
         now         = datetime.utcnow()
 
@@ -2148,12 +2138,6 @@ class StampedAPI(AStampedAPI):
         else:
             stamp                       = Stamp()
 
-        # Resize image
-        if imageUrl is not None:
-            if imageWidth is None or imageHeight is None:
-                raise StampedInputError("invalid image dimensions")
-            imageExists = True
-
         # Update content if stamp exists
         if stampExists:
             stamp.timestamp.stamped     = now
@@ -2199,9 +2183,9 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        if imageExists:
+        if imageUrl is not None:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, content.content_id])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, stamp.stamp_id, content.content_id])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2305,7 +2289,7 @@ class StampedAPI(AStampedAPI):
 
 
     @API_CALL
-    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
+    def addResizedStampImagesAsync(self, imageUrl, stampId, content_id):
         assert imageUrl is not None, "stamp image url unavailable!"
 
         max_size = (960, 960)
@@ -2325,9 +2309,7 @@ class StampedAPI(AStampedAPI):
 
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
                 # Add image dimensions to stamp object
-                image           = ImageSchema()
-                # add the default image size
-                supportedSizes['']       = (imageWidth,imageHeight)
+                image = ImageSchema()
 
                 images = c.images
                 if images is None:
