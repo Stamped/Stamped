@@ -20,7 +20,12 @@
 static const CGFloat _innerBorderHeight = 40;
 static const CGFloat _offscreenCancelPadding = 5;
 
-@interface STEntityNoResultsTableCell : UITableViewCell
+@interface STEntitySearchTableViewCell : UITableViewCell
+@property(nonatomic,retain) UILabel *titleLabel;
+@property(nonatomic,retain) UILabel *detailTitleLabel;
+@property(nonatomic,retain) STCancellation *iconCancellation;
+@property(nonatomic,retain) UIImageView *iconView;
+- (void)setSearchResult:(id<STEntitySearchResult>)searchResult;
 @end
 
 @interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, CLLocationManagerDelegate>
@@ -35,6 +40,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 @property (nonatomic, retain) STCancellation *searchCancellation;
 @property (nonatomic, retain) STCancellation *requestCancellation;
 @property (nonatomic, assign) BOOL loading;
+@property (nonatomic, retain) CLLocationManager *locationManager;
 
 @end
 
@@ -50,6 +56,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 @synthesize requestCancellation = _requestCancellation;
 @synthesize searchCancellation = _searchCancellation;
 @synthesize loading = _loading;
+@synthesize locationManager=_locationManager;
 
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
@@ -99,8 +106,6 @@ static const CGFloat _offscreenCancelPadding = 5;
     [_requestCancellation release];
     [_autoCompleteCancellation cancel];
     [_autoCompleteCancellation release];
-    [_suggestedCancellation cancel];
-    [_suggestedCancellation release];
     _locationManager.delegate = nil;
     [_locationManager release];
     [super dealloc];
@@ -122,32 +127,41 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - Location
 
 - (void)getSuggestionsWithLocation:(CLLocation*)location {
-    [self.suggestedCancellation cancel];
+    [self.requestCancellation cancel];
     STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
-    suggested.category = category_;
+    suggested.category = _category;
     if (location) {
         float longitude=location.coordinate.longitude;
         float latitude=location.coordinate.latitude;
         suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
         self.coordinates = suggested.coordinates;
     }
-    self.suggestedCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested 
-                                                       andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-                                                           if (results) {
-                                                               self.suggestedSections = results;
-                                                               [self.tableView reloadData];
-                                                           }
-                                                           else {
-                                                               [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
-                                                           }
-                                                       }];
+    
+    self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
+        
+        if (results) {
+            
+            self.suggestedSections = results;
+            [self.tableView reloadData];
+            
+        }
+        else {
+        
+            [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
+        
+        }
+                                                      
+    }];
+    
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation  fromLocation:(CLLocation *)oldLocation {
-    if (!self.suggestedCancellation && !self.suggestedSections && !self.searchSections) {
+   
+    if (!self.requestCancellation && !self.suggestedSections && !self.searchSections) {
         [self getSuggestionsWithLocation:newLocation];
         [_locationManager stopUpdatingLocation];
     }
+    
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
