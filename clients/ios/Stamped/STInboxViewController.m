@@ -66,6 +66,7 @@
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
 
       if ([STStampedAPI sharedInstance].currentUser == nil) {
           _scope = STStampedAPIScopeEveryone;
@@ -586,5 +587,8 @@
     
 }
 
+- (void)applicationDidBecomeActive:(id)notImportant {
+    [self reloadDataSource];
+}
 
 @end
