@@ -550,18 +550,19 @@ def getInstance(name):
     
     return None
 
+
+def is_ec2():
+    """ returns whether or not this python program is running on EC2 """
+    return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
+
 def getDomain():
-    if self.is_ec2():
+    if is_ec2():
         if libs.ec2_utils.is_prod_stack():
             return "https://api.stamped.com/v0/"
         return "https://dev.stamped.com/v0/"
     return "localhost:18000/v0/"
 
 
-def is_ec2():
-    """ returns whether or not this python program is running on EC2 """
-    
-    return os.path.exists("/proc/xen") and os.path.exists("/etc/ec2_version")
 
 def get_db_config(config_desc):
     """ returns MongoDB host configuration """

@@ -88,6 +88,21 @@ def show(request, authUserId, **kwargs):
     account = HTTPAccount().importAccount(account)
 
     return transformOutput(account.dataExport())
+#
+#@handleHTTPRequest(http_schema=HTTPAccountUpdateForm,
+#                   conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm)
+#@require_http_methods(["POST"])
+#def update(request, authUserId, http_schema, schema, **kwargs):
+#    schema = stampedAPI.updateAccount(schema, tempImageUrl=http_schema.temp_image_url)
+#
+#    user   = HTTPUser().importAccount(schema)
+#    logs.user(user.user_id)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
+
 
 @handleHTTPRequest(parse_request=False)
 @require_http_methods(["POST"])

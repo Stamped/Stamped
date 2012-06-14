@@ -55,7 +55,7 @@ class Twitter(object):
     def __post(self, service, user_token, user_secret, **params):
         return self.__http('POST', service, user_token, user_secret, **params)
 
-    def verifyCredentials(self, user_token, user_secret):
+    def getUserInfo(self, user_token, user_secret):
         print ('calling verifyCredentials with user_token: %s  user_secret: %s' % (user_token, user_secret))
         result = self.__get(
             'account/verify_credentials.json',
@@ -116,14 +116,13 @@ def globalTwitter():
     return __globalTwitter
 
 
-#TEST_OAUTH_TOKEN             = '87947182-2hCG8J8WY3sHod3DTDX474vSaBXZbWsCGgGR7Yo'
-#TEST_OAUTH_TOKEN_SECRET      = 'CXRhlwRULHpEckEfZ3HFH8aMBjIQ7NuDRhgseuww'
+TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
+TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
 
-#TODO: Get a test account instead of using my personal account here!
-TEST_OAUTH_TOKEN_SECRET     = 'NpWLdSOrvHrtTpy2SALH4Ty1T5QUWdMZQhAMcW6Jp4'
-TEST_OAUTH_TOKEN            = '558345111-gsOAXPBGrvjOaWNmTyCtivPcEoH6yHVh627IynHU'
+TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
+TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
 
-def demo(method, user_token=TEST_OAUTH_TOKEN, user_secret=TEST_OAUTH_TOKEN_SECRET, **params):
+def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_SECRET, **params):
     from pprint import pprint
     twitter = Twitter()
 
@@ -135,7 +134,7 @@ def demo(method, user_token=TEST_OAUTH_TOKEN, user_secret=TEST_OAUTH_TOKEN_SECRE
     #headers = utils.getTwitter('https://api.twitter.com/account/verify_credentials.json', user_token, user_secret)
     if 'verifyCredentials' in methods:      pprint(twitter.verifyCredentials(user_token, user_secret))
     if 'getFriendIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
-    if 'getFollowerIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
+    if 'getFollowerIds' in methods:         pprint(twitter.getFollowerIds(user_token, user_secret))
 
 if __name__ == '__main__':
     import sys

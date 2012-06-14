@@ -376,6 +376,20 @@ class TwitterAccountNew(Schema):
         cls.addProperty('color_secondary',                  basestring)
 
 
+class AccountUpdateForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('phone',                            basestring)
+
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+
+
 # ##### #
 # Users #
 # ##### #
