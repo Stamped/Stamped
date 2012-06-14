@@ -584,7 +584,7 @@
     else {
         [Util addCreateStampButtonToController:self];
     }
-    
+    [self reloadDataSource];
 }
 
 - (void)applicationDidBecomeActive:(id)notImportant {

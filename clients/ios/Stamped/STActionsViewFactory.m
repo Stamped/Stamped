@@ -18,6 +18,7 @@
 #import "STButton.h"
 #import "STImageCache.h"
 #import "STActionManager.h"
+#import "STConfiguration.h"
 
 @interface ActionItemView : STButton
 
@@ -57,9 +58,13 @@
         
         if (action.action.sources.count) {
             for (id<STSource> source in action.action.sources) {
-                if (source.icon) {
-                    [iconURLs addObject:source.icon];
-                }
+                if (source.icon &&
+                    ([STConfiguration flag:STActionManagerShowAllActionsKey] ||
+                     [[STActionManager sharedActionManager] canHandleSource:source
+                                                                  forAction:action.action.type
+                                                                withContext:[STActionContext context]])) {
+                         [iconURLs addObject:source.icon];
+                     }
             }
         }
         
@@ -172,14 +177,20 @@
         CGFloat cell_width = 290;
         CGFloat cell_padding_w = (320 - cell_width) / 2.0;
         for (id<STActionItem> action in detail.actions) {
-            CGRect frame = CGRectMake(cell_padding_w, 0, cell_width, cell_height);
-            ActionItemView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
-            actionView.entityDetail = detail;
-            [view appendChildView:actionView];
-            [actionView release];
-            CGRect viewFrame = view.frame;
-            viewFrame.size.height += cell_padding_h;
-            view.frame = viewFrame;
+            id<STAction> actualAction = action.action;
+            STActionContext* context = [STActionContext context];
+            if ([STConfiguration flag:STActionManagerShowAllActionsKey] || 
+                [[STActionManager sharedActionManager] canHandleAction:actualAction withContext:context]) {
+                
+                CGRect frame = CGRectMake(cell_padding_w, 0, cell_width, cell_height);
+                ActionItemView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
+                actionView.entityDetail = detail;
+                [view appendChildView:actionView];
+                [actionView release];
+                CGRect viewFrame = view.frame;
+                viewFrame.size.height += cell_padding_h;
+                view.frame = viewFrame;
+            }
         }
     }
     return view;
