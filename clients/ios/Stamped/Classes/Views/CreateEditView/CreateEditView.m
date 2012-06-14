@@ -8,8 +8,14 @@
 
 #import "CreateEditView.h"
 #import "STAvatarView.h"
+#import <CoreText/CoreText.h>
 
-@interface CreateCreditToolbar : UIControl
+@interface CreateCreditToolbar : UIControl {
+    UILabel *_titleLabel;
+    CATextLayer *_detailTitleLayer;
+    UIImageView *_stampsImageView;
+}
+- (void)setupWithUsernames:(NSArray*)usernames;
 @end
 @interface CreateCaptureMenuButton : UIButton
 @end
@@ -31,6 +37,7 @@
 @synthesize dataSource;
 @synthesize keyboardType=_keyboardType;
 @synthesize creditToolbar=_creditToolbar;
+@synthesize textViewPlaceholder=_textViewPlaceholder;
 
 @synthesize menuView=_menuView;
 @synthesize toolbar=_toolbar;
@@ -48,7 +55,7 @@
         self.scrollView = scrollView;
         
         UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(68.0f, 14.0f, self.bounds.size.width - 88.0f, 20.0f)];
-        textView.font = [UIFont systemFontOfSize:12];
+        textView.font = [UIFont systemFontOfSize:13];
         textView.keyboardAppearance = UIKeyboardAppearanceAlert;
         textView.editable = NO;
         textView.delegate = (id<UITextViewDelegate>)self;
@@ -147,14 +154,14 @@
     if (self.imageView.image) {
         
         CGRect frame = self.imageView.frame;
-        frame.origin.y = MAX(100.0f, CGRectGetMaxY(self.textView.frame)+10.0f);
+        frame.origin.y = MAX(80.0f, CGRectGetMaxY(self.textView.frame)+10.0f);
         self.imageView.frame = frame;
         size.height = CGRectGetMaxY(self.imageView.frame) + 10.0f;
         
     } else {
         size.height = CGRectGetMaxY(self.textView.frame) + 10.0f;
     }
-    size.height = MAX(size.height, self.bounds.size.height);
+    size.height = MAX(size.height, self.frame.size.height);
     if (size.height != self.scrollView.contentSize.height) {
         self.scrollView.contentSize = size;
     }
@@ -301,6 +308,10 @@
     
 }
 
+- (void)setupWithCreditUsernames:(NSArray*)usernames {
+    [self.creditToolbar setupWithUsernames:usernames];
+}
+
 
 #pragma mark - Actions
 
@@ -414,9 +425,31 @@
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
     
+    if (_textViewPlaceholder) {
+        [_textViewPlaceholder removeFromSuperview];
+        self.textViewPlaceholder = nil;
+    }
+    
 }
 
 - (void)textViewDidEndEditing:(UITextView *)textView {
+    
+    if (![textView hasText]) {
+        
+        if (!_textViewPlaceholder) {
+            
+            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 2.0f, 0.0f, 0.0f)];
+            label.font = [UIFont systemFontOfSize:12];
+            label.text = @"Add a comment";
+            label.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
+            [self.textView addSubview:label];
+            [label sizeToFit];
+            self.textViewPlaceholder = label;
+            [label release];
+            
+        }
+        
+    }
     
 }
 
@@ -584,10 +617,77 @@
         label.text = @"Who deserves credit?";
         [self addSubview:label];
         [label sizeToFit];
+        _titleLabel = label;
         [label release];
         
+        CATextLayer *textLayer = [CATextLayer layer];
+        [self.layer addSublayer:textLayer];
+        _detailTitleLayer = textLayer;
+        _detailTitleLayer.contentsScale = [[UIScreen mainScreen] scale];
+
+        imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"create_credit_stamps.png"]];
+        [self addSubview:imageView];
+        _stampsImageView = imageView;
+        [imageView release];
+        _stampsImageView.hidden = YES;
+
     }
     return self;
+    
+}
+
+- (void)setupWithUsernames:(NSArray*)usernames {
+    
+    if (usernames && [usernames count] > 0) {
+        
+        _titleLabel.text = @"Credit to";
+        [_titleLabel sizeToFit];
+        
+        NSString *othersString = @"";
+        NSInteger count = [usernames count];
+        if(count > 1) {
+            othersString = [NSString stringWithFormat:@" and %i other%@", count, count==1 ? @"" : @"s"];
+        }
+        NSString *title = [NSString stringWithFormat:@"%@%@", [usernames objectAtIndex:0], othersString];
+        
+        UIColor *textColor = [UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f];
+        UIColor *boldTextColor = [UIColor colorWithRed:0.349f green:0.349f blue:0.349f alpha:1.0f];
+        CTFontRef ctFont = CTFontCreateWithName([[UIScreen mainScreen] scale] == 2.0 ? (CFStringRef)@"HelveticaNeue" : (CFStringRef)@"Helvetica", 12, NULL);
+        CTFontRef boldFont = CTFontCreateCopyWithSymbolicTraits(ctFont, 0.0, NULL, kCTFontBoldTrait, kCTFontBoldTrait);
+        NSMutableDictionary *boldStyle = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(NSString*)boldFont, kCTFontAttributeName, (id)boldTextColor.CGColor, kCTForegroundColorAttributeName, nil];
+        
+        NSMutableDictionary *defaultStyle = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(NSString*)ctFont, kCTFontAttributeName, (id)textColor.CGColor, kCTForegroundColorAttributeName, nil];
+        
+        CFRelease(ctFont);
+        CFRelease(boldFont);
+        
+        NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:title attributes:boldStyle];
+        [string setAttributes:defaultStyle range:[string.string rangeOfString:@"and"]];
+        
+        [defaultStyle release];
+        [boldStyle release];
+        
+        CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString( (CFMutableAttributedStringRef) string); 
+        CGSize size = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRangeMake(0, 0), NULL, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX), NULL);
+        CFRelease(framesetter);
+        
+        _stampsImageView.hidden = NO;
+        CGRect frame = _stampsImageView.frame;
+        frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
+        frame.origin.x = CGRectGetMaxX(_titleLabel.frame) + 4.0f;
+        _stampsImageView.frame = frame;
+        
+        _detailTitleLayer.frame = CGRectMake(ceilf(CGRectGetMaxX(_stampsImageView.frame) + 4.0f), ceilf(((self.bounds.size.height-size.height)/2)-1.0f), ceilf(size.width), ceilf(size.height));
+        _detailTitleLayer.string = string;
+        
+    } else {
+        
+        _stampsImageView.hidden = YES;
+        _detailTitleLayer.string = nil;
+        _titleLabel.text = @"Who deserves credit?";
+        [_titleLabel sizeToFit];
+        
+    }
     
 }
 

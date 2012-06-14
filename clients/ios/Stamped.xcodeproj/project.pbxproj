@@ -1269,6 +1269,9 @@
 		03F2C344156D4C1F00D372EB /* no_data_hud@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F2C343156D4C1F00D372EB /* no_data_hud@2x.png */; };
 		03F2C345156D4C1F00D372EB /* no_data_hud@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F2C343156D4C1F00D372EB /* no_data_hud@2x.png */; };
 		03F2C347156D4C1F00D372EB /* no_data_hud@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F2C343156D4C1F00D372EB /* no_data_hud@2x.png */; };
+		03F608A7158AA7EF00B4838E /* create_credit_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F608A6158AA7EF00B4838E /* create_credit_stamps@2x.png */; };
+		03F608A8158AA7EF00B4838E /* create_credit_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F608A6158AA7EF00B4838E /* create_credit_stamps@2x.png */; };
+		03F608A9158AA7EF00B4838E /* create_credit_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F608A6158AA7EF00B4838E /* create_credit_stamps@2x.png */; };
 		03F70AEA156590970053B009 /* search_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F70AE9156590970053B009 /* search_bg@2x.png */; };
 		03F70AEB156590970053B009 /* search_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F70AE9156590970053B009 /* search_bg@2x.png */; };
 		03F70AED156590970053B009 /* search_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03F70AE9156590970053B009 /* search_bg@2x.png */; };
@@ -2807,6 +2810,7 @@
 		03F2C335156D3ADB00D372EB /* stamp_cell_media@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_cell_media@2x.png"; sourceTree = "<group>"; };
 		03F2C33E156D3CD800D372EB /* stamp_cell_text_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_cell_text_bg@2x.png"; sourceTree = "<group>"; };
 		03F2C343156D4C1F00D372EB /* no_data_hud@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "no_data_hud@2x.png"; sourceTree = "<group>"; };
+		03F608A6158AA7EF00B4838E /* create_credit_stamps@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_credit_stamps@2x.png"; sourceTree = "<group>"; };
 		03F70AE9156590970053B009 /* search_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_bg@2x.png"; sourceTree = "<group>"; };
 		03F89699156A8077009DD321 /* search_cancel_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = search_cancel_btn.png; sourceTree = "<group>"; };
 		03F8969A156A8077009DD321 /* search_cancel_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_cancel_btn@2x.png"; sourceTree = "<group>"; };
@@ -5857,6 +5861,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				03F608A6158AA7EF00B4838E /* create_credit_stamps@2x.png */,
 				03F1AB04158A671A00CEA9D3 /* create_credit_shadow@2x.png */,
 				033FB6AD1589846F00EBE666 /* create_toolbar_capture_icon_hi@2x.png */,
 				033FB6AE1589846F00EBE666 /* create_toolbar_capture_icon@2x.png */,
@@ -6770,6 +6775,7 @@
 				033FB6B21589846F00EBE666 /* create_toolbar_capture_icon_hi@2x.png in Resources */,
 				033FB6B61589846F00EBE666 /* create_toolbar_capture_icon@2x.png in Resources */,
 				03F1AB08158A671B00CEA9D3 /* create_credit_shadow@2x.png in Resources */,
+				03F608A9158AA7EF00B4838E /* create_credit_stamps@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7207,6 +7213,7 @@
 				033FB6B01589846F00EBE666 /* create_toolbar_capture_icon_hi@2x.png in Resources */,
 				033FB6B41589846F00EBE666 /* create_toolbar_capture_icon@2x.png in Resources */,
 				03F1AB06158A671B00CEA9D3 /* create_credit_shadow@2x.png in Resources */,
+				03F608A8158AA7EF00B4838E /* create_credit_stamps@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7647,6 +7654,7 @@
 				033FB6AF1589846F00EBE666 /* create_toolbar_capture_icon_hi@2x.png in Resources */,
 				033FB6B31589846F00EBE666 /* create_toolbar_capture_icon@2x.png in Resources */,
 				03F1AB05158A671A00CEA9D3 /* create_credit_shadow@2x.png in Resources */,
+				03F608A7158AA7EF00B4838E /* create_credit_stamps@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

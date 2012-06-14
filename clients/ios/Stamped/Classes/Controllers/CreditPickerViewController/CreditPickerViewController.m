@@ -11,6 +11,7 @@
 #import "CreditUserTableCell.h"
 
 @interface CreditPickerViewController ()
+@property(nonatomic,retain) CreditHeaderView *headerView;
 @property(nonatomic,retain) id <STStampedByGroup> stampedByFriends;
 @property(nonatomic,retain) NSArray *users;
 @property(nonatomic,retain) NSString *entityIdentifier;
@@ -24,6 +25,7 @@
 @synthesize users=_users;
 @synthesize entityIdentifier=_entityIdentifier;
 @synthesize loadingUsers=_loadingUsers;
+@synthesize headerView=_headerView;
 
 - (id)initWithEntityIdentifier:(NSString*)identifier {
     if ((self = [super init])) {
@@ -56,14 +58,15 @@
     self.tableView.rowHeight = 64.0f;
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
 
-    if (!self.tableView.tableHeaderView) {
+    if (!_headerView) {
       
         CreditHeaderView *view = [[CreditHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 48.0f)];
         view.delegate = (id<CreditHeaderViewDelegate>)self;
         view.dataSource = (id<CreditHeaderViewDataSource>)self;
-        self.tableView.tableHeaderView = view;
+        [self.view addSubview:view];
+        self.headerView = view;
         [view release];
-        
+        [self setContentInset:UIEdgeInsetsMake(self.headerView.bounds.size.height, 0, 0, 0)];
     }
     
     if (!self.navigationItem.leftBarButtonItem) {
@@ -99,9 +102,19 @@
 
 - (void)save:(id)sender {
     
-    if ([(id)delegate respondsToSelector:@selector(creditPickerViewController:doneWithItems:)]) {
-        [self.delegate creditPickerViewController:self doneWithItems:self.selectedUsers];
+    NSMutableArray *usernames = [[NSMutableArray alloc] initWithCapacity:self.selectedUsers.count];
+    
+    for (id <STUser> user in self.selectedUsers) {
+    
+        [usernames addObject:user.screenName];
+    
     }
+    
+    if ([(id)delegate respondsToSelector:@selector(creditPickerViewController:doneWithUsernames:)]) {
+        [self.delegate creditPickerViewController:self doneWithUsernames:usernames];
+    }
+    
+    [usernames release];
     
 }
 
@@ -130,12 +143,9 @@
 }
 
 - (void)creditHeaderViewFrameChanged:(CreditHeaderView*)view {
-        
-    CreditHeaderView *header = [view retain];
-    self.tableView.tableHeaderView = nil;
-    self.tableView.tableHeaderView = header;
-    [header release];
-    
+
+    [self setContentInset:UIEdgeInsetsMake(self.headerView.bounds.size.height, 0, 0, 0)];
+
 }
 
 - (void)creditHeaderView:(CreditHeaderView*)view textChanged:(NSString*)text {
@@ -289,7 +299,7 @@
     cell.checked = !cell.checked;
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [(CreditHeaderView*)self.tableView.tableHeaderView reloadData];
+    [self.headerView reloadData];
     
 }
 
@@ -352,7 +362,7 @@
 - (void)setupNoDataView:(NoDataView*)view {
     
     CGRect frame = view.frame;
-    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
+    CGFloat height = self.headerView.bounds.size.height;
     frame.origin.y = height;
     frame.size.height -= height;
     view.frame = frame;
