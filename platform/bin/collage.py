@@ -8,7 +8,9 @@ __license__   = "TODO"
 import Globals
 import colorsys, math, os, sys, urllib2, utils
 
-from libs.ImageCollages import *
+from api.HTTPSchemas        import HTTPTimeSlice
+from api.MongoStampedAPI    import MongoStampedAPI
+from libs.ImageCollages     import *
 
 def main(image_urls):
     collage = MusicImageCollage()
@@ -19,7 +21,10 @@ def main(image_urls):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--db', action='store')
+    parser.add_argument('-d', '--db', action='store', default=None)
+    parser.add_argument('-u', '--user', action='store', default=None)
+    parser.add_argument('-c', '--category', action='store', default=None)
+    parser.add_argument('-l', '--limit', action='store', default=None, type=int)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
     args = parser.parse_args()
@@ -27,22 +32,69 @@ if __name__ == '__main__':
     if args.db is not None:
         utils.init_db_config(args.db)
     
-    movies = [
-        'http://ia.media-imdb.com/images/M/MV5BMTk2NTI1MTU4N15BMl5BanBnXkFtZTcwODg0OTY0Nw@@._V1._SY317_CR0,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMjc0NzAyMzI1MF5BMl5BanBnXkFtZTcwMTE0NDQ1Nw@@._V1._SY317_CR0,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTQ5ODQwNzIxNV5BMl5BanBnXkFtZTYwNzAyMDE3._V1._SY317_CR0,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMjQ0MTE1NDAwNl5BMl5BanBnXkFtZTYwNzMxMDE5._V1._SY317_CR1,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTM2NjEyNzk2OF5BMl5BanBnXkFtZTcwNjcxNjUyMQ@@._V1._SY317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMjE0NzIwNzY0M15BMl5BanBnXkFtZTYwNTAyMDg5._V1._SY317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTYwOTEwNjAzMl5BMl5BanBnXkFtZTcwODc5MTUwMw@@._V1._SY317_CR0,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMjE4MjA1NTAyMV5BMl5BanBnXkFtZTcwNzM1NDQyMQ@@._V1._SY317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1._SY317_CR0,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTc2NDIxNTQyNF5BMl5BanBnXkFtZTcwNzIwMzM3MQ@@._V1._SY317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMjEyMzgwNTUzMl5BMl5BanBnXkFtZTcwNTMxMzM3Ng@@._V1._SY317_CR15,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMzk3MTE5MDU5NV5BMl5BanBnXkFtZTYwMjY3NTY3._V1._SY317_CR0,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTMwODY3NzQzNF5BMl5BanBnXkFtZTcwNzUxNjc0MQ@@._V1._SY317_CR6,0,214,317_.jpg', 
-        'http://ia.media-imdb.com/images/M/MV5BMTMwODg0NDY1Nl5BMl5BanBnXkFtZTcwMjkwNTgyMg@@._V1._SY317_.jpg', 
-    ]
+    api = MongoStampedAPI()
     
-    main(movies)
+    screen_name = "travis"
+    user_id = None
+    
+    if args.user is not None:
+        screen_name = args.user
+        
+        try:
+            import bson
+            object_id = bson.objectid.ObjectId(args.user)
+            screen_name = None
+            user_id = args.user
+        except:
+            pass
+    
+    user       = api.getUserFromIdOrScreenName({
+        'screen_name' : screen_name, 
+        'user_id' : user_id
+    })
+    
+    collages   = {
+        'basic' : BasicImageCollage(), 
+        'music' : MusicImageCollage(), 
+        'book'  : BookImageCollage(), 
+        'film'  : FilmImageCollage(), 
+        'app'   : AppImageCollage(), 
+    }
+    
+    categories = collages.keys()
+    
+    if args.category is not None:
+        assert args.category in categories
+        
+        categories = [ args.category ]
+    
+    utils.log()
+    
+    for category in categories:
+        ts = { 'user_id' : user.user_id, 'scope'   : 'user' }
+        
+        if category != 'basic':
+            if category == 'app':
+                ts['subcategory'] = 'app'
+            else:
+                ts['category'] = category
+        
+        collage     = collages[category]
+        stamp_slice = HTTPTimeSlice().dataImport(ts).exportTimeSlice()
+        stamps      = api.getStampCollection(stamp_slice)
+        entities    = map(lambda s: s.entity, stamps)
+        
+        if args.limit is not None:
+            entities = entities[:args.limit]
+        
+        utils.log("creating collage for user '%s' w/ category '%s' and %d entities" % 
+                  (user.screen_name, category, len(entities)))
+        images      = collage.generate_from_user(user, entities)
+        
+        utils.log()
+        
+        for image in images:
+            filename = "collage-%s-%s-%sx%s.jpg" % (user.screen_name, category, image.size[0], image.size[1])
+            utils.log("saving image %s" % filename)
+            image.save(filename)
 

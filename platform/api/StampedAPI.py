@@ -926,39 +926,38 @@ class StampedAPI(AStampedAPI):
 
     ### PRIVATE
 
-    def _getUserFromIdOrScreenName(self, userTiny):
+    def getUserFromIdOrScreenName(self, userTiny):
         if not isinstance(userTiny, Schema):
             userTiny = UserTiny().dataImport(userTiny)
-
+        
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
-
+        
         if userTiny.user_id is not None:
             return self._userDB.getUser(userTiny.user_id)
-
+        
         return self._userDB.getUserByScreenName(userTiny.screen_name)
 
     def _getUserStampDistribution(self, userId):
-
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         stamps      = self._enrichStampObjects(stamps)
-
+        
         categories  = {}
         num_stamps  = len(stamps)
-
+        
         for stamp in stamps:
             category = stamp.entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
-
+        
         result = []
         for k, v in categories.items():
             distribution = CategoryDistribution()
             distribution.category = k
             distribution.count = v
             result.append(distribution)
-
+        
         return result
 
     def _enrichUserObjects(self, users, authUserId=None, **kwargs):
@@ -990,7 +989,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getUser(self, userRequest, authUserId=None):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         if user.privacy == True:
             if authUserId is None:
@@ -1049,7 +1048,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getPrivacy(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         return (user.privacy == True)
 
@@ -1125,7 +1124,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addFriendship(self, authUserId, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         # Verify that you're not following yourself :)
         if user.user_id == authUserId:
@@ -1179,7 +1178,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
-        user                    = self._getUserFromIdOrScreenName(userRequest)
+        user                    = self.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -1215,11 +1214,11 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def checkFriendship(self, authUserId, userRequest):
-        userA = self._getUserFromIdOrScreenName({
+        userA = self.getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_a,
                     'screen_name': userRequest.screen_name_a
                 })
-        userB = self._getUserFromIdOrScreenName({
+        userB = self.getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_b,
                     'screen_name': userRequest.screen_name_b
                 })
@@ -1249,7 +1248,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getFriends(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
@@ -1262,7 +1261,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getFollowers(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
@@ -1275,7 +1274,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addBlock(self, authUserId, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         friendship                      = Friendship()
         friendship.user_id              = authUserId
@@ -1301,7 +1300,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def checkBlock(self, authUserId, userRequest):
-        user                    = self._getUserFromIdOrScreenName(userRequest)
+        user                    = self.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -1317,7 +1316,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeBlock(self, authUserId, userRequest):
-        user                    = self._getUserFromIdOrScreenName(userRequest)
+        user                    = self.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -4152,7 +4151,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getUnreadActivityCount(self, authUserId, **kwargs):
         ### TODO: Cache this in user.num_unread_news
-        user = self._getUserFromIdOrScreenName({'user_id': authUserId})
+        user = self.getUserFromIdOrScreenName({'user_id': authUserId})
         count = self._activityDB.getUnreadActivityCount(authUserId, user.timestamp.activity)
         if count is None:
             return 0
