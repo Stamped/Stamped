@@ -160,7 +160,7 @@
     }];
     
     CAAnimationGroup *animation = [CAAnimationGroup animation];
-    animation.duration = 0.25f;
+    animation.duration = 0.2f;
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
     animation.beginTime = [view.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
     animation.removedOnCompletion = NO;

@@ -119,6 +119,16 @@ static const CGFloat _offscreenCancelPadding = 5;
     
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.tableView.contentOffset = CGPointZero;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    self.tableView.contentOffset = CGPointZero;
+}
+
 
 #pragma mark - CLLocationManagerDelegate
 
@@ -573,17 +583,19 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.iconCancellation = nil;
     NSString* iconURL = searchResult.icon;
     if (iconURL) {
-        void (^setupImageView)(UIImage* image) = ^(UIImage* image) {
-            self.iconView.image = image;
-        };
-        UIImage* icon = [[STImageCache sharedInstance] cachedImageForImageURL:iconURL];
+
+        UIImage *icon = [[STImageCache sharedInstance] cachedImageForImageURL:iconURL];
         if (icon) {
-            setupImageView(icon);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.iconView.image = icon;
+            });
         }
         else {
             [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
                 if (image) {
-                    setupImageView(icon);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.iconView.image = icon;
+                    });
                 }
                 self.iconCancellation = nil;
             }];

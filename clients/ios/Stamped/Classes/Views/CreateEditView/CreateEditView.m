@@ -75,7 +75,7 @@
         avatar.imageURL = [NSURL URLWithString:user.imageURL];
         [self.scrollView addSubview:avatar];
         self.avatarView = avatar;
-        self.avatarView.hidden = YES;
+        self.avatarView.alpha = 0.0f;
         [avatar release];
     
         UIImage *image = [UIImage imageNamed:@"round_btn_bg.png"];
@@ -179,7 +179,7 @@
         _commentButton.hidden = !self.textView.hidden;
         
     }
-    self.avatarView.hidden = self.textView.hidden;
+    self.avatarView.alpha = self.textView.hidden ? 0.0f : 1.0f;
     self.textView.editable = _editing;
     
 }
@@ -229,6 +229,8 @@
             frame.origin.y = self.bounds.size.height - frame.size.height;
             _menuView.frame = frame;
             
+            [self updateState];
+
         } completion:^(BOOL finished) {
             
             self.scrollView.clipsToBounds = !_editing;
@@ -257,6 +259,8 @@
             frame.origin.y = self.bounds.size.height + _toolbar.bounds.size.height;
             _menuView.frame = frame;
             
+            [self updateState];
+
         } completion:^(BOOL finished) {
             
             [expandView addSubview:self];
@@ -266,14 +270,19 @@
             self.toolbar.hidden = YES;
             self.menuView.hidden = YES;
             self.backgroundColor = [UIColor whiteColor];
+
             self.creditToolbar.hidden = NO;
+            self.creditToolbar.alpha = 0.0f;
+            
+            [UIView animateWithDuration:0.1f animations:^{
+                self.creditToolbar.alpha = 1.0f;
+            }];
 
         }];
 
         
     }
     
-    [self updateState];
     
     
 }
@@ -351,11 +360,20 @@
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
+    
+    if (!_editing) {
+        
+        [self setEditing:YES];
+        self.keyboardType = CreateEditKeyboardTypeText;
 
-    BOOL _enabled = [UIView areAnimationsEnabled];
-    [UIView setAnimationsEnabled:NO];
-    self.keyboardType = CreateEditKeyboardTypeText;
-    [UIView setAnimationsEnabled:_enabled];
+    } else {
+        
+        BOOL _enabled = [UIView areAnimationsEnabled];
+        [UIView setAnimationsEnabled:NO];
+        self.keyboardType = CreateEditKeyboardTypeText;
+        [UIView setAnimationsEnabled:_enabled];
+        
+    }
 
 }
 
@@ -363,6 +381,21 @@
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
+    if (!_editing && [self.textView hasText]) {
+        
+        CGRect rect = self.bounds;
+        rect.size.height -= 50.0f;
+        CGPoint point = [gestureRecognizer locationInView:self];
+        
+        if (CGRectContainsPoint(rect, point)) {
+            return !CGRectContainsPoint(_captureButton.frame, point);
+        }
+        
+        return NO;
+        
+    }
+    
 
     return (self.keyboardType==CreateEditKeyboardTypePhoto);
     
@@ -485,6 +518,7 @@
         
         image = [UIImage imageNamed:@"create_toolbar_blue_btn.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setTitle:@"Done" forState:UIControlStateNormal];
         [button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
