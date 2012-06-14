@@ -560,6 +560,12 @@ def upgradeEntityData(entityData):
         subtitle = old.pop('subtitle', None)
         if subtitle is not None:
             new.sources.user_generated_subtitle = subtitle
+
+        # Bug fix: Some custom entities had country passed from client w/out intentional user input. Delete!
+        if 'address' in place and place['address'] == ', US': 
+            del(place['address'])
+            if 'coordinates' in old:
+                del(old['coordinates'])
     
     # Contacts
     setBasicGroup(contact, new, 'phone')

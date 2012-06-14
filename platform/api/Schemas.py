@@ -1388,7 +1388,7 @@ class RawTodo(Schema):
     def setSchema(cls):
         cls.addProperty('todo_id',                          basestring)
         cls.addProperty('user_id',                          basestring, required=True)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addPropertyList('source_stamp_ids',             basestring)
         cls.addProperty('stamp_id',                         basestring)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
@@ -1504,6 +1504,9 @@ class Activity(Schema):
         result.benefit      = self.benefit
         result.timestamp    = self.timestamp
         result.personal     = personal
+        result.header       = self.header
+        result.body         = self.body
+        result.footer       = self.footer
 
         if self.subjects is not None:
             subjects = []
@@ -1578,7 +1581,7 @@ class TimeSlice(Schema):
         
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular, user
 
 class SearchSlice(Schema):
     @classmethod

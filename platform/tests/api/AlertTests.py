@@ -60,10 +60,15 @@ class StampedAPISendAlertsTest(StampedAPIAlertsTest):
         result = self.handleGET(path, data)
         self.assertTrue(len(result) == 14)
 
-    def test_ios_alert_sent(self):
-        pass
-
-
+    # Activity unread is used for badge count
+    def test_activity_unread(self):
+        print('running')
+        path = "activity/unread.json"
+        data = {
+            "oauth_token": self.tokenA['access_token']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result['num_unread'] == 2)
 
 
 if __name__ == '__main__':

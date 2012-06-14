@@ -534,6 +534,17 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise StampedAuthError("invalid_token", msg)
 
+    def ensureEamilAlertTokenForUser(self, userId):
+        token = self._emailAlertDB.getTokensForUser(userId)
+
+        if token.user_id != userId:
+            try:
+                token = self.addEmailAlertToken(userId)
+            except:
+                logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+                return None
+        return token
+
     def ensureEmailAlertTokensForUsers(self, userIds):
         tokens = self._emailAlertDB.getTokensForUsers(userIds)
 

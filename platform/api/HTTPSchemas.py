@@ -1663,7 +1663,7 @@ class HTTPEntity(Schema):
                 source.name         = 'Download from iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
-                if getattr(entity.sources, 'itunes_url', None) is not None:
+                if entity.sources.itunes_url is not None:
                     source.link     = _encodeiTunesShortURL(entity.sources.itunes_url)
                 source.setCompletion(
                     action      = actionType,
@@ -2019,10 +2019,12 @@ class HTTPEntitySearchResultsItem(Schema):
         self.category           = entity.category
 
         # Build icon
-        if entity.isType('food'):
-            self.icon = _getIconURL('search_food')
+        if entity.isType('restaurant'):
+            self.icon = _getIconURL('search_restaurant')
         elif entity.isType('bar'):
             self.icon = _getIconURL('search_bar')
+        elif entity.isType('cafe'):
+            self.icon = _getIconURL('search_cafe')
         elif entity.kind == 'place':
             self.icon = _getIconURL('search_place')
         elif entity.isType('tv'):
@@ -2035,6 +2037,12 @@ class HTTPEntitySearchResultsItem(Schema):
             self.icon = _getIconURL('search_album')
         elif entity.isType('track'):
             self.icon = _getIconURL('search_track')
+        elif entity.isType('app'):
+            self.icon = _getIconURL('search_app')
+        elif entity.isType('book'):
+            self.icon = _getIconURL('search_book')
+        else:
+            self.icon = _getIconURL('search_other')
 
         if isinstance(distance, float) and distance >= 0:
             self.distance       = distance

@@ -12,11 +12,19 @@
     {{ block.super }}
     
     <div id="main-content" class="fixedwidth">
+        
         <br />
         <br />
         <br />
         <br />
         <br />
+        
+        <div id="collage">
+        
+        <img crossOrigin="anonymous" id="collage_img" src="http://static.stamped.com/collages/collage-travis-music-940x256.jpg" width="940" height="256" />
+        </div>
+        
+        <!--
         
         <p class='pronounced-title'>
             TEST0
@@ -30,9 +38,6 @@
             {% endwith %}
         </p>
         
-        
-        
-        <!--
         <div>
             TEST1
             
@@ -67,6 +72,9 @@
     <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/glfx2.js"></script>
+    
+    <script src="{{ STATIC_URL }}js/test.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}
