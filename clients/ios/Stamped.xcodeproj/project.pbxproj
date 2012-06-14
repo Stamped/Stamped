@@ -1662,6 +1662,9 @@
 		63E5E6AC152E2B8900579369 /* STSimpleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6AA152E2B8900579369 /* STSimpleImage.m */; };
 		63E5E6C0152E48A300579369 /* STStampsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BF152E48A300579369 /* STStampsView.m */; };
 		63E5E6C1152E48A300579369 /* STStampsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BF152E48A300579369 /* STStampsView.m */; };
+		63E771E5158A258100E7341B /* STSectionHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E771E4158A258100E7341B /* STSectionHeaderView.m */; };
+		63E771E6158A258100E7341B /* STSectionHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E771E4158A258100E7341B /* STSectionHeaderView.m */; };
+		63E771E7158A258100E7341B /* STSectionHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E771E4158A258100E7341B /* STSectionHeaderView.m */; };
 		63F016C1152CC6420069B930 /* STLikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C0152CC6420069B930 /* STLikeButton.m */; };
 		63F016C2152CC6420069B930 /* STLikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C0152CC6420069B930 /* STLikeButton.m */; };
 		63F016C5152CC7570069B930 /* STToolbarButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63F016C4152CC7570069B930 /* STToolbarButton.m */; };
@@ -3102,6 +3105,8 @@
 		63E5E6AA152E2B8900579369 /* STSimpleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleImage.m; sourceTree = "<group>"; };
 		63E5E6BE152E48A300579369 /* STStampsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampsView.h; sourceTree = "<group>"; };
 		63E5E6BF152E48A300579369 /* STStampsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampsView.m; sourceTree = "<group>"; };
+		63E771E3158A258100E7341B /* STSectionHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSectionHeaderView.h; sourceTree = "<group>"; };
+		63E771E4158A258100E7341B /* STSectionHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSectionHeaderView.m; sourceTree = "<group>"; };
 		63F016BF152CC6420069B930 /* STLikeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLikeButton.h; sourceTree = "<group>"; };
 		63F016C0152CC6420069B930 /* STLikeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLikeButton.m; sourceTree = "<group>"; };
 		63F016C3152CC7570069B930 /* STToolbarButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToolbarButton.h; sourceTree = "<group>"; };
@@ -5116,6 +5121,8 @@
 		63F016BE152CC6200069B930 /* View Components */ = {
 			isa = PBXGroup;
 			children = (
+				63E771E3158A258100E7341B /* STSectionHeaderView.h */,
+				63E771E4158A258100E7341B /* STSectionHeaderView.m */,
 				63F016BF152CC6420069B930 /* STLikeButton.h */,
 				63F016C0152CC6420069B930 /* STLikeButton.m */,
 				63F016C3152CC7570069B930 /* STToolbarButton.h */,
@@ -7573,6 +7580,7 @@
 				03312CA71586EDE4003A707D /* EditProfileHeaderView.m in Sources */,
 				03312CB31586F1F0003A707D /* EditProfileFooterView.m in Sources */,
 				63CB0E281587B52D000A4832 /* STUserListViewController.m in Sources */,
+				63E771E7158A258100E7341B /* STSectionHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7880,6 +7888,7 @@
 				03312CA51586EDE4003A707D /* EditProfileHeaderView.m in Sources */,
 				03312CB11586F1F0003A707D /* EditProfileFooterView.m in Sources */,
 				63CB0E261587B52D000A4832 /* STUserListViewController.m in Sources */,
+				63E771E6158A258100E7341B /* STSectionHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8199,6 +8208,7 @@
 				03312CA41586EDE4003A707D /* EditProfileHeaderView.m in Sources */,
 				03312CB01586F1F0003A707D /* EditProfileFooterView.m in Sources */,
 				63CB0E251587B52D000A4832 /* STUserListViewController.m in Sources */,
+				63E771E5158A258100E7341B /* STSectionHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

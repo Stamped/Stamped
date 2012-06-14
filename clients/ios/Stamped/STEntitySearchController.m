@@ -23,6 +23,8 @@
 #import "STTextChunk.h"
 #import "STChunksView.h"
 #import "STImageCache.h"
+#import "STSectionHeaderView.h"
+#import "STLoadingCell.h"
 
 static const CGFloat _innerBorderHeight = 40;
 static const CGFloat _offscreenCancelPadding = 5;
@@ -130,7 +132,9 @@ static const CGFloat _offscreenCancelPadding = 5;
 @property (nonatomic, readwrite, assign) CGRect tableFrameNormal;
 @property (nonatomic, readwrite, retain) NSString* coordinates;
 @property (nonatomic, readwrite, retain) STCancellation* autoCompleteCancellation;
+@property (nonatomic, readwrite, retain) STCancellation* suggestedCancellation;
 @property (nonatomic, readwrite, retain) UIView* cancelButton;
+@property (nonatomic, readonly, retain) CLLocationManager* locationManager;
 
 @end
 
@@ -149,6 +153,8 @@ static const CGFloat _offscreenCancelPadding = 5;
 @synthesize coordinates = _coordinates;
 @synthesize autoCompleteCancellation = _autoCompleteCancellation;
 @synthesize cancelButton = _cancelButton;
+@synthesize suggestedCancellation = _suggestedCancellation;
+@synthesize locationManager = _locationManager;
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
     self = [super init];
@@ -158,34 +164,26 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         category_ = [category retain];
         initialQuery_ = [query retain];
-        autoCompleteResults_ = (id)[[NSMutableArray alloc] init];
-        STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
-        suggested.category = category;
+        autoCompleteResults_ = (id)[[NSMutableArray alloc] init];        
+        BOOL shouldGetSuggested = YES;
+        CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
         if ([category isEqualToString:@"place"]) {
-            CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
-            locationManager.delegate = self; 
-            locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
-            locationManager.distanceFilter = kCLDistanceFilterNone; 
-            [locationManager startUpdatingLocation];
-            [locationManager stopUpdatingLocation];
-            CLLocation *location = [locationManager location];
-            if (location) {
-                float longitude=location.coordinate.longitude;
-                float latitude=location.coordinate.latitude;
-                suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
-                self.coordinates = suggested.coordinates;
+            _locationManager = [[CLLocationManager alloc] init];
+            _locationManager.delegate = self; 
+            _locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+            _locationManager.distanceFilter = kCLDistanceFilterNone; 
+            [_locationManager startUpdatingLocation];
+            location = [_locationManager location];
+            if (location == nil) {
+                shouldGetSuggested = NO;
+            }
+            else {
+                [_locationManager stopUpdatingLocation];
             }
         }
-        [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested 
-                                                           andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-                                                               if (results) {
-                                                                   self.suggestedSections = results;
-                                                                   [self.tableView reloadData];
-                                                               }
-                                                               else {
-                                                                   [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
-                                                               }
-                                                           }];
+        if (shouldGetSuggested) {
+            [self getSuggestionsWithLocation:location];
+        }
     }
     return self;
 }
@@ -198,13 +196,53 @@ static const CGFloat _offscreenCancelPadding = 5;
     [suggestedSections_ release];
     [autoCompleteResults_ release];
     [_coordinates release];
-    [self.autoCompleteCancellation cancel];
+    [_autoCompleteCancellation cancel];
     [_autoCompleteCancellation release];
+    [_suggestedCancellation cancel];
+    [_suggestedCancellation release];
+    _locationManager.delegate = nil;
+    [_locationManager release];
     [super dealloc];
+}
+
+- (void)getSuggestionsWithLocation:(CLLocation*)location {
+    [self.suggestedCancellation cancel];
+    STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
+    suggested.category = category_;
+    if (location) {
+        float longitude=location.coordinate.longitude;
+        float latitude=location.coordinate.latitude;
+        suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+        self.coordinates = suggested.coordinates;
+    }
+    self.suggestedCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested 
+                                                       andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
+                                                           if (results) {
+                                                               self.suggestedSections = results;
+                                                               [self.tableView reloadData];
+                                                           }
+                                                           else {
+                                                               [Util warnWithMessage:[NSString stringWithFormat:@"Entities suggested failed to load with error:\n%@", error] andBlock:nil];
+                                                           }
+                                                       }];
 }
 
 - (void)cancelClicked {
     [searchField_ resignFirstResponder];
+}
+
+- (void)locationManager:(CLLocationManager *)manager 
+    didUpdateToLocation:(CLLocation *)newLocation 
+           fromLocation:(CLLocation *)oldLocation {
+    if (!self.suggestedCancellation && !self.suggestedSections && !self.searchSections) {
+        [self getSuggestionsWithLocation:newLocation];
+        [_locationManager stopUpdatingLocation];
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+    [self getSuggestionsWithLocation:nil];
+    [_locationManager stopUpdatingLocation];
 }
 
 - (void)loadView {
@@ -320,7 +358,9 @@ static const CGFloat _offscreenCancelPadding = 5;
             id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
             return sectionObject.entities.count;
         }
-        return 0;
+        else {
+            return 1;
+        }
     }
 }
 
@@ -371,7 +411,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             return cell;
         }
         else {
-            return nil;
+            return [[[STLoadingCell alloc] init] autorelease];;
         }
     }
 }
@@ -443,22 +483,24 @@ static const CGFloat _offscreenCancelPadding = 5;
         }];
     }
 }
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    if (self.autoCompleteResults.count) {
-        return nil;
-    }
-    else {
-        if (self.searchSections) {
-            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
-            return sectionObject.title;
-        }
-        else if (self.suggestedSections) {
-            id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
-            return sectionObject.title;
-        }
-        return nil;
-    }
-}
+
+
+//- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+//    if (self.autoCompleteResults.count) {
+//        return nil;
+//    }
+//    else {
+//        if (self.searchSections) {
+//            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
+//            return sectionObject.title;
+//        }
+//        else if (self.suggestedSections) {
+//            id<STEntitySearchSection> sectionObject = [self.suggestedSections objectAtIndex:section];
+//            return sectionObject.title;
+//        }
+//        return nil;
+//    }
+//}
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (self.autoCompleteResults.count) {
@@ -467,6 +509,58 @@ static const CGFloat _offscreenCancelPadding = 5;
     else {
         return 64;
     } 
+}
+
+- (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)sectionNumber {
+    id<STEntitySearchSection> section = nil;
+    
+    if (self.searchSections) {
+        section = [self.searchSections objectAtIndex:sectionNumber];
+    }
+    else if (self.suggestedSections) {
+        section = [self.suggestedSections objectAtIndex:sectionNumber];
+    }
+    STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, section ? 25 : 0)] autorelease];
+    CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+    gradientLayer.frame = view.frame;
+    gradientLayer.colors =
+    [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.69 alpha:0.9].CGColor,
+     (id)[UIColor colorWithWhite:0.75 alpha:0.9].CGColor, nil];
+    id layerToReplace = nil;
+    for (CALayer* layer in view.layer.sublayers) {
+        if ([layer isKindOfClass:[CAGradientLayer class]]) {
+            layerToReplace = layer;
+            break;
+        }
+    }
+    
+    if (layerToReplace)
+        [view.layer replaceSublayer:layerToReplace with:gradientLayer];
+    else
+        [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
+    [gradientLayer release];
+   
+    /*
+    if (currentSearchFilter_ == StampFilterTypeNone ||
+        currentSearchFilter_ == StampFilterTypeFood ||
+        currentSearchFilter_ == StampFilterTypeOther ||
+        currentResultType_ == ResultTypeLocal) {
+        UIImageView* google = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"poweredbygoogle"]];
+        google.frame = CGRectOffset(google.frame, 213, 5);
+        [view addSubview:google];
+        [google release];
+    }
+     */
+    view.leftLabel.textColor = view.leftLabel.shadowColor;
+    view.leftLabel.shadowColor = [UIColor stampedGrayColor];
+    view.leftLabel.shadowOffset = CGSizeMake(0, -1);
+    if (section.title) {
+        view.leftLabel.text = [section title];
+    }
+    if ([section subtitle]) {
+        view.rightLabel.text = section.subtitle;
+    }
+    return view;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {

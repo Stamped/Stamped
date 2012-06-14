@@ -250,6 +250,7 @@ NSInteger zoom;
     [locationManager stopUpdatingLocation];
     CLLocation *location = [locationManager location];
     if (location) {
+        [STStampedAPI sharedInstance].currentUserLocation = location;
         MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
         MKCoordinateRegion region = MKCoordinateRegionMake(location.coordinate, mapSpan);
         [mapView_ setRegion:region animated:NO];
