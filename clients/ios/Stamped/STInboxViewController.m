@@ -579,10 +579,9 @@
         self.navigationItem.rightBarButtonItem = button;
         [button release];
         
-    } else {
-        
+    } 
+    else {
         [Util addCreateStampButtonToController:self];
-        
     }
     
 }

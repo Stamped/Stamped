@@ -1627,9 +1627,6 @@
 		63CA463B15406A3E00CCDD2A /* STStampedParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463915406A3D00CCDD2A /* STStampedParameter.m */; };
 		63CA463E15406B6800CCDD2A /* STStampNew.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463D15406B6700CCDD2A /* STStampNew.m */; };
 		63CA463F15406B6800CCDD2A /* STStampNew.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463D15406B6700CCDD2A /* STStampNew.m */; };
-		63CB0E251587B52D000A4832 /* STUserListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CB0E241587B52D000A4832 /* STUserListViewController.m */; };
-		63CB0E261587B52D000A4832 /* STUserListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CB0E241587B52D000A4832 /* STUserListViewController.m */; };
-		63CB0E281587B52D000A4832 /* STUserListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CB0E241587B52D000A4832 /* STUserListViewController.m */; };
 		63CBBBAD151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CBBBAE151CD14C00EA655E /* STEntityDetailViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */; };
 		63CC4439152D12AA0026BB25 /* STTodoButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CC4438152D12AA0026BB25 /* STTodoButton.m */; };
@@ -3069,8 +3066,6 @@
 		63CA463915406A3D00CCDD2A /* STStampedParameter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampedParameter.m; sourceTree = "<group>"; };
 		63CA463C15406B6700CCDD2A /* STStampNew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampNew.h; sourceTree = "<group>"; };
 		63CA463D15406B6700CCDD2A /* STStampNew.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampNew.m; sourceTree = "<group>"; };
-		63CB0E231587B52D000A4832 /* STUserListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = STUserListViewController.h; path = STUserListViewController/STUserListViewController.h; sourceTree = "<group>"; };
-		63CB0E241587B52D000A4832 /* STUserListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = STUserListViewController.m; path = STUserListViewController/STUserListViewController.m; sourceTree = "<group>"; };
 		63CBBBAB151CD14A00EA655E /* STEntityDetailViewFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntityDetailViewFactory.h; sourceTree = "<group>"; };
 		63CBBBAC151CD14B00EA655E /* STEntityDetailViewFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntityDetailViewFactory.m; sourceTree = "<group>"; };
 		63CC4437152D12A90026BB25 /* STTodoButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoButton.h; sourceTree = "<group>"; };
@@ -3840,7 +3835,6 @@
 		0364C0E11564867B00EE18C1 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				63CB0E221587B4DD000A4832 /* STUserListViewController */,
 				0324B87D1582409100977C09 /* STEditProfileViewController */,
 				036C133A1580F9B200FB9880 /* STSettingsViewController */,
 				031AD932157EC92B00C435B5 /* STUserViewController */,
@@ -4951,15 +4945,6 @@
 				63CA461C1540515500CCDD2A /* STCreateStampViewController.m */,
 			);
 			name = "Create Stamp";
-			sourceTree = "<group>";
-		};
-		63CB0E221587B4DD000A4832 /* STUserListViewController */ = {
-			isa = PBXGroup;
-			children = (
-				63CB0E231587B52D000A4832 /* STUserListViewController.h */,
-				63CB0E241587B52D000A4832 /* STUserListViewController.m */,
-			);
-			name = STUserListViewController;
 			sourceTree = "<group>";
 		};
 		63CB0E291587C6DE000A4832 /* Check soon */ = {
@@ -7579,7 +7564,6 @@
 				03A36E4C1586BBE300B615BF /* STUserInfoView.m in Sources */,
 				03312CA71586EDE4003A707D /* EditProfileHeaderView.m in Sources */,
 				03312CB31586F1F0003A707D /* EditProfileFooterView.m in Sources */,
-				63CB0E281587B52D000A4832 /* STUserListViewController.m in Sources */,
 				63E771E7158A258100E7341B /* STSectionHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -7887,7 +7871,6 @@
 				03A36E4A1586BBE300B615BF /* STUserInfoView.m in Sources */,
 				03312CA51586EDE4003A707D /* EditProfileHeaderView.m in Sources */,
 				03312CB11586F1F0003A707D /* EditProfileFooterView.m in Sources */,
-				63CB0E261587B52D000A4832 /* STUserListViewController.m in Sources */,
 				63E771E6158A258100E7341B /* STSectionHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -8207,7 +8190,6 @@
 				03A36E491586BBE300B615BF /* STUserInfoView.m in Sources */,
 				03312CA41586EDE4003A707D /* EditProfileHeaderView.m in Sources */,
 				03312CB01586F1F0003A707D /* EditProfileFooterView.m in Sources */,
-				63CB0E251587B52D000A4832 /* STUserListViewController.m in Sources */,
 				63E771E5158A258100E7341B /* STSectionHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
