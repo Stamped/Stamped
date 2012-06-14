@@ -1795,7 +1795,7 @@ class HTTPEntity(Schema):
                 gallery = HTTPEntityGallery()
                 gallery.layout = 'list'
                 images = []
-                for album in entity.albums:
+                for album in entity.albums[:10]:
                     try:
                         item            = HTTPImage()
                         size            = HTTPImageSize()

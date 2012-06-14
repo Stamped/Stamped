@@ -1679,8 +1679,6 @@ class StampedAPI(AStampedAPI):
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
-        logs.info('Popular User Ids: %s' % popularUserIds)
-
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
@@ -2316,7 +2314,6 @@ class StampedAPI(AStampedAPI):
             '-mobile' : (572, None),
             }
 
-
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using the content_id and update the images field
@@ -2331,9 +2328,9 @@ class StampedAPI(AStampedAPI):
                 if images is None:
                     images = ()
                 sizes = []
-                for k,v in supportedSizes.iteritems():
+                for k, v in supportedSizes.iteritems():
                     size            = ImageSizeSchema()
-                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.url        = 'http://static.stamped.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
                     size.height     = v[1] if v[1] is not None else v[0]
                     sizes.append(size)
@@ -3362,8 +3359,13 @@ class StampedAPI(AStampedAPI):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
         since = datetime.utcnow() - timedelta(days=90)
+        limit = 1000
         viewport = guideRequest.viewport
-        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since)
+        # Change constraints slightly for map-based views
+        if viewport is not None:
+            since = None
+            limit = 200
+        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since, limit=limit)
 
         # Combine stamp scores into grouped entity scores
         entityScores = {}
@@ -3422,16 +3424,30 @@ class StampedAPI(AStampedAPI):
         # Build previews
         entityStampPreviews = {}
         for stat in entityStats:
+            if stat.popular_users is not None and stat.popular_stamps is None:
+                # Inconsistency! Regenerate entity stat
+                logs.warning("Missing popular_stamps: entity_id=%s" % stat.entity_id)
+                tasks.invoke(tasks.APITasks.updateEntityStats, args=[stat.entity_id])
+
             if stat.popular_users is not None and stat.popular_stamps is not None:
                 if len(stat.popular_users) != len(stat.popular_stamps):
                     logs.warning("Mismatch between popular_users and popular_stamps: entity_id=%s" % stat.entity_id)
                     continue
                 stampPreviews = []
                 for i in range(min(len(stat.popular_users), 10)):
-                    stampPreview = StampPreview()
-                    stampPreview.user = userIds[stat.popular_users[i]]
-                    stampPreview.stamp_id = stat.popular_stamps[i]
-                    stampPreviews.append(stampPreview)
+                    try:
+                        stampPreview = StampPreview()
+                        user = userIds[stat.popular_users[i]]
+                        stampId = stat.popular_stamps[i]
+                        if user is None or stampId is None:
+                            raise 
+                        stampPreview.user = user
+                        stampPreview.stamp_id = stampId
+                        stampPreviews.append(stampPreview)
+                    except Exception as e:
+                        logs.warning("Failed to add preview to entity_id=%s: user_id=%s, stamp_id=%s" % \
+                            (stat.entity_id, stat.popular_users[i], stat.popular_stamps[i]))
+                        continue 
                 entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
