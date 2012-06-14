@@ -66,8 +66,6 @@ class Facebook(object):
 
                 logs.info("Retrying (%s)" % (num_retries))
                 time.sleep(0.5)
-            except Exception as e:
-                raise Exception('Error connecting to Facebook: %s' % e)
 
     def _get(self, accessToken, path, parse_json=True, **params):
         return self._http('get', accessToken, path, parse_json, **params)
@@ -148,6 +146,24 @@ class Facebook(object):
         path = test_user_id
         return self._delete(access_token, path)
 
+    def clearTestUsers(self, app_id=APP_ID, app_secret=APP_SECRET, app_access_token=None):
+        if app_access_token is None:
+            app_access_token = self.getAppAccessToken(app_id, app_secret)
+        path = "%s/accounts/test-users" % app_id
+        while True:
+            result = self._get(app_access_token, path)
+            users = result['data']
+            for user in users:
+                logs.info(self.deleteTestUser(app_access_token, user['id']))
+            if 'paging' in result and 'next' in result['paging']:
+                path = result['paging']['next']
+                url = urlparse.urlparse(result['paging']['next'])
+                params = dict([part.split('=') for part in url[4].split('&')])
+                if 'offset' in params and int(params['offset']) == len(users):
+                    continue
+            break
+
+
     def postToNewsFeed(self, user_id, access_token, message, picture=None):
         path = '%s/feed' % user_id
         self._post(
@@ -179,12 +195,13 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
+    if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToNewsFeed'
-    params['access_token'] = ACCESS_TOKEN
+    methods = 'getUserInfo'
+    params['access_token'] = "invalidaccesstoken"#ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:
