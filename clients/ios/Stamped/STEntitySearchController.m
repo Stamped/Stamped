@@ -92,7 +92,6 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.chunksView = [[[STChunksView alloc] initWithChunks:chunks] autorelease];
     [self.contentView addSubview:self.chunksView];
     
-    [self.iconCancellation cancel];
     self.iconCancellation = nil;
     NSString* iconURL = searchResult.icon;
     if (iconURL) {
@@ -162,18 +161,20 @@ static const CGFloat _offscreenCancelPadding = 5;
         autoCompleteResults_ = (id)[[NSMutableArray alloc] init];
         STEntitySuggested* suggested = [[[STEntitySuggested alloc] init] autorelease];
         suggested.category = category;
-        CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
-        locationManager.delegate = self; 
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
-        locationManager.distanceFilter = kCLDistanceFilterNone; 
-        [locationManager startUpdatingLocation];
-        [locationManager stopUpdatingLocation];
-        CLLocation *location = [locationManager location];
-        if (location) {
-            float longitude=location.coordinate.longitude;
-            float latitude=location.coordinate.latitude;
-            suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
-            self.coordinates = suggested.coordinates;
+        if ([category isEqualToString:@"place"]) {
+            CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
+            locationManager.delegate = self; 
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+            locationManager.distanceFilter = kCLDistanceFilterNone; 
+            [locationManager startUpdatingLocation];
+            [locationManager stopUpdatingLocation];
+            CLLocation *location = [locationManager location];
+            if (location) {
+                float longitude=location.coordinate.longitude;
+                float latitude=location.coordinate.latitude;
+                suggested.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+                self.coordinates = suggested.coordinates;
+            }
         }
         [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested 
                                                            andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
@@ -362,7 +363,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             result = [section.entities objectAtIndex:indexPath.row];
         }
         if (result) {
-            STEntitySearchTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:[STEntitySearchTableViewCell reuseIdentifier]];
+            STEntitySearchTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"searchResult"];
             if (!cell) {
                 cell = [[[STEntitySearchTableViewCell alloc] init] autorelease];
             }

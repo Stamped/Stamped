@@ -38,6 +38,7 @@
 #import "STHybridCacheSource.h"
 #import "STAccountParameters.h"
 #import "STRestKitLoader.h"
+#import <CoreLocation/CoreLocation.h>
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -64,6 +65,8 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
 + (NSString*)errorDomain;
 
 - (id<STUser>)currentUser;
+
+@property (readwrite, retain) CLLocation* currentUserLocation;
 
 - (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope;
 
@@ -233,6 +236,9 @@ extern NSString* const STStampedAPIUserUpdatedNotification;
                                           userSecret:(NSString*)userSecret 
                                    accountParameters:(STAccountParameters*)accountParameters
                                          andCallback:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)registerAPNSToken:(NSString*)token 
+                         andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
