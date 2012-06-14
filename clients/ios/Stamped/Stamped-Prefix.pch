@@ -24,6 +24,7 @@
     #import "STEvents.h"
     #import "STTypes.h"
     #import "STStampedAPI.h"
+    #import "UIImageHelper.h"
 #endif
 
 #define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)

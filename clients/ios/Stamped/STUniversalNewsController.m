@@ -124,14 +124,14 @@
         case STStampedAPIScopeYou:
             return @"about you";
             break;
-        case STStampedAPIScopeEveryone:
+        case STStampedAPIScopeFriends:
             return @"about your friends";
             break;
         default:
             break;
     }
     
-    return nil;
+    return @"";
 }
 
 - (NSString*)sliderScopeView:(STSliderScopeView*)slider boldTitleForScope:(STStampedAPIScope)scope {
@@ -140,14 +140,14 @@
         case STStampedAPIScopeYou:
             return @"you";
             break;
-        case STStampedAPIScopeEveryone:
+        case STStampedAPIScopeFriends:
             return @"your friends";
             break;
         default:
             break;
     }
     
-    return nil;
+    return @"";
     
 }
 
@@ -253,6 +253,7 @@
     [view setupWithTitle:@"No news" detailTitle:@"No news found."];
     
 }
+
 
 #pragma mark - Notifications 
 

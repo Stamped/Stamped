@@ -58,9 +58,9 @@
 
 	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
 	[button setTitle:aTitle forState:UIControlStateNormal];
+    [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.15f] forState:UIControlStateNormal];
 	[button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
 	[button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-	[button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
 	
     UIImage *image = [[UIImage imageNamed:(style == UIBarButtonItemStyleDone) ? kDoneButton : kButton] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f];
     UIImage *imageHI = [[UIImage imageNamed:(style == UIBarButtonItemStyleDone) ? kDoneButtonHi : kButtonHi] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f];
@@ -78,9 +78,9 @@
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
 	[button setTitle:aTitle forState:UIControlStateNormal];
+    [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.15f] forState:UIControlStateNormal];
 	[button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
 	[button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-	[button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
 	
     UIImage *image = [[UIImage imageNamed:(style == STNavigationItemStyleWhite) ? kWhiteButton : kGreenButton] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f];
     UIImage *imageHI = [[UIImage imageNamed:(style == STNavigationItemStyleWhite) ? kWhiteButtonHi : kGreenButtonHi] stretchableImageWithLeftCapWidth:5 topCapHeight:0.0f];
@@ -110,9 +110,9 @@
     if (aTitle) {
     
         [button setTitle:aTitle forState:UIControlStateNormal];
+        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.15f] forState:UIControlStateNormal];
         [button.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
         [button.titleLabel setShadowOffset:CGSizeMake(0.0f, -1.0f)];
-        [button.titleLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.1f]];
         button.titleLabel.lineBreakMode = UILineBreakModeTailTruncation;
         size = [aTitle sizeWithFont:[UIFont boldSystemFontOfSize:12]];
             

@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "STTableViewController.h"
+#import "STRestViewController.h"
 
-@interface STEntitySearchController : UIViewController
+@interface STEntitySearchController : STRestViewController
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query;
 

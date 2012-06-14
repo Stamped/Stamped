@@ -10,6 +10,7 @@
 @implementation STRestViewController
 
 @synthesize tableView=_tableView;
+@synthesize searchResultsTableView=_searchResultsTableView;
 @synthesize footerView=_footerView;
 @synthesize headerView=_headerView;
 @synthesize showsSearchBar=_showsSearchBar;
@@ -587,9 +588,10 @@
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
     
     if (_searchOverlay) {
-        _searchOverlay.hidden = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0;
+        _searchOverlay.hidden = (text!=nil && [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0);
         _searchResultsTableView.hidden = !_searchOverlay.hidden;
     }
+    
     [self updateSearchState];
     
 }

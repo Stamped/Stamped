@@ -629,6 +629,7 @@
 - (void)stEditProfileViewControllerCancelled:(STEditProfileViewController*)controller {
     [self dismissModalViewControllerAnimated:YES];
 }
+
 - (void)stEditProfileViewControllerSaved:(STEditProfileViewController*)controller {
     [self dismissModalViewControllerAnimated:YES];
 }

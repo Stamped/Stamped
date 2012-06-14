@@ -9,7 +9,6 @@
 #import "UserStampView.h"
 
 @implementation UserStampView
-@synthesize highlighted=_highlighted;
 @synthesize size;
 
 - (id)initWithFrame:(CGRect)frame {
@@ -87,7 +86,7 @@
 #pragma mark - Setters
 
 - (void)setHighlighted:(BOOL)highlighted {
-    _highlighted = highlighted;
+    [super setHighlighted:highlighted];
     [self setNeedsDisplay];
 }
 

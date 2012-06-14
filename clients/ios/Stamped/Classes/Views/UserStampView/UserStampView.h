@@ -9,13 +9,12 @@
 #import <UIKit/UIKit.h>
 
 
-@interface UserStampView : UIView {
+@interface UserStampView : UIControl {
     float r,g,b;
     float r1, g1, b1;
 }
 
 @property(nonatomic,assign) STStampImageSize size;
-@property(nonatomic,assign,getter = isHighlighted) BOOL highlighted;
 
 - (void)setupWithUser:(id<STUser>)user;
 - (void)setupWithColors:(NSArray*)colors;

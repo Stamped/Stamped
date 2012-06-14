@@ -16,13 +16,17 @@
     UIImageView *_topRightCorner;
     UITapGestureRecognizer *_tap;
     UITextField *_textField;
+    UIActivityIndicatorView *_activityView;
 }
 
 @property(nonatomic,assign) id <STSearchViewDelegate> delegate;
 @property(nonatomic,assign,getter = showingCancel) BOOL showCancelButton;
+@property(nonatomic,assign,getter = isLoading) BOOL loading;
 
 - (void)cancelSearch;
 - (void)setPlaceholderTitle:(NSString*)title;
+- (void)setText:(NSString*)text;
+- (NSString*)text;
 
 @end
 @protocol STSearchViewDelegate
