@@ -154,12 +154,11 @@ class StampedAPIGuideCollection(StampedAPIGuideTest):
         # Verify all four results are returned
         self.assertTrue(len(result) == 4)
 
-        """
-        Note: Right now the internal "popularity" ranking weights individual stamp popularity higher than anything else.
-        Consequently, Book B is weighted higher than Book A (even though Book A has more stamps). This might change
-        going forward, so unit tests right now are not verifying the order of the entities but merely that all four
-        exist.
-        """
+        # Verify order
+        self.assertTrue(result[0]['title'] == 'Book A')
+        self.assertTrue(result[1]['title'] == 'Book B')
+        self.assertTrue(result[2]['title'] == 'Book C')
+        self.assertTrue(result[3]['title'] == 'Book D')
 
     def test_guide_me(self):
         path = "guide/collection.json"

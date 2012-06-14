@@ -2687,13 +2687,13 @@ class StampedAPI(AStampedAPI):
         todos                   = self._todoDB.getTodosFromStampId(stamp.stamp_id)
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
         followerTodos           = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
-        existingTodoIds         = set(map(lambda x: x.todo_id, todos))
+        existingTodos           = set(todos)
         for todo in followerTodos:
             if len(todos) >= 100:
                 break
-            if todo.todo_id not in existingTodoIds:
+            if todo not in existingTodos:
                 todos.append(todo)
-                existingTodoIds.add(todo.todo_id)
+                existingTodos.add(todo)
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
@@ -3364,23 +3364,32 @@ class StampedAPI(AStampedAPI):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
         since = datetime.utcnow() - timedelta(days=90)
-        stampIds = self._stampStatsDB.getPopularStampIds(types=types, viewport=guideRequest.viewport, since=since)
-        
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
-        stamps.sort(key=lambda x: stampIds.index(x.stamp_id))
+        viewport = guideRequest.viewport
+        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since)
+
+        # Combine stamp scores into grouped entity scores
+        entityScores = {}
+        for stat in stampStats:
+            if stat.entity_id not in entityScores:
+                entityScores[stat.entity_id] = 0
+            entityScores[stat.entity_id] += 2 # Add 2 per stamp
+            if stat.score is not None:
+                entityScores[stat.entity_id] += stat.score # Add individual stamp score
+
+        # Rank entities
+        limit = 20
+        if guideRequest.limit is not None:
+            limit = guideRequest.limit
+        offset = 0
+        if guideRequest.offset is not None:
+            offset = guideRequest.offset
+        rankedEntityIds = sorted(entityScores.keys(), key=lambda x: entityScores[x], reverse=True)[offset:][:limit]
 
         entityIds = {}
         userIds = {}
 
-        for stamp in stamps:
-            userIds[stamp.user.user_id] = None 
-            if stamp.entity.entity_id in entityIds:
-                continue 
-            entityIds[stamp.entity.entity_id] = None 
-
         # Entities
-        entities = self._entityDB.getEntities(entityIds.keys())
-
+        entities = self._entityDB.getEntities(rankedEntityIds)
         for entity in entities:
             if entity.sources.tombstone_id is not None:
                 # Convert to newer entity
@@ -3391,62 +3400,53 @@ class StampedAPI(AStampedAPI):
                 entityIds[entity.entity_id] = entity
 
         # Entity Stats
-        stats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
+        entityStats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
         ### TEMP CODE: BEGIN
         # Temporarily force old entity stats to be generated
-        if len(stats) < len(entities):
+        if len(entityStats) < len(entities):
             statEntityIds = set()
-            for stat in stats:
+            for stat in entityStats:
                 statEntityIds.add(stat.entity_id)
             missingEntityIds = set(entityIds.keys()).difference(statEntityIds)
             for missingEntityId in missingEntityIds:
-                stats.append(self.updateEntityStatsAsync(missingEntityId))
+                entityStats.append(self.updateEntityStatsAsync(missingEntityId))
         ### TEMP CODE: END
-        for stat in stats:
+        for stat in entityStats:
             if stat.popular_users is not None:
                 for userId in stat.popular_users[:10]:
                     userIds[userId] = None 
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
-
         for user in users:
             userIds[user.user_id] = user.minimize()
 
         # Build previews
         entityStampPreviews = {}
-        for stat in stats:
-            if stat.popular_users is not None:
+        for stat in entityStats:
+            if stat.popular_users is not None and stat.popular_stamps is not None:
+                if len(stat.popular_users) != len(stat.popular_stamps):
+                    logs.warning("Mismatch between popular_users and popular_stamps: entity_id=%s" % stat.entity_id)
+                    continue
                 stampPreviews = []
-                for userId in stat.popular_users[:10]:
+                for i in range(min(len(stat.popular_users), 10)):
                     stampPreview = StampPreview()
-                    stampPreview.user = userIds[userId]
+                    stampPreview.user = userIds[stat.popular_users[i]]
+                    stampPreview.stamp_id = stat.popular_stamps[i]
                     stampPreviews.append(stampPreview)
                 entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
         result = []
-        seenEntities = set()
-        for stamp in stamps:
-            if stamp.entity.entity_id in seenEntities:
-                continue 
-            entity = entityIds[stamp.entity.entity_id]
-            seenEntities.add(stamp.entity.entity_id)
-
-            if stamp.entity.entity_id in entityStampPreviews:
+        for entityId in rankedEntityIds:
+            entity = entityIds[entityId]
+            if entityId in entityStampPreviews:
                 previews = Previews()
-                previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+                previews.stamps = entityStampPreviews[entityId]
                 entity.previews = previews
             result.append(entity)
-            
-        limit = 20
-        if guideRequest.limit is not None:
-            limit = guideRequest.limit
-        offset = 0
-        if guideRequest.offset is not None:
-            offset = guideRequest.offset
 
-        return result[offset:][:limit]
+        return result
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
