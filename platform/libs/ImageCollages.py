@@ -64,17 +64,21 @@ class ImageCollage(AImageCollage):
 
 class BasicImageCollage(ImageCollage):
     
-    def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
-        raise NotImplementedError
-
-class MusicImageCollage(ImageCollage):
+    def __init__(self, **kwargs):
+        self._square_cells = kwargs.pop('square_cells', False)
+        self._pad_coeff    = kwargs.pop('pad_coeff', 128.0)
+        
+        ImageCollage.__init__(self, **kwargs)
     
     def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
         base_cell_width  = size[0] / num_cols
-        base_cell_height = size[1] / num_rows
-        #base_cell_height = base_cell_width
         
-        pad = max(2, round(size[0] / 128.0))
+        if self._square_cells:
+            base_cell_height = base_cell_width
+        else:
+            base_cell_height = size[1] / num_rows
+        
+        pad = max(2, round(size[0] / self._pad_coeff))
         
         offset_x = (pad / (num_cols - 1) if num_cols > 1 else 0)
         offset_y = (pad / (num_rows - 1) if num_rows > 1 else 0)
@@ -96,7 +100,15 @@ class MusicImageCollage(ImageCollage):
         if num_rows == 1:
             y = (size[1] - base_cell_height) / 2
         
-        return ((cell_width, cell_height), (x, y))
+        logo_size = (cell_width / 5.0, cell_width / 5.0)
+        logo_pos  = ((x + cell_width - logo_size[0] * (4.0 / 5.0)), y - logo_size[1] / 5.0)
+        
+        return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
+
+class MusicImageCollage(BasicImageCollage):
+    
+    def __init__(self):
+        BasicImageCollage.__init__(self, square_cells=False, pad_coeff=128.0)
 
 class BookImageCollage(ImageCollage):
     
@@ -110,13 +122,16 @@ class BookImageCollage(ImageCollage):
         return num_rows, num_cols
     
     def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
-        base_cell_width  = (size[0] / max(num_cols * .5, 1))
-        base_cell_height = max(size[1], (base_cell_width * image.size[1]) / image.size[0])
+        cell_width  = (size[0] / max(num_cols * .5, 1))
+        cell_height = max(size[1], (cell_width * image.size[1]) / image.size[0])
         
         x = math.floor(size[0] * j / num_cols)
-        y = (size[1] - base_cell_height) / 2.0
+        y = (size[1] - cell_height) / 2.0
         
-        return ((base_cell_width, base_cell_height), (x, y))
+        logo_size = (cell_width / 5.0, cell_width / 5.0)
+        logo_pos  = ((x + logo_size[0] / 2.0), y + cell_height - logo_size[1] * 1.5)
+        
+        return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
 
 class FilmImageCollage(ImageCollage):
     
@@ -127,47 +142,25 @@ class FilmImageCollage(ImageCollage):
                               row_major=False)
     
     def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
-        base_cell_width  = (size[0] / max(num_cols * .95, 1))
-        base_cell_offset = (size[1] / max(num_rows * .95, 1))
-        base_cell_height = max(base_cell_offset, (base_cell_width * image.size[1]) / image.size[0])
+        cell_width  = (size[0] / max(num_cols * .95, 1))
+        cell_offset = (size[1] / max(num_rows * .95, 1))
+        cell_height = max(cell_offset, (cell_width * image.size[1]) / image.size[0])
         
-        offset = -0.5 * base_cell_offset
+        offset = -0.5 * cell_offset
         
         if ((j & 1) == 1):
             offset = 0
         
-        x = math.floor(base_cell_width * j)
-        y = (offset + i * base_cell_offset)
+        x = math.floor(cell_width * j)
+        y = (offset + i * cell_offset)
         
-        return ((base_cell_width, base_cell_height), (x, y))
+        logo_size = (cell_width / 5.0, cell_width / 5.0)
+        logo_pos  = ((x + cell_width - logo_size[0] * (4.0 / 5.0)), y - logo_size[1] / 5.0)
+        
+        return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
 
-class AppImageCollage(ImageCollage):
-                   
-    def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
-        base_cell_width  = size[0] / num_cols
-        #base_cell_height = size[1] / num_rows
-        base_cell_height = base_cell_width
-        
-        pad = max(2, round(size[0] / 128.0))
-        
-        offset_x = (pad / (num_cols - 1) if num_cols > 1 else 0)
-        offset_y = (pad / (num_rows - 1) if num_rows > 1 else 0)
-        
-        # adjust offsets to remove the outer padding from the last row and column
-        base_cell_width  += offset_x
-        base_cell_height += offset_y
-        
-        cell_width  = math.ceil(base_cell_width  - pad)
-        cell_height = math.ceil(base_cell_height - pad)
-        
-        x = math.floor(base_cell_width  * j)
-        y = math.floor(base_cell_height * i)
-        
-        if num_cols == 1:
-            x = (size[0] - base_cell_width)  / 2
-        
-        if num_rows == 1:
-            y = (size[1] - base_cell_height) / 2
-        
-        return ((cell_width, cell_height), (x, y))
+class AppImageCollage(BasicImageCollage):
+    
+    def __init__(self):
+        BasicImageCollage.__init__(self, square_cells=True, pad_coeff=32.0)
 

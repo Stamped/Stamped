@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import colorsys, math, os, sys, urllib2, utils
 
+from S3ImageDB              import S3ImageDB
 from api.HTTPSchemas        import HTTPTimeSlice
 from api.MongoStampedAPI    import MongoStampedAPI
 from libs.ImageCollages     import *
@@ -18,6 +19,10 @@ def main(image_urls):
     
     collage.generate(images)
 
+def save_local_image(image, filename):
+    utils.log("saving image %s" % filename)
+    image.save(filename)
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -25,6 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--user', action='store', default=None)
     parser.add_argument('-c', '--category', action='store', default=None)
     parser.add_argument('-l', '--limit', action='store', default=None, type=int)
+    parser.add_argument('-s', '--s3', action='store_true', default=False)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     
     args = parser.parse_args()
@@ -68,7 +74,20 @@ if __name__ == '__main__':
         
         categories = [ args.category ]
     
+    save_image = save_local_image
+    
+    if args.s3:
+        db = S3ImageDB()
+        
+        def save_s3_image(image, filename):
+            name = "collages/%s" % filename
+            
+            db.addImage(name, image)
+        
+        save_image = save_s3_image
+    
     utils.log()
+    pad = "-" * 80
     
     for category in categories:
         ts = { 'user_id' : user.user_id, 'scope'   : 'user' }
@@ -87,14 +106,19 @@ if __name__ == '__main__':
         if args.limit is not None:
             entities = entities[:args.limit]
         
+        utils.log()
+        utils.log(pad)
         utils.log("creating collage for user '%s' w/ category '%s' and %d entities" % 
                   (user.screen_name, category, len(entities)))
+        utils.log(pad)
+        utils.log()
+        
         images      = collage.generate_from_user(user, entities)
         
         utils.log()
         
         for image in images:
             filename = "collage-%s-%s-%sx%s.jpg" % (user.screen_name, category, image.size[0], image.size[1])
-            utils.log("saving image %s" % filename)
-            image.save(filename)
+            
+            save_image(image, filename)
 

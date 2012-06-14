@@ -66,7 +66,7 @@ class AImageCollage(object):
         raise NotImplementedError
     
     def _create_collage(self, 
-                        users, 
+                        user, 
                         images, 
                         num_rows=None, 
                         num_cols=None, 
@@ -88,6 +88,20 @@ class AImageCollage(object):
         elif num_cols is None:
             num_rows = int(num_rows)
             num_cols = int(math.ceil(num_images / num_rows))
+        
+        user_logo_url   = "http://static.stamped.com/logos/%s-%s-email-36x36.png" % \
+                        (user.color_primary, user.color_secondary)
+        user_logo       = self._db.getWebImage(user_logo_url)
+        user_logo_cache = {}
+        
+        def get_user_logo(size):
+            try:
+                return user_logo_cache[size]
+            except KeyError:
+                logo = user_logo.resize(size, Image.ANTIALIAS)
+                user_logo_cache[size] = logo
+                
+                return logo
         
         for size in self._sizes:
             utils.log("[%s] creating %sx%s collage" % (self, size[0], size[1]))
@@ -117,13 +131,14 @@ class AImageCollage(object):
                 index = (i * num_cols + j) % num_images
                 image = images[index]
                 
-                cell_size, pos = self.get_cell_bounds_func(size, num_cols, num_rows, i, j, image)
+                cell_size, cell_pos, logo_size, logo_pos = self.get_cell_bounds_func(size, num_cols, num_rows, i, j, image)
                 
                 # adjust cell layout bounds to align to integer grid (helps minimize aliasing)
                 cell_size = int(math.ceil(cell_size[0])), int(math.ceil(cell_size[1]))
-                x0, y0    = int(math.floor(pos[0])),      int(math.floor(pos[1]))
+                cell_pos  = int(math.floor(cell_pos[0])), int(math.floor(cell_pos[1]))
                 
-                #utils.log("SIZE: %dx%d, POS: %d,%d" % (cell_size[0], cell_size[1], x0, y0))
+                logo_size = int(math.ceil(logo_size[0])), int(math.ceil(logo_size[1]))
+                logo_pos  = int(math.floor(logo_pos[0])), int(math.floor(logo_pos[1]))
                 
                 width  = cell_size[0]
                 height = cell_size[1]
@@ -148,9 +163,13 @@ class AImageCollage(object):
                 cell  = cell.crop((0, 0, w, h))
                 
                 if enable_drop_shadows:
-                    self._paste_image_with_drop_shadow(canvas, cell, (x0, y0))
+                    self._paste_image_with_drop_shadow(canvas, cell, cell_pos)
                 else:
-                    canvas.paste(cell, (x0, y0))
+                    canvas.paste(cell, cell_pos)
+                
+                # overlay user stamp logo on top of each entity image
+                logo  = get_user_logo(logo_size)
+                canvas.paste(logo, (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1]), logo)
             
             canvas = self._apply_postprocessing(canvas)
             output.append(canvas)
@@ -169,6 +188,7 @@ class AImageCollage(object):
         canvas.paste(shadow, (pos[0] - size, pos[1] - size), shadow)
         canvas.paste(image, pos)
     
+    # note: shadow images are expensive to generate, so we cache them for reuse
     @lru_cache(maxsize=64)
     def _get_drop_shadow(self, size, shadow_size, iterations, color):
         width   = size[0] + shadow_size * 2
