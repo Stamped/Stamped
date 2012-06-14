@@ -2298,7 +2298,6 @@ class StampedAPI(AStampedAPI):
             '-mobile' : (572, None),
             }
 
-
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using the content_id and update the images field
@@ -2313,9 +2312,9 @@ class StampedAPI(AStampedAPI):
                 if images is None:
                     images = ()
                 sizes = []
-                for k,v in supportedSizes.iteritems():
+                for k, v in supportedSizes.iteritems():
                     size            = ImageSizeSchema()
-                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.url        = 'http://static.stamped.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
                     size.height     = v[1] if v[1] is not None else v[0]
                     sizes.append(size)
