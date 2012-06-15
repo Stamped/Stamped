@@ -19,6 +19,7 @@
 #import "CreateEditView.h"
 
 #define kEditContainerViewTag 101
+#define kRemovePhotoActionSheetTag 201
 
 @interface CreateStampViewController ()
 @property(nonatomic,readonly) CreateHeaderView *headerView; // weak
@@ -178,6 +179,7 @@
         button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
         [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [button setTitle:@"Add To-Do" forState:UIControlStateNormal];
+        button.contentEdgeInsets = UIEdgeInsetsMake(0.0f, 0.0f, 2.0f, 0.0f);
         [view addSubview:button];
         button.frame = CGRectMake((frame.size.width-106.0f), frame.size.height - (image.size.height+8.0f), 96.0f, image.size.height);
         self.todoStampButton = button;
@@ -287,6 +289,12 @@
     activityView.layer.position = CGPointMake((button.bounds.size.width/2), button.bounds.size.height/2);
     [activityView release];
     button.titleLabel.alpha = 0.0f;
+    
+    CAKeyframeAnimation *scale = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+    scale.duration = 0.45f;
+    scale.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.1f], [NSNumber numberWithFloat:.9f], [NSNumber numberWithFloat:1.f], nil];
+    [button.layer addAnimation:scale forKey:nil];
         
     STStampNew *stampNew = [[[STStampNew alloc] init] autorelease];
     stampNew.blurb = self.editView.textView.text;
@@ -302,8 +310,7 @@
         
         if (stamp) {
             
-           // PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
-            STPostStampViewController *controller = [[[STPostStampViewController alloc] initWithStamp:stamp] autorelease];
+            PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
             controller.navigationItem.hidesBackButton = YES;
             [self.navigationController pushViewController:controller animated:YES];
             
@@ -321,6 +328,16 @@
 
 
 #pragma mark - CreateEditViewDelegate
+
+- (void)createEditViewImageTapped:(CreateEditView*)view {
+    
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Remove photo" otherButtonTitles:nil];
+    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    actionSheet.tag = kRemovePhotoActionSheetTag;
+    [actionSheet showFromToolbar:self.navigationController.toolbar];
+    [actionSheet release];
+    
+}
 
 - (void)createEditViewSelectedCreditPicker:(CreateEditView*)view {
     
@@ -368,7 +385,20 @@
 
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (actionSheet.cancelButtonIndex == buttonIndex) return;
-    [self dismissModalViewControllerAnimated:YES];
+    
+    if (actionSheet.tag == kRemovePhotoActionSheetTag) {
+        
+        self.tempImagePath = nil;
+        self.editView.imageView.image = nil;
+        [self.editView updateState];
+        [self.editView layoutScrollView];
+        
+    } else {
+        
+        [self dismissModalViewControllerAnimated:YES];
+
+    }
+    
 }
 
 
@@ -420,6 +450,7 @@
               
         self.editView.imageView.image = image;
         [self.editView.imageView setUploading:YES];
+        [self.editView updateState];
         [self.editView layoutScrollView];
         
         [self.footerView setUploading:YES animated:YES];

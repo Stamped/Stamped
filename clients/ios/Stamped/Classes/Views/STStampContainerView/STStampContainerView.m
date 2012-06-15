@@ -47,14 +47,24 @@
             CGGradientRelease(gradient);
             
         }];
+        _containerView = container;
         
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectInset(container.bounds, 0, 1)];
+        imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
         imageView.image = [image stretchableImageWithLeftCapWidth:0.0f topCapHeight:(image.size.height/2)];
         [container addSubview:imageView];
         [imageView release];
+        [container release];
 
     }
     return self;
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+    _containerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:_containerView.bounds].CGPath;
+    
 }
 
 

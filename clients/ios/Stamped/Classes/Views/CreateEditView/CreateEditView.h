@@ -40,11 +40,13 @@ typedef enum {
 @property(nonatomic,retain) UITapGestureRecognizer *tapGesture;
 
 - (void)layoutScrollView;
+- (void)updateState;
 - (void)setupWithCreditUsernames:(NSArray*)usernames;
 
 @end
 
 @protocol CreateEditViewDelegate
+- (void)createEditViewImageTapped:(CreateEditView*)view;
 - (void)createEditViewSelectedCreditPicker:(CreateEditView*)view;
 - (void)createEditView:(CreateEditView*)view addPhotoWithSourceType:(UIImagePickerControllerSourceType)source;
 @end

@@ -65,14 +65,8 @@
         self.textView = textView;
         [textView release];
         
-       // self.textView.layer.borderColor = [UIColor redColor].CGColor;
-       // self.textView.layer.borderWidth = 1.0f;
-    
         STUploadingImageView *imageView = [[STUploadingImageView alloc] initWithFrame:CGRectMake((self.bounds.size.width-200.0f)/2, 100.0f, 200.0f, 200.0f)];
-        
-        //imageView.layer.borderWidth = 1.0f;
-        //imageView.layer.borderColor = [UIColor redColor].CGColor;
-        
+        imageView.delegate = (id<STUploadingImageViewDelegate>)self;
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         [self.scrollView addSubview:imageView];
         self.imageView = imageView;
@@ -87,6 +81,7 @@
         [avatar release];
     
         UIImage *image = [UIImage imageNamed:@"round_btn_bg.png"];
+        UIImage *imageHi = [UIImage imageNamed:@"round_btn_bg_hi.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
         [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
@@ -94,6 +89,7 @@
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 60.0f, 200.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [self.scrollView addSubview:button];
         [button addTarget:self action:@selector(comment:) forControlEvents:UIControlEventTouchUpInside];
         _commentButton = button;
@@ -105,6 +101,7 @@
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         button.frame = CGRectMake((self.bounds.size.width-85.0f)/2, 110.0f, 85.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [self.scrollView addSubview:button];
         [button addTarget:self action:@selector(capture:) forControlEvents:UIControlEventTouchUpInside];
         _captureButton = button;
@@ -167,6 +164,23 @@
         self.scrollView.contentSize = size;
     }
     
+    if (!_commentButton.hidden) {
+        
+        CGRect frame = _commentButton.frame;
+        frame.origin.y = self.imageView.image==nil ? 60.0f : 20.0f;
+        _commentButton.frame = frame;
+        
+    }
+    
+    if (!_captureButton.hidden) {
+        
+        CGRect frame = _captureButton.frame;
+        frame.origin.y = ![self.textView hasText] ? 110.0f : CGRectGetMaxY(self.textView.frame)+10.0f;
+        _captureButton.frame = frame;
+        
+    }
+    
+    
 }
 
 
@@ -174,6 +188,7 @@
 
 - (void)updateState {
     
+
     if (_editing) {
 
         self.textView.hidden = NO;
@@ -189,7 +204,8 @@
     }
     self.avatarView.alpha = self.textView.hidden ? 0.0f : 1.0f;
     self.textView.editable = _editing;
-    
+    [self layoutScrollView];
+
 }
 
 
@@ -199,7 +215,7 @@
     if (_editing == editing) return;
     if (![(id)dataSource respondsToSelector:@selector(createEditViewSuperview:)]) return;
     _editing=editing;
-
+    
     UIView *expandView = [self.dataSource createEditViewSuperview:self];
         
     if (_editing) {
@@ -400,6 +416,10 @@
         rect.size.height -= 50.0f;
         CGPoint point = [gestureRecognizer locationInView:self];
         
+        if (self.imageView.image && CGRectContainsPoint(self.imageView.frame, point)) {
+            return NO;
+        }
+        
         if (CGRectContainsPoint(rect, point)) {
             return !CGRectContainsPoint(_captureButton.frame, point);
         }
@@ -410,6 +430,17 @@
     
 
     return (self.keyboardType==CreateEditKeyboardTypePhoto);
+    
+}
+
+
+#pragma mark - STUploadingImageViewDelegate
+
+- (void)sTUploadingImageViewTapped:(STUploadingImageView*)view {
+    
+    if ([(id)delegate respondsToSelector:@selector(createEditViewImageTapped:)]) {
+        [self.delegate createEditViewImageTapped:self];
+    }
     
 }
 

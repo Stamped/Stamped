@@ -46,8 +46,9 @@
         [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [button setTitle:@"Stamp it!" forState:UIControlStateNormal];
         [button setTitle:@"Uploading..." forState:UIControlStateDisabled];
+        button.contentEdgeInsets = UIEdgeInsetsMake(0.0f, 0.0f, 2.0f, 0.0f);
         [self addSubview:button];
-        button.frame = CGRectMake((self.bounds.size.width-106.0f), self.bounds.size.height - (image.size.height+8.0f), 96.0f, image.size.height);
+        button.frame = CGRectMake((self.bounds.size.width-106.0f), self.bounds.size.height - (image.size.height+6.0f), 96.0f, image.size.height);
         self.stampButton = button;
         
         image = [UIImage imageNamed:@"share_twitter"];
@@ -97,7 +98,7 @@
             
             CreateFooterViewTextLayer *textLayer = [CreateFooterViewTextLayer layer];
             textLayer.contentsScale = [[UIScreen mainScreen] scale];
-            textLayer.frame = CGRectMake(ceilf(self.bounds.size.width-(width+12.0f)), 8.0f, ceilf(width), 14);
+            textLayer.frame = CGRectMake(ceilf(self.bounds.size.width-(width+12.0f)), 10.0f, ceilf(width), 14);
             textLayer.string = string;
             [self.layer addSublayer:textLayer];
             [string release];

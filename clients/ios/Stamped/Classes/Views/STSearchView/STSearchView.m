@@ -89,6 +89,7 @@
     
     [_textField resignFirstResponder];
     [_textField setText:nil];
+    [self setLoading:NO];
     if ([(id)delegate respondsToSelector:@selector(stSearchViewDidCancel:)]) {
         [self.delegate stSearchViewDidCancel:self];
     }
@@ -198,18 +199,14 @@
 
 - (void)cancel:(id)sender {
     
-    [_textField resignFirstResponder];
-    [_textField setText:nil];
-    if ([(id)delegate respondsToSelector:@selector(stSearchViewDidCancel:)]) {
-        [self.delegate stSearchViewDidCancel:self];
-    }
+    [self cancelSearch];
     
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
     
     [_textField becomeFirstResponder];
-    
+
 }
 
 
@@ -226,7 +223,6 @@
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
     
-    [self setLoading:NO];
 
 }
 
@@ -239,10 +235,6 @@
 }
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
-    
-    if ([(id)delegate respondsToSelector:@selector(stSearchViewDidEndSearching:)]) {
-        [self.delegate stSearchViewDidEndSearching:self];
-    }
     return YES;
 }
 
@@ -256,6 +248,7 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     
+    [textField resignFirstResponder];
     if ([(id)delegate respondsToSelector:@selector(stSearchViewHitSearch:withText:)]) {
         [self.delegate stSearchViewHitSearch:self withText:textField.text];
     }
