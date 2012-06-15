@@ -2507,8 +2507,8 @@ class HTTPStamp(Schema):
                     newImages.append(img)
                 item.images = newImages
 
-            # Insert contents in descending chronological order
-            contents.insert(0, item)
+            # Return contents in chronological order
+            contents.append(item)
         self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
