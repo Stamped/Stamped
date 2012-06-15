@@ -225,7 +225,7 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                     else:
                         stacks[stackName] = [ instance ]
         
-        self._init_security_groups()
+        #self._init_security_groups()
         
         #sl = len(stacks)
         #utils.log("found %d stack%s:" % (sl, "s" if sl != 1 else ""))

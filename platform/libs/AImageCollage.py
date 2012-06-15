@@ -6,16 +6,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import math, os, pprint, utils
+import image_utils, math, utils
 
-from abc            import ABCMeta, abstractmethod, abstractproperty
+from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
 from api.S3ImageDB  import S3ImageDB
 from LRUCache       import lru_cache
-
-def clamp(v):
-    return min(255, max(0, int(round(v))))
 
 class AImageCollage(object):
     
@@ -33,7 +30,7 @@ class AImageCollage(object):
             if entity.images is not None and len(entity.images) > 0 and len(entity.images[0].sizes) > 0:
                 image_url = entity.images[0].sizes[0].url
                 
-                if image_url is not None:
+                if image_utils.is_valid_image_url(image_url):
                     image_urls.append(image_url)
         
         return self.get_images(image_urls)
@@ -60,11 +57,9 @@ class AImageCollage(object):
         
         return self.generate(images, user)
     
-    @abstractmethod
     def generate(self, images, user=None):
         raise NotImplementedError
     
-    @abstractmethod
     def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
         raise NotImplementedError
     
@@ -188,20 +183,20 @@ class AImageCollage(object):
         stops  = [
             (
                 2.0, 
-                self._parse_rgb(user.color_primary, alpha), 
-                self._parse_rgb(user.color_secondary, alpha)
+                image_utils.parse_rgb(user.color_primary,   alpha), 
+                image_utils.parse_rgb(user.color_secondary, alpha)
             ), 
         ]
         
         bg = image.convert("L").convert("RGB")
-        fg = self._get_gradient_image(size, stops)
+        fg = image_utils.get_gradient_image(size, stops)
         
         # combine bg and fg layers via screen blend mode with 75% opacity on fg layer
         # see this wikipedia article for a description of screen blend mode:
         # http://en.wikipedia.org/wiki/Blend_modes
         output     = Image.new("RGB", size)
         data       = []
-        blend_func = lambda b, f: clamp(255.0 - (((255.0 - alphaf * f) * (255.0 - b)) / 255.0))
+        blend_func = lambda b, f: image_utils.clamp(255.0 - (((255.0 - alphaf * f) * (255.0 - b)) / 255.0))
         
         for y in xrange(size[1]):
             for x in xrange(size[0]):
@@ -220,26 +215,10 @@ class AImageCollage(object):
         if size is None:
             size = int(max(2, canvas.size[0] / 64.0))
         
-        shadow = self._get_drop_shadow(image.size, size, iterations, color)
+        shadow = self.get_drop_shadow(image.size, size, iterations, color)
         
         canvas.paste(shadow, (pos[0] - size, pos[1] - size), shadow)
         canvas.paste(image, pos)
-    
-    # note: shadow images are expensive to generate, so we cache them for reuse
-    @lru_cache(maxsize=64)
-    def _get_drop_shadow(self, size, shadow_size, iterations, color):
-        width   = size[0] + shadow_size * 2
-        height  = size[1] + shadow_size * 2
-        
-        shadow0 = Image.new("RGBA", (width, height), (125,125,125,0))
-        shadow1 = Image.new("RGBA", (size[0], size[1]), color)
-        
-        shadow0.paste(shadow1, (shadow_size, shadow_size))
-        
-        for i in xrange(iterations):
-            shadow0 = shadow0.filter(ImageFilter.BLUR)
-        
-        return shadow0
     
     def _get_output_sizes(self):
         return [
@@ -252,51 +231,18 @@ class AImageCollage(object):
     def __str__(self):
         return self.__class__.__name__
     
-    # note: gradient images are expensive to generate, so we cache them for reuse
     @lru_cache(maxsize=64)
-    def _get_gradient_image(self, size, stops):
-        image = Image.new("RGBA", size)
-        data  = []
+    def get_drop_shadow(self, size, shadow_size, iterations, color):
+        width   = size[0] + shadow_size * 2
+        height  = size[1] + shadow_size * 2
         
-        for y in xrange(size[1]):
-            dy = y / float(size[1])
-            
-            for x in xrange(size[0]):
-                dx = x / float(size[0])
-                dv = dx + dy
-                
-                start_offset = 0.0
-                color = None
-                
-                for offset, start, end in stops:
-                    if dv < offset:
-                        rgb_func = self.linear_gradient(start, end, start_offset, offset)
-                        
-                        color = tuple(rgb_func(i, dv) for i in xrange(len(end)))
-                        break
-                    else:
-                        start_offset = offset
-                
-                if color is None:
-                    end   = stops[-1][2]
-                    color = tuple(c / 255.0 for i in end)
-                
-                color = tuple(clamp(c * 255.0) for c in color)
-                data.append(color)
+        shadow0 = Image.new("RGBA", (width, height), (125,125,125,0))
+        shadow1 = Image.new("RGBA", size, color)
         
-        image.putdata(data)
+        shadow0.paste(shadow1, (shadow_size, shadow_size))
         
-        return image
-    
-    def _parse_rgb(self, color, alpha=255):
-        split = (color[0:2], color[2:4], color[4:6])
-        color = [int(x, 16) for x in split]
+        for i in xrange(iterations):
+            shadow0 = shadow0.filter(ImageFilter.BLUR)
         
-        color.append(alpha)
-        return color
-    
-    def linear_gradient(self, start, stop, start_offset=0.0, stop_offset=1.0):
-        return lambda index, offset: (start[index] + ((offset - start_offset) / \
-                                     (stop_offset - start_offset) * \
-                                     (stop[index] - start[index]))) / 255.0
+        return shadow0
 
