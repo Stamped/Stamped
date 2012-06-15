@@ -581,6 +581,59 @@ class StampedAPI(AStampedAPI):
         return account
 
     @API_CALL
+    def updateAccount(self, authUserId, updateAcctForm):
+        account = self._accountDB.getAccount(authUserId)
+        fields = updateAcctForm.dataExport()
+
+        if 'screen_name' in fields and account.screen_name != fields['screen_name']:
+            old_screen_name = account.screen_name
+            account.screen_name = fields['screen_name']
+
+            # Validate screen name
+            account.screen_name = account.screen_name.strip()
+            if not utils.validate_screen_name(account.screen_name):
+                raise StampedInputError("Invalid format for screen name")
+
+            # Verify screen_name unused
+            existingAcct = None
+            try:
+                existingAcct = self._accountDB.getAccountByScreenName(account.screen_name.lower())
+            except StampedUnavailableError:
+                pass
+            if existingAcct is not None:
+                logs.warning('Attempted to update account with pre-existing screen name')
+                raise StampedInputError("The screen name is already in use")
+
+            # Check Blacklist
+            if account.screen_name.lower() in Blacklist.screen_names:
+                raise StampedInputError("Blacklisted screen name")
+
+            # Asynchronously update profile picture link if screen name has changed
+            tasks.invoke(tasks.APITasks.updateAccountSettings, args=[
+                old_screen_name.lower(), account.screen_name.lower()])
+
+        if 'name' in fields and account.name != fields['name']:
+            account.name = fields['name']
+        if 'phone' in fields and account.phone != fields['phone']:
+            account.phone = fields['phone']
+        if 'bio' in fields and account.bio != fields['bio']:
+            account.bio = fields['bio']
+        if 'website' in fields and account.website != fields['website']:
+            if utils.validate_url(fields['website']):
+                account.website = fields['website']
+            logs.warning("Could not update account 'website' field - not a valid url string")
+            raise StampedInputError("Could not update account website")
+        if 'location' in fields and account.location != fields['location']:
+            account.location = fields['location']
+        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
+            account.color_primary = fields['color_primary']
+        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
+            account.color_secondary = fields['color_secondary']
+
+        self._accountDB.updateAccount(account)
+
+
+    @API_CALL
     def updateAccountSettings(self, authUserId, data):
 
         ### TODO: Reexamine how updates are done
@@ -617,13 +670,13 @@ class StampedAPI(AStampedAPI):
 
         # Asynchronously update profile picture link if screen name has changed
         if account.screen_name.lower() != old_screen_name.lower():
-            tasks.invoke(tasks.APITasks.updateAccountSettings, args=[
+            tasks.invoke(tasks.APITasks.changeProfileImageNameAsync, args=[
                          old_screen_name.lower(), account.screen_name.lower()])
 
         return account
 
     @API_CALL
-    def updateAccountSettingsAsync(self, old_screen_name, new_screen_name):
+    def changeProfileImageNameAsync(self, old_screen_name, new_screen_name):
         self._imageDB.changeProfileImageName(old_screen_name.lower(), new_screen_name.lower())
 
     @API_CALL
@@ -1679,6 +1732,8 @@ class StampedAPI(AStampedAPI):
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
+        logs.info('Popular User Ids: %s' % popularUserIds)
+
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
@@ -2314,6 +2369,7 @@ class StampedAPI(AStampedAPI):
             '-mobile' : (572, None),
             }
 
+
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using the content_id and update the images field
@@ -2328,9 +2384,9 @@ class StampedAPI(AStampedAPI):
                 if images is None:
                     images = ()
                 sizes = []
-                for k, v in supportedSizes.iteritems():
+                for k,v in supportedSizes.iteritems():
                     size            = ImageSizeSchema()
-                    size.url        = 'http://static.stamped.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
                     size.height     = v[1] if v[1] is not None else v[0]
                     sizes.append(size)
@@ -3359,13 +3415,8 @@ class StampedAPI(AStampedAPI):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
         since = datetime.utcnow() - timedelta(days=90)
-        limit = 1000
         viewport = guideRequest.viewport
-        # Change constraints slightly for map-based views
-        if viewport is not None:
-            since = None
-            limit = 200
-        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since, limit=limit)
+        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since)
 
         # Combine stamp scores into grouped entity scores
         entityScores = {}
@@ -3424,30 +3475,16 @@ class StampedAPI(AStampedAPI):
         # Build previews
         entityStampPreviews = {}
         for stat in entityStats:
-            if stat.popular_users is not None and stat.popular_stamps is None:
-                # Inconsistency! Regenerate entity stat
-                logs.warning("Missing popular_stamps: entity_id=%s" % stat.entity_id)
-                tasks.invoke(tasks.APITasks.updateEntityStats, args=[stat.entity_id])
-
             if stat.popular_users is not None and stat.popular_stamps is not None:
                 if len(stat.popular_users) != len(stat.popular_stamps):
                     logs.warning("Mismatch between popular_users and popular_stamps: entity_id=%s" % stat.entity_id)
                     continue
                 stampPreviews = []
                 for i in range(min(len(stat.popular_users), 10)):
-                    try:
-                        stampPreview = StampPreview()
-                        user = userIds[stat.popular_users[i]]
-                        stampId = stat.popular_stamps[i]
-                        if user is None or stampId is None:
-                            raise 
-                        stampPreview.user = user
-                        stampPreview.stamp_id = stampId
-                        stampPreviews.append(stampPreview)
-                    except Exception as e:
-                        logs.warning("Failed to add preview to entity_id=%s: user_id=%s, stamp_id=%s" % \
-                            (stat.entity_id, stat.popular_users[i], stat.popular_stamps[i]))
-                        continue 
+                    stampPreview = StampPreview()
+                    stampPreview.user = userIds[stat.popular_users[i]]
+                    stampPreview.stamp_id = stat.popular_stamps[i]
+                    stampPreviews.append(stampPreview)
                 entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
