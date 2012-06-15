@@ -1,1 +1,1 @@
-__author__ = 'paul'
+import Globals
