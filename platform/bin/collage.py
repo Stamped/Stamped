@@ -60,11 +60,11 @@ if __name__ == '__main__':
     })
     
     collages   = {
-        'basic' : BasicImageCollage(), 
-        'music' : MusicImageCollage(), 
-        'book'  : BookImageCollage(), 
-        'film'  : FilmImageCollage(), 
-        'app'   : AppImageCollage(), 
+        'default' : DefaultImageCollage(), 
+        'music'   : MusicImageCollage(), 
+        'book'    : BookImageCollage(), 
+        'film'    : FilmImageCollage(), 
+        'app'     : AppImageCollage(), 
     }
     
     categories = collages.keys()
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     for category in categories:
         ts = { 'user_id' : user.user_id, 'scope'   : 'user' }
         
-        if category != 'basic':
+        if category != 'default':
             if category == 'app':
                 ts['subcategory'] = 'app'
             else:

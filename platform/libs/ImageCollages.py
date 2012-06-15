@@ -12,7 +12,7 @@ from AImageCollage import AImageCollage
 
 # NOTE (travis): the use of rounding functions (e.g., round, floor, and ceil) 
 # throughout the layout functions in this file is very precise, though it may 
-# seem arbitrary. don't change them unless you have good reason to.
+# seem arbitrary. e.g., don't change them unless you have good reason to.
 
 class ImageCollage(AImageCollage):
     
@@ -62,7 +62,7 @@ class ImageCollage(AImageCollage):
                                              num_cols=num_cols, 
                                              **self._options)
 
-class BasicImageCollage(ImageCollage):
+class DefaultImageCollage(ImageCollage):
     
     def __init__(self, **kwargs):
         self._square_cells = kwargs.pop('square_cells', False)
@@ -105,10 +105,10 @@ class BasicImageCollage(ImageCollage):
         
         return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
 
-class MusicImageCollage(BasicImageCollage):
+class MusicImageCollage(DefaultImageCollage):
     
     def __init__(self):
-        BasicImageCollage.__init__(self, square_cells=False, pad_coeff=128.0)
+        DefaultImageCollage.__init__(self, square_cells=False, pad_coeff=128.0)
 
 class BookImageCollage(ImageCollage):
     
@@ -159,8 +159,8 @@ class FilmImageCollage(ImageCollage):
         
         return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
 
-class AppImageCollage(BasicImageCollage):
+class AppImageCollage(DefaultImageCollage):
     
     def __init__(self):
-        BasicImageCollage.__init__(self, square_cells=True, pad_coeff=32.0)
+        DefaultImageCollage.__init__(self, square_cells=True, pad_coeff=32.0)
 

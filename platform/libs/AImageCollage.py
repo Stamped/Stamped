@@ -14,6 +14,9 @@ from gevent.pool    import Pool
 from api.S3ImageDB  import S3ImageDB
 from LRUCache       import lru_cache
 
+def clamp(v):
+    return min(255, max(0, int(round(v))))
+
 class AImageCollage(object):
     
     __metaclass__ = ABCMeta
@@ -167,17 +170,51 @@ class AImageCollage(object):
                 else:
                     canvas.paste(cell, cell_pos)
                 
-                # overlay user stamp logo on top of each entity image
-                logo  = get_user_logo(logo_size)
-                canvas.paste(logo, (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1]), logo)
+                # overlay user's stamp logo on top of each entity image
+                logo     = get_user_logo(logo_size)
+                logo_box = (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1])
+                
+                canvas.paste(logo, logo_box, logo)
             
-            canvas = self._apply_postprocessing(canvas)
+            canvas = self._apply_postprocessing(canvas, user)
             output.append(canvas)
         
         return output
     
-    def _apply_postprocessing(self, image):
-        return image.convert("L")
+    def _apply_postprocessing(self, image, user):
+        size   = image.size
+        alpha  = 191
+        alphaf = alpha / 255.0
+        stops  = [
+            (
+                2.0, 
+                self._parse_rgb(user.color_primary, alpha), 
+                self._parse_rgb(user.color_secondary, alpha)
+            ), 
+        ]
+        
+        bg = image.convert("L").convert("RGB")
+        fg = self._get_gradient_image(size, stops)
+        
+        # combine bg and fg layers via screen blend mode with 75% opacity on fg layer
+        # see this wikipedia article for a description of screen blend mode:
+        # http://en.wikipedia.org/wiki/Blend_modes
+        output     = Image.new("RGB", size)
+        data       = []
+        blend_func = lambda b, f: clamp(255.0 - (((255.0 - alphaf * f) * (255.0 - b)) / 255.0))
+        
+        for y in xrange(size[1]):
+            for x in xrange(size[0]):
+                pos   = (x, y)
+                bg_px = bg.getpixel(pos)
+                fg_px = fg.getpixel(pos)
+                
+                color = tuple(blend_func(bg_px[i], fg_px[i]) for i in xrange(len(bg_px)))
+                
+                data.append(color)
+        
+        output.putdata(data)
+        return output
     
     def _paste_image_with_drop_shadow(self, canvas, image, pos, size=None, iterations=10, color=(0,0,0,255)):
         if size is None:
@@ -206,6 +243,7 @@ class AImageCollage(object):
     
     def _get_output_sizes(self):
         return [
+            (1024, 256), 
             (940, 256), 
             (512, 128), 
             (256, 64), 
@@ -213,4 +251,52 @@ class AImageCollage(object):
     
     def __str__(self):
         return self.__class__.__name__
+    
+    # note: gradient images are expensive to generate, so we cache them for reuse
+    @lru_cache(maxsize=64)
+    def _get_gradient_image(self, size, stops):
+        image = Image.new("RGBA", size)
+        data  = []
+        
+        for y in xrange(size[1]):
+            dy = y / float(size[1])
+            
+            for x in xrange(size[0]):
+                dx = x / float(size[0])
+                dv = dx + dy
+                
+                start_offset = 0.0
+                color = None
+                
+                for offset, start, end in stops:
+                    if dv < offset:
+                        rgb_func = self.linear_gradient(start, end, start_offset, offset)
+                        
+                        color = tuple(rgb_func(i, dv) for i in xrange(len(end)))
+                        break
+                    else:
+                        start_offset = offset
+                
+                if color is None:
+                    end   = stops[-1][2]
+                    color = tuple(c / 255.0 for i in end)
+                
+                color = tuple(clamp(c * 255.0) for c in color)
+                data.append(color)
+        
+        image.putdata(data)
+        
+        return image
+    
+    def _parse_rgb(self, color, alpha=255):
+        split = (color[0:2], color[2:4], color[4:6])
+        color = [int(x, 16) for x in split]
+        
+        color.append(alpha)
+        return color
+    
+    def linear_gradient(self, start, stop, start_offset=0.0, stop_offset=1.0):
+        return lambda index, offset: (start[index] + ((offset - start_offset) / \
+                                     (stop_offset - start_offset) * \
+                                     (stop[index] - start[index]))) / 255.0
 

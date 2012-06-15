@@ -61,10 +61,45 @@
                 top:  -100%;
                 left: 0;
                 display: none;
+                overflow: hidden;
                 
-                background: url(/assets/img/covers/default_cover_temp.png) repeat;
                 width:   100%;
                 height:  100%;
+                
+                .header-blur {
+                    background: url(/assets/img/covers/default_cover_temp.png) repeat;
+                    position: absolute;
+                    width:  100%;
+                    height: 100%;
+                    
+                    .transform-style(preserve-3d);
+                    .backface-visibility(hidden);
+                    
+                    .transform(perspective(600) scaleX(1.2) scaleY(1.25) rotateX(15deg));
+                    
+                    @duration-ease0: .3s ease-out;
+                    @duration-ease1: .8s ease-out;
+                    
+                    -webkit-transition: -webkit-transform @duration-ease0, -webkit-filter @duration-ease1;
+                    -moz-transition:    -moz-transform    @duration-ease0, filter         @duration-ease1;
+                    -ms-transition:     -ms-transform     @duration-ease0, filter         @duration-ease1;
+                    -o-transition:      -o-transform      @duration-ease0, filter         @duration-ease1;
+                    transition:         transform         @duration-ease0, filter         @duration-ease1;
+                    
+                    /*
+                    -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                       -moz-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                        -ms-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                         -o-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                            transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);*/
+                }
+                
+                &:hover .header-blur {
+                    filter: none;
+                    -webkit-filter: blur(0);
+                    
+                    .transform(perspective(600) rotateX(0deg));
+                }
                 
                 /*.transition(top, 0.5s, linear);*/
                 
@@ -174,28 +209,38 @@
             }
             
             .header-category-place {
-                background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-                background-size: 100% 100%;
+                .header-blur {
+                    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
+                    background-size: 100% 100%;
+                }
             }
             
             .header-category-music {
-                background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-                background-size: 100% 100%;
+                .header-blur {
+                    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
+                    background-size: 100% 100%;
+                }
             }
             
             .header-category-book {
-                background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-                background-size: 100% 100%;
+                .header-blur {
+                    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
+                    background-size: 100% 100%;
+                }
             }
             
             .header-category-film {
-                background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-                background-size: 100% 100%;
+                .header-blur {
+                    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
+                    background-size: 100% 100%;
+                }
             }
             
             .header-category-other {
-                background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-                background-size: 100% 100%;
+                .header-blur {
+                    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
+                    background-size: 100% 100%;
+                }
             }
             
             .header-animating {
@@ -909,7 +954,7 @@ a.lightbox {
 
 
 .active() {
-    background-position: -194px -6px;
+    background-position: -204px -3px;
     opacity: 1;
     
     .transition(opacity, 0s, linear);
@@ -974,8 +1019,8 @@ a.lightbox {
             a {
                 position: relative;
                 display: block;
-                width:  56px;
-                height: 56px;
+                width:  60px;
+                height: 60px;
                 overflow: visible;
                 text-overflow: visible;
                 cursor: pointer;
@@ -987,8 +1032,10 @@ a.lightbox {
                 -moz-transition: @args;
                 transition: @args;*/
                 
+                @offset: 3px;
+                
                 .selection {
-                    background: url(/assets/img/sidenav_sprite.png) no-repeat -194px -6px;
+                    background: url(/assets/img/sidenav_sprite.png) no-repeat -204px -@offset;
                     position: absolute;
                     width:  100%;
                     height: 100%;
@@ -1000,8 +1047,8 @@ a.lightbox {
                 .icon {
                     background: url(/assets/img/sidenav_sprite.png) no-repeat;
                     position: absolute;
-                    left: 13px;
-                    top:  13px;
+                    left: 15px;
+                    top:  15px;
                     
                     .transform(scale(.8, .8));
                     .transition-transform(0.3s, ease-out);
@@ -1051,7 +1098,7 @@ a.lightbox {
                     .selection {
                         .active();
                         
-                        background-position: -255px -6px;
+                        background-position: -267px -3px;
                     }
                 }
                 
@@ -1064,89 +1111,89 @@ a.lightbox {
         }
         
         li.default .icon {
-            background-position: 0 0;
+            background-position: -3px -3px;
         }
         li.default a:hover .icon {
-            background-position: 0 -64px;
+            background-position: -3px -75px;
         }
         li.default a:active .icon {
-            background-position: 0 -32px;
+            background-position: -3px -39px;
         }
         
         li.place .icon {
-            background-position: -32px 0;
+            background-position: -36px -3px;
         }
         li.place a:hover .icon {
-            background-position: -32px -64px;
+            background-position: -36px -75px;
         }
         li.place a:active .icon {
-            background-position: -32px -32px;
+            background-position: -36px -39px;
         }
         
         li.music .icon {
-            background-position: -64px 0;
+            background-position: -69px -3px;
         }
         li.music a:hover .icon {
-            background-position: -64px -64px;
+            background-position: -69px -75px;
         }
         li.music a:active .icon {
-            background-position: -64px -32px;
+            background-position: -69px -39px;
         }
         
         li.book .icon {
-            background-position: -96px 0;
+            background-position: -102px -3px;
         }
         li.book a:hover .icon {
-            background-position: -96px -64px;
+            background-position: -102px -75px;
         }
         li.book a:active .icon {
-            background-position: -96px -32px;
+            background-position: -102px -39px;
         }
         
         li.film .icon {
-            background-position: -128px 0;
+            background-position: -135px -3px;
         }
         li.film a:hover .icon {
-            background-position: -128px -64px;
+            background-position: -135px -75px;
         }
         li.film a:active .icon {
-            background-position: -128px -32px;
+            background-position: -135px -39px;
         }
         
         li.other .icon {
-            background-position: -160px 0;
+            background-position: -168px -3px;
         }
         li.other a:hover .icon {
-            background-position: -160px -64px;
+            background-position: -168px -75px;
         }
         li.other a:active .icon {
-            background-position: -160px -32px;
+            background-position: -168px -39px;
         }
     }
 }
 
 body.default #stamp-category-nav-bar ol li.default div {
-    background-position: 0 -32px;
+    background-position: -3px -39px;
 }
 
 body.place #stamp-category-nav-bar ol li.place div {
-    background-position: -32px -32px;
+    background-position: -36px -39px;
 }
 
 body.music #stamp-category-nav-bar ol li.music div {
-    background-position: -64px -32px;
+    background-position: -69px -39px;
 }
 
 body.book #stamp-category-nav-bar ol li.book div {
-    background-position: -96px -32px;
+    background-position: -102px -39px;
 }
 
 body.film #stamp-category-nav-bar ol li.film div {
-    background-position: -128px -32px;
+    background-position: -135px -39px;
 }
 
 body.other #stamp-category-nav-bar ol li.other div {
-    background-position: -160px -32px;
+    background-position: -168px -39px;
 }
 
 body.default    #stamp-category-nav-bar ol li.default, 
