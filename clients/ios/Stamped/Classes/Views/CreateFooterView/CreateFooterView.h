@@ -11,7 +11,10 @@
 @protocol CreateFooterViewDelegate;
 @interface CreateFooterView : UIView
 
+@property(nonatomic,retain) UIButton *stampButton;
 @property(nonatomic,assign) id <CreateFooterViewDelegate> delegate;
+
+- (void)setUploading:(BOOL)uploading animated:(BOOL)animated;
 
 @end
 @protocol CreateFooterViewDelegate

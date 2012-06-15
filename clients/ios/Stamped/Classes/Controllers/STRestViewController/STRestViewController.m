@@ -160,8 +160,8 @@
     }];
     
     CAAnimationGroup *animation = [CAAnimationGroup animation];
-    animation.duration = 0.2f;
-    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+    animation.duration = 0.3f;
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     animation.beginTime = [view.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
     animation.removedOnCompletion = NO;
     animation.fillMode = kCAFillModeForwards;
@@ -603,7 +603,7 @@
     
     CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-        [self setContentInset:UIEdgeInsetsMake(0, 0, keyboardFrame.size.height, 0)];
+        [self setContentInset:UIEdgeInsetsMake(self.tableView.contentInset.top, 0, keyboardFrame.size.height, 0)];
     } completion:^(BOOL finished){}];
     
 }
@@ -611,7 +611,7 @@
 - (void)keyboardWillHide:(NSNotification*)notification {
     
     [UIView animateWithDuration:0.3 animations:^{
-        [self setContentInset:UIEdgeInsetsZero];
+        [self setContentInset:UIEdgeInsetsMake(self.tableView.contentInset.top, 0, 0, 0)];
     }];
     
 }

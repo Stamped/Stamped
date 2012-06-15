@@ -164,7 +164,9 @@
         frame.size.height = originY;
         self.frame = frame;
         if ([(id)delegate respondsToSelector:@selector(creditHeaderViewFrameChanged:)]) {
-            [self.delegate creditHeaderViewFrameChanged:self];
+            [UIView animateWithDuration:0.3f animations:^{ 
+                [self.delegate creditHeaderViewFrameChanged:self];
+            }];
         }
     }
     

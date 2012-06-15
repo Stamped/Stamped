@@ -29,6 +29,7 @@ typedef enum {
 @property(nonatomic,retain) UIScrollView *scrollView;
 @property(nonatomic,retain) STUploadingImageView *imageView;
 @property(nonatomic,retain) CreateCreditToolbar *creditToolbar;
+@property(nonatomic,retain) UILabel *textViewPlaceholder;
 
 @property(nonatomic,assign) CreateEditKeyboardType keyboardType; // default CreateEditKeyboardTypeText
 @property(nonatomic,assign) BOOL editing; // default NO
@@ -39,6 +40,7 @@ typedef enum {
 @property(nonatomic,retain) UITapGestureRecognizer *tapGesture;
 
 - (void)layoutScrollView;
+- (void)setupWithCreditUsernames:(NSArray*)usernames;
 
 @end
 

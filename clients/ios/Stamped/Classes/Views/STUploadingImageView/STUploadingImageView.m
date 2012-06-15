@@ -30,6 +30,34 @@
     return self;
 }
 
+- (void)setImage:(UIImage *)image {
+    [super setImage:image];
+    
+    CGSize kMaxImageViewSize = CGSizeMake(200.0f, 200.0f);
+    
+    CGSize imageSize = image.size;
+    CGFloat aspectRatio = imageSize.width / imageSize.height;
+    CGRect frame = self.frame;
+    if (kMaxImageViewSize.width / aspectRatio <= kMaxImageViewSize.height) {
+        frame.size.width = kMaxImageViewSize.width;
+        frame.size.height = frame.size.width / aspectRatio;
+    } else {
+        frame.size.height = kMaxImageViewSize.height;
+        frame.size.width = frame.size.height * aspectRatio;
+    }
+    
+    frame.origin.x = (self.superview.bounds.size.width-frame.size.width)/2;
+    self.frame = frame;
+
+    self.layer.borderColor = [UIColor whiteColor].CGColor;
+    self.layer.borderWidth = 2.0f;
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+    self.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+    self.layer.shadowRadius = 1.0f;
+    self.layer.shadowOpacity = (image==nil) ? 0.0f : 0.2f;
+    
+}
+
 - (void)dealloc {
     self.activiyView = nil;
     [super dealloc];
@@ -45,7 +73,6 @@
     }
     
 }
-
 
 
 @end
