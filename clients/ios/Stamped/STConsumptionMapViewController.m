@@ -21,16 +21,10 @@
 static NSString* const _cacheOverlayKey = @"Consumption.food.cacheOverlay";
 
 static NSString* const _restaurantNameKey = @"Consumption.food.restaurants.name";
-static NSString* const _restaurantIconKey = @"Consumption.food.restaurants.icon";
-static NSString* const _restaurantBackIconKey = @"Consumption.food.restaurants.backIcon";
 
 static NSString* const _barNameKey = @"Consumption.food.bar.name";
-static NSString* const _barIconKey = @"Consumption.food.bar.icon";
-static NSString* const _barBackIconKey = @"Consumption.food.bar.backIcon";
 
 static NSString* const _cafeNameKey = @"Consumption.food.cafe.name";
-static NSString* const _cafeIconKey = @"Consumption.food.cafe.icon";
-static NSString* const _cafeBackIconKey = @"Consumption.food.cafe.backIcon";
 
 static NSString* const _subcategoryType = @"subcategory";
 static NSString* const _filterType = @"filter";
@@ -147,27 +141,22 @@ NSInteger zoom;
 
 - (STConsumptionToolbarItem*)rootItem {
     STConsumptionToolbarItem* item = [[STConsumptionToolbarItem alloc] init];
+    item.iconValue = @"place";
     
     STConsumptionToolbarItem* restaurants = [[[STConsumptionToolbarItem alloc] init] autorelease];
     restaurants.name = [STConfiguration value:_restaurantNameKey];
-    restaurants.icon = [STConfiguration value:_restaurantIconKey];
-    restaurants.backIcon = [STConfiguration value:_restaurantBackIconKey];
     restaurants.value = @"restaurant";
-    restaurants.type = _subcategoryType;
+    restaurants.type = STConsumptionToolbarItemTypeSubsection;
     
     STConsumptionToolbarItem* bars = [[[STConsumptionToolbarItem alloc] init] autorelease];
     bars.name = [STConfiguration value:_barNameKey];
-    bars.icon = [STConfiguration value:_barIconKey];
-    bars.backIcon = [STConfiguration value:_barBackIconKey];
     bars.value = @"bar";
-    bars.type = _subcategoryType;
+    bars.type = STConsumptionToolbarItemTypeSubsection;
     
     STConsumptionToolbarItem* cafe = [[[STConsumptionToolbarItem alloc] init] autorelease];
     cafe.name = [STConfiguration value:_cafeNameKey];
-    cafe.icon = [STConfiguration value:_cafeIconKey];
-    cafe.backIcon = [STConfiguration value:_cafeBackIconKey];
     cafe.value = @"cafe";
-    cafe.type = _subcategoryType;
+    cafe.type = STConsumptionToolbarItemTypeSubsection;
     
     item.children = [NSArray arrayWithObjects:
                      restaurants, 
@@ -595,11 +584,11 @@ NSInteger zoom;
 }
 
 - (void)toolbar:(STConsumptionToolbar *)toolbar didMoveToItem:(STConsumptionToolbarItem *)item from:(STConsumptionToolbarItem *)previous {
-    if ([item.type isEqualToString:_subcategoryType]) {
+    if (item.type == STConsumptionToolbarItemTypeSubsection) {
         self.filter = nil;
         self.subcategory = item.value;
     }
-    else if ([item.type isEqualToString:_filterType]) {
+    else if (item.type == STConsumptionToolbarItemTypeFilter) {
         self.filter = item.value;
         self.subcategory = item.parent.value;
     }
@@ -616,16 +605,10 @@ NSInteger zoom;
     [STConfiguration addFlag:NO forKey:_cacheOverlayKey];
     
     [STConfiguration addString:@"Restaurants" forKey:_restaurantNameKey];
-    [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_restaurantIconKey];
-    [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_restaurantBackIconKey];
-    
+   
     [STConfiguration addString:@"Bars" forKey:_barNameKey];
-    [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_barIconKey];
-    [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_barBackIconKey];
-    
+   
     [STConfiguration addString:@"Cafes" forKey:_cafeNameKey];
-    [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_cafeIconKey];
-    [STConfiguration addString:@"cat_icon_eDetail_food" forKey:_cafeBackIconKey];
 }
 
 @end
