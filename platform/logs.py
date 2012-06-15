@@ -212,18 +212,18 @@ def save():
     localData.log['finish'] = datetime.datetime.utcnow()
     
     try:
-        if localData.saveStat is None:
-            raise
-        localData.saveStat(localData.log)
-    except:
-        pass
-    
-    try:
         if localData.saveLog == None:
             raise
         localData.saveLog(localData.log)
     except Exception as e:
         pprint.pprint(localData.log)
+        pass
+    
+    try:
+        if localData.saveStat is None:
+            raise
+        localData.saveStat(localData.log)
+    except:
         pass
 
 def _report(caller,msg='',level=logging.ERROR):
