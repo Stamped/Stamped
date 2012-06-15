@@ -80,6 +80,7 @@
                     @duration-ease0: .3s ease-out;
                     @duration-ease1: .8s ease-out;
                     
+                    // test transition delay
                     -webkit-transition: -webkit-transform @duration-ease0, -webkit-filter @duration-ease1;
                     -moz-transition:    -moz-transform    @duration-ease0, filter         @duration-ease1;
                     -ms-transition:     -ms-transform     @duration-ease0, filter         @duration-ease1;
@@ -109,7 +110,7 @@
                     filter: none;
                     -webkit-filter: blur(0);
                     
-                    .transform(perspective(600) rotateX(0deg));
+                    .transform(perspective(600) scaleX(1.25) scaleY(1.25) rotateX(0deg));
                 }
                 
                 /*.transition(top, 0.5s, linear);*/
@@ -180,6 +181,12 @@
                     .rhs {
                         float: right;
                         
+                        .subnav-activated(@scale) {
+                            opacity: 1;
+                            .transition-transform2(0s, linear, opacity, 0s, linear);
+                            .transform(scale(@scale, @scale));
+                        }
+                        
                         .subnav {
                             width: 256px;
                             
@@ -191,25 +198,34 @@
                                 
                                 .transition-transform2(0.1s, ease-out, opacity, 0.1s, ease-out);
                                 opacity: .5;
+                                cursor: pointer;
                                 
-                                &:hover, &:active {
-                                    cursor: pointer;
-                                    
-                                    opacity: 1;
-                                    .transition-transform2(0s, linear, opacity, 0s, linear);
+                                &:hover {
+                                    .subnav-activated(1.0);
                                 }
                                 
                                 &:active {
-                                    .transform(scale(1.2, 1.2));
+                                    .subnav-activated(1.0);
                                 }
                             }
                             
-                            .subnav_button1 {
+                            .subnav_button-1 {
                                 background-position: -40px 0;
                             }
                             
-                            .subnav_button2 {
+                            .subnav_button-2 {
                                 background-position: -80px 0;
+                            }
+                        }
+                        
+                        .subnav-active-0 .subnav_button-0, 
+                        .subnav-active-1 .subnav_button-1, 
+                        .subnav-active-2 .subnav_button-2 {
+                            cursor: default !important;
+                            .subnav-activated(1.0);
+                            
+                            &:hover {
+                                .subnav-activated(1.0);
                             }
                         }
                     }

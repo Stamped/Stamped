@@ -2713,9 +2713,9 @@ class StampedAPI(AStampedAPI):
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
         stats.score = int(score)
-
+        
         self._stampStatsDB.saveStampStats(stats)
-
+        
         return stats
 
 

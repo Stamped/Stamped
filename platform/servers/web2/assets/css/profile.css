@@ -157,11 +157,11 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body:hover .header-blur {
   filter: none;
   -webkit-filter: blur(0);
-  -webkit-transform: perspective(600) rotatex(0deg);
-  -moz-transform: perspective(600) rotatex(0deg);
-  -o-transform: perspective(600) rotatex(0deg);
-  -ms-transform: perspective(600) rotatex(0deg);
-  transform: perspective(600) rotatex(0deg);
+  -webkit-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(0deg);
+  -moz-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(0deg);
+  -o-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(0deg);
+  -ms-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(0deg);
+  transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(0deg);
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
@@ -235,29 +235,70 @@ footer,
   -o-transition: -o-transform 0.1s ease-out, opacity 0.1s ease-out;
   transition: transform 0.1s ease-out, opacity 0.1s ease-out;
   opacity: .5;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button:hover,
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button:active {
   cursor: pointer;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button:hover {
   opacity: 1;
   -webkit-transition: -webkit-transform 0s linear, opacity 0s linear;
   -moz-transition: -moz-transform 0s linear, opacity 0s linear;
   -ms-transition: -ms-transform 0s linear, opacity 0s linear;
   -o-transition: -o-transform 0s linear, opacity 0s linear;
   transition: transform 0s linear, opacity 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button:active {
-  -webkit-transform: scale(1.2, 1.2);
-  -moz-transform: scale(1.2, 1.2);
-  -o-transform: scale(1.2, 1.2);
-  -ms-transform: scale(1.2, 1.2);
-  transform: scale(1.2, 1.2);
+  opacity: 1;
+  -webkit-transition: -webkit-transform 0s linear, opacity 0s linear;
+  -moz-transition: -moz-transform 0s linear, opacity 0s linear;
+  -ms-transition: -ms-transform 0s linear, opacity 0s linear;
+  -o-transition: -o-transform 0s linear, opacity 0s linear;
+  transition: transform 0s linear, opacity 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button1 {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button-1 {
   background-position: -40px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button2 {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button-2 {
   background-position: -80px 0;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav-active-0 .subnav_button-0,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav-active-1 .subnav_button-1,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav-active-2 .subnav_button-2 {
+  cursor: default !important;
+  opacity: 1;
+  -webkit-transition: -webkit-transform 0s linear, opacity 0s linear;
+  -moz-transition: -moz-transform 0s linear, opacity 0s linear;
+  -ms-transition: -ms-transform 0s linear, opacity 0s linear;
+  -o-transition: -o-transform 0s linear, opacity 0s linear;
+  transition: transform 0s linear, opacity 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav-active-0 .subnav_button-0:hover,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav-active-1 .subnav_button-1:hover,
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav-active-2 .subnav_button-2:hover {
+  opacity: 1;
+  -webkit-transition: -webkit-transform 0s linear, opacity 0s linear;
+  -moz-transition: -moz-transform 0s linear, opacity 0s linear;
+  -ms-transition: -ms-transform 0s linear, opacity 0s linear;
+  -o-transition: -o-transform 0s linear, opacity 0s linear;
+  transition: transform 0s linear, opacity 0s linear;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  transform: scale(1, 1);
 }
 .profile-header-wrapper .profile-header .profile-content-page .header-category-place .header-blur {
   background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
