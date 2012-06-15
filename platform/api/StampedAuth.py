@@ -194,7 +194,7 @@ class StampedAuth(AStampedAuth):
 
     def verifyTwitterUserCredentials(self, clientId, user_token, user_secret):
         try:
-            tw_user = self._twitter.verifyCredentials(user_token, user_secret)
+            tw_user = self._twitter.getUserInfo(user_token, user_secret)
         except StampedInputError as e:
             raise StampedHTTPError('twitter_login_failed', 400, e.message)
 

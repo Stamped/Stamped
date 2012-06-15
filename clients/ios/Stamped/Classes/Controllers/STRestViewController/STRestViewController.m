@@ -10,6 +10,7 @@
 @implementation STRestViewController
 
 @synthesize tableView=_tableView;
+@synthesize searchResultsTableView=_searchResultsTableView;
 @synthesize footerView=_footerView;
 @synthesize headerView=_headerView;
 @synthesize showsSearchBar=_showsSearchBar;
@@ -148,32 +149,32 @@
 
 #pragma mark - Cell Animation
 
-- (void)animateCell:(UITableViewCell*)cell withDelay:(float)delay {
+- (void)animateView:(UIView*)view withDelay:(float)delay {
     
-    cell.layer.opacity = 0.0f;
+    view.layer.opacity = 0.0f;
     
     [CATransaction begin];
     [CATransaction setCompletionBlock:^{
-        cell.layer.opacity = 1.0f;
-        [cell.layer removeAllAnimations];
+        view.layer.opacity = 1.0f;
+        [view.layer removeAllAnimations];
     }];
     
     CAAnimationGroup *animation = [CAAnimationGroup animation];
     animation.duration = 0.3f;
-    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    animation.beginTime = [cell.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    animation.beginTime = [view.layer convertTime:CACurrentMediaTime() fromLayer:nil] + delay;
     animation.removedOnCompletion = NO;
     animation.fillMode = kCAFillModeForwards;
     
     CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
-    position.fromValue = [NSValue valueWithCGPoint:CGPointMake(cell.layer.position.x, cell.layer.position.y + self.tableView.frame.size.height)];
+    position.fromValue = [NSValue valueWithCGPoint:CGPointMake(view.layer.position.x, view.layer.position.y + self.tableView.frame.size.height)];
     
     CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
     opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
     opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
     
     [animation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
-    [cell.layer addAnimation:animation forKey:nil];
+    [view.layer addAnimation:animation forKey:nil];
     [CATransaction commit];
     
 }
@@ -181,8 +182,8 @@
 - (void)animateIn {
     
     float delay = 0.0f;
-    for (UITableViewCell *cell in self.tableView.visibleCells) {        
-        [self animateCell:cell withDelay:delay];
+    for (UITableViewCell *cell in self.tableView.visibleCells) {
+        [self animateView:cell withDelay:delay];
         delay += 0.15f;
     }
     
@@ -587,9 +588,10 @@
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
     
     if (_searchOverlay) {
-        _searchOverlay.hidden = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0;
+        _searchOverlay.hidden = (text!=nil && [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0);
         _searchResultsTableView.hidden = !_searchOverlay.hidden;
     }
+    
     [self updateSearchState];
     
 }
@@ -601,7 +603,7 @@
     
     CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-        [self setContentInset:UIEdgeInsetsMake(0, 0, keyboardFrame.size.height, 0)];
+        [self setContentInset:UIEdgeInsetsMake(self.tableView.contentInset.top, 0, keyboardFrame.size.height, 0)];
     } completion:^(BOOL finished){}];
     
 }
@@ -609,7 +611,7 @@
 - (void)keyboardWillHide:(NSNotification*)notification {
     
     [UIView animateWithDuration:0.3 animations:^{
-        [self setContentInset:UIEdgeInsetsZero];
+        [self setContentInset:UIEdgeInsetsMake(self.tableView.contentInset.top, 0, 0, 0)];
     }];
     
 }

@@ -1,17 +1,16 @@
 
 import AccountTests
 import ActivityTests
-import BlockTests
+import AlertTests
 import ClientLogsTests
 import CollectionTests
 import CommentTests
 import EntityTests
-import TodoTests
 import FriendshipTests
+import GuideTests
+import LinkedAccountTests
 import OAuthTests
-import PlaceEntityTests
-import StampedAPITests
-import StampPlaceTests
 import StampTests
+import TodoTests
 import UserTests
 

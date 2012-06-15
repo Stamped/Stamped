@@ -204,7 +204,6 @@
   }
 }
 
-
 - (void)addUserDistributionWithUser:(id<STUserDetail>)userDetail andView:(STViewContainer*)view {
   if (userDetail.distribution) {
     STViewContainer* distributionView = [[[STViewContainer alloc] initWithDelegate:view andFrame:CGRectMake(0, 0, 310, 0)] autorelease];

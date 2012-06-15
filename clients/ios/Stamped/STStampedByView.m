@@ -17,6 +17,7 @@
 #import "STTableViewController.h"
 #import "STStampsViewSource.h"
 #import "STButton.h"
+#import "STUsersViewController.h"
 
 @interface STStampedByViewCell : UIView
 
@@ -88,7 +89,7 @@
         [self addSubview:headerText];
         
         if (group.stampPreviews.count > 0 && imagesEnabled) {
-            NSInteger limit = 7;
+            NSInteger limit = 6;
             UIView* images = [[[UIView alloc] initWithFrame:CGRectMake(xOffset, 0, self.frame.size.width - (2 * xOffset), 40)] autorelease];
             NSInteger i = 0;
             CGFloat imageSpacing = 40;
@@ -148,6 +149,15 @@
 }
 
 - (void)viewAllClicked:(id)nothing {
+    NSMutableArray* userIDs = [NSMutableArray array];
+    for (id<STStampPreview> preview in [self.group stampPreviews]) {
+        NSString* userID = preview.user.userID;
+        if (userID) {
+            [userIDs addObject:userID];
+        }
+    }
+    STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
 @end

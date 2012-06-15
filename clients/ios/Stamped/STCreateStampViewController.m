@@ -231,14 +231,17 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 - (void)addBlurbTextView {
     
     UIFont* blurbFont = [STConfiguration value:_blurbFontKey];
+    UIColor* blurbColor = [UIColor stampedGrayColor];
     self.blurbTextView = [[[UITextView alloc] initWithFrame:CGRectMake(71, 16, 215, 40)] autorelease];
     self.blurbTextView.font = blurbFont;
-    self.blurbTextView.textColor = [UIColor stampedGrayColor];
+    self.blurbTextView.textColor = blurbColor;
     self.blurbTextView.delegate = self;
     self.blurbTextView.autocorrectionType = UITextAutocorrectionTypeYes;
     self.blurbTextView.keyboardAppearance = UIKeyboardAppearanceAlert;
     self.blurbTextView.scrollEnabled = NO;
     self.blurbTextView.clipsToBounds = NO;
+    self.blurbTextView.enablesReturnKeyAutomatically = YES;
+    
     
     UIView* accessoryView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)] autorelease];
     accessoryView.backgroundColor = [UIColor clearColor];
@@ -536,7 +539,7 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 - (void)textViewDidBeginEditing:(UITextView *)textView {
     self.isEditing = YES;
     if (!self.hasBlurbText) {
-        self.blurbTextView.text = @"Add a comment";
+        //self.blurbTextView.text = @"Add a comment";
     }
     [[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
     self.scrollView.scrollEnabled = NO;
@@ -599,8 +602,9 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     if (!self.hasBlurbText) {
-        textView.text = @"";
+        //textView.text = @"";
         self.hasBlurbText = YES;
+        //textView.autocapitalizationType = UITextAutocapitalizationTypeSentences;
     }
     return YES;
 }

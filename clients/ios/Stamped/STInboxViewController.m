@@ -66,6 +66,7 @@
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
 
       if ([STStampedAPI sharedInstance].currentUser == nil) {
           _scope = STStampedAPIScopeEveryone;
@@ -299,10 +300,8 @@
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
-
-    
-    //[[STStampedActions sharedInstance] viewUserWithUserID:stamp.user.userID];
-    
+    [controller release];
+        
 }
 
 
@@ -579,13 +578,15 @@
         self.navigationItem.rightBarButtonItem = button;
         [button release];
         
-    } else {
-        
+    } 
+    else {
         [Util addCreateStampButtonToController:self];
-        
     }
     
 }
 
+- (void)applicationDidBecomeActive:(id)notImportant {
+    [self reloadDataSource];
+}
 
 @end

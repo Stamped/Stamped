@@ -234,6 +234,7 @@
     [addCommentView_ addSubview:userImage];
     
     commentTextView_ = [[UITextView alloc] initWithFrame:CGRectMake(58, 9, 250, 31)];
+    commentTextView_.scrollEnabled = NO;
     commentTextView_.font = [UIFont fontWithName:@"Helvetica" size:14];
     commentTextView_.layer.borderColor = [UIColor colorWithWhite:230/255.0 alpha:1].CGColor;
     commentTextView_.layer.borderWidth = 1;

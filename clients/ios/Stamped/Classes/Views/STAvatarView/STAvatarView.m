@@ -74,7 +74,7 @@
         UIGraphicsEndImageContext();
         return scaledImage;
         
-    } styleIdentifier:@"st_avatar" completion:^(UIImage *image, NSURL *url) {
+    } styleIdentifier:[NSString stringWithFormat:@"st_ava_%f", floorf(self.bounds.size.width)] completion:^(UIImage *image, NSURL *url) {
         if ([_imageURL isEqual:url]) {
             self.imageView.image = image;
         }
@@ -101,13 +101,13 @@
         
         if (highlightView) {
             __block UIView *view = highlightView;
-            highlightView = nil;
             BOOL _enabled = [UIView areAnimationsEnabled];
             [UIView setAnimationsEnabled:YES];
             [UIView animateWithDuration:0.25f animations:^{
                 view.alpha = 0.0f;
             } completion:^(BOOL finished) {
                 [view removeFromSuperview];
+                highlightView = nil;
             }];
             [UIView setAnimationsEnabled:_enabled];
             

@@ -103,7 +103,8 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         return self._getTimeSlice(query, timeSlice)
 
     def getTodosFromStampId(self, stampId):
-        return self._collection.find({ '$or': [{'source_stamp_ids' : stampId}, {'stamp.stamp_id': stampId}] })
+        documents = self._collection.find({ '$or': [{'source_stamp_ids' : stampId}, {'stamp.stamp_id': stampId}] }, fields=['user_id'])
+        return map(lambda x: x['user_id'], documents)
 
     def countTodos(self, userId):
         n = self._collection.find({'user_id': userId}).count()

@@ -535,6 +535,7 @@
             if (cell == nil) {
                 cell = [[[STDescriptionTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:DetailCellIdentifier] autorelease];
                 cell.delegate = (id<STDescriptionTableCellDelegate>)self;
+                cell.layer.zPosition = 10;
             }
             [cell setFirst:YES last:NO];
             
@@ -550,6 +551,7 @@
         STDetailTableCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
         if (cell == nil) {
             cell = [[[STDetailTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+            cell.layer.zPosition = 10;
         }
         
         [cell setFirst:(indexPath.row==0) last:(indexPath.row==[section count]-1)];
@@ -572,6 +574,7 @@
     if (cell == nil) {
         cell = [[[STStampCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
         cell.delegate = (id<STStampCellDelegate>)self;
+        cell.layer.zPosition = 10;
     }
     
     id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
@@ -629,6 +632,7 @@
 - (void)stEditProfileViewControllerCancelled:(STEditProfileViewController*)controller {
     [self dismissModalViewControllerAnimated:YES];
 }
+
 - (void)stEditProfileViewControllerSaved:(STEditProfileViewController*)controller {
     [self dismissModalViewControllerAnimated:YES];
 }

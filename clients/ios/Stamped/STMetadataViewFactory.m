@@ -14,7 +14,7 @@
 #import "UIFont+Stamped.h"
 #import "STViewContainer.h"
 
-static const CGFloat _kReadMoreHeight = 74;
+static const CGFloat _kReadMoreHeight = 78;
 static const CGFloat _kReadMoreHeightCutoff = 90;
 
 @interface MetadatumView : STViewContainer
