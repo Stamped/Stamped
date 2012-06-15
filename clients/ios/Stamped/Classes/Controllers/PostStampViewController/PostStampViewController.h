@@ -8,7 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PostStampViewController : UIViewController
+@class STStampContainerView;
+@interface PostStampViewController : UITableViewController {
+    STStampContainerView *_tvContainer;
+}
 
 - (id)initWithStamp:(id<STStamp>)stamp;
 

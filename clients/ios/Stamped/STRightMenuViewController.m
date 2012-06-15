@@ -274,20 +274,15 @@
     
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
-      
-        NSString *category = [self.categories objectAtIndex:button.tag];
-        //Map to BE category strings
-        category = [self.categoryMapping objectForKey:category];
-        STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
-        STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-        [menuController presentModalViewController:navController animated:YES];
-        [navController release];
-        [controller release];
-
-        
-    });
-
+    NSString *category = [self.categories objectAtIndex:button.tag];
+    //Map to BE category strings
+    category = [self.categoryMapping objectForKey:category];
+    STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
+    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+    [menuController presentModalViewController:navController animated:YES];
+    [navController release];
+    [controller release];
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.6f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
         [menuController showRootController:NO];
     });

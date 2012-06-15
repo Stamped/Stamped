@@ -345,6 +345,24 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     
+
+    if (tableView == self.searchResultsTableView) {
+        
+#warning this should take the user to create entity, not implemented yet
+        
+        NSInteger count = 0;
+        if (self.autoCompleteResults.count) {
+            count = self.autoCompleteResults.count;
+        } else if (self.searchSections) {
+            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
+            count = sectionObject.entities.count;
+        }
+        if (indexPath.row == count) {
+            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        }
+        
+    }
+    
     if (self.autoCompleteResults.count) {
         
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
@@ -438,6 +456,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (void)stSearchViewDidCancel:(STSearchView*)view {
+    [super stSearchViewDidCancel:view];
     
     [self.searchCancellation cancel];
     self.searchCancellation = nil;
@@ -519,6 +538,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
         
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(12, 17, 16, 16)];
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
         [self.contentView addSubview:imageView];
         _iconView = [imageView retain];
         [imageView release];
