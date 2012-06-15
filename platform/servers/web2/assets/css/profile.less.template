@@ -105,7 +105,7 @@ body.place      #stamp-category-nav-bar ol li.place .icon,
 body.music      #stamp-category-nav-bar ol li.music .icon, 
 body.book       #stamp-category-nav-bar ol li.book .icon, 
 body.film       #stamp-category-nav-bar ol li.film .icon, 
-body.other      #stamp-category-nav-bar ol li.app .icon {
+body.app        #stamp-category-nav-bar ol li.app .icon {
     background-color: fade(@secondary, 100%);
 }
 

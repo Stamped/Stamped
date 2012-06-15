@@ -27,7 +27,7 @@ class ActivityCollectionCache(ACollectionCache):
 
         scope = kwargs.get('scope', 'me')
         if scope == 'friends':
-            params['verbs'] = ['comment', 'like', 'todo', 'restamp', 'follow']
+            params['verbs'] = ['comment', 'like', 'todo', 'follow']
             friends = self.api._friendshipDB.getFriends(authUserId)
             activityData = []
 

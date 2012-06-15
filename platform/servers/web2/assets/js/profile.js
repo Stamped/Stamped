@@ -155,6 +155,25 @@ var g_update_stamps = null;
             });
         };
         
+        $(".subnav_button").click(function(event) {
+            event.preventDefault();
+            
+            var $this   = $(this);
+            var $parent = $this.parents('.subnav');
+            
+            $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
+            
+            if ($this.hasClass('subnav_button-0')) {
+                $parent.addClass('subnav-active-0');
+            } else if ($this.hasClass('subnav_button-1')) {
+                $parent.addClass('subnav-active-1');
+            } else if ($this.hasClass('subnav_button-2')) {
+                $parent.addClass('subnav-active-2');
+            }
+            
+            return false;
+        });
+        
         // TODO: may not be recursive
         //$(document).emoji();
         //$container.emoji();

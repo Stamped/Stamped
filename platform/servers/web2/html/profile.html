@@ -33,10 +33,12 @@
             <div class="profile-content-page">
                 
                 {% with share_widget_desc="Share this collection" %}
+                {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
+                {# {% with collage_root="http://static.stamped.com" %} #}
                     
                     <!-- DEFAULT HEADER -->
                     <div class="profile-header-body header-category-default">
-                        <!--<div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
+                        <!--<div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -59,10 +61,10 @@
                             <div class="rhs">
                                 {% handlebars_template "share-widget" %}
                                 
-                                <div class="subnav">
-                                    <div class="subnav_button subnav_button0"></div>
-                                    <div class="subnav_button subnav_button1"></div>
-                                    <div class="subnav_button subnav_button2"></div>
+                                <div class="subnav subnav-active-0">
+                                    <div class="subnav_button subnav_button-0"></div>
+                                    <div class="subnav_button subnav_button-1"></div>
+                                    <div class="subnav_button subnav_button-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -70,7 +72,7 @@
                     
                     <!-- PLACE HEADER -->
                     <div class="profile-header-body header-category-place">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -95,7 +97,7 @@
                     
                     <!-- MUSIC HEADER -->
                     <div class="profile-header-body header-category-music">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -119,7 +121,7 @@
                     
                     <!-- BOOK HEADER -->
                     <div class="profile-header-body header-category-book">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -143,7 +145,7 @@
                     
                     <!-- FILM & TV HEADER -->
                     <div class="profile-header-body header-category-film">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -167,7 +169,7 @@
                     
                     <!-- OTHER HEADER -->
                     <div class="profile-header-body header-category-app">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -208,6 +210,7 @@
                             <p>STAMPS</p>
                         </div>
                     </div>
+                {% endwith %}
                 {% endwith %}
             </div>
         </div>

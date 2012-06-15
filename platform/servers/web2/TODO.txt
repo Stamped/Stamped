@@ -50,6 +50,7 @@ TODO:
     * experiment w/ subcategory filters that slide out from category filter navbar
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
     * fix broken thetvdb images
+    * fix glitch w/ hover state on entity stamp images in gallery shifting text
     
     * sDetail:
         * DONE - "Anatomy of eDetail section" spec
