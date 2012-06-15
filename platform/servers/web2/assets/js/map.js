@@ -131,7 +131,7 @@
                 
                 google.maps.event.addListener(marker_clusterer, "clusteringend", function() {
                     if (!centered_main_cluster) {
-                        center_main_cluster  = true;
+                        center_main_cluster = true;
                         resize_map();
                     }
                 });
@@ -343,37 +343,41 @@
             
             if (!!center_main_cluster && !centered_main_cluster) {
                 if (!!marker_clusterer) {
-                    var clusters = marker_clusterer.getClusters();
-                    var max_mark = null;
-                    var max_size = -1;
-                    var resized  = false;
-                    
-                    $.each(clusters, function(i, cluster) {
-                        var size = cluster.getSize();
-                        
-                        if (size > max_size) {
-                            max_size = size;
-                            max_mark = cluster.getMarkers();
+                    var init_clusterer = function(depth) {
+                        if (depth >= 2) {
+                            return;
                         }
-                    });
-                    
-                    if (max_size > 0) {
-                        var max_cluster_bounds = new google.maps.LatLngBounds();
                         
-                        $.each(max_mark, function(i, marker) {
-                            max_cluster_bounds.extend(marker.getPosition());
+                        var clusters = marker_clusterer.getClusters();
+                        var max_mark = null;
+                        var max_size = -1;
+                        
+                        $.each(clusters, function(i, cluster) {
+                            var size = cluster.getSize();
+                            
+                            if (size > max_size) {
+                                max_size = size;
+                                max_mark = cluster.getMarkers();
+                            }
                         });
                         
-                        map.fitBounds(max_cluster_bounds);
-                        resized = true;
-                    }
+                        if (max_size > 0 && (depth === 0 || max_size > 4) {
+                            var max_cluster_bounds = new google.maps.LatLngBounds();
+                            
+                            $.each(max_mark, function(i, marker) {
+                                max_cluster_bounds.extend(marker.getPosition());
+                            });
+                            
+                            map.fitBounds(max_cluster_bounds);
+                            
+                            marker_clusterer.repaint();
+                            init_clusterer(depth + 1);
+                        }
+                    };
                     
                     center_main_cluster   = false;
                     centered_main_cluster = true;
-                    
-                    if (resized) {
-                        marker_clusterer.repaint();
-                    }
+                    init_clusterer(0);
                 }
             }
             
