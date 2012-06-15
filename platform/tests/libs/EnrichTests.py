@@ -14,7 +14,7 @@ from logs import log, report
 
 try:
     from MongoStampedAPI                import MongoStampedAPI
-    from AStampedAPITestCase            import *
+    from AStampedAPIHttpTestCase            import *
     from api.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime
@@ -24,7 +24,7 @@ except:
 
 _verbose = False
 
-class AEnrichTest(AStampedAPITestCase):
+class AEnrichHttpTest(AStampedAPIHttpTestCase):
 
     def setUp(self):
         self.api = MongoStampedAPI()
@@ -60,7 +60,7 @@ class AEnrichTest(AStampedAPITestCase):
     def tearDown(self):
         pass
 
-class EnrichMovieTest(AEnrichTest):
+class EnrichMovieTest(AEnrichHttpTest):
 
     def test_enrich_movie(self):
         modified = self.api._entityDB.enrichEntity(self.media1)

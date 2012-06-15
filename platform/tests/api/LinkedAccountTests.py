@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 from MongoStampedAPI import MongoStampedAPI
 import bson
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 from libs.Facebook import *
 from libs.Twitter import *
 
@@ -28,9 +28,9 @@ TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW
 TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
 
 
-class StampedAPILinkedAccountTest(AStampedAPITestCase):
+class StampedAPILinkedAccountHttpTest(AStampedAPIHttpTestCase):
     def __init__(self, methodName='runTest'):
-        AStampedAPITestCase.__init__(self, methodName)
+        AStampedAPIHttpTestCase.__init__(self, methodName)
         self.fb = globalFacebook()
         self.fb_app_access_token = self.fb.getAppAccessToken()
 
@@ -62,14 +62,14 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
     def tearDown(self):
         self.deleteAccount(self.token)
 
-class StampedAPILinkedAccountAdd(StampedAPILinkedAccountTest):
+class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
 
     def setUp(self):
-        StampedAPILinkedAccountTest.setUp(self)
+        StampedAPILinkedAccountHttpTest.setUp(self)
         (self.fb_user_token_a, self.fb_user_id_a)     = self._createFacebookTestUser(name='fbusera')
 
     def tearDown(self):
-        StampedAPILinkedAccountTest.tearDown(self)
+        StampedAPILinkedAccountHttpTest.tearDown(self)
         self._deleteFacebookTestUser(self.fb_user_token_a, self.fb_user_id_a)
 
     def test_add_twitter_account(self):
@@ -116,7 +116,7 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountTest):
 
 
 
-class StampedAPILinkedAccountUpgrade(AStampedAPITestCase):
+class StampedAPIHttpLinkedAccountUpgrade(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='UserA')
 
@@ -213,7 +213,7 @@ class StampedAPILinkedAccountUpgrade(AStampedAPITestCase):
 
 
 
-class StampedAPIFacebookTest(StampedAPILinkedAccountTest):
+class StampedAPIFacebookTest(StampedAPILinkedAccountHttpTest):
 
     def setUp(self):
         # Create a Facebook test user registered with our app, then use that test user to create a new Stamped account
@@ -301,7 +301,7 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
             ])
 
 
-class StampedAPITwitterTest(AStampedAPITestCase):
+class StampedAPITwitterHttpTest(AStampedAPIHttpTestCase):
 
     def setUp(self):
         self.twitter = globalTwitter()
@@ -330,7 +330,7 @@ class StampedAPITwitterTest(AStampedAPITestCase):
 ## create one stamped account, link it to twitter account, try to create new stamped twitter account
 #
 
-class StampedAPITwitterCreate(StampedAPITwitterTest):
+class StampedAPITwitterCreate(StampedAPITwitterHttpTest):
 
     def test_invalid_twitter_token_login(self):
         # attempt login with invalid twitter token
@@ -379,7 +379,7 @@ class StampedAPITwitterCreate(StampedAPITwitterTest):
             ])
 
 
-class StampedAPITwitterFind(StampedAPITwitterTest):
+class StampedAPITwitterFind(StampedAPITwitterHttpTest):
     def test_find_by_twitter(self):
         path = "users/find/twitter.json"
         data = {

@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from AStampedAPITestCase    import *
+from AStampedAPIHttpTestCase    import *
 from StampedTestUtils       import *
 from ASimulatedUser         import *
 from AStressTest            import StressTest
@@ -40,7 +40,7 @@ realisticParams = {
     'user_class': RealisticSimulatedUser
 }
 
-class StressTests(AStampedAPITestCase):
+class StressTests(AStampedAPIHttpTestCase):
     def setUp(self):
         self._test = StressTest(self, **realisticParams)
     

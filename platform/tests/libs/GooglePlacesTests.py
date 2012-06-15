@@ -15,7 +15,7 @@ from logs import log, report
 try:
     from libs.GooglePlacesSource        import GooglePlacesSource
     from libs.ExternalSourceController  import ExternalSourceController
-    from AStampedAPITestCase            import *
+    from AStampedAPIHttpTestCase            import *
     from api.Schemas                    import Entity
     from pprint                         import pformat
     from datetime                       import datetime
@@ -25,7 +25,7 @@ except:
 
 _verbose = False
 
-class APlacesSourceTest(AStampedAPITestCase):
+class APlacesSourceHttpTest(AStampedAPIHttpTestCase):
 
     def setUp(self):
         self.source = GooglePlacesSource()
@@ -46,7 +46,7 @@ class APlacesSourceTest(AStampedAPITestCase):
             age = datetime.utcnow() - timestamp
             return age.days == 0
 
-class PlacesSourceEnrichTest(APlacesSourceTest):
+class PlacesSourceEnrichTest(APlacesSourceHttpTest):
 
     def test_luger_enrich(self):
         modified = self.source.enrichEntity(self.entity,self.controller)

@@ -7,7 +7,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from utils                  import lazyProperty
+from framework.FixtureTest import *
+from AStampedAPIHttpTestCase import *
+from api.Schemas import Account
+from MongoStampedAPI import MongoStampedAPI
+
 import logs
 
 CLIENT_ID = DEFAULT_CLIENT_ID
@@ -17,7 +22,45 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # ACCOUNT #
 # ####### #
 
-class StampedAPIAccountTest(AStampedAPITestCase):
+__globalApi = None
+
+def api():
+    global __globalApi
+
+    if __globalApi is None:
+        __globalApi = MongoStampedAPI()
+
+    return __globalApi
+
+
+
+def generateTestAccount():
+    account = Account()
+    account.name = "TestUser"
+    account.email = "TestUser@stamped.com"
+    account.password = "12345"
+    account.screen_name = "TestUser"
+    api().addAccount(account)
+
+
+class StampedAPIAccountUpdateTest(AStampedFixtureTestCase):
+    def setUp(self):
+        account = Account()
+        account.name = "TestUser"
+        account.email = "TestUser@stamped.com"
+        account.password = "12345"
+        account.screen_name = "TestUser"
+        api().addAccount(account)
+
+
+    @fixtureTest(generateLocalDbFn=generateTestAccount)
+    def test_change_name(self):
+        api().getAccount
+        return True
+
+
+
+class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='devbot') 
         self.privacy = False
@@ -25,7 +68,7 @@ class StampedAPIAccountTest(AStampedAPITestCase):
     def tearDown(self):
         self.deleteAccount(self.token)
 
-class StampedAPIAccountSettings(StampedAPIAccountTest):
+class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
     def test_change_name(self):
         path = "account/update.json"
         data = {
@@ -184,7 +227,7 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
 #        self.assertEqual(result['screen_name'], "devbot")
 #        self.assertEqual(result['privacy'], self.privacy)
 
-class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
+class StampedAPIAccountUpdateProfile(StampedAPIAccountHttpTest):
     def test_update_profile(self):
         bio = "My long biography goes here."
         path = "account/update_profile.json"
@@ -195,7 +238,7 @@ class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['bio'], bio)
 
-class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
+class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
     def test_update_profile_image(self):
         path = "account/update_profile_image.json"
         data = {
@@ -215,7 +258,7 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
             result = self.handlePOST(path, data)
 
 
-class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
+class StampedAPIAccountCustomizeStamp(StampedAPIAccountHttpTest):
     def test_customize_stamp(self):
         path = "account/customize_stamp.json"
         data = {
@@ -246,7 +289,7 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
 
 
 
-class StampedAPIAccountInvalid(StampedAPIAccountTest):
+class StampedAPIAccountInvalid(StampedAPIAccountHttpTest):
     def test_blacklist(self):
         with expected_exception():
             self.createAccount('cock')
@@ -296,7 +339,7 @@ class StampedAPIAccountInvalid(StampedAPIAccountTest):
                 self.createAccount('testinv_%s' % index, email=email)
             index += 1
 
-class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
+class StampedAPIAccountCheckAccount(StampedAPIAccountHttpTest):
     def test_check_email_available(self):
         path = "account/check.json"
         data = {
@@ -470,7 +513,7 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
 """
-class StampedAPIAccountChangePassword(StampedAPIAccountTest):
+class StampedAPIAccountChangePassword(StampedAPIAccountHttpTest):
     def test_change_password(self):
         path = "account/change_password.json"
         data = {
@@ -493,7 +536,7 @@ class StampedAPIAccountChangePassword(StampedAPIAccountTest):
         self.assertTrue(len(result['token']['refresh_token']) == 43)
         self.token = result['token']
 
-class StampedAPIAccountAlertSettings(StampedAPIAccountTest):
+class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
     def test_show_settings(self):
         path = "account/alerts/show.json"
         data = {

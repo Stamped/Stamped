@@ -7,11 +7,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # GENERIC CLASSES
 
-class StampedAPIStampCreateTest(AStampedAPITestCase):
+class StampedAPIStampCreateHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         self.entity = self.createEntity(self.tokenA)
@@ -20,7 +20,7 @@ class StampedAPIStampCreateTest(AStampedAPITestCase):
         self.deleteEntity(self.tokenA, self.entity['entity_id'])
         self.deleteAccount(self.tokenA)
 
-class StampedAPIStampConsumeTest(AStampedAPITestCase):
+class StampedAPIStampConsumeHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -38,7 +38,7 @@ class StampedAPIStampConsumeTest(AStampedAPITestCase):
 
 # CREATE STAMP
 
-class StampedAPIStampCreate(StampedAPIStampCreateTest):
+class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
     def _validate_basic_stamp(self, result):
         # Verify stamp object has all necessary attributes
         self.assertTrue('stamp_id' in result)
@@ -124,7 +124,7 @@ class StampedAPIStampCreate(StampedAPIStampCreateTest):
         self.deleteAccount(self.tokenB)
 
 
-class StampedAPIStampsShow(StampedAPIStampConsumeTest):
+class StampedAPIStampsShow(StampedAPIStampConsumeHttpTest):
     def test_show(self):
         path = "stamps/show.json"
         data = { 
@@ -134,7 +134,7 @@ class StampedAPIStampsShow(StampedAPIStampConsumeTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
 
-class StampedAPIStampsRestamp(StampedAPIStampConsumeTest):
+class StampedAPIStampsRestamp(StampedAPIStampConsumeHttpTest):
     def test_restamp(self):
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], blurb='ASDF')
         path = "stamps/show.json"
@@ -147,7 +147,7 @@ class StampedAPIStampsRestamp(StampedAPIStampConsumeTest):
         self.assertEqual(result['contents'][0]['blurb'], 'ASDF')
 
 
-class StampedAPIStampsUserDetails(StampedAPIStampConsumeTest):
+class StampedAPIStampsUserDetails(StampedAPIStampConsumeHttpTest):
     def test_user_details(self):
 
         path = "account/customize_stamp.json"
@@ -260,7 +260,7 @@ class StampedAPIStampsUserDetails(StampedAPIStampConsumeTest):
 #         result = self.handlePOST(path, data)
 #         self.assertTrue(len(result['credits']) == 2)
 
-class StampedAPIStampsLimits(StampedAPIStampConsumeTest):
+class StampedAPIStampsLimits(StampedAPIStampConsumeHttpTest):
     def test_show(self):
         path = "users/show.json"
         data = { 
@@ -326,7 +326,7 @@ class StampedAPIStampsLimits(StampedAPIStampConsumeTest):
         for entity_id in entity_ids:
             self.deleteEntity(self.tokenA, entity_id)
 
-class StampedAPIStampCreditTest(AStampedAPITestCase):
+class StampedAPIStampCreditHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -350,7 +350,7 @@ class StampedAPIStampCreditTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
+class StampedAPIStampsCreditShow(StampedAPIStampCreditHttpTest):
     def test_show(self):
         path = "stamps/show.json"
         data = { 
@@ -370,7 +370,7 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
             )
 
 
-class StampedAPIStampLikesTest(AStampedAPITestCase):
+class StampedAPIStampLikesHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -385,7 +385,7 @@ class StampedAPIStampLikesTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPILikesPass(StampedAPIStampLikesTest):
+class StampedAPILikesPass(StampedAPIStampLikesHttpTest):
     def test_like(self):
         path = "stamps/likes/create.json"
         data = { 
@@ -447,7 +447,7 @@ class StampedAPILikesPass(StampedAPIStampLikesTest):
 
             self.deleteAccount(token)
 
-class StampedAPILikesFail(StampedAPIStampLikesTest):
+class StampedAPILikesFail(StampedAPIStampLikesHttpTest):
     def test_remove(self):
         path = "stamps/likes/remove.json"
         data = { 
@@ -501,7 +501,7 @@ class StampedAPILikesFail(StampedAPIStampLikesTest):
             result = self.handlePOST(path, data)
 
 
-class StampedAPIEntitiesStampedBy(StampedAPIStampConsumeTest):
+class StampedAPIEntitiesStampedBy(StampedAPIStampConsumeHttpTest):
     def test_stampedby_nogroup(self):
         # User B queries the entity User A created and Stamped
         path = "entities/stamped_by.json"

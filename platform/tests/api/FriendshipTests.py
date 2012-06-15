@@ -7,13 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # ########## #
 # FRIENDSHIP #
 # ########## #
 
-class StampedAPIFriendshipTest(AStampedAPITestCase):
+class StampedAPIFriendshipHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -24,7 +24,7 @@ class StampedAPIFriendshipTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
+class StampedAPIFriendshipsCheck(StampedAPIFriendshipHttpTest):
     def test_check_friendship_success(self):
         path = "friendships/check.json"
         data = { 
@@ -67,7 +67,7 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
                    lambda x: self.assertEqual(x['num_followers'], 1), 
         ])
 
-class StampedAPIFriends(StampedAPIFriendshipTest):
+class StampedAPIFriends(StampedAPIFriendshipHttpTest):
     def test_show_friends(self):
         path = "friendships/friends.json"
         data = { 
@@ -78,7 +78,7 @@ class StampedAPIFriends(StampedAPIFriendshipTest):
         self.async(lambda: self.handleGET(path, data), 
                    lambda x: self.assertEqual(len(x['user_ids']), 1))
 
-class StampedAPIFollowers(StampedAPIFriendshipTest):
+class StampedAPIFollowers(StampedAPIFriendshipHttpTest):
     def test_show_followers(self):
         path = "friendships/followers.json"
         data = { 
@@ -89,7 +89,7 @@ class StampedAPIFollowers(StampedAPIFriendshipTest):
         self.async(lambda: self.handleGET(path, data), 
                    lambda x: self.assertEqual(len(x['user_ids']), 1))
 
-class StampedAPIInviteFriend(StampedAPIFriendshipTest):
+class StampedAPIInviteFriend(StampedAPIFriendshipHttpTest):
     def test_invite_friend(self):
         path = "friendships/invite.json"
         data = { 
