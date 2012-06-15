@@ -28,6 +28,9 @@
 @property(nonatomic,copy) NSString *tempImagePath;
 @property(nonatomic,retain) id<STEntity> entity;
 @property(nonatomic,retain) id<STEntitySearchResult> searchResult;
+@property(nonatomic,retain) NSArray *creditUsernames;
+@property(nonatomic,retain) EntityDetailViewController *todoViewController;
+@property(nonatomic,retain) UIButton *todoStampButton;
 @end
 
 @implementation CreateStampViewController
@@ -38,6 +41,9 @@
 @synthesize searchResult=_searchResult;
 @synthesize imageUploader;
 @synthesize tempImagePath;
+@synthesize creditUsernames;
+@synthesize todoViewController;
+@synthesize todoStampButton;
 
 - (void)commonInit {
     
@@ -67,9 +73,13 @@
 
 - (void)dealloc {
     _headerView=nil;
+    _footerView=nil;
+    self.tempImagePath=nil;
+    self.editView=nil;
     self.searchResult=nil;
     self.entity=nil;
     self.imageUploader=nil;
+    self.creditUsernames=nil;
     [super dealloc];
 }
 
@@ -136,6 +146,81 @@
     self.title = [sender isOn] ? @"New To-do" : @"New Stamp";
     [self.navigationController.navigationBar setNeedsDisplay];
     
+    sender.userInteractionEnabled = NO;
+    
+    if ([sender isOn]) {
+        
+        if (self.todoViewController) return;
+        
+        __block EntityDetailViewController *controller;
+        if (self.searchResult) {
+            controller = [[EntityDetailViewController alloc] initWithSearchID:self.searchResult.searchID];
+        } else {
+            controller = [[EntityDetailViewController alloc] initWithEntityID:self.entity.entityID];
+        }
+        
+        __block UIView *view = controller.view;
+        [self.view addSubview:view];
+        [controller.toolbar setHidden:YES];
+
+        CGRect frame = self.view.bounds;
+        frame.origin.y = self.view.bounds.size.height;
+        view.frame = frame;
+        frame.origin.y = 0.0f;
+        self.todoViewController = controller;
+        [controller release];
+        
+        UIImage *image = [UIImage imageNamed:@"create_stamp_btn.png"];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        [button addTarget:self action:@selector(addTodo:) forControlEvents:UIControlEventTouchUpInside];
+        button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
+        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:image.size.height] forState:UIControlStateNormal];
+        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
+        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [button setTitle:@"Add To-Do" forState:UIControlStateNormal];
+        [view addSubview:button];
+        button.frame = CGRectMake((frame.size.width-106.0f), frame.size.height - (image.size.height+8.0f), 96.0f, image.size.height);
+        self.todoStampButton = button;
+        
+        [UIView animateWithDuration:0.3f animations:^{
+        
+            view.frame = frame;
+            
+        } completion:^(BOOL finished) {
+            sender.userInteractionEnabled = YES;
+        }];
+
+        
+    } else {
+        
+        if (self.todoViewController) {
+            
+            __block UIView *view = self.todoViewController.view;
+            CGRect frame = self.view.bounds;
+            frame.origin.y = self.view.bounds.size.height;
+
+            [UIView animateWithDuration:0.3f animations:^{
+                
+                view.frame = frame;
+                
+            } completion:^(BOOL finished) {
+                
+                [self.todoStampButton removeFromSuperview];
+                self.todoStampButton = nil;
+
+                [view removeFromSuperview];
+                self.todoViewController = nil;
+                sender.userInteractionEnabled = YES;
+
+            }];
+        }
+        
+        
+    }
+    
+    
+    
+    
 }
 
 - (void)cancel:(id)sender {
@@ -144,6 +229,13 @@
     actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
     [actionSheet showInView:self.view];
     [actionSheet release];
+    
+}
+
+- (void)addTodo:(id)sender {
+    
+    STStampSwitch *stampSwitch = (STStampSwitch*)self.navigationItem.rightBarButtonItem.customView;
+    stampSwitch.on = NO;
     
 }
 
@@ -163,8 +255,12 @@
 
 #pragma mark - CreditPickerViewControllerDelegate
 
-- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithItems:(NSArray*)items {
+- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsernames:(NSArray*)usernames {
+    
+    self.creditUsernames = usernames;
+    [self.editView setupWithCreditUsernames:self.creditUsernames];
     [self dismissModalViewControllerAnimated:YES];
+
 }
 
 - (void)creditPickerViewControllerCancelled:(CreditPickerViewController*)controller {
@@ -197,14 +293,26 @@
     stampNew.entityID = self.entity.entityID;
     stampNew.searchID = self.searchResult.searchID;
     stampNew.tempImageURL = self.tempImagePath;
+    
+    if (self.creditUsernames && [self.creditUsernames count] > 0) {
+        stampNew.credit = [self.creditUsernames componentsJoinedByString:@","];
+    }
 
     [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
         
         if (stamp) {
+            
            // PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
             STPostStampViewController *controller = [[[STPostStampViewController alloc] initWithStamp:stamp] autorelease];
             controller.navigationItem.hidesBackButton = YES;
             [self.navigationController pushViewController:controller animated:YES];
+            
+        } else {
+            
+            [activityView removeFromSuperview];
+            button.titleLabel.alpha = 1.0f;
+            self.view.userInteractionEnabled = YES;
+            
         }
         
     }];
@@ -314,10 +422,12 @@
         [self.editView.imageView setUploading:YES];
         [self.editView layoutScrollView];
         
+        [self.footerView setUploading:YES animated:YES];
         [self.imageUploader startWithProgress:^(float progress) {
             
         } completion:^(NSString *path, BOOL finished) {
             
+            [self.footerView setUploading:NO animated:YES];
             self.tempImagePath = path;
             [self.editView.imageView setUploading:NO];
 

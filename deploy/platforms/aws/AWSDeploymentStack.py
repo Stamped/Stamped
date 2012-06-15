@@ -339,8 +339,8 @@ class AWSDeploymentStack(ADeploymentStack):
         
         #utils.log("[%s] attempting to find primary db node" % self)
         maxdelay = 16
-        delay = 1
-        offset = 0
+        delay    = 1
+        offset   = 0
         
         while True:
             status = self._get_replset_status(offset=offset)
@@ -706,7 +706,7 @@ class AWSDeploymentStack(ADeploymentStack):
             ret = self.run_mongo_cmd('rs.reconfig(%s, {force : %s})' % 
                                      (confs, str(force).lower()), slave_okay=force)
             
-            if 'ok' in ret and 1 == ret['ok']:
+            if ret is not None and 'ok' in ret and 1 == ret['ok']:
                 utils.log("[%s] successfully reconfigured replica set %s" % (self, status.set))
             else:
                 msg = "[%s] error reconfiguring replica set %s" % (self, status.set)

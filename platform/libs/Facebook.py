@@ -154,7 +154,7 @@ class Facebook(object):
             result = self._get(app_access_token, path)
             users = result['data']
             for user in users:
-                logs.info(self.deleteTestUser(app_access_token, user['id']))
+                self.deleteTestUser(app_access_token, user['id'])
             if 'paging' in result and 'next' in result['paging']:
                 path = result['paging']['next']
                 url = urlparse.urlparse(result['paging']['next'])

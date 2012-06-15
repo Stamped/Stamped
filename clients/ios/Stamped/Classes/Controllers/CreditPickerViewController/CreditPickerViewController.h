@@ -17,6 +17,6 @@
 
 @end
 @protocol CreditPickerViewControllerDelegate
-- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithItems:(NSArray*)items;
+- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsernames:(NSArray*)usernames;
 - (void)creditPickerViewControllerCancelled:(CreditPickerViewController*)controller;
 @end

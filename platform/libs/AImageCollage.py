@@ -6,9 +6,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import math, os, pprint, utils
+import image_utils, math, utils
 
-from abc            import ABCMeta, abstractmethod, abstractproperty
+from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
 from api.S3ImageDB  import S3ImageDB
@@ -30,7 +30,7 @@ class AImageCollage(object):
             if entity.images is not None and len(entity.images) > 0 and len(entity.images[0].sizes) > 0:
                 image_url = entity.images[0].sizes[0].url
                 
-                if image_url is not None:
+                if image_utils.is_valid_image_url(image_url):
                     image_urls.append(image_url)
         
         return self.get_images(image_urls)
@@ -57,11 +57,9 @@ class AImageCollage(object):
         
         return self.generate(images, user)
     
-    @abstractmethod
     def generate(self, images, user=None):
         raise NotImplementedError
     
-    @abstractmethod
     def get_cell_bounds_func(self, size, num_cols, num_rows, i, j, image):
         raise NotImplementedError
     
@@ -167,45 +165,64 @@ class AImageCollage(object):
                 else:
                     canvas.paste(cell, cell_pos)
                 
-                # overlay user stamp logo on top of each entity image
-                logo  = get_user_logo(logo_size)
-                canvas.paste(logo, (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1]), logo)
+                # overlay user's stamp logo on top of each entity image
+                logo     = get_user_logo(logo_size)
+                logo_box = (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1])
+                
+                canvas.paste(logo, logo_box, logo)
             
-            canvas = self._apply_postprocessing(canvas)
+            canvas = self._apply_postprocessing(canvas, user)
             output.append(canvas)
         
         return output
     
-    def _apply_postprocessing(self, image):
-        return image.convert("L")
+    def _apply_postprocessing(self, image, user):
+        size   = image.size
+        alpha  = 191
+        alphaf = alpha / 255.0
+        stops  = [
+            (
+                2.0, 
+                image_utils.parse_rgb(user.color_primary,   alpha), 
+                image_utils.parse_rgb(user.color_secondary, alpha)
+            ), 
+        ]
+        
+        bg = image.convert("L").convert("RGB")
+        fg = image_utils.get_gradient_image(size, stops)
+        
+        # combine bg and fg layers via screen blend mode with 75% opacity on fg layer
+        # see this wikipedia article for a description of screen blend mode:
+        # http://en.wikipedia.org/wiki/Blend_modes
+        output     = Image.new("RGB", size)
+        data       = []
+        blend_func = lambda b, f: image_utils.clamp(255.0 - (((255.0 - alphaf * f) * (255.0 - b)) / 255.0))
+        
+        for y in xrange(size[1]):
+            for x in xrange(size[0]):
+                pos   = (x, y)
+                bg_px = bg.getpixel(pos)
+                fg_px = fg.getpixel(pos)
+                
+                color = tuple(blend_func(bg_px[i], fg_px[i]) for i in xrange(len(bg_px)))
+                
+                data.append(color)
+        
+        output.putdata(data)
+        return output
     
     def _paste_image_with_drop_shadow(self, canvas, image, pos, size=None, iterations=10, color=(0,0,0,255)):
         if size is None:
             size = int(max(2, canvas.size[0] / 64.0))
         
-        shadow = self._get_drop_shadow(image.size, size, iterations, color)
+        shadow = self.get_drop_shadow(image.size, size, iterations, color)
         
         canvas.paste(shadow, (pos[0] - size, pos[1] - size), shadow)
         canvas.paste(image, pos)
     
-    # note: shadow images are expensive to generate, so we cache them for reuse
-    @lru_cache(maxsize=64)
-    def _get_drop_shadow(self, size, shadow_size, iterations, color):
-        width   = size[0] + shadow_size * 2
-        height  = size[1] + shadow_size * 2
-        
-        shadow0 = Image.new("RGBA", (width, height), (125,125,125,0))
-        shadow1 = Image.new("RGBA", (size[0], size[1]), color)
-        
-        shadow0.paste(shadow1, (shadow_size, shadow_size))
-        
-        for i in xrange(iterations):
-            shadow0 = shadow0.filter(ImageFilter.BLUR)
-        
-        return shadow0
-    
     def _get_output_sizes(self):
         return [
+            (1024, 256), 
             (940, 256), 
             (512, 128), 
             (256, 64), 
@@ -213,4 +230,19 @@ class AImageCollage(object):
     
     def __str__(self):
         return self.__class__.__name__
+    
+    @lru_cache(maxsize=64)
+    def get_drop_shadow(self, size, shadow_size, iterations, color):
+        width   = size[0] + shadow_size * 2
+        height  = size[1] + shadow_size * 2
+        
+        shadow0 = Image.new("RGBA", (width, height), (125,125,125,0))
+        shadow1 = Image.new("RGBA", size, color)
+        
+        shadow0.paste(shadow1, (shadow_size, shadow_size))
+        
+        for i in xrange(iterations):
+            shadow0 = shadow0.filter(ImageFilter.BLUR)
+        
+        return shadow0
 

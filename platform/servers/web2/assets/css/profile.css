@@ -106,11 +106,62 @@ footer,
   top: -100%;
   left: 0;
   display: none;
-  background: url(/assets/img/covers/default_cover_temp.png) repeat;
+  overflow: hidden;
   width: 100%;
   height: 100%;
   /*.transition(top, 0.5s, linear);*/
 
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .header-blur {
+  background: url(/assets/img/covers/default_cover_temp.png) repeat;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -o-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(20deg);
+  -moz-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(20deg);
+  -o-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(20deg);
+  -ms-transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(20deg);
+  transform: perspective(600) scalex(1.25) scaley(1.25) rotatex(20deg);
+  -webkit-transition: -webkit-transform 0.3s ease-out, -webkit-filter 0.8s ease-out;
+  -moz-transition: -moz-transform 0.3s ease-out, filter 0.8s ease-out;
+  -ms-transition: -ms-transform 0.3s ease-out, filter 0.8s ease-out;
+  -o-transition: -o-transform 0.3s ease-out, filter 0.8s ease-out;
+  transition: transform 0.3s ease-out, filter 0.8s ease-out;
+  /*
+                    -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                       -moz-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                        -ms-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                         -o-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
+                            transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);*/
+
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .header-overlay {
+  background: url(/assets/img/covers/default_cover_temp.png) repeat;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 1;
+  -webkit-transition: opacity 0.8s ease-out;
+  -moz-transition: opacity 0.8s ease-out;
+  -ms-transition: opacity 0.8s ease-out;
+  -o-transition: opacity 0.8s ease-out;
+  transition: opacity 0.8s ease-out;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body:hover .header-blur {
+  filter: none;
+  -webkit-filter: blur(0);
+  -webkit-transform: perspective(600) rotatex(0deg);
+  -moz-transform: perspective(600) rotatex(0deg);
+  -o-transform: perspective(600) rotatex(0deg);
+  -ms-transform: perspective(600) rotatex(0deg);
+  transform: perspective(600) rotatex(0deg);
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth {
   padding: 34px 0;
@@ -208,23 +259,23 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs .subnav .subnav_button2 {
   background-position: -80px 0;
 }
-.profile-header-wrapper .profile-header .profile-content-page .header-category-place {
+.profile-header-wrapper .profile-header .profile-content-page .header-category-place .header-blur {
   background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
   background-size: 100% 100%;
 }
-.profile-header-wrapper .profile-header .profile-content-page .header-category-music {
+.profile-header-wrapper .profile-header .profile-content-page .header-category-music .header-blur {
   background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
   background-size: 100% 100%;
 }
-.profile-header-wrapper .profile-header .profile-content-page .header-category-book {
+.profile-header-wrapper .profile-header .profile-content-page .header-category-book .header-blur {
   background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
   background-size: 100% 100%;
 }
-.profile-header-wrapper .profile-header .profile-content-page .header-category-film {
+.profile-header-wrapper .profile-header .profile-content-page .header-category-film .header-blur {
   background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
   background-size: 100% 100%;
 }
-.profile-header-wrapper .profile-header .profile-content-page .header-category-other {
+.profile-header-wrapper .profile-header .profile-content-page .header-category-app .header-blur {
   background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
   background-size: 100% 100%;
 }
@@ -276,6 +327,12 @@ footer,
 }
 .stamp-count {
   display: none;
+}
+.profile-header-body:hover .header-overlay {
+  opacity: 0 !important;
+}
+.header-category-default:hover .header-overlay {
+  opacity: 1 !important;
 }
 body.default .header-category-default {
   position: relative !important;
@@ -346,19 +403,19 @@ body.film .header-category-film {
 body.film .stamp-count-film {
   display: block !important;
 }
-body.other .header-category-default {
+body.app .header-category-default {
   position: absolute !important;
   display: none !important;
   top: -100% !important;
   z-index: 50 !important;
 }
-body.other .header-category-other {
+body.app .header-category-app {
   position: relative !important;
   display: block !important;
   top: 0 !important;
   z-index: 51 !important;
 }
-body.other .stamp-count-other {
+body.app .stamp-count-app {
   display: block !important;
 }
 /* **************************************************************************
@@ -464,7 +521,7 @@ body.other .stamp-count-other {
 body.music .stamp-gallery-view-map,
 body.book .stamp-gallery-view-map,
 body.film .stamp-gallery-view-map,
-body.other .stamp-gallery-view-map {
+body.app .stamp-gallery-view-map {
   display: none;
 }
 /* **************************************************************************
@@ -758,9 +815,9 @@ a.lightbox .zoom {
   background: url(/assets/img/entity_fallbacks/book.png) no-repeat;
   height: 208px;
 }
-.stamp-preview .stamp-category-other .stamp-subcategory-app .stamp-icon,
-.stamp-preview-raw .stamp-category-other .stamp-subcategory-app .stamp-icon {
-  background: url(/assets/img/entity_fallbacks/book.png) no-repeat;
+.stamp-preview .stamp-category-app .stamp-subcategory-app .stamp-icon,
+.stamp-preview-raw .stamp-category-app .stamp-subcategory-app .stamp-icon {
+  background: url(/assets/img/entity_fallbacks/app.png) no-repeat;
   height: 212px;
 }
 .blurb,
@@ -954,8 +1011,8 @@ a.lightbox .zoom {
 #stamp-category-nav-bar ol li a {
   position: relative;
   display: block;
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   overflow: visible;
   text-overflow: visible;
   cursor: pointer;
@@ -968,7 +1025,7 @@ a.lightbox .zoom {
 
 }
 #stamp-category-nav-bar ol li a .selection {
-  background: url(/assets/img/sidenav_sprite.png) no-repeat -194px -6px;
+  background: url(/assets/img/sidenav_sprite.png) no-repeat -204px -3px;
   position: absolute;
   width: 100%;
   height: 100%;
@@ -982,8 +1039,8 @@ a.lightbox .zoom {
 #stamp-category-nav-bar ol li a .icon {
   background: url(/assets/img/sidenav_sprite.png) no-repeat;
   position: absolute;
-  left: 13px;
-  top: 13px;
+  left: 15px;
+  top: 15px;
   -webkit-transform: scale(0.8, 0.8);
   -moz-transform: scale(0.8, 0.8);
   -o-transform: scale(0.8, 0.8);
@@ -1050,17 +1107,17 @@ a.lightbox .zoom {
   transform: translatex(0);
 }
 #stamp-category-nav-bar ol li a:hover .selection {
-  background-position: -194px -6px;
+  background-position: -204px -3px;
   opacity: 1;
   -webkit-transition: opacity 0s linear;
   -moz-transition: opacity 0s linear;
   -ms-transition: opacity 0s linear;
   -o-transition: opacity 0s linear;
   transition: opacity 0s linear;
-  background-position: -255px -6px;
+  background-position: -267px -3px;
 }
 #stamp-category-nav-bar ol li a:active .selection {
-  background-position: -194px -6px;
+  background-position: -204px -3px;
   opacity: 1;
   -webkit-transition: opacity 0s linear;
   -moz-transition: opacity 0s linear;
@@ -1069,89 +1126,89 @@ a.lightbox .zoom {
   transition: opacity 0s linear;
 }
 #stamp-category-nav-bar ol li.default .icon {
-  background-position: 0 0;
+  background-position: -3px -3px;
 }
 #stamp-category-nav-bar ol li.default a:hover .icon {
-  background-position: 0 -64px;
+  background-position: -3px -75px;
 }
 #stamp-category-nav-bar ol li.default a:active .icon {
-  background-position: 0 -32px;
+  background-position: -3px -39px;
 }
 #stamp-category-nav-bar ol li.place .icon {
-  background-position: -32px 0;
+  background-position: -36px -3px;
 }
 #stamp-category-nav-bar ol li.place a:hover .icon {
-  background-position: -32px -64px;
+  background-position: -36px -75px;
 }
 #stamp-category-nav-bar ol li.place a:active .icon {
-  background-position: -32px -32px;
+  background-position: -36px -39px;
 }
 #stamp-category-nav-bar ol li.music .icon {
-  background-position: -64px 0;
+  background-position: -69px -3px;
 }
 #stamp-category-nav-bar ol li.music a:hover .icon {
-  background-position: -64px -64px;
+  background-position: -69px -75px;
 }
 #stamp-category-nav-bar ol li.music a:active .icon {
-  background-position: -64px -32px;
+  background-position: -69px -39px;
 }
 #stamp-category-nav-bar ol li.book .icon {
-  background-position: -96px 0;
+  background-position: -102px -3px;
 }
 #stamp-category-nav-bar ol li.book a:hover .icon {
-  background-position: -96px -64px;
+  background-position: -102px -75px;
 }
 #stamp-category-nav-bar ol li.book a:active .icon {
-  background-position: -96px -32px;
+  background-position: -102px -39px;
 }
 #stamp-category-nav-bar ol li.film .icon {
-  background-position: -128px 0;
+  background-position: -135px -3px;
 }
 #stamp-category-nav-bar ol li.film a:hover .icon {
-  background-position: -128px -64px;
+  background-position: -135px -75px;
 }
 #stamp-category-nav-bar ol li.film a:active .icon {
-  background-position: -128px -32px;
+  background-position: -135px -39px;
 }
-#stamp-category-nav-bar ol li.other .icon {
-  background-position: -160px 0;
+#stamp-category-nav-bar ol li.app .icon {
+  background-position: -168px -3px;
 }
-#stamp-category-nav-bar ol li.other a:hover .icon {
-  background-position: -160px -64px;
+#stamp-category-nav-bar ol li.app a:hover .icon {
+  background-position: -168px -75px;
 }
-#stamp-category-nav-bar ol li.other a:active .icon {
-  background-position: -160px -32px;
+#stamp-category-nav-bar ol li.app a:active .icon {
+  background-position: -168px -39px;
 }
 body.default #stamp-category-nav-bar ol li.default div {
-  background-position: 0 -32px;
+  background-position: -3px -39px;
 }
 body.place #stamp-category-nav-bar ol li.place div {
-  background-position: -32px -32px;
+  background-position: -36px -39px;
 }
 body.music #stamp-category-nav-bar ol li.music div {
-  background-position: -64px -32px;
+  background-position: -69px -39px;
 }
 body.book #stamp-category-nav-bar ol li.book div {
-  background-position: -96px -32px;
+  background-position: -102px -39px;
 }
 body.film #stamp-category-nav-bar ol li.film div {
-  background-position: -128px -32px;
+  background-position: -135px -39px;
 }
-body.other #stamp-category-nav-bar ol li.other div {
-  background-position: -160px -32px;
+body.app #stamp-category-nav-bar ol li.app div {
+  background-position: -168px -39px;
 }
 body.default #stamp-category-nav-bar ol li.default a,
 body.place #stamp-category-nav-bar ol li.place a,
 body.music #stamp-category-nav-bar ol li.music a,
 body.book #stamp-category-nav-bar ol li.book a,
 body.film #stamp-category-nav-bar ol li.film a,
-body.other #stamp-category-nav-bar ol li.other a,
+body.app #stamp-category-nav-bar ol li.app a,
 body.default #stamp-category-nav-bar ol li.default a:hover,
 body.place #stamp-category-nav-bar ol li.place a:hover,
 body.music #stamp-category-nav-bar ol li.music a:hover,
 body.book #stamp-category-nav-bar ol li.book a:hover,
 body.film #stamp-category-nav-bar ol li.film a:hover,
-body.other #stamp-category-nav-bar ol li.other a:hover {
+body.app #stamp-category-nav-bar ol li.app a:hover {
   pointer-events: none;
   cursor: default;
 }
@@ -1160,13 +1217,13 @@ body.place #stamp-category-nav-bar ol li.place a .icon,
 body.music #stamp-category-nav-bar ol li.music a .icon,
 body.book #stamp-category-nav-bar ol li.book a .icon,
 body.film #stamp-category-nav-bar ol li.film a .icon,
-body.other #stamp-category-nav-bar ol li.other a .icon,
+body.app #stamp-category-nav-bar ol li.app a .icon,
 body.default #stamp-category-nav-bar ol li.default a:hover .icon,
 body.place #stamp-category-nav-bar ol li.place a:hover .icon,
 body.music #stamp-category-nav-bar ol li.music a:hover .icon,
 body.book #stamp-category-nav-bar ol li.book a:hover .icon,
 body.film #stamp-category-nav-bar ol li.film a:hover .icon,
-body.other #stamp-category-nav-bar ol li.other a:hover .icon {
+body.app #stamp-category-nav-bar ol li.app a:hover .icon {
   -webkit-transform: scale(1, 1);
   -moz-transform: scale(1, 1);
   -o-transform: scale(1, 1);
@@ -1178,14 +1235,14 @@ body.place #stamp-category-nav-bar ol li.place a .selection,
 body.music #stamp-category-nav-bar ol li.music a .selection,
 body.book #stamp-category-nav-bar ol li.book a .selection,
 body.film #stamp-category-nav-bar ol li.film a .selection,
-body.other #stamp-category-nav-bar ol li.other a .selection,
+body.app #stamp-category-nav-bar ol li.app a .selection,
 body.default #stamp-category-nav-bar ol li.default a:hover .selection,
 body.place #stamp-category-nav-bar ol li.place a:hover .selection,
 body.music #stamp-category-nav-bar ol li.music a:hover .selection,
 body.book #stamp-category-nav-bar ol li.book a:hover .selection,
 body.film #stamp-category-nav-bar ol li.film a:hover .selection,
-body.other #stamp-category-nav-bar ol li.other a:hover .selection {
-  background-position: -194px -6px;
+body.app #stamp-category-nav-bar ol li.app a:hover .selection {
+  background-position: -204px -3px;
   opacity: 1;
   -webkit-transition: opacity 0s linear;
   -moz-transition: opacity 0s linear;
@@ -1198,13 +1255,13 @@ body.place #stamp-category-nav-bar ol li.place a .desc,
 body.music #stamp-category-nav-bar ol li.music a .desc,
 body.book #stamp-category-nav-bar ol li.book a .desc,
 body.film #stamp-category-nav-bar ol li.film a .desc,
-body.other #stamp-category-nav-bar ol li.other a .desc,
+body.app #stamp-category-nav-bar ol li.app a .desc,
 body.default #stamp-category-nav-bar ol li.default a:hover .desc,
 body.place #stamp-category-nav-bar ol li.place a:hover .desc,
 body.music #stamp-category-nav-bar ol li.music a:hover .desc,
 body.book #stamp-category-nav-bar ol li.book a:hover .desc,
 body.film #stamp-category-nav-bar ol li.film a:hover .desc,
-body.other #stamp-category-nav-bar ol li.other a:hover .desc {
+body.app #stamp-category-nav-bar ol li.app a:hover .desc {
   opacity: 1;
   font-weight: 700;
   -webkit-transform: translatex(0);

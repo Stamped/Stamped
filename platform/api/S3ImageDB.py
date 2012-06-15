@@ -151,7 +151,7 @@ class S3ImageDB(AImageDB):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
         
-        image    = getWebImage(image_url, "profile")
+        image    = self.getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
         
@@ -202,7 +202,7 @@ class S3ImageDB(AImageDB):
             image_url is the temp url
         """
         
-        image    = getWebImage(image_url, "stamp")
+        image    = self.getWebImage(image_url, "stamp")
         prefix   = 'stamps/%s' % imageId
 
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
@@ -471,7 +471,7 @@ class S3ImageDB(AImageDB):
             out.seek(0)
             
             image = Image.open(out)
-            __dir__ = os.path.dirname(os.path.abspath(__file__))
+            __dir__  = os.path.dirname(os.path.abspath(__file__))
             filepath = os.path.join(__dir__, mask)
             mask = Image.open(filepath).convert('RGBA').split()[3]
             image.putalpha(mask)

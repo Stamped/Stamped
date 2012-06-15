@@ -20,9 +20,9 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # ACCOUNT #
 # ####### #
 
-#TODO: Replace these tokens with a test account!!
 TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
 TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
+TWITTER_USER_A0_ID         = "595895658"
 
 TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
 TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
@@ -52,6 +52,9 @@ class StampedAPILinkedAccountTest(AStampedAPITestCase):
     def _deleteFacebookTestUser(self, fb_user_token, fb_user_id):
         return self.fb.deleteTestUser(fb_user_token, fb_user_id)
 
+    def _clearFacebookTestUsers(self):
+        return self.fb.clearTestUsers()
+
 
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='UserA')
@@ -73,7 +76,7 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountTest):
         # add the linked account
         data = {
             'service_name'   : 'twitter',
-            'user_id'        : 'test_user_a',
+            'user_id'        : TWITTER_USER_A0_ID,
             'screen_name'    : 'test_user_a',
             'token'          : TWITTER_USER_A0_TOKEN,  #'test_twitter_token',
             'secret'         : TWITTER_USER_A0_SECRET, #'test_twitter_secret',
@@ -94,7 +97,7 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountTest):
         # add the linked account
         data = {
             'service_name'   : 'facebook',
-            'user_id'        : 'fbusera',
+            'user_id'        : self.fb_user_id_a,
             'screen_name'    : 'fbusera',
             'name'           : 'Test User',
             'token'          : self.fb_user_token_a,
@@ -164,7 +167,7 @@ class StampedAPILinkedAccountUpgrade(AStampedAPITestCase):
                     "netflix_secret" : "abcdefghijkl",
                     "netflix_user_id" : "abcdefghijsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-"
                 },
-            },
+                },
             "location" : "New York",
             "password" : "S3Flv0fae32460b5aa107be10c7d71885a4e28",
             "phone" : 1234567890,
@@ -181,7 +184,7 @@ class StampedAPILinkedAccountUpgrade(AStampedAPITestCase):
                 "num_stamps_total" : 65,
                 "num_friends" : 70
             },
-        }
+            }
         testuser.update(oldFormatAccountData)
 
         self._accountDB._updateMongoDocument(testuser)
@@ -192,10 +195,10 @@ class StampedAPILinkedAccountUpgrade(AStampedAPITestCase):
         self.assertEqual(linkedAccounts['facebook'], { 'service_name': 'facebook', 'user_id' : '1234567', 'name': 'Test User'})
         self.assertEqual(linkedAccounts['netflix'],
                 {
-                    'service_name' : 'netflix',
-                    'token' : 'abcdefghijkl_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0',
-                    'secret' : 'abcdefghijkl',
-                    'user_id': 'abcdefghijsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-',
+                'service_name' : 'netflix',
+                'token' : 'abcdefghijkl_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0',
+                'secret' : 'abcdefghijkl',
+                'user_id': 'abcdefghijsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-',
                 }
         )
 
@@ -231,8 +234,9 @@ class StampedAPIFacebookTest(StampedAPILinkedAccountTest):
         self.deleteAccount(self.sUserToken)
         self.deleteAccount(self.fUserBToken)
         self.deleteAccount(self.fUserAToken)
-        self.assertTrue(self._deleteFacebookTestUser(self.fb_user_token_b, self.fb_user_id_b))
-        self.assertTrue(self._deleteFacebookTestUser(self.fb_user_token_a, self.fb_user_id_a))
+        self._clearFacebookTestUsers()
+    #        self.assertTrue(self._deleteFacebookTestUser(self.fb_user_token_b, self.fb_user_id_b))
+#        self.assertTrue(self._deleteFacebookTestUser(self.fb_user_token_a, self.fb_user_id_a))
 
 ## create two stamped accounts, give them both linked facebook id, and try to create a facebook account
 ## create one stamped account, link it to facebook account, try to create new stamped facebook account
@@ -283,19 +287,18 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
         self.assertEqual(result[0]['user_id'], self.fUserB['user_id'])
 
     def test_friend_joined_activity_alert(self):
-        result = self.showActivity(self.fUserAToken)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['verb'], 'friend_facebook')
-        self.assertEqual(result[0]['subjects'][0]['user_id'], self.fUserB['user_id'])
+        self.async(lambda: self.showActivity(self.fUserAToken), [
+            lambda x: self.assertEqual(len(x), 1),
+            lambda x: self.assertEqual(x[0]['verb'], 'friend_facebook'),
+            lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.fUserB['user_id']),
+            ])
 
-    def test_friend_joined_again(self):
         # Make sure that another activity alert is not sent
         self.deleteAccount(self.fUserBToken)
         (self.fUserB, self.fUserBToken) = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
-        result = self.showActivity(self.fUserAToken)
-        import pprint
-        pprint.pprint(result)
-        self.assertEqual(len(result), 1)
+        self.async(lambda: self.showActivity(self.fUserAToken), [
+            lambda x: self.assertEqual(len(x), 1),
+            ])
 
 
 class StampedAPITwitterTest(AStampedAPITestCase):
@@ -361,15 +364,14 @@ class StampedAPITwitterCreate(StampedAPITwitterTest):
         self.assertEqual(result['user']['user_id'], self.twUserA['user_id'])
 
     def test_friend_joined_activity_alert(self):
-        result = self.showActivity(self.twUserAToken)
         self.async(lambda: self.showActivity(self.twUserAToken), [
             lambda x: self.assertEqual(len(x), 1),
             lambda x: self.assertEqual(x[0]['verb'], 'friend_twitter'),
             lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.twUserB['user_id']),
-        ])
+            ])
 
-    def test_friend_joined_again(self):
-        # Make sure that another activity alert is not sent
+        # Test friend joined again... It is important to run this only after the previous tests have passed, as otherwise
+        #  the activity item may never get added to begin with
         self.deleteAccount(self.twUserBToken)
         (self.twUserB, self.twUserBToken) = self.createTwitterAccount(self.tw_user_b_token, self.tw_user_b_secret, name='twUserB')
         self.async(lambda: self.showActivity(self.twUserAToken), [
@@ -385,14 +387,13 @@ class StampedAPITwitterFind(StampedAPITwitterTest):
             "user_token"    : TWITTER_USER_A0_TOKEN,
             "user_secret"   : TWITTER_USER_A0_SECRET,
             }
-        result = self.handlePOST(path, data)
+        self.async(lambda: self.handlePOST(path, data), [
+                lambda x: self.assertEqual(len(x), 1),
+                lambda x: self.assertEqual(x[0]['user_id'], self.twUserB['user_id']),
+            ])
 
-        self.assertLength(result, 1)
-        self.assertEqual(result[0]['user_id'], self.twUserB['user_id'])
 
-
-
-    ### TESTS TO ADD:
+        ### TESTS TO ADD:
 # Change bio from string to None
 # Upload image data for avatar
 # Test privacy settings

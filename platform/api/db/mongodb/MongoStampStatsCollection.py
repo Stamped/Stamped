@@ -28,6 +28,7 @@ class MongoStampStatsCollection(AMongoCollection):
         self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
         self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
                                         ('lng', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING) ])
 
     ### PUBLIC
     

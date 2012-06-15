@@ -42,6 +42,9 @@
 
 
 TODO:
+    * FIX CORS WebGL canvas issue
+        * texImage2D
+        * http://blog.jacobelder.com/2012/05/3-problems-aws-needs-to-address/
     * generic JS-reliance class w/ display: none and display: block in head initialization if JS is supported
     * align stamp-gallery with profile header
     * experiment w/ subcategory filters that slide out from category filter navbar

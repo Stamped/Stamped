@@ -67,7 +67,7 @@ static id __instance;
              user_about_me (for bio)
              */
             
-            [self.facebook authorize:[NSArray arrayWithObjects:@"user_about_me", @"user_location", @"email", @"publish_stream", nil]];
+            [self.facebook authorize:[NSArray arrayWithObjects:@"user_about_me", @"user_location", @"email", @"publish_stream", @"publish_actions", nil]];
         }
         
     } else {
