@@ -194,7 +194,7 @@ class StampedAuth(AStampedAuth):
 
     def verifyTwitterUserCredentials(self, clientId, user_token, user_secret):
         try:
-            tw_user = self._twitter.verifyCredentials(user_token, user_secret)
+            tw_user = self._twitter.getUserInfo(user_token, user_secret)
         except StampedInputError as e:
             raise StampedHTTPError('twitter_login_failed', 400, e.message)
 
@@ -533,6 +533,17 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid token"
             logs.warning(msg)
             raise StampedAuthError("invalid_token", msg)
+
+    def ensureEamilAlertTokenForUser(self, userId):
+        token = self._emailAlertDB.getTokensForUser(userId)
+
+        if token.user_id != userId:
+            try:
+                token = self.addEmailAlertToken(userId)
+            except:
+                logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+                return None
+        return token
 
     def ensureEmailAlertTokensForUsers(self, userIds):
         tokens = self._emailAlertDB.getTokensForUsers(userIds)

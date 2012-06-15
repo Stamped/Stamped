@@ -184,6 +184,7 @@ class EntityStats(Schema):
         cls.addProperty('entity_id',                        basestring, required=True)
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
+        cls.addPropertyList('popular_stamps',               basestring)
 
 
 # #### #
@@ -367,6 +368,20 @@ class TwitterAccountNew(Schema):
         cls.addProperty('email',                            basestring)#, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
         cls.addProperty('phone',                            int)
+
+        cls.addProperty('bio',                              basestring)
+        cls.addProperty('website',                          basestring)
+        cls.addProperty('location',                         basestring)
+        cls.addProperty('color_primary',                    basestring)
+        cls.addProperty('color_secondary',                  basestring)
+
+
+class AccountUpdateForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('name',                             basestring)
+        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
@@ -1387,7 +1402,7 @@ class RawTodo(Schema):
     def setSchema(cls):
         cls.addProperty('todo_id',                          basestring)
         cls.addProperty('user_id',                          basestring, required=True)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addPropertyList('source_stamp_ids',             basestring)
         cls.addProperty('stamp_id',                         basestring)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
@@ -1503,6 +1518,9 @@ class Activity(Schema):
         result.benefit      = self.benefit
         result.timestamp    = self.timestamp
         result.personal     = personal
+        result.header       = self.header
+        result.body         = self.body
+        result.footer       = self.footer
 
         if self.subjects is not None:
             subjects = []
@@ -1577,7 +1595,7 @@ class TimeSlice(Schema):
         
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, friends, fof, popular
+        cls.addProperty('scope',                            basestring) # me, friends, fof, popular, user
 
 class SearchSlice(Schema):
     @classmethod

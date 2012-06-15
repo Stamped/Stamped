@@ -12,7 +12,7 @@ import os, time, zlib, struct, array, random, urllib2
 from gevent.pool import Pool
 
 try:
-    import Image, ImageFile
+    import PIL, Image, ImageFile
 except:
     utils.printException()
     pass
@@ -121,7 +121,7 @@ class S3ImageDB(AImageDB):
         }
     
     def addProfileImage(self, screen_name, image):
-        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
+        assert isinstance(image, Image.Image)
         
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
@@ -151,7 +151,7 @@ class S3ImageDB(AImageDB):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
         
-        image    = getWebImage(image_url, "profile")
+        image    = self.getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
         
@@ -173,7 +173,7 @@ class S3ImageDB(AImageDB):
             logs.warning('Warning: Failed to remove file')
     
     def addEntityImage(self, entityId, image):
-        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
+        assert isinstance(image, Image.Image)
         
         prefix   = 'entities/%s' % entityId
         max_size = (960, 960)
@@ -187,7 +187,7 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size, sizes)
     
     def addStampImage(self, stampId, image):
-        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
+        assert isinstance(image, Image.Image)
         
         prefix   = 'stamps/%s' % stampId
         url      = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
@@ -202,7 +202,7 @@ class S3ImageDB(AImageDB):
             image_url is the temp url
         """
         
-        image    = getWebImage(image_url, "stamp")
+        image    = self.getWebImage(image_url, "stamp")
         prefix   = 'stamps/%s' % imageId
 
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
@@ -225,7 +225,7 @@ class S3ImageDB(AImageDB):
             self._copyInS3(old, new)
     
     def _addImageSizes(self, prefix, image, max_size, sizes=None, original_url=None):
-        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
+        assert isinstance(image, Image.Image)
         
         def resizeImage(image, size):
             ratio = 1.0
@@ -282,37 +282,36 @@ class S3ImageDB(AImageDB):
         
         pool.join()
     
-    def addImage(self, name, image):
+    def addImage(self, name, image, jpeg_optimize=True, jpeg_quality=90):
         prefix, suffix = os.path.splitext(name)
         suffix = suffix.lower()
         
         if suffix == '.jpg' or suffix == '.jpeg':
-            return self._addJPG(prefix, image)
+            return self._addJPG(prefix, image, optimize=jpeg_optimize, quality=jpeg_quality)
         elif suffix == '.png':
             return self._addPNG(prefix, image)
         else:
             raise Exception("unsupported image type: '" + suffix + "'")
     
-    def _addJPG(self, name, image):
-        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
-        
+    def _addJPG(self, name, image, optimize=True, quality=90):
         name    = "%s.jpg" % name
         out     = StringIO()
         
         try:
-            image.save(out, 'jpeg', optimize=True, quality=90)
+            image.save(out, 'jpeg', optimize=optimize, quality=quality)
         except IOError as e:
             # TODO (travis): where does this MAXBLOCK logic coming from? really needs a comment!
+            prev_max_block     = ImageFile.MAXBLOCK
             ImageFile.MAXBLOCK = (image.size[0] * image.size[1]) + 1
+            out = StringIO()
             
-            image.save(out, 'jpeg', optimize=True, quality=90)
+            image.save(out, 'jpeg', optimize=False)
+            ImageFile.MAXBLOCK = prev_max_block
         
         logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
         return self._addDataToS3(name, out, 'image/jpeg')
     
     def _addPNG(self, name, image):
-        assert isinstance(image, Image.Image) or isinstance(image, PIL.JpegImagePlugin.JpegImageFile)
-        
         name    = "%s.png" % name
         out     = StringIO()
         
@@ -472,7 +471,7 @@ class S3ImageDB(AImageDB):
             out.seek(0)
             
             image = Image.open(out)
-            __dir__ = os.path.dirname(os.path.abspath(__file__))
+            __dir__  = os.path.dirname(os.path.abspath(__file__))
             filepath = os.path.join(__dir__, mask)
             mask = Image.open(filepath).convert('RGBA').split()[3]
             image.putalpha(mask)

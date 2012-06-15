@@ -43,7 +43,7 @@
   [encoder encodeObject:self.blurb forKey:@"blurb"];
   [encoder encodeObject:self.commentID forKey:@"commentID"];
   [encoder encodeObject:self.stampID forKey:@"stampID"];
-  [encoder encodeObject:self.created forKey:@"create"];
+  [encoder encodeObject:self.created forKey:@"created"];
   [encoder encodeObject:self.user forKey:@"user"];
 }
 

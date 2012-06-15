@@ -333,11 +333,11 @@
 
 - (UIColor*)randomColor {
     
-    float r, g, b;
+    NSInteger r, g, b;
 
-    r = arc4random() % 255;
-    g = arc4random() % 255;
-    b = arc4random() % 255;
+    r = arc4random() % 256;
+    g = arc4random() % 256;
+    b = arc4random() % 256;
 
     return [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1.0f];
     

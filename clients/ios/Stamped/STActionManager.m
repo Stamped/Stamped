@@ -11,12 +11,14 @@
 #import "STViewDelegate.h"
 #import "Util.h"
 #import "STRdio.h"
-#import "STMenuFactory.h"
 #import "STMenuPopUp.h"
 #import "STStampedActions.h"
 #import "STSimpleAction.h"
 #import "STStampedAPI.h"
 #import "STRestKitLoader.h"
+#import "STConfiguration.h"
+
+NSString* STActionManagerShowAllActionsKey = @"Actions.showAllActions";
 
 @interface STActionManager () <STViewDelegate>
 
@@ -154,6 +156,10 @@ static STActionManager* _singleton;
     }
   }
   return handled;
+}
+
++ (void)setupConfigurations {
+    [STConfiguration addFlag:NO forKey:STActionManagerShowAllActionsKey];
 }
 
 @end

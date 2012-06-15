@@ -315,38 +315,44 @@ class StampedAPI(AStampedAPI):
 
     def verifyLinkedAccount(self, linkedAccount):
         if linkedAccount.service_name == 'facebook':
-            self._verifyFacebookAccount(linkedAccount.token)
+            try:
+                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
+            except (StampedInputError, StampedUnavailableError) as e:
+                logs.warning("Unable to get user info from facebook %s" % e)
+                raise StampedInputError('Unable to connect to Facebook')
+            logs.info('### facebookUser id: %s' % facebookUser['id'])
+            if facebookUser['id'] != linkedAccount.user_id:
+                logs.warning("The facebook id associated with the facebook token is different from the id provided")
+                raise StampedAuthError('Unable to connect to Facebook')
+            self._verifyFacebookAccount(facebookUser['id'])
         elif linkedAccount.service_name == 'twitter':
-            self._verifyTwitterAccount(linkedAccount.token, linkedAccount.secret)
+            try:
+                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
+            except (StampedInputError, StampedUnavailableError):
+                logs.warning("Unable to get user info from facebook %s" % e)
+                raise StampedInputError('Unable to connect to Twitter')
+            logs.info('### twitterUser id: %s' % twitterUser['id'])
+            if twitterUser['id'] != linkedAccount.user_id:
+                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+                raise StampedAuthError('Unable to connect to Twitter')
+            self._verifyTwitterAccount(twitterUser['id'])
         return True
 
-    def _verifyFacebookAccount(self, userToken):
-        # Check to see if the Facebook credentials are valid and if no Stamped user is using the twitter account
-        user = self._facebook.getUserInfo(userToken)
-
-        account = None
+    def _verifyFacebookAccount(self, facebookId):
+        # Check that no Stamped account is linked to the facebookId
         try:
-            account = self.getAccountByFacebookId(user['id'])
+            self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
-            pass
-        if account is not None:
-            raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+            return True
+        raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
 
-        return user
-
-    def _verifyTwitterAccount(self, userToken, userSecret):
-        # Check to see if the Twitter credentials are valid and if no Stamped user is using the twitter account
-        user = self._twitter.verifyCredentials(userToken, userSecret)
-
-        account = None
+    def _verifyTwitterAccount(self, twitterId):
+        # Check that no Stamped account is linked to the twitterId
         try:
-            account = self.getAccountByTwitterId(user['id'])
+            self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
-            pass
-        if account is not None:
-            raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
-
-        return user
+            return True
+        raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -356,13 +362,18 @@ class StampedAPI(AStampedAPI):
         """
 
         # first, grab all the information from Facebook using the passed in token
-        user = self._verifyFacebookAccount(new_fb_account.user_token)
+        try:
+            facebookUser = self._facebook.getUserInfo(new_fb_account.user_token)
+        except (StampedInputError, StampedUnavailableError) as e:
+            logs.warning("Unable to get user info from facebook %s" % e)
+            raise StampedInputError('Unable to connect to Facebook')
+        self._verifyFacebookAccount(facebookUser['id'])
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
 
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
         if account.email is None:
-            account.email = 'fb_%s' % user['id']
+            account.email = 'fb_%s' % facebookUser['id']
         else:
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
@@ -371,9 +382,9 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
         fb_acct.service_name                = 'facebook'
-        fb_acct.user_id                     = user['id']
-        fb_acct.name                        = user['name']
-        fb_acct.screen_name                 = user.pop('username', None)
+        fb_acct.user_id                     = facebookUser['id']
+        fb_acct.name                        = facebookUser['name']
+        fb_acct.screen_name                 = facebookUser.pop('username', None)
         account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
@@ -392,13 +403,18 @@ class StampedAPI(AStampedAPI):
         """
 
         # First, get user information from Twitter using the passed in token
-        user = self._verifyTwitterAccount(new_tw_account.user_token, new_tw_account.user_secret)
+        try:
+            twitterUser = self._twitter.getUserInfo(new_tw_account.user_token, new_tw_account.user_secret)
+        except (StampedInputError, StampedUnavailableError):
+            logs.warning("Unable to get user info from Twitter %s" % e)
+            raise StampedInputError('Unable to connect to Twitter')
+        self._verifyTwitterAccount(twitterUser['id'])
         account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
 
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
         if account.email is None:
-            account.email = 'tw_%s' % user['id']
+            account.email = 'tw_%s' % twitterUser['id']
         else:
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
@@ -407,9 +423,9 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
         tw_acct.service_name                = 'twitter'
-        tw_acct.user_id                     = user['id']
-        tw_acct.screen_name                 = user['screen_name']
-        tw_acct.name                        = user.pop('name', None)
+        tw_acct.user_id                     = twitterUser['id']
+        tw_acct.screen_name                 = twitterUser['screen_name']
+        tw_acct.name                        = twitterUser.pop('name', None)
         account.linked.twitter              = tw_acct
         account.auth_service                = 'twitter'
 
@@ -418,7 +434,7 @@ class StampedAPI(AStampedAPI):
 
         account = self.addAccount(account, tempImageUrl=tempImageUrl)
         tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
-                     args=[account.user_id, new_tw_account.user_token, new_tw_account.user_secret])
+            args=[account.user_id, new_tw_account.user_token, new_tw_account.user_secret])
         return account
 
     @API_CALL
@@ -926,39 +942,38 @@ class StampedAPI(AStampedAPI):
 
     ### PRIVATE
 
-    def _getUserFromIdOrScreenName(self, userTiny):
+    def getUserFromIdOrScreenName(self, userTiny):
         if not isinstance(userTiny, Schema):
             userTiny = UserTiny().dataImport(userTiny)
-
+        
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
-
+        
         if userTiny.user_id is not None:
             return self._userDB.getUser(userTiny.user_id)
-
+        
         return self._userDB.getUserByScreenName(userTiny.screen_name)
 
     def _getUserStampDistribution(self, userId):
-
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
         stamps      = self._enrichStampObjects(stamps)
-
+        
         categories  = {}
         num_stamps  = len(stamps)
-
+        
         for stamp in stamps:
             category = stamp.entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
-
+        
         result = []
         for k, v in categories.items():
             distribution = CategoryDistribution()
             distribution.category = k
             distribution.count = v
             result.append(distribution)
-
+        
         return result
 
     def _enrichUserObjects(self, users, authUserId=None, **kwargs):
@@ -990,7 +1005,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getUser(self, userRequest, authUserId=None):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         if user.privacy == True:
             if authUserId is None:
@@ -1049,7 +1064,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getPrivacy(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         return (user.privacy == True)
 
@@ -1125,7 +1140,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addFriendship(self, authUserId, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         # Verify that you're not following yourself :)
         if user.user_id == authUserId:
@@ -1179,7 +1194,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
-        user                    = self._getUserFromIdOrScreenName(userRequest)
+        user                    = self.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -1215,11 +1230,11 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def checkFriendship(self, authUserId, userRequest):
-        userA = self._getUserFromIdOrScreenName({
+        userA = self.getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_a,
                     'screen_name': userRequest.screen_name_a
                 })
-        userB = self._getUserFromIdOrScreenName({
+        userB = self.getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_b,
                     'screen_name': userRequest.screen_name_b
                 })
@@ -1249,7 +1264,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getFriends(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
@@ -1262,7 +1277,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getFollowers(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
@@ -1275,7 +1290,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addBlock(self, authUserId, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        user = self.getUserFromIdOrScreenName(userRequest)
 
         friendship                      = Friendship()
         friendship.user_id              = authUserId
@@ -1301,7 +1316,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def checkBlock(self, authUserId, userRequest):
-        user                    = self._getUserFromIdOrScreenName(userRequest)
+        user                    = self.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -1317,7 +1332,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeBlock(self, authUserId, userRequest):
-        user                    = self._getUserFromIdOrScreenName(userRequest)
+        user                    = self.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -1658,19 +1673,25 @@ class StampedAPI(AStampedAPI):
 
     def updateEntityStatsAsync(self, entityId):
         numStamps = self._stampDB.countStampsForEntity(entityId)
-        popularUserIds = self._stampDB.getPopularityForEntity(entityId)
+
+        popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+        popularStamps = self._stampDB.getStamps(popularStampIds, limit=len(popularStampIds))
+        popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
+        popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
+            stats.popular_stamps = popularStampIds
             self._entityStatsDB.updateNumStamps(entityId, numStamps)
-            self._entityStatsDB.setPopular(entityId, popularUserIds)
+            self._entityStatsDB.setPopular(entityId, popularUserIds, popularStampIds)
         except StampedUnavailableError:
             stats = EntityStats()
             stats.entity_id = entityId
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
+            stats.popular_stamps = popularStampIds
             self._entityStatsDB.addEntityStats(stats)
         return stats
 
@@ -2055,15 +2076,6 @@ class StampedAPI(AStampedAPI):
             badge.user_id   = userId
             badge.genre     = "entity_first_stamp"
             badges.append(badge)
-        else:
-            friendUserIds = self._friendshipDB.getFriends(userId)
-            friendStamps = self._stampDB.getStampsFromUsersForEntity(friendUserIds, entityId)
-
-            if len(friendStamps) == 0:
-                badge           = Badge()
-                badge.user_id   = userId
-                badge.genre     = "friends_first_stamp"
-                badges.append(badge)
 
         return badges
 
@@ -2083,7 +2095,6 @@ class StampedAPI(AStampedAPI):
         imageUrl    = data.pop('temp_image_url',    None)
         imageWidth  = data.pop('temp_image_width',  None)
         imageHeight = data.pop('temp_image_height', None)
-        imageExists = False
 
         now         = datetime.utcnow()
 
@@ -2141,12 +2152,6 @@ class StampedAPI(AStampedAPI):
         else:
             stamp                       = Stamp()
 
-        # Resize image
-        if imageUrl is not None:
-            if imageWidth is None or imageHeight is None:
-                raise StampedInputError("invalid image dimensions")
-            imageExists = True
-
         # Update content if stamp exists
         if stampExists:
             stamp.timestamp.stamped     = now
@@ -2192,9 +2197,9 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        if imageExists:
+        if imageUrl is not None:
             self._statsSink.increment('stamped.api.stamps.images')
-            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, imageWidth, imageHeight, stamp.stamp_id, content.content_id])
+            tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, stamp.stamp_id, content.content_id])
 
         # Add stats
         self._statsSink.increment('stamped.api.stamps.category.%s' % entity.category)
@@ -2298,7 +2303,7 @@ class StampedAPI(AStampedAPI):
 
 
     @API_CALL
-    def addResizedStampImagesAsync(self, imageUrl, imageWidth, imageHeight, stampId, content_id):
+    def addResizedStampImagesAsync(self, imageUrl, stampId, content_id):
         assert imageUrl is not None, "stamp image url unavailable!"
 
         max_size = (960, 960)
@@ -2309,7 +2314,6 @@ class StampedAPI(AStampedAPI):
             '-mobile' : (572, None),
             }
 
-
         # get stamp using stamp_id
         stamp = self._stampDB.getStamp(stampId)
         # find the blurb using the content_id and update the images field
@@ -2318,17 +2322,15 @@ class StampedAPI(AStampedAPI):
 
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
                 # Add image dimensions to stamp object
-                image           = ImageSchema()
-                # add the default image size
-                supportedSizes['']       = (imageWidth,imageHeight)
+                image = ImageSchema()
 
                 images = c.images
                 if images is None:
                     images = ()
                 sizes = []
-                for k,v in supportedSizes.iteritems():
+                for k, v in supportedSizes.iteritems():
                     size            = ImageSizeSchema()
-                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
+                    size.url        = 'http://static.stamped.com/stamps/%s%s.jpg' % (imageId, k)
                     size.width      = v[0]
                     size.height     = v[1] if v[1] is not None else v[0]
                     sizes.append(size)
@@ -2671,8 +2673,22 @@ class StampedAPI(AStampedAPI):
         likes.reverse()
         stats.preview_likes     = likes
 
+        """
+        Note: To-Do preview objects are composed of two sources: users that have to-do'd the entity from
+        the stamp directly ("direct" to-dos) and users that are following you but have also to-do'd the entity
+        ("indirect" to-dos). Direct to-dos are guaranteed and will always show up on the stamp. Indirect to-dos 
+        are recalculated frequently based on your follower list and can change over time. 
+        """
+        todos                   = self._todoDB.getTodosFromStampId(stamp.stamp_id)
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
-        todos                   = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        followerTodos           = self._todoDB.getTodosFromUsersForEntity(followers, stamp.entity.entity_id, limit=100)
+        existingTodos           = set(todos)
+        for todo in followerTodos:
+            if len(todos) >= 100:
+                break
+            if todo not in existingTodos:
+                todos.append(todo)
+                existingTodos.add(todo)
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
@@ -2689,7 +2705,7 @@ class StampedAPI(AStampedAPI):
         stats.kind              = entity.kind
         stats.types             = entity.types
 
-        if entity.kind == 'place':
+        if entity.kind == 'place' and entity.coordinates is not None:
             stats.lat           = entity.coordinates.lat
             stats.lng           = entity.coordinates.lng
 
@@ -3229,6 +3245,8 @@ class StampedAPI(AStampedAPI):
 
         try:
             allItems = getattr(guide, guideRequest.section)
+            if allItems is None:
+                return []
         except AttributeError:
             logs.warning("Guide request for invalid section: %s" % guideRequest.section)
             raise StampedInputError()
@@ -3341,23 +3359,37 @@ class StampedAPI(AStampedAPI):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
         since = datetime.utcnow() - timedelta(days=90)
-        stampIds = self._stampStatsDB.getPopularStampIds(types=types, viewport=guideRequest.viewport, since=since)
-        
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
-        stamps.sort(key=lambda x: stampIds.index(x.stamp_id))
+        limit = 1000
+        viewport = guideRequest.viewport
+        # Change constraints slightly for map-based views
+        if viewport is not None:
+            since = None
+            limit = 200
+        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since, limit=limit)
+
+        # Combine stamp scores into grouped entity scores
+        entityScores = {}
+        for stat in stampStats:
+            if stat.entity_id not in entityScores:
+                entityScores[stat.entity_id] = 0
+            entityScores[stat.entity_id] += 2 # Add 2 per stamp
+            if stat.score is not None:
+                entityScores[stat.entity_id] += stat.score # Add individual stamp score
+
+        # Rank entities
+        limit = 20
+        if guideRequest.limit is not None:
+            limit = guideRequest.limit
+        offset = 0
+        if guideRequest.offset is not None:
+            offset = guideRequest.offset
+        rankedEntityIds = sorted(entityScores.keys(), key=lambda x: entityScores[x], reverse=True)[offset:][:limit]
 
         entityIds = {}
         userIds = {}
 
-        for stamp in stamps:
-            userIds[stamp.user.user_id] = None 
-            if stamp.entity.entity_id in entityIds:
-                continue 
-            entityIds[stamp.entity.entity_id] = None 
-
         # Entities
-        entities = self._entityDB.getEntities(entityIds.keys())
-
+        entities = self._entityDB.getEntities(rankedEntityIds)
         for entity in entities:
             if entity.sources.tombstone_id is not None:
                 # Convert to newer entity
@@ -3368,60 +3400,67 @@ class StampedAPI(AStampedAPI):
                 entityIds[entity.entity_id] = entity
 
         # Entity Stats
-        stats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
+        entityStats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
         ### TEMP CODE: BEGIN
         # Temporarily force old entity stats to be generated
-        if len(stats) < len(entities):
+        if len(entityStats) < len(entities):
             statEntityIds = set()
-            for stat in stats:
+            for stat in entityStats:
                 statEntityIds.add(stat.entity_id)
             missingEntityIds = set(entityIds.keys()).difference(statEntityIds)
             for missingEntityId in missingEntityIds:
-                stats.append(self.updateEntityStatsAsync(missingEntityId))
+                entityStats.append(self.updateEntityStatsAsync(missingEntityId))
         ### TEMP CODE: END
-        for stat in stats:
+        for stat in entityStats:
             if stat.popular_users is not None:
                 for userId in stat.popular_users[:10]:
                     userIds[userId] = None 
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
-
         for user in users:
             userIds[user.user_id] = user.minimize()
 
         # Build previews
         entityStampPreviews = {}
-        for stat in stats:
-            if stat.popular_users is not None:
-                users = []
-                for userId in stat.popular_users[:10]:
-                    users.append(userIds[userId])
-                entityStampPreviews[stat.entity_id] = users 
+        for stat in entityStats:
+            if stat.popular_users is not None and stat.popular_stamps is None:
+                # Inconsistency! Regenerate entity stat
+                logs.warning("Missing popular_stamps: entity_id=%s" % stat.entity_id)
+                tasks.invoke(tasks.APITasks.updateEntityStats, args=[stat.entity_id])
+
+            if stat.popular_users is not None and stat.popular_stamps is not None:
+                if len(stat.popular_users) != len(stat.popular_stamps):
+                    logs.warning("Mismatch between popular_users and popular_stamps: entity_id=%s" % stat.entity_id)
+                    continue
+                stampPreviews = []
+                for i in range(min(len(stat.popular_users), 10)):
+                    try:
+                        stampPreview = StampPreview()
+                        user = userIds[stat.popular_users[i]]
+                        stampId = stat.popular_stamps[i]
+                        if user is None or stampId is None:
+                            raise 
+                        stampPreview.user = user
+                        stampPreview.stamp_id = stampId
+                        stampPreviews.append(stampPreview)
+                    except Exception as e:
+                        logs.warning("Failed to add preview to entity_id=%s: user_id=%s, stamp_id=%s" % \
+                            (stat.entity_id, stat.popular_users[i], stat.popular_stamps[i]))
+                        continue 
+                entityStampPreviews[stat.entity_id] = stampPreviews
 
         # Results
         result = []
-        seenEntities = set()
-        for stamp in stamps:
-            if stamp.entity.entity_id in seenEntities:
-                continue 
-            entity = entityIds[stamp.entity.entity_id]
-            seenEntities.add(stamp.entity.entity_id)
-
-            if stamp.entity.entity_id in entityStampPreviews:
+        for entityId in rankedEntityIds:
+            entity = entityIds[entityId]
+            if entityId in entityStampPreviews:
                 previews = Previews()
-                previews.stamps = entityStampPreviews[stamp.entity.entity_id]
+                previews.stamps = entityStampPreviews[entityId]
                 entity.previews = previews
             result.append(entity)
-            
-        limit = 20
-        if guideRequest.limit is not None:
-            limit = guideRequest.limit
-        offset = 0
-        if guideRequest.offset is not None:
-            offset = guideRequest.offset
 
-        return result[offset:][:limit]
+        return result
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
@@ -3733,7 +3772,7 @@ class StampedAPI(AStampedAPI):
         entity = self._getEntityFromRequest(entityRequest)
 
         todo                    = RawTodo()
-        todo.entity             = entity
+        todo.entity             = entity.minimize()
         todo.user_id            = authUserId
         todo.timestamp          = BasicTimestamp()
         todo.timestamp.created  = datetime.utcnow()
@@ -4152,7 +4191,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getUnreadActivityCount(self, authUserId, **kwargs):
         ### TODO: Cache this in user.num_unread_news
-        user = self._getUserFromIdOrScreenName({'user_id': authUserId})
+        user = self.getUserFromIdOrScreenName({'user_id': authUserId})
         count = self._activityDB.getUnreadActivityCount(authUserId, user.timestamp.activity)
         if count is None:
             return 0

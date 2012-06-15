@@ -35,7 +35,7 @@ class ACollectionCache(object):
         if prevBlockOffset < 0:
             prevBlockOffset = None
 
-        # get the modified time of the last item of the previous activity cache block.  We use it for the slice
+        # get the modified time of the last item of the previous data cache block.  We use it for the slice
         before = None
         if prevBlockOffset is not None:
             prevBlockKey = self._generateKey(prevBlockOffset, **kwargs)

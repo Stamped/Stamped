@@ -36,6 +36,9 @@
                     
                     <!-- DEFAULT HEADER -->
                     <div class="profile-header-body header-category-default">
+                        <!--<div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
+                        <div class="header-overlay"></div>
+                        
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             <div class="profile-image-column">
                                 {% handlebars_template "profile-image-large" user %}
@@ -67,6 +70,9 @@
                     
                     <!-- PLACE HEADER -->
                     <div class="profile-header-body header-category-place">
+                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
                             <div class="profile-image-column">
@@ -89,6 +95,9 @@
                     
                     <!-- MUSIC HEADER -->
                     <div class="profile-header-body header-category-music">
+                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
                             <div class="profile-image-column">
@@ -110,6 +119,9 @@
                     
                     <!-- BOOK HEADER -->
                     <div class="profile-header-body header-category-book">
+                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
                             <div class="profile-image-column">
@@ -131,6 +143,9 @@
                     
                     <!-- FILM & TV HEADER -->
                     <div class="profile-header-body header-category-film">
+                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
                             <div class="profile-image-column">
@@ -151,7 +166,10 @@
                     </div>
                     
                     <!-- OTHER HEADER -->
-                    <div class="profile-header-body header-category-other">
+                    <div class="profile-header-body header-category-app">
+                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             
                             <div class="profile-image-column">
@@ -162,7 +180,7 @@
                             
                             <div class="lhs">
                                 <p class='name'>{{user.screen_name}}'s</p>
-                                <p class='title'>Other Stamps</p>
+                                <p class='title'>App Stamps</p>
                             </div>
                             
                             <div class="rhs">
@@ -241,9 +259,9 @@
                     <div class='icon'></div>
                 </a>
             </li>
-            <li class="other">
-                <a class="replaced" href="/{{user.screen_name}}?category=other">
-                    <div class='desc'>Apps & Other</div>
+            <li class="app">
+                <a class="replaced" href="/{{user.screen_name}}?subcategory=app">
+                    <div class='desc'>Apps</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
@@ -282,6 +300,7 @@
     <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane{% if IS_PROD %}.min{% endif %}.js"></script>
     <script src="{{ STATIC_URL }}js/libs/jquery.hotkeys{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STATIC_URL }}js/libs/glfx.js"></script>
     
     <!-- Social sharing plugins -->
     <script src="//platform.twitter.com/widgets.js"></script>

@@ -42,6 +42,7 @@
 }
 
 @property(strong, nonatomic) UITableView *tableView;
+@property(strong, nonatomic) UITableView *searchResultsTableView;
 @property(strong, nonatomic) UIView *headerView;
 @property(strong, nonatomic) UIView *footerView;
 @property(readonly, nonatomic) STSearchView *searchView;

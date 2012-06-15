@@ -21,11 +21,13 @@ def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
 
 def _get_body_classes(base, schema):
-    has_category = False
-    body_classes = base
+    has_category    = False
+    has_subcategory = False
+    body_classes    = base
     
     try:
-        has_category = (schema.category is not None)
+        has_category    = (schema.category is not None)
+        has_subcategory = (schema.subcategory is not None)
     except:
         pass
     
@@ -33,6 +35,9 @@ def _get_body_classes(base, schema):
         body_classes += " %s" % schema.category
     else:
         body_classes += " default"
+    
+    if has_subcategory:
+        body_classes += " %s" % schema.subcategory
     
     return body_classes
 
@@ -323,11 +328,6 @@ def sdetail(request, schema, **kwargs):
         'entity' : entity, 
     })
 
-
-@stamped_view()
-def test_view(request, **kwargs):
-    return stamped_render(request, 'test.html', { })
-
 @stamped_view(schema=HTTPEntityId)
 def menu(request, schema, **kwargs):
     entity  = stampedAPIProxy.getEntity(schema.entity_id)
@@ -339,4 +339,8 @@ def menu(request, schema, **kwargs):
         'menu'   : menu, 
         'entity' : entity, 
     })
+
+@stamped_view()
+def test_view(request, **kwargs):
+    return stamped_render(request, 'test.html', { })
 

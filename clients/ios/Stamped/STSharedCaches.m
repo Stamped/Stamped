@@ -17,8 +17,16 @@ NSString* const STSharedCachesDidLoadCacheNotification = @"STSharedCachesDidLoad
 
 static STCache* _inboxYou = nil;
 static STCache* _inboxInbox = nil;
-static STCache* _inboxFriendsOfFriends = nil;
 static STCache* _inboxEveryone = nil;
+
++ (void)initialize {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logout:) name:STStampedAPILogoutNotification object:nil];
+}
+
++ (void)logout:(id)notImportant {
+    [_inboxYou clearCache];
+    [_inboxInbox clearCache];
+}
 
 + (STCache*)cacheForInboxScope:(STStampedAPIScope)scope {
     switch (scope) {
@@ -26,8 +34,6 @@ static STCache* _inboxEveryone = nil;
             return _inboxYou;
         case STStampedAPIScopeFriends:
             return _inboxInbox;
-        case STStampedAPIScopeFriendsOfFriends:
-            return _inboxFriendsOfFriends;
         case STStampedAPIScopeEveryone:
             return _inboxEveryone;
         default:
@@ -63,9 +69,6 @@ static STCache* _inboxEveryone = nil;
                               break;
                           case STStampedAPIScopeFriends:
                               dst = &_inboxInbox;
-                              break;
-                          case STStampedAPIScopeFriendsOfFriends:
-                              dst = &_inboxFriendsOfFriends;
                               break;
                           case STStampedAPIScopeEveryone:
                               dst = &_inboxEveryone;

@@ -538,7 +538,16 @@
         [UIView setAnimationsEnabled:NO];
     }
     
-    [UIView animateWithDuration:.3 animations:^{
+    CGFloat span = _root.view.frame.origin.x;
+    if (_root.view.frame.origin.x<0.0f) {
+        span = (self.view.bounds.size.width - (_root.view.frame.origin.x*-1));
+    } else {
+        span = _root.view.frame.origin.x;
+    }
+    
+    CGFloat duration = (span / self.view.bounds.size.width) * 0.3f;
+    
+    [UIView animateWithDuration:duration animations:^{
         
         _root.view.frame = frame;
         
@@ -635,7 +644,7 @@
         [UIView setAnimationsEnabled:NO];
     }
     
-    [UIView animateWithDuration:.3 animations:^{
+    [UIView animateWithDuration:.15 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         _root.view.frame = frame;
     } completion:^(BOOL finished) {
         [self addTapView:YES];
