@@ -11,6 +11,7 @@
 
 @implementation STUploadingImageView
 @synthesize uploading=_uploading;
+@synthesize activiyView=_activiyView;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {

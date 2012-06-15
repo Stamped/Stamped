@@ -10,6 +10,8 @@
 
 @implementation STTableViewSectionHeader
 
+@synthesize titleLabel = _titleLabel;
+
 - (id)initWithFrame:(CGRect)frame {
     
     frame.size.height = [[self class] height];

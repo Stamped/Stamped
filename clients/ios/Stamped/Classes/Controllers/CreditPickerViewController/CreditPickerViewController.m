@@ -24,6 +24,7 @@
 @synthesize users=_users;
 @synthesize entityIdentifier=_entityIdentifier;
 @synthesize loadingUsers=_loadingUsers;
+@synthesize selectedUsers = _selectedUsers;
 
 - (id)initWithEntityIdentifier:(NSString*)identifier {
     if ((self = [super init])) {

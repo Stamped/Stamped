@@ -531,8 +531,8 @@ NSInteger zoom;
                                                         [self.annotations addObject:annotation];
                                                     }
                                                     for (STEntityAnnotation* annotation in doomed.allValues) {
-                                                        if(self.annotations.count < 100 &&
-                                                           !MKMapRectContainsPoint(self.mapView.visibleMapRect, MKMapPointForCoordinate(annotation.coordinate))
+                                                        if(self.annotations.count > 1000
+                                                           //&& !MKMapRectContainsPoint(self.mapView.visibleMapRect, MKMapPointForCoordinate(annotation.coordinate))
                                                            )
                                                         {
                                                             

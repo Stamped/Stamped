@@ -32,7 +32,6 @@
   [icon_ release];
   [backIcon_ release];
   [value_ release];
-  [parent_ release];
   [children_ release];
   [type_ release];
   [super dealloc];

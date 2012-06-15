@@ -15,7 +15,6 @@
 @property (nonatomic, readonly, retain) UIView* activeView;
 @property (nonatomic, readonly, assign) BOOL touched;
 @property (nonatomic, readwrite, retain) NSObject* token;
-@property (nonatomic, readwrite, assign) BOOL animating;
 
 @end
 

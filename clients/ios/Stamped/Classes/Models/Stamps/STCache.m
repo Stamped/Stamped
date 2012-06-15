@@ -348,6 +348,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 
 - (void)updateObjects:(NSArray<STDatum>*)objects {
     //TODO
+    //for (id<STDatum> datum =in 
 }
 
 - (void)clearCache {
