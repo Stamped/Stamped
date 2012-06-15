@@ -15,6 +15,7 @@ from utils                  import lazyProperty
 from pprint                 import pformat
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
+from SimpleDB               import SimpleDB
 from StatsDSink             import StatsDSink
 from libs.notify            import StampedNotificationHandler
 
@@ -123,7 +124,7 @@ class MongoStampedAPI(StampedAPI):
     
     @lazyProperty
     def _statsDB(self):
-        return MongoStatsCollection()
+        return SimpleDB()
 
     @lazyProperty
     def _menuDB(self):
