@@ -92,7 +92,7 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
     def __init__(self, amazon_id, data=None, maxLookupCalls=None):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
-        self._properties = self._properties + ['salesRank']
+        self._properties.append('salesRank')
 
     @lazyProperty
     def artists(self):
@@ -137,7 +137,7 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
     def __init__(self, amazon_id, data=None, maxLookupCalls=None):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
-        self._properties = self._properties + ['salesRank']
+        self._properties.append('salesRank')
 
     @lazyProperty
     def artists(self):
@@ -201,12 +201,13 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         except Exception:
             return None
 
+
 class AmazonBook(_AmazonObject, ResolverMediaItem):
 
     def __init__(self, amazon_id, data=None, maxLookupCalls=None):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='AlternateVersions,Large')
         ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
-        self._properties = self._properties + ['salesRank']
+        self._properties.append('salesRank')
 
     @lazyProperty
     def authors(self):
@@ -257,7 +258,7 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
     @lazyProperty
     def description(self):
         try:
-            review = xp(self.data, 'EditorialReview', 'Content')['v']
+            return xp(self.data, 'EditorialReview', 'Content')['v']
         except Exception:
             return ""
 
@@ -315,12 +316,262 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
             pass
         return self
 
+
+class AmazonMovie(_AmazonObject, ResolverMediaItem):
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+        _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Medium,Reviews')
+        ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
+        self._properties.append('salesRank')
+
+    TITLE_REMOVAL_REGEXES = [
+        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
+        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
+        re.compile(r'\sHD'),
+        re.compile(r'\sBlu-?ray', re.IGNORECASE),
+        ]
+
+    @lazyProperty
+    def name(self):
+        rawTitle = xp(self.attributes, 'Title')['v']
+        currTitle = rawTitle
+        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
+            alteredTitle = titleRemovalRegex.sub('', currTitle)
+            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
+            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
+            if len(alteredTitle) >= 3:
+                currTitle = alteredTitle
+            else:
+                logs.warning("Avoiding transformation to AmazonMovie title '%s' because result would be too short" %
+                             rawTitle)
+        if currTitle != rawTitle:
+            logs.warning("Converted Amazon movie title: '%s' => '%s'" % (rawTitle, currTitle))
+        return currTitle
+
+    @lazyProperty
+    def cast(self):
+        # TODO: These functions are completely fucking repetitive, factor out common code.
+        try:
+            return [ {'name': actor['v']} for actor in self.attributes['c']['Actor'] ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def directors(self):
+        try:
+            return [ { 'name': xp(self.attributes, 'Director')['v'] } ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def studios(self):
+        try:
+            return [ { 'name': xp(self.attributes, 'Studio')['v'] } ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def length(self):
+        # Traditionally runtime is reported in minutes, but we want it in seconds.
+        unitsConversion = 60
+        try:
+            units = xp(self.attributes, 'RunningTime')['a']['Units']
+            if units != 'minutes':
+                raise Exception('Unexpected units found on Amazon movie: (%s)' % units)
+        except KeyError:
+            pass
+        try:
+            return float(xp(self.attributes, 'RunningTime')['v']) * unitsConversion
+        except KeyError:
+            return None
+
+    @lazyProperty
+    def mpaa_rating(self):
+        try:
+            return xp(self.attributes, 'AudienceRating')['v']
+        except KeyError:
+            return None
+
+    @lazyProperty
+    def isbn(self):
+        try:
+            return xp(self.attributes, 'ISBN')['v']
+        except KeyError:
+            return None
+
+    @lazyProperty
+    def publishers(self):
+        try:
+            return [ { 'name' : xp(self.attributes, 'Publisher')['v'] } ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def images(self):
+        try:
+            image_set = xp(self.underlying.data, 'ImageSets','ImageSet')
+            image = xp(image_set,'LargeImage','URL')['v']
+            if image is not None:
+                return [image]
+        except Exception:
+            pass
+        return []
+
+    @lazyProperty
+    def release_date(self):
+        try:
+            return parseDateString(xp(self.attributes, 'ReleaseDate')['v'])
+        except Exception:
+            return ''
+
+    @lazyProperty
+    def description(self):
+        # TODO: Many of these attributes are common between a bunch of Amazon types. Put them in _AmazonObject.
+        try:
+            return xp(self.attributes, 'EditorialReview', 'Content')['v']
+        except KeyError:
+            return ''
+
+    @lazyProperty
+    def genres(self):
+        try:
+            return [ xp(self.attributes, 'Genre')['v'] ]
+        except KeyError:
+            return []
+
+
+class AmazonTvShow(_AmazonObject, ResolverMediaCollection):
+    # TODO: GEt rid of the copious amount of redundancy between AmazonTvShow and AmazonMovie.
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+        _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Medium,Reviews')
+        ResolverMediaCollection.__init__(self, types=['tv'], maxLookupCalls=maxLookupCalls)
+        self._properties.append('salesRank')
+
+    TITLE_REMOVAL_REGEXES = [
+        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
+        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
+        re.compile(r'(\s*[:-]\s*|\s)(the )?complete.*$', re.IGNORECASE),
+        re.compile(r'(\s*[:-]\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
+        re.compile(r'(\s*[:-]\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
+        re.compile(r'(\s*[:-]\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
+        re.compile(r'(\s*[:-]\s*|\s)volumes?\s[a-zA-Z0-9].*$', re.IGNORECASE),
+        re.compile(r'^(the )?best (\w+ )?of ', re.IGNORECASE),
+    ]
+
+    @lazyProperty
+    def name(self):
+        rawTitle = xp(self.attributes, 'Title')['v']
+        currTitle = rawTitle
+        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
+            alteredTitle = titleRemovalRegex.sub('', currTitle)
+            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
+            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
+            if len(alteredTitle) >= 3:
+                currTitle = alteredTitle
+            else:
+                logs.warning("Avoiding transformation to AmazonTvShow title '%s' because result would be too short" %
+                             rawTitle)
+        if currTitle != rawTitle:
+            logs.warning("Converted Amazon TV title: '%s' => '%s'" % (rawTitle, currTitle))
+        return currTitle
+
+    @lazyProperty
+    def cast(self):
+        # TODO: These functions are completely fucking repetitive, factor out common code.
+        try:
+            return [ {'name': actor['v']} for actor in self.attributes['c']['Actor'] ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def directors(self):
+        try:
+            return [ { 'name': xp(self.attributes, 'Director')['v'] } ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def studios(self):
+        try:
+            return [ { 'name': xp(self.attributes, 'Studio')['v'] } ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def length(self):
+        # Traditionally runtime is reported in minutes, but we want it in seconds.
+        unitsConversion = 60
+        try:
+            units = xp(self.attributes, 'RunningTime')['a']['Units']
+            if units != 'minutes':
+                raise Exception('Unexpected units found on Amazon movie: (%s)' % units)
+        except KeyError:
+            pass
+        try:
+            return float(xp(self.attributes, 'RunningTime')['v']) * unitsConversion
+        except KeyError:
+            return None
+
+    @lazyProperty
+    def mpaa_rating(self):
+        try:
+            return xp(self.attributes, 'AudienceRating')['v']
+        except KeyError:
+            return None
+
+    @lazyProperty
+    def isbn(self):
+        try:
+            return xp(self.attributes, 'ISBN')['v']
+        except KeyError:
+            return None
+
+    @lazyProperty
+    def publishers(self):
+        try:
+            return [ { 'name' : xp(self.attributes, 'Publisher')['v'] } ]
+        except KeyError:
+            return []
+
+    @lazyProperty
+    def images(self):
+        try:
+            image_set = xp(self.underlying.data, 'ImageSets','ImageSet')
+            image = xp(image_set,'LargeImage','URL')['v']
+            if image is not None:
+                return [image]
+        except Exception:
+            pass
+        return []
+
+    @lazyProperty
+    def release_date(self):
+        try:
+            return parseDateString(xp(self.attributes, 'ReleaseDate')['v'])
+        except Exception:
+            return ''
+
+    @lazyProperty
+    def description(self):
+        # TODO: Many of these attributes are common between a bunch of Amazon types. Put them in _AmazonObject.
+        try:
+            return xp(self.attributes, 'EditorialReview', 'Content')['v']
+        except KeyError:
+            return ''
+
+    @lazyProperty
+    def genres(self):
+        try:
+            return [ xp(self.attributes, 'Genre')['v'] ]
+        except KeyError:
+            return []
+
+
 class AmazonVideoGame(_AmazonObject, ResolverSoftware):
     
     def __init__(self, amazon_id, data=None, maxLookupCalls=None):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large')
         ResolverSoftware.__init__(self, types=['video_game'], maxLookupCalls=maxLookupCalls)
-        self._properties = self._properties + ['salesRank']
+        self._properties.append('salesRank')
     
     @lazyProperty
     def authors(self):
@@ -367,7 +618,7 @@ class AmazonVideoGame(_AmazonObject, ResolverSoftware):
     @lazyProperty
     def description(self):
         try:
-            review = xp(self.data, 'EditorialReview', 'Content')['v']
+            return xp(self.data, 'EditorialReview', 'Content')['v']
         except Exception:
             return ""
     
@@ -563,9 +814,23 @@ class AmazonSource(GenericSource):
             constructor=AmazonSearchAll
         )
 
-    def __searchIndexLite(self, searchIndex, queryText, constructor, results, responseGroup='Medium,Reviews,Tracks'):
-        searchResults = globalAmazon().item_search(SearchIndex=searchIndex,
-            ResponseGroup=responseGroup, Keywords=queryText)
+    class SearchIndexData(object):
+        """
+        Captures our handling of one Amazon search index: the name we have to pass in the search request, the
+        ResponseGroups we want that are supported for a request against the index, and a function to create proxies
+        for the results. The one ugly piece here right now is that constructor must take both the raw result and a
+        'maxLookupCalls' kwarg. It was either this, or make a bunch of lambda functions for the callers since the
+        constructors are mostly just Amazon_____ class constructors and for lite search we always want to pass
+        maxLookupCalls=0.
+        """
+        def __init__(self, searchIndexName, responseGroups, proxyConstructor):
+            self.searchIndexName = searchIndexName
+            self.responseGroups = responseGroups
+            self.proxyConstructor = proxyConstructor
+
+    def __searchIndexLite(self, searchIndexData, queryText, results):
+        searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
+            ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25)
         # pprint(searchResults)
         items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
 
@@ -573,33 +838,19 @@ class AmazonSource(GenericSource):
             items = items['Item']
             indexResults = []
             for item in items:
-                parsedItem = constructor(item, maxLookupCalls=0)
+                parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
                 if parsedItem:
                     indexResults.append(parsedItem)
-            results[searchIndex] = indexResults
+            results[searchIndexData.searchIndexName] = indexResults
 
-    def __searchIndexesLite(self, searchIndexes, queryText, constructors=None, constructor=None):
+    def __searchIndexesLite(self, searchIndexes, queryText):
         """
-        Issues searches for the given SearchIndexes and creates ResolverObjects from the types using the constructors.
-        Callers can either pass a list with one constructor per searchIndex, or a single constructor to be used for
-        all searches. The one ugly piece here right now is that constructor must take both the raw result and a
-        'maxLookupCalls' kwarg. It was either this, or make a bunch of lambda functions for the callers since the
-        constructors are mostly just Amazon_____ class constructors and for lite search we always want to pass
-        maxLookupCalls=0.
+        Issues searches for the given SearchIndexes and creates ResolverObjects from the results.
         """
-        if constructors is None and constructor is None:
-            raise Exception("One of kwargs 'constructor' and 'constructors' must be passed to __searchIndexesLite!")
-        if constructors is not None and constructor is not None:
-            raise Exception("Only one of kwargs 'constructor' and 'constructors' can be passed to __searchIndexesLite!")
-        if constructor is not None:
-            constructors = [constructor] * len(searchIndexes)
-        if len(constructors) != len(searchIndexes):
-            raise Exception("__searchIndexesLite must have exactly one constructor per search index!")
-
         resultsBySearchIndex = {}
         pool = Pool(len(searchIndexes))
-        for (searchIndex, constructor) in zip(searchIndexes, constructors):
-            pool.spawn(self.__searchIndexLite, searchIndex, queryText, constructor, resultsBySearchIndex)
+        for searchIndexData in searchIndexes:
+            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex)
         pool.join()
 
         return resultsBySearchIndex
@@ -623,12 +874,120 @@ class AmazonSource(GenericSource):
             return AmazonTrack(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
         elif productTypeName == 'DOWNLOADABLE_MUSIC_ALBUM':
             return AmazonAlbum(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
-        elif productTypeName in ['CONTRIBUTOR_AUTHORITY_SET', 'ABIS_DVD', 'VIDEO_VHS']:
+        elif productTypeName in ['CONTRIBUTOR_AUTHORITY_SET', 'ABIS_DVD', 'VIDEO_VHS', 'DOWNLOADABLE_MUSIC_ARTIST']:
             return None
         elif binding in ['Audio CD', 'Vinyl']:
             return AmazonAlbum(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
 
         raise AmazonSource.UnknownTypeError('Unknown product type %s seen on result with ASIN %s!' % (productTypeName, asin))
+
+    def __constructVideoObjectFromResult(self, rawResult, maxLookupCalls=None):
+        """
+        Determines what the raw result is describing. Return AmazonTvShow for TV shows, AmazonMovie for movies, and
+        None for things that are neither TV shows nor movies (for instance, TV episodes, movie collections.)
+        """
+
+        # TODO: Eliminate code duplication with __constructMusicObjectFromResult!
+        productTypeName = xp(rawResult, 'ItemAttributes', 'ProductTypeName')['v']
+        try:
+            binding = xp(rawResult, 'ItemAttributes', 'Binding')['v']
+        except KeyError:
+            binding = None
+        asin = xp(rawResult, 'ASIN')['v']
+
+        movieLikeliness = 0
+        tvShowLikeliness = 0
+
+        if productTypeName == 'DOWNLOADABLE_MOVIE':
+            movieLikeliness += 6
+        elif productTypeName == 'DOWNLOADABLE_TV_EPISODE':
+            tvShowLikeliness += 6
+        elif productTypeName in ['ABIS_DVD', 'VIDEO_DVD'] and binding in ['DVD', 'Blu-ray']:
+            pass
+        else:
+            logs.warning("Failed to recognize Amazon result with productTypeName " + productTypeName +
+                         " binding " + binding)
+            return None
+
+
+        if productTypeName == 'DOWNLOADABLE_MOVIE':
+            result = AmazonMovie(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
+            return result
+        elif productTypeName == 'DOWNLOADABLE_TV_EPISODE':
+            return None
+        elif productTypeName in ['ABIS_DVD', 'VIDEO_DVD'] and binding in ['DVD', 'Blu-ray']:
+            # Discriminate based on title, # of discs, price, audience rating, running time.
+            movieLikeliness = 0
+            tvShowLikeliness = 0
+
+        # Look for clues in the title.
+        title = xp(rawResult, 'ItemAttributes', 'Title')['v']
+        if 'complete' in title.lower():
+            tvShowLikeliness += 2
+        if 'season' in title.lower():
+            tvShowLikeliness += 4
+        if 'volume' in title.lower():
+            tvShowLikeliness += 4
+        if 'the best of' in title.lower():
+            tvShowLikeliness += 4
+
+        # Look for clues in the number of discs.
+        try:
+            numDiscs = int(xp(rawResult, 'ItemAttributes', 'NumberOfDiscs')['v'])
+            if numDiscs in (1, 2):
+                movieLikeliness += 2
+            else:
+                tvShowLikeliness += min(4, numDiscs - 3)
+        except KeyError:
+            pass
+
+        # Look for clues in the running time.
+        try:
+            runtime = xp(rawResult, 'ItemAttributes', 'RunningTime')['v']
+            # Runtime is in minutes.
+            if runtime >= 60 and runtime < 120:
+                movieLikeliness += 2
+            if runtime > 200:
+                tvShowLikeliness += 3
+            # 2-3h could be a long movie or a short TV show. Probably the former.
+            if runtime >= 120 and runtime < 180:
+                movieLikeliness += 1
+        except KeyError:
+            pass
+
+        # Look for clues in the pricing.
+        try:
+            currency = xp(rawResult, 'ItemAttributes', 'ListPrice', 'CurrencyCode')['v']
+            if currency == 'USD':
+                price = int(xp(rawResult, 'ItemAttributes', 'ListPrice', 'Amount')['v']) / 100.0
+                if price > 30:
+                    tvShowLikeliness += 3
+                elif price < 20:
+                    movieLikeliness += 3
+        except KeyError:
+            pass
+
+        # Look for clues in the rating.
+        try:
+            rating = xp(rawResult, 'ItemAttributes', 'AudienceRating')['v']
+            if rating.find('NR') == 0 or 'Not Rated' in rating or 'Unrated' in rating:
+                tvShowLikeliness += 3
+            elif tvShowLikeliness > 3:
+                # This has a rating, but has all the properties of a collection. It's probably a collection of
+                # movies. Drop it.
+                return None
+            else:
+                movieLikeliness += 5
+        except KeyError:
+            tvShowLikeliness += 2
+
+        if movieLikeliness > tvShowLikeliness:
+            result = AmazonMovie(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
+            return result
+        else:
+            result = AmazonTvShow(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
+            return result
+
 
     def __interleaveAndCombineDupesBasedOnAsin(self, scoredResultLists):
         """
@@ -657,7 +1016,45 @@ class AmazonSource(GenericSource):
 
         return dedupedResults
 
+    def __adjustScoresBySalesRank(self, resultList):
+        for searchResult in resultList:
+            salesRank = searchResult.resolverObject.salesRank
+            if salesRank:
+                # TODO: TWEAK THIS MATH. This will be fucking ridiculous with something with salesRank=1. It needs to be
+                # a lot smoother.
+                factor = (5000 / searchResult.resolverObject.salesRank) ** 0.2
+                searchResult.addScoreComponentDebugInfo('Amazon salesRank factor', factor)
+                searchResult.score *= factor
+            else:
+                # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
+                factor = 0.6
+                searchResult.addScoreComponentDebugInfo('Amazon missing salesRank factor', factor)
+                searchResult.score *= factor
+
+    def __scoreFilmResults(self, *unscoredResultsLists):
+        scoredTvShows = []
+        scoredMovies = []
+        for unscoredResultList in unscoredResultsLists:
+            scoredList = scoreResultsWithBasicDropoffScoring(unscoredResultList, sourceScore=1.0)
+            tvShows = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonTvShow)]
+            movies = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonMovie)]
+            if len(tvShows) + len(movies) != len(scoredList):
+                raise Exception('%d of %d elements in Amazon result list unrecognized!' % (
+                    len(scoredList), len(scoredList) - len(tvShows) - len(movies)
+                ))
+            scoredTvShows.append(tvShows)
+            scoredMovies.append(movies)
+
+        tvShows = self.__interleaveAndCombineDupesBasedOnAsin(scoredTvShows)
+        movies = self.__interleaveAndCombineDupesBasedOnAsin(scoredMovies)
+
+        self.__adjustScoresBySalesRank(tvShows)
+        self.__adjustScoresBySalesRank(movies)
+
+        return interleaveResultsByScore([tvShows, movies])
+
     def __scoreMusicResults(self, *unscoredResultsLists):
+        # TODO: Clean up code duplication with __scoreFilmResults!
         if not unscoredResultsLists:
             return []
 
@@ -667,12 +1064,13 @@ class AmazonSource(GenericSource):
             scoredList = scoreResultsWithBasicDropoffScoring(unscoredResultList, sourceScore=0.6)
             albums = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonAlbum)]
             tracks = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonTrack)]
+            if len(albums) + len(tracks) != len(scoredList):
+                raise Exception('%d of %d elements in Amazon result list unrecognized!' % (
+                    len(scoredList), len(scoredList) - len(albums) - len(tracks)
+                ))
 
             scoredAlbums.append(albums)
             scoredTracks.append(tracks)
-
-        print "scoredAlbums contains lengths:", [str(len(lst)) for lst in scoredAlbums]
-        print "scoredTracks contains lengths:", [str(len(lst)) for lst in scoredTracks]
 
         # We don't really expect any album dupes, but it's very possible that a track will show up for both search
         # indexes. So we do a really simple combination based on ASIN, leaving full de-duping to the EntitySearch
@@ -680,15 +1078,9 @@ class AmazonSource(GenericSource):
         albums = self.__interleaveAndCombineDupesBasedOnAsin(scoredAlbums)
         tracks = self.__interleaveAndCombineDupesBasedOnAsin(scoredTracks)
 
-        for searchResult in albums + tracks:
-            salesRank = searchResult.resolverObject.salesRank
-            if salesRank:
-                # TODO: TWEAK THIS MATH. This will be fucking ridiculous with something with salesRank=1. It needs to be
-                # a lot smoother.
-                searchResult.score *= (5000 / searchResult.resolverObject.salesRank) ** 0.2
-            else:
-                # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
-                searchResult.score *= 0.6
+        self.__adjustScoresBySalesRank(albums)
+        self.__adjustScoresBySalesRank(tracks)
+
         self.__augmentAlbumResultsWithSongs(albums, tracks)
 
         return interleaveResultsByScore([albums, tracks])
@@ -718,7 +1110,6 @@ class AmazonSource(GenericSource):
         for track in tracks:
             simpleTitle = trackSimplify(track.resolverObject.name)
             simpleArtist = ''
-            print "HANDLING", track.resolverObject.key
             if track.resolverObject.artists:
                 simpleArtist = artistSimplify(track.resolverObject.artists[0])
             if (simpleTitle, simpleArtist) in seenTitlesAndArtists:
@@ -741,13 +1132,24 @@ class AmazonSource(GenericSource):
         if queryCategory == 'music':
             # We're not passing a constructor, so this will return the raw results. This is because we're not sure if
             # they're songs or albums yet, so there's no straightforward constructor we can pass.
-            resultSets = self.__searchIndexesLite(['Music', 'DigitalMusic'], queryText,
-                constructor=self.__constructMusicObjectFromResult)
-            return self.__scoreMusicResults(resultSets.items())
+            searchIndexes = (
+                AmazonSource.SearchIndexData('Music', 'Medium,Tracks,Reviews', self.__constructMusicObjectFromResult),
+                AmazonSource.SearchIndexData('DigitalMusic', 'Medium,Reviews', self.__constructMusicObjectFromResult)
+            )
+            resultSets = self.__searchIndexesLite(searchIndexes, queryText)
+            return self.__scoreMusicResults(*resultSets.values())
         elif queryCategory == 'book':
-            searchIndexes = [ 'Books' ]
+            raise NotImplementedError()
         elif queryCategory == 'film':
-            searchIndexes = [ 'Video' ] #TODO: Is this right?
+            searchIndexes = (
+                AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),
+                AmazonSource.SearchIndexData('DVD', 'Medium,Reviews', self.__constructVideoObjectFromResult)
+            )
+            resultSets = self.__searchIndexesLite(searchIndexes, queryText)
+            return self.__scoreFilmResults(*resultSets.values())
+        else:
+            raise NotImplementedError('AmazonSource.searchLite() does not handle category (%s)' % queryCategory)
+
     
     @lazyProperty
     def __amazon_api(self):
@@ -825,10 +1227,10 @@ class AmazonSource(GenericSource):
     
     def entityProxyFromKey(self, key, **kwargs):
         try:
-            item = _AmazonObject(amazon_id=key)
-            kind = xp(item.attributes, 'ProductGroup')['v'].lower()
+            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=amazon_id)
+            kind = xp(raw, 'ItemLookupResponse','Items','Item','ItemAttributes','ProductGroup')['v'].lower()
             logs.debug(kind)
-            
+
             # TODO: Avoid additional API calls here?
             
             if kind == 'book':

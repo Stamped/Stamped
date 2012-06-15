@@ -165,10 +165,10 @@ class ResolverPlace(ResolverObject):
 
     def __init__(self, *args, **kwargs):
         super(ResolverPlace, self).__init__(*args, **kwargs)
-        self._properties = self._properties + [
+        self._properties.extend([
             'coordinates', 'address', 'address_string', 'neighborhoods', 'gallery', 'phone', 'email', 'has_food',
             'has_drinks', 'cuisines'
-        ]
+        ])
 
     @property 
     def kind(self):
@@ -233,9 +233,9 @@ class ResolverPerson(ResolverObject):
 
     def __init__(self, *args, **kwargs):
         super(ResolverPerson, self).__init__(*args, **kwargs)
-        self._properties = self._properties + [
+        self._properties.extend([
             'albums', 'tracks', 'movies', 'books', 'genres'
-        ]
+        ])
 
     @property
     def kind(self):
@@ -281,10 +281,10 @@ class ResolverMediaCollection(ResolverObject):
 
     def __init__(self, *args, **kwargs):
         super(ResolverMediaCollection, self).__init__(*args, **kwargs)
-        self._properties = self._properties + [
+        self._properties.extend([
             'artists', 'authors', 'tracks', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date',
             'genres', 'length', 'mpaa_rating'
-        ]
+        ])
 
     @property 
     def kind(self):
@@ -362,10 +362,10 @@ class ResolverMediaItem(ResolverObject):
 
     def __init__(self, *args, **kwargs):
         super(ResolverMediaItem, self).__init__(*args, **kwargs)
-        self._properties = self._properties + [
+        self._properties.extend([
             'artists', 'authors', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date', 'genres',
             'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number'
-        ]
+        ])
 
     @property
     def kind(self):
@@ -409,6 +409,7 @@ class ResolverMediaItem(ResolverObject):
 
     @property 
     def length(self):
+        # Note that for videos/songs this is in seconds.
         return -1
 
     @property 
@@ -451,9 +452,9 @@ class ResolverSoftware(ResolverObject):
 
     def __init__(self, *args, **kwargs):
         super(ResolverMediaItem, self).__init__(*args, **kwargs)
-        self._properties = self._properties + [
+        self._properties.extend([
             'authors', 'publishers', 'genres', 'screenshots', 'release_date', 'platform'
-        ]
+        ])
 
     @property
     def kind(self):

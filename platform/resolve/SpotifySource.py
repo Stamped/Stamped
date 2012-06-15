@@ -19,10 +19,11 @@ try:
     from copy                       import copy
     from GenericSource              import GenericSource, multipleSource, listSource
     from utils                      import lazyProperty
+    from pprint                     import pformat
     from gevent.pool                import Pool
     from Resolver                   import *
     from ResolverObject             import *
-    from pprint                     import pformat
+    from search.ScoringUtils        import *
 except:
     report()
     raise
@@ -39,12 +40,49 @@ class _SpotifyObject(object):
     spotify - an instance of Spotify (API proxy)
     """
 
-    def __init__(self, spotify_id, spotify=None):
+    def __init__(self, spotify_id, spotify=None, data=None):
         if spotify is None:
             spotify = globalSpotify()
         
         self.__spotify    = spotify
         self.__spotify_id = spotify_id
+        # The data we get just from search results.
+        self.__basicData = data
+        # Data retrieved from a lookup.
+        self.__fullData  = None
+
+    @property
+    def data(self):
+        """
+        The data accessor is agnostic between basic data and full lookup data. It prefers full data if it's already
+        available; if not, it falls back to basic data; if there is none, it issues the lookup.
+
+        If the field you want is only available in lookup data, use the full_data accessor.
+        """
+        if self.__fullData:
+            return self.__fullData
+        if self.__basicData:
+            return self.__basicData
+        # Lazy property call that issues lookup.
+        return self.full_data
+
+    @lazyProperty
+    def full_data(self):
+        if self.__fullData:
+            return self.__fullData
+        # Sort of hacky -- calls a function implemented by ResolverObject.
+        self.countLookupCall('full data')
+        self.__fullData = self.lookup_data()
+        return self.__fullData
+
+    def lookup_data(self):
+        raise NotImplementedError()
+
+    @property
+    def popularity(self):
+        if self.__basicData is None:
+            return None
+        return float(self.__basicData['popularity'])
 
     @property
     def spotify(self):
@@ -58,6 +96,10 @@ class _SpotifyObject(object):
     def source(self):
         return "spotify"
 
+    @property
+    def name(self):
+        return self.data['name']
+
     def __repr__(self):
         # NOTE: availability generally includes *many* ISO country codes which 
         # make sifting through debug printouts painful, so disable them here.
@@ -70,22 +112,17 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
     """
     Spotify artist proxy
     """
-    def __init__(self, spotify_id):
-        _SpotifyObject.__init__(self, spotify_id)  
-        ResolverPerson.__init__(self, types=['artist'])
+    def __init__(self, spotify_id, data=None, maxLookupCalls=None):
+        _SpotifyObject.__init__(self, spotify_id, data=data)
+        ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
+        self._properties.extend(['popularity'])
 
-    @lazyProperty
-    def data(self):
-        result = self.spotify.lookup(self.key, "albumdetail")
-        return result['artist']
-
-    @lazyProperty
-    def name(self):
-        return self.data['name']
+    def lookup_data(self):
+        return self.spotify.lookup(self.key, "albumdetail")['artist']
 
     @lazyProperty
     def albums(self):
-        album_list = self.data['albums']
+        album_list = self.full_data['albums']
         return [
             {
                 'name'  : entry['album']['name'],
@@ -135,31 +172,32 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
     """
     Spotify album proxy
     """
-    def __init__(self, spotify_id):
-        _SpotifyObject.__init__(self, spotify_id)  
-        ResolverMediaCollection.__init__(self, types=['album'])
+    def __init__(self, spotify_id, data=None, maxLookupCalls=None):
+        _SpotifyObject.__init__(self, spotify_id, data=data)
+        ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
+        self._properties.extend(['popularity'])
 
-    @lazyProperty
-    def data(self):
+    def lookup_data(self):
         return self.spotify.lookup(self.key, 'trackdetail')['album']
 
     @lazyProperty
-    def name(self):
-        return self.data['name']
-
-    @lazyProperty
     def artists(self):
-        try:
-            return [ { 
+        if 'artist' in self.data and 'artist-id' in self.data:
+            return [ {
                 'name'  : self.data['artist'],
                 'key'   : self.data['artist-id'],
             } ]
-        except Exception:
-            return []
+        if 'artists' in self.data:
+            return [ {
+                'name' : artist['name'],
+                # Artist href is missing for 'Various Artists' stuff.
+                'key'  : artist.get('href', None),
+            } for artist in self.data['artists'] ]
+        return []
 
     @lazyProperty
     def tracks(self):
-        track_list = self.data['tracks']
+        track_list = self.full_data['tracks']
         return [ 
             { 
                 'name'  : track['name'], 
@@ -173,24 +211,21 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
     """
     Spotify track proxy
     """
-    def __init__(self, spotify_id):
-        _SpotifyObject.__init__(self, spotify_id)  
-        ResolverMediaItem.__init__(self, types=['track'])
+    def __init__(self, spotify_id, data=None, maxLookupCalls=None):
+        _SpotifyObject.__init__(self, spotify_id, data=data)
+        ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
+        self._properties.extend(['popularity'])
 
-    @lazyProperty
-    def data(self):
+    def lookup_data(self):
         return self.spotify.lookup(self.key)['track']
-
-    @lazyProperty
-    def name(self):
-        return self.data['name']
 
     @lazyProperty
     def artists(self):
         try:
             return [ { 
                 'name'  : self.data['artists'][0]['name'],
-                'key'   : self.data['artists'][0]['href'],
+                # Artist href is missing for 'Various Artists' stuff.
+                'key'   : self.data['artists'][0].get('href', None),
             } ]
         except Exception:
             return []
@@ -201,6 +236,7 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
             return [ { 
                 'name'  : self.data['album']['name'],
                 'key'   : self.data['album']['href'],
+                # TODO: We also have year of release here.
             } ]
         except Exception:
             return []
@@ -211,6 +247,8 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
             return float(self.data['length'])
         except Exception:
             return -1
+
+    # TODO: We also have track # information which might be useful for de-duping against Amazon and possibly others.
 
 
 class SpotifySearchAll(ResolverProxy, ResolverSearchAll):
@@ -293,8 +331,8 @@ class SpotifySource(GenericSource):
             raise ValueError("query and query_string cannot both be None")
         
         tracks = self.__spotify.search('track',q=q)['tracks']
-        return listSource(tracks, constructor=lambda x: SpotifyTrack( x['href'] ))
-    
+        return listSource(tracks, constructor=lambda x: SpotifyTrack(x['href'], data=x))
+
     def albumSource(self, query=None, query_string=None):
         if query is not None:
             q = query.name
@@ -305,7 +343,7 @@ class SpotifySource(GenericSource):
         
         albums = self.__spotify.search('album',q=q)['albums']
         albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
-        return listSource(albums, constructor=lambda x: SpotifyAlbum( x['href'] ))
+        return listSource(albums, constructor=lambda x: SpotifyAlbum(x['href'], data=x))
 
 
     def artistSource(self, query=None, query_string=None):
@@ -317,7 +355,7 @@ class SpotifySource(GenericSource):
             raise ValueError("query and query_string cannot both be None")
         
         artists = self.__spotify.search('artist',q=q)['artists']
-        return listSource(artists, constructor=lambda x: SpotifyArtist( x['href'] ))
+        return listSource(artists, constructor=lambda x: SpotifyArtist(x['href'], data=x))
 
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
@@ -339,6 +377,62 @@ class SpotifySource(GenericSource):
             ],
             constructor=SpotifySearchAll
         )
+
+    def __augmentArtistsAndAlbumsWithTracks(self, artistSearchResults, albumSearchResults, trackSearchResults):
+        """
+        Takes three lists of SearchResult objects -- one wrapping SpotifyArtists, one wrapping SpotifyAlbums, one
+        wrapping SpotifyTracks. Increases the scores of the albums and tracks based on the artists.
+        """
+        idsToArtists = {}
+        for artistSearchResult in artistSearchResults:
+            idsToArtists[artistSearchResult.resolverObject.key] = artistSearchResult
+
+        idsToAlbums = {}
+        for albumSearchResult in albumSearchResults:
+            album = albumSearchResult.resolverObject
+            idsToAlbums[album.key] = albumSearchResult
+            if album.artists and album.artists[0]['key'] in idsToArtists:
+                artistSearchResult = idsToArtists[album.artists[0]['key']]
+                scoreBoost = albumSearchResult.score / 3
+                artistSearchResult.addScoreComponentDebugInfo('Boost from album %s' % album.name, scoreBoost)
+                artistSearchResult.score += scoreBoost
+
+        for trackSearchResult in trackSearchResults:
+            track = trackSearchResult.resolverObject
+            if track.artists and track.artists[0]['key'] in idsToArtists:
+                artistSearchResult = idsToArtists[track.artists[0]['key']]
+                scoreBoost = trackSearchResult.score / 5
+                artistSearchResult.addScoreComponentDebugInfo('Boost from track %s' % track.name, scoreBoost)
+                artistSearchResult.score += scoreBoost
+            if track.albums and track.albums[0]['key'] in idsToAlbums:
+                albumSearchResult = idsToAlbums[track.albums[0]['key']]
+                scoreBoost = trackSearchResult.score / 5
+                albumSearchResult.addScoreComponentDebugInfo('Boost from track %s' % track.name, scoreBoost)
+                albumSearchResult.score += scoreBoost
+
+
+    def searchLite(self, queryCategory, queryText, timeout=None):
+        tracks, albums, artists = [], [], []
+        def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
+            rawResults = self.__spotify.search(typeString, q=queryText)[resultsKey]
+            target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0) for rawResult in rawResults])
+        typeSearches = (
+            (tracks, SpotifyTrack, 'track', 'tracks'),
+            (albums, SpotifyAlbum, 'album', 'albums'),
+            (artists, SpotifyArtist, 'artist', 'artists'),
+        )
+        pool = Pool(len(typeSearches))
+        for typeSearch in typeSearches:
+            pool.spawn(conductTypeSearch, typeSearch)
+        pool.join(timeout=timeout)
+        # We start out penalizing albums and artists severely, with the idea that if they show up
+        tracks  = scoreResultsWithBasicDropoffScoring(tracks, sourceScore=1.0)
+        albums  = scoreResultsWithBasicDropoffScoring(albums, sourceScore=0.7)
+        artists = scoreResultsWithBasicDropoffScoring(artists, sourceScore=0.6)
+        self.__augmentArtistsAndAlbumsWithTracks(artists, albums, tracks)
+        smoothScores(tracks), smoothScores(albums), smoothScores(artists)
+        # TODO: Incorporate popularities into ranking? Only worthwhile if we think they're under-weighting them.
+        return interleaveResultsByScore((tracks, albums, artists))
 
 if __name__ == '__main__':
     demo(SpotifySource(), 'Katy Perry')
