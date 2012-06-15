@@ -387,11 +387,10 @@ class StampedAPITwitterFind(StampedAPITwitterTest):
             "user_token"    : TWITTER_USER_A0_TOKEN,
             "user_secret"   : TWITTER_USER_A0_SECRET,
             }
-        result = self.handlePOST(path, data)
-
-        self.assertLength(result, 1)
-        self.assertEqual(result[0]['user_id'], self.twUserB['user_id'])
-
+        self.async(lambda: self.handlePOST(path, data), [
+                lambda x: self.assertEqual(len(x), 1),
+                lambda x: self.assertEqual(x[0]['user_id'], self.twUserB['user_id']),
+            ])
 
 
         ### TESTS TO ADD:

@@ -1048,7 +1048,7 @@ var g_update_stamps = null;
         
         
         var $nav_bar   = $('#stamp-category-nav-bar');
-        var categories = 'default place music book film other';
+        var categories = 'default place music book film app';
         
         var set_body_class = function(category) {
             $body.removeClass(categories).addClass(category);
@@ -1119,6 +1119,7 @@ var g_update_stamps = null;
                             
                             g_category = category;
                             set_body_class(orig_category);
+                            window.g_init_social_sharing();
                         };
                         
                         if (category === null) {
@@ -1279,8 +1280,8 @@ var g_update_stamps = null;
                             text = 'books';
                         } else if (category === 'film') {
                             text = 'film and tv';
-                        } else if (category === 'other') {
-                            text = 'other';
+                        } else if (category === 'app') {
+                            text = 'apps';
                         }
                         
                         title += " - " + text;

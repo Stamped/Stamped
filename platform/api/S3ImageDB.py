@@ -471,7 +471,7 @@ class S3ImageDB(AImageDB):
             out.seek(0)
             
             image = Image.open(out)
-            __dir__ = os.path.dirname(os.path.abspath(__file__))
+            __dir__  = os.path.dirname(os.path.abspath(__file__))
             filepath = os.path.join(__dir__, mask)
             mask = Image.open(filepath).convert('RGBA').split()[3]
             image.putalpha(mask)
