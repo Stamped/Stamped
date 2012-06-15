@@ -513,7 +513,7 @@ class StampedAPI(AStampedAPI):
         self._todoDB.removeUserTodosHistory(account.user_id)
 
         # Remove stamps / collections
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps = self._stampDB.getStamps(stampIds)
 
         for stamp in stamps:
             if stamp.credits is not None and len(stamp.credits) > 0:
@@ -545,7 +545,7 @@ class StampedAPI(AStampedAPI):
 
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
-        likedStamps = self._stampDB.getStamps(likedStampIds, limit=len(likedStampIds))
+        likedStamps = self._stampDB.getStamps(likedStampIds)
 
         for stamp in likedStamps:
             self._stampDB.removeLike(account.user_id, stamp.stamp_id)
@@ -1009,7 +1009,7 @@ class StampedAPI(AStampedAPI):
 
     def _getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
-        stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps      = self._stampDB.getStamps(stampIds)
         stamps      = self._enrichStampObjects(stamps)
         
         categories  = {}
@@ -1728,7 +1728,7 @@ class StampedAPI(AStampedAPI):
         numStamps = self._stampDB.countStampsForEntity(entityId)
 
         popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
-        popularStamps = self._stampDB.getStamps(popularStampIds, limit=len(popularStampIds))
+        popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
@@ -1896,7 +1896,7 @@ class StampedAPI(AStampedAPI):
                     allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
-        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds), limit=len(allUnderlyingStampIds))
+        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds))
 
         for stamp in underlyingStamps:
             underlyingStampIds[stamp.stamp_id] = stamp
@@ -3622,7 +3622,7 @@ class StampedAPI(AStampedAPI):
         t0 = time.time()
 
         stampIds = self._collectionDB.getInboxStampIds(user.user_id)
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps = self._stampDB.getStamps(stampIds)
         stampStats = self._stampStatsDB.getStatsForStamps(stampIds)
         entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
         entities = self._entityDB.getEntities(entityIds)
@@ -3792,7 +3792,7 @@ class StampedAPI(AStampedAPI):
 
         if sourceStamps is None and rawTodo.source_stamp_ids is not None:
             # Enrich stamps
-            sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids, limit=len(rawTodo.source_stamp_ids))
+            sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids)
             sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
 
         # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
@@ -3980,7 +3980,7 @@ class StampedAPI(AStampedAPI):
             entityIds[str(entity.entity_id)] = entity
 
         # Enrich stamps
-        stamps = self._stampDB.getStamps(sourceStampIds.keys(), limit=len(sourceStampIds.keys()))
+        stamps = self._stampDB.getStamps(sourceStampIds.keys())
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds)
 
         for stamp in stamps:

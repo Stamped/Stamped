@@ -197,7 +197,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         params = {
             'since':    kwargs.pop('since', None),
             'before':   kwargs.pop('before', None), 
-            'limit':    kwargs.pop('limit', 20),
+            'limit':    kwargs.pop('limit', None),
             'sort':     sort,
             'sortOrder': pymongo.DESCENDING, 
         }
