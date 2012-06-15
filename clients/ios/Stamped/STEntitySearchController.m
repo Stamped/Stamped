@@ -349,11 +349,10 @@ static const CGFloat _offscreenCancelPadding = 5;
     if (tableView == self.searchResultsTableView) {
         
 #warning this should take the user to create entity, not implemented yet
-        
         NSInteger count = 0;
         if (self.autoCompleteResults.count) {
             count = self.autoCompleteResults.count;
-        } else if (self.searchSections) {
+        } else if (self.searchSections && indexPath.section < self.searchSections.count) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             count = sectionObject.entities.count;
         }
@@ -364,10 +363,14 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     if (self.autoCompleteResults.count) {
-        
+        if (self.autoCompleteResults.count > indexPath.row) {
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         [self.searchView setText:autoCompleteResult.completion];
         [self performSearchWithText:autoCompleteResult.completion];
+        }
+        else {
+#warning former crasher, needs fix
+        }
 
     } else {
         

@@ -26,6 +26,7 @@
 @synthesize headerView=_headerView;
 @synthesize stamp=_stamp;
 @synthesize user=_user;
+@synthesize stampedBy = _stampedBy;
 
 
 - (id)initWithStamp:(id<STStamp>)stamp {
@@ -224,6 +225,7 @@
 
     [[STStampedAPI sharedInstance] stampedByForEntityID:self.stamp.entity.entityID andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
         
+        NSLog(@"stampedby:%@", stampedBy);
         self.stampedBy = stampedBy;
         
         NSInteger count = 1;

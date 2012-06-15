@@ -98,7 +98,7 @@
     }];
     self.tableView.backgroundView = background;
     [background release];
-    
+    /*
     if (!self.navigationItem.rightBarButtonItem) {
         STStampSwitch *control = [[STStampSwitch alloc] initWithFrame:CGRectZero];
         [control addTarget:self action:@selector(switchToggled:) forControlEvents:UIControlEventValueChanged];
@@ -107,7 +107,7 @@
         self.navigationItem.rightBarButtonItem = item;
         [item release];
     }
-    
+    */
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
     self.navigationItem.leftBarButtonItem = button;
     [button release];

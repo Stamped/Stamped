@@ -29,7 +29,7 @@
 }
 
 + (NSArray*)sourcePaths {
-  return [NSArray arrayWithObjects:@"entity_id", @"search_id", @"blurb", @"credit", nil];
+  return [NSArray arrayWithObjects:@"entity_id", @"search_id", @"blurb", @"credits", nil];
 }
 
 
