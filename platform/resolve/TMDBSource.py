@@ -25,6 +25,7 @@ try:
     from datetime                   import datetime
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
+    from search.ScoringUtils        import *
 except:
     report()
     raise
@@ -41,10 +42,42 @@ class _TMDBObject(object):
     tmdb - an instance of TMDB (API proxy)
     info (abstract) - the type-specific TMDB data for the object
     """
-    def __init__(self, tmdb_id):
+    def __init__(self, tmdb_id, data=None):
         self.__key = str(tmdb_id)
         if self.__key.startswith('tt'):
             self.__key = str(self.info['id'])
+        # If data is provided in the constructor -- parsed from TMDB search results -- we save that in __basic_data,
+        # and use that to handle field accesses until we hit one that requires the full set.
+        self.__basic_data = data
+        self.__full_data = None
+
+    @property
+    def data(self):
+        """
+        The data accessor is agnostic between basic data and full lookup data. It prefers full data if it's already
+        available; if not, it falls back to basic data; if there is none, it issues the lookup.
+
+        If the field you want is only available in lookup data, use the full_data accessor.
+        """
+        if self.__full_data:
+            return self.__full_data
+        if self.__basic_data:
+            return self.__basic_data
+            # Lazy property call that issues lookup.
+        return self.full_data
+
+
+    @lazyProperty
+    def full_data(self):
+        if self.__full_data:
+            return self.__full_data
+            # Sort of hacky -- calls a function implemented by ResolverObject.
+        self.countLookupCall('full data')
+        self.__full_data = self.lookup_data()
+        return self.__full_data
+
+    def lookup_data(self):
+        raise NotImplementedError()
 
     @property
     def key(self):
@@ -58,56 +91,54 @@ class _TMDBObject(object):
     def tmdb(self):
         return globalTMDB()
 
-    @abstractproperty
-    def info(self):
-        pass
-
     def __repr__(self):
         return pformat( self.info )
 
 
+# Note that TMDB results have two image sources -- backdrop_path and poster_path -- that we're currently not using,
+# Kevin says because they won't let us directly hotlink.
 class TMDBMovie(_TMDBObject, ResolverMediaItem):
     """
     TMDB movie proxy
     """
-    def __init__(self, tmdb_id):
-        _TMDBObject.__init__(self, tmdb_id)
-        ResolverMediaItem.__init__(self, types=['movie'])
+    def __init__(self, tmdb_id, data=None, maxLookupCalls=None):
+        _TMDBObject.__init__(self, tmdb_id, data=data)
+        ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
 
     @property
     def valid(self):
         try:
-            self.info
+            self.full_data
             return True
         except HTTPError:
             return False
 
-    @lazyProperty
-    def info(self):
+    def lookup_data(self):
         return self.tmdb.movie_info(self.key)
 
     @lazyProperty
     def _castsRaw(self):
+        self.countLookupCall('full data')
         return self.tmdb.movie_casts(self.key)
 
     @lazyProperty
     def name(self):
         try:
-            return self.info['title']
+            return self.data['title']
         except Exception:
             raise
     
     @lazyProperty
     def popularity(self):
         try:
-            return self.info['popularity']
+            return self.data['popularity']
         except Exception:
             return None
     
     @lazyProperty
     def imdb(self):
         try:
-            return self.info['imdb_id']
+            return self.full_data['imdb_id']
         except KeyError:
             return None
 
@@ -145,7 +176,7 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty
     def release_date(self):
         try:
-            string = self.info['release_date']
+            string = self.data['release_date']
             return parseDateString(string)
         except KeyError:
             pass
@@ -153,19 +184,17 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def length(self):
-        try:
-            return self.info['runtime'] * 60
-        except Exception:
-            pass
-        return -1
+        if 'runtime' not in self.full_data:
+            return -1  # TODO: Would None be more appropriate here?
+        return self.full_data['runtime'] * 60
 
     @lazyProperty 
     def genres(self):
-        try:
-            return [ entry['name'] for entry in self.info['genres'] ]
-        except KeyError:
+        if 'genres' not in self.full_data:
             logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
             return []
+        return [ entry['name'] for entry in self.full_data['genres'] ]
+
 
 class TMDBSearchAll(ResolverProxy, ResolverSearchAll):
 
@@ -238,6 +267,15 @@ class TMDBSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
+
+    def searchLite(self, queryCategory, queryText, timeout=None):
+        raw_results = self.__tmdb.movie_search(queryText)['results']
+        # 20 results is good enough for us. No second requests.
+        resolver_objects = [ TMDBMovie(result['id'], data=result, maxLookupCalls=0) for result in raw_results ]
+        scored_results = scoreResultsWithBasicDropoffScoring(resolver_objects, sourceScore=1.0)
+        # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
+        # TMDB is clever enough to handle that for us.
+        return scored_results
 
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:

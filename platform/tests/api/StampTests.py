@@ -53,11 +53,12 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
         # Verify entity_ids match
         self.assertTrue(result['entity']['entity_id'] == self.entity['entity_id'])
 
-        # Verify 'contents' only has one blurb
-        self.assertTrue(len(result['contents']) == 1)
+        # Verify 'contents' matches blurb length
+        self.assertTrue(len(result['contents']) == len(self.blurbs))
 
-        # Verify 'blurb' is equal to blurb passed
-        self.assertTrue(result['contents'][0]['blurb'] == self.blurb)
+        # Verify 'blurb' is equal to blurbs defined
+        for i in range(len(result['contents'])):
+            self.assertTrue(result['contents'][i]['blurb'] == self.blurbs[i])
 
         # Verify 'user' is set up correctly 
         self.assertTrue(result['user']['screen_name'] == self.userA['screen_name'])
@@ -71,60 +72,235 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
         self.assertTrue(result['entity']['title'] == self.entity['title'])
         self.assertTrue(result['entity']['category'] == self.entity['category'])
 
-    def _validate_credited_stamp(self, result):
+    def _validate_credited_stamp(self, result, recipients=[]):
         # Verify credit is in result
         self.assertTrue('credits' in result)
-        self.assertTrue(len(result['credits']) == 1)
+        self.assertTrue(len(result['credits']) == len(recipients))
 
         # Verify credit is populated correctly
-        self.assertTrue(result['credits'][0]['user']['screen_name'] == self.userB['screen_name'])
-        self.assertTrue(result['credits'][0]['user']['user_id'] == self.userB['user_id'])
-        self.assertTrue(result['credits'][0]['user']['name'] == self.userB['name'])
-        self.assertTrue(result['credits'][0]['user']['color_primary'] == self.userB['color_primary'])
-        self.assertTrue(result['credits'][0]['user']['color_secondary'] == self.userB['color_secondary'])
-        self.assertTrue(result['credits'][0]['user']['image_url'] == self.userB['image_url'])
+        for i in range(len(result['credits'])):
+            user = recipients[i]
+            self.assertTrue(result['credits'][i]['user']['screen_name'] == user['screen_name'])
+            self.assertTrue(result['credits'][i]['user']['user_id'] == user['user_id'])
+            self.assertTrue(result['credits'][i]['user']['name'] == user['name'])
+            self.assertTrue(result['credits'][i]['user']['color_primary'] == user['color_primary'])
+            self.assertTrue(result['credits'][i]['user']['color_secondary'] == user['color_secondary'])
+            self.assertTrue(result['credits'][i]['user']['image_url'] == user['image_url'])
 
     def test_create_basic(self):
-        self.blurb = "This is a sample stamp. A 'stample', if you will."
+        try:
+            self.blurbs = [ "This is a sample stamp. A 'stample', if you will." ]
 
-        path = "stamps/create.json"
-        data = { 
-            "oauth_token"   : self.tokenA['access_token'],
-            "entity_id"     : self.entity['entity_id'],
-            "blurb"         : self.blurb,
-        }
-        result = self.handlePOST(path, data)
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+            }
+            result = self.handlePOST(path, data)
 
-        # Validate stamp
-        self._validate_basic_stamp(result)
-
-        self.deleteStamp(self.tokenA, result['stamp_id'])
+            # Validate stamp
+            self._validate_basic_stamp(result)
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
 
     def test_create_credit(self):
-        (self.userB, self.tokenB) = self.createAccount('UserB')
+        try:
+            (self.userB, self.tokenB) = self.createAccount('UserB')
 
-        self.blurb = "This is a sample stamp with credit. Because everyone likes undeserved credit."
+            self.blurbs = [ "This is a sample stamp with credit. Because everyone likes undeserved credit." ]
 
-        path = "stamps/create.json"
-        data = { 
-            "oauth_token"   : self.tokenA['access_token'],
-            "entity_id"     : self.entity['entity_id'],
-            "blurb"         : self.blurb,
-            "credits"       : self.userB['screen_name'],
-        }
-        result = self.handlePOST(path, data)
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+                "credits"       : self.userB['screen_name'],
+            }
+            result = self.handlePOST(path, data)
 
-        # Validate stamp
-        self._validate_basic_stamp(result)
+            # Validate stamp
+            self._validate_basic_stamp(result)
 
-        # Validate credit
-        self._validate_credited_stamp(result)
+            # Validate credit
+            self._validate_credited_stamp(result, recipients=[self.userB])
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+            self.deleteAccount(self.tokenB)
 
-        self.deleteStamp(self.tokenA, result['stamp_id'])
-        self.deleteAccount(self.tokenB)
+    def test_create_invalid_credit(self):
+        try:
+            (self.userB, self.tokenB) = self.createAccount('UserB')
+
+            self.blurbs = [ "This is a sample stamp with invalid credit. User 'asdf' does not exist." ]
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+                "credits"       : 'asdf',
+            }
+            result = self.handlePOST(path, data)
+
+            # Validate stamp is valid
+            self._validate_basic_stamp(result)
+
+            # Validate credit does not exist
+            self.assertTrue('credits' not in result or len(result['credits']) == 0)
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+            self.deleteAccount(self.tokenB)
+
+    def test_create_improper_credit(self):
+        try:
+            (self.userB, self.tokenB) = self.createAccount('UserB')
+
+            self.blurbs = [ "This is a sample stamp with improperly-formatted credit. 'C $1' is not a valid screen name." ]
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+                "credits"       : 'C $1',
+            }
+            result = self.handlePOST(path, data)
+
+            # Validate stamp is valid
+            self._validate_basic_stamp(result)
+
+            # Validate credit does not exist
+            self.assertTrue('credits' not in result or len(result['credits']) == 0)
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+            self.deleteAccount(self.tokenB)
+
+    def test_restamp_credit_same(self):
+        try:
+            (self.userB, self.tokenB) = self.createAccount('UserB')
+
+            self.blurbs = [ "This is a first blurb with credit." ]
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+                "credits"       : self.userB['screen_name'],
+            }
+            result = self.handlePOST(path, data)
+
+            self.blurbs.append("This is a second blurb with the same credit as the first. But it won't change anything.")
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[1],
+                "credits"       : self.userB['screen_name'],
+            }
+            result = self.handlePOST(path, data)
+
+            # Validate stamp
+            self._validate_basic_stamp(result)
+
+            # Validate credit
+            self._validate_credited_stamp(result, recipients=[self.userB])
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+            self.deleteAccount(self.tokenB)
+
+    def test_restamp_credit_add(self):
+        try:
+            (self.userB, self.tokenB) = self.createAccount('UserB')
+            (self.userC, self.tokenC) = self.createAccount('UserC')
+
+            self.blurbs = [ "This is a first blurb with credit." ]
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+                "credits"       : self.userB['screen_name'],
+            }
+            result = self.handlePOST(path, data)
+
+            self.blurbs.append("This is a second blurb with credit to a new person. Two credits should now exist.")
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[1],
+                "credits"       : self.userC['screen_name'],
+            }
+            result = self.handlePOST(path, data)
+
+            # Validate stamp
+            self._validate_basic_stamp(result)
+
+            # Validate credit
+            self._validate_credited_stamp(result, recipients=[self.userB, self.userC])
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+            self.deleteAccount(self.tokenB)
+            self.deleteAccount(self.tokenC)
+
+    def test_restamp_credit_redundant(self):
+        try:
+            (self.userB, self.tokenB) = self.createAccount('UserB')
+            (self.userC, self.tokenC) = self.createAccount('UserC')
+
+            self.blurbs = [ "This is a first blurb with credit." ]
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[0],
+                "credits"       : self.userB['screen_name'],
+            }
+            result = self.handlePOST(path, data)
+
+            self.blurbs.append("This is a second blurb with credit to the old person AND a new person. Net result: two credits.")
+
+            path = "stamps/create.json"
+            data = { 
+                "oauth_token"   : self.tokenA['access_token'],
+                "entity_id"     : self.entity['entity_id'],
+                "blurb"         : self.blurbs[1],
+                "credits"       : "%s,%s" % (self.userB['screen_name'], self.userC['screen_name']),
+            }
+            result = self.handlePOST(path, data)
+
+            # Validate stamp
+            self._validate_basic_stamp(result)
+
+            # Validate credit
+            self._validate_credited_stamp(result, recipients=[self.userB, self.userC])
+        except Exception:
+            raise 
+        finally:
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+            self.deleteAccount(self.tokenB)
+            self.deleteAccount(self.tokenC)
 
 
-class StampedAPIStampsShow(StampedAPIStampConsumeHttpTest):
+class StampedAPIStampsShow(StampedAPIStampConsumeTest):
     def test_show(self):
         path = "stamps/show.json"
         data = { 
@@ -144,7 +320,7 @@ class StampedAPIStampsRestamp(StampedAPIStampConsumeHttpTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result['contents']), 2)
-        self.assertEqual(result['contents'][0]['blurb'], 'ASDF')
+        self.assertEqual(result['contents'][1]['blurb'], 'ASDF')
 
 
 class StampedAPIStampsUserDetails(StampedAPIStampConsumeHttpTest):
@@ -330,6 +506,7 @@ class StampedAPIStampCreditHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
         self.createFriendship(self.tokenB, self.userA)
         self.entity = self.createEntity(self.tokenB)
         self.stampA = self.createStamp(self.tokenB, self.entity['entity_id'])
@@ -349,9 +526,10 @@ class StampedAPIStampCreditHttpTest(AStampedAPIHttpTestCase):
         self.deleteFriendship(self.tokenB, self.userA)
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
-class StampedAPIStampsCreditShow(StampedAPIStampCreditHttpTest):
-    def test_show(self):
+class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
+    def test_credit_basic(self):
         path = "stamps/show.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
@@ -360,14 +538,8 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditHttpTest):
         result = self.handleGET(path, data)
         
         self.assertTrue(len(result['credits']) == 1)
-        self.assertEqual(
-            result['credits'][0]['user']['screen_name'], 
-            self.stampData['credits']
-            )
-        self.assertEqual(
-            result['credits'][0]['stamp_id'], 
-            self.stampA['stamp_id']
-            )
+        self.assertTrue(result['credits'][0]['user']['screen_name'] == self.stampData['credits'])
+        self.assertTrue(result['credits'][0]['stamp_id'] == self.stampA['stamp_id'])
 
 
 class StampedAPIStampLikesHttpTest(AStampedAPIHttpTestCase):
