@@ -266,7 +266,7 @@
                                                          andDelegate:self.scrollView];
     [self.scrollView appendChildView:_commentsView];
     if ([STStampedAPI.sharedInstance.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
-        UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:@"Delete"
+        STNavigationItem* rightButton = [[[STNavigationItem alloc] initWithTitle:@"Delete"
                                                                          style:UIBarButtonItemStylePlain
                                                                         target:self
                                                                         action:@selector(_deleteStampButtonPressed:)] autorelease];

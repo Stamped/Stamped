@@ -11,9 +11,12 @@
 
 @implementation STUploadingImageView
 @synthesize uploading=_uploading;
+@synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
+        
+        self.userInteractionEnabled = YES;
         
         UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
         view.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
@@ -32,6 +35,9 @@
 
 - (void)setImage:(UIImage *)image {
     [super setImage:image];
+    
+    self.hidden = (image==nil);
+    if (!image) return;
     
     CGSize kMaxImageViewSize = CGSizeMake(200.0f, 200.0f);
     
@@ -74,5 +80,16 @@
     
 }
 
+
+#pragma mark - Touches
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    [super touchesEnded:touches withEvent:event];
+    
+    if ([(id)delegate respondsToSelector:@selector(sTUploadingImageViewTapped:)]) {
+        [self.delegate sTUploadingImageViewTapped:self];
+    }
+
+}
 
 @end

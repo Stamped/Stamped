@@ -339,9 +339,14 @@
     
 }
 
-- (void)setImageURL:(NSURL*)aURL {
-    [self setLoading:YES percentComplete:0];
+- (void)setImageURL:(NSURL*)aURL {    
+    if (!aURL || ![aURL isKindOfClass:[NSURL class]]) {
+        [self setTitle:@"Bad URL"];
+        return;
+    }
     
+    [self setLoading:YES percentComplete:0];
+
     if (_responseData) {
         [_responseData release], _responseData=nil;
     }

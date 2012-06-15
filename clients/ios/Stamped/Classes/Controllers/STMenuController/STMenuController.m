@@ -17,7 +17,7 @@
 #import "STFacebook.h"
 #import "STTwitter.h"
 
-#import "CreditPickerViewController.h"
+#import "PostStampViewController.h"
 
 @interface STMenuController ()
 @property(nonatomic,retain) LoginViewController *loginController;
@@ -34,6 +34,17 @@
         [self showWelcome:YES];
     }
     
+//double delayInSeconds = 2.0;
+//dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+//dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+//    PostStampViewController *controller = [[PostStampViewController alloc] initWithStamp:nil];
+//    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+//    [self presentModalViewController:navController animated:YES];
+//    [controller release];
+//    [navController release];
+//});
+//
+//    
 }
 
 - (void)resetNavButtons {} // overide showing nav buttons, already handled by app

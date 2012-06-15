@@ -8,5 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STStampContainerView : UIView
+@interface STStampContainerView : UIView {
+    UIView *_containerView;
+}
 @end

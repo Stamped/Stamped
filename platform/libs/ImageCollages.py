@@ -8,11 +8,13 @@ __license__   = "TODO"
 import Globals
 import math, utils
 
+import api.HTTPSchemas
+
 from AImageCollage import AImageCollage
 
 # NOTE (travis): the use of rounding functions (e.g., round, floor, and ceil) 
 # throughout the layout functions in this file is very precise, though it may 
-# seem arbitrary. don't change them unless you have good reason to.
+# seem arbitrary. e.g., don't change them unless you have good reason to.
 
 class ImageCollage(AImageCollage):
     
@@ -62,7 +64,7 @@ class ImageCollage(AImageCollage):
                                              num_cols=num_cols, 
                                              **self._options)
 
-class BasicImageCollage(ImageCollage):
+class DefaultImageCollage(ImageCollage):
     
     def __init__(self, **kwargs):
         self._square_cells = kwargs.pop('square_cells', False)
@@ -105,10 +107,10 @@ class BasicImageCollage(ImageCollage):
         
         return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
 
-class MusicImageCollage(BasicImageCollage):
+class MusicImageCollage(DefaultImageCollage):
     
     def __init__(self):
-        BasicImageCollage.__init__(self, square_cells=False, pad_coeff=128.0)
+        DefaultImageCollage.__init__(self, square_cells=False, pad_coeff=128.0)
 
 class BookImageCollage(ImageCollage):
     
@@ -159,8 +161,103 @@ class FilmImageCollage(ImageCollage):
         
         return ((cell_width, cell_height), (x, y), logo_size, logo_pos)
 
-class AppImageCollage(BasicImageCollage):
+class AppImageCollage(DefaultImageCollage):
     
     def __init__(self):
-        BasicImageCollage.__init__(self, square_cells=True, pad_coeff=32.0)
+        DefaultImageCollage.__init__(self, square_cells=True, pad_coeff=32.0)
+
+class PlaceImageCollage(AImageCollage):
+    
+    def get_clusters(self, entities, limit=None):
+        earthRadius = 3959.0 # miles
+        clusters    = [ ]
+        trivial     = True
+        
+        # find entity clusters
+        for entity in entities:
+            found_cluster = False
+            coords = entity.coordinates
+            
+            if coords is None:
+                continue
+            
+            # TODO: really should be retaining this for stamps overall instead of just subset here...
+            
+            ll = [ coords.lat, coords.lng ]
+            
+            for cluster in clusters:
+                dist = earthRadius * utils.get_spherical_distance(ll, cluster['avg'])
+                
+                if dist < 10:
+                    cluster['data'].append((ll[0], ll[1]))
+                    
+                    len_cluster   = len(cluster['data'])
+                    found_cluster = True
+                    trivial       = False
+                    
+                    cluster['sum'][0] = cluster['sum'][0] + ll[0]
+                    cluster['sum'][1] = cluster['sum'][1] + ll[1]
+                    
+                    cluster['avg'][0] = cluster['sum'][0] / len_cluster
+                    cluster['avg'][1] = cluster['sum'][1] / len_cluster
+                    
+                    break
+            
+            if not found_cluster:
+                clusters.append({
+                    'avg'  : [ ll[0], ll[1] ], 
+                    'sum'  : [ ll[0], ll[1] ], 
+                    'data' : [ (ll[0], ll[1]) ], 
+                })
+        
+        clusters_out = []
+        if trivial:
+            clusters_out = clusters
+        else:
+            # attempt to remove trivial clusters as outliers
+            for cluster in clusters:
+                if len(cluster['data']) > 1:
+                    clusters_out.append(cluster)
+            
+            if len(clusters_out) <= 0:
+                clusters_out.append(clusters[0])
+        
+        if len(clusters) > 0:
+            clusters = sorted(clusters_out, key=lambda c: len(c['data']), reverse=True)
+            
+            #for cluster in clusters:
+            #    utils.log(pprint.pformat(cluster))
+            
+            cluster = clusters[0]
+            
+            if limit is not None:
+                pts = []
+                for ll in cluster['data']:
+                    dist = utils.get_spherical_distance(ll, cluster['avg'])
+                    pts.append((dist, ll))
+                
+                pts = sorted(pts, key=lambda pt: pt[0], reverse=False)
+                if limit is not None:
+                    pts = pts[:limit]
+                
+                cluster['data'] = list(pt[1] for pt in pts)
+            
+            return cluster
+        
+        return None
+    
+    def generate_from_user(self, user, entities):
+        cluster = self.get_clusters(entities) #, limit=max(10, int(.8 * len(entities))))
+        markers = '%7C'.join("%s,%s" % pt for pt in cluster['data'])
+        images  = []
+        api_key = "AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok"
+        
+        for size in self._sizes:
+            map_url = "https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=jpg&maptype=roadmap&size=%dx%d&markers=%s&key=%s" % (size[0], size[1], markers, api_key)
+            image   = self._db.getWebImage(map_url)
+            
+            image   = self._apply_postprocessing(image, user)
+            images.append(image)
+        
+        return images
 
