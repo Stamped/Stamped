@@ -7,13 +7,14 @@ __license__   = "TODO"
 
 import Globals
 import os, sys
-from utils import Singleton
+from utils import AttributeDict, Singleton, get_db_config
 from bson import json_util
 import json
 from api.db.mongodb.AMongoCollection import MongoDBConfig
 from StampedTestUtils import *
 from libs import MongoCache
 import functools
+
 
 class AStampedFixtureTestCase(AStampedTestCase):
     """
@@ -65,8 +66,20 @@ def loadTestDbDataFromFilename(filename):
     fileHandle.close()
     loadTestDbDataFromText(contents)
 
-def issueQuery(filename):
-    pass
+def issueQueries(queries):
+    # TODO: Pull this out to a named constant somewhere, or be more intelligent about this, or something.
+    host, port = get_db_config('peach.db2')
+    config = { 'mongodb' : { 'host': host, 'port': port } }
+    devDbConfig = MongoDBConfig()
+    devDbConfig.config = AttributeDict(config)
+    devDb = devDbConfig.connection.stamped
+    # TODO: This whole "stamped_fixtures" thing really needs to be a constant.
+    localDb = MongoDBConfig.getInstance().connection.stamped_fixtures
+    for (collectionName, query) in queries:
+        devCollection = getattr(devDb, collectionName)
+        results = list(devCollection.find(query))
+        localCollection = getattr(localDb, collectionName)
+        localCollection.insert(results)
 
 def dumpDbDictToFilename(dbDict, fileName):
     """
@@ -79,11 +92,11 @@ def dumpDbDictToFilename(dbDict, fileName):
     fileOut.close()
 
 def fixtureTest(generateLocalDbFn=None,
-                generateLocalDbQuery=None,
+                generateLocalDbQueries=None,
                 fixtureFileName=None,
                 fixtureText=None):
-    if generateLocalDbFn is not None and generateLocalDbQuery is not None:
-        raise Exception('Only one of generateLocalDbFn, generateLocalDbQuery can be passed to fixtureTest!')
+    if generateLocalDbFn is not None and generateLocalDbQueries is not None:
+        raise Exception('Only one of generateLocalDbFn, generateLocalDbQueries can be passed to fixtureTest!')
     if fixtureFileName is not None and fixtureText is not None:
         raise Exception('Only one of fixtureFilename, fixtureText can be passed to fixtureTest!')
 
@@ -102,7 +115,7 @@ def fixtureTest(generateLocalDbFn=None,
             # from the database, it doesn't need to be updated, it's just something quick and hand-written. In that case, even
             # when we're doing runs of tests that regenerate the fixtures of the test suite, for these tests we still need to
             # load fixtures as normal.
-            useDbFixture = useDbFixture or (generateLocalDbFn is None and generateLocalDbQuery is None)
+            useDbFixture = useDbFixture or (generateLocalDbFn is None and generateLocalDbQueries is None)
 
             fixtureFilename = fixtureFileName
             # Clear out the whole test DB before running the test.
@@ -139,8 +152,8 @@ def fixtureTest(generateLocalDbFn=None,
             if not useDbFixture:
                 if generateLocalDbFn is not None:
                     generateLocalDbFn()
-                elif generateLocalDbQuery is not None:
-                    issueQuery(generateLocalDbQuery)
+                elif generateLocalDbQueries is not None:
+                    issueQueries(generateLocalDbQueries)
 
             # The actual DB fixtures we want to snapshot before the function runs, because we don't want to incorporate
             # anything written during the function. But the third-party calls cache we want to snapshot after the

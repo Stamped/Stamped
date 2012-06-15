@@ -15,8 +15,8 @@ from Memcache import memcached_function
 from MongoCache import mongoCachedFn
 
 ONE_WEEK = 7*24*60*60
-def cachedFn(ttl=ONE_WEEK):
+def cachedFn(ttl=ONE_WEEK, memberFn=True):
     if utils.is_ec2():
         return memcached_function(time=ttl)
     else:
-        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl))
+        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=True)
