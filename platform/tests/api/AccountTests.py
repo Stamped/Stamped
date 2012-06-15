@@ -8,9 +8,9 @@ __license__   = "TODO"
 
 import Globals, utils
 from utils                  import lazyProperty
-from framework.FixtureTest import *
+from framework.FixtureTest  import *
+from AStampedAPITestCase    import *
 from AStampedAPIHttpTestCase import *
-from api.Schemas import Account
 from MongoStampedAPI import MongoStampedAPI
 
 import logs
@@ -22,40 +22,18 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # ACCOUNT #
 # ####### #
 
-__globalApi = None
 
-def api():
-    global __globalApi
-
-    if __globalApi is None:
-        __globalApi = MongoStampedAPI()
-
-    return __globalApi
-
-
-
-def generateTestAccount():
-    account = Account()
-    account.name = "TestUser"
-    account.email = "TestUser@stamped.com"
-    account.password = "12345"
-    account.screen_name = "TestUser"
-    api().addAccount(account)
-
-
-class StampedAPIAccountUpdateTest(AStampedFixtureTestCase):
+class StampedAPIAccountUpdateTest(AStampedAPITestCase):
     def setUp(self):
-        account = Account()
-        account.name = "TestUser"
-        account.email = "TestUser@stamped.com"
-        account.password = "12345"
-        account.screen_name = "TestUser"
-        api().addAccount(account)
+        account = self.createAccount('TestUser')
+
+    def tearDown(self):
+        self.deleteAccount(self.account.user_id)
 
 
-    @fixtureTest(generateLocalDbFn=generateTestAccount)
+    @fixtureTest()
     def test_change_name(self):
-        api().getAccount
+        print(account)
         return True
 
 
@@ -186,7 +164,6 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
         with expected_exception():
             self.handlePOST(path, data)
 
-    #
 #    def test_post(self):
 #        path = "account/update.json"
 #        data = {
