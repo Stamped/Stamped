@@ -392,29 +392,6 @@ class HTTPAccount(Schema):
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring)
 
-        cls.addProperty('user_id',                          basestring)
-
-        cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('auth_service',                     basestring, required=True)
-
-        cls.addProperty('name_lower',                       basestring)
-        cls.addProperty('email',                            basestring)
-        cls.addProperty('password',                         basestring)
-        cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('screen_name_lower',                basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
-        cls.addProperty('phone',                            basestring)
-        cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
-        cls.addProperty('location',                         basestring)
-        cls.addProperty('privacy',                          bool, required=True)
-        cls.addNestedProperty('linked',                     LinkedAccounts)
-        cls.addNestedProperty('devices',                    DevicesSchema)
-        cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
-        cls.addNestedProperty('timestamp',                  UserTimestamp, required=True)
-        cls.addNestedProperty('alert_settings',             AccountAlertSettings)
-
     def importAccount(self, account, client=None):
         self.dataImport(account.dataExport(), overflow=True)
         return self
