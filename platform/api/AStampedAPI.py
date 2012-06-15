@@ -28,7 +28,7 @@ class AStampedAPI(AEntitySink):
         raise NotImplementedError
     
     @abstract
-    def updateAccountSettings(self, authUserId, data):
+    def updateAccount(self, authUserId, data):
         raise NotImplementedError
     
     @abstract

@@ -7,7 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from utils                  import lazyProperty
+from framework.FixtureTest import *
+from AStampedAPIHttpTestCase import *
+from api.Schemas import Account
+from MongoStampedAPI import MongoStampedAPI
+
+import logs
 
 CLIENT_ID = DEFAULT_CLIENT_ID
 CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
@@ -16,7 +22,45 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # ACCOUNT #
 # ####### #
 
-class StampedAPIAccountTest(AStampedAPITestCase):
+__globalApi = None
+
+def api():
+    global __globalApi
+
+    if __globalApi is None:
+        __globalApi = MongoStampedAPI()
+
+    return __globalApi
+
+
+
+def generateTestAccount():
+    account = Account()
+    account.name = "TestUser"
+    account.email = "TestUser@stamped.com"
+    account.password = "12345"
+    account.screen_name = "TestUser"
+    api().addAccount(account)
+
+
+class StampedAPIAccountUpdateTest(AStampedFixtureTestCase):
+    def setUp(self):
+        account = Account()
+        account.name = "TestUser"
+        account.email = "TestUser@stamped.com"
+        account.password = "12345"
+        account.screen_name = "TestUser"
+        api().addAccount(account)
+
+
+    @fixtureTest(generateLocalDbFn=generateTestAccount)
+    def test_change_name(self):
+        api().getAccount
+        return True
+
+
+
+class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='devbot') 
         self.privacy = False
@@ -24,48 +68,166 @@ class StampedAPIAccountTest(AStampedAPITestCase):
     def tearDown(self):
         self.deleteAccount(self.token)
 
-class StampedAPIAccountSettings(StampedAPIAccountTest):
-    def test_post(self):
+class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
+    def test_change_name(self):
         path = "account/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "screen_name": "UserA2",
-            "privacy": False,
-            "phone": 1235551234,
-        }
+            "name": "Pimpbot 5000",
+            }
         result = self.handlePOST(path, data)
-        self.assertEqual(result['privacy'], False)
-        self.privacy = result['privacy']
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['name'], "Pimpbot 5000")
 
-    def test_invalid_post(self):
+    def test_change_screen_name(self):
         path = "account/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "screen_name": "UserA2",
-            "privacy": False,
-            "phone": 1235551234,
+            "screen_name": "pimpbot5000test",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['screen_name'], "pimpbot5000test")
+
+    def test_change_phone(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "phone": "952-987-6543",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['phone'], "9529876543")
+
+    def test_change_bio(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "bio": "I got microchips from Yokohama and I'll be turning out yo mama",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        logs.info('account: %s' % account)
+        self.assertEqual(account['bio'], "I got microchips from Yokohama and I'll be turning out yo mama")
+
+    def test_change_website(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "website": "http://www.stamped.com/",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['website'], "http://www.stamped.com/")
+
+    def test_change_website_invalid(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "website": "not a website",
             }
         with expected_exception():
-            data["phone"] = "not a phone number"
-            result = self.handlePOST(path, data)
-        data["phone"] = 1235551234
+            self.handlePOST(path, data)
 
-        with expected_exception():
-            data['privacy'] = 5
-            result = self.handlePOST(path, data)
-        data['privacy'] = False
-
-
-    def test_get(self):
-        path = "account/show.json"
+    def test_change_location(self):
+        path = "account/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['screen_name'], "devbot")
-        self.assertEqual(result['privacy'], self.privacy)
+            "location": "New York, NY",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['location'], "New York, NY")
 
-class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
+    def test_change_color_primary(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "color_primary": "FF0000",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['color_primary'], "FF0000")
+
+    def test_change_color_primary_invalid(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "color_primary": "not a color",
+            }
+        with expected_exception():
+            self.handlePOST(path, data)
+
+
+    def test_change_color_secondary(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "color_secondary": "00ff00",
+            }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result['result'])
+        account = self.showAccount(self.token)
+        self.assertEqual(account['color_secondary'], "00FF00")
+
+    def test_change_color_secondary_invalid(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "color_secondary": "black",
+            }
+        with expected_exception():
+            self.handlePOST(path, data)
+
+    #
+#    def test_post(self):
+#        path = "account/update.json"
+#        data = {
+#            "oauth_token": self.token['access_token'],
+#            "screen_name": "UserA2",
+#            "privacy": False,
+#            "phone": 1235551234,
+#        }
+#        result = self.handlePOST(path, data)
+#        self.assertEqual(result['privacy'], False)
+#        self.privacy = result['privacy']
+#
+#    def test_invalid_post(self):
+#        path = "account/update.json"
+#        data = {
+#            "oauth_token": self.token['access_token'],
+#            "screen_name": "UserA2",
+#            "privacy": False,
+#            "phone": 1235551234,
+#            }
+#        with expected_exception():
+#            data["phone"] = "not a phone number"
+#            result = self.handlePOST(path, data)
+#        data["phone"] = 1235551234
+#
+#        with expected_exception():
+#            data['privacy'] = 5
+#            result = self.handlePOST(path, data)
+#        data['privacy'] = False
+#
+#
+#    def test_get(self):
+#        path = "account/show.json"
+#        data = {
+#            "oauth_token": self.token['access_token'],
+#        }
+#        result = self.handleGET(path, data)
+#        self.assertEqual(result['screen_name'], "devbot")
+#        self.assertEqual(result['privacy'], self.privacy)
+
+class StampedAPIAccountUpdateProfile(StampedAPIAccountHttpTest):
     def test_update_profile(self):
         bio = "My long biography goes here."
         path = "account/update_profile.json"
@@ -76,7 +238,7 @@ class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['bio'], bio)
 
-class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
+class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
     def test_update_profile_image(self):
         path = "account/update_profile_image.json"
         data = {
@@ -96,7 +258,7 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
             result = self.handlePOST(path, data)
 
 
-class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
+class StampedAPIAccountCustomizeStamp(StampedAPIAccountHttpTest):
     def test_customize_stamp(self):
         path = "account/customize_stamp.json"
         data = {
@@ -127,7 +289,7 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
 
 
 
-class StampedAPIAccountInvalid(StampedAPIAccountTest):
+class StampedAPIAccountInvalid(StampedAPIAccountHttpTest):
     def test_blacklist(self):
         with expected_exception():
             self.createAccount('cock')
@@ -177,7 +339,7 @@ class StampedAPIAccountInvalid(StampedAPIAccountTest):
                 self.createAccount('testinv_%s' % index, email=email)
             index += 1
 
-class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
+class StampedAPIAccountCheckAccount(StampedAPIAccountHttpTest):
     def test_check_email_available(self):
         path = "account/check.json"
         data = {
@@ -351,7 +513,7 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
 """
-class StampedAPIAccountChangePassword(StampedAPIAccountTest):
+class StampedAPIAccountChangePassword(StampedAPIAccountHttpTest):
     def test_change_password(self):
         path = "account/change_password.json"
         data = {
@@ -374,7 +536,7 @@ class StampedAPIAccountChangePassword(StampedAPIAccountTest):
         self.assertTrue(len(result['token']['refresh_token']) == 43)
         self.token = result['token']
 
-class StampedAPIAccountAlertSettings(StampedAPIAccountTest):
+class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
     def test_show_settings(self):
         path = "account/alerts/show.json"
         data = {

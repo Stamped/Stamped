@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PostStampGraphView : UIView
+@interface PostStampGraphView : UIView {
+    UIImageView *_imageView;
+    CATextLayer *_titleLayer;
+    UIView *_graphContainer;
+    UIActivityIndicatorView *_activityView;
+}
 
+@property(nonatomic,retain) id<STUserDetail> user;
+@property(nonatomic,retain) NSString *category;
+@property(nonatomic,assign) BOOL loading;
 @end

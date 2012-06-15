@@ -7,13 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # ###### #
 # ENTITY #
 # ###### #
 
-class StampedAPIEntityTest(AStampedAPITestCase):
+class StampedAPIEntityHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(client_id='iphone8')
         self.entity = self.createEntity(self.token)
@@ -22,7 +22,7 @@ class StampedAPIEntityTest(AStampedAPITestCase):
         self.deleteEntity(self.token, self.entity['entity_id'])
         self.deleteAccount(self.token)
 
-class StampedAPIEntitiesShow(StampedAPIEntityTest):
+class StampedAPIEntitiesShow(StampedAPIEntityHttpTest):
     def test_show(self):
         path = "entities/show.json"
         data = {
@@ -64,7 +64,7 @@ class StampedAPIEntitiesShow(StampedAPIEntityTest):
 #                 newDesc = item['value']
 #         self.assertEqual(newDesc, desc.decode('utf-8'))
 
-class StampedAPIEntitiesSearch(StampedAPIEntityTest):
+class StampedAPIEntitiesSearch(StampedAPIEntityHttpTest):
     def test_search(self):
         path = "entities/search.json"
         data = {
@@ -77,7 +77,7 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
         self.assertEqual(result['entities'][0]['title'].lower(), self.entity['title'].lower())
 
 
-class StampedAPIEntitiesAutoSuggest(StampedAPIEntityTest):
+class StampedAPIEntitiesAutoSuggest(StampedAPIEntityHttpTest):
     def test_autosuggest_results(self):
         path = "entities/autosuggest.json"
         data = {

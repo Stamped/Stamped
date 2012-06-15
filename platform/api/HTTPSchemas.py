@@ -2507,8 +2507,8 @@ class HTTPStamp(Schema):
                     newImages.append(img)
                 item.images = newImages
 
-            # Insert contents in descending chronological order
-            contents.insert(0, item)
+            # Return contents in chronological order
+            contents.append(item)
         self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
@@ -3006,18 +3006,11 @@ class HTTPActivity(Schema):
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
-            if activity.personal:
-                self.benefit = len(self.subjects)
-                self.body = '%s gave you credit.' % (subjects)
-                self.body_references = subjectReferences
-                if len(self.subjects) > 1:
-                    self.image = _getIconURL('news_stamp_group')
-            else:
-                verb = 'gave'
-                offset = len(subjects) + len(verb) + 2
-                userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
-                self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
-                self.body_references = subjectReferences + userObjectReferences
+            self.benefit = len(self.subjects)
+            self.body = '%s gave you credit.' % (subjects)
+            self.body_references = subjectReferences
+            if len(self.subjects) > 1:
+                self.image = _getIconURL('news_stamp_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
 

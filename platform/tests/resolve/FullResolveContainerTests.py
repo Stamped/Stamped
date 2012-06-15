@@ -14,7 +14,7 @@ from logs import report
 
 try:
     from resolve.FullResolveContainer   import FullResolveContainer
-    from AStampedAPITestCase            import *
+    from AStampedAPIHttpTestCase            import *
     from api.Schemas                    import Entity
     from pprint                         import pformat
     from datetime                       import datetime
@@ -241,7 +241,7 @@ _cases = [
     ),
 ]
 
-class AResolveTest(AStampedAPITestCase):
+class AResolveHttpTest(AStampedAPIHttpTestCase):
 
     def setUp(self):
         self.container = FullResolveContainer()
@@ -265,7 +265,7 @@ class AResolveTest(AStampedAPITestCase):
         else:
             self.assertEqual(result,after)
 
-class ResolveCasesTest(AResolveTest):
+class ResolveCasesTest(AResolveHttpTest):
 
     def test_cases_resolve(self):
         now = _now
