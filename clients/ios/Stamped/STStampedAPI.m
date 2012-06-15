@@ -262,6 +262,9 @@ static STStampedAPI* _sharedInstance;
         [params setObject:[params objectForKey:@"category"] forKey:@"section"];
         [params removeObjectForKey:@"category"];
     }
+    if ([params objectForKey:@"query"]) {
+        path = @"/guide/search.json";
+    }
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
                                             authenticated:YES

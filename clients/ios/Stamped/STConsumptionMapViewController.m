@@ -559,6 +559,7 @@ NSInteger zoom;
 - (void)textFieldDidEndEditing:(UITextField *)textField {
     //Override collapsing behavior
     self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
+    //[Util warnWithMessage:@"Search not implemented yet" andBlock:nil];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
@@ -739,9 +740,7 @@ NSInteger zoom;
         //slice.subcategory = self.subcategory;
         slice.filter = self.filter;
         slice.query = self.query;
-        if (slice.query) {
-            slice.sort = @"relevance";
-        }
+       
         slice.viewport = [NSString stringWithFormat:@"%f,%f,%f,%f", 
                           actualFrame.origin.y + actualFrame.size.height,
                           actualFrame.origin.x,
