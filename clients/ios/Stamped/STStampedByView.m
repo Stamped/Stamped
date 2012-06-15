@@ -150,13 +150,18 @@
 
 - (void)viewAllClicked:(id)nothing {
     NSMutableArray* userIDs = [NSMutableArray array];
+    NSMutableDictionary* mapping = [NSMutableDictionary dictionary];
     for (id<STStampPreview> preview in [self.group stampPreviews]) {
         NSString* userID = preview.user.userID;
         if (userID) {
             [userIDs addObject:userID];
+            if (preview.stampID) {
+                [mapping setObject:preview.stampID forKey:userID];
+            }
         }
     }
     STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+    controller.userIDToStampID = mapping;
     [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
