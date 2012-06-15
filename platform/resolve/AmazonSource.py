@@ -1227,11 +1227,11 @@ class AmazonSource(GenericSource):
     
     def entityProxyFromKey(self, key, **kwargs):
         try:
-            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=amazon_id)
-            kind = xp(raw, 'ItemLookupResponse','Items','Item','ItemAttributes','ProductGroup')['v'].lower()
+            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key)
+            kind = xp(lookupData, 'ItemLookupResponse','Items','Item','ItemAttributes','ProductGroup')['v'].lower()
             logs.debug(kind)
 
-            # TODO: Avoid additional API calls here?
+            # TODO: Avoid additional API calls here.
             
             if kind == 'book':
                 return AmazonBook(key)
