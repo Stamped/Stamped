@@ -66,6 +66,7 @@
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableView.tableHeaderView = view;
         _headerView = [view retain];
+        _headerView.titleLabel.text = self.stamp.entity.title;
         [view release];
     }
     
