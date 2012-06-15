@@ -112,7 +112,9 @@
     
     _titleLayer.string = string;
     [string release];
+    [CATransaction setDisableActions:YES];
     _titleLayer.frame = CGRectMake(42.0f, 12.0f, size.width, size.height);
+    [CATransaction setDisableActions:NO];
     
     NSInteger index = 0;
     for (id<STDistributionItem> item in self.user.distribution) {

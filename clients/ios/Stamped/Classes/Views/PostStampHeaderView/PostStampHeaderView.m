@@ -40,9 +40,7 @@
         [self addSubview:label];
         _titleLabel = [label retain];
         [label release];
-        
-        _titleLabel.text = @"The Wind-Up Bird Chronicle";
-        
+                
         font = [UIFont systemFontOfSize:11];
         label = [[UILabel alloc] initWithFrame:CGRectMake(68.0f, 12.0f, 0.0f, font.lineHeight)];
         label.backgroundColor = self.backgroundColor;
