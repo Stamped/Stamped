@@ -769,16 +769,31 @@ a.lightbox .zoom {
   max-width: 148px;
   width: 148px;
   height: auto;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -o-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 .stamp-preview .preview-image,
 .stamp-preview-raw .preview-image {
   position: relative;
-  display: none;
   display: block;
-  background-size: 100% 100%;
-  max-width: 140px;
-  width: 140px;
-  height: auto;
+  width: 100%;
+  -webkit-transition: -webkit-transform 0.5s ease-out;
+  -moz-transition: -moz-transform 0.5s ease-out;
+  -ms-transition: -ms-transform 0.5s ease-out;
+  -o-transition: -o-transform 0.5s ease-out;
+  transition: transform 0.5s ease-out;
+}
+.stamp-preview .preview-image:hover,
+.stamp-preview-raw .preview-image:hover {
+  -webkit-transform: perspective(600);
+  -moz-transform: perspective(600);
+  -o-transform: perspective(600);
+  -ms-transform: perspective(600);
+  transform: perspective(600);
 }
 .stamp-preview .stamp-user-image,
 .stamp-preview-raw .stamp-user-image {
@@ -819,11 +834,9 @@ a.lightbox .zoom {
 }
 .stamp-preview img,
 .stamp-preview-raw img {
+  position: relative;
   display: block;
-  background-size: 100% 100%;
-  max-width: 140px;
-  width: 140px;
-  height: auto;
+  width: 100%;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;

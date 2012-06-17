@@ -792,11 +792,19 @@ a.lightbox {
 .stamp-preview, .stamp-preview-raw {
     .sized(@preview-wrapper-width);
     
+    .transform-style(preserve-3d);
+    .backface-visibility(hidden);
+    
     .preview-image {
         position: relative;
-        display:  none;
+        display: block;
+        width: 100%;
         
-        .sized(@preview-width);
+        .transition-transform(0.5s, ease-out);
+        
+        &:hover {
+            .transform(perspective(600));
+        }
     }
     
     .stamp-user-image {
@@ -825,7 +833,10 @@ a.lightbox {
     }
     
     img {
-        .sized(@preview-width);
+        position: relative;
+        display:  block;
+        width: 100%;
+        
         .rounded(4px);
     }
     

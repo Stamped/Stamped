@@ -404,6 +404,25 @@ var g_update_stamps = null;
                     
                     $image.hide().addClass('hidden').parent().addClass('hidden');
                 }
+                
+                if (is_sdetail) {
+                    if (!$preview.hasClass('preview-image')) {
+                        $preview = $preview.parents('.preview-image');
+                    }
+                    
+                    var width = "200px";
+                    var t = "perspective(600) scaleX(1.15) scaleY(1.15) rotateZ(25deg) rotateX(25deg) rotateY(-25deg)";
+                    
+                    $preview.css({
+                        'width'     : width, 
+                        'max-width' : width, 
+                        '-webkit-transform' : t, 
+                        '-moz-transform'    : t, 
+                        '-ms-transform'     : t, 
+                        '-o-transform'      : t, 
+                        'transform'         : t
+                    });
+                }
             }
             
             update_gallery_layout();
