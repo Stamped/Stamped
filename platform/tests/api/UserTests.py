@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 CLIENT_ID = DEFAULT_CLIENT_ID
 CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
@@ -16,7 +16,7 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # USER #
 # #### #
 
-class StampedAPIUserTest(AStampedAPITestCase):
+class StampedAPIUserHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -28,7 +28,7 @@ class StampedAPIUserTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
 
-class StampedAPIUsersShow(StampedAPIUserTest):
+class StampedAPIUsersShow(StampedAPIUserHttpTest):
     def test_show_user_id(self):
         path = "users/show.json"
         data = { 
@@ -47,7 +47,7 @@ class StampedAPIUsersShow(StampedAPIUserTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['user_id'], self.userA['user_id'])
 
-class StampedAPIUsersLookup(StampedAPIUserTest):
+class StampedAPIUsersLookup(StampedAPIUserHttpTest):
     def test_lookup_user_ids(self):
         path = "users/lookup.json"
         data = { 
@@ -74,7 +74,7 @@ class StampedAPIUsersLookup(StampedAPIUserTest):
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 2)
 
-class StampedAPIUsersSearch(StampedAPIUserTest):
+class StampedAPIUsersSearch(StampedAPIUserHttpTest):
     def test_search(self):
         path = "users/search.json"
         data = { 
@@ -98,7 +98,7 @@ class StampedAPIUsersSearch(StampedAPIUserTest):
         }
         result = self.handlePOST(path, data)
 
-class StampedAPIUsersPrivacy(StampedAPIUserTest):
+class StampedAPIUsersPrivacy(StampedAPIUserHttpTest):
     def test_privacy_user_id(self):
         path = "users/privacy.json"
         data = { 
@@ -127,7 +127,7 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
         with expected_exception():
             result = self.handleGET(path, data)
 
-class StampedAPIUsersFindContacts(StampedAPIUserTest):
+class StampedAPIUsersFindContacts(StampedAPIUserHttpTest):
     def test_find_by_email(self):
         path = "users/find/email.json"
         emails = ['%s@stamped.com' % self.userA['screen_name'],
@@ -216,7 +216,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         self.assertIn(user['screen_name'], self.screen_names)
         self.assertIn(user['search_identifier'], numbers)
 
-class StampedAPISuggested(StampedAPIUserTest):
+class StampedAPISuggested(StampedAPIUserHttpTest):
     def test_suggested(self):
         suggestedUsers = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
         newAccounts = []

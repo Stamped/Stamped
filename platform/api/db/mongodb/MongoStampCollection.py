@@ -197,7 +197,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         params = {
             'since':    kwargs.pop('since', None),
             'before':   kwargs.pop('before', None), 
-            'limit':    kwargs.pop('limit', 20),
+            'limit':    kwargs.pop('limit', 0),
             'sort':     sort,
             'sortOrder': pymongo.DESCENDING, 
         }
@@ -354,23 +354,26 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def giveCredit(self, creditedUserId, stamp):
         # Add to 'credit received'
         ### TODO: Does this belong here?
-        self.credit_received_collection.addCredit(creditedUserId, \
-                                                    stamp.stamp_id)
+        self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.addGiver(creditedUserId, \
-                                                    stamp.user.user_id)
+        self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
     
     def removeCredit(self, creditedUserId, stamp):
         # Add to 'credit received'
         ### TODO: Does this belong here?
-        self.credit_received_collection.removeCredit(creditedUserId, \
-                                                    stamp.stamp_id)
+        self.credit_received_collection.removeCredit(creditedUserId, stamp.stamp_id)
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
         self.credit_givers_collection.removeGiver(creditedUserId, stamp.user.user_id)
+
+    def checkCredit(self, creditedUserId, stamp):
+        credits = self.credit_received_collection.getCredit(creditedUserId)
+        if stamp.stamp_id in credits:
+            return True
+        return False 
     
     def countCredits(self, userId):
         return self.credit_received_collection.numCredit(userId)
@@ -378,8 +381,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def getRestamps(self, userId, entityId, limit=None):
         try:
             query = {
-                'entity.entity_id'  : entityId,
-                'credit.user_id'    : userId,
+                'entity.entity_id'      : entityId,
+                'credits.user.user_id'  : userId,
             }
             documents = self._collection.find(query).sort('$natural', pymongo.DESCENDING).limit(limit)
             return map(self._convertFromMongo, documents)

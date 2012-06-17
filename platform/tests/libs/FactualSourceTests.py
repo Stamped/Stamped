@@ -15,7 +15,7 @@ from logs import log, report
 try:
     from libs.FactualSource				import FactualSource
     from libs.ExternalSourceController 	import ExternalSourceController
-    from AStampedAPITestCase 			import *
+    from AStampedAPIHttpTestCase 			import *
     from api.Schemas					import Entity
     from pprint							import pformat
     from datetime                       import datetime
@@ -25,7 +25,7 @@ except:
 
 _verbose = False
 
-class AFactualSourceTest(AStampedAPITestCase):
+class AFactualSourceHttpTest(AStampedAPIHttpTestCase):
 
     def setUp(self):
         self.source = FactualSource()
@@ -47,7 +47,7 @@ class AFactualSourceTest(AStampedAPITestCase):
             age = datetime.utcnow() - timestamp
             return age.days == 0
 
-class FactualSourceResolveTest(AFactualSourceTest):
+class FactualSourceResolveTest(AFactualSourceHttpTest):
 
     def test_ino_resolve(self):
         modified = self.source.resolveEntity(self.ino,self.controller)
@@ -61,13 +61,13 @@ class FactualSourceResolveTest(AFactualSourceTest):
         self.assertEqual(self.ino.singleplatform_source,'factual')
         self.assertEqual(self.recent(self.ino,'singleplatform_timestamp'),True)
 
-class FactualSourceEnrichFailTest(AFactualSourceTest):
+class FactualSourceEnrichFailTest(AFactualSourceHttpTest):
 
     def test_enrich_fails(self):
         modified = self.source.enrichEntity(self.ino,self.controller)
         self.assertEqual(modified,False)
 
-class FactualSourceEnrichTest(AFactualSourceTest):
+class FactualSourceEnrichTest(AFactualSourceHttpTest):
 
     def test_ino_enrich(self):
         self.controller.clearNow()

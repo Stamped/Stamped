@@ -863,16 +863,13 @@ class iTunesSource(GenericSource):
     def __searchEntityTypeLite(self, entityType, queryText, resultsDict):
         try:
             resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText)['results']
-            # TODO: Clean up log statements.
-            print "\n\nRESULTS FOR ENTITYTYPE", entityType, "\n\n"
+            # TODO GET RID OF ME
             import pprint
             pprint.pprint(resultsDict[entityType])
         except Exception:
-            # TODO: Clean up log statements.
-            print "CRAP"
             logs.report()
 
-    def searchLite(self, queryCategory, queryText, pool=None, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None):
         types = mapCategoryToTypes(queryCategory)
         iTunesTypes = []
         typesMap = dict(self.__types_to_itunes_strings)
@@ -901,7 +898,7 @@ class iTunesSource(GenericSource):
 
         if len(scoredResultsByType) == 0:
             # TODO: Throw exception to avoid cache?
-            return None
+            return []
         if len(scoredResultsByType) == 1:
             return scoredResultsByType.values()[0]
         assert(queryCategory in ['music', 'film'])
@@ -924,6 +921,8 @@ class iTunesSource(GenericSource):
         iTunesTypesToWeights = {
             'album' : 0.5,
             'musicArtist' : 0.8,
+            'movie' : 0.5,
+            'tvShow' : 0.5,
         }
 
         if iTunesType in iTunesTypesToWeights:

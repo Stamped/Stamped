@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 CLIENT_ID = DEFAULT_CLIENT_ID
 CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
@@ -16,14 +16,14 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 # OAUTH #
 # ##### #
 
-class StampedAPIOAuthTest(AStampedAPITestCase):
+class StampedAPIOAuthHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
 
     def tearDown(self):
         self.deleteAccount(self.tokenA)
 
-class StampedAPIOAuthLogin(StampedAPIOAuthTest):
+class StampedAPIOAuthLogin(StampedAPIOAuthHttpTest):
     def test_login_screen_name(self):
         path = "oauth2/login.json"
         data = { 

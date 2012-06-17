@@ -16,7 +16,7 @@ import functools
 import time
 from logs import log, report
 
-from AStampedAPITestCase            import *
+from AStampedAPIHttpTestCase            import *
 from libs.MongoCache                import mongoCachedFn, SerializationError
 from api.db.mongodb.AMongoCollection import MongoDBConfig
 
@@ -98,7 +98,7 @@ def randomTestFn(*args, **kwargs):
 def sumValues(**kwargs):
     return sum(kwargs.values())
 
-class MongoCacheTest(AStampedAPITestCase):
+class MongoCacheHttpTest(AStampedAPIHttpTestCase):
     def test_basic_calls(self):
         self.assertEqual(0, usageCounters.sumThree)
         self.assertEqual(6, sumThree(1,1,1))

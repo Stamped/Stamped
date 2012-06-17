@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, pprint
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 from MongoStampedAPI import *
 from Schemas import *
 
@@ -15,7 +15,7 @@ from Schemas import *
 # ACTIVITY #
 # ######## #
 
-class StampedAPIActivityTest(AStampedAPITestCase):
+class StampedAPIActivityHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -78,12 +78,12 @@ class StampedAPIActivityTest(AStampedAPITestCase):
         self.assertTrue(exists)
 
 
-class StampedAPIActivityShow(StampedAPIActivityTest):
+class StampedAPIActivityShow(StampedAPIActivityHttpTest):
     def test_show(self):
         result = self.showActivity(self.tokenA)
         self.assertEqual(len(result), 2)
 
-class StampedAPIActivityFriendship(StampedAPIActivityTest):
+class StampedAPIActivityFriendship(StampedAPIActivityHttpTest):
     def test_show_friendship(self):
         # Default (1 follower)
         result = self.showActivity(self.tokenA)
@@ -114,7 +114,7 @@ class StampedAPIActivityFriendship(StampedAPIActivityTest):
         self.deleteFriendship(self.tokenC, self.userB)
 
 
-class StampedAPIActivityLikes(StampedAPIActivityTest):
+class StampedAPIActivityLikes(StampedAPIActivityHttpTest):
     def test_show_like_benefit(self):
         entity = self.createEntity(self.tokenD)
         stampData = {
@@ -149,7 +149,7 @@ class StampedAPIActivityLikes(StampedAPIActivityTest):
 
         self.deleteFriendship(self.tokenC, self.userB)
 
-class StampedAPIActivityMentions(StampedAPIActivityTest):
+class StampedAPIActivityMentions(StampedAPIActivityHttpTest):
     def test_show_stamp_mention(self):
         entity = self.createEntity(self.tokenA)
         stampData = {
@@ -174,7 +174,7 @@ class StampedAPIActivityMentions(StampedAPIActivityTest):
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
 
-class StampedAPIActivityCredit(StampedAPIActivityTest):
+class StampedAPIActivityCredit(StampedAPIActivityHttpTest):
     def test_show_stamp_credit(self):
         entity = self.createEntity(self.tokenA)
         stampData = {
@@ -194,7 +194,7 @@ class StampedAPIActivityCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
-class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
+class StampedAPIActivityMentionAndCredit(StampedAPIActivityHttpTest):
     def test_show_stamp_mention_and_credit(self):
         entity = self.createEntity(self.tokenA)
         stampData = {
@@ -213,7 +213,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
-class StampedAPIActivityTodos(StampedAPIActivityTest):
+class StampedAPIActivityTodos(StampedAPIActivityHttpTest):
     def test_show_todos(self):
         #  We will have User B todo entity A and verify that this appears in User A's activity feed
         self.createTodo(self.tokenB, self.entityA['entity_id'])
@@ -279,7 +279,7 @@ class StampedAPIActivityTodos(StampedAPIActivityTest):
         self.deleteAccount(self.tokenE)
 
 
-class StampedAPIActivityActionComplete(StampedAPIActivityTest):
+class StampedAPIActivityActionComplete(StampedAPIActivityHttpTest):
     def test_action_complete(self):
         pass
         data = {
@@ -333,7 +333,7 @@ class StampedAPIActivityActionComplete(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stampNew['stamp_id'])
         self.deleteEntity(self.tokenA, entityNew['entity_id'])
 
-class StampedAPIActivityUniversal(StampedAPIActivityTest):
+class StampedAPIActivityUniversal(StampedAPIActivityHttpTest):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -429,7 +429,7 @@ class StampedAPIActivityUniversal(StampedAPIActivityTest):
         self._assertBody(results, ['UserD is now following UserA.'])
 
 api = MongoStampedAPI()
-class StampedAPIActivityCache(AStampedAPITestCase):
+class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
     def setUp(self):
         global api
         self.api = api

@@ -7,11 +7,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, time
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # GENERIC CLASSES
 
-class StampedAPIGuideTest(AStampedAPITestCase):
+class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         # Build users
         (self.userA, self.tokenA) = self.createAccount('UserA')
@@ -78,7 +78,7 @@ class StampedAPIGuideTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenD)
 
 
-class StampedAPIGuideCollection(StampedAPIGuideTest):
+class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
     def test_guide_inbox(self):
         path = "guide/collection.json"
         data = { 
