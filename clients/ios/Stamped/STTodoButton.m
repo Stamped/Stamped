@@ -40,7 +40,7 @@
     STActionContext* context = [STActionContext contextWithCompletionBlock:^(id stamp, NSError* error) {
       self.waiting = NO;
       if (!error) {
-        [Util reloadStampedData];
+        //[Util reloadStampedData];
       }
       else {
         self.on = !self.on;

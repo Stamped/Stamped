@@ -65,5 +65,13 @@
   return mapping;
 }
 
++ (STSimpleComment*)commentWithBlurb:(NSString*)blurb user:(id<STUser>)user andStampID:(NSString*)stampID {
+    STSimpleComment* comment = [[[STSimpleComment alloc] init] autorelease];
+    comment.blurb = blurb;
+    comment.stampID = stampID;
+    comment.user = user;
+    comment.created = [NSDate date];
+    return comment;
+}
 
 @end

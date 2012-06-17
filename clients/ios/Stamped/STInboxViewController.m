@@ -127,6 +127,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     //Resume cache ops
+    [self reloadDataSource];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {

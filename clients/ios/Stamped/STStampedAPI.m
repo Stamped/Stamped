@@ -38,6 +38,7 @@
 NSString* const STStampedAPILoginNotification = @"STStampedAPILoginNotification";
 NSString* const STStampedAPILogoutNotification = @"STStampedAPILogoutNotification";
 NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedNotification";
+NSString* const STStampedAPILocalStampModificationNotification = @"STStampedAPILocalStampModification";
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -438,9 +439,20 @@ static STStampedAPI* _sharedInstance;
                              comment:(id<STComment>)comment
                            andCredit:(id<STStamp>)credit{
     id<STStamp> stamp = [self cachedStampForStampID:stampID];
-    if (stamp) {
+    void (^block)(id<STStamp> stamp) = ^(id<STStamp> stamp) {
         STSimpleStamp* copy = [STSimpleStamp augmentedStampWithStamp:stamp todo:todo like:like comment:comment andCredit:credit];
         [self.stampCache setObject:copy forKey:stampID];
+        [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:stamp];
+    };
+    if (stamp) {
+        block(stamp);
+    }
+    else {
+        [self stampForStampID:stampID andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
+            if (stamp) {
+                block(stamp);
+            }
+        }];
     }
 }
 
@@ -450,9 +462,20 @@ static STStampedAPI* _sharedInstance;
                              comment:(id<STComment>)comment
                            andCredit:(id<STStamp>)credit{
     id<STStamp> stamp = [self cachedStampForStampID:stampID];
-    if (stamp) {
+    void (^block)(id<STStamp> stamp) = ^(id<STStamp> stamp) {
         STSimpleStamp* copy = [STSimpleStamp reducedStampWithStamp:stamp todo:todo like:like comment:comment andCredit:credit];
         [self.stampCache setObject:copy forKey:stampID];
+        [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:stamp];
+    };
+    if (stamp) {
+        block(stamp);
+    }
+    else {
+        [self stampForStampID:stampID andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
+            if (stamp) {
+                block(stamp);
+            }
+        }];
     }
 }
 
@@ -464,19 +487,22 @@ static STStampedAPI* _sharedInstance;
                             stampID, @"stamp_id",
                             blurb, @"blurb",
                             nil];
+    if (![Util isOffline]) {
+        STSimpleComment* comment = [STSimpleComment commentWithBlurb:blurb user:self.currentUser andStampID:stampID];
+        [Util executeOnMainThread:^{
+            [self _updateLocalStampWithStampID:stampID
+                                          todo:nil
+                                          like:nil
+                                       comment:comment
+                                     andCredit:nil];
+        }];
+    }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
                                                authenticated:YES
                                                       params:params 
                                                      mapping:[STSimpleComment mapping] 
                                                  andCallback:^(id result, NSError* error, STCancellation* cancellation) {
-                                                     if (!error && result) {
-                                                         [self _updateLocalStampWithStampID:stampID
-                                                                                       todo:nil
-                                                                                       like:nil
-                                                                                    comment:result
-                                                                                  andCredit:nil];
-                                                     }
                                                      block(result, error, cancellation);
                                                  }];
 }
@@ -484,19 +510,21 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)likeWithStampID:(NSString*)stampID andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block {
     NSString* path = @"/stamps/likes/create.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
+    if (![Util isOffline]) {
+        [Util executeOnMainThread:^{
+        [self _updateLocalStampWithStampID:stampID
+                                      todo:nil
+                                      like:[self currentUser]
+                                   comment:nil
+                                 andCredit:nil];
+        }];
+    }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                         post:YES
                                                authenticated:YES
                                                       params:params
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                     if (!error && result) {
-                                                         [self _updateLocalStampWithStampID:stampID
-                                                                                       todo:nil
-                                                                                       like:[self currentUser]
-                                                                                    comment:nil
-                                                                                  andCredit:nil];
-                                                     }
                                                      block(result, error, cancellation);
                                                  }];
 }
@@ -505,19 +533,22 @@ static STStampedAPI* _sharedInstance;
                          andCallback:(void(^)(id<STStamp>, NSError*, STCancellation*))block {
     NSString* path = @"/stamps/likes/remove.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
+    if (![Util isOffline]) { 
+        id<STUser> currentUser = self.currentUser;
+        [Util executeOnMainThread:^ {
+            [self _reduceLocalStampWithStampID:stampID
+                                          todo:nil
+                                          like:currentUser
+                                       comment:nil
+                                     andCredit:nil];
+        }];
+    }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                         post:YES
                                                authenticated:YES
                                                       params:params
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                     if (!error && result) {
-                                                         [self _reduceLocalStampWithStampID:stampID
-                                                                                       todo:nil
-                                                                                       like:[self currentUser]
-                                                                                    comment:nil
-                                                                                  andCredit:nil];
-                                                     }
                                                      block(result, error, cancellation);
                                                  }];
 }
@@ -530,19 +561,22 @@ static STStampedAPI* _sharedInstance;
                             stampID, @"stamp_id",
                             entityID, @"entity_id",
                             nil];
+    if (![Util isOffline]) { 
+        id<STUser> currentUser = self.currentUser;
+        [Util executeOnMainThread:^ {
+            [self _updateLocalStampWithStampID:stampID
+                                          todo:currentUser
+                                          like:nil
+                                       comment:nil
+                                     andCredit:nil];
+        }];
+    }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
                                                authenticated:YES
                                                       params:params 
                                                      mapping:[STSimpleTodo mapping] 
                                                  andCallback:^(id todo, NSError* error, STCancellation* cancellation) {
-                                                     if (todo && !error) {
-                                                         [self _updateLocalStampWithStampID:stampID
-                                                                                       todo:[self currentUser]
-                                                                                       like:nil
-                                                                                    comment:nil
-                                                                                  andCredit:nil];
-                                                     }
                                                      block(todo, error, cancellation);
                                                  }];
 }
@@ -570,19 +604,23 @@ static STStampedAPI* _sharedInstance;
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block {
     NSString* path = @"/todos/remove.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:entityID forKey:@"entity_id"];
+    if (![Util isOffline]) { 
+        id<STUser> currentUser = self.currentUser;
+        [Util executeOnMainThread:^ {
+            [self _reduceLocalStampWithStampID:stampID 
+                                          todo:currentUser
+                                          like:nil
+                                       comment:nil
+                                     andCredit:nil];
+
+        }];
+    }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
                                                         post:YES 
                                                authenticated:YES
                                                       params:params 
                                                      mapping:[STSimpleTodo mapping] 
                                                  andCallback:^(id result, NSError* error, STCancellation* cancellation) {
-                                                     if (result && !error && stampID) {
-                                                         [self _reduceLocalStampWithStampID:stampID 
-                                                                                       todo:[self currentUser]
-                                                                                       like:nil
-                                                                                    comment:nil
-                                                                                  andCredit:nil];
-                                                     }
                                                      block(error == nil, error, cancellation);
                                                  }];
 }
