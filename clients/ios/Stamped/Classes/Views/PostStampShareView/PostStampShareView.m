@@ -24,6 +24,7 @@
 @end
 
 @implementation PostStampShareView
+@synthesize contentView;
 
 @synthesize contentView = _contentView;
 

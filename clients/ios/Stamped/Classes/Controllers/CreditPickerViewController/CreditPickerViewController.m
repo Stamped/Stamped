@@ -59,10 +59,9 @@
                 [stampedByUsers addObject:preview.user];
             }
             
-            NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES];
+            NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
             _stampedByFriends = [[stampedByUsers sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort] ] retain];
-            [stampedByUsers release];
-            
+
         }
         
     }
@@ -219,9 +218,8 @@
         [matches filterUsingPredicate:[NSPredicate predicateWithFormat:@"screenName beginswith[cd] %@", text]];
         NSArray *matchesArray = [matches allObjects];
         
-        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES];
+        NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
         self.searchUsers = [matchesArray sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]];
-        [sort release];
         
     }
     
@@ -439,9 +437,8 @@
                 if (userDetails && [userDetails count] > 0) {
                     
                     [_users release], _users = nil;
-                    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES];
+                    NSSortDescriptor *sort = [[[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES selector:@selector(localizedCaseInsensitiveCompare:)] autorelease];
                     _users = [[userDetails sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort] ] retain];
-                    [sort release];
                     
                 }
                 
