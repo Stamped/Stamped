@@ -26,8 +26,6 @@
 @implementation PostStampShareView
 @synthesize contentView;
 
-@synthesize contentView = _contentView;
-
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
     

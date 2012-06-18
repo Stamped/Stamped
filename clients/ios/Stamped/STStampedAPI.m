@@ -118,7 +118,7 @@ static STStampedAPI* _sharedInstance;
         entityDetailCache_ = [[STHybridCacheSource alloc] initWithCachePath:@"Entities" relativeToCacheDir:YES];
         entityDetailCache_.delegate = self;
         entityDetailCache_.maxMemoryCost = 20;
-        entityDetailCache_.maxAge = [NSNumber numberWithInteger:60];
+        entityDetailCache_.maxAge = [NSNumber numberWithInteger:7 * 24 * 60 * 60];
         _stampedByCache = [[STHybridCacheSource alloc] initWithCachePath:@"StampedBy" relativeToCacheDir:YES];
         _stampedByCache.delegate = self;
         _stampedByCache.maxAge = [NSNumber numberWithInteger:1 * 24 * 60 * 60];
