@@ -4142,6 +4142,8 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
+        t0 = time.time()
+        t1 = t0
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
         #activityData, final = self._getActivityFromCache(authUserId, scope, offset, limit)
 
@@ -4180,36 +4182,37 @@ class StampedAPI(AStampedAPI):
         for user in users:
             userIds[str(user.user_id)] = user.minimize()
 
+        logs.debug('Time for getFromCache and lookupUsers and misc setup: %s' % (time.time() - t1))
+        t1 = time.time()
         # Enrich stamps
-        t0 = time.time()
         stamps = self._stampDB.getStamps(stampIds.keys())
-        logs.debug('Time for getStamps: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for getStamps: %s' % (time.time() - t1))
+        t1 = time.time()
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-        logs.debug('Time for enrichStampObjects: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for enrichStampObjects: %s' % (time.time() - t1))
+        t1 = time.time()
 
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
-        logs.debug('Time for getEntities: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for getEntities: %s' % (time.time() - t1))
+        t1 = time.time()
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
         # Enrich comments
         comments = self._commentDB.getComments(commentIds.keys())
-        logs.debug('Time for getComments: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for getComments: %s' % (time.time() - t1))
+        t1 = time.time()
         commentUserIds = {}
         for comment in comments:
             if comment.user.user_id not in userIds:
                 commentUserIds[comment.user.user_id] = None
         users = self._userDB.lookupUsers(commentUserIds.keys(), None)
-        logs.debug('Time for lookupUsers: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
+        t1 = time.time()
         for user in users:
             userIds[str(user.user_id)] = user.minimize()
         for comment in comments:
@@ -4232,17 +4235,18 @@ class StampedAPI(AStampedAPI):
                 logs.info('Activity item: \n%s\n' % item)
                 utils.printException()
                 continue
-        logs.debug('Time for activity enrichment loop: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for activity enrichment loop: %s' % (time.time() - t1))
+        t1 = time.time()
 
         # Reset activity count
         if personal == True:
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
-        logs.debug('Time for update user stats: %s' % (time.time() - t0))
-        t0 = time.time()
+        logs.debug('Time for update user stats: %s' % (time.time() - t1))
+        t1 = time.time()
 
+        logs.debug('Total time for getActivity: %s' % (time.time() - t0))
         return activity
 
     @API_CALL
