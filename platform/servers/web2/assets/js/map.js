@@ -371,7 +371,7 @@
                             map.fitBounds(max_cluster_bounds);
                             
                             marker_clusterer.repaint();
-                            init_clusterer(depth + 1);
+                            //init_clusterer(depth + 1);
                         }
                     };
                     
