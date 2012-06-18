@@ -226,7 +226,6 @@ static const CGFloat _offscreenCancelPadding = 5;
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
-
         NSInteger count = 0;
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
@@ -371,7 +370,12 @@ static const CGFloat _offscreenCancelPadding = 5;
         else {
 #warning former crasher, needs fix
         }
-
+        /*
+        id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
+        [self.searchView setText:autoCompleteResult.completion];
+        [self.searchView resignKeyboard];
+        [self performSearchWithText:autoCompleteResult.completion];
+         */
     } else {
         
         id<STEntitySearchResult> result = nil;

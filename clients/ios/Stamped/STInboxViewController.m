@@ -605,7 +605,6 @@
     }
         
     [self reloadDataSource];
-
 }
 
 - (void)applicationDidBecomeActive:(id)notImportant {
