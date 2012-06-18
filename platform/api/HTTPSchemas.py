@@ -2661,6 +2661,9 @@ class HTTPActivity(Schema):
         cls.addNestedPropertyList('footer_references',      HTTPTextReference)
 
     def importEnrichedActivity(self, activity):
+        t0 = time.time()
+        t1 = t0
+
         data = activity.dataExport()
         data.pop('subjects')
         data.pop('objects', None)
@@ -2680,6 +2683,10 @@ class HTTPActivity(Schema):
 
         if not activity.personal:
             del(self.benefit)
+
+        logs.debug('Time for importEnrichedActivity setup... mostly importUserMini loop: %s' % (time.time() - t1))
+        t1 = time.time()
+        logs.debug('verb:  %s      subjects: %s' (self.verb, self.subjects))
 
         def _addUserObjects():
             if activity.objects is not None and activity.objects.users is not None:
@@ -2908,6 +2915,8 @@ class HTTPActivity(Schema):
 
             raise Exception("Too many stamps! \n%s" % stamps)
 
+        logs.debug('Time for importEnrichedActivity setup... mostly importUserMini loop: %s' % (time.time() - t1))
+        t1 = time.time()
         if self.verb == 'follow':
             _addUserObjects()
 
