@@ -40,7 +40,7 @@
         view.backgroundColor = [UIColor clearColor];
         view.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         [self addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
            
             if (_icon) {
                 
@@ -112,7 +112,7 @@
             STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:self.bounds];
             view.alpha = 0.6f;
             [self insertSubview:view belowSubview:self.titleLabel];
-            [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+            [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
                 
                 drawGradient([UIColor colorWithRed:0.3f green:0.3f blue:0.3f alpha:1.0f].CGColor, [UIColor colorWithRed:0.1f green:0.1f blue:0.1f alpha:1.0f].CGColor, ctx);
                 
@@ -192,7 +192,7 @@
             STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectZero];
             view.backgroundColor = [UIColor clearColor];
             [self addSubview:view];
-            [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+            [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
                 
                 rect.size.height -= 1.0f; // shadow inset
                 CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:self.bounds.size.height/2].CGPath);

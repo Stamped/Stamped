@@ -67,9 +67,10 @@
                                                   new google.maps.Point(0,0),
                                                   new google.maps.Point(2, 17));
         
-        var stamps  = STAMPED_PRELOAD.stamps;
-        var stamps_ = {};
-        var markers = [];
+        var stamps   = STAMPED_PRELOAD.stamps;
+        var stamps_  = {};
+        var markers  = [];
+        var def_zoom = 12;
         
         // build dict of stamp_id => stamp for fast lookups
         $.each(stamps, function(i, stamp) {
@@ -123,7 +124,7 @@
                     minimumClusterSize  : minimumClusterSize, 
                     gridSize            : gridSize, 
                     averageCenter       : true, 
-                    maxZoom             : 12, 
+                    maxZoom             : def_zoom, 
                     title               : "Expand Stamp Cluster"
                 });
                 
@@ -169,8 +170,8 @@
             
             window.g_close_map_popup = close_popup;
             
-            google.maps.event.addListener(map, 'click',          close_popup);
-            google.maps.event.addListener(map, 'zoom_changed',   close_popup);
+            google.maps.event.addListener(map, 'click',         close_popup);
+            google.maps.event.addListener(map, 'zoom_changed',  close_popup);
             
             var partial_templates = {}
             
@@ -269,7 +270,7 @@
                             
                             // only adjust map bounds / center if we're not already zoomed 
                             // in on the desired marker
-                            if (!map.getBounds().contains(pos) || map.getZoom() < 12) {
+                            if (!map.getBounds().contains(pos) || map.getZoom() < def_zoom) {
                                 map.fitBounds(stamp_bounds);
                                 map.setCenter(pos);
                             }
@@ -333,6 +334,34 @@
             }
         };
         
+        var degrees_to_radians = function(x) {
+            return x * Math.PI / 180;
+        };
+        
+        var get_spherical_dist = function(p1, p2) {
+            //var R = 6371; // earth's mean radius in km
+            var R = 3959; // earth's mean radius in miles
+            var dLat  = degrees_to_radians(p2.lat() - p1.lat());
+            var dLong = degrees_to_radians(p2.lng() - p1.lng());
+            
+            var b = Math.cos(degrees_to_radians(p1.lat())) * Math.cos(degrees_to_radians(p2.lat()));
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) + b * Math.sin(dLong/2) * Math.sin(dLong/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            var d = R * c;
+            
+            return d;
+        };
+        
+        var set_temp_max_zoom = function(zoom) {
+            var bc = google.maps.event.addListener(map, 'idle', function() {
+                if (this.getZoom() > 13) {
+                    this.setZoom(13);
+                }
+                
+                google.maps.event.removeListener(bc);
+            });
+        };
+        
         // resize map to fit viewport without scrolling page and also reset map bounds
         var resize_map = function() {
             var header_height = $canvas.offset().top || 0;
@@ -351,6 +380,7 @@
                         var clusters = marker_clusterer.getClusters();
                         var max_mark = null;
                         var max_size = -1;
+                        var max_pos  = null;
                         
                         $.each(clusters, function(i, cluster) {
                             var size = cluster.getSize();
@@ -358,20 +388,56 @@
                             if (size > max_size) {
                                 max_size = size;
                                 max_mark = cluster.getMarkers();
+                                max_pos  = cluster.getCenter();
                             }
                         });
                         
-                        if (max_size > 0 && (depth == 0 || max_size > 4) {
+                        if (max_pos !== null && max_size > 0 && (depth == 0 || max_size > 10)) {
                             var max_cluster_bounds = new google.maps.LatLngBounds();
+                            var total_dist  = 0.0;
+                            var total_dist2 = 0.0;
                             
+                            // calculate mean and stdev dist of each marker to cluster center
                             $.each(max_mark, function(i, marker) {
-                                max_cluster_bounds.extend(marker.getPosition());
+                                var pos  = marker.getPosition();
+                                var dist = get_spherical_dist(max_pos, pos);
+                                
+                                total_dist  += dist;
+                                total_dist2 += dist * dist;
                             });
                             
-                            map.fitBounds(max_cluster_bounds);
+                            var mean   = (total_dist / max_size);
+                            var stdev  = Math.sqrt((total_dist2 / max_size) - mean * mean);
+                            var offset = 2.0 * stdev;
+                            var pts    = [];
                             
-                            marker_clusterer.repaint();
-                            init_clusterer(depth + 1);
+                            // add all markers to the initial viewport bounds, disregarding 
+                            // obvious outliers to produce a nice-fitting overall map
+                            $.each(max_mark, function(i, marker) {
+                                var pos  = marker.getPosition();
+                                var dist = get_spherical_dist(max_pos, pos);
+                                
+                                if (Math.abs(mean - dist) < offset) {
+                                    max_cluster_bounds.extend(pos);
+                                    pts.push(pos);
+                                }
+                            });
+                            
+                            if (pts.length == 1) {
+                                map.setCenter(pts[0]);
+                            } else {
+                                map.fitBounds(max_cluster_bounds);
+                            }
+                            
+                            set_temp_max_zoom(13);
+                            
+                            if (pts.length > 1) {
+                                marker_clusterer.repaint();
+                                
+                                init_clusterer(depth + 1);
+                            }
+                        } else if (depth == 0 && max_size > 0) {
+                            set_temp_max_zoom(13);
                         }
                     };
                     

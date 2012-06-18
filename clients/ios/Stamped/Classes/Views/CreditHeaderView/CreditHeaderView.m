@@ -75,11 +75,13 @@
         [self addGestureRecognizer:gesture];
         [gesture release];
         
+        self.clipsToBounds = NO;
         UIView *border = [[UIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height, self.bounds.size.width, 1.0f)];
         border.backgroundColor = [UIColor whiteColor];
         border.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:border];
         [border release];
+        
     
     }
     return self;

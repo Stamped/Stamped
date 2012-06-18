@@ -24,6 +24,7 @@
 @end
 
 @implementation PostStampShareView
+@synthesize contentView;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -243,7 +244,7 @@
             view.backgroundColor = [UIColor clearColor];
             [self insertSubview:view atIndex:0];
             highlightView = view;
-            [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+            [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
                
                 CGPathRef path = [UIBezierPath bezierPathWithRoundedRect:rect byRoundingCorners:self.corners cornerRadii:CGSizeMake(2.0f, 2.0f)].CGPath;
                 CGContextAddPath(ctx, path);

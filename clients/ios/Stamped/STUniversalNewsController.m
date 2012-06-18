@@ -50,7 +50,7 @@
     if (!self.tableView.backgroundView) {
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [background setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
             drawGradient([UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor, [UIColor colorWithRed:.85 green:.85 blue:.85 alpha:1.0f].CGColor, ctx);
         }];
         self.tableView.backgroundView = background;

@@ -38,7 +38,7 @@
         iconView.backgroundColor = [UIColor whiteColor];
         iconView.userInteractionEnabled = NO;
         [self addSubview:iconView];
-        [iconView setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [iconView setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
             if (_icon) {
                 CGContextSaveGState(ctx);
                 CGRect imageRect = CGRectMake((rect.size.width-_icon.size.width)/2, 0.0f, _icon.size.width, _icon.size.height);
@@ -288,7 +288,7 @@
         view.contentMode = UIViewContentModeRedraw;
         view.backgroundColor = [UIColor whiteColor];
         [self addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
             
             [[UIColor colorWithRed:0.937f green:0.960f blue:0.988f alpha:1.0f] setStroke];
             CGFloat originY = 0.5f;
@@ -307,7 +307,7 @@
         view.backgroundColor = [UIColor whiteColor];
         view.userInteractionEnabled = NO;
         [self addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
 
             if (_icon) {
                 
@@ -336,7 +336,7 @@
         view.backgroundColor = self.backgroundColor;
         view.userInteractionEnabled = NO;
         [self addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
             
             [[UIColor colorWithRed:0.937f green:0.960f blue:0.988f alpha:1.0f] setStroke];
             CGFloat originY = 0.5f;
