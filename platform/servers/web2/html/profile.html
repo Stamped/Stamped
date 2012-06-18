@@ -76,7 +76,7 @@
                                         <div class='followers-wrapper'>
                                             <div>Followers</div>
                                             <div>
-                                                <span class='friend-count'>{{user.num_friends}}</span>
+                                                <span class='friend-count'>{{user.num_followers}}</span>
                                                 
                                                 {% with users=followers %}
                                                     {% handlebars_template "user-gallery" %}
@@ -87,7 +87,7 @@
                                         <div class='following-wrapper'>
                                             <div>Following</div>
                                             <div>
-                                                <span class='friend-count'>{{user.num_followers}}</span>
+                                                <span class='friend-count'>{{user.num_friends}}</span>
                                                 
                                                 {% with users=friends %}
                                                     {% handlebars_template "user-gallery" %}
