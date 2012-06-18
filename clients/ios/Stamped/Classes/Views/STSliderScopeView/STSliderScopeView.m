@@ -43,7 +43,7 @@
     STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.bounds];
     background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self addSubview:background];
-    [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+    [background setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
         
         [[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:1.0f] setFill];
         CGContextFillRect(ctx, rect);

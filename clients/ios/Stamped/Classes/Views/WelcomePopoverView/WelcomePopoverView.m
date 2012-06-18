@@ -237,7 +237,7 @@
         STBlockUIView *dots = [[STBlockUIView alloc] initWithFrame:CGRectMake((self.bounds.size.width-14.0f)/2, originY, 14.0f, 5.0f)];
         dots.backgroundColor = [UIColor whiteColor];
         [self addSubview:dots];
-        [dots setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [dots setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
 
             [[UIColor colorWithRed:0.204f green:0.447f blue:0.863f alpha:1.0f] setFill];
             CGFloat height = rect.size.height;

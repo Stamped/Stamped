@@ -65,7 +65,7 @@
       STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, originY, self.bounds.size.width - 88.0f, 70.0f)];
       view.backgroundColor = [UIColor whiteColor];
       [self addSubview:view];
-      [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+      [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
       
           BOOL highlighted = self.highlighted || self.selected;
           
@@ -214,7 +214,7 @@
       commentView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
       commentView.backgroundColor = [UIColor whiteColor];
       [self addSubview:commentView];
-      [commentView setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+      [commentView setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
           
           BOOL highlighted = self.highlighted || self.selected;
 
