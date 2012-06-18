@@ -4181,31 +4181,42 @@ class StampedAPI(AStampedAPI):
             userIds[str(user.user_id)] = user.minimize()
 
         # Enrich stamps
+        t0 = time.time()
         stamps = self._stampDB.getStamps(stampIds.keys())
+        logs.debug('Time for getStamps: %s' % (time.time() - t0))
+        t0 = time.time()
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+        logs.debug('Time for enrichStampObjects: %s' % (time.time() - t0))
+        t0 = time.time()
 
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
+        logs.debug('Time for getEntities: %s' % (time.time() - t0))
+        t0 = time.time()
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
         # Enrich comments
         comments = self._commentDB.getComments(commentIds.keys())
+        logs.debug('Time for getComments: %s' % (time.time() - t0))
+        t0 = time.time()
         commentUserIds = {}
         for comment in comments:
             if comment.user.user_id not in userIds:
                 commentUserIds[comment.user.user_id] = None
         users = self._userDB.lookupUsers(commentUserIds.keys(), None)
+        logs.debug('Time for lookupUsers: %s' % (time.time() - t0))
+        t0 = time.time()
         for user in users:
             userIds[str(user.user_id)] = user.minimize()
         for comment in comments:
             comment.user = userIds[str(comment.user.user_id)]
             commentIds[str(comment.comment_id)] = comment
 
-        ### TEMP CODE FOR LOCAL COPY THAT DOESN"T ENRICH PROPERLY
+        ### TEMP CODE FOR LOCAL COPY THAT DOESN'T ENRICH PROPERLY
         activity = []
         for item in activityData:
             try:
@@ -4221,13 +4232,16 @@ class StampedAPI(AStampedAPI):
                 logs.info('Activity item: \n%s\n' % item)
                 utils.printException()
                 continue
-
+        logs.debug('Time for activity enrichment loop: %s' % (time.time() - t0))
+        t0 = time.time()
 
         # Reset activity count
         if personal == True:
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
+        logs.debug('Time for update user stats: %s' % (time.time() - t0))
+        t0 = time.time()
 
         return activity
 

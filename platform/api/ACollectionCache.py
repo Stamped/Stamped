@@ -129,5 +129,6 @@ class ACollectionCache(object):
 
         logs.debug('Time for getFromCache: %s' % (time.time() - t1))
         t1 = time.time()
+        logs.debug('total returned: %s' % len(data))
 
         return data[:limit], len(data) < limit
