@@ -2686,7 +2686,7 @@ class HTTPActivity(Schema):
 
         logs.debug('Time for importEnrichedActivity setup... mostly importUserMini loop: %s' % (time.time() - t1))
         t1 = time.time()
-        logs.debug('verb:  %s      subjects: %s' (self.verb, self.subjects))
+        logs.debug('verb:  %s      subjects: %s' % (self.verb, self.subjects))
 
         def _addUserObjects():
             if activity.objects is not None and activity.objects.users is not None:
