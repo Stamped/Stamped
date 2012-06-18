@@ -2915,8 +2915,6 @@ class HTTPActivity(Schema):
 
             raise Exception("Too many stamps! \n%s" % stamps)
 
-        logs.debug('Time for importEnrichedActivity setup... mostly importUserMini loop: %s' % (time.time() - t1))
-        t1 = time.time()
         if self.verb == 'follow':
             _addUserObjects()
 
