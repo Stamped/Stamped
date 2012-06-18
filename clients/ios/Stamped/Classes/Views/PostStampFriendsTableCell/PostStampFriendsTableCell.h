@@ -23,5 +23,5 @@
 
 @end
 @protocol PostStampFriendsTableCellDelegate
-- (void)postStampFriendTableCell:(PostStampFriendsTableCell*)cell selectedUser:(id<STUser>)user;
+- (void)postStampFriendTableCell:(PostStampFriendsTableCell*)cell selectedStamp:(id<STStamp>)stamp;
 @end

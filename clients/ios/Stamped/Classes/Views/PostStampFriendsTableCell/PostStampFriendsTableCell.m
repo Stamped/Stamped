@@ -104,6 +104,7 @@
       
         id<STStamp> aStamp = [stampPreviews objectAtIndex:i];
         PostStampFriendView *view = [_userViews objectAtIndex:i];
+        view.stamp = aStamp;
         [view setupWithUser:aStamp.user index:offset + (i+1)];
         CGRect frame = view.frame;
         frame.origin = CGPointMake(originX, originY);
@@ -115,6 +116,7 @@
     }
     
     PostStampFriendView *view = [_userViews lastObject];
+    view.stamp = stamp;
     [view setupWithUser:stamp.user index:stampedBy.friends.count.integerValue + 1];
     CGRect frame = view.frame;
     frame.origin = CGPointMake(originX, originY);
@@ -169,8 +171,8 @@
 
 - (void)friendSelected:(PostStampFriendView*)view {
     
-    if ([(id)delegate respondsToSelector:@selector(postStampFriendTableCell:selectedUser:)]) {
-        [self.delegate postStampFriendTableCell:self selectedUser:view.user];
+    if ([(id)delegate respondsToSelector:@selector(postStampFriendTableCell:selectedStamp:)]) {
+        [self.delegate postStampFriendTableCell:self selectedStamp:view.stamp];
     }
     
 }

@@ -264,11 +264,18 @@
 
 #pragma mark - PostStampFriendsTableCellDelegate
 
-- (void)postStampFriendTableCell:(PostStampFriendsTableCell*)cell selectedUser:(id<STUser>)user {
+- (void)postStampFriendTableCell:(PostStampFriendsTableCell*)cell selectedStamp:(id<STStamp>)stamp {
     
+    /*
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
+     */
+    
+    STActionContext* context = [STActionContext contextInView:self.view];
+    id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+
     
 }
 

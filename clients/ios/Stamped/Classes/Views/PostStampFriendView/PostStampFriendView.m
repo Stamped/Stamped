@@ -11,6 +11,7 @@
 
 @implementation PostStampFriendView
 @synthesize user=_user;
+@synthesize stamp;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -41,7 +42,7 @@
 }
 
 - (void)dealloc {
-    
+    self.stamp = nil;
     [_user release], _user=nil;
     [super dealloc];
 }
