@@ -35,13 +35,10 @@
 @synthesize headerView=_headerView;
 @synthesize stamp=_stamp;
 @synthesize user=_user;
-<<<<<<< HEAD
 @synthesize stampedByView=_stampedByView;
 @synthesize badges=_badges;
 @synthesize firstBadge;
-=======
 @synthesize stampedBy = _stampedBy;
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
 
 
 - (id)initWithStamp:(id<STStamp>)stamp {
@@ -65,9 +62,9 @@
             self.badges = array;
             
         } else {
-         
+            
             self.badges = [NSArray array];
-
+            
         }
         
     }
@@ -87,7 +84,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
     self.tableView.rowHeight = 160.0f;
@@ -122,7 +119,7 @@
     [button release];
     
     [self reloadDataSource];
-
+    
 }
 
 - (void)viewDidUnload {
@@ -171,7 +168,7 @@
     if (indexPath.row <= self.badges.count) {
         return 76.0f;
     }
-
+    
     return 105.0f;
     
 }
@@ -179,7 +176,7 @@
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
     
     NSInteger count = self.badges.count + 1;
-
+    
     if (self.stampedBy) {
         count+=1;
     }
@@ -188,7 +185,7 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-        
+    
     if (indexPath.row == 0) {
         
         [self resetContainer];
@@ -229,7 +226,7 @@
         
         [cell showShadow:(indexPath.row==1)];
         [cell setupWithBadge:[self.badges objectAtIndex:indexPath.row-1]];
-
+        
         return cell;
         
     }
@@ -265,7 +262,7 @@
 
 - (void)postStampedByView:(PostStampedByView*)view selectedPreview:(id<STStampPreview>)item {
     
-   // STStampDetailViewController *controller = [[[STStampDetailViewController alloc] initWithStamp:item.stamp] autorelease];
+    // STStampDetailViewController *controller = [[[STStampDetailViewController alloc] initWithStamp:item.stamp] autorelease];
     
     STActionContext* context = [STActionContext contextInView:self.view];
     id<STAction> action = [STStampedActions actionViewStamp:item.stampID withOutputContext:context];
@@ -304,10 +301,9 @@
     }];
     
     if (!self.stamp || self.firstBadge) return; // ignore stamped by if the user is the first to stamp
-
+    
     [[STStampedAPI sharedInstance] stampedByForEntityID:self.stamp.entity.entityID andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
         
-<<<<<<< HEAD
         if (stampedBy) {
             
             self.stampedBy = stampedBy;
@@ -327,16 +323,14 @@
             [self.tableView endUpdates];
             [self resetContainer];
             
-=======
-        NSLog(@"stampedby:%@", stampedBy);
-        self.stampedBy = stampedBy;
-        
-        NSInteger count = 1;
-        if (self.stamp) {
-            count+=self.stamp.badges.count;
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
+            NSLog(@"stampedby:%@", stampedBy);
+            self.stampedBy = stampedBy;
+            
+            NSInteger count = 1;
+            if (self.stamp) {
+                count+=self.stamp.badges.count;
+            }
         }
-
     }];
     
 }

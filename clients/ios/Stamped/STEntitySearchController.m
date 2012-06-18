@@ -64,13 +64,8 @@ static const CGFloat _offscreenCancelPadding = 5;
         if (!category) {
             category = @"music";
         }
-<<<<<<< HEAD
-
         self.title = [category capitalizedString];
-=======
-        
         self.title = category;
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
@@ -230,13 +225,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-<<<<<<< HEAD
     if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
-                
-=======
-    if (tableView == self.searchResultsTableView) {
-        
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         NSInteger count = 0;
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
@@ -380,14 +369,10 @@ static const CGFloat _offscreenCancelPadding = 5;
 #warning former crasher, needs fix
         }
         
-<<<<<<< HEAD
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         [self.searchView setText:autoCompleteResult.completion];
         [self.searchView resignKeyboard];
         [self performSearchWithText:autoCompleteResult.completion];
-
-=======
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
     } else {
         
         id<STEntitySearchResult> result = nil;
