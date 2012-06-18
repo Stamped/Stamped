@@ -369,7 +369,7 @@
         background.contentMode = UIViewContentModeRedraw;
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [self addSubview:background];
-        [background setDrawingHanlder:^(CGContextRef cx, CGRect rect) {
+        [background setDrawingHandler:^(CGContextRef cx, CGRect rect) {
             
             BOOL highlighted = (self.highlighted || self.selected);
             rect = CGRectInset(rect, 2.0f, 2.0f);

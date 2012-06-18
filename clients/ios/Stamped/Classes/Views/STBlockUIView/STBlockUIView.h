@@ -12,6 +12,6 @@ typedef void(^STBlockUIViewDrawingHandler)(CGContextRef ctx, CGRect rect);
 
 @interface STBlockUIView : UIView
 
-@property(nonatomic,copy) STBlockUIViewDrawingHandler drawingHanlder;
+@property(nonatomic,copy) STBlockUIViewDrawingHandler drawingHandler;
 
 @end

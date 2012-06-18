@@ -95,7 +95,7 @@
     
     STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
     background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+    [background setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
         drawGradient([UIColor colorWithRed:0.99f green:0.99f blue:0.99f alpha:1.0f].CGColor, [UIColor colorWithRed:0.898f green:0.898f blue:0.898f alpha:1.0f].CGColor, ctx);
     }];
     self.tableView.backgroundView = background;

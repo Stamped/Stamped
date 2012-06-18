@@ -30,6 +30,12 @@
 #import "TTTAttributedLabel.h"
 #import "STCommentButton.h"
 #import "STShareButton.h"
+#import "STCreateCommentView.h"
+
+typedef enum {
+    CommentPanDirectionUp = 0,
+    CommentPanDirectionDown,
+} CommentPanDirection;
 
 @interface STStampDetailToolbar : UIView
 
@@ -47,6 +53,7 @@
 
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
+- (void)showCommentView:(BOOL)animated;
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
 - (void)_deleteStampButtonPressed:(id)caller;
 - (void)commentButtonPressed;
@@ -54,11 +61,12 @@
 @property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
 @property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
 @property (nonatomic, readwrite, retain) STCancellation* entityDetailCancellation;
-@property (nonatomic, readonly, retain) UIView* addCommentView;
-@property (nonatomic, readonly, retain) UITextView* commentTextView;
-@property (nonatomic, readonly, retain) UIActivityIndicatorView* commentActivityView;
-@property (nonatomic, readonly, retain) UIView* addCommentShading;
 @property (nonatomic, readwrite, retain) STCancellation* stampCancellation;
+@property (nonatomic, readonly, retain) STCreateCommentView *commentView;
+@property (nonatomic, readonly, retain) UIPanGestureRecognizer *panGesture;
+@property (nonatomic, assign) CommentPanDirection direction;
+@property (nonatomic, assign) CGRect beginFrame;
+@property (nonatomic, assign) CGRect commentBeginFrame;
 
 @end
 
@@ -141,7 +149,7 @@
 
 - (void)toggleToolbar:(id)notImportant {
        
-    CGFloat delta = 208.0f;
+    CGFloat delta = 190.0f;
     
     CGRect frame = self.frame;
     CGFloat width = [[UIScreen mainScreen] applicationFrame].size.width;
@@ -160,7 +168,7 @@
             UIView *button = [buttons_ objectAtIndex:i];
             CGRect buttonFrame = button.frame;
             buttonFrame.origin.x = originX;
-            originX += 52.0f;
+            originX += self.expanded ? 46.0f : 52.0f;
             button.frame = buttonFrame;
             
             if (self.expanded && CGRectGetMaxX(buttonFrame) - 20 > frame.size.width - 50) {
@@ -194,12 +202,12 @@
 @synthesize stamp = _stamp;
 @synthesize toolbar = _toolbar;
 @synthesize entityDetailCancellation = entityDetailCancellation_;
-@synthesize addCommentView = addCommentView_;
-@synthesize commentTextView = commentTextView_;
-@synthesize commentActivityView = commentActivityView_;
-@synthesize addCommentShading = _addCommentShading;
 @synthesize stampCancellation = _stampCancellation;
-
+@synthesize commentView = _commentView;
+@synthesize panGesture=_panGesture;
+@synthesize direction;
+@synthesize beginFrame;
+@synthesize commentBeginFrame;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stamp.stampID];
@@ -219,9 +227,8 @@
     [_stamp release];
     [_toolbar release];
     [entityDetailCancellation_ release];
-    [addCommentView_ release];
-    [commentTextView_ release];
-    [_addCommentShading release];
+    [_commentView release], _commentView=nil;
+    [_panGesture release], _panGesture=nil;
     [super dealloc];
 }
 
@@ -230,66 +237,21 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _addCommentShading = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, self.view.frame.size.height)];
-    _addCommentShading.backgroundColor = [UIColor colorWithWhite:0 alpha:.3];
-    [_addCommentShading addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitComment:)] autorelease]];
-    _addCommentShading.userInteractionEnabled = NO;
-    _addCommentShading.alpha = 0;
-    [self.view addSubview:_addCommentShading];
+
+    if (!_headerView) {
+        _headerView = [[[STStampDetailHeaderView alloc] initWithStamp:self.stamp] autorelease];
+        [self.scrollView appendChildView:_headerView];
+    }
     
-    CGFloat addCommentBorderWidth = 1;
-    addCommentView_ = [[UIView alloc] initWithFrame:CGRectMake(-addCommentBorderWidth, -300, self.scrollView.frame.size.width + 2 * addCommentBorderWidth, 0)];
-    addCommentView_.backgroundColor = [UIColor whiteColor];
-    addCommentView_.layer.shadowOpacity = .4;
-    addCommentView_.layer.shadowColor = [UIColor blackColor].CGColor;
-    addCommentView_.layer.shadowRadius = 3;
-    addCommentView_.layer.shadowOffset = CGSizeMake(0, -2);
-    addCommentView_.layer.borderWidth = addCommentBorderWidth;
-    addCommentView_.layer.borderColor = [UIColor colorWithWhite:229/255.0 alpha:1].CGColor;
-    UIView* userImage = [Util profileImageViewForUser:[STStampedAPI sharedInstance].currentUser withSize:STProfileImageSize31];
-    [Util reframeView:userImage withDeltas:CGRectMake(15, 9, 0, 0)];
-    [addCommentView_ addSubview:userImage];
+    if (!_commentsView) {
+        _commentsView = [[[STStampDetailCommentsView alloc] initWithStamp:self.stamp andDelegate:self.scrollView] autorelease];
+        [self.scrollView appendChildView:_commentsView];
+    }
     
-    commentTextView_ = [[UITextView alloc] initWithFrame:CGRectMake(58, 9, 250, 31)];
-    commentTextView_.scrollEnabled = NO;
-    commentTextView_.font = [UIFont fontWithName:@"Helvetica" size:14];
-    commentTextView_.layer.borderColor = [UIColor colorWithWhite:230/255.0 alpha:1].CGColor;
-    commentTextView_.layer.borderWidth = 1;
-    commentTextView_.layer.cornerRadius = 2;
-    commentTextView_.autocorrectionType = UITextAutocorrectionTypeYes;
-    commentTextView_.returnKeyType = UIReturnKeySend;
-    commentTextView_.keyboardAppearance = UIKeyboardAppearanceAlert;
-    commentTextView_.delegate = self;
-    commentTextView_.enablesReturnKeyAutomatically = YES;
-    [addCommentView_ addSubview:commentTextView_];
-    
-    commentActivityView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    commentActivityView_.backgroundColor = [UIColor colorWithWhite:1 alpha:.6];
-    commentActivityView_.hidden = YES;
-    [self.addCommentView addSubview:commentActivityView_];
-    
-    addCommentView_.hidden = YES;
-    [self.view addSubview:addCommentView_];
-    
-    UIBarButtonItem* backButton = [[[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:self.stamp.entity.title]
-                                                                    style:UIBarButtonItemStyleBordered
-                                                                   target:nil
-                                                                   action:nil] autorelease];
-    [[self navigationItem] setBackBarButtonItem:backButton];
-    
-    _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
-    [self.scrollView appendChildView:_headerView];
-    _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp 
-                                                         andDelegate:self.scrollView];
-    [self.scrollView appendChildView:_commentsView];
     if ([STStampedAPI.sharedInstance.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
-        STNavigationItem* rightButton = [[[STNavigationItem alloc] initWithTitle:@"Delete"
-                                                                         style:UIBarButtonItemStylePlain
-                                                                        target:self
-                                                                        action:@selector(_deleteStampButtonPressed:)] autorelease];
+        STNavigationItem* rightButton = [[[STNavigationItem alloc] initWithTitle:@"Delete" style:UIBarButtonItemStylePlain target:self action:@selector(_deleteStampButtonPressed:)] autorelease];
         self.navigationItem.rightBarButtonItem = rightButton;
     }
-    //[toolbar packViews:views];
     
     UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view controller:self andStamp:self.stamp] autorelease];
     [self.view addSubview:newToolbar];
@@ -305,10 +267,30 @@
                                                                               
     }];
     
+    if (!_panGesture) {
+        UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
+        pan.delegate = (id<UIGestureRecognizerDelegate>)self;
+        [self.scrollView addGestureRecognizer:pan];
+        _panGesture = [pan retain];
+        [pan setEnabled:NO];
+        [pan release];
+    }
+    
+    if (!_commentView) {
+        STCreateCommentView *view = [[STCreateCommentView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height+44.0f, self.view.bounds.size.width, 44)];
+        view.delegate = (id<STCreateCommentViewDelegate>)self;
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+        [self.view addSubview:view];
+        _commentView = [view retain];
+        [view release];        
+    }
     
 }
 
 - (void)viewDidUnload {
+    _headerView = nil;
+    _commentsView = nil;
+    [super viewDidUnload];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -318,32 +300,62 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    if ([self.commentTextView isFirstResponder]) {
-        [self.commentTextView resignFirstResponder];
-    }
     [super viewDidAppear:animated];
     [[STActionManager sharedActionManager] setStampContext:self.stamp];
-    [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(keyboardWillShow:)
-                                                 name:UIKeyboardWillShowNotification 
-                                               object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(keyboardWillHide:)
-                                                 name:UIKeyboardWillHideNotification
-                                               object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(localModification:)
-                                                 name:STStampedAPILocalStampModificationNotification 
-                                               object:nil];
+  
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localModification:) name:STStampedAPILocalStampModificationNotification object:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    if ([self.commentTextView isFirstResponder]) {
-        [self.commentTextView resignFirstResponder];
-    }
     [[STActionManager sharedActionManager] setStampContext:nil];
     [super viewWillDisappear:animated];
+}
+
+
+#pragma mark - STCreateCommentViewDelegate
+
+- (void)cancelComment:(id)sender {
+    
+    [self.commentView killKeyboard];
+    
+}
+
+- (void)stCreateCommentView:(STCreateCommentView*)view addedComment:(id<STComment>)comment {
+    
+    [self reloadStampedData];
+    [view killKeyboard];
+    
+}
+
+- (void)stCreateCommentViewWillBeginEditing:(STCreateCommentView*)view {
+    
+    self.title = @"Comment";
+    [self.navigationController.navigationBar setNeedsDisplay];
+    
+    STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancelComment:)];
+    self.navigationItem.leftBarButtonItem = button;
+    [button release];
+    
+}
+
+- (void)stCreateCommentViewWillEndEditing:(STCreateCommentView*)view {
+    
+    self.title = nil;
+    [self.navigationController.navigationBar setNeedsDisplay];
+    
+    NSInteger index = [self.navigationController.viewControllers indexOfObject:self];
+    if (index!=NSNotFound && index > 0 && [self.navigationController isKindOfClass:[STRootViewController class]]) {
+        
+        UIViewController *prevController = [self.navigationController.viewControllers objectAtIndex:index-1];
+        STNavigationItem *button = [[STNavigationItem alloc] initWithBackButtonTitle:prevController.title style:UIBarButtonItemStyleBordered target:self.navigationController action:@selector(pop:)];
+        self.navigationItem.leftBarButtonItem = button;
+        [button release];
+        
+    }
+    
 }
 
 
@@ -399,108 +411,15 @@
 }
 
 - (void)commentButtonPressed {
-    [self.commentTextView becomeFirstResponder];
-}
+    
+    [self showCommentView:YES];
 
-- (void)exitComment:(id)notImportant {
-    if ([self.commentTextView isFirstResponder]) {
-        [self.commentTextView resignFirstResponder];
-    }
 }
 
 - (void)cancelPendingRequests {
     [self.stampCancellation cancel];
     self.stampCancellation = nil;
     [self.entityDetailCancellation cancel];
-}
-
-- (void)changeFirstResponder {
-    //[self.dummyTextField.inputAccessoryView becomeFirstResponder];
-}
-
-
-#pragma mark - Keyboard Notifications
-
-- (void)keyboardWillShow:(NSNotification *)notification {
-    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-    
-    __block CGRect frame = self.addCommentView.frame;
-    self.addCommentView.clipsToBounds = YES;
-    frame.origin.y = self.view.frame.size.height;
-    frame.size.height = 51.0f;
-    self.addCommentView.frame = frame;
-    self.addCommentView.hidden = NO;
-    self.addCommentView.alpha = 1;
-    
-    [UIView animateWithDuration:.25 animations:^{
-        
-        frame.origin.y = floorf(self.view.frame.size.height - (keyboardSize.height + frame.size.height));
-        self.addCommentView.frame = frame;
-        _addCommentShading.alpha = 1;
-        _addCommentShading.userInteractionEnabled = YES;
-
-    }];
-}
-
-- (void)keyboardWillHide:(NSNotification *)notification {
-}
-
-
-#pragma mark - UITextViewDelegate
-
-- (void)textViewDidEndEditing:(UITextView *)textView {
-    _addCommentShading.userInteractionEnabled = NO;
-    CGRect frame = self.addCommentView.frame;
-    frame.origin.y = self.view.frame.size.height;
-    [UIView animateWithDuration:.3
-                     animations:^{
-                         self.addCommentView.frame = frame;
-                         self.addCommentView.alpha = 0;
-                         _addCommentShading.alpha = 0;
-                     } completion:^(BOOL finished) {
-                         
-                         self.addCommentView.hidden = YES;
-                     }];   
-}
-
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-    if (!self.commentActivityView.hidden) {
-        return FALSE;
-    }
-    else {
-        if ([text isEqualToString:@"\n"]) {
-            self.commentActivityView.hidden = NO;
-            self.commentActivityView.frame = CGRectMake(0, 0, self.addCommentView.frame.size.width, self.addCommentView.frame.size.height);
-            [self.commentActivityView startAnimating];
-            [[STStampedAPI sharedInstance] createCommentForStampID:self.stamp.stampID 
-                                                         withBlurb:textView.text 
-                                                       andCallback:^(id<STComment> comment, NSError *error, STCancellation *cancellation) {
-                                                           [self.commentActivityView stopAnimating];
-                                                           self.commentActivityView.hidden = YES;
-                                                           if (comment && !error) {
-                                                               self.addCommentView.hidden = YES;
-                                                               textView.text = @"";
-                                                               [textView resignFirstResponder];
-                                                               //[self reloadStampedData];
-                                                           }
-                                                           else {
-                                                               [Util warnWithMessage:@"Comment creation failed!" andBlock:nil];
-                                                           }
-                                                       }];
-            return FALSE;
-        }
-        return TRUE;
-    }
-}
-
-- (void)textViewDidChange:(UITextView *)textView {
-    CGFloat heightDelta = textView.contentSize.height - textView.frame.size.height;
-    if (heightDelta > 0 && textView.frame.size.height + heightDelta < 70) {
-        [UIView animateWithDuration:.25 animations:^{
-            [Util reframeView:self.addCommentView withDeltas:CGRectMake(0, -heightDelta, 0, heightDelta)];
-            [Util reframeView:self.commentTextView withDeltas:CGRectMake(0, 0, 0, heightDelta)];
-        }];
-    }
 }
 
 
@@ -515,6 +434,170 @@
                                                                     [super reloadStampedData];
                                                                 }];
 }
+
+
+#pragma mark - Gestures
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return YES;
+}
+
+- (void)pan:(UIPanGestureRecognizer*)gesture {
+    
+    __block CGPoint translation = [gesture translationInView:self.scrollView];
+    
+    __block UIWindow *window = nil;
+    for (UIWindow *aWindow in [[UIApplication sharedApplication] windows]) {
+        if ([aWindow isKindOfClass:NSClassFromString(@"UITextEffectsWindow")]) {
+            window = aWindow;
+            break;
+        }
+    }
+    if (window==nil) {
+        return;
+    }
+    
+    if (gesture.state == UIGestureRecognizerStateBegan) {
+        beginFrame = window.frame;
+        commentBeginFrame = self.commentView.frame;
+        direction = CommentPanDirectionUp;
+    } 
+    
+    if (gesture.state == UIGestureRecognizerStateChanged || gesture.state == UIGestureRecognizerStateBegan) {
+        
+        CGFloat maxOffsetY = (self.view.superview.bounds.size.height - CGRectGetMaxY(commentBeginFrame));
+        
+        CGFloat prevY = window.frame.origin.y;
+        CGRect frame = window.frame;
+        CGFloat offsetY = MAX(beginFrame.origin.y, beginFrame.origin.y + translation.y);
+        offsetY = MIN(offsetY, beginFrame.origin.y+maxOffsetY);
+        frame.origin.y = offsetY;
+        window.frame = frame;
+        
+        if (frame.origin.y != prevY) {
+            direction = (frame.origin.y >= prevY) ? CommentPanDirectionDown : CommentPanDirectionUp;
+        } 
+        
+        frame = self.commentView.frame;
+        offsetY = MAX(commentBeginFrame.origin.y, commentBeginFrame.origin.y + translation.y);
+        offsetY = MIN(offsetY, commentBeginFrame.origin.y+maxOffsetY);
+        frame.origin.y = offsetY;
+        self.commentView.frame = frame;
+        
+    } else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
+        
+        // max this animation would move in pts
+        CGFloat maxOffsetY = ((self.view.superview.bounds.size.height) - CGRectGetMaxY(commentBeginFrame));
+        
+        if (direction==CommentPanDirectionUp) {
+            
+            // calulate animation duration
+            CGFloat diff = (window.frame.origin.y - beginFrame.origin.y);
+            float duration = (.3/maxOffsetY)*diff;
+            
+            [UIView animateWithDuration:duration animations:^{
+                window.frame = beginFrame;
+                self.commentView.frame = commentBeginFrame;
+            }];
+            
+        } else {
+            
+            CGFloat diff = ((self.view.superview.bounds.size.height) - CGRectGetMaxY(self.commentView.frame)) + 50.0f;
+            float duration = (.3/maxOffsetY)*diff;
+            
+            [UIView animateWithDuration:duration animations:^{
+                
+                CGRect frame = window.frame;
+                frame.origin.y += diff;
+                window.frame = frame;
+                
+                frame = self.commentView.frame;
+                frame.origin.y += diff;
+                self.commentView.frame = frame;
+                self.scrollView.contentInset = UIEdgeInsetsZero;
+                
+                
+            } completion:^(BOOL finished) {
+                
+                window.frame = beginFrame;
+                BOOL _enabled = [UIView areAnimationsEnabled];
+                [UIView setAnimationsEnabled:NO];
+                [self.commentView killKeyboard];
+                [UIView setAnimationsEnabled:_enabled];
+                
+            }];
+            
+        }
+        
+    }
+    
+}
+
+
+#pragma mark - Comment View
+
+- (void)showCommentView:(BOOL)animated {
+    
+    self.commentView.identifier = self.stamp.stampID;
+    //_animateKeyboard = animated;
+    [self.commentView showAnimated:animated];
+    
+}
+
+
+#pragma mark - UIKeyboard Notfications
+
+- (void)keyboardWillShow:(NSNotification*)notification {    
+    
+    if (self.commentView) {
+        [self.commentView keyboardWillShow:[notification userInfo]];
+    }
+    
+    CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGFloat contentOffset = self.scrollView.contentOffset.y + keyboardFrame.size.height;
+    CGFloat newHeight = (self.scrollView.frame.size.height - keyboardFrame.size.height);
+    contentOffset = MIN(contentOffset+40, self.scrollView.contentSize.height - newHeight);
+    
+    BOOL _enabled = [UIView areAnimationsEnabled];
+    [UIView setAnimationsEnabled:YES];
+    
+    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
+
+        self.scrollView.contentInset = UIEdgeInsetsMake(0, 0, keyboardFrame.size.height + 44.0f , 0);
+        self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
+        if (self.scrollView.contentSize.height > newHeight) {
+            self.scrollView.contentOffset = CGPointMake(0, contentOffset);
+        }
+        
+    } completion:^(BOOL finished){
+        [self.panGesture setEnabled:YES];
+    }];
+    
+    //if (!_animateKeyboard) {
+    //    self.scrollView.contentOffset = CGPointZero;
+   // }
+    [UIView setAnimationsEnabled:_enabled];
+   // _animateKeyboard = YES;
+    
+}
+
+- (void)keyboardWillHide:(NSNotification*)notification {
+    
+    if (self.commentView) {
+        [self.commentView keyboardWillHide:[notification userInfo]];
+    }
+    
+    [self.panGesture setEnabled:NO];
+    //if (_animateKeyboard) {
+        [UIView animateWithDuration:0.3 animations:^{
+            self.scrollView.contentInset = UIEdgeInsetsZero;
+            self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
+        }];
+    //}
+    
+    
+}
+
 
 
 @end
