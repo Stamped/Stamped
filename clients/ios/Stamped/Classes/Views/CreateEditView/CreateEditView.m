@@ -297,6 +297,7 @@
         
         self.creditToolbar.frame = [self.creditToolbar.superview convertRect:self.creditToolbar.frame toView:self.superview];
         [self.superview insertSubview:self.creditToolbar belowSubview:self.toolbar];
+        [self bringSubviewToFront:self.menuView];
         
         [UIView animateWithDuration:0.25f animations:^{
            

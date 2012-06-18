@@ -556,7 +556,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
         
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(12, 17, 16, 16)];
-        //imageView.contentMode = UIViewContentModeScaleAspectFit;
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
         [self.contentView addSubview:imageView];
         _iconView = [imageView retain];
         [imageView release];
@@ -631,7 +631,6 @@ static const CGFloat _offscreenCancelPadding = 5;
             self.iconCancellation = [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
                 if (image) {
                     self.iconView.image = image;
-                    [self.iconView setNeedsDisplay];
                 }
                 self.iconCancellation = nil;
             }];
