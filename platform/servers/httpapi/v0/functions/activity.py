@@ -11,13 +11,20 @@ from httpapi.v0.helpers import *
 @handleHTTPRequest(http_schema=HTTPActivitySlice)
 @require_http_methods(["GET"])
 def collection(request, authUserId, http_schema, **kwargs):
+    import time
+
     activity = stampedAPI.getActivity(authUserId, http_schema.scope, limit=http_schema.limit, offset=http_schema.offset)
 
+
+    t1 = time.time()
     result = []
     for item in activity:
         result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
-    
-    return transformOutput(result)
+    logs.debug('time for importEnrichedActivity: %s' % (time.time() - t1))
+
+    transformedOutput = transformOutput(result)
+    return transformedOutput
+    #return transformOutput(result)
 
 @handleHTTPRequest()
 @require_http_methods(["GET"])
