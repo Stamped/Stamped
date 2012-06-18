@@ -457,7 +457,7 @@ class ResolverSoftware(ResolverObject):
     """
 
     def __init__(self, *args, **kwargs):
-        super(ResolverMediaItem, self).__init__(*args, **kwargs)
+        super(ResolverSoftware, self).__init__(*args, **kwargs)
         self._properties.extend([
             'authors', 'publishers', 'genres', 'screenshots', 'release_date', 'platform'
         ])
