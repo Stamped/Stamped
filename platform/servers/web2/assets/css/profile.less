@@ -115,6 +115,12 @@
                 
                 /*.transition(top, 0.5s, linear);*/
                 
+                .subnav-activated(@scale) {
+                    opacity: 1;
+                    .transition-transform2(0s, linear, opacity, 0s, linear);
+                    .transform(scale(@scale, @scale));
+                }
+                
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
@@ -135,15 +141,19 @@
                     }
                     
                     .lhs {
-                        float: left;
                         margin-left: 24px;
+                        position: relative;
+                        float: left;
+                        min-width: 50%;
+                        
+                        color: #333;
                         
                         a.screen-name {
                             color: #000;
                         }
                         
                         p {
-                            margin: 0;
+                            margin:  0;
                         }
                         
                         p.profile-title {
@@ -151,7 +161,6 @@
                             .stamped-font();
                             
                             line-height: 100%;
-                            font-size: 7em;
                             letter-spacing: .05em;
                             color: #000;
                             
@@ -162,7 +171,7 @@
                         
                         p.name {
                             font-weight: 700;
-                            color: #333;
+                            color: #000;
                         }
                         
                         p.title {
@@ -176,16 +185,106 @@
                             display: block;
                             padding: 0;
                         }
+                        
+                        .user-location {
+                            font-size: 80%;
+                        }
+                        
+                        .inner-lhs {
+                            float: left;
+                            width: 65%;
+                        }
+                        
+                        .inner-rhs {
+                            float: right;
+                            width: 30%;
+                        }
+                        
+                        .header-subsection {
+                            display: none;
+                        }
+                        
+                        .header-subsection-0 {
+                            p.profile-title {
+                                font-size: 7em;
+                            }
+                        }
+                        
+                        .header-subsection-1 {
+                            p.profile-title {
+                                font-size: 2.5em;
+                                font-weight: 500;
+                            }
+                            
+                            .bio {
+                                font-size:  80%;
+                                margin-top: 1em;
+                            }
+                            
+                            .friend-count {
+                                .stamped-font();
+                                
+                                display: inline-block;
+                                margin-right: 1em;
+                                
+                                line-height: 100%;
+                                letter-spacing: .05em;
+                                
+                                font-size: 2.5em;
+                                font-weight: 500;
+                                color: #000;
+                            }
+                        }
+                        
+                        .header-subsection-2 {
+                            p.profile-title {
+                                font-size: 2.5em;
+                            }
+                            
+                            .user-stamp-distribution {
+                                font-size: 80%;
+                                margin-top: 1em;
+                                
+                                .section {
+                                    position: relative;
+                                    
+                                    .category-name {
+                                        display: inline-block;
+                                        min-width: 7em;
+                                    }
+                                    
+                                    .icon-wrapper {
+                                        display: inline-block;
+                                        min-width: 22px;
+                                        
+                                        .icon {
+                                            margin: 0 auto;
+                                        }
+                                    }
+                                    
+                                    .bargraph-row {
+                                        display: inline-block;
+                                        background: #FEFEFE;
+                                        .rounded(1em);
+                                        
+                                        width:  70%;
+                                        height: 1em;
+                                        
+                                        .bargraph-row-value {
+                                            /*.transition(all, .5s, easeOutCubic);*/
+                                            .rounded(1em);
+                                            
+                                            width:  0%;
+                                            height: 100%;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     
                     .rhs {
                         float: right;
-                        
-                        .subnav-activated(@scale) {
-                            opacity: 1;
-                            .transition-transform2(0s, linear, opacity, 0s, linear);
-                            .transform(scale(@scale, @scale));
-                        }
                         
                         .subnav {
                             width: 256px;
@@ -217,18 +316,25 @@
                                 background-position: -80px 0;
                             }
                         }
-                        
-                        .subnav-active-0 .subnav_button-0, 
-                        .subnav-active-1 .subnav_button-1, 
-                        .subnav-active-2 .subnav_button-2 {
-                            cursor: default !important;
-                            .subnav-activated(1.0);
-                            
-                            &:hover {
-                                .subnav-activated(1.0);
-                            }
-                        }
                     }
+                }
+                
+                /* profile header subsection navigation */
+                .subnav-active-0 .rhs .subnav .subnav_button-0, 
+                .subnav-active-1 .rhs .subnav .subnav_button-1, 
+                .subnav-active-2 .rhs .subnav .subnav_button-2 {
+                    cursor: default !important;
+                    .subnav-activated(1.0);
+                    
+                    &:hover {
+                        .subnav-activated(1.0);
+                    }
+                }
+                
+                .subnav-active-0 .lhs .header-subsection-0, 
+                .subnav-active-1 .lhs .header-subsection-1, 
+                .subnav-active-2 .lhs .header-subsection-2 {
+                    display: block !important;
                 }
             }
             

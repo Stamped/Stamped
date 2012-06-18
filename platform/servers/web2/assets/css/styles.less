@@ -277,11 +277,14 @@ a.follow-button {
 
 
 .user-gallery {
+    display: inline-block;
+    
     .user-gallery-item {
-        margin: 0 4px 4px 0;
+        display: inline-block;
+        margin: 0;
     }
     
-    :nth-child(10) {
+    :nth-child(3) {
         background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
         width:  24px;
         height: 24px;
@@ -297,7 +300,7 @@ a.follow-button {
         }*/
     }
     
-    :nth-child(n+11) {
+    :nth-child(n+4) {
         display: none;
     }
 }

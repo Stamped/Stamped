@@ -53,6 +53,7 @@ TODO:
     * fix glitch w/ hover state on entity stamp images in gallery shifting text
     * clicking on map in stamp gallery => selection in map view
     * remove ribbons from map list-view nav
+    * change profile header image and share widget to never move
     
     * sDetail:
         * DONE - "Anatomy of eDetail section" spec

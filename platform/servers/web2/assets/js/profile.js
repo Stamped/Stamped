@@ -158,8 +158,9 @@ var g_update_stamps = null;
         $(".subnav_button").click(function(event) {
             event.preventDefault();
             
-            var $this   = $(this);
-            var $parent = $this.parents('.subnav');
+            var $this    = $(this);
+            var $parent  = $this.parents('.profile-header-subnav');
+            var bargraph = false;
             
             $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
             
@@ -168,12 +169,39 @@ var g_update_stamps = null;
             } else if ($this.hasClass('subnav_button-1')) {
                 $parent.addClass('subnav-active-1');
             } else if ($this.hasClass('subnav_button-2')) {
+                bargraph = true;
                 $parent.addClass('subnav-active-2');
             }
+            
+            $('.bargraph-row-value').each(function(i, elem) {
+                var $this   = $(this);
+                var percent = 0;
+                
+                if (bargraph) {
+                    var count   = $this.data('count');
+                    percent     = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+                }
+                
+                $this.stop(true, false).animate({
+                    width : percent + "%"
+                }, {
+                    duration : 800, 
+                    specialEasing : { 
+                        width  : 'easeOutCubic'
+                    }, 
+                    complete : function() {
+                        $this.css('width', percent + "%");
+                    }
+                });
+                
+                //console.debug(percent + "%");
+                //$this.css('width', percent + "%");
+            });
             
             return false;
         });
         
+        //MIN((.5 - (1 / powf((x + 6), .4))) * 80/33,1);
         // TODO: may not be recursive
         //$(document).emoji();
         //$container.emoji();
