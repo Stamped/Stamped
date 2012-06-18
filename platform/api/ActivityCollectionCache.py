@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 
-import time
+import logs, time
 
 from ACollectionCache                           import ACollectionCache
 from utils                                      import lazyProperty
