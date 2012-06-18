@@ -10,6 +10,7 @@ import Globals
 import logs
 import re
 from errors             import *
+import Entity
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 
