@@ -65,7 +65,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             category = @"music";
         }
 
-        self.title = category;
+        self.title = [category capitalizedString];
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
@@ -185,7 +185,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
-            return self.autoCompleteResults.count + 1;
+            return self.autoCompleteResults.count;
         }
 
         if (self.searchSections) {
@@ -225,12 +225,10 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if (tableView == self.searchResultsTableView) {
+    if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
                 
         NSInteger count = 0;
-        if (self.autoCompleteResults.count) {
-            count = self.autoCompleteResults.count;
-        } else if (self.searchSections) {
+        if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             count = sectionObject.entities.count;
         }
@@ -367,6 +365,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         [self.searchView setText:autoCompleteResult.completion];
+        [self.searchView resignKeyboard];
         [self performSearchWithText:autoCompleteResult.completion];
 
     } else {
@@ -382,7 +381,6 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         
         CreateStampViewController *controller = [[CreateStampViewController alloc] initWithSearchResult:result];
-        controller.navigationItem.hidesBackButton = YES;
         [self.navigationController pushViewController:controller animated:YES];
         [controller release];
 

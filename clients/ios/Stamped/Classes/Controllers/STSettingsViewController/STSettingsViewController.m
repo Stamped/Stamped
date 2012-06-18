@@ -291,7 +291,7 @@
             if (buttonIndex == 0) {
                 [[STRestKitLoader sharedInstance] logout];
                 STAppDelegate* appDelegate = [UIApplication sharedApplication].delegate;
-                [appDelegate.menuController showWelcome:NO];
+                [appDelegate.menuController showSignIn];
             }
         }
     }
@@ -303,6 +303,7 @@
 - (void)stEditProfileViewControllerCancelled:(STEditProfileViewController*)controller {
     [self.navigationController popViewControllerAnimated:YES];
 }
+
 - (void)stEditProfileViewControllerSaved:(STEditProfileViewController*)controller {
     [self.navigationController popViewControllerAnimated:YES];
 }

@@ -8,7 +8,7 @@
 
 #import "STStampButton.h"
 #import "Util.h"
-#import "STCreateStampViewController.h"
+#import "CreateStampViewController.h"
 
 @interface STStampButton ()
 
@@ -36,8 +36,7 @@
   return self;
 }
 
-- (id)initWithStamp:(id<STStamp>)stamp
-{
+- (id)initWithStamp:(id<STStamp>)stamp {
   return [self initWithEntity:stamp.entity andUser:stamp.user];
 }
 
@@ -45,12 +44,24 @@
   return [self initWithEntity:entity andUser:nil];
 }
 
+- (void)dealloc {
+    [_user release];
+    [_entity release];
+    [super dealloc];
+}
+
 - (void)defaultHandler:(id)myself {
-  if (self.entity) {
-    UINavigationController* controller = [Util sharedNavigationController];
-    UIViewController* createStamp = [[[STCreateStampViewController alloc] initWithEntity:self.entity] autorelease];
-    [controller pushViewController:createStamp animated:YES];
-  }
+ 
+    if (self.entity) {
+        CreateStampViewController *controller = [[[CreateStampViewController alloc] initWithEntity:self.entity] autorelease];
+        STRootViewController *navController = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
+        id menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+        [menuController presentModalViewController:navController animated:YES];
+        if (self.user) {
+            controller.creditUsers = [NSArray arrayWithObject:self.user];
+        }
+    }
+    
 }
 
 @end

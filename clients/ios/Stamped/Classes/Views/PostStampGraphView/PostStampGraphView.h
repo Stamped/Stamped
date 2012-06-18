@@ -9,10 +9,12 @@
 #import <UIKit/UIKit.h>
 
 @interface PostStampGraphView : UIView {
-    UIImageView *_imageView;
+    UIView *_iconView;
     CATextLayer *_titleLayer;
     UIView *_graphContainer;
     UIActivityIndicatorView *_activityView;
+    UIView *_calloutView;
+    UIImage *_icon;
 }
 
 @property(nonatomic,retain) id<STUserDetail> user;

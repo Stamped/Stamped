@@ -96,6 +96,10 @@
     
 }
 
+- (void)resignKeyboard {
+    [_textField resignFirstResponder];
+}
+
 
 #pragma mark - Getters
 

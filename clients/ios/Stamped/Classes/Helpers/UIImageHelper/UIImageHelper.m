@@ -18,10 +18,13 @@
     }
     
     CGSize size = self.size;
+    CGFloat width = MIN(size.width, rect.size.width);
     BOOL widthIsGreater = (size.width > size.height);
 	float sideFull = (widthIsGreater) ? size.height : size.width;
-	CGContextRef ctx = UIGraphicsGetCurrentContext();    
-    CGFloat scaleFactor = rect.size.width/sideFull;
+	CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(ctx, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:1.0f].CGColor);
+    CGContextFillRect(ctx, rect);
+    CGFloat scaleFactor = width/sideFull;
     CGFloat transX = widthIsGreater ? -((size.width - sideFull)/2) * scaleFactor : 0;
     CGFloat transY = widthIsGreater ? 0 : -((size.height - sideFull) / 2) * scaleFactor;
 	CGContextSaveGState(ctx);

@@ -129,6 +129,7 @@ static const CGFloat _kReadMoreHeightCutoff = 90;
       [self addSubview:valueView];
     }
       
+    self.gradient.contentsScale = [[UIScreen mainScreen] scale];
     self.gradient.anchorPoint = CGPointMake(0, 0);
     self.gradient.position = CGPointMake(0, 0);
     self.gradient.frame = self.layer.frame;

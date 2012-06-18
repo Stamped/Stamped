@@ -29,6 +29,7 @@
 @end
 
 @protocol CreditHeaderViewDelegate
+- (void)creditHeaderView:(CreditHeaderView*)view willDeleteCell:(CreditBubbleCell*)cell;
 - (void)creditHeaderViewDidBeginEditing:(CreditHeaderView*)view;
 - (void)creditHeaderViewDidEndEditing:(CreditHeaderView*)view;
 - (void)creditHeaderViewFrameChanged:(CreditHeaderView*)view;

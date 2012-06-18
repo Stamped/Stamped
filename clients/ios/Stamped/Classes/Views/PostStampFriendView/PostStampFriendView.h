@@ -13,7 +13,10 @@
     STAvatarView *_avatarView;
     UILabel *_titleLabel;
     UIImageView *_borderView;
+
 }
+
+@property(nonatomic,readonly,retain) id <STUser> user;
 
 - (void)setupWithUser:(id<STUser>)user index:(NSInteger)index;
 

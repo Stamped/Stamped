@@ -29,7 +29,6 @@
 @property(nonatomic,copy) NSString *tempImagePath;
 @property(nonatomic,retain) id<STEntity> entity;
 @property(nonatomic,retain) id<STEntitySearchResult> searchResult;
-@property(nonatomic,retain) NSArray *creditUsernames;
 @property(nonatomic,retain) EntityDetailViewController *todoViewController;
 @property(nonatomic,retain) UIButton *todoStampButton;
 @end
@@ -42,7 +41,7 @@
 @synthesize searchResult=_searchResult;
 @synthesize imageUploader;
 @synthesize tempImagePath;
-@synthesize creditUsernames;
+@synthesize creditUsers=_creditUsers;
 @synthesize todoViewController;
 @synthesize todoStampButton;
 
@@ -57,6 +56,7 @@
     
     if ((self = [super initWithStyle:UITableViewStylePlain])) {
         [self commonInit];
+        self.entity = entity;
     }
     return self;
     
@@ -80,7 +80,7 @@
     self.searchResult=nil;
     self.entity=nil;
     self.imageUploader=nil;
-    self.creditUsernames=nil;
+    self.creditUsers=nil;
     [super dealloc];
 }
 
@@ -108,10 +108,12 @@
         [item release];
     }
     
-    STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
-    self.navigationItem.leftBarButtonItem = button;
-    [button release];
-    
+    if (!self.navigationItem.backBarButtonItem) {
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
+        self.navigationItem.leftBarButtonItem = button;
+        [button release];
+    }
+   
     if (!_headerView) {
         CreateHeaderView *view = [[CreateHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 60.0f)];
         [view addTarget:self action:@selector(headerTapped:) forControlEvents:UIControlEventTouchUpInside];
@@ -255,12 +257,37 @@
 }
 
 
+#pragma mark - Setters
+
+- (void)setCreditUsers:(NSArray *)creditUsers {
+        
+    [_creditUsers release], _creditUsers=nil;
+    _creditUsers = [creditUsers retain];
+    [self.editView setupWithCreditUsernames:[self creditUsernames]];
+
+}
+
+
+#pragma mark - Getters 
+
+- (NSArray*)creditUsernames {
+    
+    NSMutableArray *usernames = [[NSMutableArray alloc] initWithCapacity:self.creditUsers.count];
+    
+    for (id <STUser> user in self.creditUsers) {        
+        [usernames addObject:user.screenName];
+    }
+    
+    return [usernames autorelease];
+    
+}
+
+
 #pragma mark - CreditPickerViewControllerDelegate
 
-- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsernames:(NSArray*)usernames {
+- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsers:(NSArray*)users {
     
-    self.creditUsernames = usernames;
-    [self.editView setupWithCreditUsernames:self.creditUsernames];
+    self.creditUsers = users;
     [self dismissModalViewControllerAnimated:YES];
 
 }
@@ -302,8 +329,8 @@
     stampNew.searchID = self.searchResult.searchID;
     stampNew.tempImageURL = self.tempImagePath;
     
-    if (self.creditUsernames && [self.creditUsernames count] > 0) {
-        stampNew.credit = [self.creditUsernames componentsJoinedByString:@","];
+    if (self.creditUsers && [self.creditUsers count] > 0) {
+        stampNew.credit = [[self creditUsernames] componentsJoinedByString:@","];
     }
 
     [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
@@ -318,10 +345,11 @@
             
             [activityView removeFromSuperview];
             button.titleLabel.alpha = 1.0f;
-            self.view.userInteractionEnabled = YES;
             
         }
         
+        self.view.userInteractionEnabled = YES;
+
     }];
     
 }
@@ -341,8 +369,9 @@
 
 - (void)createEditViewSelectedCreditPicker:(CreateEditView*)view {
     
-    CreditPickerViewController *controller = [[CreditPickerViewController alloc] initWithEntityIdentifier:(self.entity==nil) ? self.searchResult.searchID : self.entity.entityID];
+    CreditPickerViewController *controller = [[CreditPickerViewController alloc] initWithEntityIdentifier:(self.entity==nil) ? self.searchResult.searchID : self.entity.entityID selectedUsers:self.creditUsers];
     controller.delegate = (id<CreditPickerViewControllerDelegate>)self;
+
     STRootViewController *navContorller = [[STRootViewController alloc] initWithRootViewController:controller];
     [self presentModalViewController:navContorller animated:YES];
     [controller release];
@@ -353,7 +382,6 @@
 - (void)createEditView:(CreateEditView*)view addPhotoWithSourceType:(UIImagePickerControllerSourceType)source {
     
     UIImagePickerController *controller = [[UIImagePickerController alloc] init];
-    controller.allowsEditing = YES;
     controller.delegate = (id<UIImagePickerControllerDelegate, UINavigationControllerDelegate>)self;
     if ([UIImagePickerController isSourceTypeAvailable:source]) {
         controller.sourceType = source;
@@ -410,18 +438,28 @@
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    UITableViewCell *cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
+    NSString *CellIdentifier = @"CellIdentifier";
     
-    STStampContainerView *view = [[[STStampContainerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 270.0f)] autorelease];
-    view.tag = kEditContainerViewTag;
-    view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    [cell addSubview:view];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
+        
+        STStampContainerView *view = [[[STStampContainerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 270.0f)] autorelease];
+        view.tag = kEditContainerViewTag;
+        view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [cell addSubview:view];
+        
+        CreateEditView *editView = [[[CreateEditView alloc] initWithFrame:CGRectInset(view.bounds, 5.0f, 10.0f)] autorelease];
+        editView.dataSource = (id<CreateEditViewDataSource>)self;
+        editView.delegate = (id<CreateEditViewDelegate,UIScrollViewDelegate>)self;
+        [view addSubview:editView];
+        self.editView = editView;
+        if (self.creditUsers) {
+            [self.editView setupWithCreditUsernames:[self creditUsernames]];
+        }
+        
+    }
 
-    CreateEditView *editView = [[[CreateEditView alloc] initWithFrame:CGRectInset(view.bounds, 5.0f, 10.0f)] autorelease];
-    editView.dataSource = (id<CreateEditViewDataSource>)self;
-    editView.delegate = (id<CreateEditViewDelegate,UIScrollViewDelegate>)self;
-    [view addSubview:editView];
-    self.editView = editView;    
     
     return cell;
     
@@ -432,13 +470,13 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     
-    [self.imageUploader cancel];
     [picker dismissModalViewControllerAnimated:YES];    
-   
-    if ([info objectForKey:@"UIImagePickerControllerEditedImage"]) {
+    [self.imageUploader cancel];
+           
+    if ([info objectForKey:UIImagePickerControllerOriginalImage]) {
         
-        UIImage *image = [info objectForKey:UIImagePickerControllerEditedImage];
-        image = [image aspectScaleToSize:CGSizeMake(500.0f, 500.0f)];
+        UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+        image = [image aspectScaleToSize:CGSizeMake(960.0f, 960.0f)];
 
         NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 		path = [[path stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"UploadTemp"];
@@ -466,6 +504,8 @@
         
     }
     
+    self.editView.keyboardType = CreateEditKeyboardTypeText;
+
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController*)controller {

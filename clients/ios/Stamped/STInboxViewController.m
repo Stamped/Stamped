@@ -492,8 +492,8 @@
     if (!LOGGED_IN) {
         
         STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-        [controller showWelcome:NO];
-        
+        [controller showSignIn];
+
     } else {
         
         FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
@@ -580,9 +580,13 @@
         
     } 
     else {
+        
         [Util addCreateStampButtonToController:self];
+        self.slider.scope = STStampedAPIScopeFriends;
+        self.scope = STStampedAPIScopeFriends;
+
     }
-    
+        
 }
 
 - (void)applicationDidBecomeActive:(id)notImportant {

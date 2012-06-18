@@ -12,10 +12,11 @@
 
 @interface CreditPickerViewController ()
 @property(nonatomic,retain) CreditHeaderView *headerView;
-@property(nonatomic,retain) id <STStampedByGroup> stampedByFriends;
+@property(nonatomic,retain) NSArray *stampedByFriends;
 @property(nonatomic,retain) NSArray *users;
 @property(nonatomic,retain) NSString *entityIdentifier;
 @property(nonatomic,retain) NSMutableArray *selectedUsers;
+@property(nonatomic,retain) NSArray *searchUsers;
 @property(nonatomic,assign) BOOL loadingUsers;
 @end
 
@@ -26,17 +27,35 @@
 @synthesize entityIdentifier=_entityIdentifier;
 @synthesize loadingUsers=_loadingUsers;
 @synthesize headerView=_headerView;
+@synthesize searchUsers=_searchUsers;
 
-- (id)initWithEntityIdentifier:(NSString*)identifier {
+- (id)initWithEntityIdentifier:(NSString*)identifier selectedUsers:(NSArray*)users {
     if ((self = [super init])) {
 
         self.title = @"Credit";
         _users = [[NSArray alloc] init];
         _selectedUsers = [[NSMutableArray alloc] init];
+        _searchUsers = [[NSArray alloc] init];
+        
+        if (users) {
+            [_selectedUsers addObjectsFromArray:users];
+        }
         
         _entityIdentifier = [identifier retain];
         id<STStampedBy> stampedBy = [[STStampedAPI sharedInstance] cachedStampedByForEntityID:identifier];
-        _stampedByFriends = [stampedBy.friends retain];
+        if (stampedBy.friends.count.integerValue > 0) {
+            
+            NSMutableArray *stampedByUsers = [[NSMutableArray alloc] init];
+            id<STStampedByGroup> friends = stampedBy.friends;
+            for (id <STStampPreview> preview in friends.stampPreviews) {
+                [stampedByUsers addObject:preview.user];
+            }
+            
+            NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES];
+            _stampedByFriends = [[stampedByUsers sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort] ] retain];
+            [stampedByUsers release];
+            
+        }
         
     }
     return self;
@@ -67,6 +86,7 @@
         self.headerView = view;
         [view release];
         [self setContentInset:UIEdgeInsetsMake(self.headerView.bounds.size.height, 0, 0, 0)];
+        [view reloadData];
     }
     
     if (!self.navigationItem.leftBarButtonItem) {
@@ -102,19 +122,9 @@
 
 - (void)save:(id)sender {
     
-    NSMutableArray *usernames = [[NSMutableArray alloc] initWithCapacity:self.selectedUsers.count];
-    
-    for (id <STUser> user in self.selectedUsers) {
-    
-        [usernames addObject:user.screenName];
-    
+    if ([(id)delegate respondsToSelector:@selector(creditPickerViewController:doneWithUsers:)]) {
+        [self.delegate creditPickerViewController:self doneWithUsers:self.users];
     }
-    
-    if ([(id)delegate respondsToSelector:@selector(creditPickerViewController:doneWithUsernames:)]) {
-        [self.delegate creditPickerViewController:self doneWithUsernames:usernames];
-    }
-    
-    [usernames release];
     
 }
 
@@ -131,6 +141,21 @@
 
 #pragma mark - CreditHeaderViewDelegate
 
+- (void)creditHeaderView:(CreditHeaderView*)view willDeleteCell:(CreditBubbleCell*)cell {
+
+    NSString *username = cell.titleLabel.text;
+    NSArray *usersCopy = [_selectedUsers copy];
+    for (id <STUser> user in usersCopy) {
+        if ([user.screenName isEqualToString:username]) {
+            [_selectedUsers removeObject:user];
+        }
+    }
+    [usersCopy release];
+    [self.tableView reloadData];
+    
+    
+}
+
 - (void)creditHeaderViewDidBeginEditing:(CreditHeaderView*)view {
 
     
@@ -138,18 +163,41 @@
 
 - (void)creditHeaderViewDidEndEditing:(CreditHeaderView*)view {
     
-    [self.tableView setContentOffset:CGPointZero animated:YES];
-
+    [self.tableView reloadData];
+    //[self.tableView setContentOffset:CGPointZero animated:YES];
+    
 }
 
 - (void)creditHeaderViewFrameChanged:(CreditHeaderView*)view {
 
+    CGPoint offset = self.tableView.contentOffset;
     [self setContentInset:UIEdgeInsetsMake(self.headerView.bounds.size.height, 0, 0, 0)];
-
+    self.tableView.contentOffset = offset;
+    
 }
 
 - (void)creditHeaderView:(CreditHeaderView*)view textChanged:(NSString*)text {
+            
+    if (!text || [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0) {
         
+        self.searchUsers = self.users;
+        
+    } else {
+        
+        NSMutableSet *matches = [NSMutableSet setWithArray:self.users];
+        [matches filterUsingPredicate:[NSPredicate predicateWithFormat:@"screenName beginswith[cd] %@", text]];
+        NSArray *matchesArray = [matches allObjects];
+        
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES];
+        self.searchUsers = [matchesArray sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]];
+        [sort release];
+        
+    }
+    
+  
+
+    [self.tableView reloadData];
+    
 }
 
 - (void)creditHeaderView:(CreditHeaderView*)view adjustOffset:(CGPoint)offset {
@@ -181,15 +229,19 @@
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    if (section == 0 && [[_stampedByFriends count] integerValue] > 0) {
-        return [[_stampedByFriends count] integerValue];
+    if (self.headerView.editing) return self.searchUsers.count;
+
+    if (section == 0 && [_stampedByFriends count] > 0) {
+        return [_stampedByFriends count];
     }
     return [_users count];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     
-    if ([[_stampedByFriends count] integerValue] > 0) {
+    if (self.headerView.editing) return 1;
+    
+    if ([_stampedByFriends count] > 0) {
         return 2;
     }
     
@@ -207,10 +259,13 @@
     
     id <STUser> user = nil;
     
-    if (indexPath.section == 0 && [[_stampedByFriends count] integerValue] > 0) {
+    if (self.headerView.editing) {
+         
+        user = [self.searchUsers objectAtIndex:indexPath.row];
         
-        id <STStampPreview> preview = [_stampedByFriends.stampPreviews objectAtIndex:indexPath.row];
-        user = preview.user;
+    } else if (indexPath.section == 0 && [_stampedByFriends count] > 0) {
+        
+        user = [_stampedByFriends objectAtIndex:indexPath.row];
         
     } else {
         
@@ -227,7 +282,11 @@
 
 - (NSString*)tableView:(UITableView*)tableView titleForHeaderInSection:(NSInteger)section {
  
-    if (section == 0 && [[_stampedByFriends count] integerValue] > 0) {
+    if (self.headerView.editing) {
+        return @"Search results";
+    }
+    
+    if (section == 0 && [_stampedByFriends count] > 0) {
         return @"Stamped by";
     }
     return @"People";
@@ -278,10 +337,14 @@
     
     id <STUser> user = nil;
     
-    if (indexPath.section == 0 && [[_stampedByFriends count] integerValue] > 0) {
+    
+    if (self.headerView.editing) {
         
-        id <STStampPreview> preview = [_stampedByFriends.stampPreviews objectAtIndex:indexPath.row];
-        user = preview.user;
+        user = [self.searchUsers objectAtIndex:indexPath.row];
+        
+    } else if (indexPath.section == 0 && [_stampedByFriends count] > 0) {
+        
+        user = [_stampedByFriends objectAtIndex:indexPath.row];
         
     } else {
         
@@ -328,14 +391,18 @@
            
             [[STStampedAPI sharedInstance] userDetailsForUserIDs:friendIDs andCallback:^(NSArray<STUserDetail> *userDetails, NSError *error, STCancellation* cancellation) {
                 
-                if (userDetails) {
+                if (userDetails && [userDetails count] > 0) {
+                    
                     [_users release], _users = nil;
-                    _users = [userDetails retain];
+                    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"screenName" ascending:YES];
+                    _users = [[userDetails sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort] ] retain];
+                    [sort release];
+                    
                 }
                 
                 _loadingUsers = NO;
                 [self.tableView reloadData];
-                [self animateIn];
+                //[self animateIn];
                 [self dataSourceDidFinishLoading];
                 
             }];
@@ -344,7 +411,7 @@
             
             _loadingUsers = NO;
             [self.tableView reloadData];
-            [self animateIn];
+            //[self animateIn];
             [self dataSourceDidFinishLoading];
 
             
@@ -356,7 +423,7 @@
 }
 
 - (BOOL)dataSourceIsEmpty {
-    return [_users count] == 0 && [[_stampedByFriends count] integerValue] == 0;
+    return [_users count] == 0 && [_stampedByFriends count] == 0;
 }
 
 - (void)setupNoDataView:(NoDataView*)view {

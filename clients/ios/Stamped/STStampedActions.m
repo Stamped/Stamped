@@ -17,6 +17,7 @@
 #import "STUserViewController.h"
 #import "STPhotoViewController.h"
 #import "STCreateStampViewController.h"
+#import "CreateStampViewController.h"
 
 @interface STStampedActions ()
 
@@ -177,9 +178,11 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_create_stamp"] && source.sourceID != nil && context.entity) {
         handled = YES;
         if (flag) {
-            STCreateStampViewController* controller = [[[STCreateStampViewController alloc] initWithEntity:context.entity] autorelease];
-            controller.creditedUsers = context.creditedUsers;
-            [[Util sharedNavigationController] pushViewController:controller animated:YES];
+            CreateStampViewController* controller = [[[CreateStampViewController alloc] initWithEntity:context.entity] autorelease];
+            STRootViewController *navController = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
+            controller.creditUsers = context.creditedUsers;
+            id menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+            [menuController presentModalViewController:navController animated:YES];
         }
     }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
