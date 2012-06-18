@@ -31,6 +31,7 @@
 @property(nonatomic,retain) id<STEntitySearchResult> searchResult;
 @property(nonatomic,retain) EntityDetailViewController *todoViewController;
 @property(nonatomic,retain) UIButton *todoStampButton;
+@property(nonatomic,assign) BOOL waiting;
 @end
 
 @implementation CreateStampViewController
@@ -44,11 +45,12 @@
 @synthesize creditUsers=_creditUsers;
 @synthesize todoViewController;
 @synthesize todoStampButton;
+@synthesize waiting;
 
 - (void)commonInit {
     
     self.imageUploader = [[STS3Uploader alloc] init];
-    self.title = @"New Stamp";
+    self.title = NSLocalizedString(@"New Stamp", @"New Stamp");
     
 }
 
@@ -142,6 +144,47 @@
     
     _headerView=nil;
     [super viewDidUnload];
+}
+
+
+#pragma mark - Stamp Posting
+
+- (void)postStamp {
+    
+    STStampNew *stampNew = [[[STStampNew alloc] init] autorelease];
+    stampNew.blurb = self.editView.textView.text;
+    stampNew.entityID = self.entity.entityID;
+    stampNew.searchID = self.searchResult.searchID;
+    stampNew.tempImageURL = self.tempImagePath;
+    
+    if (self.creditUsers && [self.creditUsers count] > 0) {
+        stampNew.credit = [[self creditUsernames] componentsJoinedByString:@","];
+    }
+    
+    [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
+        
+        if (stamp) {
+            
+            PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
+            controller.navigationItem.hidesBackButton = YES;
+            [self.navigationController pushViewController:controller animated:YES];
+            
+        } else {
+            
+            UIButton *button = [self.footerView stampButton];
+            for (UIView *view in button.subviews) {
+                if ([view isKindOfClass:[UIActivityIndicatorView class]]) {
+                    [view removeFromSuperview];
+                }
+            }
+            button.titleLabel.alpha = 1.0f;
+            
+        }
+        
+        self.view.userInteractionEnabled = YES;
+        
+    }];
+    
 }
 
 
@@ -325,43 +368,25 @@
     scale.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     scale.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.1f], [NSNumber numberWithFloat:.9f], [NSNumber numberWithFloat:1.f], nil];
     [button.layer addAnimation:scale forKey:nil];
-        
-    STStampNew *stampNew = [[[STStampNew alloc] init] autorelease];
-    stampNew.blurb = self.editView.textView.text;
-    stampNew.entityID = self.entity.entityID;
-    stampNew.searchID = self.searchResult.searchID;
-    stampNew.tempImageURL = self.tempImagePath;
     
-    if (self.creditUsers && [self.creditUsers count] > 0) {
-        stampNew.credit = [[self creditUsernames] componentsJoinedByString:@","];
+    if (self.imageUploader.uploading) {
+        
+        self.waiting = YES;
+        
+    } else {
+        
+        [self postStamp];
+        
     }
 
-    [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
-        
-        if (stamp) {
-            
-            PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
-            controller.navigationItem.hidesBackButton = YES;
-            [self.navigationController pushViewController:controller animated:YES];
-            
-        } else {
-            
-            [activityView removeFromSuperview];
-            button.titleLabel.alpha = 1.0f;
-            
-        }
-        
-        self.view.userInteractionEnabled = YES;
-
-    }];
-    
 }
 
 
 #pragma mark - CreateEditViewDelegate
 
 - (void)createEditViewImageTapped:(CreateEditView*)view {
-    
+
+    self.navigationController.toolbar.barStyle = UIBarStyleBlackOpaque;
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Remove photo" otherButtonTitles:nil];
     actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
     actionSheet.tag = kRemovePhotoActionSheetTag;
@@ -473,7 +498,7 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     
-    [picker dismissModalViewControllerAnimated:YES];    
+    [picker dismissModalViewControllerAnimated:YES];
     [self.imageUploader cancel];
            
     if ([info objectForKey:UIImagePickerControllerOriginalImage]) {
@@ -494,14 +519,18 @@
         [self.editView updateState];
         [self.editView layoutScrollView];
         
-        [self.footerView setUploading:YES animated:YES];
+        //[self.footerView setUploading:YES animated:YES];
         [self.imageUploader startWithProgress:^(float progress) {
             
         } completion:^(NSString *path, BOOL finished) {
             
-            [self.footerView setUploading:NO animated:YES];
+            //[self.footerView setUploading:NO animated:YES];
             self.tempImagePath = path;
             [self.editView.imageView setUploading:NO];
+            
+            if (self.waiting) {
+                [self postStamp];
+            }
 
         }];
         

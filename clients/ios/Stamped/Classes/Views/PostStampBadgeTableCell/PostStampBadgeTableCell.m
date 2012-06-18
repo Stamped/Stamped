@@ -9,6 +9,7 @@
 #import "PostStampBadgeTableCell.h"
 
 @implementation PostStampBadgeTableCell
+@synthesize delegate;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
@@ -52,6 +53,7 @@
         [button setTitleShadowColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [self addSubview:button];
         button.frame = CGRectMake(self.bounds.size.width - 65.0f, floorf((self.bounds.size.height-image.size.height)/2), 55.0f, image.size.height);
+        [button addTarget:self action:@selector(share:) forControlEvents:UIControlEventTouchUpInside];
         
         _titleLabel.text = @"You're the";
         _midTitleLabel.text = @"1st of your friends";
@@ -157,6 +159,17 @@
         
     }
 
+    
+}
+
+
+#pragma mark - Actions
+
+- (void)share:(id)sender {
+    
+    if ([(id)delegate respondsToSelector:@selector(postStampBadgeTableCellShare:)]) {
+        [self.delegate postStampBadgeTableCellShare:self];
+    }
     
 }
 

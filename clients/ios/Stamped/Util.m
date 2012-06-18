@@ -1296,7 +1296,7 @@ static Rdio* _rdio;
 
 + (CGSize)sizeForString:(NSAttributedString *)inString thatFits:(CGSize)inSize
 {
-    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)inString);
+    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)inString);
     if (theFramesetter == NULL)
     {
         NSLog(@"Could not create CTFramesetter");

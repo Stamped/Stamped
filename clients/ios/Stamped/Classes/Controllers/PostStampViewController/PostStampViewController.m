@@ -18,6 +18,7 @@
 #import "PostStampedByView.h"
 #import "STActionManager.h"
 #import "STStampedActions.h"
+#import "PostStampShareView.h"
 
 @interface PostStampViewController ()
 @property(nonatomic,strong) PostStampHeaderView *headerView;
@@ -221,6 +222,7 @@
         PostStampBadgeTableCell *cell = [tableView dequeueReusableCellWithIdentifier:BadgeCellIdentifier];
         if (cell == nil) {
             cell = [[[PostStampBadgeTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:BadgeCellIdentifier] autorelease];
+            cell.delegate = (id<PostStampBadgeTableCell>)self;
             cell.layer.zPosition = 10;
         }
         
@@ -243,6 +245,19 @@
     [cell setupWithStampedBy:self.stampedBy andStamp:self.stamp];
     
     return cell;
+    
+}
+
+
+#pragma mark - PostStampBadgeTableCell
+
+- (void)postStampBadgeTableCellShare:(PostStampBadgeTableCell*)cell {
+    
+    PostStampShareView *view = [[PostStampShareView alloc] initWithFrame:self.view.bounds];
+    view.layer.zPosition = 100;
+    [self.view addSubview:view];
+    [view popIn];
+    [view release];
     
 }
 

@@ -14,6 +14,7 @@
 #define kMinTextFieldWidth 120.0f
 #define kFrameInset 10.0f
 #define kCellHeight 28
+#define kMaxFrameHeight (kCellHeight * 3) + 16.0f
 
 #define kBlankTextFieldText  @"\u200B"
 
@@ -23,16 +24,23 @@
 @synthesize dataSource;
 @synthesize editing=_editing;
 @synthesize deleting=_deleting;
+@synthesize scrollView=_scrollView;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         
         self.backgroundColor = [UIColor whiteColor];
         
+        UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
+        scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:scrollView];
+        self.scrollView = scrollView;
+        [scrollView release];
+        
         _cells = [[NSMutableArray alloc] init];
 
         UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"credit_picker_header_icon.png"]];
-        [self addSubview:imageView];
+        [self.scrollView addSubview:imageView];
         
         CGRect frame = imageView.frame;
         frame.origin.x = 10.0f;
@@ -45,7 +53,7 @@
         label.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
         label.backgroundColor = self.backgroundColor;
         label.text = @"Credit to";
-        [self addSubview:label];
+        [self.scrollView addSubview:label];
         _titleLabel = label;
         [label release];
         
@@ -57,7 +65,7 @@
         textField.returnKeyType = UIReturnKeyDone;
         textField.textColor = [UIColor colorWithWhite:0.149f alpha:1.0f];
         textField.backgroundColor = [UIColor whiteColor];
-        [self addSubview:textField];
+        [self.scrollView addSubview:textField];
         [textField release];
         _textField = textField;
         _textField.hidden = YES;
@@ -104,14 +112,15 @@
             CreditBubbleCell *cell = [self.dataSource creditHeaderView:self cellForIndex:i];
             [cell addTarget:self action:@selector(cellSelected:) forControlEvents:UIControlEventTouchUpInside];
             [_cells addObject:cell];
-            [self addSubview:cell];
+            [self.scrollView addSubview:cell];
             
         }
         
     }
   
-    
+    _textField.text = kBlankTextFieldText;
     [self layoutCells:NO];
+    [self.scrollView flashScrollIndicators];
     
 }
 
@@ -160,7 +169,7 @@
         
         frame = _textField.frame;
         frame.origin = CGPointMake(originX, originY);
-        frame.origin.y = floorf(originY + ((34.0f-frame.size.height)/2));
+        frame.origin.y = floorf(originY + 6.0f);
         frame.size.width = floorf((self.bounds.size.width-kFrameInset) - originX);
         _textField.frame = frame;
     
@@ -170,8 +179,11 @@
 
     frame = self.frame;
     if (frame.size.height != originY) {
-        frame.size.height = originY;
+      
+        frame.size.height = MIN(kMaxFrameHeight, originY);
         self.frame = frame;
+        self.scrollView.contentSize = CGSizeMake(self.frame.size.width, originY);
+        
         if ([(id)delegate respondsToSelector:@selector(creditHeaderViewFrameChanged:)]) {
             [UIView animateWithDuration:0.3f animations:^{ 
                 [self.delegate creditHeaderViewFrameChanged:self];
@@ -186,6 +198,8 @@
         }
         
     }
+
+    [self.scrollView scrollRectToVisible:[[_cells lastObject] frame] animated:YES];
     
     
 }
@@ -236,7 +250,7 @@
             _tempTextField = textField;
             [_tempTextField becomeFirstResponder];
         }
-        _tempTextField.text = @" ";
+        _tempTextField.text = kBlankTextFieldText;
         _textField.hidden = YES;
         
     } else {
@@ -339,8 +353,24 @@
             return NO;
             
         }
+        
     } else {
         
+        if (range.length == 1 && range.location == 0 && [textField.text isEqualToString:kBlankTextFieldText] && [_cells count] > 0) {
+            
+            CreditBubbleCell *cell = [_cells lastObject];
+            [self setDeleting:YES];
+            for (CreditBubbleCell *_cell in _cells) {
+                if (cell != _cell) {
+                    _cell.selected = NO;
+                }
+            }    
+            [cell setSelected:YES];
+            _selectedCell = cell;
+            
+            return NO;
+            
+        }
         
         
     }
@@ -352,6 +382,7 @@
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     if (_tempTextField == textField) return;
     self.editing = YES;
+    textField.text = kBlankTextFieldText;
     [self setDeleting:NO];
 }
 
@@ -363,7 +394,7 @@
 - (void)textFieldTextDidChage:(UITextField*)textField {
     
     if ([(id)delegate respondsToSelector:@selector(creditHeaderView:textChanged:)]) {
-        [self.delegate creditHeaderView:self textChanged:textField.text];
+        [self.delegate creditHeaderView:self textChanged:[textField.text stringByReplacingOccurrencesOfString:kBlankTextFieldText withString:@""]];
     }
     
     if (textField.text.length == 0 && ![textField.text isEqualToString:kBlankTextFieldText]) {
@@ -374,10 +405,21 @@
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    
+    if (textField.text && [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0) {
+        
+        if ([(id)delegate respondsToSelector:@selector(creditHeaderView:addCellWithUsername:)]) {
+            [self.delegate creditHeaderView:self addCellWithUsername:[textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+        }
+        
+    }
+    
     [self setDeleting:NO];
     [_textField resignFirstResponder];
+    
     return YES;
 }
+
 
 
 

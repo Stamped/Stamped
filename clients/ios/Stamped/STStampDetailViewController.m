@@ -97,7 +97,7 @@
                                              activeView:imageView2 
                                                  target:self 
                                               andAction:@selector(toggleToolbar:)];
-        [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width + 20), 10, 0, 0)];
+        [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width + 20), 10, 15, 0)];
         expandButton_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         
         __block STStampDetailViewController* weakController = controller;
@@ -140,7 +140,7 @@
 }
 
 - (void)toggleToolbar:(id)notImportant {
-   
+       
     CGFloat delta = 208.0f;
     
     CGRect frame = self.frame;
@@ -151,7 +151,7 @@
         self.frame = frame;
     }];
     
-    [UIView animateWithDuration:self.expanded ? 0.1f : 0.25f delay:self.expanded ? 0.0f : 0.2f options:UIViewAnimationCurveEaseInOut animations:^{
+    [UIView animateWithDuration:self.expanded ? 0.1f : 0.15f delay:self.expanded ? 0.0f : 0.1f options:UIViewAnimationCurveEaseInOut animations:^{
        
         CGFloat originX = 4.0f;
         
@@ -324,27 +324,17 @@
     [super viewDidAppear:animated];
     [[STActionManager sharedActionManager] setStampContext:self.stamp];
     [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(keyboardWasShown:)
-                                                 name:UIKeyboardDidShowNotification 
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification 
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(keyboardWasHidden:)
-                                                 name:UIKeyboardDidHideNotification
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(localModification:)
                                                  name:STStampedAPILocalStampModificationNotification 
                                                object:nil];
-}
-
-- (void)localModification:(id)notImportant {
-    [self.stampCancellation cancel];
-    self.stampCancellation = [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID
-                                                                forceUpdate:NO
-                                                                andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
-                                                                    self.stamp = stamp;
-                                                                    [super reloadStampedData];
-                                                                }];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -361,6 +351,19 @@
 
 - (UIView *)toolbar {
     return _toolbar;
+}
+
+
+#pragma mark - Stamp Notifications
+
+- (void)localModification:(id)notImportant {
+    [self.stampCancellation cancel];
+    self.stampCancellation = [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID
+                                                                forceUpdate:NO
+                                                                andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
+                                                                    self.stamp = stamp;
+                                                                    [super reloadStampedData];
+                                                                }];
 }
 
 
@@ -418,25 +421,28 @@
 
 #pragma mark - Keyboard Notifications
 
-- (void)keyboardWasShown:(NSNotification *)notification {
+- (void)keyboardWillShow:(NSNotification *)notification {
     CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     
-    CGRect frame = self.addCommentView.frame;
+    __block CGRect frame = self.addCommentView.frame;
     self.addCommentView.clipsToBounds = YES;
-    frame.origin.y = self.view.frame.size.height - ( keyboardSize.height );
-    CGFloat height = 51;
-    frame.size.height = 0;
+    frame.origin.y = self.view.frame.size.height;
+    frame.size.height = 51.0f;
     self.addCommentView.frame = frame;
     self.addCommentView.hidden = NO;
     self.addCommentView.alpha = 1;
+    
     [UIView animateWithDuration:.25 animations:^{
-        [Util reframeView:self.addCommentView withDeltas:CGRectMake(0, -height, 0, height)];
+        
+        frame.origin.y = floorf(self.view.frame.size.height - (keyboardSize.height + frame.size.height));
+        self.addCommentView.frame = frame;
         _addCommentShading.alpha = 1;
         _addCommentShading.userInteractionEnabled = YES;
+
     }];
 }
 
-- (void)keyboardWasHidden:(NSNotification *)notification {
+- (void)keyboardWillHide:(NSNotification *)notification {
 }
 
 

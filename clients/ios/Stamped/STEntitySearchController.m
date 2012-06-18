@@ -495,13 +495,25 @@ static const CGFloat _offscreenCancelPadding = 5;
         self.requestCancellation = nil;
         if (results) {
             self.suggestedSections = results;
-            [self.tableView reloadData];
+            
+            if (sections == 0 && self.suggestedSections) {
+                
+                [self.tableView beginUpdates];
+                [self.tableView insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.suggestedSections.count)] withRowAnimation:UITableViewRowAnimationFade];
+                [self.tableView endUpdates];
+                
+            } else {
+                
+                [self.tableView reloadData];
+
+            }
+            
         }
         
         _loading = NO;
         [self dataSourceDidFinishLoading];
         if (sections==0) {
-            [self animateIn];
+            //[self animateIn];
         }
         
     }];

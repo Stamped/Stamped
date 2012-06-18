@@ -15,6 +15,15 @@
     if (self = [super initWithFrame:frame]) {
         self.size = STStampImageSize14;
         self.backgroundColor = [UIColor clearColor];
+        
+        r = 0.0f;
+        g = 0.290f;
+        b = 0.698f;
+        
+        r1 = 0.0f;
+        g1 = 0.3411f;
+        b1 = 0.819f;
+                
     }
     return self;    
 }

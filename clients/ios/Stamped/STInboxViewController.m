@@ -148,6 +148,20 @@
 
 #pragma mark - Cache Methods
 
+- (void)reloadTableView:(BOOL)preserveOffset {
+    
+    if (preserveOffset) {
+        
+        CGPoint offset = self.tableView.contentOffset;
+        [self.tableView reloadData];
+        self.tableView.contentOffset = offset;
+
+    } else {
+        [self.tableView reloadData];
+    }
+    
+}
+
 - (void)updateCache {
     self.cache = nil;
     self.snapshot = nil;
@@ -165,7 +179,9 @@
         self.snapshot = self.cache.snapshot;
         [self reloadDataSource];
     }
-    [self.tableView reloadData];
+    
+    [self reloadTableView:NO];
+    
 }
 
 - (void)cacheWillLoadPage:(NSNotification *)notification {
@@ -182,7 +198,7 @@
 - (void)cacheUpdate:(NSNotification *)notification {
     if (self.cache) {
         self.snapshot = self.cache.snapshot;
-        [self.tableView reloadData];
+        [self reloadTableView:YES];
     }
 }
 

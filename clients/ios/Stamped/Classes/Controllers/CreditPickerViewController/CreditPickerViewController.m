@@ -9,6 +9,7 @@
 #import "CreditPickerViewController.h"
 #import "CreditHeaderView.h"
 #import "CreditUserTableCell.h"
+#import "STSimpleUser.h"
 
 @interface CreditPickerViewController ()
 @property(nonatomic,retain) CreditHeaderView *headerView;
@@ -16,6 +17,7 @@
 @property(nonatomic,retain) NSArray *users;
 @property(nonatomic,retain) NSString *entityIdentifier;
 @property(nonatomic,retain) NSMutableArray *selectedUsers;
+@property(nonatomic,retain) NSMutableArray *usernames;
 @property(nonatomic,retain) NSArray *searchUsers;
 @property(nonatomic,assign) BOOL loadingUsers;
 @end
@@ -27,6 +29,7 @@
 @synthesize entityIdentifier=_entityIdentifier;
 @synthesize loadingUsers=_loadingUsers;
 @synthesize selectedUsers = _selectedUsers;
+@synthesize usernames = _usernames;
 @synthesize headerView=_headerView;
 @synthesize searchUsers=_searchUsers;
 
@@ -37,9 +40,13 @@
         _users = [[NSArray alloc] init];
         _selectedUsers = [[NSMutableArray alloc] init];
         _searchUsers = [[NSArray alloc] init];
+        _usernames = [[NSMutableArray alloc] init];
         
         if (users) {
             [_selectedUsers addObjectsFromArray:users];
+        }
+        for (id <STUser> user in _selectedUsers) {
+            [_usernames addObject:user.screenName];
         }
         
         _entityIdentifier = [identifier retain];
@@ -64,6 +71,9 @@
 
 - (void)dealloc {
     
+    [_headerView release], _headerView=nil;
+    [_usernames release], _usernames=nil;
+    [_searchUsers release], _searchUsers=nil;
     [_selectedUsers release], _selectedUsers=nil;
     [_entityIdentifier release], _entityIdentifier=nil;
     [_stampedByFriends release], _stampedByFriends=nil;
@@ -86,8 +96,13 @@
         [self.view addSubview:view];
         self.headerView = view;
         [view release];
-        [self setContentInset:UIEdgeInsetsMake(self.headerView.bounds.size.height, 0, 0, 0)];
         [view reloadData];
+        
+        CGRect frame = self.tableView.frame;
+        frame.origin.y = view.frame.size.height;
+        frame.size.height = self.view.bounds.size.height-frame.origin.y;
+        self.tableView.frame = frame;
+        
     }
     
     if (!self.navigationItem.leftBarButtonItem) {
@@ -124,7 +139,7 @@
 - (void)save:(id)sender {
     
     if ([(id)delegate respondsToSelector:@selector(creditPickerViewController:doneWithUsers:)]) {
-        [self.delegate creditPickerViewController:self doneWithUsers:self.users];
+        [self.delegate creditPickerViewController:self doneWithUsers:self.selectedUsers];
     }
     
 }
@@ -142,6 +157,17 @@
 
 #pragma mark - CreditHeaderViewDelegate
 
+- (void)creditHeaderView:(CreditHeaderView*)view addCellWithUsername:(NSString*)username {
+
+    STSimpleUser *user = [[STSimpleUser alloc] init];
+    user.screenName = username;
+    [self.selectedUsers addObject:user];
+    [self.usernames addObject:username];
+    [user release];
+    [self.headerView reloadData];
+    
+}
+
 - (void)creditHeaderView:(CreditHeaderView*)view willDeleteCell:(CreditBubbleCell*)cell {
 
     NSString *username = cell.titleLabel.text;
@@ -149,16 +175,18 @@
     for (id <STUser> user in usersCopy) {
         if ([user.screenName isEqualToString:username]) {
             [_selectedUsers removeObject:user];
+            [_usernames removeObject:username];
         }
     }
     [usersCopy release];
     [self.tableView reloadData];
-    
-    
+        
 }
 
 - (void)creditHeaderViewDidBeginEditing:(CreditHeaderView*)view {
 
+    self.searchUsers = self.users;
+    [self.tableView reloadData];
     
 }
 
@@ -171,14 +199,16 @@
 
 - (void)creditHeaderViewFrameChanged:(CreditHeaderView*)view {
 
-    CGPoint offset = self.tableView.contentOffset;
-    [self setContentInset:UIEdgeInsetsMake(self.headerView.bounds.size.height, 0, 0, 0)];
-    self.tableView.contentOffset = offset;
     
+    CGRect frame = self.tableView.frame;
+    frame.origin.y = view.frame.size.height;
+    frame.size.height = self.view.bounds.size.height-frame.origin.y;
+    self.tableView.frame = frame;
+
 }
 
 - (void)creditHeaderView:(CreditHeaderView*)view textChanged:(NSString*)text {
-            
+                
     if (!text || [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length == 0) {
         
         self.searchUsers = self.users;
@@ -195,15 +225,13 @@
         
     }
     
-  
-
     [self.tableView reloadData];
     
 }
 
 - (void)creditHeaderView:(CreditHeaderView*)view adjustOffset:(CGPoint)offset {
     
-    [self.tableView setContentOffset:offset animated:YES];
+    //[self.tableView setContentOffset:offset animated:YES];
 
 }
 
@@ -275,7 +303,7 @@
     }
     
     [cell setupWithUser:user];
-    cell.checked = [self.selectedUsers containsObject:user];
+    cell.checked = [self.usernames containsObject:user.screenName];
     
     return cell;
 
@@ -353,17 +381,33 @@
 
     }
     
-    if ([self.selectedUsers containsObject:user]) {
-        [self.selectedUsers removeObject:user];
+    if ([self.usernames containsObject:user.screenName]) {
+        
+        NSArray *usersCopy = [self.selectedUsers copy];
+        for (id <STUser> aUser in usersCopy) {
+            if ([aUser.screenName isEqualToString:user.screenName]) {
+                [self.selectedUsers removeObject:aUser];
+                [_usernames removeObject:user.screenName];
+            }
+        }
+        
     } else {
+        
         [self.selectedUsers addObject:user];
+        [self.usernames addObject:user.screenName];
+        
     }
+    
     
     CreditUserTableCell *cell = (CreditUserTableCell*)[tableView cellForRowAtIndexPath:indexPath];
     cell.checked = !cell.checked;
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     [self.headerView reloadData];
+    if (self.headerView.editing) {
+        
+    }
+    
     
 }
 
