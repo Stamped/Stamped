@@ -111,9 +111,12 @@
         [item release];
     }
      */
-    STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
-    self.navigationItem.leftBarButtonItem = button;
-    [button release];
+    if ([[self.navigationController viewControllers) count] == 1) {
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
+        self.navigationItem.leftBarButtonItem = button;
+        [button release];
+    }
+    
     if (!_headerView) {
         CreateHeaderView *view = [[CreateHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 60.0f)];
         [view addTarget:self action:@selector(headerTapped:) forControlEvents:UIControlEventTouchUpInside];
