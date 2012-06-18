@@ -116,8 +116,7 @@ static const CGFloat _minPhotoOffset = 75;
 static const CGFloat _minPhotoButtonOffset = 100;
 static const CGFloat _maxPhotoButtonOffset = 135;
 
-- (id)initWithEntity:(id<STEntity>)entity
-{
+- (id)initWithEntity:(id<STEntity>)entity {
     self = [super init];
     if (self) {
         entity_ = [entity retain];

@@ -49,7 +49,7 @@
         self.backgroundColor = [UIColor whiteColor];
         
         UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        scrollView.contentInset = UIEdgeInsetsMake(0.0f, 0.0f, 10.0f, 0.0f);
+        scrollView.contentInset = UIEdgeInsetsMake(0.0f, 0.0f, 20.0f, 0.0f);
         scrollView.backgroundColor = [UIColor whiteColor];
         scrollView.alwaysBounceVertical = YES;
         [self addSubview:scrollView];
@@ -71,6 +71,10 @@
         [self.scrollView addSubview:imageView];
         self.imageView = imageView;
         [imageView release];
+        
+        imageView.layer.borderColor = [UIColor redColor].CGColor;
+        imageView.layer.borderWidth = 1.0f;
+        imageView.hidden = YES;
         
         id <STUser> user = [[STStampedAPI sharedInstance] currentUser];
         STAvatarView *avatar = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 48.0f, 48.0f)];
@@ -159,7 +163,7 @@
     } else {
         size.height = CGRectGetMaxY(self.textView.frame) + 10.0f;
     }
-    size.height = MAX(size.height, self.frame.size.height);
+    size.height = MAX(size.height, 260.0f);
     if (size.height != self.scrollView.contentSize.height) {
         self.scrollView.contentSize = size;
     }
@@ -384,7 +388,7 @@
     if ([(id)delegate respondsToSelector:@selector(createEditView:addPhotoWithSourceType:)]) {
         [self.delegate createEditView:self addPhotoWithSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     }
-    
+
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
@@ -486,7 +490,7 @@
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
-    
+        
     CGRect frame = textView.frame;
     if(frame.size.height != textView.contentSize.height) {
         frame.size.height = textView.contentSize.height;
@@ -494,6 +498,19 @@
     textView.frame = frame;
     [self layoutScrollView];
     
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    
+    UITextPosition *beginning = textView.beginningOfDocument;
+    UITextPosition *start = [textView positionFromPosition:beginning offset:range.location];
+    UITextPosition *end = [textView positionFromPosition:start offset:range.length];
+    UITextRange *textRange = [textView textRangeFromPosition:start toPosition:end];
+    CGRect rect = [textView convertRect:[textView caretRectForPosition:textRange.start] toView:self.scrollView];
+    NSLog(@"rect ; %@", NSStringFromCGRect(rect));
+    [self.scrollView scrollRectToVisible:rect animated:YES];
+
+    return YES;
 }
 
 @end

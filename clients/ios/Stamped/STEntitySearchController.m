@@ -64,8 +64,13 @@ static const CGFloat _offscreenCancelPadding = 5;
         if (!category) {
             category = @"music";
         }
+<<<<<<< HEAD
+
+        self.title = [category capitalizedString];
+=======
         
         self.title = category;
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
@@ -185,7 +190,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
-            return self.autoCompleteResults.count + 1;
+            return self.autoCompleteResults.count;
         }
         
         if (self.searchSections) {
@@ -225,12 +230,15 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
+<<<<<<< HEAD
+    if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
+                
+=======
     if (tableView == self.searchResultsTableView) {
         
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         NSInteger count = 0;
-        if (self.autoCompleteResults.count) {
-            count = self.autoCompleteResults.count;
-        } else if (self.searchSections) {
+        if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             count = sectionObject.entities.count;
         }
@@ -372,6 +380,14 @@ static const CGFloat _offscreenCancelPadding = 5;
 #warning former crasher, needs fix
         }
         
+<<<<<<< HEAD
+        id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
+        [self.searchView setText:autoCompleteResult.completion];
+        [self.searchView resignKeyboard];
+        [self performSearchWithText:autoCompleteResult.completion];
+
+=======
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
     } else {
         
         id<STEntitySearchResult> result = nil;
@@ -385,7 +401,6 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         
         CreateStampViewController *controller = [[CreateStampViewController alloc] initWithSearchResult:result];
-        controller.navigationItem.hidesBackButton = YES;
         [self.navigationController pushViewController:controller animated:YES];
         [controller release];
         

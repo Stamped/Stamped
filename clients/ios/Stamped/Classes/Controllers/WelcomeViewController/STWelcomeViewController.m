@@ -43,6 +43,15 @@
         _popoverView = view;
         [view release];
         
+        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [closeButton addTarget:self action:@selector(close:) forControlEvents:UIControlEventTouchUpInside];
+        [closeButton setImage:[UIImage imageNamed:@"welcome_popover_close.png"] forState:UIControlStateNormal];
+        
+        CGRect frame = CGRectMake(-12.0f, -16.0f, 44.0f, 44.0f);
+        frame = [_popoverView convertRect:frame toView:self.view];
+        closeButton.frame = frame;
+        [self.view addSubview:closeButton];
+        
     }
     
 }
@@ -62,6 +71,14 @@
 - (void)showSignIn {
     
     [_popoverView showOptionsView];
+    
+}
+
+- (void)close:(id)sender {
+    
+    if ([(id)delegate respondsToSelector:@selector(stWelcomeViewControllerDismiss:)]) {
+        [self.delegate stWelcomeViewControllerDismiss:self];
+    }
     
 }
 

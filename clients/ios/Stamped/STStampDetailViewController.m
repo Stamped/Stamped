@@ -70,25 +70,26 @@
 @synthesize buttonContainer = buttonContainer_;
 
 - (id)initWithParent:(UIView*)view controller:(STStampDetailViewController*)controller andStamp:(id<STStamp>)stamp {
+    
+    UIImage *image = [UIImage imageNamed:@"st_detail_action_bg"];
+
     CGFloat xPadding = 5;
     CGFloat yPadding = 10;
-    CGFloat height = 40;
+    CGFloat height = image.size.height;
     CGRect frame = CGRectMake(xPadding, view.frame.size.height - (height + yPadding), view.frame.size.width - (2 * xPadding), height);
-    self = [super initWithFrame:frame];
-    if (self) {
+    
+    if ((self = [super initWithFrame:frame])) {
         expanded_ = YES;
-        self.layer.cornerRadius = 5;
-        self.layer.shadowOpacity = .3;
-        self.layer.shadowRadius = 3;
-        self.layer.shadowOffset = CGSizeMake(0, 2);
-        self.layer.borderColor = [UIColor colorWithWhite:89.0/255 alpha:1].CGColor;
-        self.layer.borderWidth = 1;
-        [Util addGradientToLayer:self.layer 
-                      withColors:[NSArray arrayWithObjects:
-                                  [UIColor colorWithWhite:.4 alpha:.80],
-                                  [UIColor colorWithWhite:.2 alpha:.85],
-                                  nil] 
-                        vertical:YES];
+        
+        UIImageView *background = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
+        background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        [self addSubview:background];
+        CGRect frame = background.frame;
+        frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
+        frame.size.width = self.bounds.size.width;
+        background.frame = frame;
+        [background release];
+
         UIImageView* imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sDetailBar_btn_more"]] autorelease];
         UIImageView* imageView2 = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sDetailBar_btn_more_active"]] autorelease];
         expandButton_ = [[STButton alloc] initWithFrame:imageView.frame 
@@ -96,7 +97,8 @@
                                              activeView:imageView2 
                                                  target:self 
                                               andAction:@selector(toggleToolbar:)];
-        [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width + 10), 10, 0, 0)];
+        [Util reframeView:expandButton_ withDeltas:CGRectMake(frame.size.width - (expandButton_.frame.size.width + 20), 10, 0, 0)];
+        expandButton_.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         
         __block STStampDetailViewController* weakController = controller;
         STCommentButton* commentButton = [[[STCommentButton alloc] initWithCallback:^{
@@ -110,12 +112,13 @@
                      [[[STTodoButton alloc] initWithStamp:stamp] autorelease],
                      [[[STShareButton alloc] initWithCallback:^{
             [Util executeOnMainThread:^{
-                [Util warnWithMessage:@"No leaking Stamped 2.0!" andBlock:nil];
+                [Util warnWithMessage:@"☝ No leaking Stamped 2.0!" andBlock:nil];
             }];
-        }] autorelease],
-                     nil] retain];
+        }] autorelease], nil] retain];
+        
         CGFloat buttonSpacing = 60;
         buttonContainer_ = [[UIView alloc] initWithFrame:CGRectMake(0, -3, CGRectGetMinX(expandButton_.frame)+50, frame.size.height-7)];
+        buttonContainer_.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         for (NSInteger i = 0; i < buttons_.count; i++) {
             UIView* button = [buttons_ objectAtIndex:i];
             [Util reframeView:button withDeltas:CGRectMake(-5 + (i * buttonSpacing), -4, 0, 0)];
@@ -126,42 +129,52 @@
         self.clipsToBounds = YES;
         [Util reframeView:expandButton_ withDeltas:CGRectMake(3, -3, 0, 0)];
         [self addSubview:expandButton_];
+        
+        BOOL _enabled = [UIView areAnimationsEnabled];
+        [UIView setAnimationsEnabled:NO];
         [self toggleToolbar:nil];
+        [UIView setAnimationsEnabled:_enabled];
+        
     }
     return self;
 }
 
 - (void)toggleToolbar:(id)notImportant {
-    CGFloat delta = 155;
-    CGFloat deltaSpacing = 15;
-    CGFloat duration = .5;
-    if (self.expanded) {
-        [UIView animateWithDuration:duration animations:^{
-            [Util reframeView:self withDeltas:CGRectMake(delta, 0, -delta, 0)];
-            [Util reframeView:self.buttonContainer withDeltas:CGRectMake(0, 0, -delta, 0)];
-            [Util reframeView:self.expandButton withDeltas:CGRectMake(-delta, 0, 0, 0)];
-            for (NSInteger i = 0; i < buttons_.count; i++) {
-                UIView* button = [buttons_ objectAtIndex:i];
-                [Util reframeView:button withDeltas:CGRectMake(i * -deltaSpacing, 0, 0, 0)];
-                if (CGRectGetMaxX(button.frame) - 20 > self.buttonContainer.frame.size.width - 50) {
-                    button.alpha = 0;
-                }
-            }
-        }];
-    }
-    else {
-        [UIView animateWithDuration:duration animations:^{
-            [Util reframeView:self withDeltas:CGRectMake(-delta, 0, delta, 0)];
-            [Util reframeView:self.buttonContainer withDeltas:CGRectMake(0, 0, delta, 0)];
-            [Util reframeView:self.expandButton withDeltas:CGRectMake(delta, 0, 0, 0)];
-            for (NSInteger i = 0; i < buttons_.count; i++) {
-                UIView* button = [buttons_ objectAtIndex:i];
-                [Util reframeView:button withDeltas:CGRectMake(i * deltaSpacing, 0, 0, 0)];
+   
+    CGFloat delta = 208.0f;
+    
+    CGRect frame = self.frame;
+    CGFloat width = [[UIScreen mainScreen] applicationFrame].size.width;
+    frame.size.width = self.expanded ? delta : width - 10.0f;
+    frame.origin.x = self.expanded ?  width - (delta+5.0f) : 5.0f;
+    [UIView animateWithDuration:0.25f animations:^{
+        self.frame = frame;
+    }];
+    
+    [UIView animateWithDuration:self.expanded ? 0.1f : 0.25f delay:self.expanded ? 0.0f : 0.2f options:UIViewAnimationCurveEaseInOut animations:^{
+       
+        CGFloat originX = 4.0f;
+        
+        for (NSInteger i = 0; i < buttons_.count; i++) {
+            
+            UIView *button = [buttons_ objectAtIndex:i];
+            CGRect buttonFrame = button.frame;
+            buttonFrame.origin.x = originX;
+            originX += 52.0f;
+            button.frame = buttonFrame;
+            
+            if (self.expanded && CGRectGetMaxX(buttonFrame) - 20 > frame.size.width - 50) {
+                button.alpha = 0;
+            } else {
                 button.alpha = 1;
             }
-        }];
-    }
+            
+        }
+
+    } completion:^(BOOL finished){}];
+
     self.expanded = !self.expanded;
+
 }
 
 - (void)reloadStampedData {
@@ -187,6 +200,7 @@
 @synthesize addCommentShading = _addCommentShading;
 @synthesize stampCancellation = _stampCancellation;
 
+
 - (id)initWithStamp:(id<STStamp>)stamp {
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stamp.stampID];
     if (cachedStamp) {
@@ -210,6 +224,9 @@
     [_addCommentShading release];
     [super dealloc];
 }
+
+
+#pragma mark - View cycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -277,15 +294,16 @@
     UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view controller:self andStamp:self.stamp] autorelease];
     [self.view addSubview:newToolbar];
     
-    self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID 
-                                                                               andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
+    self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
+        
+        STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
+        [self.scrollView appendChildView:wrapper];
+        self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
+        UIView* padding = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 60)] autorelease];
+        [self.scrollView appendChildView:padding];
                                                                                    
-                                                                                   STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
-                                                                                   [self.scrollView appendChildView:wrapper];
-                                                                                   self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
-                                                                                   UIView* padding = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 60)] autorelease];
-                                                                                   [self.scrollView appendChildView:padding];
-                                                                               }];
+                                                                              
+    }];
     
     
 }
@@ -293,64 +311,10 @@
 - (void)viewDidUnload {
 }
 
-- (void)cancelPendingRequests {
-    [self.stampCancellation cancel];
-    self.stampCancellation = nil;
-    [self.entityDetailCancellation cancel];
-}
-
-
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     //[self setUpToolbar];
     [_headerView setNeedsDisplay];
-}
-
-- (void)exitComment:(id)notImportant {
-    if ([self.commentTextView isFirstResponder]) {
-        [self.commentTextView resignFirstResponder];
-    }
-}
-
-- (void)changeFirstResponder {
-    //[self.dummyTextField.inputAccessoryView becomeFirstResponder];
-}
-
-- (void)keyboardWasShown:(NSNotification *)notification {
-    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-    
-    CGRect frame = self.addCommentView.frame;
-    self.addCommentView.clipsToBounds = YES;
-    frame.origin.y = self.view.frame.size.height - ( keyboardSize.height );
-    CGFloat height = 51;
-    frame.size.height = 0;
-    self.addCommentView.frame = frame;
-    self.addCommentView.hidden = NO;
-    self.addCommentView.alpha = 1;
-    [UIView animateWithDuration:.25 animations:^{
-        [Util reframeView:self.addCommentView withDeltas:CGRectMake(0, -height, 0, height)];
-        _addCommentShading.alpha = 1;
-        _addCommentShading.userInteractionEnabled = YES;
-    }];
-}
-
-- (void)textViewDidEndEditing:(UITextView *)textView {
-    _addCommentShading.userInteractionEnabled = NO;
-    CGRect frame = self.addCommentView.frame;
-    frame.origin.y = self.view.frame.size.height;
-    [UIView animateWithDuration:.3
-                     animations:^{
-                         self.addCommentView.frame = frame;
-                         self.addCommentView.alpha = 0;
-                         _addCommentShading.alpha = 0;
-                     } completion:^(BOOL finished) {
-                         
-                         self.addCommentView.hidden = YES;
-                     }];   
-}
-
-- (void)keyboardWasHidden:(NSNotification *)notification
-{
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -392,6 +356,16 @@
     [super viewWillDisappear:animated];
 }
 
+
+#pragma mark - Getters
+
+- (UIView *)toolbar {
+    return _toolbar;
+}
+
+
+#pragma mark - Actions
+
 - (void)_deleteStampButtonPressed:(id)caller {
     [Util confirmWithMessage:@"Are you sure?" action:@"Delete" destructive:YES withBlock:^(BOOL confirmed) {
         if (confirmed) {
@@ -421,16 +395,69 @@
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
-- (UIView *)toolbar {
-    return _toolbar;
-}
-
 - (void)commentButtonPressed {
     [self.commentTextView becomeFirstResponder];
 }
 
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
-{
+- (void)exitComment:(id)notImportant {
+    if ([self.commentTextView isFirstResponder]) {
+        [self.commentTextView resignFirstResponder];
+    }
+}
+
+- (void)cancelPendingRequests {
+    [self.stampCancellation cancel];
+    self.stampCancellation = nil;
+    [self.entityDetailCancellation cancel];
+}
+
+- (void)changeFirstResponder {
+    //[self.dummyTextField.inputAccessoryView becomeFirstResponder];
+}
+
+
+#pragma mark - Keyboard Notifications
+
+- (void)keyboardWasShown:(NSNotification *)notification {
+    CGSize keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    
+    CGRect frame = self.addCommentView.frame;
+    self.addCommentView.clipsToBounds = YES;
+    frame.origin.y = self.view.frame.size.height - ( keyboardSize.height );
+    CGFloat height = 51;
+    frame.size.height = 0;
+    self.addCommentView.frame = frame;
+    self.addCommentView.hidden = NO;
+    self.addCommentView.alpha = 1;
+    [UIView animateWithDuration:.25 animations:^{
+        [Util reframeView:self.addCommentView withDeltas:CGRectMake(0, -height, 0, height)];
+        _addCommentShading.alpha = 1;
+        _addCommentShading.userInteractionEnabled = YES;
+    }];
+}
+
+- (void)keyboardWasHidden:(NSNotification *)notification {
+}
+
+
+#pragma mark - UITextViewDelegate
+
+- (void)textViewDidEndEditing:(UITextView *)textView {
+    _addCommentShading.userInteractionEnabled = NO;
+    CGRect frame = self.addCommentView.frame;
+    frame.origin.y = self.view.frame.size.height;
+    [UIView animateWithDuration:.3
+                     animations:^{
+                         self.addCommentView.frame = frame;
+                         self.addCommentView.alpha = 0;
+                         _addCommentShading.alpha = 0;
+                     } completion:^(BOOL finished) {
+                         
+                         self.addCommentView.hidden = YES;
+                     }];   
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
     if (!self.commentActivityView.hidden) {
         return FALSE;
     }
@@ -470,6 +497,9 @@
     }
 }
 
+
+#pragma mark - DataSource Loading
+
 - (void)reloadStampedData {
     [self.stampCancellation cancel];
     self.stampCancellation = [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID
@@ -479,5 +509,6 @@
                                                                     [super reloadStampedData];
                                                                 }];
 }
+
 
 @end

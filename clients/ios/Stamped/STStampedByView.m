@@ -141,8 +141,7 @@
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [group_ release];
     [entityID_ release];
     [super dealloc];
@@ -169,8 +168,7 @@
 
 @implementation STStampedByView
 
-- (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist entityID:(NSString*)entityID andDelegate:(id<STViewDelegate>)delegate
-{
+- (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist entityID:(NSString*)entityID andDelegate:(id<STViewDelegate>)delegate {
     self = [super initWithDelegate:delegate andFrame:CGRectMake(15, 0, 290, 0)];
     if (self) {
         //self.clipsToBounds = YES;
@@ -222,6 +220,7 @@
             self.layer.shadowOffset = CGSizeMake(0,1);
             self.layer.shadowOpacity = .1;
             self.layer.shadowRadius = 1;
+            self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
             [Util addGradientToLayer:self.layer 
                           withColors:[NSArray arrayWithObjects:[UIColor colorWithWhite:.95 alpha:1], [UIColor colorWithWhite:.90 alpha:1], nil]
                             vertical:YES];

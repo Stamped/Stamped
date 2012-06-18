@@ -615,8 +615,19 @@ static Rdio* _rdio;
 }
 
 + (UINavigationController*)sharedNavigationController {
+  
     STAppDelegate *delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+    STMenuController *menuController = delegate.menuController;
+    if (menuController.modalViewController) {
+        
+        if ([menuController.modalViewController isKindOfClass:[UINavigationController class]]) {
+            return (UINavigationController*)menuController.modalViewController;
+        }
+
+    }
+
     return (UINavigationController*)delegate.menuController.rootViewController;
+
 }
 
 + (void)globalLoadingLock {
@@ -907,6 +918,7 @@ static Rdio* _rdio;
     CAGradientLayer* gradient = [CAGradientLayer layer];
     gradient.anchorPoint = CGPointMake(0, 0);
     gradient.position = CGPointMake(0, 0);
+    gradient.contentsScale = [[UIScreen mainScreen] scale];
     if (!vertical) {
         gradient.startPoint = CGPointMake(0,.5);
         gradient.endPoint = CGPointMake(1,.5);

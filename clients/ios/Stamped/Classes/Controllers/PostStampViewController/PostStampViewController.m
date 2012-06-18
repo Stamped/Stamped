@@ -7,18 +7,27 @@
 //
 
 #import "PostStampViewController.h"
+#import "STStampDetailViewController.h"
 #import "PostStampGraphView.h"
 #import "PostStampHeaderView.h"
 #import "STStampContainerView.h"
+#import "STUsersViewController.h"
 #import "PostStampBadgeTableCell.h"
 #import "PostStampFriendsTableCell.h"
+#import "STUserViewController.h"
+#import "PostStampedByView.h"
+#import "STActionManager.h"
+#import "STStampedActions.h"
 
 @interface PostStampViewController ()
 @property(nonatomic,strong) PostStampHeaderView *headerView;
 @property(nonatomic,strong) PostStampGraphView *graphView;
-@property(nonatomic,retain) id<STStamp> stamp;
-@property(nonatomic,retain) id<STUserDetail> user;
-@property(nonatomic,retain) id<STStampedBy> stampedBy;
+@property(nonatomic,strong) PostStampedByView *stampedByView;
+@property(nonatomic,strong) id<STStamp> stamp;
+@property(nonatomic,strong) id<STUserDetail> user;
+@property(nonatomic,strong) id<STStampedBy> stampedBy;
+@property(nonatomic,strong) NSArray *badges;
+@property(nonatomic,assign) BOOL firstBadge;
 @end
 
 @implementation PostStampViewController
@@ -26,13 +35,41 @@
 @synthesize headerView=_headerView;
 @synthesize stamp=_stamp;
 @synthesize user=_user;
+<<<<<<< HEAD
+@synthesize stampedByView=_stampedByView;
+@synthesize badges=_badges;
+@synthesize firstBadge;
+=======
 @synthesize stampedBy = _stampedBy;
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
 
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     if ((self = [super initWithStyle:UITableViewStylePlain])) {
-        self.title = NSLocalizedString(@"Your stamp", @"Your stamp");
+        self.title = NSLocalizedString(@"Your Stamp", @"Your Stamp");
         _stamp = [stamp retain];
+        
+        if (_stamp.badges.count) {
+            
+            NSMutableArray *array = [NSMutableArray array];
+            
+            for (id <STBadge> badge in _stamp.badges) {
+                if ([badge.genre isEqualToString:@"entity_first_stamp"]) {
+                    [array addObject:badge];
+                    self.firstBadge = YES;
+                }  else if ([badge.genre isEqualToString:@"user_first_stamp"]) {
+                    [array addObject:badge];
+                }
+            }
+            
+            self.badges = array;
+            
+        } else {
+         
+            self.badges = [NSArray array];
+
+        }
+        
     }
     return self;
 }
@@ -43,6 +80,8 @@
     self.user = nil;
     self.stamp = nil;
     self.stampedBy = nil;
+    self.stampedByView = nil;
+    self.badges = nil;
     [super dealloc];
 }
 
@@ -71,6 +110,13 @@
         [view release];
     }
     
+    if (!_stampedByView) {
+        PostStampedByView *view = [[PostStampedByView alloc] initWithFrame:CGRectMake(0.0f, 20.0f, self.tableView.bounds.size.width, 85.0f)];
+        view.delegate = (id<PostStampedByViewDelegate>)self;
+        self.stampedByView = view;
+        [view release];        
+    }
+    
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
     self.navigationItem.rightBarButtonItem = button;
     [button release];
@@ -80,6 +126,7 @@
 }
 
 - (void)viewDidUnload {
+    self.stampedByView = nil;
     self.graphView = nil;
     [super viewDidUnload];
 }
@@ -118,10 +165,10 @@
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (indexPath.row == 0) {
-        return 140.0f;
+        return 150.0f;
     }
     
-    if (self.stamp && self.stamp.badges && indexPath.row <= self.stamp.badges.count) {
+    if (indexPath.row <= self.badges.count) {
         return 76.0f;
     }
 
@@ -131,12 +178,8 @@
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
     
-    NSInteger count = 1;
-    
-    if (self.stamp) {
-        count+=self.stamp.badges.count;
-    }
-    
+    NSInteger count = self.badges.count + 1;
+
     if (self.stampedBy) {
         count+=1;
     }
@@ -157,7 +200,7 @@
             cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
             cell.layer.zPosition = 10;
             
-            PostStampGraphView *graphView = [[PostStampGraphView alloc] initWithFrame:CGRectMake(0.0f, 10.0f, self.view.bounds.size.width, 130.0f)];
+            PostStampGraphView *graphView = [[PostStampGraphView alloc] initWithFrame:CGRectMake(0.0f, 10.0f, self.view.bounds.size.width, 140.0f)];
             if (self.stamp) {
                 graphView.category = self.stamp.entity.category;
             }
@@ -175,7 +218,7 @@
         
     }
     
-    if (self.stamp.badges && indexPath.row <= self.stamp.badges.count) {
+    if (indexPath.row <= self.badges.count) {
         
         static NSString *BadgeCellIdentifier = @"BadgeCellIdentifier";
         PostStampBadgeTableCell *cell = [tableView dequeueReusableCellWithIdentifier:BadgeCellIdentifier];
@@ -185,10 +228,8 @@
         }
         
         [cell showShadow:(indexPath.row==1)];
-        if(self.stamp) {
-            [cell setupWithBadge:[[self.stamp badges] objectAtIndex:indexPath.row-1]];
-        }
-        
+        [cell setupWithBadge:[self.badges objectAtIndex:indexPath.row-1]];
+
         return cell;
         
     }
@@ -198,12 +239,51 @@
     if (cell == nil) {
         cell = [[[PostStampFriendsTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:FriendsCellIdentifier] autorelease];
         cell.layer.zPosition = 10;
+        cell.delegate = (id<PostStampFriendsTableCellDelegate>)self;
     }
     
     [cell showShadow:(indexPath.row==1)];
     [cell setupWithStampedBy:self.stampedBy andStamp:self.stamp];
     
     return cell;
+    
+}
+
+
+#pragma mark - PostStampFriendsTableCellDelegate
+
+- (void)postStampFriendTableCell:(PostStampFriendsTableCell*)cell selectedUser:(id<STUser>)user {
+    
+    STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
+    [self.navigationController pushViewController:controller animated:YES];
+    [controller release];
+    
+}
+
+
+#pragma mark - PostStampedByViewDelegate
+
+- (void)postStampedByView:(PostStampedByView*)view selectedPreview:(id<STStampPreview>)item {
+    
+   // STStampDetailViewController *controller = [[[STStampDetailViewController alloc] initWithStamp:item.stamp] autorelease];
+    
+    STActionContext* context = [STActionContext contextInView:self.view];
+    id<STAction> action = [STStampedActions actionViewStamp:item.stampID withOutputContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+    
+}
+
+- (void)postStampedByView:(PostStampedByView*)view selectedAll:(id)sender {
+    
+    NSMutableArray *userIDs = [NSMutableArray array];
+    for (id<STStampPreview> preview in [self.stampedBy.everyone stampPreviews]) {
+        NSString *userID = preview.user.userID;
+        if (userID) {
+            [userIDs addObject:userID];
+        }
+    }
+    STUsersViewController *controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+    [self.navigationController pushViewController:controller animated:YES];
     
 }
 
@@ -220,25 +300,42 @@
         } else {
             [self.graphView setLoading:YES];
         }
+        [self resetContainer];
     }];
     
-    if (!self.stamp) return;
+    if (!self.stamp || self.firstBadge) return; // ignore stamped by if the user is the first to stamp
 
     [[STStampedAPI sharedInstance] stampedByForEntityID:self.stamp.entity.entityID andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
         
+<<<<<<< HEAD
+        if (stampedBy) {
+            
+            self.stampedBy = stampedBy;
+            
+            if (_stampedByView && _stampedBy.everyone.count.integerValue > 0) {
+                UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 110.0f)];
+                container.backgroundColor = [UIColor clearColor];
+                self.tableView.tableFooterView = container;
+                [container addSubview:self.stampedByView];
+                [container release];
+                self.stampedByView.stampedBy = stampedBy;
+            } 
+            
+            [self.tableView beginUpdates];
+            [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:self.badges.count+1 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+            [self resetContainer];
+            [self.tableView endUpdates];
+            [self resetContainer];
+            
+=======
         NSLog(@"stampedby:%@", stampedBy);
         self.stampedBy = stampedBy;
         
         NSInteger count = 1;
         if (self.stamp) {
             count+=self.stamp.badges.count;
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         }
-        
-        [self.tableView beginUpdates];
-        [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:count inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
-        [self resetContainer];
-        [self.tableView endUpdates];
-        [self resetContainer];
 
     }];
     

@@ -10,6 +10,7 @@
 #import "STAvatarView.h"
 
 @implementation PostStampFriendView
+@synthesize user=_user;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -39,6 +40,12 @@
     return self;
 }
 
+- (void)dealloc {
+    
+    [_user release], _user=nil;
+    [super dealloc];
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
     
@@ -50,7 +57,17 @@
     
 }
 
+- (void)setHighlighted:(BOOL)highlighted {
+    [super setHighlighted:highlighted];
+    
+    _avatarView.highlighted = highlighted;
+    
+}
+
 - (void)setupWithUser:(id<STUser>)user index:(NSInteger)index {
+    
+    [_user release], _user=nil;
+    _user = [user retain];
     
     BOOL highlighted = NO;
     if (user) {

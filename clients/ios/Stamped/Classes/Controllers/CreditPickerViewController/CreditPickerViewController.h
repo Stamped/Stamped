@@ -10,13 +10,14 @@
 #import "STRestViewController.h"
 
 @protocol CreditPickerViewControllerDelegate;
-@interface CreditPickerViewController : STRestViewController 
-- (id)initWithEntityIdentifier:(NSString*)identifier;
+@interface CreditPickerViewController : STRestViewController
+
+- (id)initWithEntityIdentifier:(NSString*)identifier selectedUsers:(NSArray*)user;
 
 @property(nonatomic,assign) id <CreditPickerViewControllerDelegate> delegate;
 
 @end
 @protocol CreditPickerViewControllerDelegate
-- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsernames:(NSArray*)usernames;
+- (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsers:(NSArray*)users;
 - (void)creditPickerViewControllerCancelled:(CreditPickerViewController*)controller;
 @end

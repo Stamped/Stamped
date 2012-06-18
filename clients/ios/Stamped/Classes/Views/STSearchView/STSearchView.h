@@ -27,6 +27,7 @@
 - (void)setPlaceholderTitle:(NSString*)title;
 - (void)setText:(NSString*)text;
 - (NSString*)text;
+- (void)resignKeyboard;
 
 @end
 @protocol STSearchViewDelegate

@@ -15,6 +15,9 @@
 #define kFrameInset 10.0f
 #define kCellHeight 28
 
+#define kBlankTextFieldText  @"\u200B"
+
+
 @implementation CreditHeaderView
 @synthesize delegate;
 @synthesize dataSource;
@@ -63,6 +66,12 @@
         gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         [self addGestureRecognizer:gesture];
         [gesture release];
+        
+        UIView *border = [[UIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height, self.bounds.size.width, 1.0f)];
+        border.backgroundColor = [UIColor whiteColor];
+        border.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        [self addSubview:border];
+        [border release];
     
     }
     return self;
@@ -316,6 +325,10 @@
 
         if (_selectedCell) {
 
+            if ([(id)delegate respondsToSelector:@selector(creditHeaderView:willDeleteCell:)]) {
+                [self.delegate creditHeaderView:self willDeleteCell:(id)_selectedCell];
+            }
+            
             // delete key hit with cell selected
             [_selectedCell removeFromSuperview];
             [_cells removeObject:_selectedCell];
@@ -326,6 +339,10 @@
             return NO;
             
         }
+    } else {
+        
+        
+        
     }
     
     return YES;
@@ -348,6 +365,11 @@
     if ([(id)delegate respondsToSelector:@selector(creditHeaderView:textChanged:)]) {
         [self.delegate creditHeaderView:self textChanged:textField.text];
     }
+    
+    if (textField.text.length == 0 && ![textField.text isEqualToString:kBlankTextFieldText]) {
+        textField.text = kBlankTextFieldText;
+    }
+    
     
 }
 
