@@ -51,12 +51,14 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
         }
     }];
     [request setCompletionBlock:^{
+        _uploading = NO;
         if (completion) {
             completion(tempPath, YES);
         }
         [_request release], _request=nil;
     }];
     [request setFailedBlock:^{
+        _uploading = NO;
         if (completion) {
             completion(tempPath, NO);
         }

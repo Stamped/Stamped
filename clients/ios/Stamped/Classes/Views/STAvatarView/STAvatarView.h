@@ -8,15 +8,18 @@
 
 #import <UIKit/UIKit.h>
 
+@class STTextCalloutView;
 @protocol STAvatarViewDelegate;
-@interface STAvatarView : UIView {
+@interface STAvatarView : UIControl {
     UIView *highlightView;
+    STTextCalloutView *_calloutView;
 }
 
 @property(nonatomic,retain) NSURL *imageURL;
 @property(nonatomic,retain,readonly) UIImageView *imageView;
 @property(nonatomic,retain,readonly) UIView *backgroundView;
 @property(nonatomic,assign) id <STAvatarViewDelegate> delegate;
+@property(nonatomic,copy) NSString *calloutTitle;
 
 - (void)setDefault;
 

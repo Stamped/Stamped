@@ -332,7 +332,7 @@
     _dateLabel.text = [Util userReadableTimeSinceDate:stamp.created];
     [_dateLabel sizeToFit];
     CGRect frame = _dateLabel.frame;
-    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 12);
+    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 10);
     _dateLabel.frame = frame;
     
     // user avatar

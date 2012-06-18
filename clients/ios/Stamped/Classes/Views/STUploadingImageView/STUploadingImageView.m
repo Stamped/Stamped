@@ -11,6 +11,8 @@
 
 @implementation STUploadingImageView
 @synthesize uploading=_uploading;
+@synthesize activiyView=_activiyView;
+@synthesize deleteButton = _deleteButton;
 @synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame {
@@ -24,6 +26,13 @@
         self.activiyView = view;
         [view release];
         
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.imageEdgeInsets = UIEdgeInsetsMake(0, 16, 16, 0);
+        [button setImage:[UIImage imageNamed:@"delete_icon.png"] forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(delete:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:button];
+        _deleteButton = button;
+        
         CGRect frame = view.frame;
         frame.origin.x = (self.bounds.size.width-frame.size.width)/2;
         frame.origin.y = (self.bounds.size.height-frame.size.height)/2;
@@ -33,10 +42,20 @@
     return self;
 }
 
+- (void)dealloc {
+    [_deleteButton release], _deleteButton = nil;
+    self.activiyView = nil;
+    [super dealloc];
+}
+
+
+#pragma mark - Setters
+
 - (void)setImage:(UIImage *)image {
     [super setImage:image];
     
     self.hidden = (image==nil);
+    _deleteButton.hidden = self.hidden;
     if (!image) return;
     
     CGSize kMaxImageViewSize = CGSizeMake(200.0f, 200.0f);
@@ -54,19 +73,17 @@
     
     frame.origin.x = (self.superview.bounds.size.width-frame.size.width)/2;
     self.frame = frame;
-
-    self.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.layer.borderWidth = 2.0f;
+    
     self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
     self.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
     self.layer.shadowRadius = 1.0f;
     self.layer.shadowOpacity = (image==nil) ? 0.0f : 0.2f;
     
-}
-
-- (void)dealloc {
-    self.activiyView = nil;
-    [super dealloc];
+    if (_deleteButton.superview == self) {
+        [self.superview addSubview:_deleteButton];
+    }
+    _deleteButton.frame = CGRectMake(floorf(CGRectGetMaxX(self.frame)-34.0f), floorf(CGRectGetMinY(self.frame)-10.0f), 44.0f, 44.0f);
+    
 }
 
 - (void)setUploading:(BOOL)uploading {
@@ -80,11 +97,19 @@
     
 }
 
+- (void)setFrame:(CGRect)frame {
+    [super setFrame:frame];
+    
+    if (_deleteButton) {
+        _deleteButton.frame = CGRectMake(CGRectGetMaxX(frame)-34.0f, CGRectGetMinY(frame)-10.0f, 44.0f, 44.0f);
+    }
+    
+}
 
-#pragma mark - Touches
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    [super touchesEnded:touches withEvent:event];
+#pragma mark - Actions
+
+- (void)delete:(id)sender {
     
     if ([(id)delegate respondsToSelector:@selector(sTUploadingImageViewTapped:)]) {
         [self.delegate sTUploadingImageViewTapped:self];

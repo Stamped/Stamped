@@ -12,8 +12,6 @@
 #import "Util.h"
 
 int main(int argc, char* argv[]) {
-    //@try {
-    
     if ([[STConfiguration sharedInstance] internalVersion] > 0) {
         @autoreleasepool {
             return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
@@ -25,11 +23,4 @@ int main(int argc, char* argv[]) {
         [pool release];
         return retVal;
     }
-    /*}
-     @catch (NSException *exception) {
-     [Util logOperationException:exception withMessage:@"Main application error"];
-     }
-     @finally {
-     }
-     */
 }

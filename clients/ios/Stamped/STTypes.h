@@ -35,3 +35,9 @@ typedef enum {
     STProfileImageSize72 = 72,
     STProfileImageSize144 = 144,
 } STProfileImageSize;
+
+
+typedef enum {
+    STCategoryIconSize9 = 9,
+    STCategoryIconSize15 = 15,
+} STCategoryIconSize;

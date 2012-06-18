@@ -127,6 +127,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     //Resume cache ops
+    [self reloadDataSource];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -147,6 +148,20 @@
 
 #pragma mark - Cache Methods
 
+- (void)reloadTableView:(BOOL)preserveOffset {
+    
+    if (preserveOffset) {
+        
+        CGPoint offset = self.tableView.contentOffset;
+        [self.tableView reloadData];
+        self.tableView.contentOffset = offset;
+
+    } else {
+        [self.tableView reloadData];
+    }
+    
+}
+
 - (void)updateCache {
     self.cache = nil;
     self.snapshot = nil;
@@ -164,7 +179,9 @@
         self.snapshot = self.cache.snapshot;
         [self reloadDataSource];
     }
-    [self.tableView reloadData];
+    
+    [self reloadTableView:NO];
+    
 }
 
 - (void)cacheWillLoadPage:(NSNotification *)notification {
@@ -181,7 +198,7 @@
 - (void)cacheUpdate:(NSNotification *)notification {
     if (self.cache) {
         self.snapshot = self.cache.snapshot;
-        [self.tableView reloadData];
+        [self reloadTableView:YES];
     }
 }
 
@@ -492,8 +509,8 @@
     if (!LOGGED_IN) {
         
         STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-        [controller showWelcome:NO];
-        
+        [controller showSignIn];
+
     } else {
         
         FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
@@ -580,9 +597,14 @@
         
     } 
     else {
+        
         [Util addCreateStampButtonToController:self];
+        self.slider.scope = STStampedAPIScopeFriends;
+        self.scope = STStampedAPIScopeFriends;
+
     }
-    
+        
+    [self reloadDataSource];
 }
 
 - (void)applicationDidBecomeActive:(id)notImportant {

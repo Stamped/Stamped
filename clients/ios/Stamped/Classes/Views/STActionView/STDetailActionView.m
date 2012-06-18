@@ -87,10 +87,8 @@
         [itemKeys addObject:@"todo"];
         
         
-        button = [[[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_todo.png" 
-                                               imageTitleHi:@"sDetailBar_btn_todo_selected.png" 
-                                              imageTitleSel:@"sDetailBar_btn_todo_selected.png" 
-                                                     target:self action:@selector(todobuttonHit:)] autorelease];
+        button = [[[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_todo.png"  imageTitleHi:@"sDetailBar_btn_todo_selected.png"  imageTitleSel:@"sDetailBar_btn_todo_selected.png" target:self action:@selector(todobuttonHit:)] autorelease];
+           /*
         [items addObject:button];
         [itemKeys addObject:@"todo"];
         
@@ -108,8 +106,10 @@
         button = [[STDetailAction alloc] initWithImageTitle:@"sDetailBar_btn_more.png" imageTitleHi:@"sDetailBar_btn_more_active.png" target:self action:@selector(expand:)];
         [items addObject:button];
         [button release];
-
-        self.items = (id)items;        
+                                                       
+                                                       */
+                   
+        //self.items = (id)items;
     }
     return self;
 }
@@ -117,7 +117,7 @@
 - (id)initWithItems:(NSArray<STDetailActionItem>*)items {
     if ((self = [super initWithFrame:CGRectZero])) {
         [self commonInit];
-        self.items = items;
+       // self.items = items;
     }
     return self;
 }

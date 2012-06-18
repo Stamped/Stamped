@@ -61,6 +61,8 @@
         _swipe = gesture;
         [gesture release];
          */
+        
+
 
     }
     return self;
@@ -83,15 +85,7 @@
         [_container addSubview:view];
         [view release];
         _optionsView = view;
-        
-        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [closeButton addTarget:self action:@selector(close:) forControlEvents:UIControlEventTouchUpInside];
-        [closeButton setImage:[UIImage imageNamed:@"welcome_popover_close.png"] forState:UIControlStateNormal];
-        
-        frame = CGRectMake(-12.0f, -16.0f, 44.0f, 44.0f);
-        frame = [self convertRect:frame toView:self.superview];
-        closeButton.frame = frame;
-        [self.superview addSubview:closeButton];
+
 
     }
     

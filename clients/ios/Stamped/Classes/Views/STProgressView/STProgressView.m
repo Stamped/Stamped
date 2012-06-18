@@ -15,6 +15,7 @@
     if ((self = [super initWithFrame:frame])) {
         
         CALayer *layer = [CALayer layer];
+        layer.contentsScale = [[UIScreen mainScreen] scale];
         layer.backgroundColor = [UIColor colorWithWhite:0.7f alpha:0.7f].CGColor;
         [self.layer addSublayer:layer];
         _progressLayer = layer;

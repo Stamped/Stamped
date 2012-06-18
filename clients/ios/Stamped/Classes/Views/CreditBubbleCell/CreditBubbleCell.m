@@ -34,6 +34,7 @@
         _background = imageView;
         
         UserStampView *view = [[UserStampView alloc] initWithFrame:CGRectMake(6.0f, floorf((self.bounds.size.height-14.0f)/2), 14.0f, 14.0f)];
+        view.userInteractionEnabled = NO;
         [self addSubview:view];
         _stampView = [view retain];
         [view release];
@@ -43,6 +44,7 @@
         CGFloat originX = floorf(CGRectGetMaxX(_stampView.frame) + 4.0f);
         
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(originX, originY, 0.0f, font.lineHeight)];
+        label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         label.shadowOffset = CGSizeMake(0.0f, 1.0f);
         label.shadowColor = [UIColor colorWithWhite:1.0f alpha:1.0f];
         label.highlightedTextColor = [UIColor whiteColor];

@@ -615,8 +615,19 @@ static Rdio* _rdio;
 }
 
 + (UINavigationController*)sharedNavigationController {
+  
     STAppDelegate *delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+    STMenuController *menuController = delegate.menuController;
+    if (menuController.modalViewController) {
+        
+        if ([menuController.modalViewController isKindOfClass:[UINavigationController class]]) {
+            return (UINavigationController*)menuController.modalViewController;
+        }
+
+    }
+
     return (UINavigationController*)delegate.menuController.rootViewController;
+
 }
 
 + (void)globalLoadingLock {
@@ -763,6 +774,33 @@ static Rdio* _rdio;
     return [UIImage imageNamed:@"cat_icon_sDetail_other"];
 }
 
++ (UIImage*)categoryIconForCategory:(NSString*)category subcategory:(NSString*)subcategory filter:(NSString*)filter andSize:(STCategoryIconSize)size {
+    NSString* base = [NSString stringWithFormat:@"icon_%dpt", size];
+    UIImage* image = nil;
+    if (category) {
+        NSString* categoryPath = [NSString stringWithFormat:@"%@_%@", base, category];
+        if (subcategory) {
+            NSString* subcategoryPath = [NSString stringWithFormat:@"%@_%@", categoryPath, subcategory];
+            if (filter) {
+                NSString* filterPath = [NSString stringWithFormat:@"%@_%@", subcategoryPath, filter];
+                image = [UIImage imageNamed:filterPath];
+            }
+            if (!image) {
+                NSLog(@"Subpath:%@", subcategoryPath);
+                image = [UIImage imageNamed:subcategoryPath];
+            }
+        }
+        if (!image) {
+            image = [UIImage imageNamed:categoryPath];
+        }
+    }
+    if (!image && !([category isEqualToString:@"other"] && subcategory == nil && filter == nil)) {
+        image = [self categoryIconForCategory:@"other" subcategory:nil filter:nil andSize:size];
+    }
+    NSLog(@"CatIcon:%@,%@,%@,%@", category, subcategory, filter, image);
+    return image;
+}
+
 + (UIImage*)stampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size {
     return [Util gradientImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]
               withPrimaryColor:user.primaryColor
@@ -880,6 +918,7 @@ static Rdio* _rdio;
     CAGradientLayer* gradient = [CAGradientLayer layer];
     gradient.anchorPoint = CGPointMake(0, 0);
     gradient.position = CGPointMake(0, 0);
+    gradient.contentsScale = [[UIScreen mainScreen] scale];
     if (!vertical) {
         gradient.startPoint = CGPointMake(0,.5);
         gradient.endPoint = CGPointMake(1,.5);
@@ -1257,7 +1296,7 @@ static Rdio* _rdio;
 
 + (CGSize)sizeForString:(NSAttributedString *)inString thatFits:(CGSize)inSize
 {
-    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)inString);
+    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)inString);
     if (theFramesetter == NULL)
     {
         NSLog(@"Could not create CTFramesetter");

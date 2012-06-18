@@ -83,6 +83,7 @@
                   CGFloat cellHeight = 40;
                   STViewContainer* view = [[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(13, 0, width, 0)];
                   CAGradientLayer* gradient = [CAGradientLayer layer];
+                    gradient.contentsScale = [[UIScreen mainScreen] scale];
                   gradient.anchorPoint = CGPointMake(0, 0);
                   gradient.position = CGPointMake(0, 0);
                   gradient.cornerRadius = 4;

@@ -134,6 +134,16 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
         [Util removeOldCacheDirectories];
     }];
     
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+    [self.window addSubview:imageView];
+    [imageView release];
+    
+    [UIView animateWithDuration:0.3f animations:^{
+        imageView.alpha = 0.0f;
+    } completion:^(BOOL finished) {
+        [imageView removeFromSuperview];
+    }];
+ 
     
     [[STUnreadActivity sharedInstance] update];
     return YES;

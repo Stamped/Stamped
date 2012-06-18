@@ -3005,9 +3005,11 @@ class HTTPActivity(Schema):
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
+            offset = len(subjects) + len(' gave you credit for ')
+            stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
             self.benefit = len(self.subjects)
-            self.body = '%s gave you credit.' % (subjects)
+            self.body = '%s gave you credit for %s.' % (subjects, stampObjects)
             self.body_references = subjectReferences
             if len(self.subjects) > 1:
                 self.image = _getIconURL('news_stamp_group')

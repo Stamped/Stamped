@@ -278,7 +278,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
                 
                 cell.icon = nil;
                 
-                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(14.0f, (cell.bounds.size.height-20.0f)/2, 20.0f, 20.0f)];
+                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(12.0f, (cell.bounds.size.height-24.0f)/2, 24.0f, 24.0f)];
+                view.userInteractionEnabled = NO;
                 view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                 [cell addSubview:view];
                 view.imageURL = [NSURL URLWithString:[user imageURL]];

@@ -12,4 +12,6 @@
 
 - (id)initWithUserIDs:(NSArray*)userIDs;
 
+@property (nonatomic, readwrite, retain) NSDictionary* userIDToStampID;
+
 @end

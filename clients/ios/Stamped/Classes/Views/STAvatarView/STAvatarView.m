@@ -8,12 +8,14 @@
 
 #import "STAvatarView.h"
 #import "ImageLoader.h"
+#import "STTextCalloutView.h"
 
 @implementation STAvatarView
 @synthesize imageURL=_imageURL;
 @synthesize imageView=_imageView;
 @synthesize backgroundView=_background;
 @synthesize delegate;
+@synthesize calloutTitle;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -40,6 +42,14 @@
         _imageView = [imageView retain];
         [imageView release];
         
+        [self addTarget:self action:@selector(viewSelected:) forControlEvents:UIControlEventTouchUpInside];
+        
+        UILongPressGestureRecognizer *gesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
+        gesture.minimumPressDuration = 0.5f;
+        [self addGestureRecognizer:gesture];
+        [gesture release];
+        
     }
     return self;
 }
@@ -48,6 +58,7 @@
     [_background release], _background=nil;
     [_imageView release], _imageView=nil;
     [_imageURL release], _imageURL=nil;
+    self.calloutTitle = nil;
     [super dealloc];
 }
 
@@ -82,9 +93,9 @@
     
 }
 
-- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
+- (void)setHighlighted:(BOOL)highlighted {
+    [super setHighlighted:highlighted];
     
-
     if (highlighted) {
         
         if (!highlightView) {
@@ -100,13 +111,12 @@
     } else {
         
         if (highlightView) {
-            __block UIView *view = highlightView;
             BOOL _enabled = [UIView areAnimationsEnabled];
             [UIView setAnimationsEnabled:YES];
             [UIView animateWithDuration:0.25f animations:^{
-                view.alpha = 0.0f;
+                highlightView.alpha = 0.0f;
             } completion:^(BOOL finished) {
-                [view removeFromSuperview];
+                [highlightView removeFromSuperview];
                 highlightView = nil;
             }];
             [UIView setAnimationsEnabled:_enabled];
@@ -115,38 +125,39 @@
         
     }
     
-}
-
-
-#pragma mark - Touches
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    [self setHighlighted:YES animated:NO];
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-    [self setHighlighted:NO animated:YES];
-}
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+#pragma mark - Actions
+
+- (void)viewSelected:(id)sender {
     
     if ([(id)delegate respondsToSelector:@selector(stAvatarViewTapped:)]) {
         [self.delegate stAvatarViewTapped:self];
-        
-        dispatch_after( dispatch_time(DISPATCH_TIME_NOW, 0.3f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
-            [self setHighlighted:NO animated:NO];
-        });
-        
-    } else {
-        
-        [self setHighlighted:NO animated:NO];
-
     }
+    
+}
 
+- (void)longPress:(UILongPressGestureRecognizer*)gesture {
+    
+    if (!_calloutView) {
+        STTextCalloutView *view = [[STTextCalloutView alloc] init];
+        [self.superview addSubview:view];
+        [view setTitle:self.calloutTitle boldText:self.calloutTitle];
+        CGPoint pos = self.layer.position;
+        [view showFromPosition:pos animated:YES];
+    }
+    
+}
+
+
+#pragma mark - UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
+    return (self.calloutTitle!=nil);
+    
 }
 
 

@@ -10,6 +10,7 @@
 
 @protocol STUploadingImageViewDelegate;
 @interface STUploadingImageView : UIImageView
+@property(nonatomic,assign) UIButton *deleteButton;
 @property(nonatomic,retain) UIActivityIndicatorView *activiyView;
 @property(nonatomic,assign) BOOL uploading;
 @property(nonatomic,assign) id <STUploadingImageViewDelegate> delegate;

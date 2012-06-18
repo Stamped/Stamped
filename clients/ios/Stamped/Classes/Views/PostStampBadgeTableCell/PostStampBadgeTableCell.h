@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol PostStampBadgeTableCell;
 @interface PostStampBadgeTableCell : UITableViewCell {
     UIImageView *_badgeImageView;
     UILabel *_titleLabel;
@@ -17,7 +18,13 @@
     UIView *_borderView;
 }
 
+@property(nonatomic,assign) id <PostStampBadgeTableCell> delegate;
+
 - (void)setupWithBadge:(id<STBadge>)badge;
 - (void)showShadow:(BOOL)shadow;
 
+@end
+
+@protocol PostStampBadgeTableCell
+- (void)postStampBadgeTableCellShare:(PostStampBadgeTableCell*)cell;
 @end
