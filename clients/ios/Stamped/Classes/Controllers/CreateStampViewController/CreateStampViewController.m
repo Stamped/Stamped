@@ -518,7 +518,7 @@
         [self.imageUploader startWithProgress:^(float progress) {
             
         } completion:^(NSString *path, BOOL finished) {
-            
+                        
             //[self.footerView setUploading:NO animated:YES];
             self.tempImagePath = path;
             [self.editView.imageView setUploading:NO];
