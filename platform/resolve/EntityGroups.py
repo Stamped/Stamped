@@ -54,14 +54,6 @@ class OpenTableGroup(APlaceGroup):
         )
         self.addField(['sources', 'opentable_id'])
         self.addField(['sources', 'opentable_url'])
-
-class OpenTableNicknameGroup(APlaceGroup):
-
-    def __init__(self):
-        APlaceGroup.__init__(self, 'opentable_nickname',
-            source_path=['sources', 'opentable_nickname_source'], 
-            timestamp_path=['sources', 'opentable_nickname_timestamp']
-        )
         self.addField(['sources', 'opentable_nickname'])
 
 class SinglePlatformGroup(APlaceGroup):
