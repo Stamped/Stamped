@@ -14,6 +14,7 @@ from errors             import *
 from schema             import *
 from api.Schemas        import *
 from Entity             import *
+from SchemaValidation   import *
 
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
@@ -226,62 +227,6 @@ def _convertViewport(string):
         logs.warning("Unable to convert viewport (%s): %s" % (string, e))
         raise StampedInputError("Invalid viewport: %s" % string)
 
-
-# ########## #
-# VALIDATION #
-# ########## #
- 
-def _checkViewport(string):
-    # Structure: "lat0,lng0,lat1,lng1"
-    if string is None:
-        return None
-    try:
-        coords = string.split(',')
-        assert(len(coords) == 4)
-
-        lat0 = float(coords[0])
-        lng0 = float(coords[1])
-        lat1 = float(coords[2])
-        lng1 = float(coords[3])
-
-        # Latitudes between -90 and 90
-        assert(lat0 >= -90.0 or lat0 <= 90.0)
-        assert(lat1 >= -90.0 or lat1 <= 90.0)
-
-        # Longitudes between -180 and 180
-        assert(lng0 >= -180.0 or lng0 <- 180.0)
-        assert(lng1 >= -180.0 or lng1 <- 180.0)
-
-        return string 
-    except Exception as e:
-        logs.warning("Viewport check failed: %s" % string)
-
-    raise StampedInputError("Invalid viewport: %s" % string)
-
-def _checkCategory(category):
-    try:
-        category = category.lower()
-        assert(category in Entity.categories)
-        return category
-    except Exception as e:
-        logs.warning("Category check failed for '%s': %s" % (category, e))
-        raise StampedInputError("Invalid category: %s" % category)
-
-def _checkSubcategory(subcategory):
-    try:
-        subcategory = subcategory.lower()
-        assert(subcategory in Entity.subcategories)
-        return subcategory
-    except Exception as e:
-        logs.warning("Subcategory check failed for '%s': %s" % (subcategory, e))
-        raise StampedInputError("Invalid subcategory: %s" % subcategory)
-
-def _checkScreenName(screen_name):
-    if not utils.validate_screen_name(screen_name):
-        raise StampedInputError("Invalid format for screen name")
-    return screen_name
-
-
 # ######### #
 # OAuth 2.0 #
 # ######### #
@@ -388,9 +333,9 @@ class HTTPAccount(Schema):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
         cls.addProperty('email',                            basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True, cast=_checkScreenName)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('privacy',                          bool, required=True)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
     def importAccount(self, account, client=None):
         self.dataImport(account.dataExport(), overflow=True)
@@ -402,14 +347,14 @@ class HTTPAccountNew(Schema):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True, cast=_checkScreenName)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
+        cls.addProperty('website',                          basestring, cast=validateURL)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
         # for asynchronous image uploads
         cls.addProperty('temp_image_url',                   basestring)
@@ -426,16 +371,16 @@ class HTTPFacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True, cast=_checkScreenName)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
+        cls.addProperty('website',                          basestring, cast=validateURL)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
         cls.addProperty('temp_image_url',                   basestring)
 
@@ -455,13 +400,13 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
         cls.addProperty('email',                            basestring)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
+        cls.addProperty('website',                          basestring, cast=validateURL)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
         cls.addProperty('temp_image_url',                   basestring)
 
@@ -478,13 +423,13 @@ class HTTPAccountUpdateForm(Schema):
     def setSchema(cls):
         cls.addProperty('name',                             basestring)
         cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
+        cls.addProperty('website',                          basestring, cast=validateURL)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
         cls.addProperty('temp_image_url',                   basestring)
 
@@ -496,34 +441,24 @@ class HTTPAccountUpdateForm(Schema):
 
         return AccountUpdateForm().dataImport(data, overflow=True)
 
-
-class HTTPAccountSettings(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('email',                            basestring)
-        cls.addProperty('password',                         basestring)
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('privacy',                          bool)
-        cls.addProperty('phone',                            int)
-
-class HTTPAccountProfile(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('name',                             basestring)
-        cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
-        cls.addProperty('location',                         basestring)
+#class HTTPAccountProfile(Schema):
+#    @classmethod
+#    def setSchema(cls):
+#        cls.addProperty('name',                             basestring)
+#        cls.addProperty('bio',                              basestring)
+#        cls.addProperty('website',                          basestring)
+#        cls.addProperty('location',                         basestring)
 
 class HTTPCustomizeStamp(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('color_primary',                    basestring, required=True)
-        cls.addProperty('color_secondary',                  basestring, required=True)
+        cls.addProperty('color_primary',                    basestring, required=True, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, required=True, cast=validateHexColor)
 
 class HTTPAccountProfileImage(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('temp_image_url',                   basestring)
+        cls.addProperty('temp_image_url',                   basestring, cast=validateURL)
 
 class HTTPAccountCheck(Schema):
     @classmethod
@@ -729,10 +664,10 @@ class HTTPUser(Schema):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
+        cls.addProperty('website',                          basestring, cast=validateURL)
         cls.addProperty('location',                         basestring)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('image_url',                        basestring)
@@ -813,8 +748,8 @@ class HTTPUserMini(Schema):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('image_url',                        basestring)
 
@@ -2011,7 +1946,7 @@ class HTTPEntitySearchRequest(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('query',                            basestring, required=True) 
-        cls.addProperty('category',                         basestring, required=True, cast=_checkCategory)
+        cls.addProperty('category',                         basestring, required=True, cast=validateCategory)
         cls.addProperty('coordinates',                      basestring)
 
     def exportCoordinates(self):
@@ -2022,7 +1957,7 @@ class HTTPEntitySearchRequest(Schema):
 class HTTPEntitySuggestionRequest(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('category',                         basestring, required=True, cast=_checkCategory)
+        cls.addProperty('category',                         basestring, required=True, cast=validateCategory)
         cls.addProperty('subcategory',                      basestring)
         cls.addProperty('coordinates',                      basestring)
 
@@ -2119,9 +2054,9 @@ class HTTPTimeSlice(Schema):
         cls.addProperty('offset',                           int)
 
         # Filtering
-        cls.addProperty('category',                         basestring, cast=_checkCategory)
-        cls.addProperty('subcategory',                      basestring, cast=_checkSubcategory)
-        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
+        cls.addProperty('category',                         basestring, cast=validateCategory)
+        cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
+        cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
         cls.addProperty('user_id',                          basestring)
@@ -2161,9 +2096,9 @@ class HTTPWebTimeSlice(Schema):
         cls.addProperty('offset',                           int)
 
         # Filtering
-        cls.addProperty('category',                         basestring, cast=_checkCategory)
-        cls.addProperty('subcategory',                      basestring, cast=_checkSubcategory)
-        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
+        cls.addProperty('category',                         basestring, cast=validateCategory)
+        cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
+        cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
         cls.addProperty('user_id',                          basestring)
@@ -2203,9 +2138,9 @@ class HTTPSearchSlice(Schema):
         cls.addProperty('limit',                            int) # Max 50
 
         # Filtering
-        cls.addProperty('category',                         basestring, cast=_checkCategory)
-        cls.addProperty('subcategory',                      basestring, cast=_checkSubcategory)
-        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
+        cls.addProperty('category',                         basestring, cast=validateCategory)
+        cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
+        cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
         cls.addProperty('user_id',                          basestring)
@@ -2238,9 +2173,9 @@ class HTTPRelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
         # Filtering
-        cls.addProperty('category',                         basestring, cast=_checkCategory)
-        cls.addProperty('subcategory',                      basestring, cast=_checkSubcategory)
-        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
+        cls.addProperty('category',                         basestring, cast=validateCategory)
+        cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
+        cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
         cls.addProperty('user_id',                          basestring)
@@ -2302,7 +2237,7 @@ class HTTPActivitySlice(Schema):
 class HTTPGuideRequest(Schema):
     @classmethod
     def setSchema(cls):
-        def checkSection(section):
+        def validateSection(section):
             if section is None:
                 return None
             section = section.lower()
@@ -2310,7 +2245,7 @@ class HTTPGuideRequest(Schema):
                 return section 
             raise StampedInputError("Invalid section: %s" % section)
 
-        def checkSubsection(subsection):
+        def validateSubsection(subsection):
             if subsection is None:
                 return None
             subsection = subsection.lower()
@@ -2318,7 +2253,7 @@ class HTTPGuideRequest(Schema):
                 return subsection
             raise StampedInputError("Invalid subsection: %s" % subsection)
 
-        def checkScope(scope):
+        def validateScope(scope):
             if scope is None:
                 return None
             scope = scope.lower()
@@ -2329,10 +2264,10 @@ class HTTPGuideRequest(Schema):
 
         cls.addProperty('limit',                            int)
         cls.addProperty('offset',                           int)
-        cls.addProperty('section',                          basestring, required=True, cast=checkSection)
-        cls.addProperty('subsection',                       basestring, cast=checkSubsection)
-        cls.addProperty('viewport',                         basestring, cast=_checkViewport)
-        cls.addProperty('scope',                            basestring, required=True, cast=checkScope)
+        cls.addProperty('section',                          basestring, required=True, cast=validateSection)
+        cls.addProperty('subsection',                       basestring, cast=validateSubsection)
+        cls.addProperty('viewport',                         basestring, cast=validateViewport)
+        cls.addProperty('scope',                            basestring, required=True, cast=validateScope)
 
     def exportGuideRequest(self):
         data = self.dataExport()

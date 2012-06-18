@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped, Inc."
 __license__   = "TODO"
 
-import Globals, logs
+import Globals, logs, time
 from utils import abstract
 from datetime import timedelta
 from Memcache import globalMemcache
@@ -30,6 +30,9 @@ class ACollectionCache(object):
         return data
 
     def _updateCache(self, offset, **kwargs):
+        t0 = time.time()
+        t1 = t0
+
 
         prevBlockOffset = offset - self._blockSize
         if prevBlockOffset < 0:
@@ -70,6 +73,10 @@ class ACollectionCache(object):
             self._cache[key] = data
         except Exception:
             logs.error('Error storing activity items to memcached.  Is memcached running?')
+
+        logs.debug('Time for updateCache: %s' % (time.time() - t1))
+        t1 = time.time()
+
         return data
 
 
@@ -98,6 +105,9 @@ class ACollectionCache(object):
         Pull the requested data from cache if it exists there, otherwise pull the data from db
         Returns a tuple of (the data list, bool indicating if the end of the collection stream was reached)
         """
+        t0 = time.time()
+        t1 = t0
+
         if offset == 0:
             self._clearCacheForKeyParams(**kwargs)
 
@@ -116,5 +126,8 @@ class ACollectionCache(object):
             data += newData[start:start+limit]
             if len(newData) < self._blockSize:
                 break
+
+        logs.debug('Time for getFromCache: %s' % (time.time() - t1))
+        t1 = time.time()
 
         return data[:limit], len(data) < limit

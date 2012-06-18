@@ -609,20 +609,22 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Blacklisted screen name")
 
             # Asynchronously update profile picture link if screen name has changed
-            tasks.invoke(tasks.APITasks.updateAccountSettings, args=[
+            tasks.invoke(tasks.APITasks.changeProfileImageName, args=[
                 old_screen_name.lower(), account.screen_name.lower()])
 
         if 'name' in fields and account.name != fields['name']:
             account.name = fields['name']
         if 'phone' in fields and account.phone != fields['phone']:
             account.phone = fields['phone']
+
         if 'bio' in fields and account.bio != fields['bio']:
             account.bio = fields['bio']
         if 'website' in fields and account.website != fields['website']:
             if utils.validate_url(fields['website']):
                 account.website = fields['website']
-            logs.warning("Could not update account 'website' field - not a valid url string")
-            raise StampedInputError("Could not update account website")
+            else:
+                logs.warning("Could not update account 'website' field - not a valid url string")
+                raise StampedInputError("Could not update account website")
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
         if 'color_primary' in fields and account.color_primary != fields['color_primary']:
@@ -715,19 +717,6 @@ class StampedAPI(AStampedAPI):
         elif len(accounts) > 1:
             raise StampedIllegalActionError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
-
-    @API_CALL
-    def updateProfile(self, authUserId, data):
-        ### TODO: Reexamine how updates are done
-
-        account = self._accountDB.getAccount(authUserId)
-
-        # Import each item
-        for k, v in data.iteritems():
-            setattr(account, k, v)
-
-        self._accountDB.updateAccount(account)
-        return account
 
     @API_CALL
     def customizeStamp(self, authUserId, data):

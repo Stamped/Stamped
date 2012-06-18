@@ -16,6 +16,9 @@ class ActivityCollectionCache(ACollectionCache):
         ACollectionCache.__init__(self, 'activity')
 
     def _getFromDB(self, limit, before=None, **kwargs):
+        t0 = time.time()
+        t1 = t0
+
         final = False
 
         authUserId = kwargs['authUserId']
@@ -41,7 +44,7 @@ class ActivityCollectionCache(ACollectionCache):
             overlappingActivityIds =  list(set(personalActivityIds).intersection(set(activityItemIds)))
 
             for item in dirtyActivityData:
-                # Exclude the item if it is in the user's personal feed, unless it is a 'follow' item.  In that case,
+                # Exclude the item if it is in the user's 0personal feed, unless it is a 'follow' item.  In that case,
                 #  remove the user as an object and ensure there are still other users targeted by the item
                 isInPersonalFeed = item.activity_id in overlappingActivityIds
                 if isInPersonalFeed and item.verb in ['comment', 'like',  'todo', 'restamp' ]:
@@ -61,6 +64,9 @@ class ActivityCollectionCache(ACollectionCache):
             activityData = self.api._activityDB.getActivity(authUserId, **params)
             if len(activityData) < limit:
                 final = True
+
+        logs.debug('Time for getFromDB: %s' % (time.time() - t1))
+        t1 = time.time()
 
         return activityData, final
 
