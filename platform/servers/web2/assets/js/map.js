@@ -397,7 +397,7 @@
                             var total_dist  = 0.0;
                             var total_dist2 = 0.0;
                             
-                            // calculate mean and stdev dist of each marker to cluster center
+                            // calculate mean and stdev dist of each marker to the cluster's center
                             $.each(max_mark, function(i, marker) {
                                 var pos  = marker.getPosition();
                                 var dist = get_spherical_dist(max_pos, pos);
@@ -411,8 +411,8 @@
                             var offset = 2.0 * stdev;
                             var pts    = [];
                             
-                            // add all markers to the initial viewport bounds, disregarding 
-                            // obvious outliers to produce a nice-fitting overall map
+                            // add all markers to the initial viewport bounds, disregarding obvious 
+                            // outliers to produce a nice-fitting overall map
                             $.each(max_mark, function(i, marker) {
                                 var pos  = marker.getPosition();
                                 var dist = get_spherical_dist(max_pos, pos);
@@ -644,7 +644,6 @@
                 });
         }
         
-
         
         // ---------------------------------------------------------------------
         // Misc bindings and base page initialization

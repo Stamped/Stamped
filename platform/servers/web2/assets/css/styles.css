@@ -345,10 +345,14 @@ a.follow-button:active {
 /* **************************************************************************
                                 USER GALLERY
    ************************************************************************** */
-.user-gallery .user-gallery-item {
-  margin: 0 4px 4px 0;
+.user-gallery {
+  display: inline-block;
 }
-.user-gallery :nth-child(10) {
+.user-gallery .user-gallery-item {
+  display: inline-block;
+  margin: 0;
+}
+.user-gallery :nth-child(3) {
   background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
   width: 24px;
   height: 24px;
@@ -363,10 +367,10 @@ a.follow-button:active {
         }*/
 
 }
-.user-gallery :nth-child(10) img {
+.user-gallery :nth-child(3) img {
   display: none;
 }
-.user-gallery :nth-child(n+11) {
+.user-gallery :nth-child(n+4) {
   display: none;
 }
 /* **************************************************************************
