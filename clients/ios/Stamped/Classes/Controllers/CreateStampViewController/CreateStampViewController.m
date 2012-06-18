@@ -111,7 +111,7 @@
         [item release];
     }
      */
-    if ([[self.navigationController viewControllers) count] == 1) {
+    if ([[self.navigationController viewControllers] count] == 1) {
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
         self.navigationItem.leftBarButtonItem = button;
         [button release];
