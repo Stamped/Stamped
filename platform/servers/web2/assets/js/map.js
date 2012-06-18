@@ -361,7 +361,7 @@
                             }
                         });
                         
-                        if (max_size > 0 && (depth == 0 || max_size > 4) {
+                        if (max_size > 0 && (depth == 0 || max_size > 4)) {
                             var max_cluster_bounds = new google.maps.LatLngBounds();
                             
                             $.each(max_mark, function(i, marker) {
@@ -371,7 +371,7 @@
                             map.fitBounds(max_cluster_bounds);
                             
                             marker_clusterer.repaint();
-                            //init_clusterer(depth + 1);
+                            init_clusterer(depth + 1);
                         }
                     };
                     
