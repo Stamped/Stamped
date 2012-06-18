@@ -64,8 +64,8 @@ static const CGFloat _offscreenCancelPadding = 5;
         if (!category) {
             category = @"music";
         }
+
         self.title = [category capitalizedString];
-        self.title = category;
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
@@ -360,19 +360,22 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     if (self.autoCompleteResults.count) {
+        
         if (self.autoCompleteResults.count > indexPath.row) {
             id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
             [self.searchView setText:autoCompleteResult.completion];
+            [self.searchView resignKeyboard];
             [self performSearchWithText:autoCompleteResult.completion];
         }
         else {
 #warning former crasher, needs fix
         }
-        
+        /*
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         [self.searchView setText:autoCompleteResult.completion];
         [self.searchView resignKeyboard];
         [self performSearchWithText:autoCompleteResult.completion];
+         */
     } else {
         
         id<STEntitySearchResult> result = nil;

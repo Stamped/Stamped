@@ -326,10 +326,6 @@
             NSLog(@"stampedby:%@", stampedBy);
             self.stampedBy = stampedBy;
             
-            NSInteger count = 1;
-            if (self.stamp) {
-                count+=self.stamp.badges.count;
-            }
         }
     }];
     

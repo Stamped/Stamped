@@ -587,6 +587,7 @@
         self.scope = STStampedAPIScopeFriends;
 
     }
+        
     [self reloadDataSource];
 }
 
