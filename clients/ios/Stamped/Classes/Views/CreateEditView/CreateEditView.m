@@ -37,6 +37,7 @@
 @synthesize dataSource;
 @synthesize keyboardType=_keyboardType;
 @synthesize creditToolbar=_creditToolbar;
+@synthesize tapGesture  = _tapGesture;
 @synthesize textViewPlaceholder=_textViewPlaceholder;
 
 @synthesize menuView=_menuView;

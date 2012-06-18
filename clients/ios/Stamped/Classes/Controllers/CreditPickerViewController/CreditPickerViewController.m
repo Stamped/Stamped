@@ -26,6 +26,7 @@
 @synthesize users=_users;
 @synthesize entityIdentifier=_entityIdentifier;
 @synthesize loadingUsers=_loadingUsers;
+@synthesize selectedUsers = _selectedUsers;
 @synthesize headerView=_headerView;
 @synthesize searchUsers=_searchUsers;
 

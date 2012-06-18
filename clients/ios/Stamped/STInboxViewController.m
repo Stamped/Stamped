@@ -127,6 +127,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     //Resume cache ops
+    [self reloadDataSource];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -586,7 +587,11 @@
         self.scope = STStampedAPIScopeFriends;
 
     }
+<<<<<<< HEAD
         
+=======
+    [self reloadDataSource];
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
 }
 
 - (void)applicationDidBecomeActive:(id)notImportant {

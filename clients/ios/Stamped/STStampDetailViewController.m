@@ -290,6 +290,7 @@
         self.navigationItem.rightBarButtonItem = rightButton;
     }
     //[toolbar packViews:views];
+    
     UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view controller:self andStamp:self.stamp] autorelease];
     [self.view addSubview:newToolbar];
     
@@ -330,6 +331,20 @@
                                              selector:@selector(keyboardWasHidden:)
                                                  name:UIKeyboardDidHideNotification
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self 
+                                             selector:@selector(localModification:)
+                                                 name:STStampedAPILocalStampModificationNotification 
+                                               object:nil];
+}
+
+- (void)localModification:(id)notImportant {
+    [self.stampCancellation cancel];
+    self.stampCancellation = [[STStampedAPI sharedInstance] stampForStampID:self.stamp.stampID
+                                                                forceUpdate:NO
+                                                                andCallback:^(id<STStamp> stamp, NSError *error, STCancellation *cancellation) {
+                                                                    self.stamp = stamp;
+                                                                    [super reloadStampedData];
+                                                                }];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -460,7 +475,7 @@
                                                                self.addCommentView.hidden = YES;
                                                                textView.text = @"";
                                                                [textView resignFirstResponder];
-                                                               [self reloadStampedData];
+                                                               //[self reloadStampedData];
                                                            }
                                                            else {
                                                                [Util warnWithMessage:@"Comment creation failed!" andBlock:nil];

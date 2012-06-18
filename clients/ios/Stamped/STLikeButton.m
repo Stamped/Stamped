@@ -43,7 +43,7 @@
         self.on = !self.on;
       }
       else {
-        [Util reloadStampedData];
+        //[Util reloadStampedData];
       }
     }];
     id<STAction> action;

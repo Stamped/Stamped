@@ -15,7 +15,7 @@ from logs import log, report
 try:
     from libs.CleanerSource             import CleanerSource
     from libs.ExternalSourceController  import ExternalSourceController
-    from AStampedAPITestCase            import *
+    from AStampedAPIHttpTestCase            import *
     from api.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime
@@ -25,7 +25,7 @@ except:
 
 _verbose = False
 
-class ACleanerSourceTest(AStampedAPITestCase):
+class ACleanerSourceHttpTest(AStampedAPIHttpTestCase):
 
     def setUp(self):
         self.source = CleanerSource()
@@ -62,7 +62,7 @@ class ACleanerSourceTest(AStampedAPITestCase):
     def tearDown(self):
         pass
 
-class CleanerSourceReleaseDateTest(ACleanerSourceTest):
+class CleanerSourceReleaseDateTest(ACleanerSourceHttpTest):
 
     def test_release_date(self):
         self.controller.clearNow()

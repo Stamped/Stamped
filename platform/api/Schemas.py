@@ -1532,27 +1532,31 @@ class Activity(Schema):
             result.objects = ActivityObjects()
 
             if self.objects.user_ids is not None:
-                userobjectss = []
+                userobjects = []
                 for userId in self.objects.user_ids:
-                    userobjectss.append(users[str(userId)])
-                result.objects.users = userobjectss
+                    if userId in users and users[userId] is not None:
+                        userobjects.append(users[str(userId)])
+                result.objects.users = userobjects
 
             if self.objects.stamp_ids is not None:
                 stampobjects = []
                 for stampId in self.objects.stamp_ids:
-                    stampobjects.append(stamps[str(stampId)])
+                    if stampId in stamps and stamps[stampId] is not None:
+                        stampobjects.append(stamps[str(stampId)])
                 result.objects.stamps = stampobjects
 
             if self.objects.entity_ids is not None:
                 entityobjects = []
                 for entityId in self.objects.entity_ids:
-                    entityobjects.append(entities[str(entityId)])
+                    if entityId in entities and entities[entityId] is not None:
+                        entityobjects.append(entities[str(entityId)])
                 result.objects.entities = entityobjects
 
             if self.objects.comment_ids is not None:
                 commentobjects = []
                 for commentId in self.objects.comment_ids:
-                    commentobjects.append(comments[str(commentId)])
+                    if commentId in comments and comments[commentId] is not None:
+                        commentobjects.append(comments[str(commentId)])
                 result.objects.comments = commentobjects
 
         return result

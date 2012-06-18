@@ -105,41 +105,54 @@ if __name__ == '__main__':
         utils.log(pad)
         utils.log()
         
-        user = api.getUserFromIdOrScreenName(u)
+        retries = 0
         
-        if user is None:
-            continue
-        
-        for category in categories:
-            ts = { 'user_id' : user.user_id, 'scope'   : 'user' }
-            
-            if category != 'default':
-                if category == 'app':
-                    ts['subcategory'] = 'app'
-                else:
-                    ts['category'] = category
-            
-            collage     = collages[category]
-            stamp_slice = HTTPTimeSlice().dataImport(ts).exportTimeSlice()
-            stamps      = api.getStampCollection(stamp_slice)
-            entities    = map(lambda s: s.entity, stamps)
-            
-            if args.limit is not None:
-                entities = entities[:args.limit]
-            
-            utils.log()
-            utils.log(pad)
-            utils.log("creating collage for user '%s' w/ category '%s' and %d entities" % 
-                      (user.screen_name, category, len(entities)))
-            utils.log(pad)
-            utils.log()
-            
-            images      = collage.generate_from_user(user, entities)
-            
-            utils.log()
-            
-            for image in images:
-                filename = "collage-%s-%s-%sx%s.jpg" % (user.screen_name, category, image.size[0], image.size[1])
+        while retries < 3:
+            try:
+                user = api.getUserFromIdOrScreenName(u)
                 
-                save_image(image, filename)
+                if user is None:
+                    continue
+                
+                for category in categories:
+                    ts = { 'user_id' : user.user_id, 'scope'   : 'user' }
+                    
+                    if category != 'default':
+                        if category == 'app':
+                            ts['subcategory'] = 'app'
+                        else:
+                            ts['category'] = category
+                    
+                    collage     = collages[category]
+                    stamp_slice = HTTPTimeSlice().dataImport(ts).exportTimeSlice()
+                    stamps      = api.getStampCollection(stamp_slice)
+                    entities    = map(lambda s: s.entity, stamps)
+                    
+                    if args.limit is not None:
+                        entities = entities[:args.limit]
+                    
+                    utils.log()
+                    utils.log(pad)
+                    utils.log("creating collage for user '%s' w/ category '%s' and %d entities" % 
+                              (user.screen_name, category, len(entities)))
+                    utils.log(pad)
+                    utils.log()
+                    
+                    images = collage.generate_from_user(user, entities)
+                    
+                    utils.log()
+                    
+                    for image in images:
+                        filename = "collage-%s-%s-%sx%s.jpg" % (user.screen_name, category, image.size[0], image.size[1])
+                        
+                        save_image(image, filename)
+            except Exception, e:
+                utils.log("unexpected error processing user %s: %s" % (pprint.pformat(u), e))
+                utils.printException()
+                
+                retries += 1
+                time.sleep(2 ** retries)
+                continue
+            
+            break
 

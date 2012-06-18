@@ -7,13 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # ########### #
 # COLLECTIONS #
 # ########### #
 
-class StampedAPICollectionTest(AStampedAPITestCase):
+class StampedAPICollectionHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -42,7 +42,7 @@ class StampedAPICollectionTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPICollectionsShow(StampedAPICollectionTest):
+class StampedAPICollectionsShow(StampedAPICollectionHttpTest):
     def test_inbox(self):
         path = "stamps/collection.json"
         data = { 
@@ -81,7 +81,7 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         ])
 
 
-class StampedAPICollectionsSearch(StampedAPICollectionTest):
+class StampedAPICollectionsSearch(StampedAPICollectionHttpTest):
     def test_inbox(self):
         path = "stamps/search.json"
         data = { 
@@ -95,7 +95,7 @@ class StampedAPICollectionsSearch(StampedAPICollectionTest):
         ])
 
 
-class StampedAPICollectionsLikes(StampedAPICollectionTest):
+class StampedAPICollectionsLikes(StampedAPICollectionHttpTest):
     def test_like(self):
         path = "stamps/likes/create.json"
         data = {
@@ -137,7 +137,7 @@ class StampedAPICollectionsLikes(StampedAPICollectionTest):
         
         self.async(lambda: self.handleGET(path, data), _validate_result2)
     
-class StampedAPICollectionsTodos(StampedAPICollectionTest):
+class StampedAPICollectionsTodos(StampedAPICollectionHttpTest):
     def test_todo(self):
         todo = self.createTodo(self.tokenB, self.entityA['entity_id'])
         
@@ -176,7 +176,7 @@ class StampedAPICollectionsTodos(StampedAPICollectionTest):
         self.async(lambda: self.handleGET(path, data), _validate_result2)
         self.deleteTodo(self.tokenB, self.entityA['entity_id'])
 
-class StampedAPICollectionsFriends(StampedAPICollectionTest):
+class StampedAPICollectionsFriends(StampedAPICollectionHttpTest):
     def test_friends_of_friends(self):
         path = "stamps/collection.json"
         data = { 
@@ -188,7 +188,7 @@ class StampedAPICollectionsFriends(StampedAPICollectionTest):
                    lambda x: self.assertIsInstance(x, list), 
         ])
 
-class StampedAPICollectionsSuggested(StampedAPICollectionTest):
+class StampedAPICollectionsSuggested(StampedAPICollectionHttpTest):
     def test_suggested_stamps(self):
         path = "stamps/collection.json"
         data = { 

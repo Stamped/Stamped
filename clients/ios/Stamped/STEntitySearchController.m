@@ -60,16 +60,21 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
     if (self = [super init]) {
-       
+        
         if (!category) {
             category = @"music";
         }
+<<<<<<< HEAD
 
         self.title = [category capitalizedString];
+=======
+        
+        self.title = category;
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
-
+        
     }
     return self;
 }
@@ -114,7 +119,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             [_locationManager stopUpdatingLocation];
         }
     }
-
+    
     [self reloadDataSource];
     
 }
@@ -133,7 +138,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation  fromLocation:(CLLocation *)oldLocation {
-   
+    
     if (!self.requestCancellation && !self.suggestedSections && !self.searchSections) {
         float longitude = newLocation.coordinate.longitude;
         float latitude = newLocation.coordinate.latitude;
@@ -162,7 +167,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - UITableViewDataSource
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-   
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
@@ -174,20 +179,20 @@ static const CGFloat _offscreenCancelPadding = 5;
         
     }
     
-   
+    
     
     return 64;
     
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-   
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
             return self.autoCompleteResults.count;
         }
-
+        
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
             return sectionObject.entities.count + 1; // plus one to add 'add' cell
@@ -203,30 +208,35 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     return 0;
-   
-
+    
+    
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-   
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
             return 1;
         }
-
+        
         return self.searchSections ? self.searchSections.count : 1;
-
+        
     }
-
+    
     return self.suggestedSections ? self.suggestedSections.count : 0;
     
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
+<<<<<<< HEAD
     if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
                 
+=======
+    if (tableView == self.searchResultsTableView) {
+        
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         NSInteger count = 0;
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
@@ -250,10 +260,10 @@ static const CGFloat _offscreenCancelPadding = 5;
             
             return cell;
         }
-
+        
     }
     
-   
+    
     if (tableView == self.searchResultsTableView && self.autoCompleteResults.count) {
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         static NSString* reuseIdentifier = @"AutoCompleteIdentifier";
@@ -278,7 +288,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     id<STEntitySearchResult> result = nil;
-
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.searchSections) {
@@ -294,14 +304,14 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         
     }
-     
+    
     cell.searchResult = result;
     return cell;
-
+    
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-  
+    
     if (tableView == self.searchResultsTableView) {
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
@@ -315,7 +325,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         return sectionObject.title;
     }
     return nil;
-
+    
     
 }
 
@@ -335,7 +345,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         return [view autorelease];
     }
     return nil;
-
+    
 }
 
 
@@ -343,15 +353,14 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     
-
+    
     if (tableView == self.searchResultsTableView) {
         
 #warning this should take the user to create entity, not implemented yet
-        
         NSInteger count = 0;
         if (self.autoCompleteResults.count) {
             count = self.autoCompleteResults.count;
-        } else if (self.searchSections) {
+        } else if (self.searchSections && indexPath.section < self.searchSections.count) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             count = sectionObject.entities.count;
         }
@@ -362,12 +371,23 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     if (self.autoCompleteResults.count) {
+        if (self.autoCompleteResults.count > indexPath.row) {
+            id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
+            [self.searchView setText:autoCompleteResult.completion];
+            [self performSearchWithText:autoCompleteResult.completion];
+        }
+        else {
+#warning former crasher, needs fix
+        }
         
+<<<<<<< HEAD
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         [self.searchView setText:autoCompleteResult.completion];
         [self.searchView resignKeyboard];
         [self performSearchWithText:autoCompleteResult.completion];
 
+=======
+>>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
     } else {
         
         id<STEntitySearchResult> result = nil;
@@ -383,7 +403,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         CreateStampViewController *controller = [[CreateStampViewController alloc] initWithSearchResult:result];
         [self.navigationController pushViewController:controller animated:YES];
         [controller release];
-
+        
     }
     
 }
@@ -412,7 +432,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             self.searchSections = sections;
             [self.searchResultsTableView reloadData];
         }
-
+        
     }];
     
 }
@@ -424,7 +444,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
-
+    
     [super stSearchView:view textDidChange:text];
     [self.autoCompleteCancellation cancel];
     self.autoCompleteCancellation = nil;
@@ -435,7 +455,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     
     [self.searchView setLoading:YES];
     self.autoCompleteCancellation = [[STStampedAPI sharedInstance] entityAutocompleteResultsForQuery:text coordinates:self.coordinates category:self.category andCallback:^(NSArray<STEntityAutoCompleteResult> *results, NSError *error, STCancellation *cancellation) {
-                
+        
         self.autoCompleteCancellation = nil;
         if (results) {
             [self.autoCompleteResults removeAllObjects];
@@ -443,7 +463,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             [self.searchResultsTableView reloadData];
         }
         [self.searchView setLoading:NO];
-    
+        
     }];
     
     UITableViewCell *cell = (UITableViewCell*)[self.searchResultsTableView viewWithTag:kAddEntityCellTag];
@@ -486,7 +506,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     suggested.category = self.category;
     
     self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested  andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-                 
+        
         NSInteger sections = [self.tableView numberOfSections];
         self.requestCancellation = nil;
         if (results) {
@@ -502,7 +522,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         
     }];
     [super reloadDataSource];
-
+    
 }
 
 - (BOOL)dataSourceIsEmpty {
@@ -536,7 +556,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
         
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(12, 17, 16, 16)];
-        imageView.contentMode = UIViewContentModeScaleAspectFit;
+        //imageView.contentMode = UIViewContentModeScaleAspectFit;
         [self.contentView addSubview:imageView];
         _iconView = [imageView retain];
         [imageView release];
@@ -591,7 +611,6 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (void)setSearchResult:(id<STEntitySearchResult>)searchResult {
-    [_iconCancellation cancel];
     self.iconView.image = nil;
     
     _titleLabel.text = searchResult.title;
@@ -601,7 +620,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.iconCancellation = nil;
     NSString* iconURL = searchResult.icon;
     if (iconURL) {
-
+        
         UIImage *icon = [[STImageCache sharedInstance] cachedImageForImageURL:iconURL];
         if (icon) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -609,11 +628,10 @@ static const CGFloat _offscreenCancelPadding = 5;
             });
         }
         else {
-            [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            self.iconCancellation = [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
                 if (image) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.iconView.image = icon;
-                    });
+                    self.iconView.image = image;
+                    [self.iconView setNeedsDisplay];
                 }
                 self.iconCancellation = nil;
             }];

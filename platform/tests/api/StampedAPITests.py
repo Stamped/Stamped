@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 import libs.ec2_utils, os
 
-from AStampedAPITestCase    import *
+from AStampedAPIHttpTestCase    import *
 from api.MongoStampedAPI    import MongoStampedAPI
 from api.HTTPSchemas        import *
 from api.Schemas            import *
@@ -18,14 +18,14 @@ from api.Schemas            import *
 # USER #
 # #### #
 
-class StampedAPITest(AStampedAPITestCase):
+class StampedAPIHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         self.stampedAPI = MongoStampedAPI(lite_mode=True)
     
     def tearDown(self):
         pass
 
-class StampedAPIUserTests(StampedAPITest):
+class StampedAPIUserTests(StampedAPIHttpTest):
     def test_user_regex(self):
         tests = {
             '@test'                  : [ 'test', ], 
@@ -55,10 +55,10 @@ class StampedAPIUserTests(StampedAPITest):
             for i in xrange(len(groups)):
                 self.assertEqual(expected[i], groups[i])
 
-class StampedAPIStampTests(StampedAPITest):
+class StampedAPIStampTests(StampedAPIHttpTest):
     
     def setUp(self):
-        StampedAPITest.setUp(self)
+        StampedAPIHttpTest.setUp(self)
         
         self._run = not libs.ec2_utils.is_prod_stack()
         
@@ -109,7 +109,7 @@ class StampedAPIStampTests(StampedAPITest):
             }
     
     def tearDown(self):
-        StampedAPITest.tearDown(self)
+        StampedAPIHttpTest.tearDown(self)
         
         if self._run:
             self._dropCollection("stamps")

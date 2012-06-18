@@ -11,6 +11,7 @@
 
 @implementation STUploadingImageView
 @synthesize uploading=_uploading;
+@synthesize activiyView=_activiyView;
 @synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame {

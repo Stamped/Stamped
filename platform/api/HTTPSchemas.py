@@ -392,29 +392,6 @@ class HTTPAccount(Schema):
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring)
 
-        cls.addProperty('user_id',                          basestring)
-
-        cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('auth_service',                     basestring, required=True)
-
-        cls.addProperty('name_lower',                       basestring)
-        cls.addProperty('email',                            basestring)
-        cls.addProperty('password',                         basestring)
-        cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('screen_name_lower',                basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
-        cls.addProperty('phone',                            basestring)
-        cls.addProperty('bio',                              basestring)
-        cls.addProperty('website',                          basestring)
-        cls.addProperty('location',                         basestring)
-        cls.addProperty('privacy',                          bool, required=True)
-        cls.addNestedProperty('linked',                     LinkedAccounts)
-        cls.addNestedProperty('devices',                    DevicesSchema)
-        cls.addNestedProperty('stats',                      UserStatsSchema, required=True)
-        cls.addNestedProperty('timestamp',                  UserTimestamp, required=True)
-        cls.addNestedProperty('alert_settings',             AccountAlertSettings)
-
     def importAccount(self, account, client=None):
         self.dataImport(account.dataExport(), overflow=True)
         return self
@@ -2530,8 +2507,8 @@ class HTTPStamp(Schema):
                     newImages.append(img)
                 item.images = newImages
 
-            # Insert contents in descending chronological order
-            contents.insert(0, item)
+            # Return contents in chronological order
+            contents.append(item)
         self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
@@ -3029,18 +3006,11 @@ class HTTPActivity(Schema):
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
 
-            if activity.personal:
-                self.benefit = len(self.subjects)
-                self.body = '%s gave you credit.' % (subjects)
-                self.body_references = subjectReferences
-                if len(self.subjects) > 1:
-                    self.image = _getIconURL('news_stamp_group')
-            else:
-                verb = 'gave'
-                offset = len(subjects) + len(verb) + 2
-                userObjects, userObjectReferences = _formatUserObjects(self.objects.users, offset=offset)
-                self.body = '%s %s %s credit.' % (subjects, verb, userObjects)
-                self.body_references = subjectReferences + userObjectReferences
+            self.benefit = len(self.subjects)
+            self.body = '%s gave you credit.' % (subjects)
+            self.body_references = subjectReferences
+            if len(self.subjects) > 1:
+                self.image = _getIconURL('news_stamp_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
 

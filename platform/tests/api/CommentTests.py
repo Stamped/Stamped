@@ -7,13 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # ######## #
 # COMMENTS #
 # ######## #
 
-class StampedAPICommentTest(AStampedAPITestCase):
+class StampedAPICommentHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -36,7 +36,7 @@ class StampedAPICommentTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPICommentsShow(StampedAPICommentTest):
+class StampedAPICommentsShow(StampedAPICommentHttpTest):
     def test_show(self):
         path = "comments/collection.json"
         data = { 
@@ -47,7 +47,7 @@ class StampedAPICommentsShow(StampedAPICommentTest):
         self.assertIn(result[0]['blurb'],[self.blurbA, self.blurbB])
         self.assertIn(result[1]['blurb'],[self.blurbA, self.blurbB])
 
-class StampedAPICommentsRemovePermissions(StampedAPICommentTest):
+class StampedAPICommentsRemovePermissions(StampedAPICommentHttpTest):
     def test_remove_fail(self):
         path = "comments/remove.json"
         data = { 
@@ -58,7 +58,7 @@ class StampedAPICommentsRemovePermissions(StampedAPICommentTest):
         with expected_exception():
             result = self.handlePOST(path, data)
 
-class StampedAPICommentsRemoveStampOwner(StampedAPICommentTest):
+class StampedAPICommentsRemoveStampOwner(StampedAPICommentHttpTest):
     def test_show(self):
         path = "comments/remove.json"
         data = { 
@@ -71,7 +71,7 @@ class StampedAPICommentsRemoveStampOwner(StampedAPICommentTest):
         self.commentA = self.createComment(self.tokenB, self.stamp['stamp_id'], \
             self.blurbA)
 
-class StampedAPICommentsMentions(StampedAPICommentTest):
+class StampedAPICommentsMentions(StampedAPICommentHttpTest):
     def test_mention(self):
         self.blurb = "Nice job @%s!" % self.userA['screen_name']
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
@@ -104,7 +104,7 @@ class StampedAPICommentsMentions(StampedAPICommentTest):
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-class StampedAPICommentsReply(StampedAPICommentTest):
+class StampedAPICommentsReply(StampedAPICommentHttpTest):
     def test_reply(self):
         self.blurb = "@%s thanks!" % self.userA['screen_name']
         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
@@ -180,7 +180,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-class StampedAPICommentsText(StampedAPICommentTest):
+class StampedAPICommentsText(StampedAPICommentHttpTest):
     def test_utf8(self):
         blurb = '“Iñtërnâtiônàlizætiøn”'
         commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \

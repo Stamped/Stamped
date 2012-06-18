@@ -513,7 +513,7 @@ class StampedAPI(AStampedAPI):
         self._todoDB.removeUserTodosHistory(account.user_id)
 
         # Remove stamps / collections
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps = self._stampDB.getStamps(stampIds)
 
         for stamp in stamps:
             if stamp.credits is not None and len(stamp.credits) > 0:
@@ -545,7 +545,7 @@ class StampedAPI(AStampedAPI):
 
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
-        likedStamps = self._stampDB.getStamps(likedStampIds, limit=len(likedStampIds))
+        likedStamps = self._stampDB.getStamps(likedStampIds)
 
         for stamp in likedStamps:
             self._stampDB.removeLike(account.user_id, stamp.stamp_id)
@@ -1009,7 +1009,7 @@ class StampedAPI(AStampedAPI):
 
     def _getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
-        stamps      = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps      = self._stampDB.getStamps(stampIds)
         stamps      = self._enrichStampObjects(stamps)
         
         categories  = {}
@@ -1728,7 +1728,7 @@ class StampedAPI(AStampedAPI):
         numStamps = self._stampDB.countStampsForEntity(entityId)
 
         popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
-        popularStamps = self._stampDB.getStamps(popularStampIds, limit=len(popularStampIds))
+        popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
@@ -1792,7 +1792,7 @@ class StampedAPI(AStampedAPI):
 
         return mentions
 
-    def _extractCredit(self, creditData, user_id, entity_id, userIds):
+    def _extractCredit(self, creditData, entityId, stampOwner=None):
         creditedUserIds = set()
         credit = []
 
@@ -1807,17 +1807,18 @@ class StampedAPI(AStampedAPI):
 
             for creditedUser in creditedUsers:
                 userId = creditedUser.user_id
-                if userId == user_id or userId in creditedUserIds:
+                # User cannot give themselves credit!
+                if stampOwner is not None and userId == stampOwner:
+                    continue
+                # User can't give credit to the same person twice
+                if userId in creditedUserIds:
                     continue
 
                 result              = StampPreview()
                 result.user         = creditedUser.minimize()
 
-                # Add to user ids
-                userIds[userId] = creditedUser.minimize()
-
                 # Assign credit
-                creditedStamp = self._stampDB.getStampFromUserEntity(userId, entity_id)
+                creditedStamp = self._stampDB.getStampFromUserEntity(userId, entityId)
                 if creditedStamp is not None:
                     result.stamp_id = creditedStamp.stamp_id
 
@@ -1828,7 +1829,7 @@ class StampedAPI(AStampedAPI):
         if len(credit) > 0:
             return credit
 
-        return None
+        return []
 
     def _enrichStampObjects(self, stampObjects, **kwargs):
         t0 = time.time()
@@ -1895,7 +1896,7 @@ class StampedAPI(AStampedAPI):
                     allUnderlyingStampIds.add(credit)
 
         # Enrich underlying stamp ids
-        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds), limit=len(allUnderlyingStampIds))
+        underlyingStamps = self._stampDB.getStamps(list(allUnderlyingStampIds))
 
         for stamp in underlyingStamps:
             underlyingStampIds[stamp.stamp_id] = stamp
@@ -2140,7 +2141,6 @@ class StampedAPI(AStampedAPI):
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
-        userIds     = { user.user_id : user.minimize() }
         entityIds   = { entity.entity_id : entity }
 
         blurbData   = data.pop('blurb',  None)
@@ -2217,9 +2217,21 @@ class StampedAPI(AStampedAPI):
             contents.append(content)
             stamp.contents              = contents
 
-            ### TODO: Extract credit
+            # Extract credit
             if creditData is not None:
-                raise NotImplementedError("Add credit for second stamp!")
+                newCredits = self._extractCredit(creditData, entity.entity_id, stampOwner=authUserId)
+                if stamp.credits is None:
+                    stamp.credits = newCredits
+                else:
+                    creditedUserIds = set()
+                    credits = list(stamp.credits)
+                    for credit in stamp.credits:
+                        creditedUserIds.add(credit.user.user_id)
+                    for credit in newCredits:
+                        if credit.user.user_id not in creditedUserIds:
+                            credits.append(credit)
+                            creditedUserIds.add(credit.user.user_id)
+                    stamp.credits = credits
 
             stamp = self._stampDB.updateStamp(stamp)
 
@@ -2247,7 +2259,7 @@ class StampedAPI(AStampedAPI):
 
             # Extract credit
             if creditData is not None:
-                stamp.credits = self._extractCredit(creditData, user.user_id, entity.entity_id, userIds)
+                stamp.credits = self._extractCredit(creditData, entity.entity_id, stampOwner=authUserId)
 
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
@@ -2312,20 +2324,21 @@ class StampedAPI(AStampedAPI):
                 if item.user.user_id == authUserId:
                     continue
 
+                """
+                # Check if block exists between user and credited user
+
                 friendship              = Friendship()
                 friendship.user_id      = authUserId
                 friendship.friend_id    = item.user.user_id
 
-                # Check if block exists between user and credited user
                 if self._friendshipDB.blockExists(friendship) == True:
                     logs.debug("Block exists")
                     continue
+                """
 
-                ### NOTE:
-                # For now, if a block exists then no comment or activity is
-                # created. This may change ultimately (i.e. we create the
-                # 'comment' and hide it from the recipient until they're
-                # unblocked), but for now we're not going to do anything.
+                # Check if the user has been given credit previously
+                if self._stampDB.checkCredit(item.user.user_id, stamp):
+                    continue
 
                 # Assign credit
                 self._stampDB.giveCredit(item.user.user_id, stamp)
@@ -2769,9 +2782,9 @@ class StampedAPI(AStampedAPI):
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
         stats.score = int(score)
-
+        
         self._stampStatsDB.saveStampStats(stats)
-
+        
         return stats
 
 
@@ -3609,7 +3622,7 @@ class StampedAPI(AStampedAPI):
         t0 = time.time()
 
         stampIds = self._collectionDB.getInboxStampIds(user.user_id)
-        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        stamps = self._stampDB.getStamps(stampIds)
         stampStats = self._stampStatsDB.getStatsForStamps(stampIds)
         entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
         entities = self._entityDB.getEntities(entityIds)
@@ -3779,7 +3792,7 @@ class StampedAPI(AStampedAPI):
 
         if sourceStamps is None and rawTodo.source_stamp_ids is not None:
             # Enrich stamps
-            sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids, limit=len(rawTodo.source_stamp_ids))
+            sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids)
             sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
 
         # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
@@ -3967,7 +3980,7 @@ class StampedAPI(AStampedAPI):
             entityIds[str(entity.entity_id)] = entity
 
         # Enrich stamps
-        stamps = self._stampDB.getStamps(sourceStampIds.keys(), limit=len(sourceStampIds.keys()))
+        stamps = self._stampDB.getStamps(sourceStampIds.keys())
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds)
 
         for stamp in stamps:

@@ -774,6 +774,33 @@ static Rdio* _rdio;
     return [UIImage imageNamed:@"cat_icon_sDetail_other"];
 }
 
++ (UIImage*)categoryIconForCategory:(NSString*)category subcategory:(NSString*)subcategory filter:(NSString*)filter andSize:(STCategoryIconSize)size {
+    NSString* base = [NSString stringWithFormat:@"icon_%dpt", size];
+    UIImage* image = nil;
+    if (category) {
+        NSString* categoryPath = [NSString stringWithFormat:@"%@_%@", base, category];
+        if (subcategory) {
+            NSString* subcategoryPath = [NSString stringWithFormat:@"%@_%@", categoryPath, subcategory];
+            if (filter) {
+                NSString* filterPath = [NSString stringWithFormat:@"%@_%@", subcategoryPath, filter];
+                image = [UIImage imageNamed:filterPath];
+            }
+            if (!image) {
+                NSLog(@"Subpath:%@", subcategoryPath);
+                image = [UIImage imageNamed:subcategoryPath];
+            }
+        }
+        if (!image) {
+            image = [UIImage imageNamed:categoryPath];
+        }
+    }
+    if (!image && !([category isEqualToString:@"other"] && subcategory == nil && filter == nil)) {
+        image = [self categoryIconForCategory:@"other" subcategory:nil filter:nil andSize:size];
+    }
+    NSLog(@"CatIcon:%@,%@,%@,%@", category, subcategory, filter, image);
+    return image;
+}
+
 + (UIImage*)stampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size {
     return [Util gradientImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]
               withPrimaryColor:user.primaryColor

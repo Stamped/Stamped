@@ -62,6 +62,8 @@ typedef enum STGradientStyle {
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style;
 
++ (UIImage*)categoryIconForCategory:(NSString*)category subcategory:(NSString*)subcategory filter:(NSString*)filter andSize:(STCategoryIconSize)size;
+
 + (NSString*)shortUserReadableTimeSinceDate:(NSDate*)date;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
 

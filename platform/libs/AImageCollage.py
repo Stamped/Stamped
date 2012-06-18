@@ -89,10 +89,17 @@ class AImageCollage(object):
         
         user_logo_url   = "http://static.stamped.com/logos/%s-%s-email-36x36.png" % \
                         (user.color_primary, user.color_secondary)
-        user_logo       = self._db.getWebImage(user_logo_url)
+        try:
+            user_logo   = self._db.getWebImage(user_logo_url)
+        except Exception:
+            user_logo   = None
+        
         user_logo_cache = {}
         
         def get_user_logo(size):
+            if user_logo is None:
+                return None
+            
             try:
                 return user_logo_cache[size]
             except KeyError:
@@ -166,10 +173,11 @@ class AImageCollage(object):
                     canvas.paste(cell, cell_pos)
                 
                 # overlay user's stamp logo on top of each entity image
-                logo     = get_user_logo(logo_size)
-                logo_box = (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1])
+                logo  = get_user_logo(logo_size)
                 
-                canvas.paste(logo, logo_box, logo)
+                if logo is not None:
+                    logo_box = (logo_pos[0], logo_pos[1], logo_pos[0] + logo.size[0], logo_pos[1] + logo.size[1])
+                    canvas.paste(logo, logo_box, logo)
             
             canvas = self._apply_postprocessing(canvas, user)
             output.append(canvas)
@@ -178,7 +186,7 @@ class AImageCollage(object):
     
     def _apply_postprocessing(self, image, user):
         size   = image.size
-        alpha  = 191
+        alpha  = 220
         alphaf = alpha / 255.0
         stops  = [
             (
@@ -224,8 +232,9 @@ class AImageCollage(object):
         return [
             (1024, 256), 
             (940, 256), 
-            (512, 128), 
-            (256, 64), 
+            (640, 128), 
+            #(512, 128), 
+            #(256, 64), 
         ]
     
     def __str__(self):
