@@ -410,6 +410,8 @@ var g_update_stamps = null;
                         $preview = $preview.parents('.preview-image');
                     }
                     
+                    // TODO: modify static-map-small for sDetail to not be crinkled
+                    // TODO: experiment w/ initial scale at .25 scale and tween to this transform
                     var width = "200px";
                     var t = "perspective(600) scaleX(1.15) scaleY(1.15) rotateZ(25deg) rotateX(25deg) rotateY(-25deg)";
                     
