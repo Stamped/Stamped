@@ -9,7 +9,7 @@
 #import "STBlockUIView.h"
 
 @implementation STBlockUIView
-@synthesize drawingHanlder=_drawingHandler;
+@synthesize drawingHandler=_drawingHandler;
 
 - (void)drawRect:(CGRect)rect {
     if (_drawingHandler) {
@@ -18,7 +18,7 @@
 }
 
 - (void)dealloc {
-    self.drawingHanlder = nil;
+    self.drawingHandler = nil;
     [super dealloc];
 }
 

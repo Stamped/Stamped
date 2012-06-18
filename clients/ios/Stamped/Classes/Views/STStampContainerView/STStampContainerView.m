@@ -24,7 +24,7 @@
         container.layer.shadowColor = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.2f].CGColor;
         container.layer.shadowOpacity = 1.0f;
         container.layer.shadowPath = [UIBezierPath bezierPathWithRect:container.bounds].CGPath;
-        [container setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [container setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
             
             rect = CGRectInset(rect, 0, 1);
             CGContextClipToRect(ctx, rect);

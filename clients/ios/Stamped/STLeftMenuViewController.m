@@ -158,7 +158,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         view.contentMode = UIViewContentModeRedraw;
         view.alpha = 0.1f;
         view.backgroundColor = [UIColor clearColor];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
 
             drawGradient([UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, [UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, ctx);
 
