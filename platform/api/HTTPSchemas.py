@@ -754,14 +754,7 @@ class HTTPUserMini(Schema):
         cls.addProperty('image_url',                        basestring)
 
     def importUserMini(self, mini):
-        self.user_id = mini.user_id
-        self.name = mini.name
-        self.screen_name = mini.screen_name
-        self.color_primary = mini.color_primary
-        self.color_secondary = mini.color_secondary
-        self.privacy = mini.privacy
-
-        #self.dataImport(mini.dataExport(), overflow=True)
+        self.dataImport(mini.dataExport(), overflow=True)
         self.image_url = _profileImageURL(mini.screen_name, mini.timestamp.image_cache)
 
         return self
@@ -2691,10 +2684,6 @@ class HTTPActivity(Schema):
         if not activity.personal:
             del(self.benefit)
 
-        logs.debug('Time for importEnrichedActivity setup... mostly importUserMini loop: %s' % (time.time() - t1))
-        t1 = time.time()
-        logs.debug('verb:  %s      subjects: %s' % (self.verb, self.subjects))
-
         def _addUserObjects():
             if activity.objects is not None and activity.objects.users is not None:
                 if self.objects is None:
@@ -2923,6 +2912,7 @@ class HTTPActivity(Schema):
             raise Exception("Too many stamps! \n%s" % stamps)
 
         if self.verb == 'follow':
+            t1 = time.time()
             _addUserObjects()
 
             if len(self.subjects) == 1:
@@ -2949,8 +2939,10 @@ class HTTPActivity(Schema):
                 self.body_references = subjectReferences + userObjectReferences
 
                 self.action = _buildUserAction(self.objects.users[0])
+            print("\t\t\tTime for 'follow' code: %s" % (time.time() - t1))
 
         elif self.verb == 'restamp':
+            t1 = time.time()
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -2965,7 +2957,10 @@ class HTTPActivity(Schema):
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
+            print("\t\t\tTime for 'restamp' code: %s" % (time.time() - t1))
+
         elif self.verb == 'like':
+            t1 = time.time()
             _addStampObjects()
 
             self.icon = _getIconURL('news_like')
@@ -2989,7 +2984,10 @@ class HTTPActivity(Schema):
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
+            print("\t\t\tTime for 'like' code: %s" % (time.time() - t1))
+
         elif self.verb == 'todo':
+            t1 = time.time()
             _addEntityObjects()
 
             self.icon = _getIconURL('news_todo')
@@ -3009,9 +3007,14 @@ class HTTPActivity(Schema):
             else:
                 self.action = _buildEntityAction(self.objects.entities[0])
 
+            print("\t\t\tTime for 'todo' code: %s" % (time.time() - t1))
+
         elif self.verb == 'comment':
+            t1 = time.time()
             _addStampObjects()
             _addCommentObjects()
+
+            print("\t\t\tTime for build portions of 'comment' code: %s" % (time.time() - t1))
 
             verb = 'Comment on'
             offset = len(verb) + 1
@@ -3023,7 +3026,10 @@ class HTTPActivity(Schema):
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
+            print("\t\t\tTime for 'comment' code: %s" % (time.time() - t1))
+
         elif self.verb == 'reply':
+            t1 = time.time()
             _addStampObjects()
             _addCommentObjects()
 
@@ -3037,7 +3043,10 @@ class HTTPActivity(Schema):
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
+            print("\t\t\tTime for 'reply' code: %s" % (time.time() - t1))
+
         elif self.verb == 'mention':
+            t1 = time.time()
             _addStampObjects()
             _addCommentObjects()
 
@@ -3057,12 +3066,14 @@ class HTTPActivity(Schema):
                 self.body_references = stampBlurbObjectReferences
 
             self.action = _buildStampAction(self.objects.stamps[0])
+            print("\t\t\tTime for 'mention' code: %s" % (time.time() - t1))
 
         elif self.verb.startswith('friend_'):
             self.icon = _getIconURL('news_friend')
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
+            t1 = time.time()
             _addStampObjects()
 
             actionMapping = {
@@ -3091,6 +3102,8 @@ class HTTPActivity(Schema):
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+
+            print("\t\t\tTime for 'mention' code: %s" % (time.time() - t1))
 
         else:
             raise Exception("Uncrecognized verb: %s" % self.verb)

@@ -24,9 +24,7 @@ def collection(request, authUserId, http_schema, **kwargs):
         logs.debug('time for importEnrichedActivity: %s' % (time.time() - t1))
     logs.debug('TOTAL time for importEnrichedActivity loop: %s' % (time.time() - t1))
 
-    transformedOutput = transformOutput(result)
-    return transformedOutput
-    #return transformOutput(result)
+    return transformOutput(result)
 
 @handleHTTPRequest()
 @require_http_methods(["GET"])
