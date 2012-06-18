@@ -89,8 +89,8 @@ def addAccount(*args, **kwargs):
     invoke(addAccount.request, *args, **kwargs)
 
 @task(ignore_result=True)
-def updateAccountSettings(*args, **kwargs):
-    invoke(updateAccountSettings.request, *args, **kwargs)
+def changeProfileImageName(*args, **kwargs):
+    invoke(changeProfileImageName.request, *args, **kwargs)
 
 @task(ignore_result=True)
 def alertFollowersFromTwitter(*args, **kwargs):

@@ -25,7 +25,7 @@ CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
 
 class StampedAPIAccountUpdateTest(AStampedAPITestCase):
     def setUp(self):
-        account = self.createAccount('TestUser')
+        self.account = self.createAccount('TestUser')
 
     def tearDown(self):
         self.deleteAccount(self.account.user_id)
@@ -33,10 +33,99 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
 
     @fixtureTest()
     def test_change_name(self):
-        print(account)
-        return True
+        TEST_NAME = "Pimpbot 5000"
+        form = AccountUpdateForm()
+        form.name = TEST_NAME
 
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.name, TEST_NAME)
 
+    def test_change_screen_name(self):
+        TEST_SN = "pimpbot5000test"
+        form = AccountUpdateForm()
+        form.screen_name = TEST_SN
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.screen_name, TEST_SN)
+
+    def test_change_screen_name_used(self):
+        TEST_SN = "pimpbot5000test"
+        form = AccountUpdateForm()
+        form.screen_name = TEST_SN
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.screen_name, TEST_SN)
+
+        with expected_exception():
+            self.createAccount("TestUser2", screen_name = TEST_SN)
+
+    def test_change_screen_name_blacklisted(self):
+        TEST_SN = "cock"
+        form = AccountUpdateForm()
+        form.screen_name = TEST_SN
+
+        with expected_exception():
+            self.api.updateAccount(self.account.user_id, form)
+
+    def test_change_phone(self):
+        form = AccountUpdateForm()
+        form.phone = '212-987-6543'
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.phone, '2129876543')
+
+    def test_change_bio(self):
+        BIO = "I've got microchips from Yokohama and I'll be turning out yo mama!"
+        form = AccountUpdateForm()
+        form.bio = BIO
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.bio, BIO)
+
+    def test_change_website(self):
+        WEBSITE = "http://www.stamped.com/"
+        form = AccountUpdateForm()
+        form.website = WEBSITE
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.website, WEBSITE)
+
+    def test_change_website_invalid(self):
+        WEBSITE = "not a website"
+        form = AccountUpdateForm()
+        form.website = WEBSITE
+
+        with expected_exception():
+            self.api.updateAccount(self.account.user_id, form)
+
+    def test_change_location(self):
+        LOCATION = 'New York, NY'
+        form = AccountUpdateForm()
+        form.location = LOCATION
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.location, LOCATION)
+
+    def test_change_color_primary(self):
+        form = AccountUpdateForm()
+        form.color_primary = 'ff0000'
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.color_primary, 'FF0000')
+
+    def test_change_color_primary_invalid(self):
+        COLOR_PRIMARY = 'not a valid color'
+        form = AccountUpdateForm()
+        with expected_exception():
+            form.color_primary = COLOR_PRIMARY
 
 class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
@@ -47,7 +136,7 @@ class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):
         self.deleteAccount(self.token)
 
 class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
-    def test_change_name(self):
+    def test_post(self):
         path = "account/update.json"
         data = {
             "oauth_token": self.token['access_token'],
@@ -58,162 +147,14 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
         account = self.showAccount(self.token)
         self.assertEqual(account['name'], "Pimpbot 5000")
 
-    def test_change_screen_name(self):
+    def test_post_invalid(self):
         path = "account/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "screen_name": "pimpbot5000test",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        self.assertEqual(account['screen_name'], "pimpbot5000test")
-
-    def test_change_phone(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "phone": "952-987-6543",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        self.assertEqual(account['phone'], "9529876543")
-
-    def test_change_bio(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "bio": "I got microchips from Yokohama and I'll be turning out yo mama",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        logs.info('account: %s' % account)
-        self.assertEqual(account['bio'], "I got microchips from Yokohama and I'll be turning out yo mama")
-
-    def test_change_website(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "website": "http://www.stamped.com/",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        self.assertEqual(account['website'], "http://www.stamped.com/")
-
-    def test_change_website_invalid(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "website": "not a website",
+            "screen_name": "cock",
             }
         with expected_exception():
             self.handlePOST(path, data)
-
-    def test_change_location(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "location": "New York, NY",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        self.assertEqual(account['location'], "New York, NY")
-
-    def test_change_color_primary(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "color_primary": "FF0000",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        self.assertEqual(account['color_primary'], "FF0000")
-
-    def test_change_color_primary_invalid(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "color_primary": "not a color",
-            }
-        with expected_exception():
-            self.handlePOST(path, data)
-
-
-    def test_change_color_secondary(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "color_secondary": "00ff00",
-            }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
-        account = self.showAccount(self.token)
-        self.assertEqual(account['color_secondary'], "00FF00")
-
-    def test_change_color_secondary_invalid(self):
-        path = "account/update.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "color_secondary": "black",
-            }
-        with expected_exception():
-            self.handlePOST(path, data)
-
-#    def test_post(self):
-#        path = "account/update.json"
-#        data = {
-#            "oauth_token": self.token['access_token'],
-#            "screen_name": "UserA2",
-#            "privacy": False,
-#            "phone": 1235551234,
-#        }
-#        result = self.handlePOST(path, data)
-#        self.assertEqual(result['privacy'], False)
-#        self.privacy = result['privacy']
-#
-#    def test_invalid_post(self):
-#        path = "account/update.json"
-#        data = {
-#            "oauth_token": self.token['access_token'],
-#            "screen_name": "UserA2",
-#            "privacy": False,
-#            "phone": 1235551234,
-#            }
-#        with expected_exception():
-#            data["phone"] = "not a phone number"
-#            result = self.handlePOST(path, data)
-#        data["phone"] = 1235551234
-#
-#        with expected_exception():
-#            data['privacy'] = 5
-#            result = self.handlePOST(path, data)
-#        data['privacy'] = False
-#
-#
-#    def test_get(self):
-#        path = "account/show.json"
-#        data = {
-#            "oauth_token": self.token['access_token'],
-#        }
-#        result = self.handleGET(path, data)
-#        self.assertEqual(result['screen_name'], "devbot")
-#        self.assertEqual(result['privacy'], self.privacy)
-
-class StampedAPIAccountUpdateProfile(StampedAPIAccountHttpTest):
-    def test_update_profile(self):
-        bio = "My long biography goes here."
-        path = "account/update_profile.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "bio": bio
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['bio'], bio)
 
 class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
     def test_update_profile_image(self):

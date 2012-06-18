@@ -8,11 +8,13 @@ __license__   = "TODO"
 import Globals
 import copy, re
 
-from errors     import *
-from datetime   import datetime
-from schema     import *
-from utils      import lazyProperty
-from pprint     import pformat
+from errors             import *
+from datetime           import datetime
+from schema             import *
+from utils              import lazyProperty
+from pprint             import pformat
+
+from SchemaValidation   import *
 
 import libs.CountryData
 
@@ -322,9 +324,9 @@ class Account(Schema):
         cls.addProperty('password',                         basestring)
         cls.addProperty('screen_name',                      basestring, required=True)
         cls.addProperty('screen_name_lower',                basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
@@ -355,8 +357,8 @@ class FacebookAccountNew(Schema):
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
 class TwitterAccountNew(Schema):
     @classmethod
@@ -372,8 +374,8 @@ class TwitterAccountNew(Schema):
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
 
 class AccountUpdateForm(Schema):
@@ -386,8 +388,8 @@ class AccountUpdateForm(Schema):
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
 
 # ##### #
@@ -400,8 +402,8 @@ class User(Schema):
         cls.addProperty('user_id',                          basestring)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
@@ -424,8 +426,8 @@ class UserMini(Schema):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring)
         cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('privacy',                          bool)
         cls.addNestedProperty('timestamp',                  UserTimestamp) 
 

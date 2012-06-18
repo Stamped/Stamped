@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from Schemas import FacebookAccountNew
-
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -10,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import atexit
 
-from Schemas                    import *
+from api.Schemas                import *
 from StampedTestUtils           import *
 from FixtureTest                import *
 from MongoStampedAPI            import MongoStampedAPI
@@ -19,15 +17,24 @@ from utils                      import lazyProperty
 _accounts  = []
 _test_case = None
 
+
+__globalAPI = None
+def globalAPI():
+    global __globalAPI
+    if __globalAPI is None:
+        __globalAPI = MongoStampedAPI()
+    return __globalAPI
+
 class StampedAPIException(Exception):
     pass
+
 
 
 class AStampedAPITestCase(AStampedFixtureTestCase):
 
     @lazyProperty
     def api(self):
-        return MongoStampedAPI()
+        return globalAPI()
 
     ### CUSTOM ASSERTIONS
     def assertValidKey(self, key, length=24):
@@ -47,6 +54,7 @@ class AStampedAPITestCase(AStampedFixtureTestCase):
         _test_case = self
 
         account             = Account()
+        account.name        = name
         account.email       = kwargs.pop('email', '%s@stamped.com' % name)
         account.password    = kwargs.pop('password', "12345")
         account.screen_name = kwargs.pop('screen_name', name)
@@ -155,6 +163,7 @@ class AStampedAPITestCase(AStampedFixtureTestCase):
         account = self.api.getAccount(authUserId)
         if account is None:
             raise StampedIllegalActionError('Could not retrieve account for id: %s' % authUserId)
+        return account
 
     def showLinkedAccounts(self, authUserId):
         return self.api.getLinkedAccounts(authuserId)

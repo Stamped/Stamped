@@ -14,11 +14,11 @@ from errors             import StampedHTTPError
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 
-HOST              = 'api.netflix.com'
+HOST              = 'api-public.netflix.com'
 PORT              = '80'
-REQUEST_TOKEN_URL = 'http://api.netflix.com/oauth/request_token'
-ACCESS_TOKEN_URL  = 'http://api.netflix.com/oauth/access_token'
-AUTHORIZATION_URL = 'https://api-user.netflix.com/oauth/login'
+REQUEST_TOKEN_URL = 'http://api-public.netflix.com/oauth/request_token'
+ACCESS_TOKEN_URL  = 'http://api-public.netflix.com/oauth/access_token'
+AUTHORIZATION_URL = 'https://api-public-user.netflix.com/oauth/login'
 
 APP_NAME   = 'Stamped'
 API_KEY    = 'nr5nzej56j3smjra6vtybbvw'
@@ -358,9 +358,9 @@ USER_ID = 'T1OACpnytwsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-'
 OAUTH_TOKEN = 'BQAJAAEDEHC_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0'
 OAUTH_TOKEN_SECRET = '8wZ4kQGSZGkj'
 
-GHOSTBUSTERS2_ID = 'http://api.netflix.com/catalog/titles/movies/541027'
-BIGLEB_ID = 'http://api.netflix.com/catalog/titles/movies/1181532'
-INCEPTION_ID = 'http://api.netflix.com/catalog/titles/movies/70131314'
+GHOSTBUSTERS2_ID = 'http://api-public.netflix.com/catalog/titles/movies/541027'
+BIGLEB_ID = 'http://api-public.netflix.com/catalog/titles/movies/1181532'
+INCEPTION_ID = 'http://api-public.netflix.com/catalog/titles/movies/70131314'
 
 def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
     from pprint import pprint
@@ -383,8 +383,8 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
-    params['title'] = 'ghostbuts'
+    methods = 'searchTitles'
+    params['title'] = 'ghostbust'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:
