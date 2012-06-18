@@ -224,6 +224,9 @@
         
     if (_editing) {
         
+        self.creditToolbar.frame = [self convertRect:self.creditToolbar.frame toView:self.superview];
+        [self.superview addSubview:self.creditToolbar];
+        
         __block CGRect frame = [self convertRect:self.scrollView.frame toView:expandView];
         [expandView addSubview:self];
         self.frame = expandView.bounds;
@@ -231,7 +234,6 @@
         
         self.toolbar.hidden = NO;
         self.menuView.hidden = (_keyboardType==CreateEditKeyboardTypeText);
-        self.creditToolbar.hidden = YES;
         
         frame = _toolbar.frame;
         frame.origin.y = self.bounds.size.height;
@@ -299,8 +301,8 @@
             self.menuView.hidden = YES;
             self.backgroundColor = [UIColor whiteColor];
 
-            self.creditToolbar.hidden = NO;
-            self.creditToolbar.alpha = 0.0f;
+            self.creditToolbar.frame = [self.superview convertRect:self.creditToolbar.frame toView:self];
+            [self addSubview:self.creditToolbar];
             
             [UIView animateWithDuration:0.1f animations:^{
                 self.creditToolbar.alpha = 1.0f;

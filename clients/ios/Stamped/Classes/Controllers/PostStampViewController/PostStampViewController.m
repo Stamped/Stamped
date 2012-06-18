@@ -35,13 +35,10 @@
 @synthesize headerView=_headerView;
 @synthesize stamp=_stamp;
 @synthesize user=_user;
-<<<<<<< HEAD
 @synthesize stampedByView=_stampedByView;
 @synthesize badges=_badges;
 @synthesize firstBadge;
-=======
 @synthesize stampedBy = _stampedBy;
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
 
 
 - (id)initWithStamp:(id<STStamp>)stamp {
@@ -307,7 +304,6 @@
 
     [[STStampedAPI sharedInstance] stampedByForEntityID:self.stamp.entity.entityID andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
         
-<<<<<<< HEAD
         if (stampedBy) {
             
             self.stampedBy = stampedBy;
@@ -327,14 +323,6 @@
             [self.tableView endUpdates];
             [self resetContainer];
             
-=======
-        NSLog(@"stampedby:%@", stampedBy);
-        self.stampedBy = stampedBy;
-        
-        NSInteger count = 1;
-        if (self.stamp) {
-            count+=self.stamp.badges.count;
->>>>>>> bf94898e5c38b7db38746e1e8ffd608422ccca92
         }
 
     }];
