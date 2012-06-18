@@ -754,7 +754,14 @@ class HTTPUserMini(Schema):
         cls.addProperty('image_url',                        basestring)
 
     def importUserMini(self, mini):
-        self.dataImport(mini.dataExport(), overflow=True)
+        self.user_id = mini.user_id
+        self.name = mini.name
+        self.screen_name = mini.screen_name
+        self.color_primary = mini.color_primary
+        self.color_secondary = mini.color_secondary
+        self.privacy = mini.privacy
+
+        #self.dataImport(mini.dataExport(), overflow=True)
         self.image_url = _profileImageURL(mini.screen_name, mini.timestamp.image_cache)
 
         return self
