@@ -73,9 +73,9 @@
                                     </div>
                                     
                                     <div class="inner-rhs">
-                                        <div class='followers-wrapper'>
-                                            <div>Followers</div>
-                                            <div>
+                                        <div class='friends-wrapper followers-wrapper'>
+                                            <div class='friends-desc'>Followers</div>
+                                            <div class="clearfix">
                                                 <span class='friend-count'>{{user.num_followers}}</span>
                                                 
                                                 {% with users=followers %}
@@ -84,9 +84,9 @@
                                             </div>
                                         </div>
                                         
-                                        <div class='following-wrapper'>
-                                            <div>Following</div>
-                                            <div>
+                                        <div class='friends-wrapper following-wrapper'>
+                                            <div class='friends-desc'>Following</div>
+                                            <div class="clearfix">
                                                 <span class='friend-count'>{{user.num_friends}}</span>
                                                 
                                                 {% with users=friends %}

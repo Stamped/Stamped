@@ -183,9 +183,11 @@ footer,
   float: none;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs {
-  margin-left: 24px;
   position: relative;
+  top: 0;
+  left: 0;
   float: left;
+  margin-left: 24px;
   min-width: 50%;
   color: #333;
 }
@@ -231,13 +233,33 @@ footer,
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .inner-rhs {
   float: right;
-  width: 30%;
+  width: 33%;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection {
-  display: none;
+  display: block;
+  width: 100%;
+  opacity: 0;
+  -webkit-transition: opacity 0.3s ease-out;
+  -moz-transition: opacity 0.3s ease-out;
+  -ms-transition: opacity 0.3s ease-out;
+  -o-transition: opacity 0.3s ease-out;
+  transition: opacity 0.3s ease-out;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-0 {
+  position: relative;
+  top: 0;
+  left: 0;
+  height: auto;
+  /* NOTE: height and min-height dynamically set to MAX(s0/s1/s2-heights);*/
+
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-0 p.profile-title {
   font-size: 7em;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-1 {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-1 p.profile-title {
   font-size: 2.5em;
@@ -247,17 +269,31 @@ footer,
   font-size: 80%;
   margin-top: 1em;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-1 .friend-count {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-1 .friends-wrapper .friends-desc {
+  text-align: left;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-1 .friends-wrapper .friend-count {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
-  display: inline-block;
-  margin-right: 1em;
+  display: block;
+  float: left;
+  margin-right: 12px;
   line-height: 100%;
   letter-spacing: .05em;
   font-size: 2.5em;
   font-weight: 500;
   color: #000;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-1 .friends-wrapper .user-gallery {
+  float: right;
+  width: 96px;
+  line-height: 2.5em;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 p.profile-title {
   font-size: 2.5em;
@@ -276,6 +312,8 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .icon-wrapper {
   display: inline-block;
   min-width: 22px;
+  min-height: 16px;
+  height: 16px;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .icon-wrapper .icon {
   margin: 0 auto;
@@ -389,7 +427,7 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .subnav-active-0 .lhs .header-subsection-0,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .subnav-active-1 .lhs .header-subsection-1,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .subnav-active-2 .lhs .header-subsection-2 {
-  display: block !important;
+  opacity: 1 !important;
 }
 .profile-header-wrapper .profile-header .profile-content-page .header-category-place .header-blur {
   background: url(/assets/img/covers/place_cover_temp.png) no-repeat;

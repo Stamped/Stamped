@@ -53,6 +53,7 @@
         .profile-content-page {
             position: relative;
             z-index: 50;
+            
             top:  0;
             left: 0;
             
@@ -60,6 +61,7 @@
                 position: absolute;
                 top:  -100%;
                 left: 0;
+                
                 display: none;
                 overflow: hidden;
                 
@@ -141,9 +143,12 @@
                     }
                     
                     .lhs {
-                        margin-left: 24px;
                         position: relative;
+                        top:  0;
+                        left: 0;
+                        
                         float: left;
+                        margin-left: 24px;
                         min-width: 50%;
                         
                         color: #333;
@@ -197,20 +202,35 @@
                         
                         .inner-rhs {
                             float: right;
-                            width: 30%;
+                            width: 33%;
                         }
                         
                         .header-subsection {
-                            display: none;
+                            display: block;
+                            width: 100%;
+                            opacity: 0;
+                            
+                            .transition(opacity, .3s, ease-out);
                         }
                         
                         .header-subsection-0 {
+                            position: relative;
+                            top:  0;
+                            left: 0;
+                            height: auto;
+                            
+                            /* NOTE: height and min-height dynamically set to MAX(s0/s1/s2-heights);*/
+                            
                             p.profile-title {
                                 font-size: 7em;
                             }
                         }
                         
                         .header-subsection-1 {
+                            position: absolute;
+                            top:  0;
+                            left: 0;
+                            
                             p.profile-title {
                                 font-size: 2.5em;
                                 font-weight: 500;
@@ -221,22 +241,44 @@
                                 margin-top: 1em;
                             }
                             
-                            .friend-count {
-                                .stamped-font();
+                            .friends-wrapper {
+                                .friends-desc {
+                                    text-align: left;
+                                }
                                 
-                                display: inline-block;
-                                margin-right: 1em;
+                                .friend-count {
+                                    .stamped-font();
+                                    
+                                    display: block;
+                                    float: left;
+                                    margin-right: 12px;
+                                    
+                                    line-height: 100%;
+                                    letter-spacing: .05em;
+                                    
+                                    font-size: 2.5em;
+                                    font-weight: 500;
+                                    color: #000;
+                                }
                                 
-                                line-height: 100%;
-                                letter-spacing: .05em;
-                                
-                                font-size: 2.5em;
-                                font-weight: 500;
-                                color: #000;
+                                .user-gallery {
+                                    float: right;
+                                    width: 96px;
+                                    
+                                    // NOTE (travis): in order to vertically center the user-gallery 
+                                    // w.r.t. the larger friend-count, the line-height here should 
+                                    // match the previous friend-count font-size.
+                                    
+                                    line-height: 2.5em;
+                                }
                             }
                         }
                         
                         .header-subsection-2 {
+                            position: absolute;
+                            top:  0;
+                            left: 0;
+                            
                             p.profile-title {
                                 font-size: 2.5em;
                             }
@@ -255,7 +297,9 @@
                                     
                                     .icon-wrapper {
                                         display: inline-block;
-                                        min-width: 22px;
+                                        min-width:  22px;
+                                        min-height: 16px;
+                                        height:     16px;
                                         
                                         .icon {
                                             margin: 0 auto;
@@ -334,7 +378,8 @@
                 .subnav-active-0 .lhs .header-subsection-0, 
                 .subnav-active-1 .lhs .header-subsection-1, 
                 .subnav-active-2 .lhs .header-subsection-2 {
-                    display: block !important;
+                    //display: block !important;
+                    opacity: 1 !important;
                 }
             }
             

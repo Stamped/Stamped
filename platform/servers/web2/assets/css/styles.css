@@ -346,29 +346,35 @@ a.follow-button:active {
                                 USER GALLERY
    ************************************************************************** */
 .user-gallery {
-  display: inline-block;
+  display: block;
+  position: relative;
+  /*:nth-child(3) {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        margin-top: -12px;
+        
+        .overlay {
+            display: block;
+            width:  24px;
+            height: 24px;
+            
+            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
+        }
+        
+        &:hover {
+            background: lighten(@stamped-base-color, 10%);
+        }
+    }*/
+
 }
 .user-gallery .user-gallery-item {
   display: inline-block;
-  margin: 0;
 }
-.user-gallery :nth-child(3) {
-  background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
-  width: 24px;
-  height: 24px;
-  border: 2px solid #ffffff;
-  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  /*&:hover {
-            background: lighten(@stamped-base-color, 10%);
-        }*/
-
-}
-.user-gallery :nth-child(3) img {
+.user-gallery .user-gallery-item .overlay {
   display: none;
+  z-index: 23;
+  position: relative;
 }
 .user-gallery :nth-child(n+4) {
   display: none;
