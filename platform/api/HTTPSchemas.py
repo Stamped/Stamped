@@ -396,7 +396,7 @@ class HTTPTwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
         cls.addProperty('email',                            basestring)
@@ -422,7 +422,7 @@ class HTTPAccountUpdateForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
@@ -586,7 +586,7 @@ class HTTPUserId(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
 
 class HTTPUserIds(Schema):
     @classmethod
@@ -605,9 +605,9 @@ class HTTPUserRelationship(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id_a',                        basestring)
-        cls.addProperty('screen_name_a',                    basestring)
+        cls.addProperty('screen_name_a',                    basestring, cast=validateScreenName)
         cls.addProperty('user_id_b',                        basestring)
-        cls.addProperty('screen_name_b',                    basestring)
+        cls.addProperty('screen_name_b',                    basestring, cast=validateScreenName)
 
 class HTTPFindUser(Schema):
     @classmethod
@@ -663,7 +663,7 @@ class HTTPUser(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('bio',                              basestring)
@@ -747,7 +747,7 @@ class HTTPUserMini(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('privacy',                          bool, required=True)
@@ -2103,7 +2103,7 @@ class HTTPWebTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
         cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
     
     def exportTimeSlice(self):
@@ -3095,7 +3095,7 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = len(subjects) + len(verbs[0]) + 2
+            offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
             msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
