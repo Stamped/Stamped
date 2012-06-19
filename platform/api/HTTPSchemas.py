@@ -2056,7 +2056,7 @@ class HTTPTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
+        cls.addProperty('scope',                            basestring, required=True) # me, inbox, friends, fof, popular ### TODO: Add cast
 
     def exportTimeSlice(self):
         data                = self.dataExport()

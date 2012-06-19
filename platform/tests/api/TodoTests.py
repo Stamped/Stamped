@@ -132,6 +132,16 @@ class StampedAPITodosViaStamp(StampedAPITodoHttpTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 1)
 
+    def test_todo_own_stamp(self):
+        self.todo = self.createTodo(self.tokenA, self.entity['entity_id'], stampId=self.stamp['stamp_id'])
+
+        path = "todos/show.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 1)
+
 if __name__ == '__main__':
     main()
 

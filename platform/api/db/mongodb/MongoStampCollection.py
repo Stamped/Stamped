@@ -388,7 +388,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return map(self._convertFromMongo, documents)
         except Exception:
             return []
-
         
     def addLike(self, userId, stampId):
         # Add a reference to the user in the stamp's 'like' collection
