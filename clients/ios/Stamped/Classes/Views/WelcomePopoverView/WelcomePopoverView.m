@@ -61,6 +61,8 @@
         _swipe = gesture;
         [gesture release];
          */
+        
+
 
     }
     return self;
@@ -83,15 +85,7 @@
         [_container addSubview:view];
         [view release];
         _optionsView = view;
-        
-        UIButton *closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [closeButton addTarget:self action:@selector(close:) forControlEvents:UIControlEventTouchUpInside];
-        [closeButton setImage:[UIImage imageNamed:@"welcome_popover_close.png"] forState:UIControlStateNormal];
-        
-        frame = CGRectMake(-12.0f, -16.0f, 44.0f, 44.0f);
-        frame = [self convertRect:frame toView:self.superview];
-        closeButton.frame = frame;
-        [self.superview addSubview:closeButton];
+
 
     }
     
@@ -243,7 +237,7 @@
         STBlockUIView *dots = [[STBlockUIView alloc] initWithFrame:CGRectMake((self.bounds.size.width-14.0f)/2, originY, 14.0f, 5.0f)];
         dots.backgroundColor = [UIColor whiteColor];
         [self addSubview:dots];
-        [dots setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [dots setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
 
             [[UIColor colorWithRed:0.204f green:0.447f blue:0.863f alpha:1.0f] setFill];
             CGFloat height = rect.size.height;

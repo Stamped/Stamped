@@ -54,6 +54,7 @@ typedef enum {
 extern NSString* const STStampedAPILoginNotification;
 extern NSString* const STStampedAPILogoutNotification;
 extern NSString* const STStampedAPIUserUpdatedNotification;
+extern NSString* const STStampedAPILocalStampModificationNotification;
 
 @interface STStampedAPI : NSObject
 

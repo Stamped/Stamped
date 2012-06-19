@@ -20,4 +20,6 @@
 
 + (RKObjectMapping*)mapping;
 
++ (STSimpleComment*)commentWithBlurb:(NSString*)blurb user:(id<STUser>)user andStampID:(NSString*)stampID;
+
 @end

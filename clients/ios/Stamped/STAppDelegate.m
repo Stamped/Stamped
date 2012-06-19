@@ -37,6 +37,7 @@
 #import "STRestKitLoader.h"
 #import "STUnreadActivity.h"
 #import "STActionManager.h"
+#import "STCalloutView.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -134,6 +135,16 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
         [Util removeOldCacheDirectories];
     }];
     
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+    [self.window addSubview:imageView];
+    [imageView release];
+    
+    [UIView animateWithDuration:0.3f animations:^{
+        imageView.alpha = 0.0f;
+    } completion:^(BOOL finished) {
+        [imageView removeFromSuperview];
+    }];
+ 
     
     [[STUnreadActivity sharedInstance] update];
     return YES;
@@ -185,10 +196,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    
+    [STStampedAPI sharedInstance].currentUserLocation = nil;
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
+    [STStampedAPI sharedInstance].currentUserLocation = nil;
     /* NSLog(@"Going to background");
      [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
      NSLog(@"Saved"); 
@@ -362,6 +374,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STCreateStampViewController setupConfigurations];
     
     //Actions
+    [STActionManager setupConfigurations];
+    
+    [STCalloutView setupConfigurations];
 }
 
 @end

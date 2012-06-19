@@ -108,6 +108,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             # if entity.tombstone_id is not None:
             #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
+
         return result
     
     def updateEntity(self, entity):

@@ -7,13 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # ##### #
 # TODOS #
 # ##### #
 
-class StampedAPITodoTest(AStampedAPITestCase):
+class StampedAPITodoHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -28,7 +28,7 @@ class StampedAPITodoTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPITodosShow(StampedAPITodoTest):
+class StampedAPITodosShow(StampedAPITodoHttpTest):
     def test_show(self):
         path = "todos/show.json"
         data = {
@@ -45,7 +45,7 @@ class StampedAPITodosShow(StampedAPITodoTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 0)
 
-class StampedAPITodosComplete(StampedAPITodoTest):
+class StampedAPITodosComplete(StampedAPITodoHttpTest):
     def test_complete(self):
         todo = self.completeTodo(self.tokenB, self.entity['entity_id'], True)
         path = "todos/show.json"
@@ -64,7 +64,7 @@ class StampedAPITodosComplete(StampedAPITodoTest):
         result = self.handleGET(path, data)
         self.assertEqual(result[0]['complete'], False)
 
-class StampedAPITodosPreviews(StampedAPITodoTest):
+class StampedAPITodosPreviews(StampedAPITodoHttpTest):
     def test_previews_friends(self):
         # Create User C and User D, who also todo the tntity.  User B should see both users in the preview
         (self.userC, self.tokenC) = self.createAccount('UserC')
@@ -90,7 +90,7 @@ class StampedAPITodosPreviews(StampedAPITodoTest):
         self.deleteAccount(self.tokenD)
         self.deleteAccount(self.tokenC)
 
-class StampedAPITodosAlreadyComplete(StampedAPITodoTest):
+class StampedAPITodosAlreadyComplete(StampedAPITodoHttpTest):
     def test_create_completed(self):
         self.entityB    = self.createEntity(self.tokenB)
         self.stampB     = self.createStamp(self.tokenB, self.entityB['entity_id'])
@@ -112,13 +112,13 @@ class StampedAPITodosAlreadyComplete(StampedAPITodoTest):
         self.deleteStamp(self.tokenB, self.stampB['stamp_id'])
         self.deleteEntity(self.tokenB, self.entityB['entity_id'])
 
-class StampedAPITodosAlreadyOnList(StampedAPITodoTest):
+class StampedAPITodosAlreadyOnList(StampedAPITodoHttpTest):
     def test_already_on_list(self):
         with expected_exception():
             self.todoB = self.createTodo(self.tokenB, self.entity['entity_id'])
 
 
-class StampedAPITodosViaStamp(StampedAPITodoTest):
+class StampedAPITodosViaStamp(StampedAPITodoHttpTest):
     def test_show_via_stamp(self):
         self.deleteTodo(self.tokenB, self.entity['entity_id'])
         self.todo = self.createTodo(self.tokenB,\
@@ -128,6 +128,16 @@ class StampedAPITodosViaStamp(StampedAPITodoTest):
         path = "todos/show.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
+            }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 1)
+
+    def test_todo_own_stamp(self):
+        self.todo = self.createTodo(self.tokenA, self.entity['entity_id'], stampId=self.stamp['stamp_id'])
+
+        path = "todos/show.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
             }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 1)

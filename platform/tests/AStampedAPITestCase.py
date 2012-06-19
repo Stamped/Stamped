@@ -1,144 +1,41 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import atexit, os, json, mimetools, sys, urllib, urllib2
+import atexit
 
-from pprint           import pprint
-from StampedTestUtils import *
-
-DEFAULT_CLIENT_ID       = "iphone8"
-CLIENT_SECRETS  = {
-    'stampedtest': 'august1ftw',
-    'iphone8': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
-}
-
-TWITTER_KEY     = "322992345-s2s8Pg24XXl1FhUKluxTv57gnR2eetXSyLt2rB6U"
-TWITTER_SECRET  = "FlOIbBdvznmNNXPSKbkiYfKS9usFq9FWgNDfPV5hNQ"
-FB_TOKEN        = "AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv4Kx7ZCNzcj7mvlurUhBicIFRTlDmuSduiHCucZD"
+from api.Schemas                import *
+from StampedTestUtils           import *
+from FixtureTest                import *
+from MongoStampedAPI            import MongoStampedAPI
+from utils                      import lazyProperty
 
 _accounts  = []
 _test_case = None
-_baseurl   = "http://localhost:18000/v0"
-# _baseurl = "https://dev.stamped.com/v0"
+
+
+__globalAPI = None
+def globalAPI():
+    global __globalAPI
+    if __globalAPI is None:
+        __globalAPI = MongoStampedAPI()
+    return __globalAPI
 
 class StampedAPIException(Exception):
     pass
 
-if utils.is_ec2():
-    import libs.ec2_utils
-    elb = libs.ec2_utils.get_elb()
-    
-    if elb is not None:
-        _baseurl = "https://%s/v0" % elb.dns_name
 
-print "BASE_URL: %s" % _baseurl
 
-class StampedAPIURLOpener(urllib.FancyURLopener):
-    def prompt_user_passwd(self, host, realm):
-        return ('stampedtest', 'august1ftw')
+class AStampedAPITestCase(AStampedFixtureTestCase):
 
-class AStampedAPITestCase(AStampedTestCase):
-    
-    _opener = StampedAPIURLOpener()
+    @lazyProperty
+    def api(self):
+        return globalAPI()
 
-    def handleGET(self, path, data, handleExceptions=True):
-        global _baseurl
-        params = urllib.urlencode(data)
-        url    = "%s/%s?%s" % (_baseurl, path, params)
-        
-        # utils.log("GET:  %s" % url)
-        raw = self._opener.open(url).read()
-        
-        try:
-            result = json.loads(raw)
-        except:
-            raise StampedAPIException(raw)
-
-        if handleExceptions and 'error' in result:
-            raise Exception("GET failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
-        
-        return result
-    
-    def handlePOST(self, path, data, handleExceptions=True):
-        global _baseurl
-        params = urllib.urlencode(data)
-        url    = "%s/%s" % (_baseurl, path)
-
-        #utils.log("POST: %s" % url)
-        #pprint(params)
-        
-        raw = self._opener.open(url, params).read()
-        
-        try:
-            result = json.loads(raw)
-        except:
-            raise StampedAPIException(raw)
-
-        if handleExceptions and 'error' in result:
-            raise Exception("POST failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
-        
-        return result
-    
-    def handleMultiPart(self, path, fields, files, file_type='image/jpeg'):
-        global _baseurl
-        url             = "%s/%s" % (_baseurl, path)
-        headers, data   = self.encodeMultiPart(fields, files, file_type)
-        
-        request         = urllib2.Request(url, data, headers)
-        result          = urllib2.urlopen(request)
-        json_result     = json.load(result)
-        
-        return json_result
-    
-    def encodeMultiPart(self, fields, files, file_type='image/jpeg'):
-        # Inspired by http://code.google.com/apis/cloudprint/docs/pythonCode.html
-        
-        CRLF = '\r\n'
-        BOUNDARY = mimetools.choose_boundary()
-        
-        """Encodes list of parameters and files for HTTP multipart format.
-        
-        Args:
-          fields: list of tuples containing name and value of parameters.
-          files: list of tuples containing param name, filename, and file contents.
-          file_type: string if file type different than application/xml.
-        Returns:
-          A string to be sent as data for the HTTP post request.
-        """
-        lines = []
-        for key, value in fields.iteritems():
-            lines.append('--' + BOUNDARY)
-            lines.append('Content-Disposition: form-data; name="%s"' % key)
-            lines.append('')  # blank line
-            lines.append(value)
-        for key, value in files.iteritems():
-            filename = value['filename']
-            data = value['data']
-            lines.append('--' + BOUNDARY)
-            lines.append(
-                'Content-Disposition: form-data; name="%s"; filename="%s"'
-                % (key, filename))
-            lines.append('Content-Type: %s' % file_type)
-            lines.append('')  # blank line
-            lines.append(data)
-        lines.append('--' + BOUNDARY + '--')
-        lines.append('')  # blank line
-        
-        data = CRLF.join(lines)
-        
-        headers = {
-            'Content-Length': len(data), 
-            'Content-Type': 'multipart/form-data; boundary=%s' % BOUNDARY
-        }
-        
-        return headers, data
-    
     ### CUSTOM ASSERTIONS
     def assertValidKey(self, key, length=24):
         self.assertIsInstance(key, basestring)
@@ -152,38 +49,21 @@ class AStampedAPITestCase(AStampedTestCase):
                 raise AssertionError(msg)
             raise AssertionError('"%s" unexpectedly not greater than "%s"' % (first, second))
 
-    ### HELPER FUNCTIONS
-    def createAccount(self, name='TestUser', password="12345", **kwargs):
+    def createAccount(self, name='TestUser', **kwargs):
         global _test_case, _accounts
         _test_case = self
-        
-        email       = kwargs.pop('email', '%s@stamped.com' % name)
-        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
-        
-        path = "account/create.json"
-        data = {
-            "client_id": c_id,
-            "client_secret": c_secret,
-            "name": name,
-            "email": email, 
-            "password": password,
-            "screen_name": name
-        }
-        response = self.handlePOST(path, data)
-        self.assertIn('user', response)
-        self.assertIn('token', response)
-        
-        user  = response['user']
-        token = response['token']
-        
-        _accounts.append((user, token))
-        
-        self.assertValidKey(user['user_id'])
-        self.assertValidKey(token['access_token'], 22)
-        self.assertValidKey(token['refresh_token'], 43)
-        
-        return user, token
+
+        account             = Account()
+        account.name        = name
+        account.email       = kwargs.pop('email', '%s@stamped.com' % name)
+        account.password    = kwargs.pop('password', "12345")
+        account.screen_name = kwargs.pop('screen_name', name)
+        account             = self.api.addAccount(account)
+
+        self.assertValidKey(account.user_id)
+        _accounts.append(account.user_id)
+
+        return account
 
     #TODO: Consoldiate the facebook and twitter account creation methods? Consolidate all creation methods?
 
@@ -191,365 +71,222 @@ class AStampedAPITestCase(AStampedTestCase):
         global _test_case, _accounts
         _test_case = self
 
-        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
+        fbAccount                   = FacebookAccountNew()
+        fbAccount.user_token        = fb_user_token
+        fbAccount.name              = name
+        fbAccount.email             = kwargs.pop('email', None)
+        fbAccount.screen_name       = kwargs.pop('screen_name', name)
+        fbAccount.phone             = kwargs.pop('phone', None)
+        fbAccount.bio               = kwargs.pop('bio', None)
+        fbAccount.website           = kwargs.pop('website', None)
+        fbAccount.location          = kwargs.pop('location', None)
+        fbAccount.color_primary     = kwargs.pop('color_primary', None)
+        fbAccount.color_secondary   = kwargs.pop('color_secondary', None)
 
-        path = "account/create/facebook.json"
-        data = {
-            "client_id"         : c_id,
-            "client_secret"     : c_secret,
-            "name"              : name,
-            "screen_name"       : name,
-            "user_token"        : fb_user_token,
-        }
-        response = self.handlePOST(path, data)
-        self.assertIn('user', response)
-        self.assertIn('token', response)
+        account = self.api.addFacebookAccount(fbAccount)
 
-        user  = response['user']
-        token = response['token']
-
-        _accounts.append((user, token))
-
-        self.assertValidKey(user['user_id'])
-        self.assertValidKey(token['access_token'], 22)
-        self.assertValidKey(token['refresh_token'], 43)
-
-        return user, token
+        self.assertValidKey(account.user_id)
+        _accounts.append(account.user_id)
+        return account
 
     def createTwitterAccount(self, tw_user_token, tw_user_secret, name='TestUser', **kwargs):
         global _test_case, _accounts
         _test_case = self
 
-        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
+        twAccount                   = FacebookAccountNew()
+        twAccount.user_token        = tw_user_token
+        twAccount.user_secret       = tw_user_secret
+        twAccount.name              = name
+        twAccount.email             = kwargs.pop('email', None)
+        twAccount.screen_name       = kwargs.pop('screen_name', name)
+        twAccount.phone             = kwargs.pop('phone', None)
+        twAccount.bio               = kwargs.pop('bio', None)
+        twAccount.website           = kwargs.pop('website', None)
+        twAccount.location          = kwargs.pop('location', None)
+        twAccount.color_primary     = kwargs.pop('color_primary', None)
+        twAccount.color_secondary   = kwargs.pop('color_secondary', None)
 
-        path = "account/create/twitter.json"
-        data = {
-            "client_id"         : c_id,
-            "client_secret"     : c_secret,
-            "name"              : name,
-            "screen_name"       : name,
-            "user_token"        : tw_user_token,
-            "user_secret"       : tw_user_secret,
-        }
-        response = self.handlePOST(path, data)
-        self.assertIn('user', response)
-        self.assertIn('token', response)
+        account = self.api.addTwitterAccount(twAccount)
 
-        user  = response['user']
-        token = response['token']
+        self.assertValidKey(account.user_id)
+        _accounts.append(account.user_id)
+        return account
 
-        _accounts.append((user, token))
+    def addLinkedAccount(self, authUserId, service_name, **kwargs):
+        linked                          = LinkedAccount()
+        linked.service_name             = service_name
+        linked.user_id                  = kwargs.pop('user_id', None)
+        linked.screen_name              = kwargs.pop('screen_name', None)
+        linked.name                     = kwargs.pop('name', None)
+        linked.token                    = kwargs.pop('token', None)
+        linked.secret                   = kwargs.pop('secret', None)
+        linked.token_expiration         = kwargs.pop('token_expiration', None)
 
-        self.assertValidKey(user['user_id'])
-        self.assertValidKey(token['access_token'], 22)
-        self.assertValidKey(token['refresh_token'], 43)
+        return self.api.addLinkedAccount(authUserId, linked)
 
-        return user, token
+    def removeLinkedAccount(self, authuserId, service_name):
+        return self.api.removeLinkedAccount(authUserId, service_name)
 
-    def addLinkedAccount(self, user_token, **kwargs):
-        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
-
-        path = "account/linked/add.json"
-        data = {
-            "client_id"         : c_id,
-            "client_secret"     : c_secret,
-            "oauth_token"       : user_token['access_token'],
-            }
-        data.update(kwargs)
-        return self.handlePOST(path, data)
-
-    def removeLinkedAccount(self, token, service_name, **kwargs):
-        c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
-
-        path = "account/linked/remove.json"
-        data = {
-            "client_id"         : c_id,
-            "client_secret"     : c_secret,
-            "oauth_token"       : token['access_token'],
-            "service_name"      : service_name
-            }
-        return self.handlePOST(path, data)
 
     def loginWithFacebook(self, fb_user_token, **kwargs):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "oauth2/login/facebook.json"
-        data = {
-            "client_id":        c_id,
-            "client_secret":    c_secret,
-            "user_token":       fb_user_token,
-            }
-        return self.handlePOST(path, data)
+        account, token = self.api.verifyFacebookUserCredentials(c_id, fb_user_token)
+        return account, token
 
     def loginWithTwitter(self, tw_user_token, tw_user_secret, **kwargs):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
-        c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "oauth2/login/twitter.json"
-        data = {
-            "client_id":      c_id,
-            "client_secret":  c_secret,
-            "user_token":     tw_user_token,
-            "user_secret":    tw_user_secret,
-            }
-        return self.handlePOST(path, data)
+        account, token = self.api.verifyTwitterUserCredentials(c_id, tw_user_token, tw_user_secret)
+        return account, token
 
-    def deleteAccount(self, token):
-        path = "account/remove.json"
-        data = { "oauth_token": token['access_token'] }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def createFriendship(self, token, friend):
-        path = "friendships/create.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "user_id": friend['user_id']
-        }
-        friend = self.handlePOST(path, data)
+    def deleteAccount(self, authUserId):
+        return self.api.removeAccount(authUserId)
 
-        self.assertIn('user_id', friend)
-        self.assertValidKey(friend['user_id'])
+    def createFriendship(self, authUserId, targetUserId=None, targetScreenName=None):
+        userTiny = UserTiny()
+        userTiny.user_id = targetUserId
+        userTiny.screen_name = targetScreenName
+        friend = self.api.addFriendship(authUserId, userTiny)
 
+        self.assertValidKey(friend.user_id)
         return friend
-    
-    def deleteFriendship(self, token, friend):
-        path = "friendships/remove.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "user_id": friend['user_id']
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-#
-#    def addLinkedAccount(self, token, data=None):
-#        """
-#        params should include properties to fill HTTPLinkedAccounts object
-#        """
-#        path = "account/linked_accounts.json"
+
+    def deleteFriendship(self, authUserId, targetUserId=None, targetScreenName=None):
+        userTiny = UserTiny()
+        userTiny.user_id = targetUserId
+        userTiny.screen_name = targetScreenName
+        self.api.removeFriendship(authUserId, userTiny)
+
+
+    def showAccount(self, authUserId):
+        account = self.api.getAccount(authUserId)
+        if account is None:
+            raise StampedIllegalActionError('Could not retrieve account for id: %s' % authUserId)
+        return account
+
+    def showLinkedAccounts(self, authUserId):
+        return self.api.getLinkedAccounts(authuserId)
+
+
+    def showActivity(self, authUserId, limit, offset):
+        return self.api.getActivity(authuserId, 'me', limit, offset)
+
+    def showFriendsActivity(self, authUserId, limit, offset):
+        return self.api.getActivity(authUserId, 'friends', limit, offset)
+
+
+#    def createEntity(self, token, data=None):
+#        path = "entities/create.json"
+#        if data == None:
+#            data = {
+#                "oauth_token": token['access_token'],
+#                "title": "Kanye West",
+#                "subtitle": "Hubristic Rapper",
+#                "desc": "Hip-hop artist",
+#                "category": "music",
+#                "subcategory": "artist",
+#                }
 #        if "oauth_token" not in data:
 #            data['oauth_token'] = token['access_token']
-#        return self.handlePOST(path, data)
+#        entity = self.handlePOST(path, data)
+#        self.assertValidKey(entity['entity_id'])
 #
-    def showAccount(self, token):
-        path = "account/show.json"
-        data = {
-            'oauth_token'       : token['access_token'],
+#        return entity
+#
+#    def createPlaceEntity(self, token, data=None):
+#        path = "entities/create.json"
+#        if data == None:
+#            data = {
+#                "oauth_token": token['access_token'],
+#                "title": "Good Food",
+#                "subtitle": "Peoria, IL",
+#                "desc": "American food in America",
+#                "category": "place",
+#                "subcategory": "restaurant",
+#                "address": "123 Main Street, Peoria, IL",
+#                "coordinates": "40.714623,-74.006605"
+#            }
+#
+#        if "oauth_token" not in data:
+#            data['oauth_token'] = token['access_token']
+#
+#        entity = self.handlePOST(path, data)
+#        self.assertValidKey(entity['entity_id'])
+#
+#        return entity
+#
+#    def deleteEntity(self, token, entityId):
+#        path = "entities/remove.json"
+#        data = {
+#            "oauth_token": token['access_token'],
+#            "entity_id": entityId
+#        }
+#        result = self.handlePOST(path, data)
+#        self.assertTrue(result)
+
+    def createStamp(self, authUserId, entityId=None, blurb="Best restaurant in America", credits=None):
+        assert(entityId is not None or searchId is not None)
+        data ={
+            'blurb' :  blurb,
+            'credits' : credits
         }
-        return self.handleGET(path, data)
-
-    def showLinkedAccounts(self, token):
-        path = "account/linked/show.json"
-        data = {
-            'oauth_token'       : token['access_token'],
-            }
-        return self.handleGET(path, data)
-
-    def showActivity(self, token):
-        path = "activity/collection.json"
-        data = {
-            'oauth_token'       : token['access_token'],
-            'scope'             : 'me',
-            }
-        return self.handleGET(path, data)
-
-    def showFriendsActivity(self, token):
-        path = "activity/collection.json"
-        data = {
-            'oauth_token'       : token['access_token'],
-            'scope'             : 'friends',
-            }
-        return self.handleGET(path, data)
-
-    def createEntity(self, token, data=None):
-        path = "entities/create.json"
-        if data == None:
-            data = {
-                "oauth_token": token['access_token'],
-                "title": "Kanye West",
-                "subtitle": "Hubristic Rapper",
-                "desc": "Hip-hop artist", 
-                "category": "music",
-                "subcategory": "artist",
-            }
-        if "oauth_token" not in data:
-            data['oauth_token'] = token['access_token']
-        entity = self.handlePOST(path, data)
-        self.assertValidKey(entity['entity_id'])
-
-        return entity
-    
-    def createPlaceEntity(self, token, data=None):
-        path = "entities/create.json"
-        if data == None:
-            data = {
-                "oauth_token": token['access_token'],
-                "title": "Good Food",
-                "subtitle": "Peoria, IL",
-                "desc": "American food in America", 
-                "category": "place",
-                "subcategory": "restaurant",
-                "address": "123 Main Street, Peoria, IL",
-                "coordinates": "40.714623,-74.006605"
-            }
-        
-        if "oauth_token" not in data:
-            data['oauth_token'] = token['access_token']
-        
-        entity = self.handlePOST(path, data)
-        self.assertValidKey(entity['entity_id'])
-        
-        return entity
-    
-    def deleteEntity(self, token, entityId):
-        path = "entities/remove.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "entity_id": entityId
+        entityRequest = {
+            'entity_id' : entityId,
+            'search_id' : None,
         }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def createStamp(self, token, entityId, data=None, blurb="Best restaurant in America", credit=None):
-        path = "stamps/create.json"
-        if data == None:
-            data = {
-                "oauth_token": token['access_token'],
-                "entity_id": entityId,
-                "blurb": blurb,
-            }
-        
-        if "oauth_token" not in data:
-            data['oauth_token'] = token['access_token']
-
-        if credit:
-            data['credits'] = credit
-        
-        stamp = self.handlePOST(path, data)
-        self.assertValidKey(stamp['stamp_id'])
-        
+        stamp = self.api.addStamp(authUserId, entityRequest, data)
+        self.assertValidKey(stamp.stamp_id)
         return stamp
-    
-    def deleteStamp(self, token, stampId):
-        path = "stamps/remove.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "stamp_id": stampId
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def createComment(self, token, stampId, blurb="Sample Comment Text"):
-        path = "comments/create.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "stamp_id": stampId,
-            "blurb": blurb,
-        }
-        comment = self.handlePOST(path, data)
-        self.assertValidKey(comment['comment_id'])
 
+    def deleteStamp(self, authUserId, stampId):
+        return self.api.removeStamp(authUserId, stampId)
+
+    def createComment(self, authUserId, stampId, blurb="Sample Comment Text"):
+        comment = self.api.addComment(authUserId, stampId, blurb)
+        self.assertValidKey(comment.comment_id)
         return comment
-    
-    def deleteComment(self, token, commentId):
-        path = "comments/remove.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "comment_id": commentId
+
+    def deleteComment(self, authuserId, commentId):
+        return self.api.removeComment(authUserId, commentId)
+
+    def createTodo(self, authUserId, entityId, stampId=None):
+        entityRequest = {
+            'entity_id' : entityId,
+            'search_id' : None,
         }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def createTodo(self, token, entityId, stampId=None):
-        path = "todos/create.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "entity_id": entityId,
-        }
-        
-        if stampId is not None:
-            data['stamp_id'] = stampId
-        
-        todo = self.handlePOST(path, data)
-        self.assertValidKey(todo['todo_id'])
-        
+        todo = self.api.addTodo(authuserId, entityRequest, stampid)
+        self.assertValidKey(todo.todo_id)
         return todo
-    
-    def deleteTodo(self, token, entityId):
-        path = "todos/remove.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "entity_id": entityId
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
 
-    def completeTodo(self, token, entityId, complete):
-        path = "todos/complete.json"
-        data = {
-            "oauth_token":  token['access_token'],
-            "entity_id":    entityId,
-            "complete":     complete,
-        }
-        return self.handlePOST(path, data)
+    def deleteTodo(self, authUserId, entityId):
+        return self.api.removeTodo(authUserId, entityId)
 
-    def createLike(self, token, stampId):
-        path = "stamps/likes/create.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "stamp_id": stampId
-        }
-        return self.handlePOST(path, data)
+    def completeTodo(self, authUserId, entityId, complete):
+        return self.api.completeTodo(authUserId, entityId, complete)
 
-    def deleteLike(self, token, stampId):
-        path = "stamps/likes/remove.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "stamp_id": stampId
-        }
-        return self.handlePOST(path, data)
+    def createLike(self, authUserId, stampId):
+        stamp = self.api.addLike(authUserId, stampId)
+        self.assertValidKey(stamp.stamp_id)
+        return stamp
 
-    def showLikes(self, token, stampId):
-        path = "stamps/likes/show.json"
-        data = {
-            "oauth_token": token['access_token'],
-            "stamp_id": stampId
-        }
-        return self.handleGET(path, data)
+    def deleteLike(self, authUserId, stampId):
+        return self.api.removeLike(authUserId, stampId)
 
-    def _loadCollection(self, collection, filename=None, drop=True):
-        if filename is None:
-            filename = "%s.db" % collection
-        
-        col = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "api/data"), filename)
-        cmd = "mongoimport -d stamped -c %s --stopOnError %s %s" % \
-              (collection, "--drop" if drop else "", col)
-        
-        #utils.log(cmd)
-        ret = utils.shell(cmd)
-        self.assertEqual(ret[1], 0)
-    
-    def _dropCollection(self, collection):
-        cmd = "mongo stamped --eval \"db.%s.drop()\"" % collection
-        ret = utils.shell(cmd)
-        self.assertEqual(ret[1], 0)
+    def showLikes(self, authUserId, stampId):
+        return self.api.getLikes(authUserId, stampId)
 
 def __cleanup():
     global _test_case, _accounts
-    
+
     # attempt to clean up all accounts created in this session
     test = _test_case
     if test is not None:
         print "cleaning up..."
-        
+
         for acct in _accounts:
             try:
-                test.deleteAccount(acct[1])
+                test.deleteAccount(acct)
             except:
                 pass
 

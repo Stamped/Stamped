@@ -155,6 +155,93 @@ var g_update_stamps = null;
             });
         };
         
+        $(".subnav_button").click(function(event) {
+            event.preventDefault();
+            
+            var $this    = $(this);
+            var $parent  = $this.parents('.profile-header-subnav');
+            var bargraph = false;
+            
+            $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
+            
+            if ($this.hasClass('subnav_button-0')) {
+                $parent.find('.header-subsection-0').show();
+                $parent.addClass('subnav-active-0');
+            } else if ($this.hasClass('subnav_button-1')) {
+                $parent.find('.header-subsection-1').show();
+                $parent.addClass('subnav-active-1');
+            } else if ($this.hasClass('subnav_button-2')) {
+                bargraph = true;
+                $parent.find('.header-subsection-2').show();
+                $parent.addClass('subnav-active-2');
+            }
+            
+            // TODO: better approach here than setTimeout
+            setTimeout(function() {
+                var $elem   = $parent.find('.header-subsection-1');
+                var opacity = parseFloat($elem.css('opacity'));
+                
+                if (opacity <= 0.05) {
+                    $elem.hide();
+                }
+                
+                $elem   = $parent.find('.header-subsection-2');
+                opacity = parseFloat($elem.css('opacity'));
+                
+                if (opacity <= 0.05) {
+                    $elem.hide();
+                }
+            }, 200);
+            
+            // update the user's stamp category distribution bargraph via a spiffy animation
+            $('.bargraph-row-value').each(function(i, elem) {
+                var $this = $(this);
+                var percentage = 0;
+                
+                if (bargraph) {
+                    var count   = $this.data('count') || 0;
+                    percentage  = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+                }
+                
+                $this.stop(true, false).animate({
+                    width : percentage + "%"
+                }, {
+                    duration : 1000, 
+                    specialEasing : { 
+                        width  : 'easeInOutBack'
+                    }, 
+                    complete : function() {
+                        $this.css('width', percentage + "%");
+                    }
+                });
+            });
+            
+            setTimeout(function() {
+            }, 200);
+            
+            return false;
+        });
+        
+        var $header_subsections = $('.header-subsection');
+        var header_subsection_height = 0;
+        var $header_subsection_0 = null;
+        
+        $header_subsections.each(function(i, elem) {
+            var $elem = $(elem);
+            if ($elem.hasClass('header-subsection-0')) {
+                $header_subsection_0 = $elem;
+            }
+            
+            header_subsection_height = Math.max($elem.height(), header_subsection_height);
+        });
+        
+        if (!!$header_subsection_0) {
+            $header_subsection_0.css({
+                'height'     : header_subsection_height, 
+                'min-height' : header_subsection_height
+            });
+        }
+        
         // TODO: may not be recursive
         //$(document).emoji();
         //$container.emoji();
@@ -384,6 +471,45 @@ var g_update_stamps = null;
                     var $image = $(images[i]);
                     
                     $image.hide().addClass('hidden').parent().addClass('hidden');
+                }
+                
+                if (is_sdetail) {
+                    if (!$preview.hasClass('preview-image')) {
+                        $preview = $preview.parents('.preview-image');
+                    }
+                    
+                    // TODO: modify static-map-small for sDetail to not be crinkled
+                    // TODO: experiment w/ initial scale at .25 scale and tween to this transform
+                    var width = "200px";
+                    var t = "perspective(600) scaleX(1.15) scaleY(1.15) rotateZ(25deg) rotateX(25deg) rotateY(-25deg)";
+                    $preview.css({
+                        'width'     : width, 
+                        'max-width' : width, 
+                        '-webkit-transform' : t, 
+                        '-moz-transform'    : t, 
+                        '-ms-transform'     : t, 
+                        '-o-transform'      : t, 
+                        'transform'         : t
+                    }).hover(function() {
+                        var t2 = "perspective(600)";
+                        
+                        // TODO: remove duplication of CSS here
+                        $preview.css({
+                            '-webkit-transform' : t2, 
+                            '-moz-transform'    : t2, 
+                            '-ms-transform'     : t2, 
+                            '-o-transform'      : t2, 
+                            'transform'         : t2
+                        });
+                    }, function() {
+                        $preview.css({
+                            '-webkit-transform' : t, 
+                            '-moz-transform'    : t, 
+                            '-ms-transform'     : t, 
+                            '-o-transform'      : t, 
+                            'transform'         : t
+                        });
+                    });
                 }
             }
             
@@ -1717,28 +1843,6 @@ var g_update_stamps = null;
         };
         
         setTimeout(show_initial_gallery, 150);
-        return;
-        
-        var userP = client.get_user_by_screen_name(screen_name);
-        
-        userP.done(function (user) {
-            var stampsP = client.get_user_stamps_by_screen_name(screen_name);
-            
-            stampsP.done(function (stamps) {
-                $("#data2").hide();
-                
-                var stamps_view = new client.StampsGalleryView({
-                    model : stamps, 
-                    el : $("#data2")
-                });
-                
-                $("#data").hide('slow', function() {
-                    stamps_view.render();
-                    
-                    $("#data2").show('slow');
-                });
-            });
-        });
     });
 })();
 

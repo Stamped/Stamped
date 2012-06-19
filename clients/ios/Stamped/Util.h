@@ -62,6 +62,10 @@ typedef enum STGradientStyle {
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style;
 
++ (UIImage*)categoryIconForCategory:(NSString*)category subcategory:(NSString*)subcategory filter:(NSString*)filter andSize:(STCategoryIconSize)size;
+
++ (UIImage*)creditImageForUser:(id<STUser>)user creditUser:(id<STUser>)creditedUser andSize:(STStampImageSize)size;
+
 + (NSString*)shortUserReadableTimeSinceDate:(NSDate*)date;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
 
@@ -228,5 +232,7 @@ typedef enum STGradientStyle {
 + (void)setTopRightForView:(UIView*)view toPoint:(CGPoint)point;
 
 + (void)setBottomLeftForView:(UIView*)view toPoint:(CGPoint)point;
+
++ (CGRect)scaledRectWithRect:(CGRect)original andScale:(CGFloat)scale;
 
 @end

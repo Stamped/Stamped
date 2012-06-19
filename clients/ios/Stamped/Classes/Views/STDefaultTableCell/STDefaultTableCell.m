@@ -20,7 +20,7 @@
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.bounds.size.width, 0.0f)];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         background.backgroundColor = [UIColor clearColor];
-        [background setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [background setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
             
             CGFloat inset = 8.5f;
             CGFloat corner = 2.0f;

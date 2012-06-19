@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals
 import base64, os, utils, Image, binascii
 
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 from MongoStampedAPI import MongoStampedAPI
 from S3ImageDB import S3ImageDB
 
@@ -17,9 +17,9 @@ from S3ImageDB import S3ImageDB
 # IMAGES #
 # ###### #
 
-class AImageTest(AStampedAPITestCase):
+class AImageHttpTest(AStampedAPIHttpTestCase):
     def __init__(self, *args, **kwargs):
-        AStampedAPITestCase.__init__(self, *args, **kwargs)
+        AStampedAPIHttpTestCase.__init__(self, *args, **kwargs)
         
         base = os.path.dirname(os.path.abspath(__file__))
         image_dir = os.path.join(os.path.join(base, 'data'), 'images')
@@ -31,7 +31,7 @@ class AImageTest(AStampedAPITestCase):
             
             self.images.append(image)
 
-class ImageDBTests(AImageTest):
+class ImageDBTests(AImageHttpTest):
     def setUp(self):
         self.imageDB = S3ImageDB(bucket_name='stamped.com.static.test')
         self.baseurl = 'http://%s.s3.amazonaws.com' % self.imageDB.bucket_name
@@ -73,7 +73,7 @@ class ImageDBTests(AImageTest):
         for key in keys:
             key.delete()
 
-class StampedAPIImageTests(AImageTest):
+class StampedAPIImageTests(AImageHttpTest):
     def setUp(self):
         (self.user, self.token) = self.createAccount()
     

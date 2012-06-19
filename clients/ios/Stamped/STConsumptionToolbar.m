@@ -100,12 +100,12 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
     }];
 }
 
-- (STButton*)consumptionButtonWithName:(NSString*)name icon:(NSString*)icon selector:(SEL)selector {
+- (STButton*)consumptionButtonWithName:(NSString*)name icon:(UIImage*)icon selector:(SEL)selector {
     CGFloat height = [[STConfiguration value:_buttonHeightKey] floatValue];
     CGFloat padding = [[STConfiguration value:_buttonInnerPaddingKey] floatValue];
     UIImageView* imageView = nil;
     if (icon) {
-        imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:icon]] autorelease];
+        imageView = [[[UIImageView alloc] initWithImage:icon] autorelease];
         imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(padding, 0, imageView.frame.size.width, height)];
     }
     UIView* text = [Util viewWithText:name
@@ -178,7 +178,8 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
     CGFloat cornerRadius = [[STConfiguration value:_buttonCornerRadiusKey] floatValue];
     
     if (item.parent) {
-        UIImageView* backIconView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:item.backIcon]] autorelease];
+        UIImage* backIcon = [Util gradientImage:item.icon withPrimaryColor:@"797979" secondary:@"535353" andStyle:STGradientStyleVertical];
+        UIImageView* backIconView = [[[UIImageView alloc] initWithImage:backIcon] autorelease];
         CGRect buttonFrame = CGRectMake(0, 0, MAX(backIconView.frame.size.width + 2 * innerPadding, height), height);
         backIconView.frame = [Util centeredAndBounded:backIconView.frame.size inFrame:buttonFrame];
         UIView* views[2];
@@ -212,7 +213,8 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
         [outputArray addObject:backButton];
     }
     for (STConsumptionToolbarItem* child in item.children) {
-        STButton* button = [self consumptionButtonWithName:child.name icon:child.icon selector:@selector(childChosen:)];
+        UIImage* childIcon = [Util gradientImage:child.icon withPrimaryColor:@"404040" secondary:@"1a1a1a" andStyle:STGradientStyleVertical];
+        STButton* button = [self consumptionButtonWithName:child.name icon:childIcon selector:@selector(childChosen:)];
         button.message = child;
         [Util reframeView:button withDeltas:CGRectMake(width, 0, 0, 0)];
         width += button.frame.size.width + padding;

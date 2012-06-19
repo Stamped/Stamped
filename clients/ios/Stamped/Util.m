@@ -226,6 +226,21 @@ static Rdio* _rdio;
                      secondary:secondary];
 }
 
++ (UIImage*)creditImageForUser:(id<STUser>)user creditUser:(id<STUser>)creditedUser andSize:(STStampImageSize)stampSize {
+    CGSize size = CGSizeMake(stampSize * 1.5, stampSize);
+    UIImage* userStamp = [self stampImageForUser:user withSize:stampSize];
+    UIImage* creditedUserStamp = [self stampImageForUser:creditedUser withSize:stampSize];
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextDrawImage(context, CGRectMake(0, 0, stampSize, stampSize), userStamp.CGImage);
+    CGContextDrawImage(context, CGRectMake(.5 * stampSize, 0, stampSize, stampSize), creditedUserStamp.CGImage);
+    
+    UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return result;
+}
+
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style {
     CGFloat r1, g1, b1, r2, g2, b2;
     [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
@@ -615,8 +630,19 @@ static Rdio* _rdio;
 }
 
 + (UINavigationController*)sharedNavigationController {
+  
     STAppDelegate *delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
+    STMenuController *menuController = delegate.menuController;
+    if (menuController.modalViewController) {
+        
+        if ([menuController.modalViewController isKindOfClass:[UINavigationController class]]) {
+            return (UINavigationController*)menuController.modalViewController;
+        }
+
+    }
+
     return (UINavigationController*)delegate.menuController.rootViewController;
+
 }
 
 + (void)globalLoadingLock {
@@ -763,6 +789,33 @@ static Rdio* _rdio;
     return [UIImage imageNamed:@"cat_icon_sDetail_other"];
 }
 
++ (UIImage*)categoryIconForCategory:(NSString*)category subcategory:(NSString*)subcategory filter:(NSString*)filter andSize:(STCategoryIconSize)size {
+    NSString* base = [NSString stringWithFormat:@"icon_%dpt", size];
+    UIImage* image = nil;
+    if (category) {
+        NSString* categoryPath = [NSString stringWithFormat:@"%@_%@", base, category];
+        if (subcategory) {
+            NSString* subcategoryPath = [NSString stringWithFormat:@"%@_%@", categoryPath, subcategory];
+            if (filter) {
+                NSString* filterPath = [NSString stringWithFormat:@"%@_%@", subcategoryPath, filter];
+                image = [UIImage imageNamed:filterPath];
+            }
+            if (!image) {
+                NSLog(@"Subpath:%@", subcategoryPath);
+                image = [UIImage imageNamed:subcategoryPath];
+            }
+        }
+        if (!image) {
+            image = [UIImage imageNamed:categoryPath];
+        }
+    }
+    if (!image && !([category isEqualToString:@"other"] && subcategory == nil && filter == nil)) {
+        image = [self categoryIconForCategory:@"other" subcategory:nil filter:nil andSize:size];
+    }
+    NSLog(@"CatIcon:%@,%@,%@,%@", category, subcategory, filter, image);
+    return image;
+}
+
 + (UIImage*)stampImageForUser:(id<STUser>)user withSize:(STStampImageSize)size {
     return [Util gradientImage:[UIImage imageNamed:[NSString stringWithFormat:@"stamp_%dpt_texture", size]]
               withPrimaryColor:user.primaryColor
@@ -880,6 +933,7 @@ static Rdio* _rdio;
     CAGradientLayer* gradient = [CAGradientLayer layer];
     gradient.anchorPoint = CGPointMake(0, 0);
     gradient.position = CGPointMake(0, 0);
+    gradient.contentsScale = [[UIScreen mainScreen] scale];
     if (!vertical) {
         gradient.startPoint = CGPointMake(0,.5);
         gradient.endPoint = CGPointMake(1,.5);
@@ -1257,7 +1311,7 @@ static Rdio* _rdio;
 
 + (CGSize)sizeForString:(NSAttributedString *)inString thatFits:(CGSize)inSize
 {
-    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)inString);
+    CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)inString);
     if (theFramesetter == NULL)
     {
         NSLog(@"Could not create CTFramesetter");
@@ -1386,6 +1440,14 @@ static Rdio* _rdio;
     frame.origin.x = point.x;
     frame.origin.y = point.y - frame.size.height;
     view.frame = frame;
+}
+
++ (CGRect)scaledRectWithRect:(CGRect)original andScale:(CGFloat)scale {
+    CGFloat newWidth = original.size.width * scale;
+    CGFloat newHeight = original.size.height * scale;
+    CGFloat deltaX = -(newWidth - original.size.width) / 2.0;
+    CGFloat deltaY = -(newHeight - original.size.height) / 2.0;
+    return CGRectMake(original.origin.x + deltaX, original.origin.y + deltaY, newWidth, newHeight);
 }
 
 @end

@@ -37,6 +37,7 @@
 @synthesize dataSource;
 @synthesize keyboardType=_keyboardType;
 @synthesize creditToolbar=_creditToolbar;
+@synthesize tapGesture  = _tapGesture;
 @synthesize textViewPlaceholder=_textViewPlaceholder;
 
 @synthesize menuView=_menuView;
@@ -48,13 +49,14 @@
         self.backgroundColor = [UIColor whiteColor];
         
         UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-        scrollView.contentInset = UIEdgeInsetsMake(0.0f, 0.0f, 10.0f, 0.0f);
+        scrollView.contentInset = UIEdgeInsetsMake(0.0f, 0.0f, 50.0f, 0.0f);
+        scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
         scrollView.backgroundColor = [UIColor whiteColor];
         scrollView.alwaysBounceVertical = YES;
         [self addSubview:scrollView];
         self.scrollView = scrollView;
         
-        UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(68.0f, 14.0f, self.bounds.size.width - 88.0f, 20.0f)];
+        UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(58.0f, 10.0f, self.bounds.size.width - 88.0f, 20.0f)];
         textView.font = [UIFont systemFontOfSize:13];
         textView.keyboardAppearance = UIKeyboardAppearanceAlert;
         textView.editable = NO;
@@ -64,12 +66,17 @@
         self.textView = textView;
         [textView release];
         
+        //textView.layer.borderColor = [UIColor redColor].CGColor;
+        //textView.layer.borderWidth = 1.0f;
+
+        
         STUploadingImageView *imageView = [[STUploadingImageView alloc] initWithFrame:CGRectMake((self.bounds.size.width-200.0f)/2, 100.0f, 200.0f, 200.0f)];
         imageView.delegate = (id<STUploadingImageViewDelegate>)self;
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         [self.scrollView addSubview:imageView];
         self.imageView = imageView;
         [imageView release];
+        imageView.hidden = YES;
         
         id <STUser> user = [[STStampedAPI sharedInstance] currentUser];
         STAvatarView *avatar = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 48.0f, 48.0f)];
@@ -148,17 +155,29 @@
 - (void)layoutScrollView {
     
     CGSize size = self.scrollView.contentSize;
+    size.width = self.scrollView.frame.size.width;
     if (self.imageView.image) {
         
         CGRect frame = self.imageView.frame;
-        frame.origin.y = MAX(80.0f, CGRectGetMaxY(self.textView.frame)+10.0f);
+        frame.origin.y = MAX(50.0f, CGRectGetMaxY(self.textView.frame));
+        if (!_commentButton.hidden) {
+            frame.origin.y = MAX(frame.origin.y, CGRectGetMaxY(_commentButton.frame));
+        }
+        frame.origin.x = self.textView.frame.origin.x + 6.0f;
         self.imageView.frame = frame;
         size.height = CGRectGetMaxY(self.imageView.frame) + 10.0f;
         
+    } else if (!_captureButton.hidden){
+        
+        size.height = CGRectGetMaxY(_captureButton.frame) + 10.0f;
+
     } else {
+        
         size.height = CGRectGetMaxY(self.textView.frame) + 10.0f;
+        
     }
-    size.height = MAX(size.height, self.frame.size.height);
+    
+    size.height = MAX(size.height, 150.0f);
     if (size.height != self.scrollView.contentSize.height) {
         self.scrollView.contentSize = size;
     }
@@ -215,9 +234,16 @@
     if (![(id)dataSource respondsToSelector:@selector(createEditViewSuperview:)]) return;
     _editing=editing;
     
+    self.scrollView.contentInset = UIEdgeInsetsMake(0.0f, 0.0f, _editing ? 20.0f : 50.0f, 0.0f);
+    self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
+
+    
     UIView *expandView = [self.dataSource createEditViewSuperview:self];
         
     if (_editing) {
+        
+        self.creditToolbar.frame = [self convertRect:self.creditToolbar.frame toView:self.superview];
+        [self.superview addSubview:self.creditToolbar];
         
         __block CGRect frame = [self convertRect:self.scrollView.frame toView:expandView];
         [expandView addSubview:self];
@@ -226,7 +252,6 @@
         
         self.toolbar.hidden = NO;
         self.menuView.hidden = (_keyboardType==CreateEditKeyboardTypeText);
-        self.creditToolbar.hidden = YES;
         
         frame = _toolbar.frame;
         frame.origin.y = self.bounds.size.height;
@@ -270,6 +295,10 @@
         __block CGRect frame = [expandView.superview convertRect:expandView.frame toView:self];
         self.backgroundColor = [UIColor clearColor];
         
+        self.creditToolbar.frame = [self.creditToolbar.superview convertRect:self.creditToolbar.frame toView:self.superview];
+        [self.superview insertSubview:self.creditToolbar belowSubview:self.toolbar];
+        [self bringSubviewToFront:self.menuView];
+        
         [UIView animateWithDuration:0.25f animations:^{
            
             self.scrollView.frame = CGRectInset(frame, 5, 10.0f);
@@ -289,17 +318,15 @@
             [expandView addSubview:self];
             self.frame = CGRectInset(expandView.bounds, 5, 10.0f);
             self.scrollView.frame = self.bounds;
+            self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width, self.scrollView.contentSize.height);
             
             self.toolbar.hidden = YES;
             self.menuView.hidden = YES;
             self.backgroundColor = [UIColor whiteColor];
 
-            self.creditToolbar.hidden = NO;
-            self.creditToolbar.alpha = 0.0f;
+            self.creditToolbar.frame = [self.creditToolbar.superview convertRect:self.creditToolbar.frame toView:self];
+            [self addSubview:self.creditToolbar];
             
-            [UIView animateWithDuration:0.1f animations:^{
-                self.creditToolbar.alpha = 1.0f;
-            }];
 
         }];
 
@@ -383,7 +410,7 @@
     if ([(id)delegate respondsToSelector:@selector(createEditView:addPhotoWithSourceType:)]) {
         [self.delegate createEditView:self addPhotoWithSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     }
-    
+
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
@@ -409,21 +436,29 @@
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     
-    if (!_editing && [self.textView hasText]) {
+    if (!_editing) {
         
         CGRect rect = self.bounds;
         rect.size.height -= 50.0f;
         CGPoint point = [gestureRecognizer locationInView:self];
         
-        if (self.imageView.image && CGRectContainsPoint(self.imageView.frame, point)) {
+        if (self.imageView.image && CGRectContainsPoint(self.imageView.deleteButton.frame, point)) {
             return NO;
         }
         
         if (CGRectContainsPoint(rect, point)) {
-            return !CGRectContainsPoint(_captureButton.frame, point);
+            
+            if (CGRectContainsPoint(_captureButton.frame, point)) {
+                return NO;
+            }
+            
+            if (CGRectContainsPoint(_commentButton.frame, point) && ![_textView hasText]) {
+                return NO;
+            }
+
         }
         
-        return NO;
+        return YES;
         
     }
     
@@ -485,7 +520,7 @@
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
-    
+        
     CGRect frame = textView.frame;
     if(frame.size.height != textView.contentSize.height) {
         frame.size.height = textView.contentSize.height;
@@ -493,6 +528,18 @@
     textView.frame = frame;
     [self layoutScrollView];
     
+}
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    
+    UITextPosition *beginning = textView.beginningOfDocument;
+    UITextPosition *start = [textView positionFromPosition:beginning offset:range.location];
+    UITextPosition *end = [textView positionFromPosition:start offset:range.length];
+    UITextRange *textRange = [textView textRangeFromPosition:start toPosition:end];
+    CGRect rect = [textView convertRect:[textView caretRectForPosition:textRange.start] toView:self.scrollView];
+    [self.scrollView scrollRectToVisible:rect animated:YES];
+    
+    return YES;
 }
 
 @end
@@ -675,8 +722,8 @@
         [_titleLabel sizeToFit];
         
         NSString *othersString = @"";
-        NSInteger count = [usernames count];
-        if(count > 1) {
+        NSInteger count = [usernames count]-1;
+        if(count >= 1) {
             othersString = [NSString stringWithFormat:@" and %i other%@", count, count==1 ? @"" : @"s"];
         }
         NSString *title = [NSString stringWithFormat:@"%@%@", [usernames objectAtIndex:0], othersString];
@@ -693,7 +740,7 @@
         CFRelease(boldFont);
         
         NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:title attributes:boldStyle];
-        [string setAttributes:defaultStyle range:[string.string rangeOfString:@"and"]];
+        [string setAttributes:defaultStyle range:[string.string rangeOfString:@" and "]];
         
         [defaultStyle release];
         [boldStyle release];

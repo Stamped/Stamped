@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 from MongoStampedAPI import *
 
 import alerts
@@ -16,7 +16,7 @@ import alerts
 # ALERTS #
 # ###### #
 
-class StampedAPIAlertsTest(AStampedAPITestCase):
+class StampedAPIAlertsHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -50,7 +50,7 @@ class StampedAPIAlertsTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenD)
 
 
-class StampedAPISendAlertsTest(StampedAPIAlertsTest):
+class StampedAPISendAlertsTest(StampedAPIAlertsHttpTest):
     def test_alerts_show(self):
         print('running')
         path = "account/alerts/show.json"

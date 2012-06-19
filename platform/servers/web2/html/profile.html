@@ -33,13 +33,15 @@
             <div class="profile-content-page">
                 
                 {% with share_widget_desc="Share this collection" %}
+                {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
+                {# {% with collage_root="http://static.stamped.com" %} #}
                     
                     <!-- DEFAULT HEADER -->
                     <div class="profile-header-body header-category-default">
-                        <!--<div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
+                        <!--<div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
                         <div class="header-overlay"></div>
                         
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix profile-header-subnav subnav-active-0">
                             <div class="profile-image-column">
                                 {% handlebars_template "profile-image-large" user %}
                                 
@@ -47,22 +49,89 @@
                             </div>
                             
                             <div class="lhs">
-                                <p class='profile-title'>
-                                    {{user.name}}
-                                </p>
+                                <div class="header-subsection header-subsection-0">
+                                    <p class='profile-title'>{{user.name}}</p>
+                                    
+                                    <p>
+                                        <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
+                                    </p>
+                                </div>
                                 
-                                <p>
-                                    <a class='screen-name' href="/{{user.screen_name}}">{{user.screen_name}}</a>{% if user.location %} / {{user.location}}{% endif %}
-                                </p>
+                                <div class="header-subsection header-subsection-1 clearfix">
+                                    <div class="inner-lhs">
+                                        <p class='profile-title'>{{user.name}}</p>
+                                        
+                                        <p>
+                                            <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
+                                        </p>
+                                        
+                                        {% if user.bio %}
+                                        <p class='bio'>
+                                            {{ user.bio }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="inner-rhs">
+                                        <div class='friends-wrapper followers-wrapper'>
+                                            <div class='friends-desc'>Followers</div>
+                                            <div class="clearfix">
+                                                <span class='friend-count'>{{user.num_followers}}</span>
+                                                
+                                                {% with users=followers %}
+                                                    {% handlebars_template "user-gallery" %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class='friends-wrapper following-wrapper'>
+                                            <div class='friends-desc'>Following</div>
+                                            <div class="clearfix">
+                                                <span class='friend-count'>{{user.num_friends}}</span>
+                                                
+                                                {% with users=friends %}
+                                                    {% handlebars_template "user-gallery" %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="header-subsection header-subsection-2">
+                                    <p class='profile-title'>{{user.name}}</p>
+                                    
+                                    <div class="user-stamp-distribution">
+                                        {% for section in user.distribution %}
+                                            <div class="section stamp-category-{{section.category}} clearfix">
+                                                <div class="category-name">
+                                                    {% if section.category == "place" %}Places{% endif %}
+                                                    {% if section.category == "music" %}Musics{% endif %}
+                                                    {% if section.category == "book" %}Books{% endif %}
+                                                    {% if section.category == "film" %}Film &amp; TV{% endif %}
+                                                    {% if section.category == "app" %}Apps{% endif %}
+                                                    {% if section.category == "other" %}Other{% endif %}
+                                                </div>
+                                                
+                                                <div class='icon-wrapper'>
+                                                    <div class='icon'></div>
+                                                </div>
+                                                
+                                                <div class="bargraph-row">
+                                                    <div class="bargraph-row-value" data-count="{{section.count}}"></div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="rhs">
                                 {% handlebars_template "share-widget" %}
                                 
                                 <div class="subnav">
-                                    <div class="subnav_button subnav_button0"></div>
-                                    <div class="subnav_button subnav_button1"></div>
-                                    <div class="subnav_button subnav_button2"></div>
+                                    <div class="subnav_button subnav_button-0"></div>
+                                    <div class="subnav_button subnav_button-1"></div>
+                                    <div class="subnav_button subnav_button-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -70,7 +139,7 @@
                     
                     <!-- PLACE HEADER -->
                     <div class="profile-header-body header-category-place">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -95,7 +164,7 @@
                     
                     <!-- MUSIC HEADER -->
                     <div class="profile-header-body header-category-music">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -119,7 +188,7 @@
                     
                     <!-- BOOK HEADER -->
                     <div class="profile-header-body header-category-book">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -143,7 +212,7 @@
                     
                     <!-- FILM & TV HEADER -->
                     <div class="profile-header-body header-category-film">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -167,7 +236,7 @@
                     
                     <!-- OTHER HEADER -->
                     <div class="profile-header-body header-category-app">
-                        <div class="blur_3 header-blur" style="background: url(http://static.stamped.com/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -208,6 +277,7 @@
                             <p>STAMPS</p>
                         </div>
                     </div>
+                {% endwith %}
                 {% endwith %}
             </div>
         </div>

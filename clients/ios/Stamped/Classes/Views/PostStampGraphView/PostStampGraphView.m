@@ -8,8 +8,11 @@
 
 #import "PostStampGraphView.h"
 #import "STStampContainerView.h"
+#import "NSStringHelper.h"
 #import <CoreText/CoreText.h>
 #import "ImageLoader.h"
+#import "STGraphCallout.h"
+#import "STTextCalloutView.h"
 
 @interface STPostGraphCell : UIControl {
     UIImage *_icon;
@@ -29,14 +32,26 @@
 @synthesize category;
 
 - (id)initWithFrame:(CGRect)frame {
-
     if ((self = [super initWithFrame:frame])) {
         
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(20.0f, 11.0f, 16.0f, 16.0f)];
-        [self addSubview:imageView];
-        imageView.contentMode = UIViewContentModeScaleAspectFit;
-        _imageView = imageView;
-        [imageView release];
+        STBlockUIView *iconView = [[STBlockUIView alloc] initWithFrame:CGRectMake(21.0f, 9.0f, 16.0f, 16.0f)];
+        iconView.backgroundColor = [UIColor whiteColor];
+        iconView.userInteractionEnabled = NO;
+        [self addSubview:iconView];
+        [iconView setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
+            if (_icon) {
+                CGContextSaveGState(ctx);
+                CGRect imageRect = CGRectMake((rect.size.width-_icon.size.width)/2, 0.0f, _icon.size.width, _icon.size.height);
+                CGContextTranslateCTM(ctx, 0, rect.size.height);
+                CGContextScaleCTM(ctx, 1.0, -1.0);
+                [[UIColor colorWithWhite:0.6f alpha:1.0f] setFill];
+                CGContextClipToMask(ctx, imageRect, _icon.CGImage);
+                CGContextFillRect(ctx, imageRect);
+                CGContextRestoreGState(ctx);
+            }
+        }];
+        _iconView = iconView;
+        [iconView release];
         
         CATextLayer *textLayer = [CATextLayer layer];
         textLayer.contentsScale = [[UIScreen mainScreen] scale];
@@ -52,6 +67,7 @@
         CGFloat originX = 0.0f;
         for (NSInteger i = 0; i < 6; i++) {
             STPostGraphCell *cell = [[STPostGraphCell alloc] initWithFrame:CGRectMake(originX, 0.0f, 45.0f, _graphContainer.bounds.size.height)];
+            [cell addTarget:self action:@selector(cellTapped:) forControlEvents:UIControlEventTouchUpInside];
             [_graphContainer addSubview:cell];
             originX += 49.0f;
             [cell release];
@@ -62,6 +78,9 @@
 }
 
 - (void)dealloc {
+    if (_icon) {
+        [_icon release], _icon=nil;
+    }
     
     self.category = nil;
     [_user release], _user=nil;
@@ -81,12 +100,14 @@
     }
 
     if (relevantItem) {
-        [[ImageLoader sharedLoader] imageForURL:[NSURL URLWithString:relevantItem.icon] completion:^(UIImage *image, NSURL *url) {
-            _imageView.image = image;
-        }];
+        UIImage *image =  [UIImage imageNamed:[NSString stringWithFormat:@"graph_%@_icon.png", self.category]];
+        if (image) {
+            _icon = [image retain];
+            [_iconView setNeedsDisplay];
+        }
     }
     
-    NSString *ordinalText = [NSString stringWithFormat:@"%i", [relevantItem.count integerValue]];
+    NSString *ordinalText = [NSString ordinalString:relevantItem.count];
     NSString *title = [NSString stringWithFormat:@"That's your %@ stamp in %@", ordinalText, [relevantItem.category capitalizedString]];
  
     UIColor *textColor = [UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f];
@@ -115,15 +136,21 @@
     [CATransaction setDisableActions:YES];
     _titleLayer.frame = CGRectMake(42.0f, 12.0f, size.width, size.height);
     [CATransaction setDisableActions:NO];
-    
+
     NSInteger index = 0;
     for (id<STDistributionItem> item in self.user.distribution) {
+       
         STPostGraphCell *cell = [[_graphContainer subviews] objectAtIndex:index];
         if (item == relevantItem) {
             cell.highlighted = YES;
         }
-        [cell setupWithDistributionItem:item barHeight:MAX((item.count.integerValue * (cell.bounds.size.height-18.0f)) / maxStamps, 3)];
+       
+        CGFloat x = item.count.integerValue;
+        CGFloat coeff = MIN((.5 - (1 / powf((x + 6), .4))) * 80/33,1);
+        [cell setupWithDistributionItem:item barHeight:MAX((coeff * cell.bounds.size.height), 2)];
+        //[cell setupWithDistributionItem:item barHeight:MAX((item.count.integerValue * (cell.bounds.size.height-18.0f)) / maxStamps, 3)];
         index++;
+    
     }
     
     
@@ -176,6 +203,70 @@
     
 }
 
+- (void)hideCallout {
+    
+    if (_calloutView) {
+        [UIView animateWithDuration:0.2f animations:^{
+            _calloutView.alpha = 0.0f;
+        } completion:^(BOOL finished) {
+            if (_calloutView) {
+                [_calloutView removeFromSuperview];
+                _calloutView = nil;
+            }
+        }];
+    }
+    
+}
+
+- (void)cellTapped:(STPostGraphCell*)cell {
+    
+    UIView *view = [[UIView alloc] initWithFrame:self.bounds];
+    [self addSubview:view];
+    [view release];
+    
+    UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
+    gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
+    [view addGestureRecognizer:gesture];
+    [gesture release];
+    
+    STTextCalloutView *callout = [[STTextCalloutView alloc] init];
+    [view addSubview:callout];
+    [callout setTitle:[NSString stringWithFormat:@"%i stamp%@ in %@", cell.stampCount, (cell.stampCount==1) ? @"" : @"s", cell.category] boldText:cell.category];
+    CGPoint point = CGPointMake(cell.bounds.size.width/2, (cell.bounds.size.height - cell.barHeight)-14.0f);
+    [callout showFromPosition:[view convertPoint:point fromView:cell] animated:YES];
+    [callout release];
+    
+    _calloutView = view;
+    [self performSelector:@selector(hideCallout) withObject:nil afterDelay:2.0f];
+    
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
+    UIView *subview = [[gestureRecognizer.view subviews] lastObject];
+    CGRect frame = subview.frame;
+    frame.size.height -= 10.0f; // remove drop shadow
+    return !CGRectContainsPoint(frame, [gestureRecognizer locationInView:gestureRecognizer.view]);
+    
+}
+
+- (void)tapped:(UITapGestureRecognizer*)gesture {
+    
+    if (_calloutView) {
+        [NSThread cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideCallout) object:nil];
+        [_calloutView removeFromSuperview], _calloutView=nil;
+    }
+    
+    CGPoint point = [gesture locationInView:_graphContainer];
+    for (STPostGraphCell *view in _graphContainer.subviews) {
+        if (CGRectContainsPoint(view.frame, point)) {
+            [self cellTapped:view];
+            break;
+        }
+    }
+    
+}
+
 @end
 
 
@@ -192,10 +283,31 @@
         
         self.backgroundColor = [UIColor clearColor];
         
-        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height-16.0f, self.bounds.size.width, 16.0f)];
-        view.backgroundColor = [UIColor clearColor];
+        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height-18.0f)];
+        view.userInteractionEnabled = NO;
+        view.contentMode = UIViewContentModeRedraw;
+        view.backgroundColor = [UIColor whiteColor];
         [self addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
+            
+            [[UIColor colorWithRed:0.937f green:0.960f blue:0.988f alpha:1.0f] setStroke];
+            CGFloat originY = 0.5f;
+            CGContextMoveToPoint(ctx, 0.0f, originY);
+            for (NSInteger i = 0; i<4; i++) {
+                CGContextAddLineToPoint(ctx, rect.size.width, originY);
+                originY+=rect.size.height/3;
+                CGContextMoveToPoint(ctx, 0.0f, originY);
+            }
+            CGContextStrokePath(ctx);
+            
+        }];
+        [view release];
+        
+        view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height-16.0f, self.bounds.size.width, 16.0f)];
+        view.backgroundColor = [UIColor whiteColor];
+        view.userInteractionEnabled = NO;
+        [self addSubview:view];
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
 
             if (_icon) {
                 
@@ -222,8 +334,19 @@
         view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height-18.0f, self.bounds.size.width, 1.0f)];
         view.contentMode = UIViewContentModeRedraw;
         view.backgroundColor = self.backgroundColor;
+        view.userInteractionEnabled = NO;
         [self addSubview:view];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
+            
+            [[UIColor colorWithRed:0.937f green:0.960f blue:0.988f alpha:1.0f] setStroke];
+            CGFloat originY = 0.5f;
+            CGContextMoveToPoint(ctx, 0.0f, originY);
+            for (NSInteger i = 0; i<4; i++) {
+                CGContextAddLineToPoint(ctx, rect.size.width, originY);
+                originY+=36.0f;
+                CGContextMoveToPoint(ctx, 0.0f, originY);
+            }
+            CGContextStrokePath(ctx);
            
             CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:2.0f].CGPath);
             CGContextClip(ctx);

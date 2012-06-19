@@ -180,7 +180,6 @@ class FactualSource(GenericSource):
                 'site',
                 'cuisine',
                 'alcohol_flag',
-                'opentable_nickname',
                 'opentable',
                 'foursquare',
             ],

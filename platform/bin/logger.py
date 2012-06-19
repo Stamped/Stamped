@@ -56,6 +56,10 @@ def parseCommandLine():
     parser.add_option("-t", "--severity", dest="severity", 
         default=None, type="string", help="Filter results on severity (debug, info, warning, error, critical)")
     
+    parser.add_option("-c", "--code", dest="code", 
+        default=None, type="int", help="Filter results on status code")
+
+
     (options, args) = parser.parse_args()
     
     if options.db:
@@ -76,6 +80,7 @@ def main():
     severity    = options.pop('severity', None)
     verbose     = options.pop('verbose', False)
     method      = options.pop('method', None)
+    code        = options.pop('code', None)
     
     if severity not in ['debug', 'info', 'warning', 'error', 'critical']:
         severity = None
@@ -86,7 +91,7 @@ def main():
         levels = ['info', 'warning', 'error', 'critical']
     
     logs = MongoLogsCollection().getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
-                                            path=path, severity=severity, method=method)
+                                            path=path, severity=severity, method=method, code=code)
     for i in xrange(len(logs)):
         print 
         print

@@ -60,16 +60,16 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (id)initWithCategory:(NSString*)category andQuery:(NSString*)query {
     if (self = [super init]) {
-       
+        
         if (!category) {
             category = @"music";
         }
 
-        self.title = category;
+        self.title = [category capitalizedString];
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
-
+        
     }
     return self;
 }
@@ -99,6 +99,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.navigationItem.leftBarButtonItem = button;
     [button release];
     
+    BOOL loadResults = YES;
     CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
     if ([_category isEqualToString:@"place"]) {
         _locationManager = [[CLLocationManager alloc] init];
@@ -108,15 +109,19 @@ static const CGFloat _offscreenCancelPadding = 5;
         [_locationManager startUpdatingLocation];
         location = [_locationManager location];
         if (location) {
+            [STStampedAPI sharedInstance].currentUserLocation = location;
             float longitude = location.coordinate.longitude;
             float latitude = location.coordinate.latitude;
             self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
             [_locationManager stopUpdatingLocation];
         }
+        else {
+            loadResults = NO;
+        }
     }
-
-    [self reloadDataSource];
-    
+    if (loadResults) {
+        [self reloadDataSource];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -133,19 +138,20 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation  fromLocation:(CLLocation *)oldLocation {
-   
-    if (!self.requestCancellation && !self.suggestedSections && !self.searchSections) {
-        float longitude = newLocation.coordinate.longitude;
-        float latitude = newLocation.coordinate.latitude;
-        self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
-        [self reloadDataSource];
-        [_locationManager stopUpdatingLocation];
-    }
     
+    float longitude = newLocation.coordinate.longitude;
+    float latitude = newLocation.coordinate.latitude;
+    self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+    [STStampedAPI sharedInstance].currentUserLocation = newLocation;
+    [_locationManager stopUpdatingLocation];
+    if (!self.requestCancellation && !self.suggestedSections && !self.searchSections) {
+        [self reloadDataSource];
+    }
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    [self getSuggestionsWithLocation:nil];
+    //[STStampedAPI sharedInstance].currentUserLocation = nil;
+    [self reloadDataSource];
     [_locationManager stopUpdatingLocation];
 }
 
@@ -162,7 +168,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - UITableViewDataSource
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-   
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
@@ -174,26 +180,26 @@ static const CGFloat _offscreenCancelPadding = 5;
         
     }
     
-   
+    
     
     return 64;
     
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-   
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
-            return self.autoCompleteResults.count + 1;
-        }
-
-        if (self.searchSections) {
-            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
-            return sectionObject.entities.count + 1; // plus one to add 'add' cell
+            return self.autoCompleteResults.count;
         }
         
-        return 1;
+        if (self.searchSections) {
+            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
+            return sectionObject.entities.count; // + 1; // plus one to add 'add' cell
+        }
+        
+        return 0; //1;
         
     }
     
@@ -203,34 +209,31 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     return 0;
-   
-
+    
+    
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-   
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
             return 1;
         }
-
-        return self.searchSections ? self.searchSections.count : 1;
-
+        
+        return self.searchSections ? self.searchSections.count : 0;
+        
     }
-
+    
     return self.suggestedSections ? self.suggestedSections.count : 0;
     
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if (tableView == self.searchResultsTableView) {
-                
+    if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
         NSInteger count = 0;
-        if (self.autoCompleteResults.count) {
-            count = self.autoCompleteResults.count;
-        } else if (self.searchSections) {
+        if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             count = sectionObject.entities.count;
         }
@@ -252,10 +255,10 @@ static const CGFloat _offscreenCancelPadding = 5;
             
             return cell;
         }
-
+        
     }
     
-   
+    
     if (tableView == self.searchResultsTableView && self.autoCompleteResults.count) {
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         static NSString* reuseIdentifier = @"AutoCompleteIdentifier";
@@ -280,7 +283,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     }
     
     id<STEntitySearchResult> result = nil;
-
+    
     if (tableView == self.searchResultsTableView) {
         
         if (self.searchSections) {
@@ -296,14 +299,14 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         
     }
-     
+    
     cell.searchResult = result;
     return cell;
-
+    
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-  
+    
     if (tableView == self.searchResultsTableView) {
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
@@ -317,7 +320,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         return sectionObject.title;
     }
     return nil;
-
+    
     
 }
 
@@ -337,7 +340,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         return [view autorelease];
     }
     return nil;
-
+    
 }
 
 
@@ -345,15 +348,14 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     
-
+    
     if (tableView == self.searchResultsTableView) {
         
 #warning this should take the user to create entity, not implemented yet
-        
         NSInteger count = 0;
         if (self.autoCompleteResults.count) {
             count = self.autoCompleteResults.count;
-        } else if (self.searchSections) {
+        } else if (self.searchSections && indexPath.section < self.searchSections.count) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             count = sectionObject.entities.count;
         }
@@ -365,10 +367,21 @@ static const CGFloat _offscreenCancelPadding = 5;
     
     if (self.autoCompleteResults.count) {
         
+        if (self.autoCompleteResults.count > indexPath.row) {
+            id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
+            [self.searchView setText:autoCompleteResult.completion];
+            [self.searchView resignKeyboard];
+            [self performSearchWithText:autoCompleteResult.completion];
+        }
+        else {
+#warning former crasher, needs fix
+        }
+        /*
         id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
         [self.searchView setText:autoCompleteResult.completion];
+        [self.searchView resignKeyboard];
         [self performSearchWithText:autoCompleteResult.completion];
-
+         */
     } else {
         
         id<STEntitySearchResult> result = nil;
@@ -382,10 +395,9 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         
         CreateStampViewController *controller = [[CreateStampViewController alloc] initWithSearchResult:result];
-        controller.navigationItem.hidesBackButton = YES;
         [self.navigationController pushViewController:controller animated:YES];
         [controller release];
-
+        
     }
     
 }
@@ -406,6 +418,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     STEntitySearch *search = [[[STEntitySearch alloc] init] autorelease];
     search.category = self.category;
     search.query = text;
+    search.coordinates = self.coordinates;
     self.searchCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchSection> *sections, NSError *error, STCancellation* cancellation) {
         
         [self.searchView setLoading:NO];
@@ -414,7 +427,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             self.searchSections = sections;
             [self.searchResultsTableView reloadData];
         }
-
+        
     }];
     
 }
@@ -426,7 +439,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
-
+    
     [super stSearchView:view textDidChange:text];
     [self.autoCompleteCancellation cancel];
     self.autoCompleteCancellation = nil;
@@ -437,7 +450,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     
     [self.searchView setLoading:YES];
     self.autoCompleteCancellation = [[STStampedAPI sharedInstance] entityAutocompleteResultsForQuery:text coordinates:self.coordinates category:self.category andCallback:^(NSArray<STEntityAutoCompleteResult> *results, NSError *error, STCancellation *cancellation) {
-                
+        
         self.autoCompleteCancellation = nil;
         if (results) {
             [self.autoCompleteResults removeAllObjects];
@@ -445,7 +458,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             [self.searchResultsTableView reloadData];
         }
         [self.searchView setLoading:NO];
-    
+        
     }];
     
     UITableViewCell *cell = (UITableViewCell*)[self.searchResultsTableView viewWithTag:kAddEntityCellTag];
@@ -488,23 +501,35 @@ static const CGFloat _offscreenCancelPadding = 5;
     suggested.category = self.category;
     
     self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested  andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-                 
+        
         NSInteger sections = [self.tableView numberOfSections];
         self.requestCancellation = nil;
         if (results) {
             self.suggestedSections = results;
-            [self.tableView reloadData];
+            
+            if (sections == 0 && self.suggestedSections) {
+                
+                [self.tableView beginUpdates];
+                [self.tableView insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.suggestedSections.count)] withRowAnimation:UITableViewRowAnimationFade];
+                [self.tableView endUpdates];
+                
+            } else {
+                
+                [self.tableView reloadData];
+
+            }
+            
         }
         
         _loading = NO;
         [self dataSourceDidFinishLoading];
         if (sections==0) {
-            [self animateIn];
+            //[self animateIn];
         }
         
     }];
     [super reloadDataSource];
-
+    
 }
 
 - (BOOL)dataSourceIsEmpty {
@@ -593,7 +618,6 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (void)setSearchResult:(id<STEntitySearchResult>)searchResult {
-    [_iconCancellation cancel];
     self.iconView.image = nil;
     
     _titleLabel.text = searchResult.title;
@@ -603,7 +627,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.iconCancellation = nil;
     NSString* iconURL = searchResult.icon;
     if (iconURL) {
-
+        
         UIImage *icon = [[STImageCache sharedInstance] cachedImageForImageURL:iconURL];
         if (icon) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -611,11 +635,9 @@ static const CGFloat _offscreenCancelPadding = 5;
             });
         }
         else {
-            [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            self.iconCancellation = [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
                 if (image) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.iconView.image = icon;
-                    });
+                    self.iconView.image = image;
                 }
                 self.iconCancellation = nil;
             }];

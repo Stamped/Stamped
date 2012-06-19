@@ -107,11 +107,12 @@ class StampedAuth(AStampedAuth):
                 raise
 
             if account.auth_service != 'stamped':
-                msg = "Attempting to do a stamped login for an account that doesn't use stamped for auth'"
+                msg = "Attempting a stamped login for an account that doesn't use stamped for auth'"
                 logs.warning(msg)
                 raise StampedHTTPError("invalid_credentials", 401, msg)
 
             if not auth.comparePasswordToStored(password, account.password):
+                logs.warning('Invalid password for user: %s' % userIdentifier)
                 raise
 
             logs.info("Login successful")

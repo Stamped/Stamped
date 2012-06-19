@@ -35,17 +35,22 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     
     name = scope.get('name')
     screen_name = scope.get('screen_name')
-    alt = "@%s" % screen_name
+    alt  = ""
     
-    if name is not None:
-        alt  = "%s (%s)" % (name, alt)
+    if size > 72:
+        alt = "@%s" % screen_name
+        
+        if name is not None:
+            alt  = "%s (%s)" % (name, alt)
+        
+        alt = 'alt="%s" ' % alt
     
     url  = scope.get('image_url', "http://static.stamped.com/users/default.jpg")
     
     if not url.endswith('default.jpg'):
         url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
     
-    return pybars.strlist('<img alt="%s" src="%s" />' % (alt, url))
+    return pybars.strlist('<img %s src="%s" />' % (alt, url))
 
 def entity_image(template_name, pad, scope, *args, **kwargs):
     size = None

@@ -45,10 +45,8 @@ def _get_body_classes(base, schema):
 # appear every page refresh, with preferential treatment always going to users 
 # who have customized their profile image away from the default.
 def _shuffle_split_users(users):
-    return users
-    """
-    has_image        = (lambda a: a['image'] and a['image']['sizes'] and len(a['image']['sizes']) > 0)
-    has_custom_image = (lambda a: has_image(a) and not _is_static_profile_image(a['image']['sizes'][0]['url']))
+    has_image        = (lambda a: a.get('image_url', None) is not None)
+    has_custom_image = (lambda a: has_image(a) and not _is_static_profile_image(a['image_url']))
     
     # find all users who have a custom profile image
     a0 = filter(has_custom_image, users)
@@ -65,7 +63,6 @@ def _shuffle_split_users(users):
     a0.extend(a1)
     
     return a0
-    """
 
 @stamped_view()
 def index(request):
@@ -89,7 +86,7 @@ def profile(request, schema, **kwargs):
     
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
-    screen_name = schema.screen_name
+    screen_name   = schema.screen_name
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -136,78 +133,6 @@ def profile(request, schema, **kwargs):
     
     #utils.log("FOLLOWERS:")
     #utils.log(pprint.pformat(followers))
-    
-    """
-    if schema.category == 'place':
-        earthRadius = 3959.0 # miles
-        clusters    = [ ]
-        trivial     = True
-        
-        # find stamp clusters
-        for stamp in stamps:
-            entity = stamp['entity']
-            if 'coordinates' not in entity or entity['coordinates'] is None:
-                continue
-            
-            # TODO: really should be retaining this for stamps overall instead of just subset here...
-            
-            coords = api.HTTPSchemas._coordinatesFlatToDict(entity['coordinates'])
-            found_cluster = False
-            
-            ll = [ coords['lat'], coords['lng'] ]
-            #print "%s) %s" % (stamp.title, ll)
-            
-            for cluster in clusters:
-                dist = earthRadius * utils.get_spherical_distance(ll, cluster['avg'])
-                #print "%s) %s vs %s => %s (%s)" % (stamp.title, ll, cluster['avg'], dist, cluster['data'])
-                
-                if dist < 10:
-                    cluster['data'].append((ll[0], ll[1]))
-                    
-                    len_cluster   = len(cluster['data'])
-                    found_cluster = True
-                    trivial       = False
-                    
-                    cluster['sum'][0] = cluster['sum'][0] + ll[0]
-                    cluster['sum'][1] = cluster['sum'][1] + ll[1]
-                    
-                    cluster['avg'][0] = cluster['sum'][0] / len_cluster
-                    cluster['avg'][1] = cluster['sum'][1] / len_cluster
-                    
-                    #print "%s) %d %s" % (stamp.title, len_cluster, cluster)
-                    break
-            
-            if not found_cluster:
-                clusters.append({
-                    'avg'  : [ ll[0], ll[1] ], 
-                    'sum'  : [ ll[0], ll[1] ], 
-                    'data' : [ (ll[0], ll[1]) ], 
-                })
-        
-        clusters_out = []
-        if trivial:
-            clusters_out = clusters
-        else:
-            # attempt to remove trivial clusters as outliers
-            for cluster in clusters:
-                if len(cluster['data']) > 1:
-                    clusters_out.append(cluster)
-            
-            if len(clusters_out) <= 0:
-                clusters_out.append(clusters[0])
-        
-        if len(clusters) > 0:
-            clusters = sorted(clusters_out, key=lambda c: len(c['data']), reverse=True)
-            
-            for cluster in clusters:
-                utils.log(pprint.pformat(cluster))
-            
-            main_cluster = clusters[0]
-            main_cluster = {
-                'coordinates' : "%f,%f" % (main_cluster['avg'][0], main_cluster['avg'][1]), 
-                'markers'     : list("%f,%f" % (c[0], c[1]) for c in main_cluster['data']), 
-            }
-    """
     
     friends   = _shuffle_split_users(friends)
     followers = _shuffle_split_users(followers)

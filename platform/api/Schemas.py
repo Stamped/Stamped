@@ -8,11 +8,13 @@ __license__   = "TODO"
 import Globals
 import copy, re
 
-from errors     import *
-from datetime   import datetime
-from schema     import *
-from utils      import lazyProperty
-from pprint     import pformat
+from errors             import *
+from datetime           import datetime
+from schema             import *
+from utils              import lazyProperty
+from pprint             import pformat
+
+from SchemaValidation   import *
 
 import libs.CountryData
 
@@ -322,9 +324,9 @@ class Account(Schema):
         cls.addProperty('password',                         basestring)
         cls.addProperty('screen_name',                      basestring, required=True)
         cls.addProperty('screen_name_lower',                basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
-        cls.addProperty('phone',                            basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
+        cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
@@ -355,8 +357,8 @@ class FacebookAccountNew(Schema):
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
 class TwitterAccountNew(Schema):
     @classmethod
@@ -372,8 +374,8 @@ class TwitterAccountNew(Schema):
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
 
 class AccountUpdateForm(Schema):
@@ -386,8 +388,10 @@ class AccountUpdateForm(Schema):
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
+
+        cls.addProperty('temp_image_url',                   basestring, cast=validateURL)
 
 
 # ##### #
@@ -400,8 +404,8 @@ class User(Schema):
         cls.addProperty('user_id',                          basestring)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('bio',                              basestring)
         cls.addProperty('website',                          basestring)
         cls.addProperty('location',                         basestring)
@@ -424,8 +428,8 @@ class UserMini(Schema):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring)
         cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('color_primary',                    basestring)
-        cls.addProperty('color_secondary',                  basestring)
+        cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
+        cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('privacy',                          bool)
         cls.addNestedProperty('timestamp',                  UserTimestamp) 
 
@@ -1532,27 +1536,31 @@ class Activity(Schema):
             result.objects = ActivityObjects()
 
             if self.objects.user_ids is not None:
-                userobjectss = []
+                userobjects = []
                 for userId in self.objects.user_ids:
-                    userobjectss.append(users[str(userId)])
-                result.objects.users = userobjectss
+                    if userId in users and users[userId] is not None:
+                        userobjects.append(users[str(userId)])
+                result.objects.users = userobjects
 
             if self.objects.stamp_ids is not None:
                 stampobjects = []
                 for stampId in self.objects.stamp_ids:
-                    stampobjects.append(stamps[str(stampId)])
+                    if stampId in stamps and stamps[stampId] is not None:
+                        stampobjects.append(stamps[str(stampId)])
                 result.objects.stamps = stampobjects
 
             if self.objects.entity_ids is not None:
                 entityobjects = []
                 for entityId in self.objects.entity_ids:
-                    entityobjects.append(entities[str(entityId)])
+                    if entityId in entities and entities[entityId] is not None:
+                        entityobjects.append(entities[str(entityId)])
                 result.objects.entities = entityobjects
 
             if self.objects.comment_ids is not None:
                 commentobjects = []
                 for commentId in self.objects.comment_ids:
-                    commentobjects.append(comments[str(commentId)])
+                    if commentId in comments and comments[commentId] is not None:
+                        commentobjects.append(comments[str(commentId)])
                 result.objects.comments = commentobjects
 
         return result

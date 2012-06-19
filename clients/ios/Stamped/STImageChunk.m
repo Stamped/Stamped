@@ -10,14 +10,14 @@
 
 @interface STImageChunk ()
 
-@property (nonatomic, readonly, assign) CGRect frame;
+@property (nonatomic, readonly, assign) CGRect imageFrame;
 
 @end
 
 @implementation STImageChunk
 
 @synthesize image = _image;
-@synthesize frame = _frame;
+@synthesize imageFrame = _imageFrame;
 
 - (id)initWithPrev:(STChunk*)chunk andFrame:(CGRect)frame {
     CGFloat width = CGRectGetMaxX(frame);
@@ -37,7 +37,7 @@
     self = [super initWithLineHeight:chunk.lineHeight start:chunk.end end:end width:chunk.frame.size.width lineCount:lineCount lineLimit:lineLimit];
     if (self) {
         self.topLeft = CGPointMake(chunk.topLeft.x, chunk.topLeft.y + chunk.lineHeight * (chunk.lineCount - 1 ) );
-        _frame = frame;
+        _imageFrame = frame;
     }
     return self;
 }
@@ -51,8 +51,8 @@
 - (void)drawRect:(CGRect)rect {
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
-    CGContextTranslateCTM(context, self.frame.origin.x, self.frame.origin.y);
-    [self.image drawInRect:self.frame];
+    CGContextTranslateCTM(context, self.frame.origin.x + self.start, self.frame.origin.y + self.lineHeight - self.imageFrame.size.height);
+    [self.image drawInRect:self.imageFrame];
     CGContextRestoreGState(context);
 }
 

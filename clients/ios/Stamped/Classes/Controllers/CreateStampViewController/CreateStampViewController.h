@@ -13,5 +13,7 @@
 - (id)initWithEntity:(id<STEntity>)entity;
 - (id)initWithSearchResult:(id<STEntitySearchResult>)searchResult;
 
+@property(nonatomic,retain) NSArray *creditUsers;
+
 
 @end

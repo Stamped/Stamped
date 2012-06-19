@@ -142,6 +142,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)viewWillUnload {
+    [super viewWillUnload];
   //NSLog(@"warning SHOULD IMPLEMENT");
 }
 

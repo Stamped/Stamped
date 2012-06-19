@@ -20,6 +20,7 @@
   self.shadowOffset = CGSizeMake(0, 1);
   self.shadowRadius = 1;
   self.cornerRadius = 5;
+  self.contentsScale = [[UIScreen mainScreen] scale];
   [Util addGradientToLayer:self withColors:[UIColor stampedGradient] vertical:YES];
 }
 
@@ -31,6 +32,7 @@
   self.shadowOffset = CGSizeMake(0, 1);
   self.shadowRadius = 1;
   self.cornerRadius = 5;
+  self.contentsScale = [[UIScreen mainScreen] scale];
   [Util addGradientToLayer:self withColors:[UIColor stampedDarkGradient] vertical:YES];
 }
 

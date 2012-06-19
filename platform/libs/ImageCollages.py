@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import math, utils
+import math, pprint, utils
 
 import api.HTTPSchemas
 
@@ -170,6 +170,7 @@ class PlaceImageCollage(AImageCollage):
     
     def get_clusters(self, entities, limit=None):
         earthRadius = 3959.0 # miles
+        threshold   = 10.0
         clusters    = [ ]
         trivial     = True
         
@@ -188,7 +189,7 @@ class PlaceImageCollage(AImageCollage):
             for cluster in clusters:
                 dist = earthRadius * utils.get_spherical_distance(ll, cluster['avg'])
                 
-                if dist < 10:
+                if dist < threshold:
                     cluster['data'].append((ll[0], ll[1]))
                     
                     len_cluster   = len(cluster['data'])
@@ -197,7 +198,7 @@ class PlaceImageCollage(AImageCollage):
                     
                     cluster['sum'][0] = cluster['sum'][0] + ll[0]
                     cluster['sum'][1] = cluster['sum'][1] + ll[1]
-                    
+                    4
                     cluster['avg'][0] = cluster['sum'][0] / len_cluster
                     cluster['avg'][1] = cluster['sum'][1] / len_cluster
                     
@@ -228,21 +229,7 @@ class PlaceImageCollage(AImageCollage):
             #for cluster in clusters:
             #    utils.log(pprint.pformat(cluster))
             
-            cluster = clusters[0]
-            
-            if limit is not None:
-                pts = []
-                for ll in cluster['data']:
-                    dist = utils.get_spherical_distance(ll, cluster['avg'])
-                    pts.append((dist, ll))
-                
-                pts = sorted(pts, key=lambda pt: pt[0], reverse=False)
-                if limit is not None:
-                    pts = pts[:limit]
-                
-                cluster['data'] = list(pt[1] for pt in pts)
-            
-            return cluster
+            return clusters[0]
         
         return None
     
@@ -250,10 +237,16 @@ class PlaceImageCollage(AImageCollage):
         cluster = self.get_clusters(entities) #, limit=max(10, int(.8 * len(entities))))
         markers = '%7C'.join("%s,%s" % pt for pt in cluster['data'])
         images  = []
-        api_key = "AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok"
+        API_KEY = "AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok"
+        bounds  = ""
+        
+        # TODO: test specific center + zoom depending on #markers
+        
+        if len(cluster['data']) > 4:
+            bounds = "center=%s,%s&zoom=%d&" % (cluster['avg'][0], cluster['avg'][1], 14)
         
         for size in self._sizes:
-            map_url = "https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=jpg&maptype=roadmap&size=%dx%d&markers=%s&key=%s" % (size[0], size[1], markers, api_key)
+            map_url = "https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=jpg&maptype=roadmap&size=%dx%d&%smarkers=%s&key=%s" % (size[0], size[1], bounds, markers, API_KEY)
             image   = self._db.getWebImage(map_url)
             
             image   = self._apply_postprocessing(image, user)

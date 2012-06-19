@@ -6,13 +6,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPITestCase import *
+from AStampedAPIHttpTestCase import *
 
 # ########## #
 # ClientLogs #
 # ########## #
 
-class StampedAPIClientLogsTests(AStampedAPITestCase):
+class StampedAPIHttpClientLogsTests(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='devbot') 
     

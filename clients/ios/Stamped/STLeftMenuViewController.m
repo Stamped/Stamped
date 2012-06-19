@@ -158,7 +158,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         view.contentMode = UIViewContentModeRedraw;
         view.alpha = 0.1f;
         view.backgroundColor = [UIColor clearColor];
-        [view setDrawingHanlder:^(CGContextRef ctx, CGRect rect) {
+        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
 
             drawGradient([UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, [UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, ctx);
 
@@ -278,7 +278,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
                 
                 cell.icon = nil;
                 
-                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(14.0f, (cell.bounds.size.height-20.0f)/2, 20.0f, 20.0f)];
+                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(12.0f, (cell.bounds.size.height-24.0f)/2, 24.0f, 24.0f)];
+                view.userInteractionEnabled = NO;
                 view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                 [cell addSubview:view];
                 view.imageURL = [NSURL URLWithString:[user imageURL]];

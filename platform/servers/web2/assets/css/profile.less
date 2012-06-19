@@ -53,6 +53,7 @@
         .profile-content-page {
             position: relative;
             z-index: 50;
+            
             top:  0;
             left: 0;
             
@@ -60,6 +61,7 @@
                 position: absolute;
                 top:  -100%;
                 left: 0;
+                
                 display: none;
                 overflow: hidden;
                 
@@ -80,6 +82,7 @@
                     @duration-ease0: .3s ease-out;
                     @duration-ease1: .8s ease-out;
                     
+                    // test transition delay
                     -webkit-transition: -webkit-transform @duration-ease0, -webkit-filter @duration-ease1;
                     -moz-transition:    -moz-transform    @duration-ease0, filter         @duration-ease1;
                     -ms-transition:     -ms-transform     @duration-ease0, filter         @duration-ease1;
@@ -109,10 +112,16 @@
                     filter: none;
                     -webkit-filter: blur(0);
                     
-                    .transform(perspective(600) rotateX(0deg));
+                    .transform(perspective(600) scaleX(1.25) scaleY(1.25) rotateX(0deg));
                 }
                 
                 /*.transition(top, 0.5s, linear);*/
+                
+                .subnav-activated(@scale) {
+                    opacity: 1;
+                    .transition-transform2(0s, linear, opacity, 0s, linear);
+                    .transform(scale(@scale, @scale));
+                }
                 
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
@@ -134,15 +143,22 @@
                     }
                     
                     .lhs {
+                        position: relative;
+                        top:  0;
+                        left: 0;
+                        
                         float: left;
                         margin-left: 24px;
+                        min-width: 50%;
+                        
+                        color: #333;
                         
                         a.screen-name {
                             color: #000;
                         }
                         
                         p {
-                            margin: 0;
+                            margin:  0;
                         }
                         
                         p.profile-title {
@@ -150,7 +166,6 @@
                             .stamped-font();
                             
                             line-height: 100%;
-                            font-size: 7em;
                             letter-spacing: .05em;
                             color: #000;
                             
@@ -161,7 +176,7 @@
                         
                         p.name {
                             font-weight: 700;
-                            color: #333;
+                            color: #000;
                         }
                         
                         p.title {
@@ -174,6 +189,154 @@
                             
                             display: block;
                             padding: 0;
+                        }
+                        
+                        .user-location {
+                            font-size: 80%;
+                        }
+                        
+                        .inner-lhs {
+                            float: left;
+                            width: 65%;
+                        }
+                        
+                        .inner-rhs {
+                            float: right;
+                            width: 33%;
+                        }
+                        
+                        .header-subsection {
+                            display: block;
+                            width: 100%;
+                            opacity: 0;
+                            
+                            .transition(opacity, .3s, ease-out);
+                        }
+                        
+                        .header-subsection-0 {
+                            position: relative;
+                            top:  0;
+                            left: 0;
+                            height: auto;
+                            
+                            /* NOTE: height and min-height dynamically set to MAX(s0/s1/s2-heights);*/
+                            
+                            p.profile-title {
+                                font-size: 7em;
+                            }
+                        }
+                        
+                        .header-subsection-1 {
+                            position: absolute;
+                            top:  0;
+                            left: 0;
+                            
+                            p.profile-title {
+                                font-size: 2.5em;
+                                font-weight: 500;
+                            }
+                            
+                            .bio {
+                                font-size:  80%;
+                                margin-top: 1em;
+                            }
+                            
+                            .friends-wrapper {
+                                .friends-desc {
+                                    text-align: left;
+                                }
+                                
+                                .friend-count {
+                                    .stamped-font();
+                                    
+                                    display: block;
+                                    float: left;
+                                    margin-right: 12px;
+                                    
+                                    line-height: 100%;
+                                    letter-spacing: .05em;
+                                    
+                                    font-size: 2.5em;
+                                    font-weight: 500;
+                                    color: #000;
+                                }
+                                
+                                .user-gallery {
+                                    float: right;
+                                    width: 96px;
+                                    
+                                    // NOTE (travis): in order to vertically center the user-gallery 
+                                    // w.r.t. the larger friend-count, the line-height here should 
+                                    // match the previous friend-count font-size.
+                                    
+                                    line-height: 2.5em;
+                                }
+                            }
+                        }
+                        
+                        .header-subsection-2 {
+                            position: absolute;
+                            top:  0;
+                            left: 0;
+                            
+                            p.profile-title {
+                                font-size: 2.5em;
+                            }
+                            
+                            .user-stamp-distribution {
+                                font-size: 80%;
+                                margin-top: 1em;
+                                
+                                .section {
+                                    position: relative;
+                                    
+                                    .category-name {
+                                        display: inline-block;
+                                        min-width: 7em;
+                                    }
+                                    
+                                    .icon-wrapper {
+                                        display: inline-block;
+                                        min-width:  22px;
+                                        min-height: 16px;
+                                        height:     16px;
+                                        
+                                        .icon {
+                                            margin: 0 auto;
+                                        }
+                                    }
+                                    
+                                    .bargraph-row {
+                                        display: inline-block;
+                                        background: #FEFEFE;
+                                        .rounded(1em);
+                                        
+                                        width:  70%;
+                                        height: 1em;
+                                        
+                                        @b0: #3b84eb;
+                                        @b1: #438fed;
+                                        
+                                        .bargraph-row-value {
+                                            /*.transition(all, .5s, easeOutCubic);*/
+                                            .rounded(1em);
+                                            
+                                            //background-color: #000;
+                                            @c0: lighten(@b0, 10%);
+                                            @c1: lighten(@b1, 15%);
+                                            
+                                            .linear-gradient2(left, @c0, @c1);
+                                            
+                                            width:  0%;
+                                            height: 100%;
+                                        }
+                                        
+                                        &:hover .bargraph-row-value {
+                                            .linear-gradient2(left, @b0, @b1);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     
@@ -191,28 +354,45 @@
                                 
                                 .transition-transform2(0.1s, ease-out, opacity, 0.1s, ease-out);
                                 opacity: .5;
+                                cursor: pointer;
                                 
-                                &:hover, &:active {
-                                    cursor: pointer;
-                                    
-                                    opacity: 1;
-                                    .transition-transform2(0s, linear, opacity, 0s, linear);
+                                &:hover {
+                                    .subnav-activated(1.0);
                                 }
                                 
                                 &:active {
-                                    .transform(scale(1.2, 1.2));
+                                    .subnav-activated(1.0);
                                 }
                             }
                             
-                            .subnav_button1 {
+                            .subnav_button-1 {
                                 background-position: -40px 0;
                             }
                             
-                            .subnav_button2 {
+                            .subnav_button-2 {
                                 background-position: -80px 0;
                             }
                         }
                     }
+                }
+                
+                /* profile header subsection navigation */
+                .subnav-active-0 .rhs .subnav .subnav_button-0, 
+                .subnav-active-1 .rhs .subnav .subnav_button-1, 
+                .subnav-active-2 .rhs .subnav .subnav_button-2 {
+                    cursor: default !important;
+                    .subnav-activated(1.0);
+                    
+                    &:hover {
+                        .subnav-activated(1.0);
+                    }
+                }
+                
+                .subnav-active-0 .lhs .header-subsection-0, 
+                .subnav-active-1 .lhs .header-subsection-1, 
+                .subnav-active-2 .lhs .header-subsection-2 {
+                    //display: block !important;
+                    opacity: 1 !important;
                 }
             }
             
@@ -776,11 +956,19 @@ a.lightbox {
 .stamp-preview, .stamp-preview-raw {
     .sized(@preview-wrapper-width);
     
+    .transform-style(preserve-3d);
+    .backface-visibility(hidden);
+    
     .preview-image {
         position: relative;
-        display:  none;
+        display: block;
+        width: 100%;
         
-        .sized(@preview-width);
+        .transition-transform(0.5s, ease-out);
+        
+        &:hover {
+            .transform(perspective(600));
+        }
     }
     
     .stamp-user-image {
@@ -809,7 +997,10 @@ a.lightbox {
     }
     
     img {
-        .sized(@preview-width);
+        position: relative;
+        display:  block;
+        width: 100%;
+        
         .rounded(4px);
     }
     
