@@ -159,7 +159,7 @@ static STActionManager* _singleton;
 }
 
 + (void)setupConfigurations {
-    [STConfiguration addFlag:NO forKey:STActionManagerShowAllActionsKey];
+    [STConfiguration addFlag:YES forKey:STActionManagerShowAllActionsKey];
 }
 
 @end

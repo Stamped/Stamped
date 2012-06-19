@@ -35,6 +35,7 @@
 #import "FindFriendsViewController.h"
 #import "STMenuController.h"
 #import "STUserViewController.h"
+#import "STUnreadActivity.h"
 
 @interface STInboxViewController ()
 
@@ -45,6 +46,7 @@
 @property (nonatomic, readwrite, retain) STCacheSnapshot* snapshot;
 @property (nonatomic, readwrite, retain) NSArray<STStamp>* searchResults;
 @property (nonatomic, readwrite, assign) BOOL reloading;
+@property (nonatomic, readwrite, assign) BOOL dirty;
 
 @end
 
@@ -57,27 +59,29 @@
 @synthesize snapshot = _snapshot;
 @synthesize searchResults = _searchResults;
 @synthesize reloading = _reloading;
+@synthesize dirty = _dirty;
 
 - (id)init {
-  if (self = [super init]) {
-      
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILoginNotification object:nil];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
-
-      if ([STStampedAPI sharedInstance].currentUser == nil) {
-          _scope = STStampedAPIScopeEveryone;
-      } else {
-          _scope = STStampedAPIScopeFriends;
-      }
-      _searchQuery = nil;
-      _reloading = YES;
-      self.showsSearchBar = NO;
-  }
-  return self;
+    if (self = [super init]) {
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILoginNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localStampModification:) name:STStampedAPILocalStampModificationNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        
+        if ([STStampedAPI sharedInstance].currentUser == nil) {
+            _scope = STStampedAPIScopeEveryone;
+        } else {
+            _scope = STStampedAPIScopeFriends;
+        }
+        _searchQuery = nil;
+        _reloading = YES;
+        self.showsSearchBar = NO;
+    }
+    return self;
 }
 
 - (void)dealloc {
@@ -90,9 +94,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-  
+    
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-
+    
     if (!LOGGED_IN) {
         
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
@@ -102,9 +106,9 @@
     } else {
         
         [Util addCreateStampButtonToController:self];
-
-    }
         
+    }
+    
     if (!_slider) {
         _slider = [[STSliderScopeView alloc] initWithFrame:CGRectMake(0, 0.0f, self.view.bounds.size.width, 54)];
         _slider.delegate = (id<STSliderScopeViewDelegate>)self;
@@ -127,7 +131,9 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     //Resume cache ops
-    [self reloadDataSource];
+    if (self.dirty) {
+        [self reloadDataSource];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -139,7 +145,7 @@
 #pragma mark - Actions
 
 - (void)login:(id)sender {
-
+    
     STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller showSignIn];
     
@@ -155,7 +161,7 @@
         CGPoint offset = self.tableView.contentOffset;
         [self.tableView reloadData];
         self.tableView.contentOffset = offset;
-
+        
     } else {
         [self.tableView reloadData];
     }
@@ -280,7 +286,7 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  
+    
     static NSString *CellIdentifier = @"CellIdentifier";
     [self.cache refreshAtIndex:indexPath.row+1 force:NO];
     STStampCell *cell = (STStampCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -293,7 +299,7 @@
     [cell setupWithStamp:stamp];
     
     return cell;
-  
+    
 }
 
 
@@ -318,7 +324,7 @@
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
-        
+    
 }
 
 
@@ -372,7 +378,9 @@
 }
 
 - (void)reloadDataSource {
+    self.dirty = NO;
     [self.cache refreshAtIndex:-1 force:YES];
+    [[STUnreadActivity sharedInstance] update];
     [super reloadDataSource];
 }
 
@@ -381,7 +389,7 @@
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-
+    
     view.imageView.userInteractionEnabled = YES;
     [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
@@ -498,7 +506,7 @@
         [gesture release];
         
     } 
-
+    
 }
 
 
@@ -510,7 +518,7 @@
         
         STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
         [controller showSignIn];
-
+        
     } else {
         
         FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
@@ -546,7 +554,7 @@
     magnifyView.frame = frame;
     [view addSubview:magnifyView];
     [magnifyView release];
-
+    
     UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
     [view insertSubview:imageView atIndex:0];
     [imageView release];
@@ -584,6 +592,9 @@
     
 }
 
+- (void)localStampModification:(id)notImportant {
+    self.dirty = YES;
+}
 
 #pragma mark - Login Notifications 
 
@@ -601,9 +612,9 @@
         [Util addCreateStampButtonToController:self];
         self.slider.scope = STStampedAPIScopeFriends;
         self.scope = STStampedAPIScopeFriends;
-
-    }
         
+    }
+    
     [self reloadDataSource];
 }
 

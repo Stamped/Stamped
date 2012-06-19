@@ -47,11 +47,25 @@ TODO:
     * fix glitch w/ hover state on entity stamp images in gallery shifting text
     * clicking on map in stamp gallery => selection in map view
     * remove ribbons from map list-view nav
-    * TODO: disable navigation to empty category-sections
     
-    * headers:
-        * change profile header image and share widget to remain constant
-        * transition between subheader sections
+    * profile:
+        * category nav:
+            * fix bug where sometimes URL params get in inconsistent state and you can't click on default
+            * disable navigation to empty category-sections
+        * gallery:
+            * fix sDetail bug where opening sDetail scrolls back to top of page
+            * adaptive layout improvements
+        * headers:
+            * change profile header image and share widget to remain constant
+            * experiment w/ different transitions between subheader sections
+            * expanded friend view
+                * mock?
+                * possibly interesting popup gallery of user profile images?
+        * sDetail:
+            * user feedback images inline and expanded view
+            * fixes to user-generated-image w/ zoom icon placement
+            * nuance 3D transition to entity image
+            * change crinkled map => larger, non-crinkled map
     
     * FIX CORS WebGL canvas issue
         * texImage2D

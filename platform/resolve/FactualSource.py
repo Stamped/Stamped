@@ -26,6 +26,7 @@ try:
     from pprint                     import pformat
     from gevent.pool                import Pool
     from api.Schemas                import TimesSchema, HoursSchema
+    from search.ScoringUtils        import *
 except:
     report()
     raise
@@ -46,6 +47,10 @@ def _ppath(*args):
 class FactualPlace(ResolverPlace):
 
     def __init__(self, factual_id=None, data=None):
+        # Note: We don't bother with maxLookupCalls with FactualPlaces because right now we know that if data!=None
+        # there won't be any lookup calls. If you change the code to implicitly call Factual even when data is provided
+        # in the constructor, please add a maxLookupCalls kwarg here and set it to 0 in the constructor calls from
+        # FactualSource.searchLite().
         if factual_id is None and data is None:
             raise ValueError("must have id or data")
         ResolverPlace.__init__(self)
@@ -267,6 +272,46 @@ class FactualSource(GenericSource):
             except GeneratorExit:
                 pass
         return generatorSource(gen(), constructor=FactualSearchAll)
+
+
+    def searchLite(self, queryCategory, queryText, timeout=None, queryLatLng=None):
+        if queryCategory != 'place':
+            raise NotImplementedError()
+
+        local_results = []
+        national_results = []
+
+        def getLocalResults():
+            # Radius is == the radius used with Google Places.
+            results = self.__factual.search(queryText, coordinates=queryLatLng, radius=20000)
+            local_results.extend(results)
+        def getNationalResults():
+            results = self.__factual.search(queryText)
+            national_results.extend(results)
+        if queryLatLng is not None:
+            pool = Pool(2)
+            pool.spawn(getLocalResults)
+            pool.spawn(getNationalResults)
+            pool.join(timeout=timeout)
+        else:
+            getNationalResults()
+
+        local_results = [FactualPlace(data=result) for result in local_results]
+        national_results = [FactualPlace(data=result) for result in national_results]
+
+        # The nice thing about Factual (as compared to Google) is that both national and local search return full
+        # results, so we can weight them the same. We weight them both low.
+        # TODO: Investigate adding in city name querytext matching to the score augmentation!
+        local_results = scoreResultsWithBasicDropoffScoring(local_results, sourceScore=0.4)
+        national_results = scoreResultsWithBasicDropoffScoring(national_results, sourceScore=0.4)
+
+        augmentPlaceScoresForRelevanceAndProximity(local_results, queryText, queryLatLng)
+        augmentPlaceScoresForRelevanceAndProximity(national_results, queryText, queryLatLng)
+
+        smoothScores(local_results)
+        smoothScores(national_results)
+
+        return dedupeById(local_results + national_results)
 
 
     def enrichEntity(self, entity, controller, decorations, timestamps):

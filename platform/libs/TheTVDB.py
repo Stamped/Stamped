@@ -23,20 +23,29 @@ class TheTVDB(object):
     def __init__(self, api_key='F1D337C9BF2357FB'):
         self.api_key = api_key
 
-    # note: these decorators add tiered caching to this function, such that 
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
     @cachedFn()
-    def search(self, query, transform=True, detailed=False):
+    def searchRaw(self, query):
         url = self._get_url(query)
-        
         try:
             xml = utils.getFile(url)
         except:
+            return None
+
+        # Putting results into the mongo cache will convert them to unicode, so in order to keep things parallel between
+        # the case where this does go through the cache and the case where it doesn't, we decode here and encode on the
+        # other side.
+        return xml.decode('utf-8')
+
+    def search(self, query, transform=True, detailed=False):
+        xml = self.searchRaw(query)
+        if xml is None:
             return []
-        
-        tree = objectify.fromstring(xml)
+
+        tree = objectify.fromstring(xml.encode('utf-8'))
         
         if not transform:
             return tree
@@ -111,6 +120,9 @@ class TheTVDB(object):
             setattr(target, self.__new_path[-1], self.__conversion_func(elem))
 
     def _parse_entity(self, item):
+        # TODO: This is completely out of keeping with how every other source does this. The rest all return raw
+        # XML here and then map fields in the ResolverObject class, whereas this actually converts to an Entity here
+        # and then has a resolver class that just passes through to the entity. Ugh.
         def makeBasicEntityMini(title, mini_type=BasicEntityMini):
             result = mini_type()
             result.title = title

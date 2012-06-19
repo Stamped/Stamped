@@ -152,7 +152,7 @@
 }
 
 - (BOOL)iconOnImages {
-    if (self.scope == STStampedAPIScopeYou && self.hasIcon) {
+    if (self.scope != STStampedAPIScopeYou && self.hasIcon) {
         return YES;
     }
     else {
@@ -443,23 +443,6 @@
 @synthesize configuration = _configuration;
 @synthesize scope = scope_;
 
-/*
- - (void)addUserImagesForUsers:(NSArray<STUser>*)users inView:(UIView*)view {
- NSInteger imageLimit = MIN(4, self.activity.subjects.count);
- CGRect imagesBounds = [STActivityCell imagesBoundsForActivity:self.activity andScope:self.scope];
- for (NSInteger i = 0; i < imageLimit; i++) {
- CGFloat size = 28;
- CGFloat padding = 5;
- id<STUser> subjectUser = [self.activity.subjects objectAtIndex:i];
- UIView* imageView = [Util profileImageViewForUser:subjectUser withSize:size];
- [Util reframeView:imageView withDeltas:CGRectMake(imagesBounds.origin.x + (size + padding) * i, imagesBounds.origin.y, 0, 0)];
- [view addSubview:imageView];
- UIView* imageButton = [Util tapViewWithFrame:imageView.frame target:self selector:@selector(userImageClicked:) andMessage:subjectUser];
- [view addSubview:imageButton];
- }
- }
- */
-
 - (CGFloat)addAttributedText:(NSString*)text 
                        frame:(CGRect)frame 
                         font:(UIFont*)font 
@@ -532,9 +515,15 @@
         }
         else if (self.activity.image) {
             imageView = [[[UIImageView alloc] initWithFrame:self.configuration.imageFrame] autorelease];
-            [[STImageCache sharedInstance] imageForImageURL:self.activity.image andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-                [(id)imageView setImage:image]; 
-            }];
+            UIImage* image = [[STImageCache sharedInstance] cachedImageForImageURL:self.activity.image];
+            if (image) {
+                [(id)imageView setImage:image];
+            }
+            else {
+                [[STImageCache sharedInstance] imageForImageURL:self.activity.image andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                    [(id)imageView setImage:image]; 
+                }];
+            }
             [self addSubview:imageView];
         }
         CGFloat y = self.configuration.headerPadding;
@@ -581,9 +570,15 @@
                         iconImageView.image = [Util stampImageForUser:currentUser withSize:STStampImageSize12];
                     }
                     else {
-                        [[STImageCache sharedInstance] imageForImageURL:self.activity.icon andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-                            iconImageView.image = image; 
-                        }];
+                        UIImage* iconImage = [[STImageCache sharedInstance] cachedImageForImageURL:self.activity.icon];
+                        if (iconImage) {
+                            iconImageView.image = iconImage;
+                        }
+                        else {
+                            [[STImageCache sharedInstance] imageForImageURL:self.activity.icon andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                                iconImageView.image = image; 
+                            }];
+                        }
                     }
                     [self addSubview:iconImageView];
                 }
@@ -624,13 +619,13 @@
             footerX = self.configuration.contentOffset + timestampView.frame.size.width + 13;
         }
         if (self.configuration.footer) {
-                CGFloat maxFooterX = 11 + [self addAttributedText:self.configuration.footer
-                                                    frame:CGRectMake(footerX, y, self.configuration.footerWidth, self.configuration.footerHeight.floatValue)
-                                                     font:self.configuration.footerFontNormal
-                                                    color:self.configuration.footerColorNormal
-                                                   offset:0
-                                               references:self.activity.footerReferences
-                                                   toView:self];
+            CGFloat maxFooterX = 11 + [self addAttributedText:self.configuration.footer
+                                                        frame:CGRectMake(footerX, y, self.configuration.footerWidth, self.configuration.footerHeight.floatValue)
+                                                         font:self.configuration.footerFontNormal
+                                                        color:self.configuration.footerColorNormal
+                                                       offset:0
+                                                   references:self.activity.footerReferences
+                                                       toView:self];
             if (self.scope == STStampedAPIScopeYou) {
                 timestampX = maxFooterX;
             }
@@ -638,7 +633,7 @@
         [Util reframeView:timestampView withDeltas:CGRectMake(timestampX, y, 0, 0)];
         [self addSubview:timestampView];
         
-        if (!self.configuration.iconOnImages && self.configuration.hasIcon) {
+        if (!self.configuration.iconOnImages && self.configuration.hasIcon && !self.activity.image) {
             UIImageView* iconView = [[[UIImageView alloc] initWithFrame:self.configuration.iconFrame] autorelease];
             if (self.configuration.useStampIcon) {
                 id<STUser> user = [self.activity.subjects objectAtIndex:0];
@@ -646,9 +641,15 @@
                 iconView.image = stampIcon;
             }
             else {
-                [[STImageCache sharedInstance] imageForImageURL:self.activity.icon andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-                    iconView.image = image;
-                }];
+                UIImage* iconImage = [[STImageCache sharedInstance] cachedImageForImageURL:self.activity.icon];
+                if (iconImage) {
+                    iconView.image = iconImage;
+                }
+                else {
+                    [[STImageCache sharedInstance] imageForImageURL:self.activity.icon andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                        iconView.image = image;
+                    }];
+                }
             }
             [self addSubview:iconView];
         }

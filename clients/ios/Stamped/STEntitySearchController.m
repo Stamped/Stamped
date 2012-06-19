@@ -99,6 +99,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.navigationItem.leftBarButtonItem = button;
     [button release];
     
+    BOOL loadResults = YES;
     CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
     if ([_category isEqualToString:@"place"]) {
         _locationManager = [[CLLocationManager alloc] init];
@@ -108,15 +109,19 @@ static const CGFloat _offscreenCancelPadding = 5;
         [_locationManager startUpdatingLocation];
         location = [_locationManager location];
         if (location) {
+            [STStampedAPI sharedInstance].currentUserLocation = location;
             float longitude = location.coordinate.longitude;
             float latitude = location.coordinate.latitude;
             self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
             [_locationManager stopUpdatingLocation];
         }
+        else {
+            loadResults = NO;
+        }
     }
-    
-    [self reloadDataSource];
-    
+    if (loadResults) {
+        [self reloadDataSource];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -134,18 +139,19 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation  fromLocation:(CLLocation *)oldLocation {
     
+    float longitude = newLocation.coordinate.longitude;
+    float latitude = newLocation.coordinate.latitude;
+    self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
+    [STStampedAPI sharedInstance].currentUserLocation = newLocation;
+    [_locationManager stopUpdatingLocation];
     if (!self.requestCancellation && !self.suggestedSections && !self.searchSections) {
-        float longitude = newLocation.coordinate.longitude;
-        float latitude = newLocation.coordinate.latitude;
-        self.coordinates = [NSString stringWithFormat:@"%f,%f", latitude, longitude];
         [self reloadDataSource];
-        [_locationManager stopUpdatingLocation];
     }
-    
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    [self getSuggestionsWithLocation:nil];
+    //[STStampedAPI sharedInstance].currentUserLocation = nil;
+    [self reloadDataSource];
     [_locationManager stopUpdatingLocation];
 }
 
@@ -190,10 +196,10 @@ static const CGFloat _offscreenCancelPadding = 5;
         
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
-            return sectionObject.entities.count + 1; // plus one to add 'add' cell
+            return sectionObject.entities.count; // + 1; // plus one to add 'add' cell
         }
         
-        return 1;
+        return 0; //1;
         
     }
     
@@ -215,7 +221,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             return 1;
         }
         
-        return self.searchSections ? self.searchSections.count : 1;
+        return self.searchSections ? self.searchSections.count : 0;
         
     }
     
@@ -412,6 +418,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     STEntitySearch *search = [[[STEntitySearch alloc] init] autorelease];
     search.category = self.category;
     search.query = text;
+    search.coordinates = self.coordinates;
     self.searchCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchSection> *sections, NSError *error, STCancellation* cancellation) {
         
         [self.searchView setLoading:NO];

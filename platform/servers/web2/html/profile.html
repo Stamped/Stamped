@@ -102,7 +102,7 @@
                                     
                                     <div class="user-stamp-distribution">
                                         {% for section in user.distribution %}
-                                            <div class="section stamp-category-{{section.category}} clearfix">
+                                            <div class="section stamp-category-{{section.category}} stamp-subcategory-{{section.category}} clearfix">
                                                 <div class="category-name">
                                                     {% if section.category == "place" %}Places{% endif %}
                                                     {% if section.category == "music" %}Musics{% endif %}
@@ -112,9 +112,7 @@
                                                     {% if section.category == "other" %}Other{% endif %}
                                                 </div>
                                                 
-                                                <div class='icon-wrapper'>
-                                                    <div class='icon'></div>
-                                                </div>
+                                                <div class='icon dark-icon'></div>
                                                 
                                                 <div class="bargraph-row">
                                                     <div class="bargraph-row-value" data-count="{{section.count}}"></div>
