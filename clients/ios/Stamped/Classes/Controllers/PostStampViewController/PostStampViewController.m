@@ -295,13 +295,17 @@
 - (void)postStampedByView:(PostStampedByView*)view selectedAll:(id)sender {
     
     NSMutableArray *userIDs = [NSMutableArray array];
+    NSMutableDictionary* stamps = [NSMutableDictionary dictionary];
     for (id<STStampPreview> preview in [self.stampedBy.everyone stampPreviews]) {
         NSString *userID = preview.user.userID;
-        if (userID) {
+        NSString* stampID = preview.stampID;
+        if (userID && stampID) {
             [userIDs addObject:userID];
+            [stamps setObject:stampID forKey:userID];
         }
     }
     STUsersViewController *controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+    controller.userIDToStampID = stamps;
     [self.navigationController pushViewController:controller animated:YES];
     
 }

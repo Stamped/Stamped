@@ -459,6 +459,8 @@
 
 #pragma mark - Getters
 
+#warning Shouldn't mangle passwords
+
 - (NSString*)username {
     
     if (_username.text) {

@@ -222,10 +222,12 @@ typedef enum {
 }
 
 - (void)dealloc {
+    
     [_headerView release];
     [_commentsView release];
     [_stamp release];
     [_toolbar release];
+    [entityDetailCancellation_ cancel];
     [entityDetailCancellation_ release];
     [_commentView release], _commentView=nil;
     [_panGesture release], _panGesture=nil;
@@ -239,12 +241,12 @@ typedef enum {
     [super viewDidLoad];
 
     if (!_headerView) {
-        _headerView = [[[STStampDetailHeaderView alloc] initWithStamp:self.stamp] autorelease];
+        _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
         [self.scrollView appendChildView:_headerView];
     }
     
     if (!_commentsView) {
-        _commentsView = [[[STStampDetailCommentsView alloc] initWithStamp:self.stamp andDelegate:self.scrollView] autorelease];
+        _commentsView = [[STStampDetailCommentsView alloc] initWithStamp:self.stamp andDelegate:self.scrollView];
         [self.scrollView appendChildView:_commentsView];
     }
     
@@ -288,8 +290,6 @@ typedef enum {
 }
 
 - (void)viewDidUnload {
-    _headerView = nil;
-    _commentsView = nil;
     [super viewDidUnload];
 }
 
@@ -325,7 +325,7 @@ typedef enum {
 
 - (void)stCreateCommentView:(STCreateCommentView*)view addedComment:(id<STComment>)comment {
     
-    [self reloadStampedData];
+    //[self reloadStampedData];
     [view killKeyboard];
     
 }
@@ -540,7 +540,7 @@ typedef enum {
     
     self.commentView.identifier = self.stamp.stampID;
     //_animateKeyboard = animated;
-    [self.commentView showAnimated:animated];
+    [self.commentView showAnimated:YES];
     
 }
 
@@ -557,7 +557,7 @@ typedef enum {
     CGFloat contentOffset = self.scrollView.contentOffset.y + keyboardFrame.size.height;
     CGFloat newHeight = (self.scrollView.frame.size.height - keyboardFrame.size.height);
     contentOffset = MIN(contentOffset+40, self.scrollView.contentSize.height - newHeight);
-    
+    /*
     BOOL _enabled = [UIView areAnimationsEnabled];
     [UIView setAnimationsEnabled:YES];
     
@@ -578,6 +578,7 @@ typedef enum {
    // }
     [UIView setAnimationsEnabled:_enabled];
    // _animateKeyboard = YES;
+     */
     
 }
 
@@ -586,7 +587,7 @@ typedef enum {
     if (self.commentView) {
         [self.commentView keyboardWillHide:[notification userInfo]];
     }
-    
+    /*
     [self.panGesture setEnabled:NO];
     //if (_animateKeyboard) {
         [UIView animateWithDuration:0.3 animations:^{
@@ -594,7 +595,7 @@ typedef enum {
             self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
         }];
     //}
-    
+    */
     
 }
 

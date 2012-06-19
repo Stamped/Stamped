@@ -179,6 +179,7 @@
         for (id<STActionItem> action in detail.actions) {
             id<STAction> actualAction = action.action;
             STActionContext* context = [STActionContext context];
+            context.entityDetail = detail;
             if ([STConfiguration flag:STActionManagerShowAllActionsKey] || 
                 [[STActionManager sharedActionManager] canHandleAction:actualAction withContext:context]) {
                 

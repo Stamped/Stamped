@@ -472,7 +472,7 @@
         
         if (!_firstPan) {
             
-            [self moveToScope:scope animated:YES duration:0.1f completion:^{}];
+            [self moveToScope:scope animated:YES duration:.1 completion:^{}];
             
         } else {
             

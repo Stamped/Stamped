@@ -7,16 +7,20 @@
 //
 
 #import "STCalloutView.h"
+#import "STConfiguration.h"
 
 #define kCalloutHeight 54.0f
 #define kMinWidth 120.0f
+
+static NSString* const _fadeDurationKey = @"PopUp-ToolTip.fadeDuration";
+static NSString* const _fadeDelayKey = @"PopUp-ToolTip.fadeDelay";
 
 @implementation STCalloutView
 
 - (void)commonInit {
     
     self.frame = CGRectMake(0.0f, 0.0f, kMinWidth, kCalloutHeight);
-
+    
     UIImage *image = [UIImage imageNamed:@"st_callout_left.png"];
     UIImageView *imageView = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:image.size.width-1 topCapHeight:0]];
     [self addSubview:imageView];
@@ -33,7 +37,7 @@
     [self addSubview:imageView];
     [imageView release];
     _mid = imageView;
-
+    
 }
 
 - (id)initWithFrame:(CGRect)frame {
@@ -78,7 +82,7 @@
     
     frame.origin.y = position.y - self.bounds.size.height;
     self.frame = frame;
-
+    
     frame = _mid.frame;
     frame.origin.x = arrowLocation - (_mid.bounds.size.width/2);
     _mid.frame = frame;
@@ -111,26 +115,23 @@
         [self.layer addAnimation:animation forKey:nil];
         
     }
-
+    
 }
 
 - (void)hide:(BOOL)animated {
- 
-    [CATransaction begin];
-    [CATransaction setCompletionBlock:^{
-        [self removeFromSuperview];
-    }];
-    
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-    animation.duration = 0.2f;
-    animation.fromValue = [NSNumber numberWithFloat:1.0f];
-    animation.toValue = [NSNumber numberWithFloat:0.0f];
-    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    animation.fillMode = kCAFillModeForwards;
-    [self.layer addAnimation:animation forKey:nil];
-    self.layer.opacity = 0.0f;
+    [UIView animateWithDuration:[[STConfiguration value:_fadeDurationKey] floatValue]
+                          delay:[[STConfiguration value:_fadeDelayKey] floatValue] 
+                        options:UIViewAnimationOptionCurveEaseOut 
+                     animations:^{
+                         self.alpha = 0; 
+                     } completion:^(BOOL finished) {
+                         [self removeFromSuperview];
+                     }];
+}
 
-    [CATransaction commit];
++ (void)setupConfigurations {
+    [STConfiguration addNumber:[NSNumber numberWithFloat:.4] forKey:_fadeDurationKey];
+    [STConfiguration addNumber:[NSNumber numberWithFloat:.9] forKey:_fadeDelayKey];
 }
 
 @end

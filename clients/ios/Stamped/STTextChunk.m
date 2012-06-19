@@ -32,7 +32,14 @@
     NSAttributedString* string = [Util attributedStringForString:text font:font color:color lineHeight:chunk.lineHeight indent:chunk.end];
     CGSize size = [Util sizeForString:string thatFits:CGSizeMake(chunk.frame.size.width, chunk.lineHeight * lineLimit)];
     lineCount = roundf(size.height / chunk.lineHeight);
-    end = [Util endForString:string withSize:size];
+    //size.width = chunk.frame.size.width;
+    if (lineCount == 1) {
+        end = size.width + chunk.end;
+    }
+    else {
+        size.width = chunk.frame.size.width;
+        end = [Util endForString:string withSize:size];
+    }
     self = [super initWithLineHeight:chunk.lineHeight start:chunk.end end:end width:chunk.frame.size.width lineCount:lineCount lineLimit:lineLimit];
     if (self) {
         self.topLeft = CGPointMake(chunk.topLeft.x, chunk.topLeft.y + chunk.lineHeight *(chunk.lineCount - 1 ) );

@@ -92,10 +92,18 @@ static STStampedActions* _sharedInstance;
     else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
       UIViewController* controller = nil;
       if (context.user) {
-        controller = [[[STUserViewController alloc] initWithUser:source] autorelease];
+        controller = [[[STUserViewController alloc] initWithUser:context.user] autorelease];
       }
       else {
-        controller = [[[STUserViewController alloc] initWithUser:source] autorelease];
+          [[STStampedAPI sharedInstance] userDetailForUserID:source.sourceID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+              if (userDetail) {
+                  [[Util sharedNavigationController] pushViewController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease] 
+                                                           animated:YES];
+              }
+              else {
+                  [Util warnWithMessage:@"User not found" andBlock:nil];
+              }
+          }];
       }
       if (controller) {
         [[Util sharedNavigationController] pushViewController:controller animated:YES];
@@ -187,6 +195,7 @@ static STStampedActions* _sharedInstance;
     }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
       handled = YES;
+        NSLog(@"menu handled");
       if (flag) {
         [Util globalLoadingLock];
         [[STStampedAPI sharedInstance] menuForEntityID:source.sourceID andCallback:^(id<STMenu> menu, NSError* error, STCancellation* cancellation) {

@@ -196,10 +196,10 @@ static const CGFloat _offscreenCancelPadding = 5;
         
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
-            return sectionObject.entities.count + 1; // plus one to add 'add' cell
+            return sectionObject.entities.count; // + 1; // plus one to add 'add' cell
         }
         
-        return 1;
+        return 0; //1;
         
     }
     
@@ -221,7 +221,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             return 1;
         }
         
-        return self.searchSections ? self.searchSections.count : 1;
+        return self.searchSections ? self.searchSections.count : 0;
         
     }
     

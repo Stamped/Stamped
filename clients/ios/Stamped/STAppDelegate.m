@@ -37,6 +37,7 @@
 #import "STRestKitLoader.h"
 #import "STUnreadActivity.h"
 #import "STActionManager.h"
+#import "STCalloutView.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -373,6 +374,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STCreateStampViewController setupConfigurations];
     
     //Actions
+    [STActionManager setupConfigurations];
+    
+    [STCalloutView setupConfigurations];
 }
 
 @end

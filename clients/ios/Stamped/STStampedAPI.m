@@ -285,6 +285,11 @@ static STStampedAPI* _sharedInstance;
                                                       params:stampNew.asDictionaryParams
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
+                                                     if (stamp) {
+                                                         [self.stampCache setObject:stamp forKey:[stamp stampID]];
+                                                         [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification
+                                                                                                             object:[stamp stampID]];
+                                                     }
                                                      block(stamp, error, cancellation);
                                                  }];
 }
@@ -442,7 +447,7 @@ static STStampedAPI* _sharedInstance;
     void (^block)(id<STStamp> stamp) = ^(id<STStamp> stamp) {
         STSimpleStamp* copy = [STSimpleStamp augmentedStampWithStamp:stamp todo:todo like:like comment:comment andCredit:credit];
         [self.stampCache setObject:copy forKey:stampID];
-        [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:stamp];
+        [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:stampID];
     };
     if (stamp) {
         block(stamp);
@@ -465,7 +470,7 @@ static STStampedAPI* _sharedInstance;
     void (^block)(id<STStamp> stamp) = ^(id<STStamp> stamp) {
         STSimpleStamp* copy = [STSimpleStamp reducedStampWithStamp:stamp todo:todo like:like comment:comment andCredit:credit];
         [self.stampCache setObject:copy forKey:stampID];
-        [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:stamp];
+        [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:stampID];
     };
     if (stamp) {
         block(stamp);
