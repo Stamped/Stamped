@@ -100,7 +100,7 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 
 #@handleHTTPRequest(parse_request=False)
 #@require_http_methods(["POST"])
-#def update(request, authUserId, **kwargs):
+#def update(request, authUserId, **kwargs):x
 #    ### TODO: Carve out password changes, require original password sent again?
 #
 #    ### TEMP: Generate list of changes. Need to do something better eventually..
@@ -118,18 +118,18 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 #
 #    return transformOutput(account.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPAccountProfile)
-@require_http_methods(["POST"])
-def updateProfile(request, authUserId, data, **kwargs):
-    ### TEMP: Generate list of changes. Need to do something better eventually...
-    for k, v in data.iteritems():
-        if v == '':
-            data[k] = None
-    
-    account = stampedAPI.updateProfile(authUserId, data)
-    user    = HTTPUser().importUser(account)
-    
-    return transformOutput(user.dataExport())
+#@handleHTTPRequest(http_schema=HTTPAccountProfile)
+#@require_http_methods(["POST"])
+#def updateProfile(request, authUserId, data, **kwargs):
+#    ### TEMP: Generate list of changes. Need to do something better eventually...
+#    for k, v in data.iteritems():
+#        if v == '':
+#            data[k] = None
+#
+#    account = stampedAPI.updateProfile(authUserId, data)
+#    user    = HTTPUser().importUser(account)
+#
+#    return transformOutput(user.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPAccountProfileImage)

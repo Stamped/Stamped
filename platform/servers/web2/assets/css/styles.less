@@ -277,27 +277,39 @@ a.follow-button {
 
 
 .user-gallery {
+    display: block;
+    position: relative;
+    
     .user-gallery-item {
-        margin: 0 4px 4px 0;
+        display: inline-block;
+        
+        .overlay {
+            display: none;
+            z-index: 23;
+            position: relative;
+        }
     }
     
-    :nth-child(10) {
-        background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
-        width:  24px;
-        height: 24px;
+    /*:nth-child(3) {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        margin-top: -12px;
         
-        .profile-image-border(2px);
-        
-        img {
-            display: none;
+        .overlay {
+            display: block;
+            width:  24px;
+            height: 24px;
+            
+            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
         }
         
-        /*&:hover {
+        &:hover {
             background: lighten(@stamped-base-color, 10%);
-        }*/
-    }
+        }
+    }*/
     
-    :nth-child(n+11) {
+    :nth-child(n+4) {
         display: none;
     }
 }

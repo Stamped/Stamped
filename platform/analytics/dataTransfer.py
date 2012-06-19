@@ -1,12 +1,12 @@
 import Globals
-
 import sys
-import keys.aws, logs, utils
-from MongoStampedAPI import MongoStampedAPI
+import keys.aws, logs, utils, time
 import boto
-from db.mongodb.MongoStatsCollection            import MongoStatsCollection
-from bson.objectid          import ObjectId
-from gevent.pool import Pool
+
+from MongoStampedAPI                        import MongoStampedAPI
+from db.mongodb.MongoStatsCollection        import MongoStatsCollection
+from bson.objectid                          import ObjectId
+from gevent.pool                            import Pool
 
 
 conn = boto.connect_sdb("AKIAJPJJ2QXCMPIITWDQ","XwBv06/ezFEjsJvalbLNgE9IrHJ46DlGtWc5/F+X")
@@ -39,7 +39,7 @@ for i in sample:
         count += 1 
         pool.spawn(put,i)
         if count % 1000 == 0:
-            print count
+            print count, time.time()
     except: 
         badRequests.append(i)
         

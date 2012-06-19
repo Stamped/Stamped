@@ -378,7 +378,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def countCredits(self, userId):
         return self.credit_received_collection.numCredit(userId)
 
-    def getRestamps(self, userId, entityId, limit=None):
+    def getRestamps(self, userId, entityId, limit=0):
         try:
             query = {
                 'entity.entity_id'      : entityId,
@@ -388,7 +388,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return map(self._convertFromMongo, documents)
         except Exception:
             return []
-
         
     def addLike(self, userId, stampId):
         # Add a reference to the user in the stamp's 'like' collection
