@@ -3096,7 +3096,7 @@ class HTTPActivity(Schema):
                 verbs = actionMapping[self.verb[7:]]
 
             #offset = verbs.find('###') #- #13 + len(subjects) + 1
-            verbs = re.sub("###", "", verbs)
+            #verbs = re.sub("###", "", verbs)
 
             offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
