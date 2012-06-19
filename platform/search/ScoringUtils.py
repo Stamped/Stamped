@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 from SearchResult import SearchResult
+from difflib import SequenceMatcher
 
 def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dropoffFactor=0.7):
     """
@@ -66,3 +67,58 @@ def interleaveResultsByScore(resultLists):
     sortByScore(allResults)
     return allResults
 
+def dedupeById(scoredResults, boostFactor=1.0):
+    keysToResults = {}
+    for scoredResult in scoredResults:
+        key = scoredResult.resolverObject.key
+        if key in keysToResults:
+            priorResult = keysToResults[key]
+            # For several sources we send several different types of queries out, and often they can have some overlap.
+            # If two queries sent to one source for a specific query both return something with the same key, it's a
+            # good sign that the result is relevant.
+            priorResult.score += scoredResult.score * boostFactor
+            priorResult.addScoreComponentDebugInfo('boost from dupe by ID within results from single source',
+                                                   boostFactor)
+        else:
+            keysToResults[key] = scoredResult
+    return keysToResults.values()
+
+
+import math
+def geoDistance((lat1, lng1), (lat2, lng2)):
+    radius = 6371 # km
+
+    dlat = math.radians(lat2-lat1)
+    dlng = math.radians(lng2-lng1)
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1))\
+                                              * math.cos(math.radians(lat2)) * math.sin(dlng/2) * math.sin(dlng/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = radius * c
+
+    return d
+
+
+def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
+    """
+    What I'm really looking for here are hints as to how I should blend between search and autocomplete results.
+    TODO: We should do text matching that extends past the title and into the address as well -- queries like
+    'Shake Shack Westport' are really good ways to make your intent explicit to Google, but we don't do a good
+    job of handling them.
+    """
+    for result in results:
+        # TODO: I think the string matching here underweights substring matches, and especially prefix matches.
+        titleSimilarity = SequenceMatcher(',]:-.'.__contains__, queryText, result.resolverObject.name).ratio()
+        if titleSimilarity > 0.6:
+            factor = 1 + (titleSimilarity - 0.6)
+            # Maxes out at 1.5 if it's identical.
+            if titleSimilarity == 1:
+                factor += 0.1
+            result.score *= factor
+            result.addScoreComponentDebugInfo('title similarity factor', factor)
+
+        if queryLatLng and result.resolverObject.coordinates:
+            distance = geoDistance(queryLatLng, result.resolverObject.coordinates)
+            # Works out to about x2 for being right fucking next to something and x1.2 for being 25km away.
+            distance_boost = 1 + math.log(100 / distance, 1000)
+            result.score *= distance_boost
+            result.addScoreComponentDebugInfo('proximity score factor', distance_boost)

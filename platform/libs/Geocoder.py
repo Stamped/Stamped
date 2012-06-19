@@ -11,6 +11,7 @@ import json, re, urllib
 from optparse       import OptionParser
 from AKeyBasedAPI   import AKeyBasedAPI
 from errors         import *
+from CachedFunction import cachedFn
 
 class AGeocoder(AKeyBasedAPI):
     """
@@ -74,7 +75,8 @@ class Geocoder(AGeocoder):
             isValid |= decoder.isValid
         
         return True
-    
+
+    @cachedFn()
     def addressToLatLng(self, address):
         address = utils.removeNonAscii(address)
         latLng = None

@@ -449,11 +449,11 @@ class AmazonTvShow(_AmazonObject, ResolverMediaCollection):
     TITLE_REMOVAL_REGEXES = [
         re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
         re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'(\s*[:-]\s*|\s)(the )?complete.*$', re.IGNORECASE),
-        re.compile(r'(\s*[:-]\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
-        re.compile(r'(\s*[:-]\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'(\s*[:-]\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
-        re.compile(r'(\s*[:-]\s*|\s)volumes?\s[a-zA-Z0-9].*$', re.IGNORECASE),
+        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?complete.*$', re.IGNORECASE),
+        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
+        re.compile(r'(\s*[:,;.-]+\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
+        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
+        re.compile(r'(\s*[:,;.-]+\s*|\s)(volumes?|vol\.)\s[a-zA-Z0-9].*$', re.IGNORECASE),
         re.compile(r'^(the )?best (\w+ )?of ', re.IGNORECASE),
     ]
 
@@ -887,6 +887,21 @@ class AmazonSource(GenericSource):
         None for things that are neither TV shows nor movies (for instance, TV episodes, movie collections.)
         """
 
+        # TODO: This shit needs some work. It's fairly functional right now but is not to the point of being a clear
+        # improvement over video search without Amazon. What we need to do is:
+        # 1. Have a standard library for clipping out title nonsense but only when we're really sure -- like when it's
+        #    preceded by punctuation.
+        # 2. Have a standard library for detecting TV-ness and collection-ness using title nonsense & other attribute.s
+        # 3. Have a standard library for detecting things in titles that are likely bullshit, but possibly not.
+        # 4. Severely demote or mark as match-only things that either (a) are ambiguous TV-vs-movie, (b) are ambiguous
+        #    movie-vs-movie-colleciton, or (b) likely have title bullshit.
+        raise NotImplementedError()
+
+        """
+        print "CONSTRUCTING FROM RAW OBJECT\n\n"
+        pprint(rawResult)
+        print "\n\n"
+
         # TODO: Eliminate code duplication with __constructMusicObjectFromResult!
         productTypeName = xp(rawResult, 'ItemAttributes', 'ProductTypeName')['v']
         try:
@@ -901,7 +916,7 @@ class AmazonSource(GenericSource):
         if productTypeName == 'DOWNLOADABLE_MOVIE':
             movieLikeliness += 6
         elif productTypeName == 'DOWNLOADABLE_TV_EPISODE':
-            tvShowLikeliness += 6
+            pass
         elif productTypeName in ['ABIS_DVD', 'VIDEO_DVD'] and binding in ['DVD', 'Blu-ray']:
             pass
         else:
@@ -909,27 +924,32 @@ class AmazonSource(GenericSource):
                          " binding " + binding)
             return None
 
-
-        if productTypeName == 'DOWNLOADABLE_MOVIE':
-            result = AmazonMovie(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
-            return result
-        elif productTypeName == 'DOWNLOADABLE_TV_EPISODE':
-            return None
-        elif productTypeName in ['ABIS_DVD', 'VIDEO_DVD'] and binding in ['DVD', 'Blu-ray']:
-            # Discriminate based on title, # of discs, price, audience rating, running time.
-            movieLikeliness = 0
-            tvShowLikeliness = 0
+        print "AFTER TYPES, WE HAVE:", "movie=", movieLikeliness, "tv=", tvShowLikeliness
 
         # Look for clues in the title.
         title = xp(rawResult, 'ItemAttributes', 'Title')['v']
-        if 'complete' in title.lower():
+        titleWords = title.lower().split()
+        if 'complete' in titleWords:
             tvShowLikeliness += 2
-        if 'season' in title.lower():
+        if 'collection' in titleWords:
             tvShowLikeliness += 4
-        if 'volume' in title.lower():
+        if 'gift set' in titleWords:
             tvShowLikeliness += 4
-        if 'the best of' in title.lower():
+        if 'double feature' in titleWords:
             tvShowLikeliness += 4
+        if 'season' in titleWords:
+            tvShowLikeliness += 4
+        if 'episodes' in titleWords:
+            tvShowLikeliness += 4
+        if 'trilogy' in titleWords:
+            tvShowLikeliness += 4
+            movieLikeliness += 4
+        if 'volume' in titleWords:
+            tvShowLikeliness += 4
+        if 'the best of' in titleWords:
+            tvShowLikeliness += 4
+
+        print "AFTER TITLE HITS, WE HAVE:", "movie=", movieLikeliness, "tv=", tvShowLikeliness
 
         # Look for clues in the number of discs.
         try:
@@ -941,9 +961,11 @@ class AmazonSource(GenericSource):
         except KeyError:
             pass
 
+        print "AFTER NUM DISCS, WE HAVE:", "movie=", movieLikeliness, "tv=", tvShowLikeliness
+
         # Look for clues in the running time.
         try:
-            runtime = xp(rawResult, 'ItemAttributes', 'RunningTime')['v']
+            runtime = float(xp(rawResult, 'ItemAttributes', 'RunningTime')['v'])
             # Runtime is in minutes.
             if runtime >= 60 and runtime < 120:
                 movieLikeliness += 2
@@ -954,6 +976,8 @@ class AmazonSource(GenericSource):
                 movieLikeliness += 1
         except KeyError:
             pass
+
+        print "AFTER RUNTIME, WE HAVE:", "movie=", movieLikeliness, "tv=", tvShowLikeliness
 
         # Look for clues in the pricing.
         try:
@@ -967,6 +991,8 @@ class AmazonSource(GenericSource):
         except KeyError:
             pass
 
+        print "AFTER PRICE, WE HAVE:", "movie=", movieLikeliness, "tv=", tvShowLikeliness
+
         # Look for clues in the rating.
         try:
             rating = xp(rawResult, 'ItemAttributes', 'AudienceRating')['v']
@@ -975,11 +1001,18 @@ class AmazonSource(GenericSource):
             elif tvShowLikeliness > 3:
                 # This has a rating, but has all the properties of a collection. It's probably a collection of
                 # movies. Drop it.
+                print "Probably a collection! Dropping."
                 return None
             else:
                 movieLikeliness += 5
         except KeyError:
             tvShowLikeliness += 2
+
+        print "AFTER RATING, WE HAVE:", "movie=", movieLikeliness, "tv=", tvShowLikeliness
+
+        if movieLikeliness > 3 and tvShowLikeliness > 3:
+            print "CONFLICT! Dropping."
+            return None
 
         if movieLikeliness > tvShowLikeliness:
             result = AmazonMovie(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
@@ -987,6 +1020,7 @@ class AmazonSource(GenericSource):
         else:
             result = AmazonTvShow(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
             return result
+        """
 
 
     def __interleaveAndCombineDupesBasedOnAsin(self, scoredResultLists):

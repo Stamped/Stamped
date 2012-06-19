@@ -15,6 +15,8 @@ from logs import report
 
 try:
     import logs
+    import math
+    import string
     from GenericSource              import GenericSource
     from GooglePlaces               import GooglePlaces
     from Resolver                   import *
@@ -25,6 +27,8 @@ try:
     from functools                  import partial
     from LibUtils                   import states
     from pprint                     import pformat
+    from search.ScoringUtils        import *
+    from difflib                    import SequenceMatcher
 except:
     report()
     raise
@@ -46,6 +50,7 @@ def _constant_helper(value,not_used):
 
 def _constant(value):
     return partial(_constant_helper,value)
+
 
 """
 {u'address_components': [{u'long_name': u'3583',
@@ -82,9 +87,14 @@ def _constant(value):
  u'website': u'http://www.starbellysf.com/'}
 """
 
+
 class GooglePlacesPlace(ResolverPlace):
 
     def __init__(self, data):
+        # Note: We don't bother with maxLookupCalls with FactualPlaces because right now we know that if data!=None
+        # there won't be any lookup calls. If you change the code to implicitly call Factual even when data is provided
+        # in the constructor, please add a maxLookupCalls __init__ kwarg and set it to 0 in the constructor calls from
+        # GooglePlacesSource.searchLite().
         ResolverPlace.__init__(self)
         self.__data = data
 
@@ -114,8 +124,10 @@ class GooglePlacesPlace(ResolverPlace):
     def address_string(self):
         if 'address_string' in self.data:
             return self.data['address_string']
+        elif 'vicinity' in self.data:
+            return self.data['vicinity']
         return None
-    
+
     @lazyProperty
     def address(self):
         if 'address_components' not in self.data:
@@ -201,6 +213,58 @@ class GooglePlacesPlace(ResolverPlace):
     def source(self):
         return 'googleplaces'
     
+    def __repr__(self):
+        return pformat(self.data)
+
+
+class GooglePlacesAutocompletePlace(ResolverPlace):
+    """
+    Right now GooglePlacesPlace sort of encapsulates GooglePlaces data that came in either through a lookup or a
+    search result. They're fairly similar so that's alright for now, but autocomplete places are a lot more restricted
+    and the data you're looking for is in different places so they deserve their own class.
+
+    TODO: Split out any common functionality with GooglePlacesPlace to a superclass, possibly also split out the
+    lookup/search results into separate classes.
+    """
+    def __init__(self, data):
+        ResolverPlace.__init__(self)
+        self.__data = data
+
+    @property
+    def source(self):
+        return 'googleplaces'
+
+    @property
+    def key(self):
+        return self.__data['id']
+
+    @lazyProperty
+    def __terms(self):
+        try:
+            return [term['value'] for term in self.__data['terms']]
+        except Exception:
+            # TODO: Why might this throw an exception?
+            return []
+
+    @lazyProperty
+    def name(self):
+        if self.__terms:
+            return self.__terms[0]
+        return self.__data['description']
+
+    @property
+    def reference(self):
+        return self.__data['reference']
+
+    @lazyProperty
+    def address_string(self):
+        address_components = self.__terms[1:]
+        if not address_components:
+            return ''
+        if address_components[-1] == 'United States':
+            del address_components[-1]
+        return string.joinfields(address_components, ', ')
+
     def __repr__(self):
         return pformat(self.data)
 
@@ -318,6 +382,51 @@ class GooglePlacesSource(GenericSource):
                 pass
         
         return self.generatorSource(gen())
+
+    def searchLite(self, queryCategory, queryText, timeout=None, queryLatLng=None):
+        if (queryCategory != 'place'):
+            raise NotImplementedError()
+
+        print "queryText is", queryText
+        print "queryCategory is", queryCategory
+        print "queryLatLng is", queryLatLng
+
+        localResults = []
+        nationalResults = []
+        def searchLocally():
+            results = self.__places.getSearchResultsByLatLng(queryLatLng, params={'name': queryText, 'radius': 20000})
+            if results:
+                localResults.extend(results)
+        def searchNationally():
+            results = self.__places.getAutocompleteResults(queryLatLng, queryText)
+            if results:
+                nationalResults.extend(results)
+        if queryLatLng:
+            pool = Pool(2)
+            pool.spawn(searchLocally)
+            pool.spawn(searchNationally)
+            pool.join(timeout=timeout)
+        else:
+            searchNationally()
+
+        # Convert JSON objects to GooglePlacesPages.
+        localResults = [GooglePlacesPlace(result) for result in localResults]
+        nationalResults = [GooglePlacesAutocompletePlace(result) for result in nationalResults]
+
+        # Start with super basic scoring. Score local results significantly lower because they can get boosts for
+        # title and proximity, but national results only ever get title boosts because we don't have lat-lngs.
+        # TODO: Investigate adding in city name querytext matching to the score augmentation!
+        localResults = scoreResultsWithBasicDropoffScoring(localResults, sourceScore=0.4, dropoffFactor=0.9)
+        nationalResults = scoreResultsWithBasicDropoffScoring(nationalResults, sourceScore=0.6, dropoffFactor=0.9)
+
+        augmentPlaceScoresForRelevanceAndProximity(localResults, queryText, queryLatLng)
+        augmentPlaceScoresForRelevanceAndProximity(nationalResults, queryText, queryLatLng)
+
+        smoothScores(localResults)
+        smoothScores(nationalResults)
+
+        return dedupeById(localResults + nationalResults)
+
 
     def entityProxyFromKey(self, key, **kwargs):
         try:

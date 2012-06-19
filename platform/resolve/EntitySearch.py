@@ -192,7 +192,8 @@ class EntitySearch(object):
             if not full and source.sourceName != 'stamped':
                 # ignore any external sources if full search is disabled
                 continue
-            
+
+            # TODO: Make sure timeout gets passed through to source member functions.
             pool.spawn(self.__search_helper, query, limit, offset, source, results, timeout=timeout)
         
         pool.join(timeout=timeout)

@@ -77,6 +77,8 @@ class ResolverObject(object):
             # thread trying to hold the same lock twice, which never works.
             raise LookupRequiredError(self.source, 'unknown', 'name')
 
+        self.__lookupCallsMade += 1
+
     def __str__(self):
         # Temporary disable lookup calls because we don't want to make them just for printing.
         # There are some obvious concurrency issues here.

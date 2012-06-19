@@ -261,7 +261,7 @@ class Factual(object):
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
     
-    def search(self, query, limit=_limit, coordinates=None):
+    def search(self, query, limit=_limit, coordinates=None, radius=5000):
         params = {}
         params['prefix']    = 't'
         params['limit']     = limit
@@ -275,7 +275,7 @@ class Factual(object):
         
         if coordinates is not None:
             params['geo'] = urllib.quote(json.dumps({
-                '$circle':{'$center':[coordinates[0], coordinates[1]],'$meters':5000}
+                '$circle':{'$center':[coordinates[0], coordinates[1]],'$meters':radius}
             }))
         
         return self.__factual('global', **params)
