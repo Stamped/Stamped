@@ -1289,7 +1289,9 @@ a.lightbox {
                     .transform(translatex(-72px));
                     .transition-transform2(.3s, ease-out, opacity, .3s, ease-out);
                 }
-                
+            }
+            
+            a.active {
                 &:hover, &:active {
                     .icon {
                         .transform(scale(1.0, 1.0));
@@ -1316,73 +1318,79 @@ a.lightbox {
                     }
                 }
             }
+            
+            a.disabled {
+                opacity: .5;
+                pointer-events: none;
+                cursor: default;
+            }
         }
         
         li.default .icon {
             background-position: -3px -3px;
         }
-        li.default a:hover .icon {
+        li.default a.active:hover .icon {
             background-position: -3px -75px;
         }
-        li.default a:active .icon {
+        li.default a.active:active .icon {
             background-position: -3px -39px;
         }
         
         li.place .icon {
             background-position: -36px -3px;
         }
-        li.place a:hover .icon {
+        li.place a.active:hover .icon {
             background-position: -36px -75px;
         }
-        li.place a:active .icon {
+        li.place a.active:active .icon {
             background-position: -36px -39px;
         }
         
         li.music .icon {
             background-position: -69px -3px;
         }
-        li.music a:hover .icon {
+        li.music a.active:hover .icon {
             background-position: -69px -75px;
         }
-        li.music a:active .icon {
+        li.music a.active:active .icon {
             background-position: -69px -39px;
         }
         
         li.book .icon {
             background-position: -102px -3px;
         }
-        li.book a:hover .icon {
+        li.book a.active:hover .icon {
             background-position: -102px -75px;
         }
-        li.book a:active .icon {
+        li.book a.active:active .icon {
             background-position: -102px -39px;
         }
         
         li.film .icon {
             background-position: -135px -3px;
         }
-        li.film a:hover .icon {
+        li.film a.active:hover .icon {
             background-position: -135px -75px;
         }
-        li.film a:active .icon {
+        li.film a.active:active .icon {
             background-position: -135px -39px;
         }
         
         li.app .icon {
             background-position: -168px -3px;
         }
-        li.app a:hover .icon {
+        li.app a.active:hover .icon {
             background-position: -168px -75px;
         }
-        li.app a:active .icon {
+        li.app a.active:active .icon {
             background-position: -168px -39px;
         }
     }
 }
 
 .stamp-category-nav-bar-clamped {
-    // TODO: 
-    top: (250px+198px) !important;
+    // clamp the top of the nav-bar
+    top: (250px + 198px) !important;
 }
 
 body.default #stamp-category-nav-bar ol li.default div {

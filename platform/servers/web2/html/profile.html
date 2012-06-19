@@ -288,7 +288,7 @@
         
         <ol>
             <li class="default">
-                <a class="replaced" href="/{{user.screen_name}}">
+                <a class="replaced active" href="/{{user.screen_name}}">
                     <div class='desc'>All Stamps</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
@@ -296,7 +296,7 @@
                 </a>
             </li>
             <li class="place">
-                <a class="replaced" href="/{{user.screen_name}}?category=place">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "place" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=place">
                     <div class='desc'>Places</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
@@ -304,7 +304,7 @@
                 </a>
             </li>
             <li class="music">
-                <a class="replaced" href="/{{user.screen_name}}?category=music">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "music" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=music">
                     <div class='desc'>Music</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
@@ -312,7 +312,7 @@
                 </a>
             </li>
             <li class="book">
-                <a class="replaced" href="/{{user.screen_name}}?category=book">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "book" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=book">
                     <div class='desc'>Books</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
@@ -320,7 +320,7 @@
                 </a>
             </li>
             <li class="film">
-                <a class="replaced" href="/{{user.screen_name}}?category=film">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "film" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=film">
                     <div class='desc'>Film & TV</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
@@ -328,7 +328,7 @@
                 </a>
             </li>
             <li class="app">
-                <a class="replaced" href="/{{user.screen_name}}?subcategory=app">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "app" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?subcategory=app">
                     <div class='desc'>Apps</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
