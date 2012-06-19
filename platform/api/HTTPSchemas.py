@@ -431,7 +431,7 @@ class HTTPAccountUpdateForm(Schema):
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
-        cls.addProperty('temp_image_url',                   basestring)
+        cls.addProperty('temp_image_url',                   basestring, cast=validateURL)
 
     def convertToAccountUpdateForm(self):
         data = self.dataExport()
@@ -1280,7 +1280,7 @@ class HTTPEntity(Schema):
 
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
-                source.name         = 'Watch on iTunes'
+                source.name         = 'Watch Trailer on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.source_data  = { 'preview_url': entity.sources.itunes_preview }
@@ -1295,7 +1295,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+            self._addAction(actionType, 'Watch trailer', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
             actionType  = 'add_to_instant_queue'
@@ -1356,7 +1356,7 @@ class HTTPEntity(Schema):
             self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
-            # Actions: Watch Now
+            # Actions: Preview
 
             actionType  = 'watch'
             actionIcon  = _getIconURL('act_play_primary', client=client)
@@ -1364,7 +1364,7 @@ class HTTPEntity(Schema):
 
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
-                source.name         = 'Watch on iTunes'
+                source.name         = 'Watch Trailer on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.source_data  = { 'preview_url': entity.sources.itunes_preview }
@@ -1381,7 +1381,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+            self._addAction(actionType, 'Watch trailer', sources, icon=actionIcon)
 
             # Actions: Find Tickets
 
@@ -1440,10 +1440,6 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
-
-            # Actions: Watch Trailer
-
-            ### TODO: Add source
 
             # Actions: Download
 
@@ -2060,7 +2056,7 @@ class HTTPTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
+        cls.addProperty('scope',                            basestring, required=True) # me, inbox, friends, fof, popular ### TODO: Add cast
 
     def exportTimeSlice(self):
         data                = self.dataExport()
@@ -2086,6 +2082,11 @@ class HTTPTimeSlice(Schema):
             slc.viewport = _convertViewport(self.viewport)
 
         return slc
+
+class HTTPTodoTimeSlice(HTTPTimeSlice):
+    def __init__(self):
+        HTTPTimeSlice.__init__(self)
+        self.scope = 'todo'
 
 class HTTPWebTimeSlice(Schema):
     @classmethod
@@ -2384,6 +2385,7 @@ class HTTPStamp(Schema):
         credits                 = getattr(stamp, 'credits', [])
 
         data = stamp.dataExport()
+
         data['contents'] = []
         if 'previews' in data:
             del(data['previews'])
@@ -2626,7 +2628,7 @@ class HTTPTodoComplete(Schema):
 # Activity #
 # ######## #
 
-class HTTPActivityObjects(Schema):
+class  HTTPActivityObjects(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedPropertyList('users',                  HTTPUserMini)
@@ -2661,9 +2663,6 @@ class HTTPActivity(Schema):
         cls.addNestedPropertyList('footer_references',      HTTPTextReference)
 
     def importEnrichedActivity(self, activity):
-        t0 = time.time()
-        t1 = t0
-
         data = activity.dataExport()
         data.pop('subjects')
         data.pop('objects', None)
@@ -2700,7 +2699,7 @@ class HTTPActivity(Schema):
                 stampobjects = []
                 for stamp in activity.objects.stamps:
                     stampobjects.append(HTTPStamp().importStamp(stamp))
-                self.objects.stamps = stampobjects 
+                self.objects.stamps = stampobjects
 
         def _addEntityObjects():
             if activity.objects is not None and activity.objects.entities is not None:
@@ -2912,7 +2911,6 @@ class HTTPActivity(Schema):
             raise Exception("Too many stamps! \n%s" % stamps)
 
         if self.verb == 'follow':
-            t1 = time.time()
             _addUserObjects()
 
             if len(self.subjects) == 1:
@@ -2939,10 +2937,8 @@ class HTTPActivity(Schema):
                 self.body_references = subjectReferences + userObjectReferences
 
                 self.action = _buildUserAction(self.objects.users[0])
-            print("\t\t\tTime for 'follow' code: %s" % (time.time() - t1))
 
         elif self.verb == 'restamp':
-            t1 = time.time()
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -2957,10 +2953,7 @@ class HTTPActivity(Schema):
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
-            print("\t\t\tTime for 'restamp' code: %s" % (time.time() - t1))
-
         elif self.verb == 'like':
-            t1 = time.time()
             _addStampObjects()
 
             self.icon = _getIconURL('news_like')
@@ -2984,10 +2977,8 @@ class HTTPActivity(Schema):
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
-            print("\t\t\tTime for 'like' code: %s" % (time.time() - t1))
 
         elif self.verb == 'todo':
-            t1 = time.time()
             _addEntityObjects()
 
             self.icon = _getIconURL('news_todo')
@@ -3007,14 +2998,9 @@ class HTTPActivity(Schema):
             else:
                 self.action = _buildEntityAction(self.objects.entities[0])
 
-            print("\t\t\tTime for 'todo' code: %s" % (time.time() - t1))
-
         elif self.verb == 'comment':
-            t1 = time.time()
             _addStampObjects()
             _addCommentObjects()
-
-            print("\t\t\tTime for build portions of 'comment' code: %s" % (time.time() - t1))
 
             verb = 'Comment on'
             offset = len(verb) + 1
@@ -3026,10 +3012,7 @@ class HTTPActivity(Schema):
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
-            print("\t\t\tTime for 'comment' code: %s" % (time.time() - t1))
-
         elif self.verb == 'reply':
-            t1 = time.time()
             _addStampObjects()
             _addCommentObjects()
 
@@ -3043,10 +3026,7 @@ class HTTPActivity(Schema):
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
-            print("\t\t\tTime for 'reply' code: %s" % (time.time() - t1))
-
         elif self.verb == 'mention':
-            t1 = time.time()
             _addStampObjects()
             _addCommentObjects()
 
@@ -3066,14 +3046,12 @@ class HTTPActivity(Schema):
                 self.body_references = stampBlurbObjectReferences
 
             self.action = _buildStampAction(self.objects.stamps[0])
-            print("\t\t\tTime for 'mention' code: %s" % (time.time() - t1))
 
         elif self.verb.startswith('friend_'):
             self.icon = _getIconURL('news_friend')
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
-            t1 = time.time()
             _addStampObjects()
 
             actionMapping = {
@@ -3102,8 +3080,6 @@ class HTTPActivity(Schema):
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
-
-            print("\t\t\tTime for 'mention' code: %s" % (time.time() - t1))
 
         else:
             raise Exception("Uncrecognized verb: %s" % self.verb)

@@ -72,7 +72,9 @@
         _user = [user retain];
         
         if ([user isKindOfClass:NSClassFromString(@"STSimpleSource")]) {
-            
+#warning What the fuck, seriously?
+            [_user release];
+            _user = nil;
             STSimpleSource *source = (STSimpleSource*)_user;
             self.userIdentifier = source.sourceID;
             self.title = source.name;

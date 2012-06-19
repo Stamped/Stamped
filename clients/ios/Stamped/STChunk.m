@@ -57,7 +57,9 @@
                                                            width:chunk.frame.size.width
                                                        lineCount:2
                                                        lineLimit:chunk.lineLimit - (chunk.lineCount - 1)] autorelease];
-    newlineChunk.topLeft = chunk.topLeft;
+    CGPoint topLeft = chunk.topLeft;
+    topLeft.y += (chunk.lineCount - 1) * chunk.lineHeight;
+    newlineChunk.topLeft = topLeft;
     return newlineChunk;
 }
 

@@ -391,6 +391,8 @@ class AccountUpdateForm(Schema):
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
 
+        cls.addProperty('temp_image_url',                   basestring, cast=validateURL)
+
 
 # ##### #
 # Users #

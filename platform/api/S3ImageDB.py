@@ -223,6 +223,8 @@ class S3ImageDB(AImageDB):
             old = '%s-%s%s' % (oldPrefix, size, suffix)
             new = '%s-%s%s' % (newPrefix, size, suffix)
             self._copyInS3(old, new)
+
+        # TODO: add Async task to clean up unused profile images
     
     def _addImageSizes(self, prefix, image, max_size, sizes=None, original_url=None):
         assert isinstance(image, Image.Image)

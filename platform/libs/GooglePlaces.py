@@ -216,7 +216,10 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             # ensure that we received a valid response
             if response['status'] != 'OK' or len(response['results']) <= 0:
                 utils.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
-                          'ErrorCode: ' + response['status'] + '\n')
+                          'ErrorCode: ' + str(response['status']) + '\n')
+
+                import pprint
+                pprint.pprint(response)
                 
                 if response['status'] == 'OVER_QUERY_LIMIT':
                     count += 1
@@ -244,9 +247,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             # ensure that we received a valid response
             if response['status'] != 'OK' or len(response['predictions']) <= 0:
-                utils.log('[GooglePlaces] error autocompleting "' + query + '"\n' + 
-                          'ErrorCode: ' + response['status'] + '\n')
-                
+                utils.log('[GooglePlaces] error autocompleting "%s" (ErrorCode: %s)\n' %
+                          (query, response['status']))
+
                 if response['status'] == 'OVER_QUERY_LIMIT':
                     count += 1
                     continue
@@ -255,7 +258,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['predictions']
     
-    # note: these decorators add tiered caching to this function, such that 
+    # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached remotely via memcached with a TTL of 7 days
     @lru_cache(maxsize=64)
@@ -449,102 +452,53 @@ def globalGooglePlaces():
 
 
 def parseCommandLine():
-    usage   = "Usage: %prog [options] address|latLng"
+    usage   = "Usage: %prog [options]"
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
+
+    parser.add_option("--method", action="store", dest="method", default="search")
+    parser.add_option("--address", action="store", dest="address", default=None)
+    parser.add_option("--latlng", action="store", dest="latlng", default=None)
+    parser.add_option("-q", "--query", action="store", dest="query", default=None)
+
+    defaultRadius = 500
+    parser.add_option("-r", "--radius", action="store", type="int", dest="radius", default=defaultRadius,
+        help="Optionally specify a radius in meters (defaults to %d meters)" % defaultRadius)
     
-    parser.add_option("-a", "--address", action="store_true", dest="address", 
-        default=True, help="Parse the argument as an address")
-    
-    parser.add_option("-b", "--latLng", action="store_false", dest="address", 
-        default=False, help="Parse the argument as an encoded latitude/longitude pair (e.g., '40.144729,-74.053527')")
-    
-    parser.add_option("-n", "--name", action="store", type="string", dest="name", 
-        default=None, help="Optionally provide a name to filter results")
-    
-    d = 500
-    parser.add_option("-r", "--radius", action="store", type="int", dest="radius", 
-        default=d, help="Optionally specify a radius in meters (defaults to %d meters)" % d)
-    
-    parser.add_option("-t", "--types", action="store", type="string", dest="types", 
+    parser.add_option("-t", "--types", action="store", type="string", dest="types",
         default=None, help="Optionally specify one or more types to search by, with " + 
         "each type separated by a pipe symbol (e.g., -t 'food|restaurant'). " + 
         "Note that types must be surrounded by single quotes to prevent shell interpretation " + 
         "of the pipe character(s).")
     
-    parser.add_option("-l", "--limit", action="store", type="int", dest="limit", 
+    parser.add_option("-l", "--limit", action="store", type="int", dest="limit",
         default=None, help="Limit the number of results shown to the top n results")
     
-    parser.add_option("-v", "--verbose", action="store_true", default=False, 
+    parser.add_option("-v", "--verbose", action="store_true", default=False,
                       help="Print out verbose results")
-    
-    parser.add_option("-s", "--suggest", action="store_true", default=False, 
-                      help="Use Places autosuggest API")
-    
-    parser.add_option("-d", "--detail", action="store_true", default=False, 
-                      help="Use Places detail API")
-    
-    parser.set_defaults(address=True)
-    parser.set_defaults(name=None)
+
     parser.set_defaults(types=None)
     parser.set_defaults(limit=None)
     parser.set_defaults(radius=None)
     
     (options, args) = parser.parse_args()
-    
-    if len(args) < 1:
-        parser.print_help()
-        return None
-    
-    if not options.suggest and options.radius is None:
-        options.radius = 500
-    
-    do = True
-    if options.suggest or options.detail:
-        if len(args) > 1:
-            options.input = args[1]
-            args[0] = args[1]
-        else:
-            options.input = args[0]
-            do = False
-    
-    if do and not options.address:
-        lat, lng = args[0].split(',')
-        lat, lng = float(lat), float(lng)
-        args[0] = (lat, lng)
-    
-    options.latLng = args[0]
-    
+
+    if options.method not in ['search', 'autocomplete']:
+        raise Exception('Unrecognized method: (%s)' % options.method)
+
+    if options.method == 'search' and not options.address and not options.latlng:
+        raise Exception('With --method=search, one of --address, --latlng is required!')
+
+    if options.method == 'autocomplete' and not options.query:
+        raise Exception('With --method=autocomplete, the --query flag is also required!')
+
+    if options.method == 'autocomplete' and options.address:
+        raise Exception('--address is not currently supported with --method=autocomplete!')
+
+    if options.address and options.latlng:
+        raise Exception('--address and --latlng flags are mutually exclusive!')
+
     return (options, args)
-
-
-from LRUCache import lru_cache
-@lru_cache(3)
-def test_lrucache(arbitrary_arg, copies):
-    suggested = []
-
-    def _add_suggested_section(title, entities):
-        suggested.append({ 'name' : title, 'entities' : entities })
-    import random
-    import copy
-
-    random.seed()
-
-    entity = PlaceEntity()
-    entity.title                            = 'Test'
-    entity.lat                              = float(random.randint(0,100000))
-    entity.lng                              = float(random.randint(0,100000))
-    entity.sources.googleplaces_id          = 'theGooglePlacesId'
-    entity.sources.googleplaces_reference   = 'theGooglePlacesReference'
-
-    entities = []
-    for x in xrange(copies):
-        entities.append(copy.copy(entity))
-
-    _add_suggested_section('testEntities', entities )
-
-    return suggested
-
 
 
 def main():
@@ -580,58 +534,33 @@ def main():
     places = GooglePlaces()
     results = []
     params  = {}
+
     
-    if options.name:
-        params['name'] = options.name
     if options.radius:
         params['radius'] = options.radius
     if options.types:
         params['types'] = options.types
 
+    if options.method == 'search':
+        if options.query:
+            params['name'] = options.query
+        if options.address:
+            results = places.getSearchResultsByAddress(options.address, params)
+        elif options.latlng:
+            latlng = options.latlng.split(',')
+            results = places.getSearchResultsByLatLng(latlng, params)
+    elif options.method == 'autocomplete':
+        latlng = options.latlng.split(',')
+        results = places.getAutocompleteResults(latlng, options.query, params)
+
     import pprint
-    pprint.pprint(options)
-    print('options.latLng: %s    params: %s' % (options.latLng, params))
-
-    params = { 'radius' : 500 }
-    pprint.pprint( places.getAutocompleteResults(['40.781174','-73.951820'], 'Roma', params))
-
-#    if options.detail:
-#        results = places.getPlaceDetails(options.input, params)
-#    elif options.suggest:
-#        results = places.getAutocompleteResults(options.latLng, options.input, params)
-#    elif options.address:
-#        results = places.getSearchResultsByAddress(options.latLng, params)
-#    else:
-#        results = places.getSearchResultsByLatLng(options.latLng, params)
-#
     if results is None:
-        print "Failed to return results for '%s'" % (options.latLng, )
+        print "Failed to return results!"
     else:
-        if options.limit:
-            results = results[0:min(options.limit, len(results))]
+        pprint.pprint(results)
 
-        # print the prettified, formatted results
-        print json.dumps(results, sort_keys=True, indent=2)
-
-"""
-g=GooglePlaces()
-from Schemas import Entity
-e=Entity()
-e.title = 'TEST_PLACE_DELETE'
-e.lat = 43.0
-e.lng = -71
-r = g.addPlaceReport(e)
-print r
-"""
-
-"""
-p = GooglePlaces()
-#f = "CkQ6AAAAe9fbCd2v01fWvsL1pth68lnlyo2zugxpxZZV8-qBHRyA6q5_YkHpeETA8Vt5KpNkGAzDQUIkXUT3RKG3EFPPyBIQpMwl-TJnQi3amCWI9_r6YBoUzs7f38upa92ztqtXe5EDaSudw2Q"
-f = "CmRaAAAAyyIyNPbq2JCfERw_8mVh6CKEujLmheDtYSAGEd6ZF4PmnPg2_s7vw5MlBlx49ohoSp6JIM0xhcNlQXvR30G2kSk5NRE4u1317ALVY4FDZBdrrFkf-yx86hvFYgRz5D3_EhDgTQ-fyzUyNnNHd7UhpRIEGhQ1e2xcP4vhqxD4kozQXHVmde4pXA"
-r = p.getPlaceDetails(f)
-from pprint import pprint
-pprint(r)
-"""
+    # print the prettified, formatted results
+    # print json.dumps(results, sort_keys=True, indent=2)
 
 if __name__ == '__main__':
     main()

@@ -870,6 +870,9 @@ class iTunesSource(GenericSource):
             logs.report()
 
     def searchLite(self, queryCategory, queryText, timeout=None):
+        if queryCategory not in ('music', 'film', 'app', 'book'):
+            raise NotImplementedError()
+
         types = mapCategoryToTypes(queryCategory)
         iTunesTypes = []
         typesMap = dict(self.__types_to_itunes_strings)
@@ -893,6 +896,7 @@ class iTunesSource(GenericSource):
                 except UnknownITunesTypeError:
                     logs.report()
                     pass
+
             if len(processedResults) > 0:
                 scoredResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults)
 
@@ -901,7 +905,6 @@ class iTunesSource(GenericSource):
             return []
         if len(scoredResultsByType) == 1:
             return scoredResultsByType.values()[0]
-        assert(queryCategory in ['music', 'film'])
         if queryCategory == 'music':
             # We have to separately request songs, albums, and artists because iTunes does a terrible job blending
             # results between the three. So we need to blend, but it's hard to know how to. We do a little work on the

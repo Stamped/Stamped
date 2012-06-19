@@ -9,7 +9,7 @@ import Globals
 from logs import report
 
 try:
-    import pymongo
+    import pymongo, logs
     from AMongoCollection               import AMongoCollection
     from api.Schemas                        import *
 except:
@@ -65,8 +65,10 @@ class MongoStampStatsCollection(AMongoCollection):
         kinds = kwargs.pop('kinds', None)
         types = kwargs.pop('types', None)
         since = kwargs.pop('since', None)
+        before = kwargs.pop('before', None)
         viewport = kwargs.pop('viewport', None)
         entityId = kwargs.pop('entityId', None)
+        minScore = kwargs.pop('minScore', None)
 
         query = {}
 
@@ -104,14 +106,21 @@ class MongoStampStatsCollection(AMongoCollection):
         if entityId is not None:
             query['entity_id'] = entityId
 
-        if since is not None:
+        if since is not None and before is not None:
+            query['last_stamped'] = {'$gte': since, '$lte': before}
+        elif since is not None:
             query['last_stamped'] = {'$gte': since}
+        elif before is not None:
+            query['last_stamped'] = {'$lte': before}
+
+        if minScore is not None:
+            query['score'] = {'$gte' : minScore}
 
         return query
 
     def getPopularStampIds(self, **kwargs):
         limit = kwargs.pop('limit', 1000)
-
+        
         query = self._buildPopularQuery(**kwargs)
 
         documents = self._collection.find(query, fields=['_id']) \

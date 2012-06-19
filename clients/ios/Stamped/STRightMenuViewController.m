@@ -9,6 +9,10 @@
 #import "STRightMenuViewController.h"
 #import "STEntitySearchController.h"
 #import "DDMenuController.h"
+#import "Util.h"
+#import "STMenuController.h"
+#import "STAppDelegate.h"
+#import "STRootViewController.h"
 
 @interface STRightMenuViewController ()
 - (void)animateIn:(BOOL)animated;
@@ -176,36 +180,45 @@
 }
 
 - (void)popInView:(UIView*)view withDelay:(CGFloat)delay {
+    CGRect frame = view.frame;
+    [Util reframeView:view withDeltas:CGRectMake(40, 0, 0, 0)];
+    [UIView animateWithDuration:.15 
+                          delay:delay
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         view.frame = frame;
+                     } completion:^(BOOL finished) {
+                     }];
     
-    [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
-
-    [CATransaction begin];
-    [CATransaction setAnimationDuration:0.15f];
-    [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-    [CATransaction setCompletionBlock:^{
-        [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
-        [view.layer removeAllAnimations];
-    }];
     
-    CAAnimationGroup *groupAnimation = [CAAnimationGroup animation];
-    groupAnimation.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
-    groupAnimation.removedOnCompletion = NO;
-    groupAnimation.fillMode = kCAFillModeForwards;
-    
-    CGPoint fromPos = view.layer.position;
-    fromPos.x += 40.0f;
-    CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
-    position.fromValue = [NSValue valueWithCGPoint:fromPos];
-
-    CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
-    opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
-    opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
-
-    [groupAnimation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
-    [view.layer addAnimation:groupAnimation forKey:nil];
-
-    [CATransaction commit];
-    
+//    [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
+//
+//    [CATransaction begin];
+//    [CATransaction setAnimationDuration:0.15f];
+//    [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
+//    [CATransaction setCompletionBlock:^{
+//        [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
+//        [view.layer removeAllAnimations];
+//    }];
+//    
+//    CAAnimationGroup *groupAnimation = [CAAnimationGroup animation];
+//    groupAnimation.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
+//    groupAnimation.removedOnCompletion = NO;
+//    groupAnimation.fillMode = kCAFillModeForwards;
+//    
+//    CGPoint fromPos = view.layer.position;
+//    fromPos.x += 40.0f;
+//    CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
+//    position.fromValue = [NSValue valueWithCGPoint:fromPos];
+//
+//    CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+//    opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
+//    opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
+//
+//    [groupAnimation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
+//    [view.layer addAnimation:groupAnimation forKey:nil];
+//
+//    [CATransaction commit];
 }
 
 - (void)animateIn:(BOOL)animated {
@@ -260,7 +273,6 @@
 }
 
 - (void)buttonHit:(UIButton*)button {
-    
     CABasicAnimation *opacity = [CABasicAnimation animationWithKeyPath:@"opacity"];
     opacity.toValue = [NSNumber numberWithFloat:0.0f];
     

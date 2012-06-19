@@ -226,6 +226,21 @@ static Rdio* _rdio;
                      secondary:secondary];
 }
 
++ (UIImage*)creditImageForUser:(id<STUser>)user creditUser:(id<STUser>)creditedUser andSize:(STStampImageSize)stampSize {
+    CGSize size = CGSizeMake(stampSize * 1.5, stampSize);
+    UIImage* userStamp = [self stampImageForUser:user withSize:stampSize];
+    UIImage* creditedUserStamp = [self stampImageForUser:creditedUser withSize:stampSize];
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextDrawImage(context, CGRectMake(0, 0, stampSize, stampSize), userStamp.CGImage);
+    CGContextDrawImage(context, CGRectMake(.5 * stampSize, 0, stampSize, stampSize), creditedUserStamp.CGImage);
+    
+    UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return result;
+}
+
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style {
     CGFloat r1, g1, b1, r2, g2, b2;
     [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
@@ -1425,6 +1440,14 @@ static Rdio* _rdio;
     frame.origin.x = point.x;
     frame.origin.y = point.y - frame.size.height;
     view.frame = frame;
+}
+
++ (CGRect)scaledRectWithRect:(CGRect)original andScale:(CGFloat)scale {
+    CGFloat newWidth = original.size.width * scale;
+    CGFloat newHeight = original.size.height * scale;
+    CGFloat deltaX = -(newWidth - original.size.width) / 2.0;
+    CGFloat deltaY = -(newHeight - original.size.height) / 2.0;
+    return CGRectMake(original.origin.x + deltaX, original.origin.y + deltaY, newWidth, newHeight);
 }
 
 @end

@@ -105,6 +105,8 @@
 
 - (void)facebook:(PostStampShareCell*)sender {
     
+    [Util warnWithMessage:@"Not implemented yet" andBlock:nil];
+    /*
     sender.loading = YES;
     
     double delayInSeconds = 2.0;
@@ -117,10 +119,12 @@
         
         
     });
+     */
 }
 
 - (void)twitter:(PostStampShareCell*)sender {
-    
+    [Util warnWithMessage:@"Not implemented yet" andBlock:nil];
+    /*
     sender.loading = YES;
     
     double delayInSeconds = 2.0;
@@ -132,7 +136,7 @@
         sender.shared = YES;
 
     });    
-    
+     */
 }
 
 

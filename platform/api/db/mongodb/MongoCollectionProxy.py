@@ -12,18 +12,24 @@ from pymongo.errors import AutoReconnect
 from errors         import Fail
 from datetime       import datetime
 
+DEBUG = False
+
 class MongoCollectionProxy(object):
     def __init__(self, parent, connection, database, collection):
+        global DEBUG
         try:
             self._parent     = parent
             self._connection = connection
             self._database   = self._connection[database]
             self._collection = self._database[collection]
+            self._debug      = DEBUG
         except:
             logs.warning("Error: unable to set collection")
             raise
     
     def find(self, spec=None, output=None, limit=None, **kwargs):
+        if self._debug:
+            print("Mongo 'find' - spec: %s output: %s limit: %s kwargs: %s" % (spec, output, limit, kwargs))
         num_retries = 0
         max_retries = 5
         
@@ -51,6 +57,9 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def command(self, cmd):
+        if self._debug:
+            print("Mongo 'command' - cmd %s" % cmd)
+
         num_retries = 0
         max_retries = 5
         
@@ -70,6 +79,9 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def count(self):
+        if self._debug:
+            print("Mongo 'count'")
+
         num_retries = 0
         max_retries = 5
         
@@ -89,6 +101,9 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def find_one(self, spec_or_id=None, **kwargs):
+        if self._debug:
+            print("Mongo 'find_one' - spec_or_id: %s kwargs: %s" % (spec_or_id, kwargs))
+
         if spec_or_id is not None and not isinstance(spec_or_id, dict):
             spec_or_id = { "_id": spec_or_id }
         
@@ -111,6 +126,10 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def insert(self, docs, manipulate=True, safe=False, check_keys=True, **kwargs):
+        if self._debug:
+            print("Mongo 'insert' - manipulate: %s safe: %s check_keys: %s kwargs: %s" %
+                       (manipulate, safe, check_keys, kwargs))
+
         max_batch_size = 64
         max_retries = 7
 
@@ -159,12 +178,18 @@ class MongoCollectionProxy(object):
         return _insert(docs, 0)
     
     def insert_one(self, doc, safe=False, **kwargs):
+        if self._debug:
+            print("Mongo 'insert_one' - safe: %s kwargs: %s" % (safe, kwargs))
+
         try:
             return self.insert([doc], safe=safe, **kwargs)[0]
         except:
             raise
         
     def save(self, to_save, manipulate=True, safe=False, **kwargs):
+        if self._debug:
+            print("Mongo 'save' - manipulate: %s safe: %s kwargs: %s" % (manipulate, safe, kwargs))
+
         num_retries = 0
         max_retries = 5
 
@@ -188,6 +213,9 @@ class MongoCollectionProxy(object):
         
     def update(self, spec, document, upsert=False, manipulate=False,
                safe=False, multi=False, **kwargs):
+        if self._debug:
+            print("Mongo 'update'")
+
         num_retries = 0
         max_retries = 5
         
@@ -207,6 +235,9 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def remove(self, spec_or_id=None, safe=False, **kwargs):
+        if self._debug:
+            print("Mongo 'remove'")
+
         num_retries = 0
         max_retries = 5
         
@@ -226,6 +257,9 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def ensure_index(self, key_or_list, **kwargs):
+        if self._debug:
+            print("Mongo 'ensure_index'")
+
         num_retries = 0
         max_retries = 5
         
@@ -254,6 +288,9 @@ class MongoCollectionProxy(object):
                 time.sleep(0.25)
     
     def inline_map_reduce(self, m, r, full_response=False, **kwargs):
+        if self._debug:
+            print("Mongo 'inline_map_reduce'")
+
         num_retries = 0
         max_retries = 5
         
