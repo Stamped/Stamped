@@ -10,7 +10,7 @@ from gevent.pool                            import Pool
 
 
 conn = boto.connect_sdb("AKIAJPJJ2QXCMPIITWDQ","XwBv06/ezFEjsJvalbLNgE9IrHJ46DlGtWc5/F+X")
-domain = conn.get_domain('stats-prod')
+domain = conn.get_domain('stats-dev')
 
 api = MongoStampedAPI()
 sample = MongoStatsCollection()._collection.find()

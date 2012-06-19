@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, time
 from AStampedAPIHttpTestCase import *
 
 # ########### #
@@ -54,12 +54,47 @@ class StampedAPICollectionsShow(StampedAPICollectionHttpTest):
                    lambda x: self.assertEqual(len(x), 3), 
                    lambda x: self.assertTrue(x[0]['contents'][-1]['blurb'] == self.stampA['contents'][-1]['blurb']), 
         ])
+
+    def test_popular(self):
+        """
+        Stamps require at least a few actions on them to become 'popular', so give this stamp some activity!
+        """
+        self.createLike(self.tokenA, self.stampA['stamp_id'])
+        self.createLike(self.tokenB, self.stampA['stamp_id'])
+        self.createTodo(self.tokenA, self.entityA['entity_id'], stampId=self.stampA['stamp_id'])
+        self.createTodo(self.tokenB, self.entityA['entity_id'], stampId=self.stampA['stamp_id'])
+
+        time.sleep(1)
+
+        # Because of cutoff, we cannot get any popular activity right away
+        path = "stamps/collection.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "scope" : "popular",
+        }
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 0),
+        ])
+
+        # That said, we can hack it by passing the "before" timestamp set to now
+        path = "stamps/collection.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "scope" : "popular",
+            "before" : int(time.time()),
+        }
+        
+        self.async(lambda: self.handleGET(path, data), [ 
+                   lambda x: self.assertEqual(len(x), 1),
+        ])
     
     def test_user_user_id(self):
         path = "stamps/collection.json"
         data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "user_id": self.userA['user_id']
+            "oauth_token" : self.tokenB['access_token'],
+            "scope" : "user",
+            "user_id" : self.userA['user_id']
         }
         
         self.async(lambda: self.handleGET(path, data), [ 
@@ -175,18 +210,6 @@ class StampedAPICollectionsTodos(StampedAPICollectionHttpTest):
         
         self.async(lambda: self.handleGET(path, data), _validate_result2)
         self.deleteTodo(self.tokenB, self.entityA['entity_id'])
-
-class StampedAPICollectionsFriends(StampedAPICollectionHttpTest):
-    def test_friends_of_friends(self):
-        path = "stamps/collection.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "scope" : "fof",
-        }
-        
-        self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertIsInstance(x, list), 
-        ])
 
 class StampedAPICollectionsSuggested(StampedAPICollectionHttpTest):
     def test_suggested_stamps(self):

@@ -42,18 +42,23 @@
 
 
 TODO:
+    * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
+    * fix broken thetvdb images
+    * fix glitch w/ hover state on entity stamp images in gallery shifting text
+    * clicking on map in stamp gallery => selection in map view
+    * remove ribbons from map list-view nav
+    * TODO: disable navigation to empty category-sections
+    
+    * headers:
+        * change profile header image and share widget to remain constant
+        * transition between subheader sections
+    
     * FIX CORS WebGL canvas issue
         * texImage2D
         * http://blog.jacobelder.com/2012/05/3-problems-aws-needs-to-address/
     * generic JS-reliance class w/ display: none and display: block in head initialization if JS is supported
     * align stamp-gallery with profile header
     * experiment w/ subcategory filters that slide out from category filter navbar
-    * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
-    * fix broken thetvdb images
-    * fix glitch w/ hover state on entity stamp images in gallery shifting text
-    * clicking on map in stamp gallery => selection in map view
-    * remove ribbons from map list-view nav
-    * change profile header image and share widget to never move
     
     * sDetail:
         * DONE - "Anatomy of eDetail section" spec

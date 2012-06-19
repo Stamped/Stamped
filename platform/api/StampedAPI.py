@@ -2587,7 +2587,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
 
         # Remove from stats
-        self._stampStatsDB.removeStampStats(stampId)
+        self._stampStatsDB.removeStampStats(stamp.stamp_id)
 
         ### TODO: Remove from activity? To do? Anything else?
 
@@ -2703,7 +2703,10 @@ class StampedAPI(AStampedAPI):
                 statsDict[stat.stamp_id] = stat 
             for stampId in stampIds:
                 if stampId not in statsDict:
-                    statsDict[stampId] = self.updateStampStatsAsync(stampId)
+                    try:
+                        statsDict[stampId] = self.updateStampStatsAsync(stampId)
+                    except Exception as e:
+                        logs.warning("Failed to generate stamp stats for %s: %s" % (stampId, e))
             return statsDict
 
     def updateStampStatsAsync(self, stampId):
@@ -3168,12 +3171,12 @@ class StampedAPI(AStampedAPI):
             elif authUserId is not None:
                 return self._collectionDB.getUserCreditStampIds(authUserId)
             else:
-                raise StampedInputError("User id required")
+                raise StampedInputError("User required")
 
         if scope == 'user':
             if userId is not None:
                 return self._collectionDB.getUserStampIds(userId)
-            raise StampedInputError("User id required")
+            raise StampedInputError("User required")
 
         if userId is not None and scope is not None:
             raise StampedInputError("Invalid scope combination")
@@ -3181,17 +3184,11 @@ class StampedAPI(AStampedAPI):
         if userId is not None:
             self._collectionDB.getUserStampIds(userId)
 
-        if scope is None:
+        if scope == 'everyone':
             return None
-
-        if scope == 'popular':
-            return None
-
-        if authUserId is None and scope is not None:
-            raise StampedInputError("Must be logged in to use scope")
 
         if authUserId is None:
-            return None
+            raise StampedPermissionsError("Must be logged in to view %s" % scope)
 
         if scope == 'me':
             return self._collectionDB.getUserStampIds(authUserId)
@@ -3202,13 +3199,35 @@ class StampedAPI(AStampedAPI):
         if scope == 'friends':
             raise NotImplementedError()
 
-        return None
+        raise StampedInputError("Unknown scope: %s" % scope)
 
     @API_CALL
     def getStampCollection(self, timeSlice, authUserId=None):
-        t0 = time.time()
-        stampIds    = self._getScopeStampIds(timeSlice.scope, timeSlice.user_id, authUserId)
-        logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
+        # Special-case "tastemakers"
+        if timeSlice.scope == 'everyone':
+            stampIds = []
+            limit = timeSlice.limit
+            if limit <= 0:
+                limit = 20
+            start = datetime.utcnow() - timedelta(hours=3)
+            if timeSlice.before is not None:
+                start = timeSlice.before 
+            daysOffset = 0
+            while len(stampIds) < limit and daysOffset < 7:
+                """
+                Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't 
+                have enough stamps, it should check the previous day, with a max of one week.
+                """
+                before = start - timedelta(hours=(24*daysOffset))
+                since = before - timedelta(hours=24)
+                stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
+                daysOffset += 1
+            stampIds = stampIds[:limit]
+
+        else:
+            t0 = time.time()
+            stampIds = self._getScopeStampIds(timeSlice.scope, timeSlice.user_id, authUserId)
+            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
@@ -3847,7 +3866,7 @@ class StampedAPI(AStampedAPI):
         #stamp
         if stampId is not None:
             stamp = self._stampDB.getStamp(stampId)
-            stamp_owner = stamp.user.user_id
+            stampOwner = stamp.user.user_id
 
         friendIds = self._friendshipDB.getFriends(user.user_id)
 
@@ -3864,7 +3883,8 @@ class StampedAPI(AStampedAPI):
             recipientIds.remove(authUserId)
 
         if stampId is not None:
-            recipientIds.append(stamp_owner)
+            if stampOwner != authUserId:
+                recipientIds.append(stampOwner)
         # get rid of duplicate entries
         recipientIds = list(set(recipientIds))
 
