@@ -1442,7 +1442,7 @@ var g_update_stamps = null;
         var fixed_width     = 1000;
         var fixed_padding   = 80;
         var min_col_width   = 305;
-        var last_nav_pos    = null;
+        var last_nav_pos_x  = null;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
@@ -1533,7 +1533,7 @@ var g_update_stamps = null;
             }
             
             if (!force_no_update) {
-                if (update || last_nav_pos !== pos) {
+                if (update || last_nav_pos_x !== pos) {
                     if (!gallery) {
                         var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
                         var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
@@ -1553,16 +1553,26 @@ var g_update_stamps = null;
                 }
             }
             
-            if (last_nav_pos !== pos) {
+            var clamped = 'stamp-category-nav-bar-clamped';
+            
+            if (window.innerHeight / 2 - 198 <= 250) {
+                if (!$nav_bar.hasClass(clamped)) {
+                    $nav_bar.addClass(clamped);
+                }
+            } else if ($nav_bar.hasClass(clamped)) {
+                $nav_bar.removeClass(clamped);
+            }
+            
+            if (last_nav_pos_x !== pos) {
                 var style = {
-                    left  : pos + "px"
+                    left : pos + "px"
                 };
                 
-                if (last_nav_pos === null) {
+                if (last_nav_pos_x === null) {
                     style['right'] = 'auto';
                 }
                 
-                last_nav_pos = pos;
+                last_nav_pos_x = pos;
                 $nav_bar.css(style);
             }
         };

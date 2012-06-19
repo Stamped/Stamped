@@ -1156,7 +1156,7 @@ a.lightbox .zoom {
     -moz-transition: @targets;
     transition: @targets;*/
 
-  margin: -180px 0 0;
+  margin: -198px 0 0;
   padding: 0;
 }
 #stamp-category-nav-bar .stamp-category-nav-bar-pre {
@@ -1371,6 +1371,10 @@ a.lightbox .zoom {
 }
 #stamp-category-nav-bar ol li.app a:active .icon {
   background-position: -168px -39px;
+}
+.stamp-category-nav-bar-clamped {
+  top: 250px !important;
+  margin-top: 0 !important;
 }
 body.default #stamp-category-nav-bar ol li.default div {
   background-position: -3px -39px;

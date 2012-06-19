@@ -223,3 +223,16 @@ ChangeList 6/8/2012:
     * sDetail:
         * if a lightbox is active, ESC will now only close the lightbox, and then you have to press ESC again to close the sDetail overlay
 
+ChangeList 6/19/2012:
+    * Map:
+        * Centers on most stamped cluster (much better algorithm now)
+        * 
+    
+    * Profile:
+        * Header:
+            * Subsection polish
+            * Hidden subsections aren't visible on page load anymore
+    
+    * sDetail:
+        * Opening sDetail and closing now properly remembers the window's scroll offset
+
