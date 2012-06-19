@@ -3057,14 +3057,14 @@ class HTTPActivity(Schema):
 
             if self.source is not None:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
-                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
-                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
-                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'listen'    : '%(subjects)s listened to ###%(objects)s on %(source)s.',
+                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist on %(source)s.',
+                    'download'  : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'reserve'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
+                    'buy'       : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'watch'     : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'tickets'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
                     }
             else:
                 actionMapping = {
@@ -3096,8 +3096,8 @@ class HTTPActivity(Schema):
                 verbs = actionMapping[self.verb[7:]]
 
             offset = verbs.find('###') - 13 + len(subjects) + 1
-            verbs = re.sub("###", "", verbs)
-
+            #verbs = re.sub("###", "", verbs)
+            logs.info('offset: %s' % offset)
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
