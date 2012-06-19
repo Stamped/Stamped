@@ -1525,7 +1525,7 @@ class StampedAPI(AStampedAPI):
 
     @lazyProperty
     def _entitySearch(self):
-        from EntitySearch import EntitySearch
+        from resolve.EntitySearch import EntitySearch
         return EntitySearch()
 
     @API_CALL

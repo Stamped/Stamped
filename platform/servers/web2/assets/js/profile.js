@@ -197,21 +197,32 @@ var g_update_stamps = null;
             $('.bargraph-row-value').each(function(i, elem) {
                 var $this = $(this);
                 var percentage = 0;
+                var opacity = 1.0;
                 
                 if (bargraph) {
-                    var count   = $this.data('count') || 0;
-                    percentage  = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+                    var count  = $this.data('count') || 0;
+                    
+                    if (count > 0) {
+                        percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+                    } else {
+                        percentage = 0.0;
+                        opacity    = 0.0;
+                    }
                 }
                 
                 $this.stop(true, false).animate({
-                    width : percentage + "%"
+                    width   : percentage + "%", 
+                    opacity : opacity
                 }, {
                     duration : 1000, 
                     specialEasing : { 
                         width  : 'easeInOutBack'
                     }, 
                     complete : function() {
-                        $this.css('width', percentage + "%");
+                        $this.css({
+                            'width'     : percentage + "%", 
+                            'opacity'   : opacity
+                        });
                     }
                 });
             });
