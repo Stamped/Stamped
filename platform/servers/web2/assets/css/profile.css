@@ -239,6 +239,7 @@ footer,
   display: block;
   width: 100%;
   opacity: 0;
+  display: none;
   -webkit-transition: opacity 0.3s ease-out;
   -moz-transition: opacity 0.3s ease-out;
   -ms-transition: opacity 0.3s ease-out;
@@ -250,6 +251,7 @@ footer,
   top: 0;
   left: 0;
   height: auto;
+  display: block;
   /* NOTE: height and min-height dynamically set to MAX(s0/s1/s2-heights);*/
 
 }
