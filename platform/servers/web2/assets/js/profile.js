@@ -591,12 +591,15 @@ var g_update_stamps = null;
                     close_sdetail_func = function() {
                         close_sdetail_func = null;
                         $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                        $window.scrollTop(scroll_top);
                         
                         var close_sdetail_inner_func = function() {
                             init_infinite_scroll();
                             update_dynamic_header();
                             update_navbar_layout();
+                            
+                            // reset window's vertical scroll position to where it was 
+                            // before the sDetail popup
+                            $window.scrollTop(scroll_top);
                             
                             resize_sdetail_wrapper($target, 'closing', function() {
                                 $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
