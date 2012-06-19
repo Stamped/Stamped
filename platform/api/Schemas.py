@@ -1502,6 +1502,7 @@ class Activity(Schema):
         cls.addPropertyList('subjects',                     basestring)
         cls.addProperty('verb',                             basestring, required=True)
         cls.addNestedProperty('objects',                    ActivityObjectIds)
+        cls.addProperty('source',                           basestring)
 
         # Text
         cls.addProperty('header',                           basestring)
@@ -1523,6 +1524,7 @@ class Activity(Schema):
         result.timestamp    = self.timestamp
         result.personal     = personal
         result.header       = self.header
+        result.source       = self.source
         result.body         = self.body
         result.footer       = self.footer
 
@@ -1576,6 +1578,7 @@ class EnrichedActivity(Schema):
         cls.addNestedPropertyList('subjects',               UserMini)
         cls.addProperty('verb',                             basestring, required=True)
         cls.addNestedProperty('objects',                    ActivityObjects)
+        cls.addProperty('source',                           basestring)
 
         # Text
         cls.addProperty('personal',                         bool)

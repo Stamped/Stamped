@@ -306,7 +306,7 @@ class StampedAPIActivityActionComplete(StampedAPIActivityHttpTest):
         result = self.showActivity(self.tokenA)
         self._assertVerbExists(result, 'action_listen')
         self.assertEqual(len(result), 3)
-        self._assertBody(result, ['UserB listened to Call Your Girlfriend - Single.'])
+        self._assertBody(result, ['UserB listened to Call Your Girlfriend - Single on rdio.'])
 
         # Repeat the same action, make sure it doesn't get added to the activity feed again
         self.handlePOST(path, data)
@@ -326,8 +326,8 @@ class StampedAPIActivityActionComplete(StampedAPIActivityHttpTest):
         self.handlePOST(path, data)
         result = self.showActivity(self.tokenA)
         self.assertEqual(len(result), 3)
-        self._assertBody(result, ['UserB and UserC listened to Call Your Girlfriend - Single.',
-                                  'UserC and UserB listened to Call Your Girlfriend - Single.'])
+        self._assertBody(result, ['UserB and UserC listened to Call Your Girlfriend - Single on rdio.',
+                                  'UserC and UserB listened to Call Your Girlfriend - Single on rdio.'])
 
         # cleanup
         self.deleteStamp(self.tokenA, stampNew['stamp_id'])

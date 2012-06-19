@@ -90,6 +90,7 @@ class MongoActivityCollection(AActivityDB):
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
         benefit         = kwargs.pop('benefit', None)
+        source          = kwargs.pop('source', None)
         body            = kwargs.pop('body', None)
 
         sendAlert       = kwargs.pop('sendAlert', True)
@@ -114,6 +115,8 @@ class MongoActivityCollection(AActivityDB):
                 activity.subjects = [ subject ]
             if len(objects) > 0:
                 activity.objects = ActivityObjectIds().dataImport(objects)
+            if source is not None:
+                activity.source = source
             if benefit is not None:
                 activity.benefit = benefit
             if body is not None:

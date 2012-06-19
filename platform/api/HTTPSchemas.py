@@ -2649,6 +2649,7 @@ class HTTPActivity(Schema):
         cls.addProperty('verb',                             basestring)
         cls.addNestedPropertyList('subjects',               HTTPUserMini)
         cls.addNestedProperty('objects',                    HTTPActivityObjects)
+        cls.addProperty('source',                           basestring)
 
         # Image
         cls.addProperty('image',                            basestring) ### TODO: Change to image_url
@@ -3054,16 +3055,40 @@ class HTTPActivity(Schema):
         elif self.verb.startswith('action_'):
             _addStampObjects()
 
-            actionMapping = {
-                'listen'    : ('listened to', ''),
-                'playlist'  : ('added', 'to a playlist'),
-                'download'  : ('downloaded', ''),
-                'reserve'   : ('made a reservation at', ''),
-                'menu'      : ('viewed the menu for', ''),
-                'buy'       : ('bought', ''),
-                'watch'     : ('watched', ''),
-                'tickets'   : ('bought tickets for', ''),
-            }
+            if self.source is not None:
+                actionMapping = {
+                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
+                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    }
+            else:
+                actionMapping = {
+                    'listen'    : '%(subjects)s listened to %(objects)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
+                    'download'  : '%(subjects)s checked out %(objects)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s.',
+                    }
+
+#            actionMapping = {
+#                'listen'    : ('listened to', ''),
+#                'playlist'  : ('added', 'to a playlist'),
+#                'download'  : ('downloaded', ''),
+#                'reserve'   : ('checked out', ''),
+#                'menu'      : ('viewed the menu for', ''),
+#                'buy'       : ('checked out', ''),
+#                'watch'     : ('watched', ''),
+#                'tickets'   : ('bought tickets for', ''),
+#            }
+
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verbs = ('completed', '')
 
@@ -3073,16 +3098,19 @@ class HTTPActivity(Schema):
             offset = len(subjects) + len(verbs[0]) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
-            if len(verbs[1]) > 0:
-                self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
-            else:
-                self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
+            msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
+            self.body = verbs % msgDict
+
+#            if len(verbs[1]) > 0:
+#                self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
+#            else:
+#                self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
         else:
-            raise Exception("Uncrecognized verb: %s" % self.verb)
+            raise Exception("Unrecognized verb: %s" % self.verb)
 
         return self
 
