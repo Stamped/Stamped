@@ -1,12 +1,13 @@
 import Globals
-import sys
-import keys.aws, logs, utils, time
-import boto
 
-from MongoStampedAPI                        import MongoStampedAPI
-from db.mongodb.MongoStatsCollection        import MongoStatsCollection
-from bson.objectid                          import ObjectId
-from gevent.pool                            import Pool
+import sys
+import keys.aws, logs, utils
+from MongoStampedAPI import MongoStampedAPI
+import boto
+from db.mongodb.MongoStatsCollection            import MongoStatsCollection
+from bson.objectid          import ObjectId
+from gevent.pool import Pool
+import sha
 
 
 conn = boto.connect_sdb("AKIAJPJJ2QXCMPIITWDQ","XwBv06/ezFEjsJvalbLNgE9IrHJ46DlGtWc5/F+X")
@@ -15,52 +16,118 @@ domain = conn.get_domain('stats-dev')
 api = MongoStampedAPI()
 sample = MongoStatsCollection()._collection.find()
 
-to_add = {}
-
-count = 0
-failures = 0
-badRequests = []
-
-def put(item): 
+def putMongo(item,destination): 
+    
     if 'bgn' in item:
         item['bgn'] = item['bgn'].isoformat()
     if 'end' in item:
         item['end'] = item['end'].isoformat()
         
     k = str(item.pop('_id', ObjectId()))
-    domain.put_attributes(k, item, replace = False)
+    destination.put_attributes(k, item, replace = False)
 
-pool = Pool(30)
 
-for i in sample:
-    global count
-    global badRequests
-    try:
-        count += 1 
-        pool.spawn(put,i)
-        if count % 1000 == 0:
-            print count, time.time()
-    except: 
-        badRequests.append(i)
-        
-pool.join()
+def mongoToSDB(origin, destination):
+    count = 0
+    failures = 0
+    badRequests = []
+    
+    pool = Pool(30)
+    
+    for i in origin:
 
-print "Now attempting bad requests"
-
-#Attempts bad reqeusts up until 1000 additional failures and then exits, printing a list of the bad requests left unadded
-for i in badRequests:
-    global failures
-    global badRequests
-    try:
-        pool.spawn(put,i)
-    except: 
-        failures += 1
-        if failures > 1000:
-            print badRequests
-            break
-        else:
+        try: 
+            pool.spawn(putMongo,i,destination)
+            count += 1
+            if count % 1000 == 0:
+                print count
+        except: 
             badRequests.append(i)
+            
+    pool.join()
+    
+    print "Now attempting bad requests"
+    
+    #Attempts bad reqeusts up until 1000 additional failures and then exits, printing a list of the bad requests left unadded
+    for i in badRequests:
+        try:
+            pool.spawn(putMongo,i,destination)
+        except: 
+            failures += 1
+            if failures > 1000:
+                print badRequests
+                break
+            else:
+                badRequests.append(i)
+    
+    pool.join()
+    
+def putSDB(item,suffix): 
+    global queues
+    global domains
+    
+    queues[suffix][item.name] = item
+    
+    if len(queues[suffix]) >= 24:
+        domains[suffix].batch_put_attributes(queues[suffix], replace = False)
+        queues[suffix] = {}
 
-pool.join()
+def SDBToSDB(origin,destination,domains):
+    place = 0
+    count = 0
+    failures = 0
+    badRequests = []
+    pings_ignored = 0
+    
+    pool = Pool(30)
+    
+    for i in origin:
+        if place > 100000:
+            try:
+                if i['uri'] == "/v0/ping.json" or i['uri'] == '/v0/temp/ping.json':
+                    pings_ignored += 1
+                    if pings_ignored % 500 == 0:
+                        print 'ignored: ' + str(pings_ignored)
+                else: 
+                    suffix = '0'+sha.new(i.name).hexdigest()[0]
+                    pool.spawn(putSDB,i,suffix)
+                    count += 1
+                    if count % 1000 == 0:
+                        print str(count) + ', ' + str(len(badRequests))
+            except:
+                badRequests.append(i)
+        place += 1
+        
+    pool.join()
+    
+    print "Now attempting bad requests"
+    
+    #Attempts bad reqeusts up until 1000 additional failures and then exits, printing a list of the bad requests left unadded
+    for i in badRequests:
+        dest = sha.new(i.name).hexdigest()[0]
+        shard = destination + '_'+str(dest)
+        try:
+            pool.spawn(putSDB,i,shard)
+        except: 
+            failures += 1
+            if failures > 1000:
+                print badRequests
+                break
+            else:
+                badRequests.append(i)
+    
+    pool.join()
+    
+origin = conn.get_domain('stats-prod')
+domains = {}
+queues = {}
+
+for i in range (0,16):
+    queues['0'+hex(i)[2]] = {}
+
+for i in range (0,16):
+    domains['0'+hex(i)[2]] = conn.get_domain('stats-prod_0'+hex(i)[2])
+    
+SDBToSDB(origin,'stats-prod',domains) 
 
 
