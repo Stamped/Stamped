@@ -23,7 +23,9 @@ class SearchResultDeduper(object):
             resultList[maxResultsPerSource:] = []
         dedupeFnMap = {'music': self.__dedupeMusicResults,
                        'film': self.__dedupeVideoResults,
-                       'place': self.__dedupePlaceResults}
+                       'place': self.__dedupePlaceResults,
+                       'app': self.__dedupeAppResults,
+                       'book': self.__dedupeBookResults}
         return dedupeFnMap[category](resultLists)
 
     def __formClusters(self, search_results, cluster_class):
@@ -117,3 +119,21 @@ class SearchResultDeduper(object):
         # another cluster in the same city that doesn't, just get rid of the second one.
         sortByScore(placeClusters)
         return placeClusters
+
+    def __dedupeAppResults(self, resultLists):
+        apps = []
+        for resultList in resultLists:
+            apps.extend(resultList)
+        clusters = self.__formClusters(apps, AppSearchResultCluster)
+        sortByScore(clusters)
+        print "RESULTS WAS OF LENGTH", len(apps)
+        print "CLUSTERED TO", len(clusters)
+        return clusters
+
+    def __dedupeBookResults(self, resultLists):
+        books = []
+        for resultList in resultLists:
+            books.extend(resultList)
+        clusters = self.__formClusters(books, BookSearchResultCluster)
+        sortByScore(clusters)
+        return clusters

@@ -831,7 +831,9 @@ class AmazonSource(GenericSource):
     def __searchIndexLite(self, searchIndexData, queryText, results):
         searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
             ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25)
-        # pprint(searchResults)
+        print "\n\n\n\nAMAZON\n\n\n\n\n"
+        pprint(searchResults)
+        print "\n\n\n\nENDMAZON\n\n\n\n\n"
         items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
 
         if 'Item' in items:
@@ -843,7 +845,7 @@ class AmazonSource(GenericSource):
                     indexResults.append(parsedItem)
             results[searchIndexData.searchIndexName] = indexResults
 
-    def __searchIndexesLite(self, searchIndexes, queryText):
+    def __searchIndexesLite(self, searchIndexes, queryText, timeout=None):
         """
         Issues searches for the given SearchIndexes and creates ResolverObjects from the results.
         """
@@ -851,7 +853,7 @@ class AmazonSource(GenericSource):
         pool = Pool(len(searchIndexes))
         for searchIndexData in searchIndexes:
             pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex)
-        pool.join()
+        pool.join(timeout)
 
         return resultsBySearchIndex
 
@@ -1162,7 +1164,7 @@ class AmazonSource(GenericSource):
             except KeyError:
                 pass
 
-    def searchLite(self, queryCategory, queryText):
+    def searchLite(self, queryCategory, queryText, timeout=None):
         if queryCategory == 'music':
             # We're not passing a constructor, so this will return the raw results. This is because we're not sure if
             # they're songs or albums yet, so there's no straightforward constructor we can pass.
@@ -1170,17 +1172,28 @@ class AmazonSource(GenericSource):
                 AmazonSource.SearchIndexData('Music', 'Medium,Tracks,Reviews', self.__constructMusicObjectFromResult),
                 AmazonSource.SearchIndexData('DigitalMusic', 'Medium,Reviews', self.__constructMusicObjectFromResult)
             )
-            resultSets = self.__searchIndexesLite(searchIndexes, queryText)
+            resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
             return self.__scoreMusicResults(*resultSets.values())
         elif queryCategory == 'book':
-            raise NotImplementedError()
-        elif queryCategory == 'film':
+            def createBook(rawResult, maxLookupCalls):
+                asin = xp(rawResult, 'ASIN')['v']
+                return AmazonBook(asin, data=rawResult, maxLookupCalls=maxLookupCalls)
             searchIndexes = (
-                AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),
-                AmazonSource.SearchIndexData('DVD', 'Medium,Reviews', self.__constructVideoObjectFromResult)
-            )
-            resultSets = self.__searchIndexesLite(searchIndexes, queryText)
-            return self.__scoreFilmResults(*resultSets.values())
+                    AmazonSource.SearchIndexData('Books', 'Medium,Reviews', createBook),
+                )
+            resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
+            if len(resultSets) == 0:
+                return []
+            if len(resultSets) == 1:
+                results = resultSets['Books']
+            return scoreResultsWithBasicDropoffScoring(results)
+        #elif queryCategory == 'film':
+        #    searchIndexes = (
+        #        AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),
+        #        AmazonSource.SearchIndexData('DVD', 'Medium,Reviews', self.__constructVideoObjectFromResult)
+        #    )
+        #    resultSets = self.__searchIndexesLite(searchIndexes, queryText)
+        #    return self.__scoreFilmResults(*resultSets.values())
         else:
             raise NotImplementedError('AmazonSource.searchLite() does not handle category (%s)' % queryCategory)
 

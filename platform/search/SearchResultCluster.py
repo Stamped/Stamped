@@ -130,13 +130,13 @@ class SearchResultCluster(object):
             source_score = source_scores[0]
             for (score_idx, secondary_score) in list(enumerate(source_scores))[1:]:
                 # The marginal value that additional elements within the same source can contribute is small.
-                source_score += secondary_score * (0.5 ** score_idx)
+                source_score += secondary_score * (0.7 ** score_idx)
             composite_scores.append(source_score)
         composite_scores.sort(reverse=True)
         cluster_score = composite_scores[0]
         for (score_idx, secondary_score) in list(enumerate(composite_scores))[1:]:
-            # Marginal value of additional elements across sources degrades much more slowly.
-            cluster_score += secondary_score * (0.9 ** score_idx)
+            # Supporting results across other sources are completely additive.
+            cluster_score += secondary_score
         self.__score = cluster_score
         return self.__score
 
@@ -459,6 +459,42 @@ class PlaceSearchResultCluster(SearchResultCluster):
             return CompareResult.definitely_not_match()
         else:
             return CompareResult.unknown()
+
+
+class BookSearchResultCluster(SearchResultCluster):
+    @classmethod
+    def _compare_proxies(cls, book1, book2):
+        """
+        """
+        book1_name_simple = cached_simplify(book1.name)
+        book2_name_simple = cached_simplify(book2.name)
+        name_similarity = cached_string_comparison(book1_name_simple, book2_name_simple)
+        if name_similarity < 0.8:
+            return CompareResult.unknown()
+
+        try:
+            author1_name_simple = cached_simplify(book1.authors[0]['name'])
+            author2_name_simple = cached_simplify(book2.authors[0]['name'])
+            # TODO: Look for multiple authors, try to match intelligently.
+            author_similarity = cached_string_comparison(author1_name_simple, author2_name_simple)
+            if name_similarity + author_similarity > 1.7:
+                return CompareResult.match(name_similarity + author_similarity)
+        except Exception:
+            import traceback
+            print "HERE IT IS"
+            traceback.print_exc()
+            print "OK DONE NOW"
+            pass
+
+        return CompareResult.unknown()
+
+
+class AppSearchResultCluster(SearchResultCluster):
+    @classmethod
+    def _compare_proxies(cls, app1, app2):
+        """
+        """
+        return CompareResult.unknown()
 
 
 class TvSearchResultCluster(SearchResultCluster):
