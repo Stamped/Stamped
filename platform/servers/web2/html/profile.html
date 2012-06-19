@@ -105,7 +105,7 @@
                                             <div class="section stamp-category-{{section.category}} stamp-subcategory-{{section.category}} clearfix">
                                                 <div class="category-name">
                                                     {% if section.category == "place" %}Places{% endif %}
-                                                    {% if section.category == "music" %}Musics{% endif %}
+                                                    {% if section.category == "music" %}Music{% endif %}
                                                     {% if section.category == "book" %}Books{% endif %}
                                                     {% if section.category == "film" %}Film &amp; TV{% endif %}
                                                     {% if section.category == "app" %}Apps{% endif %}
@@ -127,9 +127,9 @@
                                 {% handlebars_template "share-widget" %}
                                 
                                 <div class="subnav">
-                                    <div class="subnav_button subnav_button-0"></div>
-                                    <div class="subnav_button subnav_button-1"></div>
-                                    <div class="subnav_button subnav_button-2"></div>
+                                    <a class="subnav_button subnav_button-0" title="Profile default"></a>
+                                    <a class="subnav_button subnav_button-1" title="Profile details"></a>
+                                    <a class="subnav_button subnav_button-2" title="Stamp distribution"></a>
                                 </div>
                             </div>
                         </div>

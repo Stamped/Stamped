@@ -343,7 +343,7 @@ footer,
   width: 0%;
   height: 100%;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .bargraph-row:hover .bargraph-row-value {
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section:hover .bargraph-row .bargraph-row-value {
   background: #3b84eb;
   background: -webkit-linear-gradient(left, #3b84eb, #438fed);
   background: -moz-linear-gradient(left, #3b84eb, #438fed);

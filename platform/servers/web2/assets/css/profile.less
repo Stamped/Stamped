@@ -292,6 +292,9 @@
                                 .section {
                                     position: relative;
                                     
+                                    @b0: #3b84eb;
+                                    @b1: #438fed;
+                                    
                                     .category-name {
                                         display: inline-block;
                                         min-width: 6em;
@@ -309,9 +312,6 @@
                                         width:  70%;
                                         height: 1em;
                                         
-                                        @b0: #3b84eb;
-                                        @b1: #438fed;
-                                        
                                         .bargraph-row-value {
                                             /*.transition(all, .5s, easeOutCubic);*/
                                             .rounded(1em);
@@ -325,10 +325,10 @@
                                             width:  0%;
                                             height: 100%;
                                         }
-                                        
-                                        &:hover .bargraph-row-value {
-                                            .linear-gradient2(left, @b0, @b1);
-                                        }
+                                    }
+                                    
+                                    &:hover .bargraph-row .bargraph-row-value {
+                                        .linear-gradient2(left, @b0, @b1);
                                     }
                                 }
                             }
