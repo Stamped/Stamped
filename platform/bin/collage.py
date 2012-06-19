@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import colorsys, math, os, pprint, sys, urllib2, utils
+import colorsys, math, os, pprint, sys, time, urllib2, utils
 
 from S3ImageDB              import S3ImageDB
 from api.HTTPSchemas        import HTTPTimeSlice

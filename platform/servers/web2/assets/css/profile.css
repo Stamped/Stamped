@@ -299,24 +299,20 @@ footer,
   font-size: 2.5em;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution {
-  font-size: 80%;
   margin-top: 1em;
+  font-weight: 700;
+  font-size: 80%;
+  color: #000;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section {
   position: relative;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .category-name {
   display: inline-block;
-  min-width: 7em;
+  min-width: 6em;
 }
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .icon-wrapper {
-  display: inline-block;
-  min-width: 22px;
-  min-height: 16px;
-  height: 16px;
-}
-.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .icon-wrapper .icon {
-  margin: 0 auto;
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .icon {
+  margin: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .bargraph-row {
   display: inline-block;
