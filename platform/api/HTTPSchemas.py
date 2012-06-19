@@ -3095,7 +3095,7 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = verbs.find('###') - 13 + len(subjects) + 1
+            offset = verbs.find('###') #- #13 + len(subjects) + 1
             verbs = re.sub("###", "", verbs)
 
             #offset = len(subjects) + len(verbs) + 2
