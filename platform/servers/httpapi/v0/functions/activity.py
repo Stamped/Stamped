@@ -23,7 +23,7 @@ def collection(request, authUserId, http_schema, **kwargs):
         t1 = time.time()
         result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
         logs.debug('time for importEnrichedActivity: %s' % (time.time() - t1))
-        totalTime += float(t1)
+        totalTime += float(time.time() - t1)
     logs.debug('TOTAL time for importEnrichedActivity loop: %s' % (time.time() - t0))
     logs.debug("### aggregated time: %s" % totalTime)
     return transformOutput(result)
