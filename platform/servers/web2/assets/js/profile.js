@@ -1385,58 +1385,56 @@ var g_update_stamps = null;
         }
         
         // handle nav bar click routing
-        $nav_bar.find('a').each(function () {
-            $(this).click(function(event) {
-                event.preventDefault();
+        $nav_bar.find('a.active').click(function(event) {
+            event.preventDefault();
+            
+            var $link    = $(this);
+            var orig_category = $link.parent().attr('class');
+            var category = orig_category;
+            
+            if (category === 'default') {
+                category = null;
+            }
+            
+            var params   = get_custom_params({
+                category : category
+            });
+            
+            if (History && History.enabled) {
+                var params_str = get_custom_params_string(params);
                 
-                var $link    = $(this);
-                var orig_category = $link.parent().attr('class');
-                var category = orig_category;
+                console.debug(params);
+                console.debug(orig_category);
+                console.debug(params_str);
                 
-                if (category === 'default') {
-                    category = null;
-                }
-                
-                var params   = get_custom_params({
-                    category : category
-                });
-                
-                if (History && History.enabled) {
-                    var params_str = get_custom_params_string(params);
+                var title = "Stamped - " + screen_name;
+                if (category !== null) {
+                    var text = category;
                     
-                    console.debug(params);
-                    console.debug(orig_category);
-                    console.debug(params_str);
-                    
-                    var title = "Stamped - " + screen_name;
-                    if (category !== null) {
-                        var text = category;
-                        
-                        if (category === 'place') {
-                            text = 'places';
-                        } else if (category === 'music') {
-                            text = 'music';
-                        } else if (category === 'book') {
-                            text = 'books';
-                        } else if (category === 'film') {
-                            text = 'film and tv';
-                        } else if (category === 'app') {
-                            text = 'apps';
-                        }
-                        
-                        title += " - " + text;
+                    if (category === 'place') {
+                        text = 'places';
+                    } else if (category === 'music') {
+                        text = 'music';
+                    } else if (category === 'book') {
+                        text = 'books';
+                    } else if (category === 'film') {
+                        text = 'film and tv';
+                    } else if (category === 'app') {
+                        text = 'apps';
                     }
                     
-                    History.pushState(params, title, params_str);
-                } else {
-                    var next_url = get_custom_url(params);
-                    
-                    //alert("TODO: support navigation when browser history is disabled");
-                    window.location = next_url;
+                    title += " - " + text;
                 }
                 
-                return false;
-            });
+                History.pushState(params, title, params_str);
+            } else {
+                var next_url = get_custom_url(params);
+                
+                //alert("TODO: support navigation when browser history is disabled: " + next_url);
+                window.location = next_url;
+            }
+            
+            return false;
         });
         
         var fixed_width     = 1000;

@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import keys.aws, logs, utils
-import os, time, urllib2
+import os, time, urllib2, sha
 
 from gevent.pool            import Pool
 from libs.ec2_utils         import is_ec2, is_prod_stack
@@ -19,7 +19,7 @@ from boto.exception         import SDBResponseError
 class SimpleDB(object):
     
     def __init__(self, domain=None):
-        conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+        self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 
         if domain is None:
             if is_prod_stack():
@@ -30,9 +30,9 @@ class SimpleDB(object):
             #     domain = 'stats-test'
 
         try:
-            self.domain = conn.get_domain(domain)
+            self.domain = self.conn.get_domain(domain)
         except SDBResponseError:
-            self.domain = conn.create_domain(domain)
+            self.domain = self.conn.create_domain(domain)
 
     def addStat(self, stat):
         if self.domain is None:
@@ -79,7 +79,11 @@ class SimpleDB(object):
 
             if len(data) > 0:
                 statId = str(ObjectId())
-                self.domain.put_attributes(statId, data, replace=False)
+                if data['uri'] != '/v0/ping.json' and data['uri'] != '/v0/temp/ping.json' and is_prod_stack():
+                    suffix = '_0'+sha.new(statId).hexdigest()[0]
+                    alt_domain = self.conn.get_domain('stats-prod'+suffix)
+                    alt_domain.put_attributes(statId, data, replace=False)
+                self.domain.put_attributes(statId, data, replace=False) 
 
         except Exception as e:
             print e

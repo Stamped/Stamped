@@ -7,18 +7,17 @@ __license__   = "TODO"
 
 #Imports
 import Globals
-import argparse
-import sys
-import datetime
-import calendar
-import pprint
+
+import calendar, pprint, datetime, sys, argparse
 import keys.aws, logs, utils
-from MongoStampedAPI import MongoStampedAPI
-from boto.sdb.connection    import SDBConnection
-from boto.exception         import SDBResponseError
+import Queries
+
+from MongoStampedAPI                            import MongoStampedAPI
+from boto.sdb.connection                        import SDBConnection
+from boto.exception                             import SDBResponseError
 from db.mongodb.MongoStatsCollection            import MongoStatsCollection
 
-
+ 
 #Handle command line input
 
 parser = argparse.ArgumentParser(description='Queries for vital statistics over a selected timeframe. Default is total')
@@ -29,11 +28,11 @@ parser.add_argument('-d', help='Show daily totals between bgn and end', action='
 parser.add_argument('-w', help='Show weekly totals between bgn and end', action='store_true')
 parser.add_argument('-m', help='Show monthly totals between bgn and end', action='store_true')
 parser.add_argument('--prod', help='Ignore data past the most recent data copy from prod to dev', action='store_true')
-parser.add_argument('-per', help='Show stats on a per active user basis', action='store_true')
+parser.add_argument('-perUser', help='Show stats on a per active user basis', action='store_true')
 
 
 args = parser.parse_args()
-d, w, m, vital, bgn, end, prod, per = [args.d, args.w, args.m, args.vital[0], args.bgn[0], args.end, args.prod, args.per]
+d, w, m, vital, bgn, end, prod, per = [args.d, args.w, args.m, args.vital[0], args.bgn[0], args.end, args.prod, args.perUser]
 
 
 #Get all of our dates correctly formatted
@@ -69,7 +68,7 @@ if vital != 'stamps' and vital != 'accounts' and vital != 'users':
 
 #Functions for computing stats
 api = MongoStampedAPI()
-userRecords = []
+
 conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 domain = conn.get_domain('stats-dev')
 leftOff = 0
@@ -84,30 +83,20 @@ def incrMonth(date):
 #Some global variables for use in active Users
 
 def activeUsers(t0, t1):
-    users = []
-    global userRecords
-    global leftOff
+    users = set()
     
-    if userRecords == []:
-    
-        cursor =  domain.select('select uid,bgn from `stats-dev` where uid is not null and ' +
-                                'bgn >= "' + str(bgn.isoformat()) + '" and bgn <= "' + str(end.isoformat()) +
-                                '" order by bgn')
+    stats =  domain.select('select uid from `stats-dev` where uri = "/v0/collections/inbox.json" and ' + 'bgn >= "' + str(t0.isoformat()) + '" and bgn <= "' + str(t1.isoformat()) +'"')
         
-        #Outdated mongo query for a possible sanity check.. Remove the .isoformat() suffixes from all remaining t0/t1 references in order to make it work
-        #cursor = MongoStatsCollection()._collection.find({'bgn': {'$gte': bgn, '$lte': end}, 'uid': {'$exists': True}}).sort('bgn', 1)
+    #Equivalent mongo query for a possible sanity check.. Remove the .isoformat() suffixes from all remaining t0/t1 references in order to make it work
+    #cursor = MongoStatsCollection()._collection.find({'bgn': {'$gte': bgn, '$lte': end}, 'uid': {'$exists': True}}).sort('bgn', 1)
         
-        for action in cursor:
-            userRecords.append((action['uid'],action['bgn']))
+    for stat in stats:
+        try:
+            users.add(stat['uid'])
+        except:
+            pass
         
-    for record in userRecords[leftOff:len(userRecords)]:
-        if record[1] >= t0.isoformat() and record[1] <= t1.isoformat():
-            users.append(record[0])
-            leftOff += 1
-        elif record[1] > t1.isoformat():
-            break
-
-    return len(set(users))
+    return len(users)
 
 def newStamps(t0,t1):
     collection = api._stampDB._collection
@@ -130,6 +119,7 @@ def compute():
     prev = bgn
     agg=0
     output = []
+    printing = []
     
     #No flags
     if not (d or w or m):
@@ -174,17 +164,39 @@ def compute():
         except Exception:
             raise
         
-        print str(prev)+' - '+str(succ) + ' : '+ str(total)
-        output.append((str(prev)+' - '+str(succ),total))
+        
+        printing.append((str(prev)+' - '+str(succ), total))
+        output.append((prev,succ,total))
         prev = succ + datetime.timedelta(microseconds=1)
         agg += total
     
     output.append(('total',agg))
-    return output
+    return printing, output
+
+
+
+def perUser(computed):
+    out = []
+    #totalUsers = 0
+    for i in range (0,len(computed)-1):
+        computed
+        t0,t1 = computed[i][0], computed[i][1]
+        users = activeUsers(t0,t1)
+        if users == 0:
+            out.append((t0.isoformat()+' - '+ t1.isoformat(),'No Users'))
+        else:
+            out.append((t0.isoformat()+' - '+ t1.isoformat(),float(computed[i][2])/users))
+        #totalUsers += users
+    #out.append(('average',float(computed[len(computed)-1][1])/totalUsers))
+    return out
+
+
 
 pp = pprint.PrettyPrinter(indent =4)
-pp.pprint(compute())
-
+if not per:
+    pp.pprint(compute()[0])
+else: 
+    pp.pprint(perUser(compute()[1]))
 
 
 
