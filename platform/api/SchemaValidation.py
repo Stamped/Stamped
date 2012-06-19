@@ -19,7 +19,8 @@ from django.core.exceptions import ValidationError
 # ########## #
 
 def parsePhoneNumber(phoneStr):
-    return re.sub("[^0-9]", "", phoneStr)
+    if phoneStr is not None:
+        return re.sub("[^0-9]", "", phoneStr)
 
 
 _color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
