@@ -2714,7 +2714,10 @@ class StampedAPI(AStampedAPI):
                 statsDict[stat.stamp_id] = stat 
             for stampId in stampIds:
                 if stampId not in statsDict:
-                    statsDict[stampId] = self.updateStampStatsAsync(stampId)
+                    try:
+                        statsDict[stampId] = self.updateStampStatsAsync(stampId)
+                    except Exception as e:
+                        logs.warning("Failed to generate stamp stats for %s: %s" % (stampId, e))
             return statsDict
 
     def updateStampStatsAsync(self, stampId):
