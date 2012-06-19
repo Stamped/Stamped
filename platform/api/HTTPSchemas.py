@@ -2083,6 +2083,11 @@ class HTTPTimeSlice(Schema):
 
         return slc
 
+class HTTPTodoTimeSlice(HTTPTimeSlice):
+    def __init__(self):
+        HTTPTimeSlice.__init__(self)
+        self.scope = 'todo'
+
 class HTTPWebTimeSlice(Schema):
     @classmethod
     def setSchema(cls):
