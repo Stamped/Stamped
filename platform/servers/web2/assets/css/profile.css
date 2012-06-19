@@ -1373,8 +1373,7 @@ a.lightbox .zoom {
   background-position: -168px -39px;
 }
 .stamp-category-nav-bar-clamped {
-  top: 250px !important;
-  margin-top: 0 !important;
+  top: 448px !important;
 }
 body.default #stamp-category-nav-bar ol li.default div {
   background-position: -3px -39px;
