@@ -1280,7 +1280,7 @@ class HTTPEntity(Schema):
 
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
-                source.name         = 'Watch on iTunes'
+                source.name         = 'Watch Trailer on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.source_data  = { 'preview_url': entity.sources.itunes_preview }
@@ -1295,7 +1295,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+            self._addAction(actionType, 'Watch trailer', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
             actionType  = 'add_to_instant_queue'
@@ -1356,7 +1356,7 @@ class HTTPEntity(Schema):
             self._addMetadata('Genres', self._formatMetadataList(entity.genres), optional=True)
             self._addMetadata('Rating', entity.mpaa_rating, key='rating', optional=True)
 
-            # Actions: Watch Now
+            # Actions: Preview
 
             actionType  = 'watch'
             actionIcon  = _getIconURL('act_play_primary', client=client)
@@ -1364,7 +1364,7 @@ class HTTPEntity(Schema):
 
             if entity.sources.itunes_id is not None and entity.sources.itunes_preview is not None:
                 source              = HTTPActionSource()
-                source.name         = 'Watch on iTunes'
+                source.name         = 'Watch Trailer on iTunes'
                 source.source       = 'itunes'
                 source.source_id    = entity.sources.itunes_id
                 source.source_data  = { 'preview_url': entity.sources.itunes_preview }
@@ -1381,7 +1381,7 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            self._addAction(actionType, 'Watch now', sources, icon=actionIcon)
+            self._addAction(actionType, 'Watch trailer', sources, icon=actionIcon)
 
             # Actions: Find Tickets
 
@@ -1440,10 +1440,6 @@ class HTTPEntity(Schema):
                 sources.append(source)
 
             self._addAction(actionType, 'Add to Netflix Instant Queue', sources, icon=actionIcon)
-
-            # Actions: Watch Trailer
-
-            ### TODO: Add source
 
             # Actions: Download
 
