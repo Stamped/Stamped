@@ -197,21 +197,32 @@ var g_update_stamps = null;
             $('.bargraph-row-value').each(function(i, elem) {
                 var $this = $(this);
                 var percentage = 0;
+                var opacity = 1.0;
                 
                 if (bargraph) {
-                    var count   = $this.data('count') || 0;
-                    percentage  = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+                    var count  = $this.data('count') || 0;
+                    
+                    if (count > 0) {
+                        percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+                    } else {
+                        percentage = 0.0;
+                        opacity    = 0.0;
+                    }
                 }
                 
                 $this.stop(true, false).animate({
-                    width : percentage + "%"
+                    width   : percentage + "%", 
+                    opacity : opacity
                 }, {
                     duration : 1000, 
                     specialEasing : { 
                         width  : 'easeInOutBack'
                     }, 
                     complete : function() {
-                        $this.css('width', percentage + "%");
+                        $this.css({
+                            'width'     : percentage + "%", 
+                            'opacity'   : opacity
+                        });
                     }
                 });
             });
@@ -591,12 +602,15 @@ var g_update_stamps = null;
                     close_sdetail_func = function() {
                         close_sdetail_func = null;
                         $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                        $window.scrollTop(scroll_top);
                         
                         var close_sdetail_inner_func = function() {
                             init_infinite_scroll();
                             update_dynamic_header();
                             update_navbar_layout();
+                            
+                            // reset window's vertical scroll position to where it was 
+                            // before the sDetail popup
+                            $window.scrollTop(scroll_top);
                             
                             resize_sdetail_wrapper($target, 'closing', function() {
                                 $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -1371,64 +1385,62 @@ var g_update_stamps = null;
         }
         
         // handle nav bar click routing
-        $nav_bar.find('a').each(function () {
-            $(this).click(function(event) {
-                event.preventDefault();
+        $nav_bar.find('a.active').click(function(event) {
+            event.preventDefault();
+            
+            var $link    = $(this);
+            var orig_category = $link.parent().attr('class');
+            var category = orig_category;
+            
+            if (category === 'default') {
+                category = null;
+            }
+            
+            var params   = get_custom_params({
+                category : category
+            });
+            
+            if (History && History.enabled) {
+                var params_str = get_custom_params_string(params);
                 
-                var $link    = $(this);
-                var orig_category = $link.parent().attr('class');
-                var category = orig_category;
+                console.debug(params);
+                console.debug(orig_category);
+                console.debug(params_str);
                 
-                if (category === 'default') {
-                    category = null;
-                }
-                
-                var params   = get_custom_params({
-                    category : category
-                });
-                
-                if (History && History.enabled) {
-                    var params_str = get_custom_params_string(params);
+                var title = "Stamped - " + screen_name;
+                if (category !== null) {
+                    var text = category;
                     
-                    console.debug(params);
-                    console.debug(orig_category);
-                    console.debug(params_str);
-                    
-                    var title = "Stamped - " + screen_name;
-                    if (category !== null) {
-                        var text = category;
-                        
-                        if (category === 'place') {
-                            text = 'places';
-                        } else if (category === 'music') {
-                            text = 'music';
-                        } else if (category === 'book') {
-                            text = 'books';
-                        } else if (category === 'film') {
-                            text = 'film and tv';
-                        } else if (category === 'app') {
-                            text = 'apps';
-                        }
-                        
-                        title += " - " + text;
+                    if (category === 'place') {
+                        text = 'places';
+                    } else if (category === 'music') {
+                        text = 'music';
+                    } else if (category === 'book') {
+                        text = 'books';
+                    } else if (category === 'film') {
+                        text = 'film and tv';
+                    } else if (category === 'app') {
+                        text = 'apps';
                     }
                     
-                    History.pushState(params, title, params_str);
-                } else {
-                    var next_url = get_custom_url(params);
-                    
-                    //alert("TODO: support navigation when browser history is disabled");
-                    window.location = next_url;
+                    title += " - " + text;
                 }
                 
-                return false;
-            });
+                History.pushState(params, title, params_str);
+            } else {
+                var next_url = get_custom_url(params);
+                
+                //alert("TODO: support navigation when browser history is disabled: " + next_url);
+                window.location = next_url;
+            }
+            
+            return false;
         });
         
         var fixed_width     = 1000;
         var fixed_padding   = 80;
         var min_col_width   = 305;
-        var last_nav_pos    = null;
+        var last_nav_pos_x  = null;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
@@ -1519,7 +1531,7 @@ var g_update_stamps = null;
             }
             
             if (!force_no_update) {
-                if (update || last_nav_pos !== pos) {
+                if (update || last_nav_pos_x !== pos) {
                     if (!gallery) {
                         var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
                         var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
@@ -1539,16 +1551,26 @@ var g_update_stamps = null;
                 }
             }
             
-            if (last_nav_pos !== pos) {
+            var clamped = 'stamp-category-nav-bar-clamped';
+            
+            if (window.innerHeight / 2 - 198 <= 250) {
+                if (!$nav_bar.hasClass(clamped)) {
+                    $nav_bar.addClass(clamped);
+                }
+            } else if ($nav_bar.hasClass(clamped)) {
+                $nav_bar.removeClass(clamped);
+            }
+            
+            if (last_nav_pos_x !== pos) {
                 var style = {
-                    left  : pos + "px"
+                    left : pos + "px"
                 };
                 
-                if (last_nav_pos === null) {
+                if (last_nav_pos_x === null) {
                     style['right'] = 'auto';
                 }
                 
-                last_nav_pos = pos;
+                last_nav_pos_x = pos;
                 $nav_bar.css(style);
             }
         };

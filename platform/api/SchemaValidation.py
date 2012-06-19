@@ -22,7 +22,6 @@ def parsePhoneNumber(phoneStr):
     if phoneStr is not None:
         return re.sub("[^0-9]", "", str(phoneStr))
 
-
 _color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
 def validateHexColor(color):
     global _color_re

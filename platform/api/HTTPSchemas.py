@@ -396,7 +396,7 @@ class HTTPTwitterAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
         cls.addProperty('email',                            basestring)
@@ -422,7 +422,7 @@ class HTTPAccountUpdateForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
@@ -586,7 +586,7 @@ class HTTPUserId(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
 
 class HTTPUserIds(Schema):
     @classmethod
@@ -605,9 +605,9 @@ class HTTPUserRelationship(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_id_a',                        basestring)
-        cls.addProperty('screen_name_a',                    basestring)
+        cls.addProperty('screen_name_a',                    basestring, cast=validateScreenName)
         cls.addProperty('user_id_b',                        basestring)
-        cls.addProperty('screen_name_b',                    basestring)
+        cls.addProperty('screen_name_b',                    basestring, cast=validateScreenName)
 
 class HTTPFindUser(Schema):
     @classmethod
@@ -663,7 +663,7 @@ class HTTPUser(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('bio',                              basestring)
@@ -747,7 +747,7 @@ class HTTPUserMini(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('privacy',                          bool, required=True)
@@ -2103,7 +2103,7 @@ class HTTPWebTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
         cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
     
     def exportTimeSlice(self):
@@ -2649,6 +2649,7 @@ class HTTPActivity(Schema):
         cls.addProperty('verb',                             basestring)
         cls.addNestedPropertyList('subjects',               HTTPUserMini)
         cls.addNestedProperty('objects',                    HTTPActivityObjects)
+        cls.addProperty('source',                           basestring)
 
         # Image
         cls.addProperty('image',                            basestring) ### TODO: Change to image_url
@@ -3054,35 +3055,65 @@ class HTTPActivity(Schema):
         elif self.verb.startswith('action_'):
             _addStampObjects()
 
-            actionMapping = {
-                'listen'    : ('listened to', ''),
-                'playlist'  : ('added', 'to a playlist'),
-                'download'  : ('downloaded', ''),
-                'reserve'   : ('made a reservation at', ''),
-                'menu'      : ('viewed the menu for', ''),
-                'buy'       : ('bought', ''),
-                'watch'     : ('watched', ''),
-                'tickets'   : ('bought tickets for', ''),
-            }
+            if self.source is not None:
+                actionMapping = {
+                    'listen'    : '%(subjects)s listened to ###%(objects)s on %(source)s.',
+                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist on %(source)s.',
+                    'download'  : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'reserve'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
+                    'buy'       : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'watch'     : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'tickets'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    }
+            else:
+                actionMapping = {
+                    'listen'    : '%(subjects)s listened to ###%(objects)s.',
+                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist.',
+                    'download'  : '%(subjects)s checked out ###%(objects)s.',
+                    'reserve'   : '%(subjects)s checked out ###%(objects)s.',
+                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
+                    'buy'       : '%(subjects)s checked out ###%(objects)s.',
+                    'watch'     : '%(subjects)s checked out ###%(objects)s.',
+                    'tickets'   : '%(subjects)s checked out ###%(objects)s.',
+                    }
+
+#            actionMapping = {
+#                'listen'    : ('listened to', ''),
+#                'playlist'  : ('added', 'to a playlist'),
+#                'download'  : ('downloaded', ''),
+#                'reserve'   : ('checked out', ''),
+#                'menu'      : ('viewed the menu for', ''),
+#                'buy'       : ('checked out', ''),
+#                'watch'     : ('watched', ''),
+#                'tickets'   : ('bought tickets for', ''),
+#            }
+
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verbs = ('completed', '')
 
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = len(subjects) + len(verbs[0]) + 2
+            #offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
+            verbs = re.sub("###", "", verbs)
+            offset = 0
+            #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
-            if len(verbs[1]) > 0:
-                self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
-            else:
-                self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
+            msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
+            self.body = verbs % msgDict
+
+#            if len(verbs[1]) > 0:
+#                self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
+#            else:
+#                self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
         else:
-            raise Exception("Uncrecognized verb: %s" % self.verb)
+            raise Exception("Unrecognized verb: %s" % self.verb)
 
         return self
 

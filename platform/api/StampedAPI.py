@@ -871,7 +871,13 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
         if service_name not in ['facebook', 'twitter', 'netflix']:
+            logs.warning('Attempted to remove invalid linked account: %s' % service_name)
             raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
+
+        account = self.getAccount(authUserId)
+        if account.auth_service == service_name:
+            logs.warning('Attempted to remove linked account used for auth service')
+            raise StampedIllegalActionError('Cannot remove a third-party account used for authorization.')
 
         self._accountDB.removeLinkedAccount(authUserId, service_name)
         return True
@@ -1519,7 +1525,7 @@ class StampedAPI(AStampedAPI):
 
     @lazyProperty
     def _entitySearch(self):
-        from EntitySearch import EntitySearch
+        from resolve.EntitySearch import EntitySearch
         return EntitySearch()
 
     @API_CALL
@@ -1637,7 +1643,7 @@ class StampedAPI(AStampedAPI):
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
             if action in actions and authUserId != stamp.user.user_id:
-                self._addActionCompleteActivity(authUserId, action, stamp.stamp_id, stamp.user.user_id)
+                self._addActionCompleteActivity(authUserId, action, source, stamp.stamp_id, stamp.user.user_id)
 
         return True
 
@@ -4105,11 +4111,12 @@ class StampedAPI(AStampedAPI):
                                                               requireRecipient = True,
                                                               unique = True)
 
-    def _addActionCompleteActivity(self, userId, action_name, stampId, friendId, body=None):
+    def _addActionCompleteActivity(self, userId, action_name, source, stampId, friendId, body=None):
         objects = ActivityObjectIds()
         objects.user_ids        = [ friendId ]
         objects.stamp_ids       = [ stampId ]
         self._addActivity('action_%s' % action_name, userId, objects,
+                                                             source = source,
                                                              body = body,
                                                              group = True,
                                                              groupRange = timedelta(days=1),
@@ -4118,6 +4125,7 @@ class StampedAPI(AStampedAPI):
     def _addActivity(self, verb,
                            userId,
                            objects,
+                           source=None,
                            body=None,
                            recipientIds=[],
                            requireRecipient=False,
@@ -4143,6 +4151,7 @@ class StampedAPI(AStampedAPI):
         self._activityDB.addActivity(verb           = verb,
                                      subject        = userId,
                                      objects        = objects,
+                                     source         = source,
                                      body           = body,
                                      recipientIds   = recipientIds,
                                      benefit        = benefit,
@@ -4158,7 +4167,6 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
-        #activityData, final = self._getActivityFromCache(authUserId, scope, offset, limit)
 
         # Append user objects
         userIds     = {}

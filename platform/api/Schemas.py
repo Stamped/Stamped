@@ -322,7 +322,7 @@ class Account(Schema):
         cls.addProperty('name_lower',                       basestring)
         cls.addProperty('email',                            basestring)
         cls.addProperty('password',                         basestring)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('screen_name_lower',                basestring)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
@@ -351,7 +351,7 @@ class FacebookAccountNew(Schema):
 
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('email',                            basestring)#, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('phone',                            int)
 
         cls.addProperty('bio',                              basestring)
@@ -368,7 +368,7 @@ class TwitterAccountNew(Schema):
 
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('email',                            basestring)#, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('phone',                            int)
 
         cls.addProperty('bio',                              basestring)
@@ -382,7 +382,7 @@ class AccountUpdateForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
         cls.addProperty('phone',                            basestring)
 
         cls.addProperty('bio',                              basestring)
@@ -403,7 +403,7 @@ class User(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring)
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('screen_name',                      basestring, required=True)
+        cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('bio',                              basestring)
@@ -427,7 +427,7 @@ class UserMini(Schema):
     def setSchema(cls):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addProperty('name',                             basestring)
-        cls.addProperty('screen_name',                      basestring)
+        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
         cls.addProperty('color_secondary',                  basestring, cast=validateHexColor)
         cls.addProperty('privacy',                          bool)
@@ -1502,6 +1502,7 @@ class Activity(Schema):
         cls.addPropertyList('subjects',                     basestring)
         cls.addProperty('verb',                             basestring, required=True)
         cls.addNestedProperty('objects',                    ActivityObjectIds)
+        cls.addProperty('source',                           basestring)
 
         # Text
         cls.addProperty('header',                           basestring)
@@ -1523,6 +1524,7 @@ class Activity(Schema):
         result.timestamp    = self.timestamp
         result.personal     = personal
         result.header       = self.header
+        result.source       = self.source
         result.body         = self.body
         result.footer       = self.footer
 
@@ -1576,6 +1578,7 @@ class EnrichedActivity(Schema):
         cls.addNestedPropertyList('subjects',               UserMini)
         cls.addProperty('verb',                             basestring, required=True)
         cls.addNestedProperty('objects',                    ActivityObjects)
+        cls.addProperty('source',                           basestring)
 
         # Text
         cls.addProperty('personal',                         bool)
