@@ -45,10 +45,6 @@ class TheTVDB(object):
         if xml is None:
             return []
 
-        print "\n\n\n"
-        print xml.encode('utf-8')
-        print "\n\n\n"
-
         tree = objectify.fromstring(xml.encode('utf-8'))
         
         if not transform:
