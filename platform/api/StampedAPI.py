@@ -3195,7 +3195,7 @@ class StampedAPI(AStampedAPI):
         if userId is not None:
             self._collectionDB.getUserStampIds(userId)
 
-        if scope == 'popular':
+        if scope == 'everyone':
             return None
 
         if authUserId is None:
@@ -3215,7 +3215,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getStampCollection(self, timeSlice, authUserId=None):
         # Special-case "tastemakers"
-        if timeSlice.scope == 'popular':
+        if timeSlice.scope == 'everyone':
             stampIds = []
             limit = timeSlice.limit
             if limit <= 0:
