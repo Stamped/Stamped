@@ -339,8 +339,20 @@ footer,
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
+  background: #69a1f0;
+  background: -webkit-linear-gradient(left, #69a1f0, #89b9f4);
+  background: -moz-linear-gradient(left, #69a1f0, #89b9f4);
+  background: -ms-linear-gradient(left, #69a1f0, #89b9f4);
+  background: -o-linear-gradient(left, #69a1f0, #89b9f4);
   width: 0%;
   height: 100%;
+}
+.profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs .header-subsection-2 .user-stamp-distribution .section .bargraph-row:hover .bargraph-row-value {
+  background: #3b84eb;
+  background: -webkit-linear-gradient(left, #3b84eb, #438fed);
+  background: -moz-linear-gradient(left, #3b84eb, #438fed);
+  background: -ms-linear-gradient(left, #3b84eb, #438fed);
+  background: -o-linear-gradient(left, #3b84eb, #438fed);
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .rhs {
   float: right;

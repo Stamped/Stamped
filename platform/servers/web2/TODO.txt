@@ -47,6 +47,7 @@ TODO:
     * fix glitch w/ hover state on entity stamp images in gallery shifting text
     * clicking on map in stamp gallery => selection in map view
     * remove ribbons from map list-view nav
+    * TODO: disable navigation to empty category-sections
     
     * headers:
         * change profile header image and share widget to remain constant

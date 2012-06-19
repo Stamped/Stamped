@@ -314,12 +314,25 @@
                                         width:  70%;
                                         height: 1em;
                                         
+                                        @b0: #3b84eb;
+                                        @b1: #438fed;
+                                        
                                         .bargraph-row-value {
                                             /*.transition(all, .5s, easeOutCubic);*/
                                             .rounded(1em);
                                             
+                                            //background-color: #000;
+                                            @c0: lighten(@b0, 10%);
+                                            @c1: lighten(@b1, 15%);
+                                            
+                                            .linear-gradient2(left, @c0, @c1);
+                                            
                                             width:  0%;
                                             height: 100%;
+                                        }
+                                        
+                                        &:hover .bargraph-row-value {
+                                            .linear-gradient2(left, @b0, @b1);
                                         }
                                     }
                                 }
