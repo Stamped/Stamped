@@ -3068,14 +3068,14 @@ class HTTPActivity(Schema):
                     }
             else:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to %(objects)s.',
-                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
-                    'download'  : '%(subjects)s checked out %(objects)s.',
-                    'reserve'   : '%(subjects)s checked out %(objects)s.',
-                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
-                    'buy'       : '%(subjects)s checked out %(objects)s.',
-                    'watch'     : '%(subjects)s checked out %(objects)s.',
-                    'tickets'   : '%(subjects)s checked out %(objects)s.',
+                    'listen'    : '%(subjects)s listened to ###%(objects)s.',
+                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist.',
+                    'download'  : '%(subjects)s checked out ###%(objects)s.',
+                    'reserve'   : '%(subjects)s checked out ###%(objects)s.',
+                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
+                    'buy'       : '%(subjects)s checked out ###%(objects)s.',
+                    'watch'     : '%(subjects)s checked out ###%(objects)s.',
+                    'tickets'   : '%(subjects)s checked out ###%(objects)s.',
                     }
 
 #            actionMapping = {
@@ -3095,7 +3095,10 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = len(subjects) + len(verbs) + 2
+            offset = verbs.find('###') - 13 + len(subjects) + 1
+            verbs = re.sub("###", "", verbs)
+
+            #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
             msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
