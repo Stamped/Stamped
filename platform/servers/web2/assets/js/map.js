@@ -354,8 +354,8 @@
         
         var set_temp_max_zoom = function(zoom) {
             var bc = google.maps.event.addListener(map, 'idle', function() {
-                if (this.getZoom() > 13) {
-                    this.setZoom(13);
+                if (this.getZoom() > zoom) {
+                    this.setZoom(zoom);
                 }
                 
                 google.maps.event.removeListener(bc);
@@ -379,8 +379,8 @@
                         
                         var clusters = marker_clusterer.getClusters();
                         var max_mark = null;
-                        var max_size = -1;
                         var max_pos  = null;
+                        var max_size = -1;
                         
                         $.each(clusters, function(i, cluster) {
                             var size = cluster.getSize();
@@ -392,7 +392,7 @@
                             }
                         });
                         
-                        if (max_pos !== null && max_size > 0 && (depth == 0 || max_size > 10)) {
+                        if (max_pos !== null && max_size >= 4 && (depth == 0 || max_size > 10)) {
                             var max_cluster_bounds = new google.maps.LatLngBounds();
                             var total_dist  = 0.0;
                             var total_dist2 = 0.0;
@@ -426,6 +426,8 @@
                             if (pts.length == 1) {
                                 map.setCenter(pts[0]);
                             } else {
+                                //console.debug(pts.length + " vs " + max_size);
+                                //console.debug(max_cluster_bounds.toString());
                                 map.fitBounds(max_cluster_bounds);
                             }
                             
