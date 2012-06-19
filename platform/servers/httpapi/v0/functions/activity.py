@@ -18,7 +18,7 @@ def collection(request, authUserId, http_schema, **kwargs):
     t0 = time.time()
     t1 = t0
     totalTime = t0-t0
-    logs.debug(t0-t)
+    logs.debug(t0-t0)
     result = []
     for item in activity:
         t1 = time.time()
