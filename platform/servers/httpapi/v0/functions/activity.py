@@ -17,16 +17,15 @@ def collection(request, authUserId, http_schema, **kwargs):
 
     t0 = time.time()
     t1 = t0
-    totalTime = t0-t0
+    totalTime = 0
     result = []
     for item in activity:
         t1 = time.time()
         result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
         logs.debug('time for importEnrichedActivity: %s' % (time.time() - t1))
-        totalTime += t1
+        totalTime += float(time.time() - t1)
     logs.debug('TOTAL time for importEnrichedActivity loop: %s' % (time.time() - t0))
-    logs.debug('TOTAL aggregated time: %s' % totalTime)
-
+    logs.debug("### aggregated time: %s" % totalTime)
     return transformOutput(result)
 
 @handleHTTPRequest()
