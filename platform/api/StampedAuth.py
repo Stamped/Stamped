@@ -112,6 +112,7 @@ class StampedAuth(AStampedAuth):
                 raise StampedHTTPError("invalid_credentials", 401, msg)
 
             if not auth.comparePasswordToStored(password, account.password):
+                logs.warning('Invalid password for user: %s' % userIdentifier)
                 raise
 
             logs.info("Login successful")
