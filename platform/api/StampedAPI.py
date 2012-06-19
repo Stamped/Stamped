@@ -2273,6 +2273,10 @@ class StampedAPI(AStampedAPI):
             # add activity for credit and mentions
             tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
 
+        else:
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
         return stamp
 
     @API_CALL
@@ -2347,6 +2351,8 @@ class StampedAPI(AStampedAPI):
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
 
+        # Update stamp stats
+        tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, stampId, content_id):
