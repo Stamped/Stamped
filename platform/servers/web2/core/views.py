@@ -185,11 +185,11 @@ def map(request, schema, **kwargs):
         s = schema.dataExport()
         del s['screen_name']
         s['user_id'] = user_id
+        s['category'] = 'place'
         
         stamps      = stampedAPIProxy.getUserStamps(s)
     
     # TODO: bake this into stampedAPIProxy request
-    stamps    = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
     
     body_classes = _get_body_classes('map collapsed-header', schema)
     
