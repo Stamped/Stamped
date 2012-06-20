@@ -863,9 +863,6 @@ class iTunesSource(GenericSource):
     def __searchEntityTypeLite(self, entityType, queryText, resultsDict):
         try:
             resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText)['results']
-            # TODO GET RID OF ME
-            import pprint
-            pprint.pprint(resultsDict[entityType])
         except Exception:
             logs.report()
 
@@ -926,6 +923,9 @@ class iTunesSource(GenericSource):
             'musicArtist' : 0.8,
             'movie' : 0.5,
             'tvShow' : 0.5,
+            # Having iTunes book results is good for enrichment, and in case Amazon doesn't return results or something,
+            # but we really don't want it having much of an impact on ranking.
+            'ebook': 0.1,
         }
 
         if iTunesType in iTunesTypesToWeights:

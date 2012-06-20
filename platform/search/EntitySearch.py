@@ -90,7 +90,7 @@ class EntitySearch(object):
         print "TIME CHECK DONE AT", datetime.datetime.now()
         print "ELAPSED:", afterDeduping - start
 
-        for dedupedResult in dedupedResults[:10]:
+        for dedupedResult in dedupedResults[:20]:
             print "\n\n"
             print dedupedResult
             print "\n\n"

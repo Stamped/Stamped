@@ -462,14 +462,39 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
 
 class BookSearchResultCluster(SearchResultCluster):
+    SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
+    @classmethod
+    def _strip_subtitle(cls, title):
+        without_subtitle = cls.SUBTITLE_RE.sub('\\1', title)
+        if len(without_subtitle) > 5:
+            return without_subtitle
+        return title
+
+    @classmethod
+    def _compare_titles(cls, title1, title2):
+        book1_name_simple = cached_simplify(title1)
+        book2_name_simple = cached_simplify(title2)
+        if book1_name_simple == book2_name_simple:
+            return 1
+
+        similarity = cached_string_comparison(book1_name_simple, book2_name_simple)
+        title1_without_subtitle = cls._strip_subtitle(book1_name_simple)
+        title2_without_subtitle = cls._strip_subtitle(book2_name_simple)
+        if book1_name_simple == title2_without_subtitle or book2_name_simple == title1_without_subtitle:
+            similarity = max(similarity, 0.95)
+        elif title1_without_subtitle == title2_without_subtitle:
+            similarity = max(similarity, 0.9)
+        else:
+            subtitle_similarity = cached_string_comparison(title1_without_subtitle, title2_without_subtitle)
+            similarity = max(similarity, subtitle_similarity - 0.1)
+        return similarity
+
     @classmethod
     def _compare_proxies(cls, book1, book2):
         """
         """
-        book1_name_simple = cached_simplify(book1.name)
-        book2_name_simple = cached_simplify(book2.name)
-        name_similarity = cached_string_comparison(book1_name_simple, book2_name_simple)
-        if name_similarity < 0.8:
+        title_similarity = cls._compare_titles(book1.name, book2.name)
+        if title_similarity < 0.75:
             return CompareResult.unknown()
 
         try:
@@ -477,13 +502,9 @@ class BookSearchResultCluster(SearchResultCluster):
             author2_name_simple = cached_simplify(book2.authors[0]['name'])
             # TODO: Look for multiple authors, try to match intelligently.
             author_similarity = cached_string_comparison(author1_name_simple, author2_name_simple)
-            if name_similarity + author_similarity > 1.7:
-                return CompareResult.match(name_similarity + author_similarity)
+            if title_similarity + author_similarity > 1.7:
+                return CompareResult.match(title_similarity + author_similarity)
         except Exception:
-            import traceback
-            print "HERE IT IS"
-            traceback.print_exc()
-            print "OK DONE NOW"
             pass
 
         return CompareResult.unknown()
