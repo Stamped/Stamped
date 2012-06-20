@@ -53,12 +53,9 @@ class EntitySearch(object):
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
         # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
         # enough to give a solid idea.
-        logs.debug("DEBUG DEBUG DEBUG OK ABOUT TO SEARCH SOURCE " + source.sourceName)
         before = datetime.datetime.now()
         try:
-            logs.debug('DEBUG DEBUG DEBUG Searching source: ' + source.sourceName)
             resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
-            logs.debug('DEBUG DEBUG DEBUG Done searching source: ' + source.sourceName)
         except:
             logs.report()
         after = datetime.datetime.now()
@@ -76,22 +73,18 @@ class EntitySearch(object):
         results = {}
         times = {}
         pool = Pool(len(self.__categories_to_sources))
-        logs.debug('DEBUG DEBUG DEBUG Category is: ' + category)
-        logs.debug('DEBUG DEBUG DEBUG Num sources: ' + str(len(self.__categories_to_sources[category])))
         for source in self.__categories_to_sources[category]:
             # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
-            logs.debug('DEBUG DEBUG DEBUG NOW SPAWNING FOR SOURCE ' + source.sourceName)
-            #pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
-            self.__searchSource(source, category, text, results, times, timeout=timeout, **queryParams)
-            logs.debug('DEBUG DEBUG DEBUG DONE SPAWNING FOR SOURCE ' + source.sourceName)
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join(timeout=timeout)
         logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
 
         logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
+        logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
         for source in self.__all_sources:
             if source in results and results[source]:
                 logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
@@ -114,7 +107,7 @@ class EntitySearch(object):
         return dedupedResults[:limit]
 
 
-    def searchEntities(self, category, text, timeout=None, limit=10, queryLatLng=None, **queryParams):
+    def searchEntities(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
         if queryLatLng:
             queryParams['queryLatLng'] = queryLatLng
         logs.debug('In searchEntities')

@@ -366,9 +366,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        except StampedIllegalActionError:
-            raise StampedIllegalActionError("Multiple accounts already exist with this Facebook user")
-        raise StampedIllegalActionError("An account already exists with this Facebook user")
+        raise StampedLinkedAccountExists("Account already exists for facebookId: %s" % facebookId)
 
     def _verifyTwitterAccount(self, twitterId):
         # Check that no Stamped account is linked to the twitterId
@@ -376,9 +374,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        except StampedIllegalActionError:
-            raise StampedIllegalActionError("Multiple accounts already exist with this Twitter user")
-        raise StampedIllegalActionError("An account already exists with this Twitter user")
+        raise StampedLinkedAccountExists("Account already exists for twitterId: %s" % twitterId)
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -730,7 +726,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using facebook_id: %s" % facebookId)
+            raise StampedLinkedAccountExists("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
 
     @API_CALL
@@ -739,7 +735,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using twitter_id: %s" % twitterId)
+            raise StampedLinkedAccountExists("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
 
     @API_CALL
@@ -748,7 +744,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using netflix_id: %s" % netflixId)
+            raise StampedLinkedAccountExists("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
 
     @API_CALL
@@ -1573,7 +1569,7 @@ class StampedAPI(AStampedAPI):
         queryLatLng = None
         if coords:
             queryLatLng = (coords.lat, coords.lng)
-        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=coords)
+        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=queryLatLng)
 
         results = []
         process = 5
