@@ -10,19 +10,12 @@ import logs
 class Fail(Exception):
     pass
 
-class StampedException(Exception):
-    def __init__(self, msg=None):
-        Exception.__init__(self, msg)
-        self.msg  = msg
-        if msg is not None:
-            logs.warning(msg)
-
 class StampedHTTPError(Exception):
-    def __init__(self, msg, code, desc=None):
+    def __init__(self, code, kind=None, msg=None):
         Exception.__init__(self, msg)
         self.code = code
         self.msg  = msg
-        self.desc = desc
+        self.kind = kind
         
         if msg is not None:
             logs.warning(msg)
@@ -114,7 +107,36 @@ class StampedAuthError(Exception):
 
 # Specific Stamped Exceptions
 
-class StampedLinkedAccountExists(StampedIllegalActionError):
+class StampedLinkedAccountExistsError(StampedIllegalActionError):
     def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
+
+class StampedInvalidPasswordError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidScreenNameError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidEmailError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidClientError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidCredentialsError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedDuplicateEmailError(StampedDuplicationError):
+    def __init__(self, msg=None):
+        StampedDuplicationError.__init__(self, msg)
+
+class StampedDuplicateScreenNameError(StampedDuplicationError):
+    def __init__(self, msg=None):
+        StampedDuplicationError.__init__(self, msg)
+
 

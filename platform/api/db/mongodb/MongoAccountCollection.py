@@ -144,9 +144,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         except DuplicateKeyError as e:
             logs.warning("Unable to add account: %s" % e)
             if self._collection.find_one({"email": user.email}) is not None:
-                raise StampedDuplicationError("An account already exists with email '%s'" % user.email)
+                raise StampedDuplicateEmailError("An account already exists with email '%s'" % user.email)
             elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
-                raise StampedDuplicationError("An account already exists with screen name '%s'" % user.screen_name)
+                raise StampedDuplicateScreenNameError("An account already exists with screen name '%s'" % user.screen_name)
             else:
                 raise StampedDuplicationError("Account information already exists: %s" % e)
     

@@ -19,7 +19,6 @@ try:
     
     from utils                  import getFile
     from urllib2                import HTTPError
-    from errors                 import StampedHTTPError
     from RateLimiter            import RateLimiter, RateException
     from LRUCache               import lru_cache
     from CachedFunction         import cachedFn
@@ -57,12 +56,13 @@ class iTunes(object):
 
                 result = getFile(url, params=params)
         except HTTPError as e:
-            raise StampedHTTPError('itunes threw an exception',e.code,e.message)
+            logs.warning("iTunes threw an exception (%s): %s" % (e.code, e.message))
+            raise Exception
         
         result = json.loads(result)
 
         if result is None:
-            raise StampedHTTPError('iTunes returned "None" result')
+            raise Exception('iTunes returned "None" result')
 
         return result
 

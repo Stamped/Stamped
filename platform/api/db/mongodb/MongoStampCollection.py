@@ -273,7 +273,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 upsert=True)
 
     def updateStampEntity(self, stampId, entity):
-        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'entity': entity}})
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'entity': entity.dataExport()}})
 
     def getStampFromUserEntity(self, userId, entityId):
         try:
