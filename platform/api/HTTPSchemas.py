@@ -1990,6 +1990,11 @@ class HTTPEntitySearchResultsItem(Schema):
         self.subtitle           = entity.subtitle
         self.category           = entity.category
 
+        if entity.kind == 'place':
+            address = entity.formatAddress()
+            if address is not None:
+                self.subtitle = address
+
         # Build icon
         if entity.isType('restaurant'):
             self.icon = _getIconURL('search_restaurant')
@@ -2017,7 +2022,7 @@ class HTTPEntitySearchResultsItem(Schema):
             self.icon = _getIconURL('search_other')
 
         if isinstance(distance, float) and distance >= 0:
-            self.distance       = distance
+            self.distance = distance
 
         assert self.search_id is not None
 
