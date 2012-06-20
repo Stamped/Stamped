@@ -84,6 +84,7 @@ class EntitySearch(object):
         logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
 
         logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
+        logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
         for source in self.__all_sources:
             if source in results and results[source]:
                 logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
