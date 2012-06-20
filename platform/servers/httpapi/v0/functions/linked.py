@@ -138,7 +138,7 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     source.name                         = 'Added to Netflix Instant Queue'
     source.source                       = 'stamped'
     source.source_data                  = dict()
-    source.source_data['title']         = 'Added to Netflix Instant Queue'
+    source.source_data['title']         = 'Added to Netflix'
     source.source_data['subtitle']      = 'Instant Queue'
     source.source_data['icon']          = 'http://static.stamped.com/assets/icons/default/src_netflix.png'
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
