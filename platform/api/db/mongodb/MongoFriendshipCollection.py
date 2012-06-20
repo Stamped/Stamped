@@ -266,7 +266,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         
         # seed potential friends with users who have stamped at least one of the same entities
         for entity_id in user_entity_ids:
-            stamps = self.stamp_collection.getStampsSliceForEntity(entity_id, GenericCollectionSlice(limit=200))
+            stamps = self.stamp_collection.getStampsForEntity(entity_id, limit=200)
             
             for stamp in stamps:
                 user_id = stamp.user.user_id
