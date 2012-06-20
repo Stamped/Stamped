@@ -93,7 +93,7 @@ class AStampedAPITestCase(AStampedFixtureTestCase):
         global _test_case, _accounts
         _test_case = self
 
-        twAccount                   = FacebookAccountNew()
+        twAccount                   = TwitterAccountNew()
         twAccount.user_token        = tw_user_token
         twAccount.user_secret       = tw_user_secret
         twAccount.name              = name

@@ -311,6 +311,28 @@ class StampedAPI(AStampedAPI):
 
         return account
 
+    def upgradeAccount(self, authUserId, email, password):
+        account = self.getAccount(authUserId)
+
+        if account.auth_service == 'stamped':
+            logs.warning('Cannot upgrade an account that is already using stamped auth')
+            raise StampedIllegalActionError("Account is already using Stamped authorization")
+
+        if account.email != email:
+            email = str(email).lower().strip()
+            if not utils.validate_email(email):
+                raise StampedInputError("Invalid format for email address")
+            account.email = email
+
+        if password is None:
+            raise StampedInputError("A password must be provided")
+
+        account.password = convertPasswordForStorage(password)
+        account.auth_service = 'stamped'
+
+        return self._accountDB.updateAccount(account)
+
+
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
     def verifyLinkedAccount(self, linkedAccount):
