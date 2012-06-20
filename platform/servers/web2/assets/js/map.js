@@ -450,7 +450,7 @@
             }
             
             var nav_header_height = $stamp_map_nav_wrapper.find('.nav-header').height();
-            var list_height       = (height - footer_height - 26 - nav_header_height);
+            var list_height       = (height - footer_height - 24 - nav_header_height);
             var list_height_px    = list_height + "px";
             
             list_height_expanded_px = list_height_px;
