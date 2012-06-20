@@ -30,9 +30,6 @@ class SimpleDB(object):
                 self.domain_name = 'stats_dev'
         else:
             self.domain_name = domain
-            #     domain = 'stats-test'
-
-
 
     def addStat(self, stat):
         if self.domain_name is None:
