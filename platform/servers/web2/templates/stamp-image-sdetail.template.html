@@ -1,0 +1,31 @@
+
+<div class="stamp-preview-raw stamp-category-{{entity.category}}">
+    <div class="stamp-category-{{entity.category}}">
+        <div class="stamp-subcategory-{{entity.subcategory}}">
+            <div class='preview-image stamp-user-image'>
+                {{#contents}}
+                    {{entity_image}}
+                {{/contents}}
+            </div>
+            
+            {{#entity}}
+                <div class='preview-image stamp-entity-image'>
+                    {{entity_image}}
+                </div>
+                
+                {{#if coordinates}}
+                    <div>
+                        <div class='preview-image stamp-map'>
+                            {{> static-map-sdetail}}
+                        </div>
+                    </div>
+                {{/if}}
+                
+                <div>
+                    <div class="preview-image stamp-icon"></div>
+                </div>
+            {{/entity}}
+        </div>
+    </div>
+</div>
+

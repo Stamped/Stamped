@@ -60,7 +60,7 @@
                         {% for stamp in stamps %}
                             <div class="stamp-list-view-item user-primary-selection stamp-id-{{stamp.stamp_id}}">
                                 <div class="entity-header">
-                                    <div class="stamp-category-{{stamp.entity.category}}">
+                                    <div class="stamp-category-{{stamp.entity.category}} stamp-subcategory-{{stamp.entity.subcategory}}">
                                         <div class='title clearfloat'>
                                             <div class="pronounced-title">
                                                 <a class='sdetail' href="{{stamp.url}}" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
@@ -89,7 +89,7 @@
                         </div>
                         
                         <div class="content">
-                            <a class="back" href="/{{user.screen_name}}">View {{user.screen_name}}'s Profile</a>
+                            <a class="map-profile-link" href="/{{user.screen_name}}"><div class='map-profile-icon-wrapper profile-icon'><div class='map-profile-icon'><div class='inner'></div><div class='inner-shadow'></div></div></div><span class="desc"> View Full Profile</span></a>
                         </div>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                     </div>
                     
                     <div class="content">
-                        <a class="back" href="/{{user.screen_name}}">View {{user.screen_name}}'s Profile</a>
+                        <a class="map-profile-link" href="/{{user.screen_name}}"><div class='map-profile-icon-wrapper profile-icon'><div class='map-profile-icon'><div class='inner-shadow'></div><div class='inner'></div></div></div><span class="desc"> View Full Profile</span></a>
                     </div>
                 </div>
             </div>

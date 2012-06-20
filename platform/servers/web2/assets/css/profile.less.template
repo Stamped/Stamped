@@ -87,6 +87,20 @@
     }
 }
 
+a.map-profile-link {
+    &:hover {
+        color: fade(@primary, 100%);
+        
+        .map-profile-icon-wrapper {
+            border: 2px solid fade(@primary, 100%);
+        }
+    }
+    
+    .profile-icon {
+        .user-gradient-func(135deg, 40%);
+    }
+}
+
 #stamp-category-nav-bar {
     ol {
         li.default  a.active:active .icon, 
