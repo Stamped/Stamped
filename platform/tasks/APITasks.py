@@ -140,6 +140,10 @@ def updateStampStats(*args, **kwargs):
 def buildGuide(*args, **kwargs):
     invoke(buildGuide.request, *args, **kwargs)
 
+@task(ignore_result=True)
+def updateTombstonedEntityReferences(*args, **kwargs):
+    invoke(updateTombstonedEntityReferences.request, *args, **kwargs)
+
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
     version = "%prog " + __version__

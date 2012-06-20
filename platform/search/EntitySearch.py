@@ -64,7 +64,7 @@ class EntitySearch(object):
         after = datetime.datetime.now()
         timesDict[source] = after - before
         logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
-            source, str(after - before), len(resultsDict[source])
+            source.sourceName, str(after - before), len(resultsDict[source])
         ))
 
     def search(self, category, text, timeout=None, limit=10, **queryParams):
@@ -84,7 +84,8 @@ class EntitySearch(object):
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
             logs.debug('DEBUG DEBUG DEBUG NOW SPAWNING FOR SOURCE ' + source.sourceName)
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+            #pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+            self.__searchSource(source, category, text, results, times, timeout=timeout, **queryParams)
             logs.debug('DEBUG DEBUG DEBUG DONE SPAWNING FOR SOURCE ' + source.sourceName)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join(timeout=timeout)
