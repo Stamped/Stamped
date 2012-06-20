@@ -1616,7 +1616,7 @@ to {
 @-webkit-keyframes map-profile-inner-bounce {
     0%   { -webkit-transform: perspective(600px) translate(0, 0); }
     50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
-    100% { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
+    100% { -webkit-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
 }
 
 @-webkit-keyframes map-profile-inner-shadow-bounce {
@@ -1715,7 +1715,7 @@ a.map-profile-link {
         
         .map-profile-icon-wrapper {
             .map-profile-icon {
-                @duration: .8s;
+                @duration: .6s;
                 @timing: easeInOutCubic;
                 
                 .inner {
