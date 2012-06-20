@@ -2053,6 +2053,18 @@ class HTTPActionComplete(Schema):
 class HTTPTimeSlice(Schema):
     @classmethod
     def setSchema(cls):
+
+        def validateScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'friends', 'popular', 'todo', 'user', 'credit']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
         # Paging
         cls.addProperty('before',                           int)
         cls.addProperty('limit',                            int)
@@ -2065,7 +2077,7 @@ class HTTPTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring, required=True) # me, inbox, friends, fof, popular ### TODO: Add cast
+        cls.addProperty('scope',                            basestring, cast=validateScope, required=True) 
 
     def exportTimeSlice(self):
         data                = self.dataExport()
@@ -2144,6 +2156,18 @@ class HTTPWebTimeSlice(Schema):
 class HTTPSearchSlice(Schema):
     @classmethod
     def setSchema(cls):
+
+        def validateScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'friends', 'popular', 'todo', 'user', 'credit']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
         # Paging
         cls.addProperty('limit',                            int) # Max 50
 
@@ -2154,7 +2178,7 @@ class HTTPSearchSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
+        cls.addProperty('scope',                            basestring, cast=validateScope)
         cls.addProperty('query',                            basestring, required=True)
 
     def exportSearchSlice(self):
@@ -2182,6 +2206,18 @@ class HTTPSearchSlice(Schema):
 class HTTPRelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
+
+        def validateScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'friends', 'popular', 'todo', 'user', 'credit']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
         # Filtering
         cls.addProperty('category',                         basestring, cast=validateCategory)
         cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
@@ -2189,7 +2225,7 @@ class HTTPRelevanceSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: add cast
+        cls.addProperty('scope',                            basestring, cast=validateScope)
 
     def exportRelevanceSlice(self):
         data                = self.dataExport()
@@ -2267,7 +2303,10 @@ class HTTPGuideRequest(Schema):
             if scope is None:
                 return None
             scope = scope.lower()
-            if scope in set(['me', 'inbox', 'everyone']):
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'popular']):
                 return scope 
             raise StampedInputError("Invalid scope: %s" % scope)
 
