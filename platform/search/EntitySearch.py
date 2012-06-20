@@ -54,7 +54,12 @@ class EntitySearch(object):
         # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
         # enough to give a solid idea.
         before = datetime.datetime.now()
-        resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
+        try:
+            logs.debug('DEBUG DEBUG DEBUG Searching source: ' + source.sourceName)
+            resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
+            logs.debug('DEBUG DEBUG DEBUG Done searching source: ' + source.sourceName)
+        except:
+            logs.report()
         after = datetime.datetime.now()
         timesDict[source] = after - before
         logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
@@ -70,6 +75,8 @@ class EntitySearch(object):
         results = {}
         times = {}
         pool = Pool(16)
+        logs.debug('DEBUG DEBUG DEBUG Category is: ' + category)
+        logs.debug('DEBUG DEBUG DEBUG Num sources: ' + str(len(self.__categories_to_sources[category])))
         for source in self.__categories_to_sources[category]:
             # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
