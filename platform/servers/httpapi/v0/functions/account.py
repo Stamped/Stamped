@@ -18,7 +18,8 @@ from Facebook           import *
                    requires_client=True, 
                    http_schema=HTTPAccountNew, 
                    conversion=HTTPAccountNew.convertToAccount,
-                   upload='profile_image')
+                   upload='profile_image',
+                   parse_request_kwargs={'obfuscate':['password' ]})
 @require_http_methods(["POST"])
 def create(request, client_id, http_schema, schema, **kwargs):
     logs.info('account schema passed in: %s' % schema)
@@ -32,11 +33,26 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
+# upgrade account from third party auth to stamped auth
+@handleHTTPRequest(requires_client=True,
+                   http_schema=HTTPAccountUpgradeForm,
+                   parse_request_kwargs={'obfuscate':['password']})
+@require_http_methods(["POST"])
+def upgrade(request, client_id, authUserId, http_schema, **kwargs):
+    account = stampedAPI.upgradeAccount(authUserId, http_schema.email, http_schema.password)
+
+    user   = HTTPUser().importAccount(account)
+
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
+
+    return transformOutput(output)
+
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPFacebookAccountNew,
                    conversion=HTTPFacebookAccountNew.convertToFacebookAccountNew,
-                   upload='profile_image')
+                   parse_request_kwargs={'obfuscate':['user_token' ]})
 @require_http_methods(["POST"])
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
@@ -50,10 +66,10 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     return transformOutput(output)
 
 @handleHTTPRequest(requires_auth=False,
-    requires_client=True,
-    http_schema=HTTPTwitterAccountNew,
-    conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
-    upload='profile_image')
+                   requires_client=True,
+                   http_schema=HTTPTwitterAccountNew,
+                   conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
+                   parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
 @require_http_methods(["POST"])
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
     account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)

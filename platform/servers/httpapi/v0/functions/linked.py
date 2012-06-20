@@ -105,7 +105,9 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
 
-    return createNetflixLoginResponse(authUserId)
+    return HttpResponseRedirect("stamped://test")
+
+    #return createNetflixLoginResponse(authUserId)
 
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
