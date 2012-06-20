@@ -135,12 +135,12 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     response = HTTPEndpointResponse()
 
     source                              = HTTPActionSource()
-    source.source                       = 'stamped_confirm'
+    source.source                       = 'stamped'
     source.source_data['title']         = 'Added to Netflix'
     source.source_data['subtitle']      = 'Instant Queue'
     source.source_data['icon']          = 'http://static.stamped.com/assets/icons/default/src_netflix.png'
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
-    response.setAction('netflix_login', 'Login to Netflix', [source])
+    response.setAction('stamped_confirm', 'Added to Netflix', [source])
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(response.dataExport())
