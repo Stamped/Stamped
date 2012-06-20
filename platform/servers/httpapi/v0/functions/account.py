@@ -55,7 +55,10 @@ def upgrade(request, client_id, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token' ]})
 @require_http_methods(["POST"])
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    try:
+        account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    except StampedLinkedAccountExists:
+        raise StampedHTTPError("An account already exists for this Facebook account", 400)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -72,7 +75,10 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
 @require_http_methods(["POST"])
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    try:
+        account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    except StampedLinkedAccountExists:
+        raise StampedHTTPError("An account already exists for this Twitter account", 400)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
