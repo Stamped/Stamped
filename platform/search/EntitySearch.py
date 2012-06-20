@@ -84,7 +84,8 @@ class EntitySearch(object):
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
             logs.debug('DEBUG DEBUG DEBUG NOW SPAWNING FOR SOURCE ' + source.sourceName)
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+            #pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+            self.__searchSource(source, category, text, results, times, timeout=timeout, **queryParams)
             logs.debug('DEBUG DEBUG DEBUG DONE SPAWNING FOR SOURCE ' + source.sourceName)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join(timeout=timeout)
