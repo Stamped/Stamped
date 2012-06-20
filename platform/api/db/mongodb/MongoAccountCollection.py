@@ -48,7 +48,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             return
 
         if 'linked' in document:
-            logs.error("Account contains both 'linked' and 'linked_account' fields.  Should only have one")
+            logs.warning("Account contains both 'linked' and 'linked_account' fields.  Should only have one")
             return document
 
         document['linked'] = {}
