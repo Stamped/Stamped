@@ -289,6 +289,9 @@ class HTTPActionSource(Schema):
         self.completion_endpoint    = COMPLETION_ENDPOINT
         self.completion_data        = HTTPActionCompletionData().dataImport(kwargs, overflow=True).dataExport()
 
+    def setIcon(self, filename, client=None):
+        self.source_data['icon'] = _getIconURL(filename, client)
+
 class HTTPAction(Schema):
     @classmethod
     def setSchema(cls):
