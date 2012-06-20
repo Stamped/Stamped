@@ -880,10 +880,11 @@ class HTTPEndpointResponse(Schema):
     def setSchema(cls):
         cls.addNestedProperty('action',                     HTTPAction)
 
-    def setAction(self, actionType, name, sources, **kwargs):
+    def setAction(self, actionType, name, sources):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
+            action.name     = name
             action.sources  = sources
 
             self.action = action
