@@ -3098,7 +3098,7 @@ class HTTPActivity(Schema):
             offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
             verbs = re.sub("###", "", verbs)
             assert(offset < len(verbs))
-
+            logs.info('### offset: %s' % offset)
 
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
