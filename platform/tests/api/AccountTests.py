@@ -206,6 +206,8 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
         with expected_exception():
             self.handlePOST(path, data)
 
+"""
+# Disabled for now - Mike is rewriting due to implementation changes
 class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
     def test_update_profile_image(self):
         path = "account/update_profile_image.json"
@@ -224,7 +226,7 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
             }
         with expected_exception():
             result = self.handlePOST(path, data)
-
+"""
 
 class StampedAPIAccountCustomizeStamp(StampedAPIAccountHttpTest):
     def test_customize_stamp(self):

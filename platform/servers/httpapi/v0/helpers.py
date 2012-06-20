@@ -188,11 +188,17 @@ def handleHTTPRequest(requires_auth=True,
                 return ret
             
             except StampedHTTPError as e:
-                logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+                if e.kind is None:
+                    e.kind = 'stamped_error'
+
+                logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
                 logs.warning(utils.getFormattedException())
                 logs.error(e.code)
 
-                error = {'error': e.msg}
+                error = {'error': e.kind}
+                if e.msg is not None:
+                    error['message'] = unicode(e.msg)
+
                 return transformOutput(error, status=e.code)
             
             except StampedAuthError as e:
@@ -377,7 +383,7 @@ def parseRequest(schema, request, **kwargs):
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
         
-        raise StampedHTTPError("invalid_form", 400, msg)
+        raise StampedHTTPError(400, kind="invalid_form")
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -435,7 +441,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.warning(msg)
         utils.printException()
         
-        raise StampedHTTPError("invalid_form", 400)
+        raise StampedHTTPError(400, kind="invalid_form")
 
 def transformOutput(value, **kwargs):
     """

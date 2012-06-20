@@ -278,17 +278,17 @@ class StampedAPI(AStampedAPI):
         # Validate screen name
         account.screen_name = account.screen_name.strip()
         if not utils.validate_screen_name(account.screen_name):
-            raise StampedInputError("Invalid format for screen name")
+            raise StampedInvalidScreenNameError("Invalid format for screen name: %s" % account.screen_name)
 
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
-            raise StampedInputError("Blacklisted screen name")
+            raise StampedInvalidScreenNameError("Blacklisted screen name: %s" % account.screen_name)
 
         # Validate email address
         if account.email is not None and account.auth_service == 'stamped':
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
-                raise StampedInputError("Invalid format for email address")
+                raise StampedInvalidEmailError("Invalid format for email address: %s" % account.email)
 
         # Add image timestamp if exists
         if tempImageUrl is not None:
@@ -366,7 +366,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountExists("Account already exists for facebookId: %s" % facebookId)
+        raise StampedLinkedAccountExistsError("Account already exists for facebookId: %s" % facebookId)
 
     def _verifyTwitterAccount(self, twitterId):
         # Check that no Stamped account is linked to the twitterId
@@ -374,7 +374,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountExists("Account already exists for twitterId: %s" % twitterId)
+        raise StampedLinkedAccountExistsError("Account already exists for twitterId: %s" % twitterId)
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -726,7 +726,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExists("More than one account exists using facebook_id: %s" % facebookId)
+            raise StampedLinkedAccountExistsError("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
 
     @API_CALL
@@ -735,7 +735,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExists("More than one account exists using twitter_id: %s" % twitterId)
+            raise StampedLinkedAccountExistsError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
 
     @API_CALL
@@ -744,7 +744,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExists("More than one account exists using netflix_id: %s" % netflixId)
+            raise StampedLinkedAccountExistsError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
 
     @API_CALL
@@ -3244,7 +3244,7 @@ class StampedAPI(AStampedAPI):
         if userId is not None:
             self._collectionDB.getUserStampIds(userId)
 
-        if scope == 'everyone':
+        if scope == 'popular':
             return None
 
         if authUserId is None:
@@ -3264,7 +3264,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getStampCollection(self, timeSlice, authUserId=None):
         # Special-case "tastemakers"
-        if timeSlice.scope == 'everyone':
+        if timeSlice.scope == 'popular':
             stampIds = []
             limit = timeSlice.limit
             if limit <= 0:
@@ -3581,14 +3581,14 @@ class StampedAPI(AStampedAPI):
         if guideRequest.scope == 'inbox':
             return self.getUserGuide(guideRequest, authUserId)
 
-        if guideRequest.scope == 'everyone':
+        if guideRequest.scope == 'popular':
             return self.getTastemakerGuide(guideRequest)
 
     @API_CALL
     def searchGuide(self, guideSearchRequest, authUserId):
         if guideSearchRequest.scope == 'inbox':
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
-        elif guideSearchRequest.scope == 'everyone':
+        elif guideSearchRequest.scope == 'popular':
             stampIds = None
         else:
             # TODO: What should we return for other search queries (not inbox and not popular)?

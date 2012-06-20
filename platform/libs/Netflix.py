@@ -10,7 +10,6 @@ import json
 import utils
 import logs
 
-from errors             import StampedHTTPError
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 
@@ -140,7 +139,7 @@ class Netflix(object):
                 msg = 'Netflix returned a failure response: %s' % responseData
                 status_code = response.status
             finally:
-                raise StampedHTTPError(msg, status_code)
+                raise Exception(msg)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
