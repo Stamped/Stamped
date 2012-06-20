@@ -10,6 +10,13 @@ import logs
 class Fail(Exception):
     pass
 
+class StampedException(Exception):
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        self.msg  = msg
+        if msg is not None:
+            logs.warning(msg)
+
 class StampedHTTPError(Exception):
     def __init__(self, msg, code, desc=None):
         Exception.__init__(self, msg)
@@ -19,6 +26,8 @@ class StampedHTTPError(Exception):
         
         if msg is not None:
             logs.warning(msg)
+
+# Schema Exceptions
 
 class SchemaTypeError(TypeError):
     def __init__(self, msg=None, desc=None):
@@ -46,6 +55,8 @@ class SchemaValidationError(Exception):
 
         if msg is not None:
             logs.warning(msg)
+
+# Basic Stamped Exceptions
 
 class StampedPermissionsError(Exception):
     def __init__(self, msg=None, desc=None):
@@ -100,4 +111,10 @@ class StampedAuthError(Exception):
         
         if msg is not None:
             logs.warning(msg)
+
+# Specific Stamped Exceptions
+
+class StampedLinkedAccountExists(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
 
