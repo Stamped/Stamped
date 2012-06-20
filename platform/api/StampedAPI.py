@@ -1573,7 +1573,7 @@ class StampedAPI(AStampedAPI):
         queryLatLng = None
         if coords:
             queryLatLng = (coords.lat, coords.lng)
-        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=coords)
+        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=queryLatLng)
 
         results = []
         process = 5
