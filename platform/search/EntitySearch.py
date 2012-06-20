@@ -64,7 +64,7 @@ class EntitySearch(object):
         after = datetime.datetime.now()
         timesDict[source] = after - before
         logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
-            source.sourceName, str(after - before), len(resultsDict[source])
+            source.sourceName, str(after - before), len(resultsDict.get(source, []))
         ))
 
     def search(self, category, text, timeout=None, limit=10, **queryParams):
