@@ -364,13 +364,14 @@ OAUTH_TOKEN_SECRET = '8wZ4kQGSZGkj'
 GHOSTBUSTERS2_ID = 'http://api-public.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api-public.netflix.com/catalog/titles/movies/1181532'
 INCEPTION_ID = 'http://api-public.netflix.com/catalog/titles/movies/70131314'
+ARRESTED_DEV_ID = "http://api.netflix.com/catalog/titles/series/70140358"
 
 def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
     from pprint import pprint
     netflix = Netflix()
 
     netflix_id = BIGLEB_ID
-    title = 'ghostbusters'
+    title = 'arrested development'
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
 
@@ -387,7 +388,7 @@ if __name__ == '__main__':
     import sys
     params = {}
     methods = 'searchTitles'
-    params['title'] = 'ghostbust'
+    params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:
