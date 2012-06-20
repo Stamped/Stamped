@@ -53,6 +53,7 @@ class EntitySearch(object):
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
         # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
         # enough to give a solid idea.
+        logs.debug("DEBUG DEBUG DEBUG OK ABOUT TO SEARCH SOURCE " + source.sourceName)
         before = datetime.datetime.now()
         try:
             logs.debug('DEBUG DEBUG DEBUG Searching source: ' + source.sourceName)
@@ -74,7 +75,7 @@ class EntitySearch(object):
         start = datetime.datetime.now()
         results = {}
         times = {}
-        pool = Pool(16)
+        pool = Pool(len(self.__categories_to_sources))
         logs.debug('DEBUG DEBUG DEBUG Category is: ' + category)
         logs.debug('DEBUG DEBUG DEBUG Num sources: ' + str(len(self.__categories_to_sources[category])))
         for source in self.__categories_to_sources[category]:
@@ -82,7 +83,9 @@ class EntitySearch(object):
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
+            logs.debug('DEBUG DEBUG DEBUG NOW SPAWNING FOR SOURCE ' + source.sourceName)
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+            logs.debug('DEBUG DEBUG DEBUG DONE SPAWNING FOR SOURCE ' + source.sourceName)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join(timeout=timeout)
         logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
