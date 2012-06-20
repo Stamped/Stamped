@@ -1632,7 +1632,7 @@ body.sdetail_popup #main-page-content-body #main-content {
     -webkit-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
   }
   100% {
-    -webkit-transform: perspective(600px) rotatey(180deg) translate(0, 0);
+    -webkit-transform: perspective(600px) rotatey(360deg) translate(0, 0);
   }
 }
 @-webkit-keyframes map-profile-inner-shadow-bounce {
@@ -1733,11 +1733,11 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner {
   -webkit-animation-name: map-profile-inner-bounce;
   -webkit-animation-iteration-count: 1;
   -webkit-animation-timing-function: easeInOutCubic;
-  -webkit-animation-duration: 0.8s;
+  -webkit-animation-duration: 0.6s;
 }
 a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shadow {
   -webkit-animation-name: map-profile-inner-shadow-bounce;
   -webkit-animation-iteration-count: 1;
   -webkit-animation-timing-function: easeInOutCubic;
-  -webkit-animation-duration: 0.8s;
+  -webkit-animation-duration: 0.6s;
 }
