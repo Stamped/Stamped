@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime
+import sys, datetime, logs
 from api                        import Entity
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
@@ -57,9 +57,54 @@ class EntitySearch(object):
         resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
         after = datetime.datetime.now()
         timesDict[source] = after - before
-        print "GOT RESULTS FROM SOURCE", source, "IN ELAPSED TIME", after - before, "COUNT", len(resultsDict[source])
+        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
+            source, str(after - before), len(resultsDict[source])
+        ))
+
+    def search(self, category, text, timeout=None, limit=10, **queryParams):
+        logs.debug('In search')
+        if category not in Entity.categories:
+            raise Exception("unrecognized category: (%s)" % category)
+
+        start = datetime.datetime.now()
+        results = {}
+        times = {}
+        pool = Pool(16)
+        for source in self.__categories_to_sources[category]:
+            # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
+            # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
+            # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
+            # more gracefully.
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+        logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
+        pool.join(timeout=timeout)
+        logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
+
+        logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
+        for source in self.__all_sources:
+            if source in results and results[source]:
+                logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
+                for result in results[source]:
+                    #print unicode(result).encode('utf-8'), "\n\n"
+                    pass
+
+        logs.debug("DEDUPING")
+        beforeDeduping = datetime.datetime.now()
+        dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
+        afterDeduping = datetime.datetime.now()
+        logs.debug("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
+        logs.debug("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
+        logs.debug("ELAPSED:" + str(afterDeduping - start))
+
+        logs.debug("\n\nDEDUPED RESULTS\n\n")
+        for dedupedResult in dedupedResults[:limit]:
+            logs.debug("\n\n%s\n\n" % str(dedupedResult))
+
+        return dedupedResults[:limit]
+
 
     def searchEntities(self, category, text, timeout=None, limit=10, **queryParams):
+        logs.debug('In searchEntities')
         stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
         entityResults = []
@@ -95,47 +140,6 @@ class EntitySearch(object):
             entityResults.append(entity)
 
         return entityResults
-
-    def search(self, category, text, timeout=None, limit=10, **queryParams):
-        if category not in Entity.categories:
-            raise Exception("unrecognized category: (%s)" % category)
-
-        start = datetime.datetime.now()
-        results = {}
-        times = {}
-        pool = Pool(16)
-        for source in self.__categories_to_sources[category]:
-            # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
-            # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
-            # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
-            # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
-        print "TIME CHECK ISSUED ALL QUERIES AT", datetime.datetime.now()
-        pool.join(timeout=timeout)
-        print "TIME CHECK GOT ALL RESPONSES AT", datetime.datetime.now()
-
-        print "GOT RESULTS: ", (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()]))
-        for source in self.__all_sources:
-            if source in results and results[source]:
-                print "\nRESULTS FROM SOURCE", source, "TIME ELAPSED:", times[source], "\n\n"
-                for result in results[source]:
-                    #print unicode(result).encode('utf-8'), "\n\n"
-                    pass
-
-        print "\n\n\n\nDEDUPING\n\n\n\n"
-        beforeDeduping = datetime.datetime.now()
-        dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
-        afterDeduping = datetime.datetime.now()
-        print "DEDUPING TOOK", afterDeduping - beforeDeduping
-        print "TIME CHECK DONE AT", datetime.datetime.now()
-        print "ELAPSED:", afterDeduping - start
-
-        for dedupedResult in dedupedResults[:limit]:
-            print "\n\n"
-            print dedupedResult
-            print "\n\n"
-
-        return dedupedResults[:limit]
 
 
 from optparse import OptionParser
