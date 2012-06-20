@@ -367,6 +367,13 @@ class HTTPAccountNew(Schema):
 
         return Account().dataImport(data, overflow=True)
 
+class HTTPAccountUpgradeForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('email',                            basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True)
+
+
 class HTTPFacebookAccountNew(Schema):
     @classmethod
     def setSchema(cls):
@@ -646,6 +653,7 @@ class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamped_oauth_token',              basestring)
+        cls.addProperty('netflix_add_id',                   basestring)
         cls.addProperty('oauth_token',                      basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('oauth_verifier',                   basestring)
@@ -3099,7 +3107,6 @@ class HTTPActivity(Schema):
             offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
             verbs = re.sub("###", "", verbs)
             assert(offset < len(verbs))
-            logs.info('### offset: %s' % offset)
 
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)

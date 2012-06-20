@@ -311,6 +311,28 @@ class StampedAPI(AStampedAPI):
 
         return account
 
+    def upgradeAccount(self, authUserId, email, password):
+        account = self.getAccount(authUserId)
+
+        if account.auth_service == 'stamped':
+            logs.warning('Cannot upgrade an account that is already using stamped auth')
+            raise StampedIllegalActionError("Account is already using Stamped authorization")
+
+        if account.email != email:
+            email = str(email).lower().strip()
+            if not utils.validate_email(email):
+                raise StampedInputError("Invalid format for email address")
+            account.email = email
+
+        if password is None:
+            raise StampedInputError("A password must be provided")
+
+        account.password = convertPasswordForStorage(password)
+        account.auth_service = 'stamped'
+
+        return self._accountDB.updateAccount(account)
+
+
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
     def verifyLinkedAccount(self, linkedAccount):
@@ -344,7 +366,9 @@ class StampedAPI(AStampedAPI):
             self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+        except StampedIllegalActionError:
+            raise StampedIllegalActionError("Multiple accounts already exist with this Facebook user")
+        raise StampedIllegalActionError("An account already exists with this Facebook user")
 
     def _verifyTwitterAccount(self, twitterId):
         # Check that no Stamped account is linked to the twitterId
@@ -352,7 +376,9 @@ class StampedAPI(AStampedAPI):
             self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
+        except StampedIllegalActionError:
+            raise StampedIllegalActionError("Multiple accounts already exist with this Twitter user")
+        raise StampedIllegalActionError("An account already exists with this Twitter user")
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -1547,7 +1573,7 @@ class StampedAPI(AStampedAPI):
         queryLatLng = None
         if coords:
             queryLatLng = (coords.lat, coords.lng)
-        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=coords)
+        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=queryLatLng)
 
         results = []
         process = 5
@@ -1742,6 +1768,28 @@ class StampedAPI(AStampedAPI):
             stats.popular_stamps = popularStampIds
             self._entityStatsDB.addEntityStats(stats)
         return stats
+
+    def updateTombstonedEntityReferencesAsync(self, oldEntityId):
+        """
+        Basic function to update all references to an entity_id that has been tombstoned.
+        """
+        oldEntity = self._entityDB.getEntity(oldEntityId)
+        newEntity = self._entityDB.getEntity(oldEntity.sources.tombstone_id)
+        newEntityId = newEntity.entity_id 
+        newEntityMini = newEntity.minimize()
+
+        # Stamps
+        stampIds = self._stampDB.getStampIdsForEntity(oldEntityId)
+        for stampId in stampIds:
+            self._stampDB.updateStampEntity(stampId, newEntityMini)
+            r = self.updateStampStatsAsync(stampId)
+
+        # Todos
+        todoIds = self._todoDB.getTodoIdsFromEntityId(oldEntityId)
+        for todoId in todoIds:
+            self._todoDB.updateTodoEntity(todoId, newEntityMini)
+
+        self.updateEntityStatsAsync(newEntityId)
 
 
     """
@@ -2066,7 +2114,6 @@ class StampedAPI(AStampedAPI):
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
-                                logs.debug("Stamp preview: %s" % stampPreview)
                                 continue
                     previews.credits = creditPreviews
 
@@ -2920,10 +2967,6 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.getStamp(comment.stamp_id)
             if stamp.user.user_id != authUserId:
                 raise StampedPermissionsError("Insufficient privileges to remove comment")
-
-        # Don't allow user to delete comment for restamp notification
-        if comment.restamp_id is not None:
-            raise StampedIllegalActionError("Cannot remove 'restamp' comment")
 
         # Remove comment
         self._commentDB.removeComment(comment.comment_id)

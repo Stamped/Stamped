@@ -241,23 +241,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         
         return self._getSearchSlice(query, searchSlice)
     
-    ### DEPRECATED: 5/22/12
-    def getStampsSlice(self, stampIds, genericCollectionSlice):
-        if stampIds is not None:
-            if len(stampIds) == 0:
-                return []
-            
-            ids     = map(self._getObjectIdFromString, stampIds)
-            
-            if len(ids) == 1:
-                query   = { '_id' : ids[0] }
-            else:
-                query   = { '_id' : { '$in' : ids } }
-        else:
-            query   = { }
-        
-        return self._getSlice(query, genericCollectionSlice)
-    
     def countStamps(self, userId):
         return len(self.user_stamps_collection.getUserStampIds(userId))
     
@@ -289,6 +272,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                  '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
 
+    def updateStampEntity(self, stampId, entity):
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'entity': entity}})
 
     def getStampFromUserEntity(self, userId, entityId):
         try:
@@ -312,31 +297,25 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return map(self._convertFromMongo, documents)
         except Exception:
             return []
-    
-    def getStampsSliceForEntity(self, entityId, genericCollectionSlice, userIds=None):
-        query = {'entity.entity_id': entityId}
-
-        if userIds is not None:
-            if len(userIds) == 0:
-                return []
-            
-            if len(userIds) == 1:
-                query['user.user_id'] = userIds[0]
-            else:
-                query['user.user_id'] = { '$in' : userIds }
-
-        return self._getSlice(query, genericCollectionSlice)
 
     def getStampsForEntity(self, entityId, limit=None):
         try:
-            docs = self._collection.find({
-                'entity.entity_id': entityId,
-            })
+            docs = self._collection.find({'entity.entity_id': entityId})
             if limit is not None:
                 docs = docs.limit(limit)
-            
             return list(self._convertFromMongo(doc) for doc in docs)
-        except Exception:
+        except Exception as e:
+            logs.warning("Could not get stamps for entity '%s': %s" % (entityId, e))
+            return []
+
+    def getStampIdsForEntity(self, entityId, limit=None):
+        try:
+            docs = self._collection.find({'entity.entity_id': entityId}, fields=['_id'])
+            if limit is not None:
+                docs = docs.limit(limit)
+            return list(self._getStringFromObjectId(doc['_id']) for doc in docs)
+        except Exception as e:
+            logs.warning("Could not get stamp ids for entity '%s': %s" % (entityId, e))
             return []
     
     def getStampFromUserStampNum(self, userId, stampNum):
