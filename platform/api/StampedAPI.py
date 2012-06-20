@@ -4479,6 +4479,13 @@ class StampedAPI(AStampedAPI):
 
     """
 
+    MUSIC_SOURCES = {
+        'itunes':       iTunesSource,
+        'rdio':         RdioSource,
+        'spotify':      SpotifySource,
+        'amazon':       AmazonSource,
+    }
+
     @lazyProperty
     def __full_resolve(self):
         return FullResolveContainer.FullResolveContainer()
@@ -4546,35 +4553,50 @@ class StampedAPI(AStampedAPI):
         return entity_id
 
 
-    def mergeEntity(self, entity, link=True):
+    def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport(), link])
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
 
-    def mergeEntityAsync(self, entityDict, link=True):
-        self._mergeEntity(Entity.buildEntity(entityDict), link)
+    def mergeEntityAsync(self, entityDict):
+        self._mergeEntity(Entity.buildEntity(entityDict), set())
 
-    def mergeEntityId(self, entityId, link=True):
+    def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
-        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId, link])
+        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
 
-    def mergeEntityIdAsync(self, entityId, link=True):
-        self._mergeEntity(self._entityDB.getEntity(entityId), link)
+    def mergeEntityIdAsync(self, entityId):
+        self._mergeEntity(self._entityDB.getEntity(entityId), set())
 
-    def _mergeEntity(self, entity, link=True):
+    def _mergeEntity(self, entity, resolved, depth=3):
+        """Enriches the entity and possibly follow any links it may have.
+
+        The depth is a way to limit the scope of the search. We will only look
+        at items within "depth" distance from the given entity.
+        """
+
+        entitySummary = (entity.title, entity.kind)
+        if entitySummary in resolved and entity.entity_id:
+            # TODO: maybe we can just check for entity_id here.
+            return entity
+
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
-        if link:
-            modified = self._resolveEntityLinks(entity) | modified
+        modified = self._resolveRelatedEntities(entity) or modified
 
         if modified:
             if entity.entity_id is None:
-                self._entityDB.addEntity(entity)
+                entity = self._entityDB.addEntity(entity)
             else:
-                self._entityDB.updateEntity(entity)
+                entity = self._entityDB.updateEntity(entity)
 
+        resolved.add(entitySummary)
+
+        if depth and self._followOutLinks(entity, resolved, depth-1):
+            entity = self._entityDB.updateEntity(entity)
+
+        return entity
 
     def _resolveEntity(self, entity):
-
         def _getSuccessor(tombstoneId):
             logs.info("Get successor: %s" % tombstoneId)
             successor_id = tombstoneId
@@ -4625,217 +4647,118 @@ class StampedAPI(AStampedAPI):
             report()
             raise
 
+    def _resolveRelatedEntities(self, entity):
+        def _resolveStubList(entity, attr):
+            stubList = getattr(entity, attr)
+            if stubList is None:
+                return False
 
-    def _resolveEntityLinks(self, entity):
+            resolvedList = []
+            stubsModified = False
 
-        def _resolveStub(stub, sources):
-            """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
+            for stub in stubList:
+                stubId = stub.entity_id
+                try:
+                    resolved, modified = self._resolveStub(stub, self.MUSIC_SOURCES)
+                    if resolved is None:
+                        continue
+                    resolvedList.append(resolved.minimize())
 
-            Tries to fast resolve Stamped DB using existing third-party source IDs.
-            Failing that (for one source at a time, not for all sources) tries to use standard resolution against
-                StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
-                falling back?)
-            Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
-                if there were any.
-            If none of this works, throws a KeyError.
-            """
+                    # Compare entity id before and after
+                    if stubId != resolved.entity_id:
+                        stubsModified = True
+                except KeyError as e:
+                    logs.warning('stub resolution failed: %s, %s' % (stub, e))
 
-            source          = None
-            source_id       = None
-            entity_id       = None
-            proxy           = None
+            setattr(entity, attr, resolvedList)
+            return stubsModified
 
-            stubModified    = False
+        return self._iterateOutLinks(entity, _resolveStubList)
 
-            if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
-                entity_id = stub.entity_id
-            else:
-                for sourceName in sources:
-                    try:
-                        if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
-                            source = sources[sourceName]()
-                            source_id = getattr(stub.sources, '%s_id' % sourceName)
-                            # Attempt to resolve against the Stamped DB (quick)
-                            entity_id = stampedSource.resolve_fast(source, source_id)
-                            if entity_id is None:
-                                # Attempt to resolve against the Stamped DB (full)
-                                proxy = source.entityProxyFromKey(source_id, entity=stub)
-                                results = stampedSource.resolve(proxy)
-                                if len(results) > 0 and results[0][0]['resolved']:
-                                    entity_id = results[0][1].key
-                            break
-                    except Exception as e:
-                        logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
-                        pass
-            if entity_id is not None:
-                entity = self._entityDB.getEntity(entity_id)
-            elif source_id is not None and proxy is not None:
-                entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-                entity = entityProxy.buildEntity()
-                stubModified = True
-            else:
-                logs.warning('Unable to resolve stub: %s' % stub)
-                raise KeyError('Unable to resolve stub')
-
-            return entity, stubModified
-
-
-        ### TRACKS
-        def _resolveTrack(stub):
-            try:
-                track, trackModified = _resolveStub(stub, musicSources)
-            except KeyError as e:
-                logs.warning('Track resolution failed: %s' % e)
-                return stub
-
-            # Merge track if it wasn't resolved
-            if track.entity_id is None:
-                self.mergeEntity(track, link=False)
-
-            return track
-
-        def _resolveTracks(entity):
-            trackList = []
-            tracksModified = False
-
-            if entity.tracks is None:
-                return tracksModified
-
-            for stub in entity.tracks:
-                trackId = stub.entity_id
-                track = _resolveTrack(stub)
-                if track is None:
+    def _followOutLinks(self, entity, resolved, depth):
+        def followStubList(entity, attr):
+            modified = False
+            stubList = []
+            for i, stub in enumerate(getattr(entity, attr)):
+                try:
+                    resolvedFull, stubModified = self._resolveStub(stub, self.MUSIC_SOURCES)
+                except KeyError as e:
+                    logs.warning('stub resolution failed: %s, %s' % (stub, e))
                     continue
-                # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
-                if isinstance(track, BasicEntity):
-                    track = track.minimize()
-                else:
-                    logs.info('failed to resolve stub: %s' % stub)
 
-                trackList.append(track)
+                merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
+                stubList.append(merged)
+                modified = modified or (merged != stub)
+            setattr(entity, attr, stubList)
+            return modified
+        return self._iterateOutLinks(entity, followStubList)
 
-                # Compare entity id before and after
-                if trackId != track.entity_id:
-                    tracksModified = True
+    def _resolveStub(self, stub, sources):
+        """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
 
-            entity.tracks = trackList
-            return tracksModified
+        Tries to fast resolve Stamped DB using existing third-party source IDs.
+        Failing that (for one source at a time, not for all sources) tries to use standard resolution against
+            StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
+            falling back?)
+        Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
+            if there were any.
+        If none of this works, throws a KeyError.
+        """
 
+        source          = None
+        source_id       = None
+        entity_id       = None
+        proxy           = None
+        stubModified    = False
 
-        ### ALBUMS
-        def _resolveAlbum(stub):
-            try:
-                album, albumModified = _resolveStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Album resolution failed')
-                return stub
+        stampedSource   = StampedSource(stamped_api=self)
 
-            # Merge album if it wasn't resolved
-            if album.entity_id is None:
-                self.mergeEntity(album)
-
-            return album
-
-        def _resolveAlbums(entity):
-            albumList = []
-            albumsModified = False
-
-            if entity.albums is None:
-                return albumsModified
-
-            for stub in entity.albums:
-                albumId = stub.entity_id
-                album = _resolveAlbum(stub)
-                if album is None:
+        if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
+            entity_id = stub.entity_id
+        else:
+            for sourceName in sources:
+                try:
+                    if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
+                        source = sources[sourceName]()
+                        source_id = getattr(stub.sources, '%s_id' % sourceName)
+                        # Attempt to resolve against the Stamped DB (quick)
+                        entity_id = stampedSource.resolve_fast(source, source_id)
+                        if entity_id is None:
+                            # Attempt to resolve against the Stamped DB (full)
+                            proxy = source.entityProxyFromKey(source_id, entity=stub)
+                            results = stampedSource.resolve(proxy)
+                            if len(results) > 0 and results[0][0]['resolved']:
+                                entity_id = results[0][1].key
+                        break
+                except Exception as e:
+                    logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
                     continue
-                # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
-                if isinstance(album, BasicEntity):
-                    album = album.minimize()
-                else:
-                    logs.info('failed to resolve stub: %s' % stub)
+        if entity_id is not None:
+            entity = self._entityDB.getEntity(entity_id)
+        elif source_id is not None and proxy is not None:
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            stubModified = True
+        else:
+            logs.warning('Unable to resolve stub: %s' % stub)
+            raise KeyError('Unable to resolve stub')
 
-                albumList.append(album)
+        return entity, stubModified
 
-                # Compare entity id before and after
-                if albumId != album.entity_id:
-                    albumsModified = True
-
-            entity.albums = albumList
-            return albumsModified
-
-
-        ### ARTISTS
-        def _resolveArtist(stub):
-            try:
-                artist, artistModified = _resolveStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Artist resolution failed')
-                return stub
-
-            # Merge artist if it wasn't resolved
-            # if artist.entity_id is None:
-            #     self.mergeEntity(artist)
-
-            return artist
-
-        def _resolveArtists(entity):
-            artistList = []
-            artistsModified = False
-
-            if entity.artists is None:
-                return artistsModified
-
-            for stub in entity.artists:
-                artistId = stub.entity_id
-                artist = _resolveArtist(stub)
-                # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
-                if isinstance(artist, BasicEntity):
-                    artist = artist.minimize()
-                else:
-                    logs.info('failed to resolve stub: %s' % stub)
-
-                artistList.append(artist)
-
-                # Compare entity id before and after
-                if artistId != artist.entity_id:
-                    artistsModified = True
-
-            entity.artists = artistList
-            return artistsModified
-
-        stampedSource   = StampedSource(stamped_api = self)
-        musicSources    = {
-            'itunes':       iTunesSource,
-            'rdio':         RdioSource,
-            'spotify':      SpotifySource,
-            'amazon':       AmazonSource,
-        }
-
+    def _iterateOutLinks(self, entity, func):
         modified = False
-
         if entity.isType('album'):
-            modified = _resolveArtists(entity) | modified
-            modified = _resolveTracks(entity) | modified
-
-        if entity.isType('artist'):
-            modified = _resolveAlbums(entity) | modified
-            modified = _resolveTracks(entity) | modified
-
-        if entity.isType('artist') or entity.isType('track'):
-            # Enrich albums instead
-            if entity.albums is not None:
-                for albumItem in entity.albums:
-                    try:
-                        albumItem, albumModified = _resolveStub(albumItem, musicSources)
-                        if albumItem.entity_id is not None:
-                            if albumItem.isType('album'):
-                                self.mergeEntityId(albumItem.entity_id)
-                        else:
-                            self.mergeEntity(albumItem)
-                    except Exception as e:
-                        logs.warning('Failed to enrich album: %s' % e)
+            modified = func(entity, 'artists') or modified
+            modified = func(entity, 'tracks') or modified
+        elif entity.isType('artist'):
+            modified = func(entity, 'albums') or modified
+            modified = func(entity, 'tracks') or modified
+        elif entity.isType('track'):
+            modified = func(entity, 'artists') or modified
+            modified = func(entity, 'albums') or modified
 
         return modified
+
 
     """
     ######
