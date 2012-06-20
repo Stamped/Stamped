@@ -13,6 +13,7 @@ __all__ = [
     'ResolverMediaItem',
     'ResolverSoftware',
     'ResolverSearchAll',
+    'LookupRequiredError'
 ]
 
 import Globals
@@ -74,8 +75,8 @@ class ResolverObject(object):
             # opens self.data, and self.data requires a lookup, which throws an error here, and for the error text we
             # try to get self.name. If I try to break the loop here with a fieldName == 'name' check it doesn't matter
             # because the problem is actually beneath here in the lazyProperty code -- basically it ends up with one
-            # thread trying to hold the same lock twice, which never works.
-            raise LookupRequiredError(self.source, 'unknown', 'name')
+            # thread trying to hold the same lock twice.
+            raise LookupRequiredError(self.source, self.key, fieldName)
 
         self.__lookupCallsMade += 1
 
@@ -87,12 +88,9 @@ class ResolverObject(object):
 
         lines = []
         for property in self._properties:
-            try:
-                propertyValue = getattr(self, property)
-                if propertyValue is not None and propertyValue != [] and propertyValue != '':
-                    lines.append('%s\t:%s' % (property, unicode(propertyValue).encode('utf-8')))
-            except LookupRequiredError:
-                pass
+            propertyValue = getattr(self, property)
+            if propertyValue is not None and propertyValue != [] and propertyValue != '':
+                lines.append('%s\t:%s' % (property, unicode(propertyValue).encode('utf-8')))
 
         self.__maxLookupCalls = oldMax
         return '\n'.join(lines)

@@ -13,7 +13,6 @@ from utils import indentText
 from libs.LRUCache import lru_cache
 from resolve.Resolver import *
 from search.SearchResult import SearchResult
-from resolve.ResolverObject import LookupRequiredError
 from search import ScoringUtils
 
 @lru_cache()
@@ -272,7 +271,7 @@ class PlaceSearchResultCluster(SearchResultCluster):
         if place.coordinates:
             # 5 points for lat/lng
             score += 5
-        if cls._try_to_get_field(place, 'address') or cls._try_to_get_field(place, 'address_string'):
+        if place.address or place.address_string:
             # 5 points for presence of any address info at all.
             score += 2
         if cls._try_to_get_street_address(place):
@@ -284,13 +283,6 @@ class PlaceSearchResultCluster(SearchResultCluster):
                 score += 2
         return score
 
-    @classmethod
-    def _try_to_get_field(cls, place, field_name, default=None):
-        try:
-            return getattr(place, field_name)
-        except LookupRequiredError:
-            return default
-
     STREET_NUMBER_RE = re.compile('(^|\s)\d+($|[\s.,])')
     NONCRITICAL_CHARS = re.compile('[^a-zA-Z0-9 ]')
     @classmethod
@@ -299,14 +291,14 @@ class PlaceSearchResultCluster(SearchResultCluster):
         Given a place, attempts to return the street address only (# and street name) as a string.
         """
         # First try to retrieve it from structured data.
-        address = cls._try_to_get_field(place, 'address')
+        address = place.address
         # TODO: Is this the right name?
         if address and 'street' in address:
             return address['street']
 
         # Next, look in the address string. Peel off the first segment of it and try to determine if it's a street
         # address. A little hacky.
-        address_string = cls._try_to_get_field(place, 'address_string')
+        address_string = place.address_string
         if not address_string:
             return None
 
@@ -375,10 +367,8 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
         compared_locations = False
         
-        place1_coordinates = cls._try_to_get_field(place1, 'coordinates')
-        place2_coordinates = cls._try_to_get_field(place2, 'coordinates')
-        if place1_coordinates and place2_coordinates:
-            distance_in_km = ScoringUtils.geoDistance(place1_coordinates, place2_coordinates)
+        if place1.coordinates and place2.coordinates:
+            distance_in_km = ScoringUtils.geoDistance(place1.coordinates, place2.coordinates)
             if distance_in_km > 10:
                 # print "CRAPPING OUT"
                 return CompareResult.unknown()
@@ -434,13 +424,11 @@ class PlaceSearchResultCluster(SearchResultCluster):
             #print "SCORE IS NOW", similarity_score
             compared_locations = True
 
-        address_string1 = cls._try_to_get_field(place1, 'address_string')
-        address_string2 = cls._try_to_get_field(place2, 'address_string')
-        if not compared_locations and address_string1 and address_string2:
+        if not compared_locations and place1.address_string and place2.address_string:
             # Default to raw address string comparison. Maybe they're both in the same city, and that's all we know
             # about either of them. In that case, it's fine to de-dupe them.
-            address_string1 = cls._simplify_address(address_string1)
-            address_string2 = cls._simplify_address(address_string2)
+            address_string1 = cls._simplify_address(place1.address_string)
+            address_string2 = cls._simplify_address(place2.address_string)
 
             address_string_similarity = cached_string_comparison(address_string1, address_string2)
 
@@ -462,14 +450,39 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
 
 class BookSearchResultCluster(SearchResultCluster):
+    SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
+    @classmethod
+    def _strip_subtitle(cls, title):
+        without_subtitle = cls.SUBTITLE_RE.sub('\\1', title)
+        if len(without_subtitle) > 5:
+            return without_subtitle
+        return title
+
+    @classmethod
+    def _compare_titles(cls, title1, title2):
+        book1_name_simple = cached_simplify(title1)
+        book2_name_simple = cached_simplify(title2)
+        if book1_name_simple == book2_name_simple:
+            return 1
+
+        similarity = cached_string_comparison(book1_name_simple, book2_name_simple)
+        title1_without_subtitle = cls._strip_subtitle(book1_name_simple)
+        title2_without_subtitle = cls._strip_subtitle(book2_name_simple)
+        if book1_name_simple == title2_without_subtitle or book2_name_simple == title1_without_subtitle:
+            similarity = max(similarity, 0.95)
+        elif title1_without_subtitle == title2_without_subtitle:
+            similarity = max(similarity, 0.9)
+        else:
+            subtitle_similarity = cached_string_comparison(title1_without_subtitle, title2_without_subtitle)
+            similarity = max(similarity, subtitle_similarity - 0.1)
+        return similarity
+
     @classmethod
     def _compare_proxies(cls, book1, book2):
         """
         """
-        book1_name_simple = cached_simplify(book1.name)
-        book2_name_simple = cached_simplify(book2.name)
-        name_similarity = cached_string_comparison(book1_name_simple, book2_name_simple)
-        if name_similarity < 0.8:
+        title_similarity = cls._compare_titles(book1.name, book2.name)
+        if title_similarity < 0.75:
             return CompareResult.unknown()
 
         try:
@@ -477,13 +490,9 @@ class BookSearchResultCluster(SearchResultCluster):
             author2_name_simple = cached_simplify(book2.authors[0]['name'])
             # TODO: Look for multiple authors, try to match intelligently.
             author_similarity = cached_string_comparison(author1_name_simple, author2_name_simple)
-            if name_similarity + author_similarity > 1.7:
-                return CompareResult.match(name_similarity + author_similarity)
+            if title_similarity + author_similarity > 1.7:
+                return CompareResult.match(title_similarity + author_similarity)
         except Exception:
-            import traceback
-            print "HERE IT IS"
-            traceback.print_exc()
-            print "OK DONE NOW"
             pass
 
         return CompareResult.unknown()
@@ -533,44 +542,32 @@ class MovieSearchResultCluster(SearchResultCluster):
         score = name_similarity - 0.9
 
         movie1_length, movie2_length = None, None
-        try:
-            if movie1.length and movie2.length:
-                if movie1.length == movie2.length:
-                    score += 0.3
-                elif abs(movie1.length - movie2.length) <= 60:
-                    # Here, it might be really nice to actually check if one of them has been rounded to minutes and
-                    # then converted back.
-                    score += 0.1
-        except LookupRequiredError:
-            # Required a lookup call.
-            pass
+        if movie1.length and movie2.length:
+            if movie1.length == movie2.length:
+                score += 0.3
+            elif abs(movie1.length - movie2.length) <= 60:
+                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
+                # then converted back.
+                score += 0.1
 
+        if movie1.release_date and movie2.release_date:
+            time_difference = abs(movie1.release_date - movie2.release_date)
+            if time_difference < datetime.timedelta(7):
+                score += 0.4
+            elif time_difference < datetime.timedelta(30):
+                score += 0.3
+            elif time_difference < datetime.timedelta(365):
+                # Within 1 year + exact title match = cluster.
+                score += 0.2
 
-        try:
-            if movie1.release_date and movie2.release_date:
-                time_difference = abs(movie1.release_date - movie2.release_date)
-                if time_difference < datetime.timedelta(7):
-                    score += 0.4
-                elif time_difference < datetime.timedelta(30):
-                    score += 0.3
-                elif time_difference < datetime.timedelta(365):
-                    # Within 1 year + exact title match = cluster.
-                    score += 0.2
-        except LookupRequiredError:
-            # Required a lookup call.
-            pass
-
-        try:
-            cast1_names = set([cached_simplify(actor['name']) for actor in movie1.cast])
-            cast2_names = set([cached_simplify(actor['name']) for actor in movie2.cast])
-            if cast1_names and cast2_names:
-                overlap_fraction = float(len(cast1_names.intersection(cast2_names))) / min(len(cast1_names), len(cast2_names))
-                # So the midpoint here is at 20% matching. If less than that matches, it's a bad sign. If more than that
-                # matches, it's a good sign.
-                # TODO: This is totally not the best way to do this.
-                score += (overlap_fraction / 2) - 0.1
-        except LookupRequiredError:
-            pass
+        cast1_names = set([cached_simplify(actor['name']) for actor in movie1.cast])
+        cast2_names = set([cached_simplify(actor['name']) for actor in movie2.cast])
+        if cast1_names and cast2_names:
+            overlap_fraction = float(len(cast1_names.intersection(cast2_names))) / min(len(cast1_names), len(cast2_names))
+            # So the midpoint here is at 20% matching. If less than that matches, it's a bad sign. If more than that
+            # matches, it's a good sign.
+            # TODO: This is totally not the best way to do this.
+            score += (overlap_fraction / 2) - 0.1
 
         try:
             movie1_director = cached_simplify(movie1.directors[0]['name'])
@@ -579,8 +576,6 @@ class MovieSearchResultCluster(SearchResultCluster):
                 score += 0.2
             else:
                 score -= 0.2
-        except LookupRequiredError:
-            pass
         except IndexError:
             pass
 
@@ -593,8 +588,6 @@ class MovieSearchResultCluster(SearchResultCluster):
             if movie1_studio == movie2_studio:
                 score += 0.2
             # Don't subtract otherwise because sometimes it gets billed differently.
-        except LookupRequiredError:
-            pass
         except IndexError:
             pass
 

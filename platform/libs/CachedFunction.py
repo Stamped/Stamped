@@ -15,8 +15,30 @@ from Memcache import memcached_function
 from MongoCache import mongoCachedFn
 
 ONE_WEEK = 7*24*60*60
-def cachedFn(ttl=ONE_WEEK, memberFn=True):
+
+def cachedFn(ttl=ONE_WEEK, memberFn=True, schemaClasses=[]):
+    """
+    Decorator that wraps a function in a caching layer, using either Memcache if operating in production or MongoCache
+    if running on a development machine.
+
+    ttl determines how long, in seconds, results will be stored in the cache before being invalidated.
+    memberFn should be set to False when the wrapped function is not a member function.
+    schemaClasses should be a list of the actual schema classes that we expect to be returned within the response. So,
+      for instance, you might decorate a function with @cachedFn(schemaClasses=[User,Entity]) if you expected it to
+      return a user and a list of entities on their to-do list.
+    """
     if utils.is_ec2():
         return memcached_function(time=ttl)
     else:
-        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=True)
+        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=[])
+
+def devOnlyCachedFn(memberFn=True, schemaClasses=[]):
+    """
+    Decorator that wraps a function in a Mongo-based caching layer only if running on a development machine.
+
+    Meanings of memberFn and schemaClasses are as with cachedFn decorator above.
+    """
+    if utils.is_ec2():
+        return lambda wrappedFn: wrappedFn
+    else:
+        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=[])

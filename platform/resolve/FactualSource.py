@@ -71,6 +71,7 @@ class FactualPlace(ResolverPlace):
     @lazyProperty
     def data(self):
         if self.__data is None:
+            self.countLookupCall('full data')
             return self.factual.data(self.key)
         else:
             return self.__data

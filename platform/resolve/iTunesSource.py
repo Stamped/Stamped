@@ -64,6 +64,8 @@ class _iTunesObject(object):
             return size400url
         except urllib2.HTTPError:
             pass
+        except LookupRequiredError:
+            pass
 
         try:
             self.countLookupCall('image')
@@ -71,53 +73,64 @@ class _iTunesObject(object):
             return size200url
         except urllib2.HTTPError:
             pass
+        except LookupRequiredError:
+            pass
 
         return url
 
 
     @lazyProperty
     def data(self):
-        if self.__data == None:
-            if self.isType('album') or self.isType('artist'):
-                entity_field = 'song'
-                if self.isType('artist'):
-                    entity_field = 'album,song'
-                # This is pretty heinous -- this method doesn't actually exist on iTunesObject but secretly we know that
-                # all iTunesObjects are also ResolverObjects, which defines countLookupCall. Ugh.
-                self.countLookupCall('full data')
-                results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field, limit=1000)['results']
-                m = {
-                    'tracks':[],
-                    'albums':[],
-                    'artists':[]
-                }
-                for result in results:
-                    k = None
-                    if 'wrapperType' in result:
-                        t = result['wrapperType']
-                        if t == 'track' and result['kind'] == 'song':
-                            k = 'tracks'
-                        elif t == 'collection' and result['collectionType'] == 'Album':
-                            k = 'albums'
-                        elif t == 'artist' and result['artistType'] == 'Artist':
-                            k = 'artists'
-                    if k is not None:
-                        m[k].append(result)
-                if self.isType('artist'):
-                    data = m['artists'][0]
-                    data['albums'] = m['albums']
-                    data['tracks'] = m['tracks']
-                    return data
-                else:
-                    data = m['albums'][0]
-                    data['tracks'] = m['tracks']
-                    return data
-            else:
-                self.countLookupCall('full data')
-                return self.itunes.method('lookup', id=self.__itunes_id)['results'][0]
-        else:
+        if self.__data is not None:
             return self.__data
-    
+
+        if not (self.isType('album') or self.isType('artist')):
+            # Here and in the later call, we don't bother catching the LookupRequiredError because if you're not passing
+            # the data param into an iTunesSource with capped lookup calls you're doing it wrong.
+            self.countLookupCall('full data')
+            return self.itunes.method('lookup', id=self.__itunes_id)['results'][0]
+
+        entity_field = 'song'
+        if self.isType('artist'):
+            entity_field = 'album,song'
+        # This is pretty heinous -- this method doesn't actually exist on iTunesObject but secretly we know that
+        # all iTunesObjects are also ResolverObjects, which defines countLookupCall. Ugh.
+        # TODO: Multiple inheritance blows. Maybe instead of making these things explicitly ResolverObject subtypes,
+        # we can just have them call functions in their initializers that perform debug checks to (a) make sure they
+        # define the right fields and (b) make sure the fields all return the right types. This makes it more onerous
+        # to define an implementation that falls back to empty values for a bunch of fields, but the initializer could
+        # fill those fields in with static values, or something.
+        #    (if not hasattr(self, 'authors') self.authors = [])
+        # Instead of being able to say "is ResolverPerson," then, you could instead use types, etc.
+        self.countLookupCall('full data')
+        results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field, limit=1000)['results']
+        m = {
+            'tracks':[],
+            'albums':[],
+            'artists':[]
+        }
+        for result in results:
+            k = None
+            if 'wrapperType' in result:
+                t = result['wrapperType']
+                if t == 'track' and result['kind'] == 'song':
+                    k = 'tracks'
+                elif t == 'collection' and result['collectionType'] == 'Album':
+                    k = 'albums'
+                elif t == 'artist' and result['artistType'] == 'Artist':
+                    k = 'artists'
+            if k is not None:
+                m[k].append(result)
+        if self.isType('artist'):
+            data = m['artists'][0]
+            data['albums'] = m['albums']
+            data['tracks'] = m['tracks']
+            return data
+        else:
+            data = m['albums'][0]
+            data['tracks'] = m['tracks']
+            return data
+
     @property 
     def itunes(self):
         return self.__itunes
@@ -170,13 +183,16 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         if 'albums' in self.data:
             results = self.data['albums']
         else:
-            self.countLookupCall('albums')
-            results = self.itunes.method('lookup', id=self.key, entity='album', limit=1000)['results']
+            try:
+                self.countLookupCall('albums')
+                results = self.itunes.method('lookup', id=self.key, entity='album', limit=1000)['results']
+            except LookupRequiredError:
+                results = []
         return [
             {
-                'name'  : album['collectionName'], 
-                'key'   : str(album['collectionId']), 
-                'data'  : album, 
+                'name'  : album['collectionName'],
+                'key'   : str(album['collectionId']),
+                'data'  : album,
             }
                 for album in results if album.pop('collectionType', None) == 'Album' ]
 
@@ -193,8 +209,11 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            self.countLookupCall('tracks')
-            results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
+            try:
+                self.countLookupCall('tracks')
+                results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
+            except LookupRequiredError:
+                results = []
         return [
             {
                 'name':             track['trackName'],
@@ -269,8 +288,11 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
         if 'tracks' in self.data:
             results = self.data['tracks']
         else:
-            self.countLookupCall('tracks')
-            results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
+            try:
+                self.countLookupCall('tracks')
+                results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
+            except LookupRequiredError:
+                results = []
         if results is None:
             return []
         return [
@@ -863,9 +885,6 @@ class iTunesSource(GenericSource):
     def __searchEntityTypeLite(self, entityType, queryText, resultsDict):
         try:
             resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText)['results']
-            # TODO GET RID OF ME
-            import pprint
-            pprint.pprint(resultsDict[entityType])
         except Exception:
             logs.report()
 
@@ -926,6 +945,9 @@ class iTunesSource(GenericSource):
             'musicArtist' : 0.8,
             'movie' : 0.5,
             'tvShow' : 0.5,
+            # Having iTunes book results is good for enrichment, and in case Amazon doesn't return results or something,
+            # but we really don't want it having much of an impact on ranking.
+            'ebook': 0.1,
         }
 
         if iTunesType in iTunesTypesToWeights:

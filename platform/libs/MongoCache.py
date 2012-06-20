@@ -24,11 +24,16 @@ import Globals
 import binascii, bson, datetime, ec2_utils, functools, logs, utils, pylibmc
 from pymongo.errors import AutoReconnect
 from api.db.mongodb.AMongoCollection import MongoDBConfig
+from schema import Schema
 
 
 #####################################################################
 ########################### SERIALIZATION ###########################
 #####################################################################
+
+# Huge TODO: There's no good reason to serialize all of this shit and then hash it.
+# I should just hash it in the first place, with some care taken to avoid the problem
+# of class objects that are hashable but really shouldn't be.
 
 class SerializationError(Exception):
     def __init__(self, string):
@@ -36,64 +41,120 @@ class SerializationError(Exception):
 
 basic_types = [basestring, int, float, bool]
 
-def isBasicType(term):
-    return any(isinstance(term, basic_type) for basic_type in basic_types)
+def isBasicType(x):
+    return x is None or any(isinstance(x, basic_type) for basic_type in basic_types)
 
-def termIsSerializable(term, n=1):
-    if isBasicType(term):
-        return True
+def argIsSerializable(original_arg):
+    queue = [original_arg]
+    while queue:
+        arg = queue.pop()
 
-    if n == 0:
-        # We're not going any deeper; at this point it needs to be all basic types.
-        return False
-
-    if isinstance(term, list) or isinstance(term, set) or isinstance(term, tuple):
-        return all(termIsSerializable(inner_term, n-1) for inner_term in term)
-
-    if isinstance(term, dict):
-        return (all(termIsSerializable(inner_term, n-1) for inner_term in term.keys()) and
-                all(termIsSerializable(inner_term, n-1) for inner_term in term.values()))
+        if isBasicType(arg):
+            continue
+        elif isinstance(arg, list) or isinstance(arg, set) or isinstance(arg, tuple):
+            queue.extend(arg)
+        elif isinstance(arg, dict):
+            queue.extend(arg.keys())
+            queue.extend(arg.values())
+        else:
+            print "Can't handle type", type(arg)
+            return False
+    return True
 
 
 def assertCallIsSerializable(args, kwargs):
     for idx, arg in enumerate(args):
-        if not termIsSerializable(arg):
+        if not argIsSerializable(arg):
             raise SerializationError('Failed to serialize %dth argument value: (%s)' % (idx, str(arg)))
 
     for key, val in kwargs.items():
-        if not termIsSerializable(val):
+        if not argIsSerializable(val):
             raise SerializationError('Failed to serialize "%s" keyword argument value: (%s)' % (key, str(val)))
 
 
-def serializeTerm(term):
-    if isBasicType(term) or isinstance(term, tuple):
-        return term
-    elif isinstance(term, list) or isinstance(term, set):
-        return tuple(term)
-    elif isinstance(term, dict):
+def serializeArgument(arg):
+    """
+    Yeah the name is a misnomer at this point. Just converts it into all immutable hashable types.
+    """
+    if isBasicType(arg):
+        return arg
+    elif isinstance(arg, list) or isinstance(arg, set) or isinstance(arg, tuple):
+        return tuple(map(serializeArgument, arg))
+    elif isinstance(arg, dict):
         # Technically this means you can have collisions -- for instance, the call foo({1: 2, 4: 3})
         # would collide with the call foo([(1, 2), (4, 3)]) -- but whatever.
-        return tuple(term.items())
+        return ((serializeArgument(key), serializeArgument(value)) for key, value in arg.items())
     # We don't expect to get here; assertCallIsSerializable should have found the problem first.
-    raise SerializationError('Unexpectedly failed to serialize term: (%s)' % str(term))
+    raise SerializationError('Unexpectedly failed to serialize arg: (%s)' % str(arg))
+
+
+def serializeValue(arg, schemaClasses):
+    """
+    Takes types Mongo can't handle and converts them into types it can.
+    """
+    def recurse(arg2):
+        return serializeValue(arg2, schemaClasses)
+
+    if isBasicType(arg):
+        return arg
+    elif isinstance(arg, list) or isinstance(arg, set) or isinstance(arg, tuple):
+        return [arg.__class__.__name__] + map(recurse, arg)
+    elif isinstance(arg, dict):
+        if not arg:
+            return {}
+        keys, values = zip(*arg.items())
+        if not all(isinstance(key, basestring) for key in keys):
+            raise SerializationError('All dict keys must be strings in serialized values for MongoCache!')
+        return dict(zip(map(recurse, keys), map(recurse, values)))
+    elif isinstance(arg, Schema):
+        className = arg.__class__.__name__
+        if className not in schemaClasses:
+            raise SerializationError('Unable to serialize schema of type %s without class being passed to decorator!' %
+                                     className)
+        return { '__schema_class__': className,
+                 '__data__': arg.dataExport() }
+
+def deserializeValue(arg, schemaClasses):
+    def recurse(arg2):
+        return deserializeValue(arg2, schemaClasses)
+
+    if isBasicType(arg):
+        return arg
+    elif isinstance(arg, list):
+        # Tuples, sets, and lists all end up as lists, so the first element of the serialized list tell us what type it
+        # was originally.
+        containerType = eval(arg[0])
+        return containerType(map(recurse, arg[1:]))
+    elif isinstance(arg, dict):
+        # Schemas and dicts both end up as dicts so we use the presence/absence of __schema_class__ to differentiate.
+        schemaClassName = arg.pop('__schema_class__', None)
+        if schemaClassName:
+            schemaClass = schemaClasses[schemaClassName]
+            return schemaClass().dataImport(arg['__data__'])
+        else:
+            keys, values = zip(*arg.items())
+            # Keys must be strings, so we don't have to bother deserializing.
+            return dict(zip(keys, map(recurse, values)))
+
+
 
 #####################################################################
 ############################# DECORATOR #############################
 #####################################################################
 
-def serializeCall(fnName, args, kwargs):
+def hashFunctionCall(fnName, args, kwargs):
     """Serialize the arguments to the function call into a concise cache key.
 
     In this case we convert sets, lists and dicts to tuples (only going one level deep) and try to hash. This will
     fail if there are nested lists/dicts or if there are class objects."""
 
-    args = tuple(map(serializeTerm, args))
+    args = tuple(map(serializeArgument, args))
     # TODO: This relies on the fact that keys() and values() are always in the same order. Is this safe?
     if not kwargs:
         kwargs = ()
     else:
         keys, values = zip(*kwargs.items())
-        kwargs = tuple(zip(map(serializeTerm, keys), map(serializeTerm, values)))
+        kwargs = tuple(zip(map(serializeArgument, keys), map(serializeArgument, values)))
     return hash((fnName, args, kwargs))
 
 
@@ -106,9 +167,13 @@ disableStaleness = False
 
 
 ONE_WEEK = datetime.timedelta(7)
-def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
+def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
     # Don't use Mongo caching in production.
     assert(not utils.is_ec2())
+
+    schemaClassesMap = {}
+    for schemaClass in schemaClasses:
+        schemaClassesMap[schemaClass.__name__] = schemaClass
 
     def decoratingFn(userFunction):
         userFnName = userFunction.func_name
@@ -131,7 +196,7 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
                 fnName = userFnName
 
             assertCallIsSerializable(args, kwargs)
-            callHash = serializeCall(fnName, args, kwargs)
+            callHash = hashFunctionCall(fnName, args, kwargs)
 
             force_recalculate = kwargs.pop('force_recalculate', False)
             try:
@@ -151,16 +216,16 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True):
 
             if result and (disableStaleness or (result['expiration'] > now)) and not force_recalculate:
                 # We hit the cache and the result isn't stale! Woo!
-                return result['value']
+                return deserializeValue(result['value'], schemaClassesMap)
 
             expiration = None if disableStaleness else now + maxStaleness
-            result = {'_id':callHash,
-                      'func_name': fnName,
-                      'value': userFunction(*fullArgs, **kwargs),
-                      'expiration':expiration}
-            table.update({'_id':callHash}, result, upsert=True)
-
-            return result['value']
+            result = userFunction(*fullArgs, **kwargs)
+            cacheEntry = {'_id':callHash,
+                          'func_name': fnName,
+                          'value': serializeValue(result, schemaClassesMap),
+                          'expiration':expiration}
+            table.update({'_id':callHash}, cacheEntry, upsert=True)
+            return result
 
         return wrappedFn
 

@@ -1,0 +1,23 @@
+## The list of dependencies that are required for server development.
+## To install everything on this list, simply run
+##   pip install -r deploy/requriements.pip
+## TODO: add version number constraints for each of these.
+APNSWrapper
+BeautifulSoup
+boto
+celery
+django
+fabric
+feedparser
+gevent
+greenlet
+gunicorn
+httplib2
+lxml
+pil
+pyes
+pylibmc
+pymongo
+unittest2
+whisper
+xlrd

@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime
+import sys, datetime, logs
 from api                        import Entity
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
@@ -17,6 +17,9 @@ from resolve.TMDBSource         import TMDBSource
 from resolve.TheTVDBSource      import TheTVDBSource
 from resolve.GooglePlacesSource import GooglePlacesSource
 from resolve.FactualSource      import FactualSource
+from resolve.StampedSource      import StampedSource
+from resolve.EntityProxyContainer   import EntityProxyContainer
+from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
 
 class EntitySearch(object):
@@ -51,12 +54,20 @@ class EntitySearch(object):
         # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
         # enough to give a solid idea.
         before = datetime.datetime.now()
-        resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
+        try:
+            logs.debug('DEBUG DEBUG DEBUG Searching source: ' + source.sourceName)
+            resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
+            logs.debug('DEBUG DEBUG DEBUG Done searching source: ' + source.sourceName)
+        except:
+            logs.report()
         after = datetime.datetime.now()
         timesDict[source] = after - before
-        print "GOT RESULTS FROM SOURCE", source, "IN ELAPSED TIME", after - before, "COUNT", len(resultsDict[source])
+        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
+            source, str(after - before), len(resultsDict[source])
+        ))
 
-    def search(self, category, text, timeout=None, **queryParams):
+    def search(self, category, text, timeout=None, limit=10, **queryParams):
+        logs.debug('In search')
         if category not in Entity.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -64,38 +75,78 @@ class EntitySearch(object):
         results = {}
         times = {}
         pool = Pool(16)
+        logs.debug('DEBUG DEBUG DEBUG Category is: ' + category)
+        logs.debug('DEBUG DEBUG DEBUG Num sources: ' + str(len(self.__categories_to_sources[category])))
         for source in self.__categories_to_sources[category]:
             # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
-        print "TIME CHECK ISSUED ALL QUERIES AT", datetime.datetime.now()
+        logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join(timeout=timeout)
-        print "TIME CHECK GOT ALL RESPONSES AT", datetime.datetime.now()
+        logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
 
-        print "GOT RESULTS: ", (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()]))
+        logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
         for source in self.__all_sources:
             if source in results and results[source]:
-                print "\nRESULTS FROM SOURCE", source, "TIME ELAPSED:", times[source], "\n\n"
+                logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
                 for result in results[source]:
                     #print unicode(result).encode('utf-8'), "\n\n"
                     pass
 
-        print "\n\n\n\nDEDUPING\n\n\n\n"
+        logs.debug("DEDUPING")
         beforeDeduping = datetime.datetime.now()
         dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
         afterDeduping = datetime.datetime.now()
-        print "DEDUPING TOOK", afterDeduping - beforeDeduping
-        print "TIME CHECK DONE AT", datetime.datetime.now()
-        print "ELAPSED:", afterDeduping - start
+        logs.debug("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
+        logs.debug("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
+        logs.debug("ELAPSED:" + str(afterDeduping - start))
 
-        for dedupedResult in dedupedResults[:10]:
-            print "\n\n"
-            print dedupedResult
-            print "\n\n"
+        logs.debug("\n\nDEDUPED RESULTS\n\n")
+        for dedupedResult in dedupedResults[:limit]:
+            logs.debug("\n\n%s\n\n" % str(dedupedResult))
 
-        # TODO: Fast resolution against our database using all IDs!
+        return dedupedResults[:limit]
+
+
+    def searchEntities(self, category, text, timeout=None, limit=10, **queryParams):
+        logs.debug('In searchEntities')
+        stampedSource = StampedSource()
+        clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
+        entityResults = []
+        for cluster in clusters:
+            entityId = None
+            for result in cluster.results:
+                if result.resolverObject.source == 'stamped':
+                    entityId = result.resolverObject.key
+                    break
+
+            results = cluster.results[:]
+            results.sort(key = lambda result:result.score, reverse=True)
+            for result in results:
+                if entityId:
+                    break
+                proxy = result.resolverObject
+                # TODO: Batch the database requests into one big OR query. Have appropriate handling for when we get
+                # multiple Stamped IDs back.
+                entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
+                # TODO: Incorporate data fullness here!
+
+            if entityId:
+                proxy = stampedSource.entityProxyFromKey(entityId)
+                entity = EntityProxyContainer(proxy).buildEntity()
+                # TODO: Somehow mark the entity to be enriched with these other IDs I've attached
+                entity.entity_id = entityId
+            else:
+                entityBuilder = EntityProxyContainer(results[0].resolverObject)
+                for result in results[1:]:
+                    entityBuilder.addSource(EntityProxySource(result.resolverObject))
+                entity = entityBuilder.buildEntity()
+
+            entityResults.append(entity)
+
+        return entityResults
 
 
 from optparse import OptionParser
@@ -120,7 +171,9 @@ def main():
         print '\nUSAGE:\n\nEntitySearch.py <category> <search terms>\n\nwhere <category> is one of:', categories, '\n'
         return 1
     searcher = EntitySearch()
-    searcher.search(args[0], ' '.join(args[1:]), **queryParams)
+    results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
+    for result in results:
+        print "\n\n", result
 
 
 if __name__ == '__main__':

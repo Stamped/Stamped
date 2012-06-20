@@ -2800,6 +2800,7 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
+            logs.info('### formatStampObjects  offset: %s' % offset)
             if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
@@ -3095,9 +3096,11 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = verbs.find('###') - 13 + len(subjects) + 1
-            #verbs = re.sub("###", "", verbs)
-            logs.info('offset: %s' % offset)
+            offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
+            verbs = re.sub("###", "", verbs)
+            assert(offset < len(verbs))
+            logs.info('### offset: %s' % offset)
+
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
