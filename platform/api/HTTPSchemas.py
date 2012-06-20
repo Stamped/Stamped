@@ -3095,9 +3095,11 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            #offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
+            offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
             verbs = re.sub("###", "", verbs)
-            offset = 0
+            assert(offset < len(verbs))
+            logs.info('### offset: %s' % offset)
+
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
