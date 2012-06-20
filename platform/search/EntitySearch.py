@@ -17,6 +17,8 @@ from resolve.TMDBSource         import TMDBSource
 from resolve.TheTVDBSource      import TheTVDBSource
 from resolve.GooglePlacesSource import GooglePlacesSource
 from resolve.FactualSource      import FactualSource
+from resolve.StampedSource      import StampedSource
+from resolve.EntityProxyContainer   import EntityProxyContainer
 from SearchResultDeduper        import SearchResultDeduper
 
 class EntitySearch(object):
@@ -56,7 +58,43 @@ class EntitySearch(object):
         timesDict[source] = after - before
         print "GOT RESULTS FROM SOURCE", source, "IN ELAPSED TIME", after - before, "COUNT", len(resultsDict[source])
 
-    def search(self, category, text, timeout=None, **queryParams):
+    def searchEntities(self, category, text, timeout=None, limit=10, **queryParams):
+        stampedSource = StampedSource()
+        clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
+        entityResults = []
+        for cluster in clusters:
+            entityId = None
+            bestResult = None
+            for result in cluster.results:
+                if result.resolverObject.source == 'stamped':
+                    entityId = result.resolverObject.key
+                    break
+
+            results = cluster.results[:]
+            results.sort(key = lambda result:result.score, reverse=True)
+            for result in results:
+                if entityId:
+                    break
+                proxy = result.resolverObject
+                # TODO: Batch the database requests into one big OR query. Have appropriate handling for when we get
+                # multiple Stamped IDs back.
+                entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
+                if bestResult is None or result.score > bestResult.score:
+                    bestResult = result
+
+            if entityId:
+                proxy = stampedSource.entityProxyFromKey(entityId)
+            else:
+                proxy = bestResult.resolverObject
+
+            entity = EntityProxyContainer(proxy).buildEntity()
+            if proxy.source == 'stamped':
+                entity.entity_id = proxy.key
+            entityResults.append(entity)
+
+        return entityResults
+
+    def search(self, category, text, timeout=None, limit=10, **queryParams):
         if category not in Entity.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -90,12 +128,12 @@ class EntitySearch(object):
         print "TIME CHECK DONE AT", datetime.datetime.now()
         print "ELAPSED:", afterDeduping - start
 
-        for dedupedResult in dedupedResults[:10]:
+        for dedupedResult in dedupedResults[:limit]:
             print "\n\n"
             print dedupedResult
             print "\n\n"
 
-        # TODO: Fast resolution against our database using all IDs!
+        return dedupedResults[:limit]
 
 
 from optparse import OptionParser
@@ -120,7 +158,9 @@ def main():
         print '\nUSAGE:\n\nEntitySearch.py <category> <search terms>\n\nwhere <category> is one of:', categories, '\n'
         return 1
     searcher = EntitySearch()
-    searcher.search(args[0], ' '.join(args[1:]), **queryParams)
+    results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
+    for result in results:
+        print "\n\n", result
 
 
 if __name__ == '__main__':

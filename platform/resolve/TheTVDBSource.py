@@ -226,7 +226,8 @@ class TheTVDBSource(GenericSource):
         
         return gen()
 
-    def searchLite(self, queryCategory, queryText):
+    def searchLite(self, queryCategory, queryText, timeout=None):
+        # TODO: USE TIMEOUT.
         if queryCategory != 'film':
             raise NotImplementedError()
         # Ugh. Why are we using entities?

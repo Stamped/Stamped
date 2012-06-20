@@ -95,10 +95,13 @@ def fixtureTest(generateLocalDbFn=None,
                 generateLocalDbQueries=None,
                 fixtureFileName=None,
                 fixtureText=None):
-    if generateLocalDbFn is not None and generateLocalDbQueries is not None:
-        raise Exception('Only one of generateLocalDbFn, generateLocalDbQueries can be passed to fixtureTest!')
+    totalFixtureSources = ((generateLocalDbFn is not None) +
+                           (generateLocalDbQueries is not None) +
+                           (fixtureText is not None))
+    if totalFixtureSources > 1:
+        raise Exception('generateLocalDbFn, generateLocalDbQueries, and fixtureText are mutually exclusive!')
     if fixtureFileName is not None and fixtureText is not None:
-        raise Exception('Only one of fixtureFilename, fixtureText can be passed to fixtureTest!')
+        raise Exception('Only one of fixtureFileName, fixtureText can be passed to fixtureTest!')
 
     def decoratorFn(testFn):
         fixtureFilename = fixtureFileName

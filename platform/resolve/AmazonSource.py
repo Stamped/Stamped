@@ -831,9 +831,9 @@ class AmazonSource(GenericSource):
     def __searchIndexLite(self, searchIndexData, queryText, results):
         searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
             ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25)
-        print "\n\n\n\nAMAZON\n\n\n\n\n"
-        pprint(searchResults)
-        print "\n\n\n\nENDMAZON\n\n\n\n\n"
+        #print "\n\n\n\nAMAZON\n\n\n\n\n"
+        #pprint(searchResults)
+        #print "\n\n\n\nENDMAZON\n\n\n\n\n"
         items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
 
         if 'Item' in items:
@@ -1053,21 +1053,34 @@ class AmazonSource(GenericSource):
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
+        # TODO: This math needs some work.
+        defaultFactor = 0.2
+        def calculateFactor(salesRank):
+            return min(2.0, max(0.3, (5000 / salesRank) ** 0.1))
+
+        factors = []
+        for searchResult in resultList:
+            if not searchResult.resolverObject.salesRank:
+                factors.append(defaultFactor)
+            else:
+                factors.append(calculateFactor(searchResult.resolverObject.salesRank))
+        meanFactor = sum(factors) / float(len(resultList))
+        # We want to normalize by the mean because for some searches the results aren't super high salesRank and in
+        # those cases we don't want to ditch Amazon results compared to other sources.
+
         for searchResult in resultList:
             salesRank = searchResult.resolverObject.salesRank
             if salesRank:
-                # TODO: TWEAK THIS MATH. This will be fucking ridiculous with something with salesRank=1. It needs to be
-                # a lot smoother.
-                factor = (5000 / searchResult.resolverObject.salesRank) ** 0.2
+                factor = calculateFactor(salesRank) / meanFactor
                 searchResult.addScoreComponentDebugInfo('Amazon salesRank factor', factor)
                 searchResult.score *= factor
             else:
                 # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
-                factor = 0.6
+                factor = defaultFactor / meanFactor
                 searchResult.addScoreComponentDebugInfo('Amazon missing salesRank factor', factor)
                 searchResult.score *= factor
 
-    def __scoreFilmResults(self, *unscoredResultsLists):
+    def __scoreFilmResults(self, unscoredResultsLists):
         scoredTvShows = []
         scoredMovies = []
         for unscoredResultList in unscoredResultsLists:
@@ -1089,7 +1102,7 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByScore([tvShows, movies])
 
-    def __scoreMusicResults(self, *unscoredResultsLists):
+    def __scoreMusicResults(self, unscoredResultsLists):
         # TODO: Clean up code duplication with __scoreFilmResults!
         if not unscoredResultsLists:
             return []
@@ -1120,6 +1133,35 @@ class AmazonSource(GenericSource):
         self.__augmentAlbumResultsWithSongs(albums, tracks)
 
         return interleaveResultsByScore([albums, tracks])
+
+    def __scoreBookResults(self, unscoredResultsLists):
+        assert(len(unscoredResultsLists) <= 1)
+        if len(unscoredResultsLists) == 0:
+            return []
+        # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
+        # complete shit results that I want to drop off the bottom.
+        scoredResults = scoreResultsWithBasicDropoffScoring(unscoredResultsLists['Books'], dropoffFactor=0.9)
+        self.__adjustScoresBySalesRank(scoredResults)
+        for scoredResult in scoredResults:
+            if not scoredResult.resolverObject.authors:
+                # TODO: Penalize other missing factors as well.
+                penaltyFactor = 0.2
+                scoredResult.score *= penaltyFactor
+                scoredResult.addScoreComponentDebugInfo('penalty factor for missing author', penaltyFactor)
+            if not scoredResult.resolverObject.isbn:
+                penaltyFactor = 0.7
+                scoredResult.score *= penaltyFactor
+                scoredResult.addScoreComponentDebugInfo('penalty factor for missing isbn', penaltyFactor)
+            if not scoredResult.resolverObject.publishers:
+                penaltyFactor = 0.4
+                scoredResult.score *= penaltyFactor
+                scoredResult.addScoreComponentDebugInfo('penalty factor for missing publishers', penaltyFactor)
+            if not scoredResult.resolverObject.release_date:
+                penaltyFactor = 0.8
+                scoredResult.score *= penaltyFactor
+                scoredResult.addScoreComponentDebugInfo('penalty factor for missing release date', penaltyFactor)
+
+        return scoredResults
 
     def __augmentAlbumResultsWithSongs(self, albums, tracks):
         """
@@ -1173,7 +1215,7 @@ class AmazonSource(GenericSource):
                 AmazonSource.SearchIndexData('DigitalMusic', 'Medium,Reviews', self.__constructMusicObjectFromResult)
             )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
-            return self.__scoreMusicResults(*resultSets.values())
+            return self.__scoreMusicResults(resultSets.values())
         elif queryCategory == 'book':
             def createBook(rawResult, maxLookupCalls):
                 asin = xp(rawResult, 'ASIN')['v']
@@ -1182,18 +1224,14 @@ class AmazonSource(GenericSource):
                     AmazonSource.SearchIndexData('Books', 'Medium,Reviews', createBook),
                 )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
-            if len(resultSets) == 0:
-                return []
-            if len(resultSets) == 1:
-                results = resultSets['Books']
-            return scoreResultsWithBasicDropoffScoring(results)
+            return self.__scoreBookResults(resultSets)
         #elif queryCategory == 'film':
         #    searchIndexes = (
         #        AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),
         #        AmazonSource.SearchIndexData('DVD', 'Medium,Reviews', self.__constructVideoObjectFromResult)
         #    )
         #    resultSets = self.__searchIndexesLite(searchIndexes, queryText)
-        #    return self.__scoreFilmResults(*resultSets.values())
+        #    return self.__scoreFilmResults(resultSets.values())
         else:
             raise NotImplementedError('AmazonSource.searchLite() does not handle category (%s)' % queryCategory)
 
