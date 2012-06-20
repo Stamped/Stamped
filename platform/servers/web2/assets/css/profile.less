@@ -1625,15 +1625,9 @@ to {
     100% { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
 }
 
-/*@-webkit-keyframes map-profile-bounce-reverse {
-    from { -webkit-transform: translate(0, -16px); }
-    to   { -webkit-transform: translate(0, 0); }
-}*/
-
 a.map-profile-link {
     font: bold 12pt "Helvetica", "Arial", sans-serif;
     color: #999;
-    //white-space: nowrap;
     display: inline-block;
     min-width: 10em;
     
@@ -1654,20 +1648,14 @@ a.map-profile-link {
             height: 27px;
             .rounded(2px);
             
-            .inner {
+            .inner, .inner-shadow {
                 position: absolute;
                 background: url(/assets/img/map_profile_sprite.png) no-repeat;
                 width:  58px;
                 height: 33px;
                 top: -6px;
-            }
-            
-            .inner-shadow {
-                position: absolute;
-                background: url(/assets/img/map_profile_sprite.png) no-repeat;
-                width:  58px;
-                height: 33px;
-                top: -6px;
+                
+                //.transition-transform(.3s, easeOutCubic);
             }
         }
     }
@@ -1719,6 +1707,7 @@ a.map-profile-link {
                 @timing: easeInOutCubic;
                 
                 .inner {
+                    // TODO: tie this animation start to hover but
                     -webkit-animation-name: map-profile-inner-bounce;
                     -webkit-animation-iteration-count: 1;
                     -webkit-animation-timing-function: @timing;

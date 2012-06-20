@@ -164,19 +164,24 @@ footer {
         height:    100%;
         
         .stamp-map-nav-wrapper {
+            background: transparent;
             position: relative;
             height: 100%;
-            background: transparent;
             
             .stamp-map-nav {
                 background: #fff;
                 pointer-events: auto;
+                height: 100%;
                 
                 .box-shadow(0, 0, 8px, 0, @shadow);
                 
                 .nav-header {
                     padding: @map_nav_space (@map_nav_space / 4 - 2px) 0 @map_nav_space;
                     background: #fff;
+                    .box-shadow(0, 3px, 3px, 0, @shadow);
+                    
+                    position: relative;
+                    z-index: 26;
                     
                     .profile-image-small {
                         float: left;
@@ -244,7 +249,7 @@ footer {
                     
                     padding: (@map_nav_space / 4) 0;
                     position: relative;
-                    top: 8px;
+                    z-index: 25;
                     
                     .transition(all, 0.5s, easeOutCubic);
                     
@@ -281,23 +286,20 @@ footer {
                     &:focus {
                         outline: none;
                     }
+                    
+                    .jspVerticalBar {
+                        padding-top:    8px;
+                        //padding-bottom: 48px;
+                    }
                 }
             }
             
-            .gradient-wrapper {
-                background: #fff;
-                pointer-events: auto;
-            }
-            
-            .top-user-gradient {
-                .box-shadow(0, 3px, 3px, 0, @shadow);
-            }
-            
-            .bottom-user-gradient {
-                .box-shadow(0, -3px, 3px, 0, @shadow);
-            }
-            
             .nav-footer, .nav-dummy-footer {
+                .box-shadow(0, -3px, 3px, 0, @shadow);
+                
+                position: relative;
+                z-index: 26;
+                
                 background: #fff;
                 width: 100%;
                 
