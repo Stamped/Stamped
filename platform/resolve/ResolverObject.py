@@ -75,7 +75,7 @@ class ResolverObject(object):
             # try to get self.name. If I try to break the loop here with a fieldName == 'name' check it doesn't matter
             # because the problem is actually beneath here in the lazyProperty code -- basically it ends up with one
             # thread trying to hold the same lock twice, which never works.
-            raise LookupRequiredError(self.source, 'unknown', 'name')
+            raise LookupRequiredError(self.source, 'unknown', name)
 
         self.__lookupCallsMade += 1
 
