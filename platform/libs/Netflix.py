@@ -128,6 +128,9 @@ class Netflix(object):
         else:
             responseData = response.read()
             failData = json.loads(responseData)['status']
+            # if already in queue at the top, then just return True
+            if failData['status_code'] == 412 and failData['sub_code'] == 710:
+                return True
             logs.info('Failed with status code %d' % response.status)
             try:
                 msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
