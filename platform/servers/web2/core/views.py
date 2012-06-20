@@ -176,6 +176,7 @@ def map(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = 1000 # TODO: customize this
     screen_name = schema.screen_name
+    del schema.ajax
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
