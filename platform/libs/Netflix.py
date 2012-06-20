@@ -357,16 +357,16 @@ def globalNetflix():
     
     return __globalNetflix
 
-USER_ID = 'T1OACpnytwsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-'
-OAUTH_TOKEN = 'BQAJAAEDEHC_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0'
-OAUTH_TOKEN_SECRET = '8wZ4kQGSZGkj'
+USER_ID = 'BQAJAAEDEBt1T1psKyjyA2IphhT34icw3Nwze3KAkc232VbNA7apgZuLYhrDaHkY2dTHbhLCE1aBH2mxmhKYIbgy9mJZmHdy'
+OAUTH_TOKEN = 'BQAJAAEDED8KJJJDY_Qw_il_VdQFVFUw9r1bQHG5UauU1DMV0mSwjtr1K0-gDtWO0MoS-FF8l5tcDrfZXUEdf8T5hYMglERE'
+OAUTH_TOKEN_SECRET = 'QGFPRGVgpjPF'
 
 GHOSTBUSTERS2_ID = 'http://api-public.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api-public.netflix.com/catalog/titles/movies/1181532'
 INCEPTION_ID = 'http://api-public.netflix.com/catalog/titles/movies/70131314'
 ARRESTED_DEV_ID = "http://api.netflix.com/catalog/titles/series/70140358"
 
-def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
+def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=ARRESTED_DEV_ID, **params):
     from pprint import pprint
     netflix = Netflix()
 
@@ -387,7 +387,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'searchTitles'
+    methods = 'addToQueue'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
