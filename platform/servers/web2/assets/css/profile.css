@@ -474,7 +474,9 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post {
   position: relative;
   z-index: 54;
+  width: 100%;
   height: 16px;
+  background: #fff;
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);

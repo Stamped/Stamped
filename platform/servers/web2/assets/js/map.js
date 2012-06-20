@@ -586,7 +586,7 @@
                 }
             });
             
-            var duration = 100;
+            var duration = 200;
             var easing   = 'easeOutCubic';
             var done     = 0;
              

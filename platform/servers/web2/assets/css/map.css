@@ -201,7 +201,6 @@ footer {
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav {
   background: #fff;
   pointer-events: auto;
-  height: 100%;
   -webkit-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
