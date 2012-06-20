@@ -113,7 +113,9 @@ class EntitySearch(object):
         return dedupedResults[:limit]
 
 
-    def searchEntities(self, category, text, timeout=None, limit=10, **queryParams):
+    def searchEntities(self, category, text, timeout=None, limit=10, queryLatLng=None, **queryParams):
+        if queryLatLng:
+            queryParams['queryLatLng'] = queryLatLng
         logs.debug('In searchEntities')
         stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
