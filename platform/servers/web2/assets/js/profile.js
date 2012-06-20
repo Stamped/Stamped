@@ -577,7 +577,8 @@ var g_update_stamps = null;
                     var href  = $link.attr('href');
                     
                     href = href.replace('http://www.stamped.com', '');
-                    href = href + "?" + new Date().getTime();
+                    href = href + "?ajax=true";
+                    href = href + "&" + new Date().getTime();
                     
                     $(sdetail_wrapper_sel).remove();
                     var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");

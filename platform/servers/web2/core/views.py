@@ -10,7 +10,7 @@ import api.HTTPSchemas
 import os, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
-from api.Schemas    import *
+from schemas        import *
 from helpers        import *
 
 import travis_test
@@ -87,6 +87,11 @@ def profile(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     screen_name   = schema.screen_name
+    ajax          = schema.ajax
+    del schema.ajax
+    
+    friends       = []
+    followers     = []
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -113,14 +118,16 @@ def profile(request, schema, **kwargs):
         
         stamps      = stampedAPIProxy.getUserStamps(s)
     
-    if ENABLE_TRAVIS_TEST:
-        friends     = travis_test.friends
-        followers   = travis_test.followers
-    else:
-        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=screen_name))
-        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=screen_name))
-    
-    main_cluster    = { }
+    if not ajax:
+        if ENABLE_TRAVIS_TEST:
+            friends     = travis_test.friends
+            followers   = travis_test.followers
+        else:
+            friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=screen_name))
+            followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=screen_name))
+        
+        friends   = _shuffle_split_users(friends)
+        followers = _shuffle_split_users(followers)
     
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))
@@ -134,8 +141,7 @@ def profile(request, schema, **kwargs):
     #utils.log("FOLLOWERS:")
     #utils.log(pprint.pformat(followers))
     
-    friends   = _shuffle_split_users(friends)
-    followers = _shuffle_split_users(followers)
+    schema.ajax = True
     
     if schema.offset > 0:
         prev_url = format_url(url_format, schema, {
@@ -160,7 +166,6 @@ def profile(request, schema, **kwargs):
         'next_url'              : next_url, 
         
         'body_classes'          : body_classes, 
-        'main_stamp_cluster'    : main_cluster, 
     }, preload=[ 'user' ])
 
 @stamped_view(schema=HTTPWebTimeSlice)
