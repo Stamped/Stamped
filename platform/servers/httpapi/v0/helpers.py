@@ -219,6 +219,8 @@ def handleHTTPRequest(requires_auth=True,
                 logs.error(403)
 
                 error = {'error': 'illegal_action'}
+                if e.msg is not None:
+                    error['message'] = unicode(e.msg)
                 return transformOutput(error, status=403)
             
             except StampedPermissionsError as e:

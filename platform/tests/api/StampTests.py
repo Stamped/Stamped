@@ -300,7 +300,7 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
             self.deleteAccount(self.tokenC)
 
 
-class StampedAPIStampsShow(StampedAPIStampConsumeTest):
+class StampedAPIStampsShow(StampedAPIStampConsumeHttpTest):
     def test_show(self):
         path = "stamps/show.json"
         data = { 
@@ -528,7 +528,7 @@ class StampedAPIStampCreditHttpTest(AStampedAPIHttpTestCase):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
 
-class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
+class StampedAPIStampsCreditShow(StampedAPIStampCreditHttpTest):
     def test_credit_basic(self):
         path = "stamps/show.json"
         data = { 
