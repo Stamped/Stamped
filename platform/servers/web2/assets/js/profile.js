@@ -879,22 +879,41 @@ var g_update_stamps = null;
         
         $('.stamp-gallery-view-map a').click(function(event) {
             event.preventDefault();
-            var $this = $(this);
             
-            // TODO
-            console.debug("TODO: stamp-gallery-view-map functionality");
-            
-            if (History && History.enabled) {
-                //var params_str = get_custom_params_string(params);
-                //History.pushState(params, title, params_str);
-            } 
-            
-            var url = get_custom_url({}, "/" + screen_name + "/map");
+            var url   = get_custom_url({}, "/" + screen_name + "/map");
             var title = "Stamped - " + screen_name + " - map";
             
             window.location = url;
             return false;
         });
+        
+        /*
+        $('a.map-profile-link').hover(function() {
+            var $this   = $(this);
+            var $inner  = $this.find('.inner');
+            var $shadow = $this.find('.inner-shadow');
+            
+            $inner.stop(true, false);
+            $shadow.stop(true, false);
+            
+            var animate = function() {
+                $inner.animate({
+                    top : -18px
+                }, {
+                    duration : 200, 
+                    specialEasing : { 
+                        width  : 'ease-out', 
+                        height : 'ease-out'
+                    }, 
+                    complete : function() {
+                        animate();
+                    }
+                });
+            };
+        }, function() {
+            var $this = $(this);
+            
+        });*/
         
         
         // ---------------------------------------------------------------------
