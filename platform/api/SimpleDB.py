@@ -25,9 +25,9 @@ class SimpleDB(object):
 
         if domain is None:
             if is_prod_stack():
-                self.domain_name = 'stats-prod'
+                self.domain_name = 'stats_prod'
             elif is_ec2():
-                self.domain_name = 'stats-dev'
+                self.domain_name = 'stats_dev'
         else:
             self.domain_name = domain
             #     domain = 'stats-test'
@@ -35,7 +35,7 @@ class SimpleDB(object):
 
 
     def addStat(self, stat):
-        if self.domain is None:
+        if self.domain_name is None:
             return
 
         try:
