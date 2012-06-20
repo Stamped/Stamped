@@ -72,9 +72,9 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
-def createNetflixLoginResponse(authUserId):
+def createNetflixLoginResponse(authUserId, netflixAddId=None):
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(authUserId)
+    secret, url = netflix.getLoginUrl(authUserId, netflixAddId)
 
     response                = HTTPEndpointResponse()
     source                  = HTTPActionSource()
@@ -85,10 +85,10 @@ def createNetflixLoginResponse(authUserId):
 
     return transformOutput(response.dataExport())
 
-@handleHTTPRequest()
+@handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["GET"])
-def netflixLogin(request, authUserId, http_schema, **kwargs):
-    return createNetflixLoginResponse(authUserId)
+def netflixLogin(request, authUserId, **kwargs):
+    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
     parse_request_kwargs={'allow_oauth_token': True})
@@ -106,15 +106,20 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
 
-    return HttpResponseRedirect("stamped://test")
+    if http_schema.netflix_add_id is not None:
+        try:
+            result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
+        except StampedHTTPError as e:
+            return HttpResponseRedirect("stamped://fail/netflix")
+        if result == None:
+            return HttpResponseRedirect("stamped://fail/netflix")
 
-    #return createNetflixLoginResponse(authUserId)
 
+    return HttpResponseRedirect("stamped://success/netflix")
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
-    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:

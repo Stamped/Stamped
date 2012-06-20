@@ -653,6 +653,7 @@ class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamped_oauth_token',              basestring)
+        cls.addProperty('netflix_add_id',                   basestring)
         cls.addProperty('oauth_token',                      basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('oauth_verifier',                   basestring)
