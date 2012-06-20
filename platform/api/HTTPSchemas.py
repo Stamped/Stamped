@@ -2800,6 +2800,7 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
+            logs.info('### formatStampObjects  offset: %s' % offset)
             if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
