@@ -123,8 +123,9 @@ def profile(request, schema, **kwargs):
             friends     = travis_test.friends
             followers   = travis_test.followers
         else:
-            friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=screen_name))
-            followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=screen_name))
+            params      = dict(user_id=user_id, screen_name=screen_name)
+            friends     = stampedAPIProxy.getFriends  (params, limit=10)
+            followers   = stampedAPIProxy.getFollowers(params, limit=10)
         
         friends   = _shuffle_split_users(friends)
         followers = _shuffle_split_users(followers)
