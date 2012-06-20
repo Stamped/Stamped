@@ -97,8 +97,10 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
     authUserId = http_schema.stamped_oauth_token
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
-    result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
-
+    try:
+        result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
+    except Exception as e:
+        return HttpResponseRedirect("stamped://netflix/link/fail")
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
     linked.user_id                  = result['user_id']
@@ -110,12 +112,11 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
         try:
             result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
         except StampedHTTPError as e:
-            return HttpResponseRedirect("stamped://fail/netflix")
+            return HttpResponseRedirect("stamped://netflix/add/fail")
         if result == None:
-            return HttpResponseRedirect("stamped://fail/netflix")
-
-
-    return HttpResponseRedirect("stamped://success/netflix")
+            return HttpResponseRedirect("stamped://netflix/add/fail")
+        return HttpResponseRedirect("stamped://netflix/add/success")
+    return HttpResponseRedirect("stamped://netflix/link/success")
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
@@ -124,20 +125,23 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
         if e.code == 401:
-            return createNetflixLoginResponse(authUserId)
+            return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
             # return login endpoint action
         else:
             raise e
     if result == None:
-        return createNetflixLoginResponse(authUserId)
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
     response = HTTPEndpointResponse()
 
-    source                  = HTTPActionSource()
-    source.source           = 'stamped_confirm'
-    source.source_data      = 'The item is now added to your Netflix Queue.'
+    source                              = HTTPActionSource()
+    source.name                         = 'Added to Netflix Instant Queue'
+    source.source                       = 'stamped'
+    source.source_data['title']         = 'Added to Netflix Instant Queue'
+    source.source_data['subtitle']      = 'Instant Queue'
+    source.source_data['icon']          = 'http://static.stamped.com/assets/icons/default/src_netflix.png'
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
-    response.setAction('netflix_login', 'Login to Netflix', [source])
+    response.setAction('stamped_confirm', 'Added to Netflix', [source])
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(response.dataExport())

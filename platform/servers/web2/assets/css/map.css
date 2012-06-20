@@ -194,13 +194,14 @@ footer {
   height: 100%;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper {
+  background: transparent;
   position: relative;
   height: 100%;
-  background: transparent;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav {
   background: #fff;
   pointer-events: auto;
+  height: 100%;
   -webkit-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
@@ -210,6 +211,13 @@ footer {
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header {
   padding: 24px 4px 0 24px;
   background: #fff;
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  position: relative;
+  z-index: 26;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .profile-image-small {
   float: left;
@@ -265,7 +273,7 @@ footer {
   background: #fff;
   padding: 6px 0;
   position: relative;
-  top: 8px;
+  z-index: 25;
   -webkit-transition: all 0.5s easeOutCubic;
   -moz-transition: all 0.5s easeOutCubic;
   -ms-transition: all 0.5s easeOutCubic;
@@ -300,26 +308,18 @@ footer {
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .stamp-list-view:focus {
   outline: none;
 }
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .gradient-wrapper {
-  background: #fff;
-  pointer-events: auto;
+.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .stamp-list-view .jspVerticalBar {
+  padding-top: 8px;
 }
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .top-user-gradient {
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-}
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .bottom-user-gradient {
+.stamp-map .fixedwidth .stamp-map-nav-wrapper .nav-footer,
+.stamp-map .fixedwidth .stamp-map-nav-wrapper .nav-dummy-footer {
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
-}
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .nav-footer,
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .nav-dummy-footer {
+  position: relative;
+  z-index: 26;
   background: #fff;
   width: 100%;
 }

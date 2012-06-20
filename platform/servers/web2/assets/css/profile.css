@@ -1649,10 +1649,6 @@ body.sdetail_popup #main-page-content-body #main-content {
     opacity: 1.0;
   }
 }
-/*@-webkit-keyframes map-profile-bounce-reverse {
-    from { -webkit-transform: translate(0, -16px); }
-    to   { -webkit-transform: translate(0, 0); }
-}*/
 a.map-profile-link {
   font: bold 12pt "Helvetica", "Arial", sans-serif;
   color: #999;
@@ -1683,13 +1679,7 @@ a.map-profile-link .map-profile-icon-wrapper .map-profile-icon {
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-a.map-profile-link .map-profile-icon-wrapper .map-profile-icon .inner {
-  position: absolute;
-  background: url(/assets/img/map_profile_sprite.png) no-repeat;
-  width: 58px;
-  height: 33px;
-  top: -6px;
-}
+a.map-profile-link .map-profile-icon-wrapper .map-profile-icon .inner,
 a.map-profile-link .map-profile-icon-wrapper .map-profile-icon .inner-shadow {
   position: absolute;
   background: url(/assets/img/map_profile_sprite.png) no-repeat;
