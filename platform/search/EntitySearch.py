@@ -19,6 +19,7 @@ from resolve.GooglePlacesSource import GooglePlacesSource
 from resolve.FactualSource      import FactualSource
 from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
+from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
 
 class EntitySearch(object):
@@ -64,7 +65,6 @@ class EntitySearch(object):
         entityResults = []
         for cluster in clusters:
             entityId = None
-            bestResult = None
             for result in cluster.results:
                 if result.resolverObject.source == 'stamped':
                     entityId = result.resolverObject.key
@@ -79,17 +79,19 @@ class EntitySearch(object):
                 # TODO: Batch the database requests into one big OR query. Have appropriate handling for when we get
                 # multiple Stamped IDs back.
                 entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
-                if bestResult is None or result.score > bestResult.score:
-                    bestResult = result
+                # TODO: Incorporate data fullness here!
 
             if entityId:
                 proxy = stampedSource.entityProxyFromKey(entityId)
+                entity = EntityProxyContainer(proxy).buildEntity()
+                # TODO: Somehow mark the entity to be enriched with these other IDs I've attached
+                entity.entity_id = entityId
             else:
-                proxy = bestResult.resolverObject
+                entityBuilder = EntityProxyContainer(results[0].resolverObject)
+                for result in results[1:]:
+                    entityBuilder.addSource(EntityProxySource(result.resolverObject))
+                entity = entityBuilder.buildEntity()
 
-            entity = EntityProxyContainer(proxy).buildEntity()
-            if proxy.source == 'stamped':
-                entity.entity_id = proxy.key
             entityResults.append(entity)
 
         return entityResults

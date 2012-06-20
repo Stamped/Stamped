@@ -50,7 +50,9 @@ class _AmazonObject(object):
 
     def _issueLookup(self):
         # Slightly ugly -- calling ResolverObject method just because we know all _AmazonObject implementations also
-        # inherit from ResolverObject.
+        # inherit from ResolverObject. TODO: Get rid of multiple inheritance!
+        # We don't catch the LookupRequiredError here because if you are initializing a capped-lookup object without
+        # passing in initial data, you are doing it wrong.
         self.countLookupCall('base data')
         raw = globalAmazon().item_lookup(**self.__params)
         self.__data = xp(raw, 'ItemLookupResponse','Items','Item')
@@ -111,7 +113,10 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
         try:
             tracks = list(xp(self.data, 'RelatedItems')['c']['RelatedItem'])
         except KeyError:
-            self._issueLookup()
+            try:
+                self._issueLookup()
+            except LookupRequiredError:
+                return []
         try:
             tracks = list(xp(self.data, 'RelatedItems')['c']['RelatedItem'])
             page_count = int(xp(self.data, 'RelatedItems', 'RelatedItemPageCount')['v'])
@@ -127,7 +132,10 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
                     'key' : xp(track, 'Item', 'ASIN')['v'],
                 }
             return [ track_d[k] for k in sorted(track_d) ]
+        except LookupRequiredException:
+            return []
         except Exception:
+            # TODO: It seems possible that only one of the requests failed; shouldn't we keep the results of the others?
             report()
             return []
 
@@ -164,7 +172,10 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         try:
             album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
         except KeyError:
-            self._issueLookup()
+            try:
+                self._issueLookup()
+            except LookupRequiredError:
+                return []
         try:
             album = xp(self.data, 'RelatedItems', 'RelatedItem', 'Item')
             key = xp(album, 'ASIN')['v']
