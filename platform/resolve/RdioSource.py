@@ -48,6 +48,7 @@ class _RdioObject(object):
             if rdio_id is None:
                 raise ValueError('data or rdio_id must not be None')
             try:
+                self.countLookupCall('main data')
                 data = rdio.method('get',keys=rdio_id,extras=extras)['result'][rdio_id]
             except KeyError:
                 raise ValueError('bad rdio_id')
@@ -105,8 +106,11 @@ class RdioArtist(_RdioObject, ResolverPerson):
 
     @lazyProperty
     def albums(self):
-        self.countLookupCall('albums')
-        album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
+        try:
+            self.countLookupCall('albums')
+            album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
+        except LookupRequiredError:
+            return []
         return [ 
             {
                 'name'  : entry['name'],
@@ -118,8 +122,11 @@ class RdioArtist(_RdioObject, ResolverPerson):
 
     @lazyProperty
     def tracks(self):
-        self.countLookupCall('tracks')
-        track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
+        try:
+            self.countLookupCall('tracks')
+            track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
+        except LookupRequiredError:
+            return []
         return [ 
             {
                 'name'  : entry['name'],
@@ -150,9 +157,12 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
 
     @lazyProperty
     def tracks(self):
-        keys = ','.join(self.data['trackKeys'])
-        self.countLookupCall('tracks')
-        track_dict = self.rdio.method('get',keys=keys)['result']
+        try:
+            keys = ','.join(self.data['trackKeys'])
+            self.countLookupCall('tracks')
+            track_dict = self.rdio.method('get',keys=keys)['result']
+        except LookupRequiredError:
+            return []
         return [ 
             {
                 'name'  : entry['name'],

@@ -1524,8 +1524,13 @@ class StampedAPI(AStampedAPI):
         return entity
 
     @lazyProperty
-    def _entitySearch(self):
+    def _oldEntitySearch(self):
         from resolve.EntitySearch import EntitySearch
+        return EntitySearch()
+
+    @lazyProperty
+    def _newEntitySearch(self):
+        from search.EntitySearch import EntitySearch
         return EntitySearch()
 
     @API_CALL
@@ -1535,10 +1540,14 @@ class StampedAPI(AStampedAPI):
                        authUserId=None,
                        category=None):
 
-        entities = self._entitySearch.searchEntities(query,
-                                                     limit=10,
-                                                     coords=coords,
-                                                     category=category)
+        #entities = self._oldEntitySearch.searchEntities(query,
+        #                                                limit=10,
+        #                                                coords=coords,
+        #                                                category=category)
+        queryLatLng = None
+        if coords:
+            queryLatLng = (coords.lat, coords.lng)
+        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=coords)
 
         results = []
         process = 5
@@ -1547,7 +1556,7 @@ class StampedAPI(AStampedAPI):
             distance = None
             try:
                 if coords is not None and entity.coordinates is not None:
-                    a = (coords['lat'], coords['lng'])
+                    a = (coords.lat, coords.lng)
                     b = (entity.coordinates.lat, entity.coordinates.lng)
                     distance = abs(utils.get_spherical_distance(a, b) * 3959)
             except Exception:
