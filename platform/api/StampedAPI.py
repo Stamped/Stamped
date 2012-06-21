@@ -3586,18 +3586,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
-        if guideRequest.scope == 'me':
+        if guideRequest.scope == 'me' and authUserId is not None:
             return self.getPersonalGuide(guideRequest, authUserId)
 
-        if guideRequest.scope == 'inbox':
+        if guideRequest.scope == 'inbox' and authUserId is not None:
             return self.getUserGuide(guideRequest, authUserId)
 
         if guideRequest.scope == 'popular':
             return self.getTastemakerGuide(guideRequest)
 
+        raise StampedInputError("Invalid scope for guide: %s" % guideRequest.scope)
+
     @API_CALL
     def searchGuide(self, guideSearchRequest, authUserId):
-        if guideSearchRequest.scope == 'inbox':
+        if guideSearchRequest.scope == 'inbox' and authUserId is not None:
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
         elif guideSearchRequest.scope == 'popular':
             stampIds = None
