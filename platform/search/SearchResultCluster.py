@@ -230,8 +230,15 @@ class AlbumSearchResultCluster(SearchResultCluster):
         if album_name_sim <= 0.9:
             return CompareResult.unknown()
         # TODO: Handle case with multiple artists? Does this come up?
-        artist1_name_simple = cached_artist_simplify(album1.artists[0]['name'])
-        artist2_name_simple = cached_artist_simplify(album2.artists[0]['name'])
+
+        try:
+            artist1_name_simple = cached_artist_simplify(album1.artists[0]['name'])
+            artist2_name_simple = cached_artist_simplify(album2.artists[0]['name'])
+        except IndexError:
+            # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
+            # 'Various Artists' or whatever.
+            return CompareResult.unknown()
+
         artist_name_sim = cached_string_comparison(artist1_name_simple, artist2_name_simple)
         if artist_name_sim <= 0.9:
             return CompareResult.unknown()
