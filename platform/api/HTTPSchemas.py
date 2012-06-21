@@ -3092,25 +3092,27 @@ class HTTPActivity(Schema):
 
             if self.source is not None:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to ###%(objects)s on %(source)s.',
-                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist on %(source)s.',
-                    'download'  : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'reserve'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
-                    'buy'       : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'watch'     : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'tickets'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
+                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue on %(source)s.',
                     }
             else:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to ###%(objects)s.',
-                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist.',
-                    'download'  : '%(subjects)s checked out ###%(objects)s.',
-                    'reserve'   : '%(subjects)s checked out ###%(objects)s.',
-                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
-                    'buy'       : '%(subjects)s checked out ###%(objects)s.',
-                    'watch'     : '%(subjects)s checked out ###%(objects)s.',
-                    'tickets'   : '%(subjects)s checked out ###%(objects)s.',
+                    'listen'    : '%(subjects)s listened to %(objects)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
+                    'download'  : '%(subjects)s checked out %(objects)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s.',
+                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue.',
                     }
 
 #            actionMapping = {
@@ -3130,8 +3132,7 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
-            verbs = re.sub("###", "", verbs)
+            offset = verbs.index('%(objects)s') - len('%(subjects)s') + len(subjects)
             assert(offset < len(verbs))
 
             #offset = len(subjects) + len(verbs) + 2
@@ -3147,6 +3148,21 @@ class HTTPActivity(Schema):
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+
+            ### TEMP ICON WORK
+            if self.source in set(['rdio', 'opentable', 'itunes', 'fandango', 'amazon']):
+                if self.source == 'itunes' and self.verb[7:] == 'download':
+                    self.icon = _getIconURL('news_appstore')
+                else:
+                    self.icon = _getIconURL('news_%s' % self.source)
+            elif self.verb[7:] in set(['watch', 'playlist', 'menu', 'listen']):
+                self.icon = _getIconURL('news_%s' % self.verb[7:])
+            elif self.verb[7:] == 'add_to_instant_queue':
+                self.icon = _getIconURL('news_queue')
+
+            ### TEMP HACK TO SET IMAGE TO ICON - NEED TO GET ASSETS
+            if len(self.subjects) > 1:
+                self.image = self.icon
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

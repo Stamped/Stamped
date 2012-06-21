@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import keys.aws, logs, utils
-import os, time, urllib2, sha
+import os, time, urllib2
 
 from gevent.pool            import Pool
 from libs.ec2_utils         import is_ec2, is_prod_stack
@@ -15,6 +15,7 @@ from errors                 import *
 from bson.objectid          import ObjectId
 from boto.sdb.connection    import SDBConnection
 from boto.exception         import SDBResponseError
+from hashlib                import sha1
 
 class SimpleDB(object):
     
@@ -77,7 +78,7 @@ class SimpleDB(object):
             if len(data) > 0:
                 statId = str(ObjectId())
                 if data['uri'] != '/v0/ping.json' and data['uri'] != '/v0/temp/ping.json':
-                    suffix = '0%s' % (sha.new(statId).hexdigest()[0])
+                    suffix = '0%s' % (sha1(statId).hexdigest()[0])
                     if suffix in self.domains:
                         domain = self.domains[suffix]
                     else:
