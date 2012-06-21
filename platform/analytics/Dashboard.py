@@ -61,9 +61,9 @@ while True:
     print "Change: %s%%\n\n" % deltaS
     
     totalA,newA,deltaA = totalAccounts()
-    print "Total Accounts: %s" % totalS
-    print "New Accounts Today: %s" % newS
-    print "Change: %s%%\n\n" % deltaS
+    print "Total Accounts: %s" % totalA
+    print "New Accounts Today: %s" % newA
+    print "Change: %s%%\n\n" % deltaA
     
     users = todaysUsers()
     print "Unique users today: %s" % users
