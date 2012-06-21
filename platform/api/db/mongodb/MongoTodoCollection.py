@@ -113,16 +113,23 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
     def getTodoEntityIds(self, userId):
         return self.user_todo_entities_collection.getUserTodosEntities(userId)
 
-    def getTodosFromEntityId(self, entityId, limit=10):
+    def getUserIdsFromEntityId(self, entityId, limit=10):
         ### TODO: Convert to index collection
         documents = self._collection.find({'entity.entity_id': entityId}, fields={'user_id': 1}).sort('$natural', pymongo.DESCENDING).limit(limit)
         return map(lambda x: x['user_id'], documents)
+
+    def getTodoIdsFromEntityId(self, entityId, limit=0):
+        documents = self._collection.find({'entity.entity_id': entityId}, fields={'_id': 1}).limit(limit)
+        return map(lambda x: self._getStringFromObjectId(x['_id']), documents)
 
     def getTodosFromUsersForEntity(self, userIds, entityId, limit=10):
         ### TODO: Convert to index collection
         query = { 'entity.entity_id' : entityId, 'user_id' : { '$in' : userIds } }
         documents = self._collection.find(query, fields=['user_id']).sort('$natural', pymongo.DESCENDING).limit(limit)
         return map(lambda x: x['user_id'], documents)
+
+    def updateTodoEntity(self, todoId, entity):
+        self._collection.update({'_id': self._getObjectIdFromString(todoId)}, {'$set': {'entity': entity.dataExport()}})
 
     def getUserTodosHistory(self, userId):
         return self.user_todos_history_collection.getUserTodos(userId)

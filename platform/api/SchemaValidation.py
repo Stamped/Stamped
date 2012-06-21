@@ -25,6 +25,8 @@ def parsePhoneNumber(phoneStr):
 _color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
 def validateHexColor(color):
     global _color_re
+    if color is None:
+        return None
     color = color.upper()
     try:
         if _color_re.match(color) is not None:
@@ -35,8 +37,9 @@ def validateHexColor(color):
         raise StampedInputError("Invalid color value.")
 
 def validateURL(url):
+    if url is None:
+        return None
     val = URLValidator(verify_exists=False)
-
     try:
         val(url)
     except ValidationError, e:
@@ -74,6 +77,8 @@ def validateViewport(string):
     raise StampedInputError("Invalid viewport: %s" % string)
 
 def validateCategory(category):
+    if category is None:
+        return None
     try:
         category = category.lower()
         assert(category in Entity.categories)
@@ -83,6 +88,8 @@ def validateCategory(category):
         raise StampedInputError("Invalid category: %s" % category)
 
 def validateSubcategory(subcategory):
+    if subcategory is None:
+        return None
     try:
         subcategory = subcategory.lower()
         assert(subcategory in Entity.subcategories)
@@ -94,6 +101,8 @@ def validateSubcategory(subcategory):
 _screen_name_re = re.compile("^[\w-]{1,20}$", re.IGNORECASE)
 def validateScreenName(screen_name):
     global _screen_name_re
+    if screen_name is None:
+        return None
     try:
         if _screen_name_re.match(screen_name) and isinstance(screen_name, basestring):
             return screen_name

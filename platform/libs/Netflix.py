@@ -9,8 +9,8 @@ import httplib
 import json
 import utils
 import logs
+from errors import *
 
-from errors             import StampedHTTPError
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 
@@ -126,18 +126,23 @@ class Netflix(object):
         if response.status < 300:
             return json.loads(response.read())
         else:
-            responseData = response.read()
-            failData = json.loads(responseData)['status']
             logs.info('Failed with status code %d' % response.status)
+            responseData = response.read()
             try:
-                msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
-                     (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code']
-                status_code = failData['status_code']
+                failData = json.loads(responseData)['status']
+                status = failData['status_code']
+                subcode = failData.get('sub_code', None)
+                message = failData['message']
             except:
-                msg = 'Netflix returned a failure response: %s' % responseData
-                status_code = response.status
-            finally:
-                raise StampedHTTPError(msg, status_code)
+                raise StampedThirdPartyError("Error parsing Netflix error response")
+
+            # For the full list of possible status codes, see: http://developer.netflix.com/docs/HTTP_Status_Codes
+            if status == 401:
+                raise StampedThirdPartyInvalidCredentialsError(message)
+            elif status == 412 and subcode == 710:
+                return True
+            else:
+                return StampedThirdPartyError(message)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
@@ -147,7 +152,7 @@ class Netflix(object):
 
     def __delete(self, service, user_id=None, token=None, **parameters):
         return self.__http('DELETE', service, user_id, token, **parameters)
-
+    
     def __asList(self, elmt):
         if isinstance(elmt, list):
             return elmt
@@ -312,15 +317,18 @@ class Netflix(object):
             ratings.append( ( self._getFromLinks(self.__asList(x['link']), 'rel', 'catalog/title', 'href') , x['user_rating']) )
         return ratings
 
-    def getLoginUrl(self, authUserId):
+    def getLoginUrl(self, authUserId, netflixAddId=None):
         #request the oauth token and secret
         token_info = self.__get('oauth/request_token')
         token = oauth.OAuthToken(
             token_info['oauth_token'].encode('ascii'),
             token_info['oauth_token_secret'].encode('ascii'),
         )
-        token.set_callback(utils.getDomain() + 'account/linked/netflix/login_callback.json?secret=%s&stamped_oauth_token=%s'
-                % (token_info['oauth_token_secret'].encode('ascii'), authUserId))
+        callback_url = utils.getDomain() + ('account/linked/netflix/login_callback.json?secret=%s&stamped_oauth_token=%s' %
+                                             (token_info['oauth_token_secret'].encode('ascii'), authUserId))
+        if netflixAddId is not None:
+            callback_url += "&netflix_add_id=%s" % netflixAddId
+        token.set_callback(callback_url)
 
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url = 'https://api-user.netflix.com/oauth/login',
@@ -354,20 +362,21 @@ def globalNetflix():
     
     return __globalNetflix
 
-USER_ID = 'T1OACpnytwsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-'
-OAUTH_TOKEN = 'BQAJAAEDEHC_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0'
-OAUTH_TOKEN_SECRET = '8wZ4kQGSZGkj'
+USER_ID = 'BQAJAAEDEBt1T1psKyjyA2IphhT34icw3Nwze3KAkc232VbNA7apgZuLYhrDaHkY2dTHbhLCE1aBH2mxmhKYIbgy9mJZmHdy'
+OAUTH_TOKEN = 'BQAJAAEDED8KJJJDY_Qw_il_VdQFVFUw9r1bQHG5UauU1DMV0mSwjtr1K0-gDtWO0MoS-FF8l5tcDrfZXUEdf8T5hYMglERE'
+OAUTH_TOKEN_SECRET = 'QGFPRGVgpjPF'
 
 GHOSTBUSTERS2_ID = 'http://api-public.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api-public.netflix.com/catalog/titles/movies/1181532'
 INCEPTION_ID = 'http://api-public.netflix.com/catalog/titles/movies/70131314'
+ARRESTED_DEV_ID = "http://api.netflix.com/catalog/titles/series/70140358"
 
-def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=BIGLEB_ID, **params):
+def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKEN_SECRET, netflix_id=ARRESTED_DEV_ID, **params):
     from pprint import pprint
     netflix = Netflix()
 
     netflix_id = BIGLEB_ID
-    title = 'ghostbusters'
+    title = 'arrested development'
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
 
@@ -383,8 +392,8 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'searchTitles'
-    params['title'] = 'ghostbust'
+    methods = 'addToQueue'
+    params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

@@ -446,7 +446,9 @@
             .profile-header-post {
                 position: relative;
                 z-index: 54;
+                width:  100%;
                 height:  16px;
+                background: #fff;
                 
                 .box-shadow(0, -3px, 3px, 0, @shadow);
                 
@@ -624,7 +626,7 @@ body.app {
     .stamp-gallery-view-map {
         float: right;
         
-        a {
+        /*a {
             //display: block;
             //-moz-box-align: center;
             //-webkit-box-align: center;
@@ -653,7 +655,7 @@ body.app {
                     background-position: -82px 0;
                 }
             }
-        }
+        }*/
     }
     
     .expanded {
@@ -1600,6 +1602,127 @@ body.sdetail_popup {
         #main-content {
             display: none;
             //visibility: hidden !important;
+        }
+    }
+}
+
+@-webkit-keyframes spin {  
+from {  
+    -webkit-transform: rotate(0deg);  
+}  
+to {  
+    -webkit-transform: rotate(360deg);  
+    }  
+}  
+
+@-webkit-keyframes map-profile-inner-bounce {
+    0%   { -webkit-transform: perspective(600px) translate(0, 0); }
+    50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
+    100% { -webkit-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+}
+
+@-webkit-keyframes map-profile-inner-shadow-bounce {
+    0%   { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
+    50%  { -webkit-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
+    100% { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
+}
+
+a.map-profile-link {
+    font: bold 12pt "Helvetica", "Arial", sans-serif;
+    color: #999;
+    display: inline-block;
+    min-width: 10em;
+    
+    .map-profile-icon-wrapper {
+        display: inline-block;
+        position: relative;
+        
+        width:  58px;
+        height: 27px;
+        
+        border: 2px solid transparent;
+        .rounded(2px);
+        
+        .map-profile-icon {
+            background: url(/assets/img/map_profile_sprite.png) no-repeat;
+            
+            width:  58px;
+            height: 27px;
+            .rounded(2px);
+            
+            .inner, .inner-shadow {
+                position: absolute;
+                background: url(/assets/img/map_profile_sprite.png) no-repeat;
+                width:  58px;
+                height: 33px;
+                top: -6px;
+                
+                //.transition-transform(.3s, easeOutCubic);
+            }
+        }
+    }
+    
+    .desc {
+        position: relative;
+        top: -8px;
+    }
+    
+    .profile-icon {
+        margin-right: .75em;
+        
+        .map-profile-icon {
+            background-position: 0 -41px;
+            
+            .inner {
+                background-position: -60px -35px;
+            }
+            
+            .inner-shadow {
+                background-position: -120px -35px;
+            }
+        }
+    }
+    
+    .map-icon {
+        margin-left: .75em;
+        
+        .map-profile-icon {
+            background-position: 0 -6px;
+            
+            .inner {
+                background-position: -60px 0;
+            }
+            
+            .inner-shadow {
+                background-position: -120px 0;
+            }
+        }
+    }
+    
+    &:hover {
+        cursor: pointer;
+        text-decoration: none !important;
+        
+        .map-profile-icon-wrapper {
+            .map-profile-icon {
+                @duration: .6s;
+                @timing: easeInOutCubic;
+                
+                .inner {
+                    // TODO: tie this animation start to hover but
+                    -webkit-animation-name: map-profile-inner-bounce;
+                    -webkit-animation-iteration-count: 1;
+                    -webkit-animation-timing-function: @timing;
+                    -webkit-animation-duration: @duration;
+                }
+                
+                .inner-shadow {
+                    -webkit-animation-name: map-profile-inner-shadow-bounce;
+                    -webkit-animation-iteration-count: 1;
+                    -webkit-animation-timing-function: @timing;
+                    -webkit-animation-duration: @duration;
+                }
+            }
         }
     }
 }

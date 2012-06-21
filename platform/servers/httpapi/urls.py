@@ -87,7 +87,6 @@ urlpatterns = patterns('',
     (r'v0/account/linked/netflix/update.json',              'v0.functions.linked.linked_accounts'),
     (r'v0/account/linked/netflix/remove.json',              'v0.functions.linked.removeNetflix'),
     (r'v0/account/linked/netflix/add_instant.json',         'v0.functions.linked.addToNetflixInstant'),
-    (r'v0/account/linked/netflix/remove_instant.json',      'v0.functions.linked.removeFromNetflixInstant'),
     (r'v0/account/linked/instagram/login_callback.json',    'v0.functions.linked.instagramLogin'),
 
     ### USERS

@@ -164,9 +164,9 @@ footer {
         height:    100%;
         
         .stamp-map-nav-wrapper {
+            background: transparent;
             position: relative;
             height: 100%;
-            background: transparent;
             
             .stamp-map-nav {
                 background: #fff;
@@ -177,6 +177,10 @@ footer {
                 .nav-header {
                     padding: @map_nav_space (@map_nav_space / 4 - 2px) 0 @map_nav_space;
                     background: #fff;
+                    .box-shadow(0, 3px, 3px, 0, @shadow);
+                    
+                    position: relative;
+                    z-index: 26;
                     
                     .profile-image-small {
                         float: left;
@@ -208,31 +212,33 @@ footer {
                         float: right;
                         text-align: right;
                         
-                        a {
-                            margin:  0;
+                        a.arrow {
+                            background: url(/assets/img/map-collapselist.png) no-repeat;
+                            
+                            display: block;
+                            width:  15px;
+                            height: 15px;
+                            
+                            margin:  0 0 4px;
                             padding: 0;
-                            line-height: 80%;
-                            
-                            &:hover, &:active {
-                                cursor: pointer;
-                                color: #fff;
-                            }
-                            
-                            &:hover {
-                                background-color: #999;
-                            }
-                            
-                            &:active {
-                                background-color: #666;
-                            }
                         }
                         
                         a.up-arrow {
-                            display: inline;
+                            display: block;
+                            background-position: 0 0;
+                            
+                            &:hover {
+                                background-position: -17px 0;
+                            }
                         }
                         
                         a.down-arrow {
                             display: none;
+                            background-position: -34px 0;
+                            
+                            &:hover {
+                                background-position: -51px 0;
+                            }
                         }
                     }
                 }
@@ -244,7 +250,7 @@ footer {
                     
                     padding: (@map_nav_space / 4) 0;
                     position: relative;
-                    top: 8px;
+                    z-index: 25;
                     
                     .transition(all, 0.5s, easeOutCubic);
                     
@@ -281,31 +287,25 @@ footer {
                     &:focus {
                         outline: none;
                     }
+                    
+                    .jspVerticalBar {
+                        padding-top:    8px;
+                        //padding-bottom: 48px;
+                    }
                 }
             }
             
-            .gradient-wrapper {
-                background: #fff;
-                pointer-events: auto;
-            }
-            
-            .top-user-gradient {
-                .box-shadow(0, 3px, 3px, 0, @shadow);
-            }
-            
-            .bottom-user-gradient {
-                .box-shadow(0, -3px, 3px, 0, @shadow);
-            }
-            
             .nav-footer, .nav-dummy-footer {
+                .box-shadow(0, -3px, 3px, 0, @shadow);
+                
+                position: relative;
+                z-index: 26;
+                
                 background: #fff;
                 width: 100%;
                 
                 .content {
                     padding: (@map_nav_space / 2) @map_nav_space;
-                }
-                
-                a.back {
                 }
             }
             
@@ -329,11 +329,11 @@ footer {
                 .nav-header {
                     .list-view-nav {
                         a.up-arrow {
-                            display: none   !important;
+                            display: none  !important;
                         }
                         
                         a.down-arrow {
-                            display: inline !important;
+                            display: block !important;
                         }
                     }
                 }

@@ -450,7 +450,7 @@
             }
             
             var nav_header_height = $stamp_map_nav_wrapper.find('.nav-header').height();
-            var list_height       = (height - footer_height - 64 - nav_header_height);
+            var list_height       = (height - footer_height - 24 - nav_header_height);
             var list_height_px    = list_height + "px";
             
             list_height_expanded_px = list_height_px;
@@ -586,8 +586,9 @@
                 }
             });
             
-            var duration = 100;
-            var done = 0;
+            var duration = 200;
+            var easing   = 'easeOutCubic';
+            var done     = 0;
              
             var complete = function() {
                 if (++done >= 2) {
@@ -597,9 +598,26 @@
                 }
             };
             
-            // TODO: animate only height and opacity
-            $to_show.stop(true, false).show(duration, 'easeOutCubic', complete);
-            $to_hide.stop(true, false).hide(duration, 'easeOutCubic', complete);
+            // animate width, height, and opacity
+            //$to_show.stop(true, false).show(duration, easing, complete);
+            //$to_hide.stop(true, false).hide(duration, easing, complete);
+            
+            // animate height and opacity
+            $to_show.stop(true, false).slideDown(duration, easing, complete).animate({
+                'opacity' : 1
+            }, {
+                duration : duration, 
+                easing   : easing, 
+                queue    : false
+            });
+            
+            $to_hide.stop(true, false).slideUp(duration, easing, complete).animate({
+                'opacity' : 0
+            }, {
+                duration : duration, 
+                easing   : easing, 
+                queue    : false
+            });
         };
         
         

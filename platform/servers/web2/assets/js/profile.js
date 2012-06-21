@@ -18,6 +18,7 @@ var g_update_stamps = null;
         
         var client                  = new StampedClient();
         var screen_name             = STAMPED_PRELOAD.user.screen_name;
+        var user_id                 = STAMPED_PRELOAD.user.user_id;
         var $body                   = $('body');
         var selected                = 'selected';
         var selected_sel            = '.' + selected;
@@ -577,7 +578,8 @@ var g_update_stamps = null;
                     var href  = $link.attr('href');
                     
                     href = href.replace('http://www.stamped.com', '');
-                    href = href + "?" + new Date().getTime();
+                    href = href + "?ajax=true";
+                    //href = href + "&" + new Date().getTime();
                     
                     $(sdetail_wrapper_sel).remove();
                     var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
@@ -879,22 +881,41 @@ var g_update_stamps = null;
         
         $('.stamp-gallery-view-map a').click(function(event) {
             event.preventDefault();
-            var $this = $(this);
             
-            // TODO
-            console.debug("TODO: stamp-gallery-view-map functionality");
-            
-            if (History && History.enabled) {
-                //var params_str = get_custom_params_string(params);
-                //History.pushState(params, title, params_str);
-            } 
-            
-            var url = get_custom_url({}, "/" + screen_name + "/map");
+            var url   = get_custom_url({}, "/" + screen_name + "/map");
             var title = "Stamped - " + screen_name + " - map";
             
             window.location = url;
             return false;
         });
+        
+        /*
+        $('a.map-profile-link').hover(function() {
+            var $this   = $(this);
+            var $inner  = $this.find('.inner');
+            var $shadow = $this.find('.inner-shadow');
+            
+            $inner.stop(true, false);
+            $shadow.stop(true, false);
+            
+            var animate = function() {
+                $inner.animate({
+                    top : -18px
+                }, {
+                    duration : 200, 
+                    specialEasing : { 
+                        width  : 'ease-out', 
+                        height : 'ease-out'
+                    }, 
+                    complete : function() {
+                        animate();
+                    }
+                });
+            };
+        }, function() {
+            var $this = $(this);
+            
+        });*/
         
         
         // ---------------------------------------------------------------------
@@ -1203,7 +1224,9 @@ var g_update_stamps = null;
             History.Adapter.bind(window, 'statechange', function() {
                 var State    = History.getState();
                 var category = 'default';
-                var custom_params = {}
+                var custom_params = {
+                    'ajax' : true
+                };
                 
                 for (var key in State.data) {
                     if (State.data.hasOwnProperty(key)) {
@@ -1216,6 +1239,7 @@ var g_update_stamps = null;
                 }
                 
                 console.debug("NEW CATEGORY: " + category);
+                console.debug("user_id: " + user_id);
                 
                 History.log(State.data, State.title, State.url);
                 var orig_category = category;
@@ -1300,6 +1324,7 @@ var g_update_stamps = null;
                         return;
                     }
                     
+                    // TODO: optimize!!
                     var $elements = $target.find('.stamp-gallery-item').remove();
                     
                     //$('.stamp-gallery-nav').show();
@@ -1309,7 +1334,8 @@ var g_update_stamps = null;
                     if (typeof(href) === 'undefined') {
                         href = "#";
                     }
-                    console.debug("NEW HREF: " + href);
+                    //log("NEW HREF: " + href);
+                    //console.debug("NEW HREF: " + href);
                     
                     $(infinite_scroll_next_selector).attr('href', href);
                     

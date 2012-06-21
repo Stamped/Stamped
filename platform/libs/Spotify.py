@@ -18,7 +18,6 @@ try:
     import logs, urllib
     from RateLimiter            import RateLimiter, RateException
     from urllib2                import HTTPError
-    from errors                 import StampedHTTPError
     from LRUCache               import lru_cache
     from CachedFunction         import cachedFn
     
@@ -53,7 +52,8 @@ class Spotify(object):
                 logs.info( url )
                 result = urllib.urlopen(url).read()
             except HTTPError as e:
-                raise StampedHTTPError('spotify threw an %s exception' % e.code,e.code,e.message)
+                logs.warning("Spotify threw an exception (%s): %s" % (e.code, e.message))
+                raise
         
         return json.loads(result)
     

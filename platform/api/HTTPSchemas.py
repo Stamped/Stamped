@@ -289,6 +289,9 @@ class HTTPActionSource(Schema):
         self.completion_endpoint    = COMPLETION_ENDPOINT
         self.completion_data        = HTTPActionCompletionData().dataImport(kwargs, overflow=True).dataExport()
 
+    def setIcon(self, filename, client=None):
+        self.source_data['icon'] = _getIconURL(filename, client)
+
 class HTTPAction(Schema):
     @classmethod
     def setSchema(cls):
@@ -366,6 +369,13 @@ class HTTPAccountNew(Schema):
             data['phone'] = phone
 
         return Account().dataImport(data, overflow=True)
+
+class HTTPAccountUpgradeForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('email',                            basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True)
+
 
 class HTTPFacebookAccountNew(Schema):
     @classmethod
@@ -646,6 +656,7 @@ class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamped_oauth_token',              basestring)
+        cls.addProperty('netflix_add_id',                   basestring)
         cls.addProperty('oauth_token',                      basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('oauth_verifier',                   basestring)
@@ -872,10 +883,11 @@ class HTTPEndpointResponse(Schema):
     def setSchema(cls):
         cls.addNestedProperty('action',                     HTTPAction)
 
-    def setAction(self, actionType, name, sources, **kwargs):
+    def setAction(self, actionType, name, sources):
         if len(sources) > 0:
             action          = HTTPAction()
             action.type     = actionType
+            action.name     = name
             action.sources  = sources
 
             self.action = action
@@ -1312,7 +1324,7 @@ class HTTPEntity(Schema):
                 source.source_id        = entity.sources.netflix_id
                 source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = {'netflix_id': entity.sources.netflix_id}
-                source.icon             = _getIconURL('src_itunes', client=client)
+                source.icon             = _getIconURL('src_netflix', client=client)
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
@@ -1978,6 +1990,11 @@ class HTTPEntitySearchResultsItem(Schema):
         self.subtitle           = entity.subtitle
         self.category           = entity.category
 
+        if entity.kind == 'place':
+            address = entity.formatAddress()
+            if address is not None:
+                self.subtitle = address
+
         # Build icon
         if entity.isType('restaurant'):
             self.icon = _getIconURL('search_restaurant')
@@ -2005,7 +2022,7 @@ class HTTPEntitySearchResultsItem(Schema):
             self.icon = _getIconURL('search_other')
 
         if isinstance(distance, float) and distance >= 0:
-            self.distance       = distance
+            self.distance = distance
 
         assert self.search_id is not None
 
@@ -2044,6 +2061,18 @@ class HTTPActionComplete(Schema):
 class HTTPTimeSlice(Schema):
     @classmethod
     def setSchema(cls):
+
+        def validateScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'friends', 'popular', 'todo', 'user', 'credit']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
         # Paging
         cls.addProperty('before',                           int)
         cls.addProperty('limit',                            int)
@@ -2056,7 +2085,7 @@ class HTTPTimeSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring, required=True) # me, inbox, friends, fof, popular ### TODO: Add cast
+        cls.addProperty('scope',                            basestring, cast=validateScope, required=True) 
 
     def exportTimeSlice(self):
         data                = self.dataExport()
@@ -2088,53 +2117,21 @@ class HTTPTodoTimeSlice(HTTPTimeSlice):
         HTTPTimeSlice.__init__(self)
         self.scope = 'todo'
 
-class HTTPWebTimeSlice(Schema):
-    @classmethod
-    def setSchema(cls):
-        # Paging
-        cls.addProperty('before',                           int)
-        cls.addProperty('limit',                            int)
-        cls.addProperty('offset',                           int)
-
-        # Filtering
-        cls.addProperty('category',                         basestring, cast=validateCategory)
-        cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
-        cls.addProperty('viewport',                         basestring, cast=validateViewport)
-
-        # Scope
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
-    
-    def exportTimeSlice(self):
-        data                = self.dataExport()
-        beforeData          = data.pop('before', None)
-        viewportData        = data.pop('viewport', None)
-        categoryData        = data.pop('category', None)
-        subcategoryData     = data.pop('subcategory', None)
-
-        slc                 = TimeSlice()
-        slc.dataImport(data)
-
-        if self.before is not None:
-            slc.before          = datetime.utcfromtimestamp(int(self.before))
-
-        if self.subcategory is not None:
-            slc.kinds = list(Entity.mapSubcategoryToKinds(self.subcategory))
-            slc.types = list(Entity.mapSubcategoryToTypes(self.subcategory))
-        elif self.category is not None:
-            slc.kinds = list(Entity.mapCategoryToKinds(self.category))
-            slc.types = list(Entity.mapCategoryToTypes(self.category))
-
-        if self.viewport is not None:
-            slc.viewport = _convertViewport(self.viewport)
-
-        return slc
-
-
 class HTTPSearchSlice(Schema):
     @classmethod
     def setSchema(cls):
+
+        def validateScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'friends', 'popular', 'todo', 'user', 'credit']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
         # Paging
         cls.addProperty('limit',                            int) # Max 50
 
@@ -2145,7 +2142,7 @@ class HTTPSearchSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
+        cls.addProperty('scope',                            basestring, cast=validateScope)
         cls.addProperty('query',                            basestring, required=True)
 
     def exportSearchSlice(self):
@@ -2173,6 +2170,18 @@ class HTTPSearchSlice(Schema):
 class HTTPRelevanceSlice(Schema):
     @classmethod
     def setSchema(cls):
+
+        def validateScope(scope):
+            if scope is None:
+                return None
+            scope = scope.lower()
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'friends', 'popular', 'todo', 'user', 'credit']):
+                return scope 
+            raise StampedInputError("Invalid scope: %s" % scope)
+
         # Filtering
         cls.addProperty('category',                         basestring, cast=validateCategory)
         cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
@@ -2180,7 +2189,7 @@ class HTTPRelevanceSlice(Schema):
 
         # Scope
         cls.addProperty('user_id',                          basestring)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: add cast
+        cls.addProperty('scope',                            basestring, cast=validateScope)
 
     def exportRelevanceSlice(self):
         data                = self.dataExport()
@@ -2258,7 +2267,10 @@ class HTTPGuideRequest(Schema):
             if scope is None:
                 return None
             scope = scope.lower()
-            if scope in set(['me', 'inbox', 'everyone']):
+            ### TEMP
+            if scope == 'everyone':
+                scope = 'popular'
+            if scope in set(['me', 'inbox', 'popular']):
                 return scope 
             raise StampedInputError("Invalid scope: %s" % scope)
 
@@ -2800,6 +2812,7 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
+            logs.info('### formatStampObjects  offset: %s' % offset)
             if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
@@ -3057,25 +3070,27 @@ class HTTPActivity(Schema):
 
             if self.source is not None:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to ###%(objects)s on %(source)s.',
-                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist on %(source)s.',
-                    'download'  : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'reserve'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
-                    'buy'       : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'watch'     : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'tickets'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
+                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue on %(source)s.',
                     }
             else:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to ###%(objects)s.',
-                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist.',
-                    'download'  : '%(subjects)s checked out ###%(objects)s.',
-                    'reserve'   : '%(subjects)s checked out ###%(objects)s.',
-                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
-                    'buy'       : '%(subjects)s checked out ###%(objects)s.',
-                    'watch'     : '%(subjects)s checked out ###%(objects)s.',
-                    'tickets'   : '%(subjects)s checked out ###%(objects)s.',
+                    'listen'    : '%(subjects)s listened to %(objects)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
+                    'download'  : '%(subjects)s checked out %(objects)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s.',
+                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue.',
                     }
 
 #            actionMapping = {
@@ -3095,10 +3110,8 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
-            verbs = re.sub("###", "", verbs)
+            offset = verbs.index('%(objects)s') - len('%(subjects)s') + len(subjects)
             assert(offset < len(verbs))
-
 
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
@@ -3113,6 +3126,21 @@ class HTTPActivity(Schema):
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+
+            ### TEMP ICON WORK
+            if self.source in set(['rdio', 'opentable', 'itunes', 'fandango', 'amazon']):
+                if self.source == 'itunes' and self.verb[7:] == 'download':
+                    self.icon = _getIconURL('news_appstore')
+                else:
+                    self.icon = _getIconURL('news_%s' % self.source)
+            elif self.verb[7:] in set(['watch', 'playlist', 'menu', 'listen']):
+                self.icon = _getIconURL('news_%s' % self.verb[7:])
+            elif self.verb[7:] == 'add_to_instant_queue':
+                self.icon = _getIconURL('news_queue')
+
+            ### TEMP HACK TO SET IMAGE TO ICON - NEED TO GET ASSETS
+            if len(self.subjects) > 1:
+                self.image = self.icon
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

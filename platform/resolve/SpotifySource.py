@@ -63,7 +63,8 @@ class _SpotifyObject(object):
             return self.__fullData
         if self.__basicData:
             return self.__basicData
-        # Lazy property call that issues lookup.
+        # Lazy property call that issues lookup. This could catch LookupRequiredError but we're not catching it here
+        # because if you're creating a capped-lookup-call object without any initial data you're doing it wrong.
         return self.full_data
 
     @lazyProperty
@@ -71,6 +72,7 @@ class _SpotifyObject(object):
         if self.__fullData:
             return self.__fullData
         # Sort of hacky -- calls a function implemented by ResolverObject.
+        # Note that full_data does not catch the LookupRequiredError, so any users of it need to.
         self.countLookupCall('full data')
         self.__fullData = self.lookup_data()
         return self.__fullData
@@ -122,7 +124,10 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
 
     @lazyProperty
     def albums(self):
-        album_list = self.full_data['albums']
+        try:
+            album_list = self.full_data['albums']
+        except LookupRequiredError:
+            return []
         return [
             {
                 'name'  : entry['album']['name'],
@@ -197,7 +202,10 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
 
     @lazyProperty
     def tracks(self):
-        track_list = self.full_data['tracks']
+        try:
+            track_list = self.full_data['tracks']
+        except LookupRequiredError:
+            return []
         return [ 
             { 
                 'name'  : track['name'], 

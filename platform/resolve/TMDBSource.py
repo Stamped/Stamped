@@ -72,6 +72,9 @@ class _TMDBObject(object):
         if self.__full_data:
             return self.__full_data
             # Sort of hacky -- calls a function implemented by ResolverObject.
+
+        # We don't catch the LookupRequiredError here because if you are initializing a capped-lookup object without
+        # passing in initial data, you are doing it wrong.
         self.countLookupCall('full data')
         self.__full_data = self.lookup_data()
         return self.__full_data
@@ -118,16 +121,16 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def _castsRaw(self):
-        self.countLookupCall('full data')
-        return self.tmdb.movie_casts(self.key)
+        try:
+            self.countLookupCall('cast')
+            return self.tmdb.movie_casts(self.key)
+        except LookupRequiredError:
+            return []
 
     @lazyProperty
     def name(self):
-        try:
-            return self.data['title']
-        except Exception:
-            raise
-    
+        return self.data['title']
+
     @lazyProperty
     def popularity(self):
         try:
@@ -140,6 +143,8 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
         try:
             return self.full_data['imdb_id']
         except KeyError:
+            return None
+        except LookupRequiredError:
             return None
 
     @lazyProperty
@@ -184,16 +189,22 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def length(self):
-        if 'runtime' not in self.full_data:
-            return -1  # TODO: Would None be more appropriate here?
-        return self.full_data['runtime'] * 60
+        try:
+            if 'runtime' not in self.full_data:
+                return -1  # TODO: Would None be more appropriate here?
+            return self.full_data['runtime'] * 60
+        except LookupRequiredError:
+            return None
 
     @lazyProperty 
     def genres(self):
-        if 'genres' not in self.full_data:
-            logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
+        try:
+            if 'genres' not in self.full_data:
+                logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
+                return []
+            return [ entry['name'] for entry in self.full_data['genres'] ]
+        except LookupRequiredError:
             return []
-        return [ entry['name'] for entry in self.full_data['genres'] ]
 
 
 class TMDBSearchAll(ResolverProxy, ResolverSearchAll):

@@ -474,7 +474,9 @@ footer,
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post {
   position: relative;
   z-index: 54;
+  width: 100%;
   height: 16px;
+  background: #fff;
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -642,23 +644,37 @@ body.app .stamp-count-app {
 }
 .stamp-gallery-header .stamp-gallery-view-map {
   float: right;
-}
-.stamp-gallery-header .stamp-gallery-view-map a .icon {
-  background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
-  display: inline-block;
-  width: 39px;
-  height: 33px;
-}
-.stamp-gallery-header .stamp-gallery-view-map a:hover,
-.stamp-gallery-header .stamp-gallery-view-map a:active {
-  color: #23a2f9 !important;
-  text-decoration: none !important;
-}
-.stamp-gallery-header .stamp-gallery-view-map a:hover .icon {
-  background-position: -41px 0;
-}
-.stamp-gallery-header .stamp-gallery-view-map a:active .icon {
-  background-position: -82px 0;
+  /*a {
+            //display: block;
+            //-moz-box-align: center;
+            //-webkit-box-align: center;
+            
+            .icon {
+                background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
+                display: inline-block;
+                
+                width:  39px;
+                height: 33px;
+            }
+            
+            &:hover, &:active {
+                color: #23a2f9 !important;
+                text-decoration: none !important;
+            }
+            
+            &:hover {
+                .icon {
+                    background-position: -41px 0;
+                }
+            }
+            
+            &:active {
+                .icon {
+                    background-position: -82px 0;
+                }
+            }
+        }*/
+
 }
 .stamp-gallery-header .expanded {
   position: absolute;
@@ -1601,4 +1617,119 @@ body.sdetail_popup #main-page-content-body {
 }
 body.sdetail_popup #main-page-content-body #main-content {
   display: none;
+}
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes map-profile-inner-bounce {
+  0% {
+    -webkit-transform: perspective(600px) translate(0, 0);
+  }
+  50% {
+    -webkit-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
+  }
+  100% {
+    -webkit-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+  }
+}
+@-webkit-keyframes map-profile-inner-shadow-bounce {
+  0% {
+    -webkit-transform: perspective(600px) scale(1, 1);
+    opacity: 1.0;
+  }
+  50% {
+    -webkit-transform: perspective(600px) scale(0.8, 0.8);
+    opacity: .75;
+  }
+  100% {
+    -webkit-transform: perspective(600px) scale(1, 1);
+    opacity: 1.0;
+  }
+}
+a.map-profile-link {
+  font: bold 12pt "Helvetica", "Arial", sans-serif;
+  color: #999;
+  display: inline-block;
+  min-width: 10em;
+}
+a.map-profile-link .map-profile-icon-wrapper {
+  display: inline-block;
+  position: relative;
+  width: 58px;
+  height: 27px;
+  border: 2px solid transparent;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+a.map-profile-link .map-profile-icon-wrapper .map-profile-icon {
+  background: url(/assets/img/map_profile_sprite.png) no-repeat;
+  width: 58px;
+  height: 27px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+a.map-profile-link .map-profile-icon-wrapper .map-profile-icon .inner,
+a.map-profile-link .map-profile-icon-wrapper .map-profile-icon .inner-shadow {
+  position: absolute;
+  background: url(/assets/img/map_profile_sprite.png) no-repeat;
+  width: 58px;
+  height: 33px;
+  top: -6px;
+}
+a.map-profile-link .desc {
+  position: relative;
+  top: -8px;
+}
+a.map-profile-link .profile-icon {
+  margin-right: .75em;
+}
+a.map-profile-link .profile-icon .map-profile-icon {
+  background-position: 0 -41px;
+}
+a.map-profile-link .profile-icon .map-profile-icon .inner {
+  background-position: -60px -35px;
+}
+a.map-profile-link .profile-icon .map-profile-icon .inner-shadow {
+  background-position: -120px -35px;
+}
+a.map-profile-link .map-icon {
+  margin-left: .75em;
+}
+a.map-profile-link .map-icon .map-profile-icon {
+  background-position: 0 -6px;
+}
+a.map-profile-link .map-icon .map-profile-icon .inner {
+  background-position: -60px 0;
+}
+a.map-profile-link .map-icon .map-profile-icon .inner-shadow {
+  background-position: -120px 0;
+}
+a.map-profile-link:hover {
+  cursor: pointer;
+  text-decoration: none !important;
+}
+a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner {
+  -webkit-animation-name: map-profile-inner-bounce;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-timing-function: easeInOutCubic;
+  -webkit-animation-duration: 0.6s;
+}
+a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shadow {
+  -webkit-animation-name: map-profile-inner-shadow-bounce;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-timing-function: easeInOutCubic;
+  -webkit-animation-duration: 0.6s;
 }
