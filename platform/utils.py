@@ -809,6 +809,19 @@ def runMongoCommand(mongo_cmd, db='stamped', verbose=False):
     except ValueError:
         return ret[0]
 
+def tryGetObjectId(string):
+    """
+        Attempts to parse the given string as a valid bson ObjectId (e.g., the 
+        default underlying type for MongoDB _id's). Returns a valid ObjectId 
+        instance or None if the given string could not be converted to a valid 
+        ObjectId.
+    """
+    
+    try:
+        return bson.objectid.ObjectId(str(string))
+    except Exception as e:
+        return None
+
 def generateUid():
     return str(bson.objectid.ObjectId())
 

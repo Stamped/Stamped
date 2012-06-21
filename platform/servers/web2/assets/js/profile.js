@@ -18,6 +18,7 @@ var g_update_stamps = null;
         
         var client                  = new StampedClient();
         var screen_name             = STAMPED_PRELOAD.user.screen_name;
+        var user_id                 = STAMPED_PRELOAD.user.user_id;
         var $body                   = $('body');
         var selected                = 'selected';
         var selected_sel            = '.' + selected;
@@ -578,7 +579,7 @@ var g_update_stamps = null;
                     
                     href = href.replace('http://www.stamped.com', '');
                     href = href + "?ajax=true";
-                    href = href + "&" + new Date().getTime();
+                    //href = href + "&" + new Date().getTime();
                     
                     $(sdetail_wrapper_sel).remove();
                     var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
@@ -1223,7 +1224,9 @@ var g_update_stamps = null;
             History.Adapter.bind(window, 'statechange', function() {
                 var State    = History.getState();
                 var category = 'default';
-                var custom_params = {}
+                var custom_params = {
+                    'ajax' : true
+                };
                 
                 for (var key in State.data) {
                     if (State.data.hasOwnProperty(key)) {
@@ -1236,6 +1239,7 @@ var g_update_stamps = null;
                 }
                 
                 console.debug("NEW CATEGORY: " + category);
+                console.debug("user_id: " + user_id);
                 
                 History.log(State.data, State.title, State.url);
                 var orig_category = category;
@@ -1320,6 +1324,7 @@ var g_update_stamps = null;
                         return;
                     }
                     
+                    // TODO: optimize!!
                     var $elements = $target.find('.stamp-gallery-item').remove();
                     
                     //$('.stamp-gallery-nav').show();
@@ -1329,7 +1334,8 @@ var g_update_stamps = null;
                     if (typeof(href) === 'undefined') {
                         href = "#";
                     }
-                    console.debug("NEW HREF: " + href);
+                    //log("NEW HREF: " + href);
+                    //console.debug("NEW HREF: " + href);
                     
                     $(infinite_scroll_next_selector).attr('href', href);
                     
