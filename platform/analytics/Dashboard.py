@@ -8,7 +8,7 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, pprint, sys, argparse
+
 import keys.aws, logs, utils
 
 from logsQuery                          import logsQuery
