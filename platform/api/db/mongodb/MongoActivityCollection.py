@@ -85,7 +85,7 @@ class MongoActivityCollection(AActivityDB):
         return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
-        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
+        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s kwargs %s' % (verb, kwargs))
 
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
@@ -100,6 +100,8 @@ class MongoActivityCollection(AActivityDB):
         groupRange      = kwargs.pop('groupRange', None)
 
         now             = datetime.utcnow()
+        created         = kwargs.pop('created', now) 
+
         alerts          = []
         sentTo          = set()
 
@@ -123,7 +125,7 @@ class MongoActivityCollection(AActivityDB):
                 activity.body = body
 
             timestamp           = BasicTimestamp()
-            timestamp.created   = now
+            timestamp.created   = created
             timestamp.modified  = now
             activity.timestamp  = timestamp 
 
@@ -187,7 +189,7 @@ class MongoActivityCollection(AActivityDB):
                 alert.activity_id   = activityId
                 alert.user_id       = subject
                 alert.genre         = verb
-                alert.created       = now
+                alert.created       = created
                 alerts.append(alert)
 
         if len(alerts): 
