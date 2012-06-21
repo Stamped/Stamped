@@ -19,6 +19,7 @@ from db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                        import Pool
 from datetime                           import datetime
 from datetime                           import timedelta
+from topStamped                         import getTopStamped
  
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
@@ -66,10 +67,10 @@ while True:
     print "Change: %s%%\n\n" % deltaA
     
     users = todaysUsers()
-    print "Unique users today: %s" % users
+    print "Unique users today: %s\n\n" % users
    
-    
-    #Show me the top stamped overall by vertical
+    print "Most Stamped Today:"
+    getTopStamped(None,str(today().date()))
     
     #Show me the top stamped this week by vertical
     
