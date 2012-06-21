@@ -37,13 +37,13 @@ def today():
 
 def totalStamps(): 
     total = stamp_collection.count()
-    new = stamp_collection.find({'timestamp.created:': {'$gte': today()}}).count()
+    new = stamp_collection.find({'timestamp.created': {'$gte': today()}}).count()
     delta = float(new) / (total - new) *100.0
     return (total,new,delta)
 
 def totalAccounts():
     total = acct_collection.count()
-    new = acct_collection.find({'timestamp.created:': {'$gte': today()}}).count()
+    new = acct_collection.find({'timestamp.created': {'$gte': today()}}).count()
     delta = float(new) / (total - new) *100.0
     return (total,new,delta)
 
