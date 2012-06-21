@@ -1740,6 +1740,11 @@ class StampedAPI(AStampedAPI):
         return stampedby
 
     def updateEntityStatsAsync(self, entityId):
+        entity = self._entityDB.getEntity(entityId)
+        if entity.sources.tombstone_id is not None:
+            # Call async process to update references
+            tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
+
         numStamps = self._stampDB.countStampsForEntity(entityId)
 
         popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
@@ -1912,7 +1917,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -2353,8 +2359,6 @@ class StampedAPI(AStampedAPI):
                 self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
-
-        ### TODO: Update stamp with new entity_id if old one is tombstoned
 
         creditedUserIds = set()
 
@@ -2822,6 +2826,10 @@ class StampedAPI(AStampedAPI):
         if entity.kind == 'place' and entity.coordinates is not None:
             stats.lat           = entity.coordinates.lat
             stats.lng           = entity.coordinates.lng
+
+        if entity.sources.tombstone_id is not None:
+            # Call async process to update references
+            tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
         score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
@@ -3344,7 +3352,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3448,7 +3457,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3520,7 +3530,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3619,7 +3630,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
