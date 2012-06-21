@@ -123,12 +123,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
-            # return login endpoint action
-        else:
-            raise e
+    except StampedThirdPartyInvalidCredentialsError:
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
     if result == None:
         return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
@@ -147,18 +143,4 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     #TODO return an HTTPAction
     return transformOutput(response.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPNetflixId)
-@require_http_methods(["POST"])
-def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
-    try:
-        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            #redirect to sign in
-            raise e
-        else:
-            raise e
-        #TODO throw status codes on error
-    #TODO return an HTTPAction
-    return transformOutput(True)
 
