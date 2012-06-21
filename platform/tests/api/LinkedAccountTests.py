@@ -115,6 +115,71 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
         self.assertEqual(len(linkedAccounts), 0)
 
 
+class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
+
+    def setUp(self):
+        StampedAPILinkedAccountHttpTest.setUp(self)
+        (self.fb_user_token_a, self.fb_user_id_a)     = self._createFacebookTestUser(name='fbusera')
+
+    def tearDown(self):
+        StampedAPILinkedAccountHttpTest.tearDown(self)
+        self._deleteFacebookTestUser(self.fb_user_token_a, self.fb_user_id_a)
+
+    def test_update_facebook_share_settings(self):
+        # add the linked account
+        data = {
+            'service_name'   : 'facebook',
+            'user_id'        : self.fb_user_id_a,
+            'screen_name'    : 'fbusera',
+            'name'           : 'Test User',
+            'token'          : self.fb_user_token_a,
+            }
+        self.addLinkedAccount(self.token, **data)
+
+        # verify that the linked account was properly added
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 1)
+        self.assertEqual(linkedAccounts['facebook']['service_name'], 'facebook')
+
+        # update share settings: enable share stamps on facebook
+        path = "account/linked/update_share_settings.json"
+        data = {
+            "oauth_token"   : self.token['access_token'],
+            'service_name'   : 'facebook',
+            'share_stamps'   : True,
+            }
+        self.handlePOST(path, data)
+
+        # verify that share settings were updated
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_stamps'], True)
+
+        account = self.showAccount(self.token)
+        import pprint
+        pprint.pprint(linkedAccounts)
+
+        print('###')
+        pprint.pprint(account)
+
+#        self.entity = self.createEntity(self.token)
+#        self.stamp = self.createStamp(self.token, self.entity['entity_id'], blurb='ASDF')
+#
+#        import time
+#        time.sleep(10)
+
+#
+#        self.async(lambda: self.showActivity(self.fUserAToken), [
+#            lambda x: self.assertEqual(len(x), 1),
+#            lambda x: self.assertEqual(x[0]['verb'], 'friend_facebook'),
+#            lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.fUserB['user_id']),
+#            ])
+
+
+        # remove the linked account and verify that it has been removed
+        self.removeLinkedAccount(self.token, 'facebook')
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 0)
+
 
 class StampedAPIHttpLinkedAccountUpgrade(AStampedAPIHttpTestCase):
     def setUp(self):

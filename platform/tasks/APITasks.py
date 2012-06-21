@@ -137,6 +137,10 @@ def updateStampStats(*args, **kwargs):
     invoke(updateStampStats.request, *args, **kwargs)
 
 @task(ignore_result=True)
+def postToOpenGraph(*args, **kwargs):
+    invoke(postToOpenGraph.request, *args, **kwargs)
+
+@task(ignore_result=True)
 def buildGuide(*args, **kwargs):
     invoke(buildGuide.request, *args, **kwargs)
 

@@ -891,6 +891,24 @@ class StampedAPI(AStampedAPI):
         return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
+    def updateLinkedAccountShareSettings(self, authUserId, service_name, linkedAccountShareSettings):
+        if service_name not in ['facebook', 'twitter', 'netflix']:
+            logs.warning('Attempted to update share settings of invalid linked account: %s' % service_name)
+            raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
+
+        account = self.getAccount(authUserId)
+        if getattr(account.linked, service_name, None) == None:
+            logs.warning('Could not find linked account to update: %s' % service_name)
+            raise StampedIllegalActionError("There was an error updating share settings")
+
+        linkedAccount = getattr(account.linked, service_name)
+        logs.info('### share_settings: %s' % linkedAccountShareSettings)
+        linkedAccount.share_settings = linkedAccountShareSettings
+
+        self._accountDB.updateLinkedAccount(authUserId, linkedAccount)
+        return True
+
+    @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
         if service_name not in ['facebook', 'twitter', 'netflix']:
             logs.warning('Attempted to remove invalid linked account: %s' % service_name)
@@ -2412,6 +2430,10 @@ class StampedAPI(AStampedAPI):
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id})
+
+
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, stampId, content_id):
         assert imageUrl is not None, "stamp image url unavailable!"
@@ -2831,6 +2853,102 @@ class StampedAPI(AStampedAPI):
         self._stampStatsDB.saveStampStats(stats)
         
         return stats
+
+    # TODO: Move this helper function to a more centralizated location?
+
+    def _kindTypeToOpenGraphType(self, kind, types):
+        if kind == 'place':
+            if 'bar' in types:
+                return 'bar'
+            elif 'restaurant' in types:
+                return 'restaurant'
+            else:
+                return 'place'
+
+        elif kind == 'person':
+            if 'artist' in types:
+                return 'artist'
+
+        elif kind == 'media_collection':
+            if 'tv' in types:
+                return 'tv_show'
+            elif 'album' in types:
+                return 'album'
+
+        elif kind == 'media_item':
+            if 'track' in types:
+                return 'track'
+            elif 'movie' in types:
+                return 'movie'
+            elif 'book' in types:
+                return 'book'
+
+        elif kind == 'software':
+            if 'app' in types:
+                return 'app'
+
+        else:
+            return 'other'
+
+    def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
+        #TODO: fill this with something other than the dummy url
+        if stampId is not None:
+            return "http://static.stamped.com/assets/movies6.html"
+
+
+    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
+        account = self.getAccount(authUserId)
+
+        logs.info('######')
+        import pprint
+        logs.info(pprint.pformat(account))
+
+        if account.linked is None or account.linked.facebook is None or account.linked.facebook.share_settings is None\
+           or account.linked.facebook.token is None:
+            return
+
+        share_settings = account.linked.facebook.share_settings
+
+        token = account.linked.facebook.token
+        action = None
+        ogType = None
+        url = None
+
+        logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
+
+        if stampId is not None and share_settings.share_stamps == True:
+            action = 'stamp'
+            stamp = self.getStamp(stampId)
+            kind = stamp.entity.kind
+            types = stamp.entity.types
+            ogType = self._kindTypeToOpenGraphType(kind, types)
+            url = self._getOpenGraphUrl(stampId = stampId)
+        elif likeStampId is not None and share_settings.share_likes == True:
+            action = 'like'
+            stamp = self.getStamp(stampid)
+            kind = stamp.entity.kind
+            types = stamp.entity.types
+            ogType = self._kindTypeToOpenGraphType(kind, types)
+            url = self._getOpenGraphUrl(stampId = stampId)
+        elif todoEntityId is not None and share_settings.share_todos == True:
+            action = 'todo'
+            entity = self.getEntity({'entity_id': todoEntityId})
+            kind = entity.kind
+            types = entity.types
+            ogType = self._kindTypeToOpenGraphType(kind, types)
+            url = self._getOpenGraphUrl(entityId = entity.entity_id)
+        elif followUserId is not None and share_settings.share_follows == True:
+            action = 'follow'
+            user = self.getUser({'user_id' : followUserId})
+            ogType = 'user'
+            url = self._getOpenGraphUrl(userId = user.user_id)
+
+        if action is None or ogType is None or url is None:
+            return
+
+        logs.info('### about to call postToGraph on facebook lib')
+        self._facebook.postToOpenGraph(token, ogType, url)
+
 
 
     """

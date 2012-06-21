@@ -480,6 +480,27 @@ class HTTPRemoveLinkedAccountForm(Schema):
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
 
+class HTTPUpdateLinkedAccountShareSettingsForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
+    def exportLinkedAccountShareSettings(self):
+        shareSettings = LinkedAccountShareSettings().dataImport(self.dataExport(), overflow=True)
+        return shareSettings
+
+class HTTPLinkedAccountShareSettings(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
 class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
@@ -490,6 +511,7 @@ class HTTPLinkedAccount(Schema):
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
+        cls.addNestedProperty('share_settings',                   HTTPLinkedAccountShareSettings)
 
     def importLinkedAccount(self, linked):
         self.dataImport(linked.dataExport(), overflow=True)

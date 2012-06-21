@@ -20,7 +20,6 @@ from django.http        import HttpResponseRedirect
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
-    logs.info('### %s' % linkedAccounts)
     if linkedAccounts is None:
         result = None
     else:
@@ -46,9 +45,17 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPLinkedAccount)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.updateLinkedAccount(authUserId, http_schema.service_name)
+    result = stampedAPI.updateLinkedAccount(authUserId, http_schema)
 
     return transformOutput(True)
+
+@handleHTTPRequest(http_schema=HTTPUpdateLinkedAccountShareSettingsForm,
+                   conversion=HTTPUpdateLinkedAccountShareSettingsForm.exportLinkedAccountShareSettings)
+@require_http_methods(["POST"])
+def updateShareSettings(request, authUserId, http_schema, schema, **kwargs):
+    result = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, schema)
+    return transformOutput(True)
+
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])
