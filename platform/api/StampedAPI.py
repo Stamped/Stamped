@@ -3901,7 +3901,8 @@ class StampedAPI(AStampedAPI):
             exists = False
 
         if exists:
-            raise StampedDuplicationError("Todo already exists")
+            return testTodo
+            #raise StampedDuplicationError("Todo already exists")
 
         # Check if user has already stamped the todo entity, mark as complete and provide stamp_id, if so
         users_stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
@@ -3993,7 +3994,8 @@ class StampedAPI(AStampedAPI):
         RawTodo = self._todoDB.getTodo(authUserId, entityId)
 
         if not RawTodo or not RawTodo.todo_id:
-            raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
+            return True
+            #raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.removeTodo(authUserId, entityId)
 

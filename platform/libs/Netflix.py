@@ -152,7 +152,7 @@ class Netflix(object):
 
     def __delete(self, service, user_id=None, token=None, **parameters):
         return self.__http('DELETE', service, user_id, token, **parameters)
-
+    
     def __asList(self, elmt):
         if isinstance(elmt, list):
             return elmt
