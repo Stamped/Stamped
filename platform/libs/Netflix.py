@@ -10,7 +10,6 @@ import json
 import utils
 import logs
 
-from errors             import StampedHTTPError
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
 
@@ -128,6 +127,9 @@ class Netflix(object):
         else:
             responseData = response.read()
             failData = json.loads(responseData)['status']
+            # if already in queue at the top, then just return True
+            if failData['status_code'] == 412 and failData['sub_code'] == 710:
+                return True
             logs.info('Failed with status code %d' % response.status)
             try:
                 msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
@@ -137,7 +139,7 @@ class Netflix(object):
                 msg = 'Netflix returned a failure response: %s' % responseData
                 status_code = response.status
             finally:
-                raise StampedHTTPError(msg, status_code)
+                raise Exception(msg)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)

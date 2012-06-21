@@ -66,13 +66,6 @@
     margin: 0;
 }
 
-.profile-header-post, .stamp-card-post {
-    background: #fff;
-    
-    width:  100%;
-    margin: 0;
-}
-
 .user-primary {
     color: @user_primary;
 }

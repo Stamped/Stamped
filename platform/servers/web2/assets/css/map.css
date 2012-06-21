@@ -201,7 +201,6 @@ footer {
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav {
   background: #fff;
   pointer-events: auto;
-  height: 100%;
   -webkit-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 0 8px 0 rgba(50, 50, 50, 0.35);
@@ -245,27 +244,27 @@ footer {
   float: right;
   text-align: right;
 }
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a {
-  margin: 0;
+.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a.arrow {
+  background: url(/assets/img/map-collapselist.png) no-repeat;
+  display: block;
+  width: 15px;
+  height: 15px;
+  margin: 0 0 4px;
   padding: 0;
-  line-height: 80%;
-}
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a:hover,
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a:active {
-  cursor: pointer;
-  color: #fff;
-}
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a:hover {
-  background-color: #999;
-}
-.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a:active {
-  background-color: #666;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a.up-arrow {
-  display: inline;
+  display: block;
+  background-position: 0 0;
+}
+.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a.up-arrow:hover {
+  background-position: -17px 0;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a.down-arrow {
   display: none;
+  background-position: -34px 0;
+}
+.stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .nav-header .list-view-nav a.down-arrow:hover {
+  background-position: -51px 0;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper .stamp-map-nav .stamp-list-view {
   overflow-y: auto;
@@ -337,10 +336,10 @@ footer {
   visibility: hidden;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper-collapsed .stamp-map-nav .nav-header .list-view-nav a.up-arrow {
-  display: none   !important;
+  display: none  !important;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper-collapsed .stamp-map-nav .nav-header .list-view-nav a.down-arrow {
-  display: inline !important;
+  display: block !important;
 }
 .stamp-map .fixedwidth .stamp-map-nav-wrapper-collapsed .stamp-map-nav .nav-dummy-footer {
   display: none;

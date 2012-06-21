@@ -111,7 +111,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     if http_schema.netflix_add_id is not None:
         try:
             result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
-        except StampedHTTPError as e:
+        except Exception as e:
             return HttpResponseRedirect("stamped://netflix/add/fail")
         if result == None:
             return HttpResponseRedirect("stamped://netflix/add/fail")
@@ -120,7 +120,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
-def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
+def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedHTTPError as e:
@@ -138,9 +138,9 @@ def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
     source.name                         = 'Added to Netflix Instant Queue'
     source.source                       = 'stamped'
     source.source_data                  = dict()
-    source.source_data['title']         = 'Added to Netflix Instant Queue'
+    source.source_data['title']         = 'Added to Netflix'
     source.source_data['subtitle']      = 'Instant Queue'
-    source.source_data['icon']          = 'http://static.stamped.com/assets/icons/default/src_netflix.png'
+    source.setIcon('act_response_netflix', stampedAuth.getClientDetails(authClientId))
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
     response.setAction('stamped_confirm', 'Added to Netflix', [source])
     #TODO throw status codes on error

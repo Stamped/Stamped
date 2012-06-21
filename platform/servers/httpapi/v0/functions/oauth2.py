@@ -11,7 +11,7 @@ from httpapi.v0.helpers import *
 @require_http_methods(["POST"])
 def token(request, client_id, http_schema, **kwargs):
     if str(http_schema.grant_type).lower() != 'refresh_token':
-        raise StampedHTTPError("invalid_request", 400, "Grant type incorrect")
+        raise StampedInputError("Grant type incorrect")
     
     token = stampedAuth.verifyRefreshToken(client_id, http_schema.refresh_token)
     
@@ -21,9 +21,10 @@ def token(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthLogin)
 @require_http_methods(["POST"])
 def login(request, client_id, http_schema, **kwargs):
-    account, token = stampedAuth.verifyUserCredentials(client_id, \
-                                                    http_schema.login, \
-                                                    http_schema.password)
+    try:
+        account, token = stampedAuth.verifyUserCredentials(client_id, http_schema.login, http_schema.password)
+    except StampedInvalidCredentialsError:
+        raise StampedHTTPError(409, kind="invalid_credentials")
     
     user = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -35,7 +36,12 @@ def login(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthFacebookLogin)
 @require_http_methods(["POST"])
 def loginWithFacebook(request, client_id, http_schema, **kwargs):
-    account, token = stampedAuth.verifyFacebookUserCredentials(client_id, http_schema.user_token)
+    try:
+        account, token = stampedAuth.verifyFacebookUserCredentials(client_id, http_schema.user_token)
+    except (StampedInputError, StampedInvalidCredentialsError):
+        raise StampedHTTPError(400, msg="Facebook login failed")
+    except StampedLinkedAccountExistsError:
+        raise StampedHTTPError(409, msg="Multiple accounts exist for this Facebook user")
 
     user = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -47,7 +53,12 @@ def loginWithFacebook(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, requires_client=True, http_schema=OAuthTwitterLogin)
 @require_http_methods(["POST"])
 def loginWithTwitter(request, client_id, http_schema, **kwargs):
-    account, token = stampedAuth.verifyTwitterUserCredentials(client_id, http_schema.user_token, http_schema.user_secret)
+    try:
+        account, token = stampedAuth.verifyTwitterUserCredentials(client_id, http_schema.user_token, http_schema.user_secret)
+    except (StampedInputError, StampedInvalidCredentialsError):
+        raise StampedHTTPError(400, msg="Twitter login failed")
+    except StampedLinkedAccountExistsError:
+        raise StampedHTTPError(409, msg="Multiple accounts exist for this Twitter user")
 
     user = HTTPUser().importAccount(account)
     logs.user(user.user_id)

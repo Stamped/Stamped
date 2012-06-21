@@ -129,7 +129,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         return map(lambda x: x['user_id'], documents)
 
     def updateTodoEntity(self, todoId, entity):
-        self._collection.update({'_id': self._getObjectIdFromString(todoId)}, {'$set': {'entity': entity}})
+        self._collection.update({'_id': self._getObjectIdFromString(todoId)}, {'$set': {'entity': entity.dataExport()}})
 
     def getUserTodosHistory(self, userId):
         return self.user_todos_history_collection.getUserTodos(userId)
