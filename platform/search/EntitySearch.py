@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs
+import sys, datetime, logs, gevent
 from api                        import Entity
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
@@ -22,33 +22,82 @@ from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
 
+
+
 class EntitySearch(object):
-    def __registerSource(self, source, *categories):
+    def __registerSource(self, source, **categoriesToPriorities):
         self.__all_sources.append(source)
-        for category in categories:
+        for (category, priority) in categoriesToPriorities.items():
             if category not in Entity.categories:
                 raise Exception("unrecognized category: %s" % category)
-            self.__categories_to_sources[category].append(source)
+            self.__categories_to_sources_and_priorities[category].append((source, priority))
 
     def __init__(self):
         allCategories = Entity.categories
         self.__all_sources = []
-        self.__categories_to_sources = {}
+        # Within each category, we have a number of sources and each is assigned a priority. The priority is used to
+        # determine how long to wait for results from that source.
+        self.__categories_to_sources_and_priorities = {}
         for category in allCategories:
-            self.__categories_to_sources[category] = []
+            self.__categories_to_sources_and_priorities[category] = []
 
         #self.__registerSource(StampedSource(), allCategories)
-        self.__registerSource(iTunesSource(), 'music', 'film', 'book', 'app')
+        self.__registerSource(iTunesSource(), music=10, film=10, book=3, app=10)
         # TODO: Enable film for Amazon. Amazon film results blend TV and movies and have better retrieval than
         # iTunes. On the other hand, they're pretty dreadful -- no clear distinction between TV and movies, no
         # clear distinction between individual movies and box sets, etc.
-        self.__registerSource(AmazonSource(), 'music' ,'book')
-        self.__registerSource(GooglePlacesSource(), 'place')
-        self.__registerSource(FactualSource(), 'place')
-        self.__registerSource(TMDBSource(), 'film')
-        self.__registerSource(TheTVDBSource(), 'film')
-        self.__registerSource(RdioSource(), 'music')
-        self.__registerSource(SpotifySource(), 'music')
+        self.__registerSource(AmazonSource(), music=5, book=10)
+        self.__registerSource(GooglePlacesSource(), place=8)
+        self.__registerSource(FactualSource(), place=8)
+        self.__registerSource(TMDBSource(), film=8)
+        self.__registerSource(TheTVDBSource(), film=8)
+        self.__registerSource(RdioSource(), music=8)
+        self.__registerSource(SpotifySource(), music=8)
+
+    def __terminateWaiting(self, pool, start_time, category, resultsDict):
+        sources_to_priorities = dict(self.__categories_to_sources_and_priorities[category])
+        total_value_received = 0
+        total_potential_value_outstanding = sum(sources_to_priorities.values())
+        sources_seen = set()
+        logs.warning("RESTARTING")
+        while True:
+            elapsed_seconds = (datetime.datetime.now() - start_time).total_seconds()
+            for (source, results) in resultsDict.items():
+                if source in sources_seen:
+                    continue
+                logs.warning('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                sources_seen.add(source)
+                logs.warning('SOURCES_SEEN IS ' + str([source for source in sources_seen]))
+                # If a source returns at least 5 results, we assume we got a good result set from it. If it
+                # returns less, we're more inclined to wait for straggling sources.
+                total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
+                total_potential_value_outstanding -= sources_to_priorities[source]
+            if total_value_received:
+                marginal_value_of_outstanding_sources = total_potential_value_outstanding / total_value_received
+                # Comes out to:
+                #   0.08 for 1s
+                #   0.25 for 1.5s
+                #   0.79 for 2s
+                #   2.51 for 2.5s
+                #   7.94 for 3s
+                # So we'll ditch that 4th remaining source for music around 1.5s; we'll ditch the second source for
+                # something like Places around 2s; we'll ditch any lingering source around 3s if we've received
+                # anything.
+                min_marginal_value = 10 ** (elapsed_seconds - 2.1)
+                if min_marginal_value > marginal_value_of_outstanding_sources:
+                    sources_not_seen = [
+                        source.sourceName for source in sources_to_priorities.keys() if source not in sources_seen
+                    ]
+                    if sources_not_seen:
+                        log_template = 'QUITTING EARLY: At %f second elapsed, bailing on sources [%s] because with ' + \
+                            'value received %f, value outstanding %f, marginal value %f, min marginal value %f'
+                        logs.warning(log_template % (
+                            elapsed_seconds, ', '.join(sources_not_seen), total_value_received,
+                            total_potential_value_outstanding, marginal_value_of_outstanding_sources, min_marginal_value
+                        ))
+                    pool.kill()
+                    return
+            gevent.sleep(0.01)
 
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
         # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
@@ -72,15 +121,17 @@ class EntitySearch(object):
         start = datetime.datetime.now()
         results = {}
         times = {}
-        pool = Pool(len(self.__categories_to_sources))
-        for source in self.__categories_to_sources[category]:
+        pool = Pool(len(self.__categories_to_sources_and_priorities))
+        for (source, priority) in self.__categories_to_sources_and_priorities[category]:
             # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, **queryParams)
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, **queryParams)
+
+        pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
-        pool.join(timeout=timeout)
+        pool.join()
         logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
 
         logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))

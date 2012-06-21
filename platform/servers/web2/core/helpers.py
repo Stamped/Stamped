@@ -48,13 +48,16 @@ class StampedAPIProxy(object):
             params['scope'] = 'user'
             return self._handle_get("stamps/collection.json", params)
     
-    def getFriends(self, params):
+    def getFriends(self, params, limit=None):
         if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/friends.json", params)
             
             if 'user_ids' in response and len(response['user_ids']) > 0:
+                if limit is not None:
+                    response['user_ids'] = response['user_ids'][:limit]
+                
                 # TODO: this only returns max 100 at a time
                 return self._handle_post("users/lookup.json", {
                     'user_ids' : ",".join(response['user_ids']), 
@@ -62,13 +65,16 @@ class StampedAPIProxy(object):
             else:
                 return []
     
-    def getFollowers(self, params):
+    def getFollowers(self, params, limit=None):
         if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/followers.json", params)
             
             if 'user_ids' in response and len(response['user_ids']) > 0:
+                if limit is not None:
+                    response['user_ids'] = response['user_ids'][:limit]
+                
                 # TODO: this only returns max 100 at a time
                 return self._handle_post("users/lookup.json", {
                     'user_ids' : ",".join(response['user_ids']), 

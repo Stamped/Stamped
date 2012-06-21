@@ -1990,6 +1990,11 @@ class HTTPEntitySearchResultsItem(Schema):
         self.subtitle           = entity.subtitle
         self.category           = entity.category
 
+        if entity.kind == 'place':
+            address = entity.formatAddress()
+            if address is not None:
+                self.subtitle = address
+
         # Build icon
         if entity.isType('restaurant'):
             self.icon = _getIconURL('search_restaurant')
@@ -2017,7 +2022,7 @@ class HTTPEntitySearchResultsItem(Schema):
             self.icon = _getIconURL('search_other')
 
         if isinstance(distance, float) and distance >= 0:
-            self.distance       = distance
+            self.distance = distance
 
         assert self.search_id is not None
 
@@ -2111,50 +2116,6 @@ class HTTPTodoTimeSlice(HTTPTimeSlice):
     def __init__(self):
         HTTPTimeSlice.__init__(self)
         self.scope = 'todo'
-
-class HTTPWebTimeSlice(Schema):
-    @classmethod
-    def setSchema(cls):
-        # Paging
-        cls.addProperty('before',                           int)
-        cls.addProperty('limit',                            int)
-        cls.addProperty('offset',                           int)
-
-        # Filtering
-        cls.addProperty('category',                         basestring, cast=validateCategory)
-        cls.addProperty('subcategory',                      basestring, cast=validateSubcategory)
-        cls.addProperty('viewport',                         basestring, cast=validateViewport)
-
-        # Scope
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
-        cls.addProperty('scope',                            basestring) # me, inbox, friends, fof, popular ### TODO: Add cast
-    
-    def exportTimeSlice(self):
-        data                = self.dataExport()
-        beforeData          = data.pop('before', None)
-        viewportData        = data.pop('viewport', None)
-        categoryData        = data.pop('category', None)
-        subcategoryData     = data.pop('subcategory', None)
-
-        slc                 = TimeSlice()
-        slc.dataImport(data)
-
-        if self.before is not None:
-            slc.before          = datetime.utcfromtimestamp(int(self.before))
-
-        if self.subcategory is not None:
-            slc.kinds = list(Entity.mapSubcategoryToKinds(self.subcategory))
-            slc.types = list(Entity.mapSubcategoryToTypes(self.subcategory))
-        elif self.category is not None:
-            slc.kinds = list(Entity.mapCategoryToKinds(self.category))
-            slc.types = list(Entity.mapCategoryToTypes(self.category))
-
-        if self.viewport is not None:
-            slc.viewport = _convertViewport(self.viewport)
-
-        return slc
-
 
 class HTTPSearchSlice(Schema):
     @classmethod

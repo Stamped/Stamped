@@ -118,11 +118,10 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     
     @lazyProperty 
     def genres(self):
-        try:
-            return self.data.genres
-        except Exception:
+        if self.data.genres is None:
             return []
-    
+        return self.data.genres
+
     @lazyProperty
     def description(self):
         try:

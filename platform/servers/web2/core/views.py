@@ -10,7 +10,7 @@ import api.HTTPSchemas
 import os, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
-from api.Schemas    import *
+from schemas        import *
 from helpers        import *
 
 import travis_test
@@ -87,6 +87,11 @@ def profile(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = schema.limit  or 25
     screen_name   = schema.screen_name
+    ajax          = schema.ajax
+    del schema.ajax
+    
+    friends       = []
+    followers     = []
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -103,24 +108,61 @@ def profile(request, schema, **kwargs):
         
         stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
     else:
-        user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-        user_id     = user['user_id']
+        if ajax and schema.user_id is not None:
+            user        = None
+            user_id     = schema.user_id
+        else:
+            user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+            user_id     = user['user_id']
+        
+        """
+        r = "4e57048accc2175fcd000001"
+        utils.log(user_id)
+        utils.log(r)
+        assert user_id == r
+        """
+        
+        # simple sanity check validation of user_id
+        if utils.tryGetObjectId(user_id) is None:
+            raise StampedInputError("invalid user_id")
         
         #utils.log(pprint.pformat(schema.dataExport()))
-        s = schema.dataExport()
-        del s['screen_name']
-        s['user_id'] = user_id
+        schema_data = schema.dataExport()
+        del schema_data['screen_name']
+        schema_data['user_id'] = user_id
         
-        stamps      = stampedAPIProxy.getUserStamps(s)
+        stamps = stampedAPIProxy.getUserStamps(schema_data)
+        
+        if user is None:
+            user = {
+                'user_id' : user_id
+            }
+            
+            if len(stamps) > 0:
+                user2    = stamps[0]['user']
+                user2_id = user2['user_id']
+                
+                if user2_id is None or user2_id != user_id:
+                    raise StampedInputError("mismatched user_id")
+                else:
+                    user.update(user2)
+            else:
+                user = stampedAPIProxy.getUser(dict(user_id=user_id))
+                
+                if user['user_id'] is None or user['user_id'] != user_id:
+                    raise StampedInputError("mismatched user_id")
     
-    if ENABLE_TRAVIS_TEST:
-        friends     = travis_test.friends
-        followers   = travis_test.followers
-    else:
-        friends     = stampedAPIProxy.getFriends(dict(user_id=user_id, screen_name=screen_name))
-        followers   = stampedAPIProxy.getFollowers(dict(user_id=user_id, screen_name=screen_name))
-    
-    main_cluster    = { }
+    if not ajax:
+        if ENABLE_TRAVIS_TEST:
+            friends     = travis_test.friends
+            followers   = travis_test.followers
+        else:
+            params      = dict(user_id=user_id, screen_name=screen_name)
+            friends     = stampedAPIProxy.getFriends  (params, limit=10)
+            followers   = stampedAPIProxy.getFollowers(params, limit=10)
+        
+        friends   = _shuffle_split_users(friends)
+        followers = _shuffle_split_users(followers)
     
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))
@@ -134,8 +176,9 @@ def profile(request, schema, **kwargs):
     #utils.log("FOLLOWERS:")
     #utils.log(pprint.pformat(followers))
     
-    friends   = _shuffle_split_users(friends)
-    followers = _shuffle_split_users(followers)
+    # modify schema for purposes of next / prev gallery nav links
+    schema.ajax    = True
+    schema.user_id = user['user_id']
     
     if schema.offset > 0:
         prev_url = format_url(url_format, schema, {
@@ -146,6 +189,9 @@ def profile(request, schema, **kwargs):
         next_url = format_url(url_format, schema, {
             'offset' : schema.offset + len(stamps), 
         })
+    
+    utils.log("PREV: %s" % prev_url)
+    utils.log("NEXT: %s" % next_url)
     
     body_classes = _get_body_classes('profile', schema)
     
@@ -160,7 +206,6 @@ def profile(request, schema, **kwargs):
         'next_url'              : next_url, 
         
         'body_classes'          : body_classes, 
-        'main_stamp_cluster'    : main_cluster, 
     }, preload=[ 'user' ])
 
 @stamped_view(schema=HTTPWebTimeSlice)
@@ -170,6 +215,7 @@ def map(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = 1000 # TODO: customize this
     screen_name = schema.screen_name
+    del schema.ajax
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -181,6 +227,10 @@ def map(request, schema, **kwargs):
     else:
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
+        
+        # simple sanity check validation of user_id
+        if utils.tryGetObjectId(user_id) is None:
+            raise StampedInputError("invalid user_id")
         
         s = schema.dataExport()
         del s['screen_name']
