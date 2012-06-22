@@ -20,9 +20,7 @@ from bson.code import Code
 
 
 
-def getTopStamped(vertical,date):
-    api = MongoStampedAPI()
-    collection = api._stampDB._collection
+def getTopStamped(vertical,date,collection):
     
     if vertical == None:
         query = """function () {
@@ -51,10 +49,8 @@ def getTopStamped(vertical,date):
     
     sortedResult = sorted(result, key=lambda k: k['value'],reverse=True) 
     
-    count = 1
-    for i in sortedResult[0:200]:
-        print str(count) + ') ' + i['_id'] + ": "+str(i['value'])+ " stamps"
-        count += 1
+    return sortedResult
+    
         
         
 

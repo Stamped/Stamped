@@ -1269,6 +1269,9 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_friends',   increment=1)
         self._userDB.updateUserStats(userId,     'num_followers', increment=1)
 
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
         user                    = self.getUserFromIdOrScreenName(userRequest)
@@ -3227,6 +3230,9 @@ class StampedAPI(AStampedAPI):
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
+
         return stamp
 
     @API_CALL
@@ -4090,6 +4096,9 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
         for friendStamp in friendStamps:
             tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
+
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoEntityId':entity.entity_id})
 
         return todo
 
