@@ -27,7 +27,7 @@ class MongoActivityLinkCollection(AMongoCollection):
     def saveActivityLink(self, activityId, userId, **kwargs):
         # Note: 'created' is necessary for backfilling data from v1
         now = kwargs.pop('created', datetime.utcnow())
-        
+
         query = {'activity_id': activityId, 'user_id': userId}
         if self._collection.find(query).count() > 0:
             item = self._collection.update(query, { '$set' : { 'timestamp.modified' : now } }, safe=True )
@@ -75,7 +75,7 @@ class MongoActivityLinkCollection(AMongoCollection):
     def getActivityIdsForUser(self, userId, **kwargs):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
-        limit       = kwargs.pop('limit', 20)
+        limit       = kwargs.pop('limit', 0)
 
         query = { 'user_id' : userId }
         if since is not None and before is not None:

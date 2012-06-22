@@ -19,7 +19,9 @@ import pymongo
 api = MongoStampedAPI()
 activityDB = AMongoCollection(collection='activity', primary_key='activity_id', overflow=True)
 
-query = {'recipient_id': '4e570489ccc2175fcd000000'}
+query = {'recipient_id': '4e570489ccc2175fcd000000'} # Kevin
+query = {'timestamp.created': {'$gte': datetime(2012, 05, 01)}}
+
 oldActivity = activityDB._collection.find(query).sort('timestamp.created', pymongo.ASCENDING)
 
 for item in oldActivity:
