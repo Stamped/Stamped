@@ -4248,7 +4248,8 @@ class StampedAPI(AStampedAPI):
         self._addActivity('todo', userId, objects,
                                           recipientIds = recipientIds,
                                           requireRecipient = True,
-                                          group=True)
+                                          group=True,
+                                          groupRange=timedelta(days=1))
 
     def _addCommentActivity(self, userId, recipientIds, stampId, commentId):
         objects = ActivityObjectIds()

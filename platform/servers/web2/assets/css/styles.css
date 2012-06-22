@@ -201,7 +201,7 @@ a.follow-button:active {
   box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
   position: relative;
   display: block;
-  height: 16px;
+  height: 15px;
 }
 .user-logo-large {
   position: absolute;
@@ -231,12 +231,12 @@ a.follow-button:active {
   z-index: 101;
 }
 .ribbon-top {
-  background: url(/assets/img/ribbon-top.png) left top repeat-x;
-  height: 16px;
+  background: url(/assets/img/ribbon-top.png) repeat-x;
+  height: 15px;
 }
 .ribbon-bottom {
-  background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
-  height: 16px;
+  background: url(/assets/img/ribbon-bottom.png) repeat-x 0 -1px;
+  height: 15px;
 }
 #main-page-content {
   position: relative;
@@ -1487,6 +1487,9 @@ footer .copyright a {
 .stamp-subcategory-cafe .icon {
   background-position: -40px 0;
 }
+.stamp-subcategory-tv .icon {
+  background-position: -20px -20px;
+}
 .stamp-subcategory-song .icon {
   background-position: -100px 0;
 }
@@ -1513,8 +1516,4 @@ a.pronounced-title {
   font-size: 3em;
   letter-spacing: .05em;
   color: #000;
-  /*text-shadow: 0.05em 0.05em 0.03em #aaa;
-    font-smooth: always;
-    -webkit-font-smoothing: antialiased;*/
-
 }
