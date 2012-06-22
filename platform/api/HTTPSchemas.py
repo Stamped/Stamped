@@ -2719,36 +2719,36 @@ class HTTPActivity(Schema):
             del(self.benefit)
 
         def _addUserObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.users is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 userobjects = []
                 for user in activity.objects.users:
                     userobjects.append(HTTPUserMini().importUserMini(user))
                 self.objects.users = userobjects 
 
         def _addStampObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.stamps is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 stampobjects = []
                 for stamp in activity.objects.stamps:
                     stampobjects.append(HTTPStamp().importStamp(stamp))
                 self.objects.stamps = stampobjects
 
         def _addEntityObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.entities is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 entityobjects = []
                 for entity in activity.objects.entities:
                     entityobjects.append(HTTPEntityMini().importEntity(entity))
                 self.objects.entities = entityobjects 
 
         def _addCommentObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.comments is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 commentobjects = []
                 for comment in activity.objects.comments:
                     comment = HTTPComment().importComment(comment)
