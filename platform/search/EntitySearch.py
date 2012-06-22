@@ -67,10 +67,11 @@ class EntitySearch(object):
                     continue
                 logs.warning('JUST NOW SEEING SOURCE: ' + source.sourceName)
                 sources_seen.add(source)
-                logs.warning('SOURCES_SEEN IS ' + str([source for source in sources_seen]))
+                logs.warning('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
                 # If a source returns at least 5 results, we assume we got a good result set from it. If it
                 # returns less, we're more inclined to wait for straggling sources.
                 total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
+                logs.warning('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
                 total_potential_value_outstanding -= sources_to_priorities[source]
             logs.warning('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
                     elapsed_seconds, total_value_received, total_potential_value_outstanding
