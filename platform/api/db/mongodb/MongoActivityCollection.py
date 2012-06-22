@@ -177,7 +177,7 @@ class MongoActivityCollection(AActivityDB):
             if recipientId in sentTo:
                 continue
             
-            self.activity_links_collection.saveActivityLink(activityId, recipientId)
+            self.activity_links_collection.saveActivityLink(activityId, recipientId, created=created)
 
             sentTo.add(recipientId)
 
