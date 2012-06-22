@@ -624,6 +624,7 @@ var g_update_stamps = null;
                             resume_infinite_scroll();
                             update_dynamic_header();
                             update_navbar_layout();
+                            g_init_social_sharing();
                             
                             // reset window's vertical scroll position to where it was 
                             // before the sDetail popup
@@ -1380,7 +1381,7 @@ var g_update_stamps = null;
                             
                             g_category = category;
                             set_body_class(orig_category);
-                            window.g_init_social_sharing();
+                            g_init_social_sharing();
                         };
                         
                         if (category === null) {
@@ -1978,7 +1979,7 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        window.g_init_social_sharing();
+        g_init_social_sharing();
         update_dynamic_header();
         update_stamps();
         init_gallery();
