@@ -70,6 +70,47 @@ footer,
   font-weight: 400;
   src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
 }
+/**** Isotope Filtering ****/
+.isotope-item {
+  z-index: 2;
+}
+.isotope-hidden.isotope-item {
+  pointer-events: none;
+  z-index: 1;
+}
+/**** Isotope CSS3 transitions ****/
+.isotope,
+.isotope .isotope-item {
+  -webkit-transition-duration: 0.8s;
+  -moz-transition-duration: 0.8s;
+  -ms-transition-duration: 0.8s;
+  -o-transition-duration: 0.8s;
+  transition-duration: 0.8s;
+}
+.isotope {
+  -webkit-transition-property: height, width;
+  -moz-transition-property: height, width;
+  -ms-transition-property: height, width;
+  -o-transition-property: height, width;
+  transition-property: height, width;
+}
+.isotope .isotope-item {
+  -webkit-transition-property: -webkit-transform, opacity;
+  -moz-transition-property: -moz-transform, opacity;
+  -ms-transition-property: -ms-transform, opacity;
+  -o-transition-property: top, left, opacity;
+  transition-property: transform, opacity;
+}
+/**** disabling Isotope CSS3 transitions ****/
+.isotope.no-transition,
+.isotope.no-transition .isotope-item,
+.isotope .isotope-item.no-transition {
+  -webkit-transition-duration: 0s;
+  -moz-transition-duration: 0s;
+  -ms-transition-duration: 0s;
+  -o-transition-duration: 0s;
+  transition-duration: 0s;
+}
 /* **************************************************************************
                                 PROFILE HEADER
    ************************************************************************** */
@@ -475,7 +516,7 @@ footer,
   position: relative;
   z-index: 54;
   width: 100%;
-  height: 16px;
+  height: 15px;
   background: #fff;
   -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
@@ -507,7 +548,7 @@ footer,
   margin: 0 0 .5em;
   color: #000;
 }
-.stamp-count {
+.stamp-count-dependent {
   display: none;
 }
 .profile-header-body:hover .header-overlay {
@@ -743,8 +784,6 @@ body.app .stamp-gallery-view-map {
   margin: 0;
 }
 .stamp-gallery-item {
-  /*.transition(background-color, .5s, ease-in);*/
-
   display: block;
   width: 100%;
   min-width: 257px;
@@ -756,20 +795,6 @@ body.app .stamp-gallery-view-map {
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  /*@args: 0.8s ease-out;
-    
-    -webkit-transition: top @args, left @args, width @args, height @args;
-    -moz-transition: top @args, left @args, width @args, height @args;
-    transition: top @args, left @args, width @args, height @args;*/
-
-  /*.transition(all, 0.8s, ease-out);*/
-
-  /* TODO: keep this to enable GPU acceleration or not? Profile! */
-
-  /*.transform(perspective(200px) translate(0,0));*/
-
-  /*background-color: #FEFEFE;*/
-
 }
 .stamp-gallery-item:hover .content .content_2 .timestamp {
   opacity: 1;
@@ -1068,7 +1093,6 @@ a.lightbox .zoom {
 }
 .subtitle-line .icon {
   display: inline-block;
-  margin: 0 4px 0 0;
 }
 .loading {
   background: url(/assets/img/loading.gif) no-repeat;
@@ -1582,9 +1606,12 @@ ul.user-category-distribution li .bargraph .value {
 .sdetail-loading .sdetail-loading-content {
   display: block;
 }
-body.sdetail_popup_animation .post-header,
-body.sdetail_popup .post-header {
-  background: #fff;
+.post-header {
+  -webkit-transition: background 0.6s ease-out;
+  -moz-transition: background 0.6s ease-out;
+  -ms-transition: background 0.6s ease-out;
+  -o-transition: background 0.6s ease-out;
+  transition: background 0.6s ease-out;
 }
 body.sdetail_popup_animation #main-page-content-body,
 body.sdetail_popup #main-page-content-body {
@@ -1618,36 +1645,52 @@ body.sdetail_popup #main-page-content-body {
 body.sdetail_popup #main-page-content-body #main-content {
   display: none;
 }
-@-webkit-keyframes spin {
-  from {
-    -webkit-transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(360deg);
-  }
-}
 @-webkit-keyframes map-profile-inner-bounce {
   0% {
     -webkit-transform: perspective(600px) translate(0, 0);
+    -moz-transform: perspective(600px) translate(0, 0);
+    -o-transform: perspective(600px) translate(0, 0);
+    -ms-transform: perspective(600px) translate(0, 0);
+    transform: perspective(600px) translate(0, 0);
   }
   50% {
     -webkit-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
+    -moz-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
+    -o-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
+    -ms-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
+    transform: perspective(600px) rotatey(180deg) translate(0, -12px);
   }
   100% {
     -webkit-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+    -moz-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+    -o-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+    -ms-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+    transform: perspective(600px) rotatey(360deg) translate(0, 0);
   }
 }
 @-webkit-keyframes map-profile-inner-shadow-bounce {
   0% {
     -webkit-transform: perspective(600px) scale(1, 1);
+    -moz-transform: perspective(600px) scale(1, 1);
+    -o-transform: perspective(600px) scale(1, 1);
+    -ms-transform: perspective(600px) scale(1, 1);
+    transform: perspective(600px) scale(1, 1);
     opacity: 1.0;
   }
   50% {
     -webkit-transform: perspective(600px) scale(0.8, 0.8);
+    -moz-transform: perspective(600px) scale(0.8, 0.8);
+    -o-transform: perspective(600px) scale(0.8, 0.8);
+    -ms-transform: perspective(600px) scale(0.8, 0.8);
+    transform: perspective(600px) scale(0.8, 0.8);
     opacity: .75;
   }
   100% {
     -webkit-transform: perspective(600px) scale(1, 1);
+    -moz-transform: perspective(600px) scale(1, 1);
+    -o-transform: perspective(600px) scale(1, 1);
+    -ms-transform: perspective(600px) scale(1, 1);
+    transform: perspective(600px) scale(1, 1);
     opacity: 1.0;
   }
 }
@@ -1726,10 +1769,42 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner {
   -webkit-animation-iteration-count: 1;
   -webkit-animation-timing-function: easeInOutCubic;
   -webkit-animation-duration: 0.6s;
+  -moz-animation-name: map-profile-inner-bounce;
+  -moz-animation-iteration-count: 1;
+  -moz-animation-timing-function: easeInOutCubic;
+  -moz-animation-duration: 0.6s;
+  -o-animation-name: map-profile-inner-bounce;
+  -o-animation-iteration-count: 1;
+  -o-animation-timing-function: easeInOutCubic;
+  -o-animation-duration: 0.6s;
+  -ms-animation-name: map-profile-inner-bounce;
+  -ms-animation-iteration-count: 1;
+  -ms-animation-timing-function: easeInOutCubic;
+  -ms-animation-duration: 0.6s;
+  animation-name: map-profile-inner-bounce;
+  animation-iteration-count: 1;
+  animation-timing-function: easeInOutCubic;
+  animation-duration: 0.6s;
 }
 a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shadow {
   -webkit-animation-name: map-profile-inner-shadow-bounce;
   -webkit-animation-iteration-count: 1;
   -webkit-animation-timing-function: easeInOutCubic;
   -webkit-animation-duration: 0.6s;
+  -moz-animation-name: map-profile-inner-shadow-bounce;
+  -moz-animation-iteration-count: 1;
+  -moz-animation-timing-function: easeInOutCubic;
+  -moz-animation-duration: 0.6s;
+  -o-animation-name: map-profile-inner-shadow-bounce;
+  -o-animation-iteration-count: 1;
+  -o-animation-timing-function: easeInOutCubic;
+  -o-animation-duration: 0.6s;
+  -ms-animation-name: map-profile-inner-shadow-bounce;
+  -ms-animation-iteration-count: 1;
+  -ms-animation-timing-function: easeInOutCubic;
+  -ms-animation-duration: 0.6s;
+  animation-name: map-profile-inner-shadow-bounce;
+  animation-iteration-count: 1;
+  animation-timing-function: easeInOutCubic;
+  animation-duration: 0.6s;
 }

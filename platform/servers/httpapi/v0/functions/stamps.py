@@ -88,6 +88,7 @@ def collection(request, authUserId, schema, **kwargs):
     stamps = stampedAPI.getStampCollection(schema, authUserId)
     return transformStamps(stamps)
 
+
 # Search
 @handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
 @require_http_methods(["GET"])
@@ -128,10 +129,6 @@ def searchGuide(request, authUserId, schema, **kwargs):
             # logs.warning(utils.getFormattedException())
 
     return transformOutput(result)
-
-
-
-
 
 
 @handleHTTPRequest(http_schema=HTTPStampId)

@@ -480,6 +480,27 @@ class HTTPRemoveLinkedAccountForm(Schema):
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
 
+class HTTPUpdateLinkedAccountShareSettingsForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
+    def exportLinkedAccountShareSettings(self):
+        shareSettings = LinkedAccountShareSettings().dataImport(self.dataExport(), overflow=True)
+        return shareSettings
+
+class HTTPLinkedAccountShareSettings(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
 class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
@@ -490,6 +511,7 @@ class HTTPLinkedAccount(Schema):
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
+        cls.addNestedProperty('share_settings',                   HTTPLinkedAccountShareSettings)
 
     def importLinkedAccount(self, linked):
         self.dataImport(linked.dataExport(), overflow=True)
@@ -2697,36 +2719,36 @@ class HTTPActivity(Schema):
             del(self.benefit)
 
         def _addUserObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.users is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 userobjects = []
                 for user in activity.objects.users:
                     userobjects.append(HTTPUserMini().importUserMini(user))
                 self.objects.users = userobjects 
 
         def _addStampObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.stamps is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 stampobjects = []
                 for stamp in activity.objects.stamps:
                     stampobjects.append(HTTPStamp().importStamp(stamp))
                 self.objects.stamps = stampobjects
 
         def _addEntityObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.entities is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 entityobjects = []
                 for entity in activity.objects.entities:
                     entityobjects.append(HTTPEntityMini().importEntity(entity))
                 self.objects.entities = entityobjects 
 
         def _addCommentObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.comments is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 commentobjects = []
                 for comment in activity.objects.comments:
                     comment = HTTPComment().importComment(comment)
@@ -2812,7 +2834,6 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
-            logs.info('### formatStampObjects  offset: %s' % offset)
             if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")

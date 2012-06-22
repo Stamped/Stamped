@@ -144,6 +144,7 @@ def handleHTTPRequest(requires_auth=True,
                 
                 params = {}
                 
+                ### TODO: Fix this so that if the user passes an expired token, it fails appropriately
                 try:
                     params['authUserId'], params['authClientId'] = checkOAuth(request)
                 except Exception:

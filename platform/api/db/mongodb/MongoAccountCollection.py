@@ -313,6 +313,19 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         return newLinkedAccount
 
+    def updateLinkedAccount(self, userId, linkedAccount):
+        fields = {}
+        validFields = ['twitter', 'facebook', 'netflix' ]
+        if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix'] :
+            raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
+
+        logs.info('### linkedAccount: %s' % linkedAccount)
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)},
+            {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
+        )
+
+
     def removeLinkedAccount(self, userId, linkedAccount):
         fields = {}
         validFields = ['twitter', 'facebook', 'netflix' ]
