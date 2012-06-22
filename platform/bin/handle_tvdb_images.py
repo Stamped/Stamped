@@ -64,8 +64,8 @@ if __name__ == '__main__':
                     api._entityDB.updateEntity(entity)
         
         # TODO: handle new-style entity images
-        #query = {"_id" : bson.objectid.ObjectId("4ea8803cfe4a1d2a4200081f")}
-        query = {'image' : {'$regex' : r'^.*thetvdb.com.*$'}}
+        query = {"_id" : bson.objectid.ObjectId("4ea8803cfe4a1d2a4200081f")}
+        #query = {'image' : {'$regex' : r'^.*thetvdb.com.*$'}}
         #query = {'subcategory' : 'tv'}
         
         docs  = api._entityDB._collection.find(query)
