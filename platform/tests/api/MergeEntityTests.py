@@ -12,12 +12,12 @@ import datetime
 from libs.MongoCache import mongoCachedFn
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
 from MongoStampedAPI import globalMongoStampedAPI
+from pprint import pprint
 
-ARTIST = 'Justin Bieber'
-ALBUMS = set(['My World', 'Believe'])
+ARTIST = 'Carly Rae Jepsen'
+ALBUMS = set(['Tug of War'])
 TRACKS = {
-        'My World' : set(['One Time', 'Bigger', 'Love Me']),
-        'Believe' : set(['Boyfriend', 'Fall', 'One Love']),
+        'Tug of War' : set(['Bucket', 'Tell Me', 'Heavy Lifting'])
         }
 
 class MergeEntityTest(AStampedFixtureTestCase):
@@ -27,10 +27,9 @@ class MergeEntityTest(AStampedFixtureTestCase):
         collection = mongoApi._entityDB
         allItems = collection.getEntitiesByQuery(dict())
         for item in allItems:
-            print item
             if item.isType('artist') and (item.albums or item.tracks):
-                item.albums = []
-                item.tracks = []
+                del item.albums
+                del item.tracks
                 item = collection.updateEntity(item)
                 merged = mongoApi._mergeEntity(item, set())
                 self.verifyAllLinks(merged, collection)
@@ -39,8 +38,6 @@ class MergeEntityTest(AStampedFixtureTestCase):
     def verifyAllLinks(self, artist, entityCollection):
         assert ALBUMS <= set(album.title for album in artist.albums)
         for albumMini in artist.albums:
-            if albumMini.entity_id is None:
-                print albumMini
             album = entityCollection.getEntity(albumMini.entity_id)
             assert any(albumArtist.entity_id == artist.entity_id for albumArtist in album.artists)
             assert TRACKS.get(album.title, set()) <= set(track.title for track in album.tracks)

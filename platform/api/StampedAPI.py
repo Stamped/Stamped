@@ -4584,7 +4584,7 @@ class StampedAPI(AStampedAPI):
 
         entitySummary = (entity.title, entity.kind)
         if entitySummary in resolved and entity.entity_id:
-            # TODO: maybe we can just check for entity_id here.
+            # TODO(geoff): maybe we can just check for entity_id here.
             return entity
 
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
@@ -4658,7 +4658,7 @@ class StampedAPI(AStampedAPI):
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
             stubList = getattr(entity, attr)
-            if stubList is None:
+            if not stubList:
                 return False
 
             resolvedList = []
@@ -4667,7 +4667,7 @@ class StampedAPI(AStampedAPI):
             for stub in stubList:
                 stubId = stub.entity_id
                 try:
-                    resolved, modified = self._resolveStub(stub, {})
+                    resolved, modified = self._resolveStub(stub, True)
                     if resolved is None:
                         continue
                     resolvedList.append(resolved.minimize())
@@ -4684,31 +4684,28 @@ class StampedAPI(AStampedAPI):
         return self._iterateOutLinks(entity, _resolveStubList)
 
     def _followOutLinks(self, entity, resolved, depth):
-        musicSources = {
-            'itunes':       iTunesSource,
-            'rdio':         RdioSource,
-            'spotify':      SpotifySource,
-            'amazon':       AmazonSource,
-        }
-
         def followStubList(entity, attr):
+            stubList = getattr(entity, attr)
+            if not stubList:
+                return False
+
             modified = False
-            stubList = []
-            for i, stub in enumerate(getattr(entity, attr)):
+            visitedStubs = []
+            for i, stub in enumerate(stubList):
                 try:
-                    resolvedFull, stubModified = self._resolveStub(stub, musicSources)
+                    resolvedFull, stubModified = self._resolveStub(stub, False)
                 except KeyError as e:
                     logs.warning('stub resolution failed: %s, %s' % (stub, e))
                     continue
 
                 merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
-                stubList.append(merged)
+                visitedStubs.append(merged)
                 modified = modified or (merged != stub)
-            setattr(entity, attr, stubList)
+            setattr(entity, attr, visitedStubs)
             return modified
         return self._iterateOutLinks(entity, followStubList)
 
-    def _resolveStub(self, stub, sources):
+    def _resolveStub(self, stub, quickResolveOnly):
         """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
 
         Tries to fast resolve Stamped DB using existing third-party source IDs.
@@ -4719,6 +4716,13 @@ class StampedAPI(AStampedAPI):
             if there were any.
         If none of this works, throws a KeyError.
         """
+
+        musicSources = {
+            'itunes':       iTunesSource,
+            'rdio':         RdioSource,
+            'spotify':      SpotifySource,
+            'amazon':       AmazonSource,
+        }
 
         source          = None
         source_id       = None
@@ -4733,14 +4737,14 @@ class StampedAPI(AStampedAPI):
         if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
             entity_id = stub.entity_id
         else:
-            for sourceName in sources:
+            for sourceName in musicSources:
                 try:
                     if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
-                        source = sources[sourceName]()
+                        source = musicSources[sourceName]()
                         source_id = getattr(stub.sources, '%s_id' % sourceName)
                         # Attempt to resolve against the Stamped DB (quick)
                         entity_id = stampedSource.resolve_fast(source, source_id)
-                        if entity_id is None:
+                        if entity_id is None and not quickResolveOnly:
                             # Attempt to resolve against the Stamped DB (full)
                             proxy = source.entityProxyFromKey(source_id, entity=stub)
                             results = stampedSource.resolve(proxy)
