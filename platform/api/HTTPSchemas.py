@@ -2834,7 +2834,6 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
-            logs.info('### formatStampObjects  offset: %s' % offset)
             if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
@@ -2915,7 +2914,7 @@ class HTTPActivity(Schema):
         def _formatCommentObjects(comments, required=True, offset=0):
             if comments is None or len(comments) == 0:
                 if required:
-                    raise Exception("No comment objects!")
+                    raise Exception("No comment objects! Activity object: %s" % activity)
                 return None, []
 
             if len(comments) == 1:
