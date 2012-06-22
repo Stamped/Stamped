@@ -4671,12 +4671,12 @@ class StampedAPI(AStampedAPI):
                     if resolved is None:
                         continue
                     resolvedList.append(resolved.minimize())
-
-                    # Compare entity id before and after
                     if stubId != resolved.entity_id:
                         stubsModified = True
                 except KeyError as e:
-                    logs.warning('stub resolution failed: %s, %s' % (stub, e))
+                    # It's okay to fail resolution here, since we're only
+                    # resolving against our own db
+                    resolvedList.append(stub)
 
             setattr(entity, attr, resolvedList)
             return stubsModified
@@ -4757,8 +4757,7 @@ class StampedAPI(AStampedAPI):
             entity = entityProxy.buildEntity()
             stubModified = True
         else:
-            logs.warning('Unable to resolve stub: %s' % stub)
-            raise KeyError('Unable to resolve stub')
+            raise KeyError('Unable to resolve stub: ' + str(stub))
 
         return entity, stubModified
 

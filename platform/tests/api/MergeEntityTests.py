@@ -27,6 +27,7 @@ class MergeEntityTest(AStampedFixtureTestCase):
         collection = mongoApi._entityDB
         allItems = collection.getEntitiesByQuery(dict())
         for item in allItems:
+            print item
             if item.isType('artist') and (item.albums or item.tracks):
                 item.albums = []
                 item.tracks = []
