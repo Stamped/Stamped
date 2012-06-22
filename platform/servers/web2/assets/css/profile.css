@@ -1,4 +1,3 @@
-@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
 /* profile.less
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
@@ -893,6 +892,10 @@ body.app .stamp-gallery-view-map {
 }
 .timestamp_raw {
   display: none;
+}
+.stamp-card .entity-image-wrapper {
+  position: relative;
+  margin: 0 auto;
 }
 a.lightbox {
   position: absolute;

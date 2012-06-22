@@ -185,7 +185,7 @@ def stamped_view(schema=None,
                 return response
             
             except StampedHTTPError as e:
-                logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+                logs.warning("%s Error: %s" % (e.code, e.msg))
                 logs.warning(utils.getFormattedException())
                 
                 response = HttpResponse(e.msg, status=e.code)

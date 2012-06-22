@@ -43,7 +43,6 @@
 
 TODO:
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
-    * fix broken thetvdb images
     
     * profile:
         * category nav:
@@ -203,6 +202,7 @@ OLD:
     * fix opacity of lower profile header ribbon
     * modify update_stamps to be more efficient and only process new stamps!!!
     * user stamp category distribution
+    * fix broken thetvdb images
 
 
 ChangeList 6/8/2012:
