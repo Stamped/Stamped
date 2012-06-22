@@ -1487,6 +1487,9 @@ footer .copyright a {
 .stamp-subcategory-cafe .icon {
   background-position: -40px 0;
 }
+.stamp-subcategory-tv .icon {
+  background-position: -20px -20px;
+}
 .stamp-subcategory-song .icon {
   background-position: -100px 0;
 }
