@@ -721,7 +721,7 @@ var g_update_stamps = null;
             }
             
             if ($sdetail_wrapper.length === 1) {
-                var offset = cur_header_height + 16;
+                var offset = cur_header_height + 15;
                 var hidden = window.innerHeight + "px";
                 
                 if (!!$body && $body.hasClass('map')) {
@@ -731,7 +731,7 @@ var g_update_stamps = null;
                 offset += "px";
                 
                 //var offset = $window.scrollTop()  + "px";
-                //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 16));
+                //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
@@ -1252,7 +1252,7 @@ var g_update_stamps = null;
                 // ensure main body content's vertical offset respects the dynamic 
                 // header's height
                 $content.css({
-                    top : cur_header_height + 16
+                    top : cur_header_height + 15
                 });
                 
                 // layout and style the header's login / join content
