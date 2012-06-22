@@ -13,6 +13,7 @@
 
 
 @import "common.less";
+@import "libs/isotope.less";
 
 
 /* **************************************************************************
@@ -737,26 +738,12 @@ body.music, body.book, body.film, body.app {
 }
 
 .stamp-gallery-item {
-    /*.transition(background-color, .5s, ease-in);*/
     display: block;
     width:  100%;
     min-width: @stamp-gallery-item-min-width;
     
     /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
-    
-    /*@args: 0.8s ease-out;
-    
-    -webkit-transition: top @args, left @args, width @args, height @args;
-    -moz-transition: top @args, left @args, width @args, height @args;
-    transition: top @args, left @args, width @args, height @args;*/
-
-    /*.transition(all, 0.8s, ease-out);*/
-    
-    /* TODO: keep this to enable GPU acceleration or not? Profile! */
-    /*.transform(perspective(200px) translate(0,0));*/
-    
-    /*background-color: #FEFEFE;*/
     
     &:hover {
         .content .content_2 .timestamp {

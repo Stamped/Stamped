@@ -282,6 +282,18 @@ var g_update_stamps = null;
             }
         };
         
+        var pause_infinite_scroll = function() {
+            if (!!infinite_scroll && !!$gallery) {
+                $gallery.infinitescroll('pause');
+            }
+        };
+        
+        var resume_infinite_scroll = function() {
+            if (!!infinite_scroll && !!$gallery) {
+                $gallery.infinitescroll('resume');
+            }
+        };
+        
         var destroy_gallery = function() {
             if ($gallery !== null) {
                 $gallery = $(".stamp-gallery .stamps");
@@ -335,11 +347,7 @@ var g_update_stamps = null;
         var last_layout = null;
         var gallery_is_visible = false;
         
-        // lazily relayout the stamp gallery using isotope
-        // NOTE: we apply time-based coalescing here s.t. if this function is 
-        // called several times, it will attempt to only update the layout once
-        // to avoid doing extra, unnecessary work / rendering that could result 
-        // in a choppier end-user experience.
+        // relayout the stamp gallery using isotope
         var update_gallery_layout = function(is_visible, callback) {
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
             gallery_is_visible |= is_visible;
@@ -592,8 +600,9 @@ var g_update_stamps = null;
                     
                     console.debug("AJAX: " + href);
                     
-                    // TODO: disable infinite scroll for sdetail popup
-                    destroy_infinite_scroll();
+                    // TODO: disable infinite scroll and gallery animations during sdetail popup
+                    pause_infinite_scroll();
+                    enable_gallery_animations(false);
                     
                     $(sdetail_wrapper_sel).hide().remove();
                     $target.insertAfter($('#main-page-content-body').get(0));
@@ -612,13 +621,15 @@ var g_update_stamps = null;
                         $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                         
                         var close_sdetail_inner_func = function() {
-                            init_infinite_scroll();
+                            resume_infinite_scroll();
                             update_dynamic_header();
                             update_navbar_layout();
                             
                             // reset window's vertical scroll position to where it was 
                             // before the sDetail popup
                             $window.scrollTop(scroll_top);
+                            // reenable gallery animations
+                            enable_gallery_animations(true);
                             
                             resize_sdetail_wrapper($target, 'closing', function() {
                                 $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -887,6 +898,36 @@ var g_update_stamps = null;
                 });
                 
                 init_infinite_scroll();
+            }
+        };
+        
+        var enable_gallery_animations = function(b) {
+            var enabled = (typeof(b) === 'undefined' ? true : b);
+            
+            if (!enabled) {
+                $('.isotope,.isotope .isotope-item').css({
+                    '-webkit-transition-duration' : '0s'
+                });
+                
+                if (!!$gallery) {
+                    $gallery.isotope({
+                        animationOptions : {
+                            duration : 0
+                        }
+                    });
+                }
+            } else {
+                $('.isotope,.isotope .isotope-item').css({
+                    '-webkit-transition-duration' : '.8s'
+                });
+                
+                if (!!$gallery) {
+                    $gallery.isotope({
+                        animationOptions : {
+                            duration : 800
+                        }
+                    });
+                }
             }
         };
         

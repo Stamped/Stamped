@@ -70,6 +70,47 @@ footer,
   font-weight: 400;
   src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
 }
+/**** Isotope Filtering ****/
+.isotope-item {
+  z-index: 2;
+}
+.isotope-hidden.isotope-item {
+  pointer-events: none;
+  z-index: 1;
+}
+/**** Isotope CSS3 transitions ****/
+.isotope,
+.isotope .isotope-item {
+  -webkit-transition-duration: 0.8s;
+  -moz-transition-duration: 0.8s;
+  -ms-transition-duration: 0.8s;
+  -o-transition-duration: 0.8s;
+  transition-duration: 0.8s;
+}
+.isotope {
+  -webkit-transition-property: height, width;
+  -moz-transition-property: height, width;
+  -ms-transition-property: height, width;
+  -o-transition-property: height, width;
+  transition-property: height, width;
+}
+.isotope .isotope-item {
+  -webkit-transition-property: -webkit-transform, opacity;
+  -moz-transition-property: -moz-transform, opacity;
+  -ms-transition-property: -ms-transform, opacity;
+  -o-transition-property: top, left, opacity;
+  transition-property: transform, opacity;
+}
+/**** disabling Isotope CSS3 transitions ****/
+.isotope.no-transition,
+.isotope.no-transition .isotope-item,
+.isotope .isotope-item.no-transition {
+  -webkit-transition-duration: 0s;
+  -moz-transition-duration: 0s;
+  -ms-transition-duration: 0s;
+  -o-transition-duration: 0s;
+  transition-duration: 0s;
+}
 /* **************************************************************************
                                 PROFILE HEADER
    ************************************************************************** */
@@ -743,8 +784,6 @@ body.app .stamp-gallery-view-map {
   margin: 0;
 }
 .stamp-gallery-item {
-  /*.transition(background-color, .5s, ease-in);*/
-
   display: block;
   width: 100%;
   min-width: 257px;
@@ -756,20 +795,6 @@ body.app .stamp-gallery-view-map {
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  /*@args: 0.8s ease-out;
-    
-    -webkit-transition: top @args, left @args, width @args, height @args;
-    -moz-transition: top @args, left @args, width @args, height @args;
-    transition: top @args, left @args, width @args, height @args;*/
-
-  /*.transition(all, 0.8s, ease-out);*/
-
-  /* TODO: keep this to enable GPU acceleration or not? Profile! */
-
-  /*.transform(perspective(200px) translate(0,0));*/
-
-  /*background-color: #FEFEFE;*/
-
 }
 .stamp-gallery-item:hover .content .content_2 .timestamp {
   opacity: 1;
