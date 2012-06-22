@@ -30,12 +30,36 @@ class MergeEntityTest(AStampedFixtureTestCase):
             if item.isType('artist') and (item.albums or item.tracks):
                 del item.albums
                 del item.tracks
-                item = collection.updateEntity(item)
-                merged = mongoApi._mergeEntity(item, set())
-                self.verifyAllLinks(merged, collection)
+                mongoApi._mergeEntity(item, set())
+                self.verifyAllLinks(item.entity_id, collection)
                 break
 
-    def verifyAllLinks(self, artist, entityCollection):
+    SONG_QUERY = ('entities', {
+        '$and' : [{
+            'title' : 'Call Me Maybe',
+            'types' : 'track',
+            'artists.title' : 'Carly Rae Jepsen'
+        }]
+    })
+    @fixtureTest(generateLocalDbQueries=[SONG_QUERY])
+    def test_resolve_song(self):
+        mongoApi = globalMongoStampedAPI()
+        collection = mongoApi._entityDB
+        allItems = collection.getEntitiesByQuery(dict())
+        merged = None
+        for item in allItems:
+            if item.isType('track') and item.title == 'Call Me Maybe':
+                del item.albums
+                del item.artists
+                merged = mongoApi._mergeEntity(item, set())
+                break
+        assert merged is not None
+        for artist in merged.artists:
+            if artist.title == ARTIST:
+                self.verifyAllLinks(artist.entity_id, collection)
+
+    def verifyAllLinks(self, artistId, entityCollection):
+        artist = entityCollection.getEntity(artistId)
         assert ALBUMS <= set(album.title for album in artist.albums)
         for albumMini in artist.albums:
             album = entityCollection.getEntity(albumMini.entity_id)
