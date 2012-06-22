@@ -72,6 +72,10 @@ while True:
     print "Most Stamped Today:"
     getTopStamped(None,str(today().date()))
     
+    print "\nTrending this Week:"
+    past_week = today() - timedelta(days=6)
+    getTopStamped(None,str(past_week.date()))
+    
     #Show me the top stamped this week by vertical
     
     raw_input("Press Enter to refresh...")
