@@ -47,15 +47,15 @@ TODO:
     
     * profile:
         * category nav:
-            * fix bug where sometimes URL params get in inconsistent state and you can't click on default
+            * DONE - fix bug where sometimes URL params get in inconsistent state and you can't click on default
             * DONE - disable navigation to empty category-sections
         * gallery:
             * DONE - fix sDetail bug where opening sDetail scrolls back to top of page
             * clicking on map in stamp gallery => selection in map view
-            * FIX INFINITE SCROLL
+            * BETA - FIX INFINITE SCROLL
             * optimize infinite scroll
             * adaptive layout improvements
-            * (can't repro) fix glitch w/ hover state on entity stamp images in gallery shifting text
+            * NOREPRO - fix glitch w/ hover state on entity stamp images in gallery shifting text
         * headers:
             * change profile header image and share widget to remain constant
             * DONE - experiment w/ different transitions between subheader sections
@@ -64,8 +64,8 @@ TODO:
         * sDetail:
             * user feedback images inline and expanded view
             * fixes to user-generated-image w/ zoom icon placement
-            * nuance 3D transform applied to entity image
-            * ALPHA - change crinkled map => larger, non-crinkled map
+            * DONE  - nuance 3D transform applied to entity image
+            * DONE  - change crinkled map => larger, non-crinkled map
     * map:
         * add spiffy icon to return to profile
         * remove ribbons from map list-view nav
@@ -227,11 +227,12 @@ ChangeList 6/8/2012:
         * if a lightbox is active, ESC will now only close the lightbox, and then you have to press ESC again to close the sDetail overlay
 
 
-ChangeList 6/19/2012:
+ChangeList 6/22/2012:
 --------------------
     * Map:
         * Centers on most stamped cluster (much better algorithm now)
         * Misc polish
+        * @anthony Header ribbon now goes to a 10% opacity gradient instead of white s.t. the change is slightly less jarring
     
     * Profile:
         * Gallery:
@@ -245,6 +246,7 @@ ChangeList 6/19/2012:
         * Navbar:
             * Empty categories are now disabled in the navbar
             * Category descriptions now include number of stamps in parens
+            * Fixed bug where sometimes URL params was in inconsistent state and you can't click on default category
     
     * sDetail:
         * Opening sDetail and closing now properly remembers the window's scroll offset

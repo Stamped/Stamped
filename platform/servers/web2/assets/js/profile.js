@@ -1872,7 +1872,7 @@ var g_update_stamps = null;
             }
             
             // initialize reserve action
-            var $action_reserve = $sdetail.find('.action-reserve');
+            /*var $action_reserve = $sdetail.find('.action-reserve');
             
             if ($action_reserve.length == 1) {
                 var $link = $action_reserve.parent('a.action-link');
@@ -1904,7 +1904,7 @@ var g_update_stamps = null;
                         }).fancybox(popup_options);
                     });
                 }
-            }
+            }*/
             
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
