@@ -507,9 +507,8 @@ var g_update_stamps = null;
                     // TODO: modify static-map-small for sDetail to not be crinkled
                     // TODO: experiment w/ initial scale at .25 scale and tween to this transform
                     var width = "200px";
-                    var scale = 1.0;
                     var angle = "20deg";
-                    var t = "perspective(600) scaleX(" + scale + ") scaleY(" + scale + ") rotateZ(" + angle + ") rotateX(" + angle + ") rotateY(-" + angle + ")";
+                    var t = "perspective(600) rotateZ(" + angle + ") rotateX(" + angle + ") rotateY(-" + angle + ")";
                     
                     $preview.css({
                         'width'     : width, 
@@ -828,7 +827,7 @@ var g_update_stamps = null;
                 if (init) {
                     // TODO: customize loading image
                     infinite_scroll = $gallery.infinitescroll({
-                        bufferPx        : window.innerHeight * .8, 
+                        bufferPx        : window.innerHeight * .2, 
                         debug           : true, 
                         
                         navSelector     : "div.stamp-gallery-nav", 

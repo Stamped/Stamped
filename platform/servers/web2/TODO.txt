@@ -231,15 +231,20 @@ ChangeList 6/19/2012:
 --------------------
     * Map:
         * Centers on most stamped cluster (much better algorithm now)
-        * 
+        * Misc polish
     
     * Profile:
+        * Gallery:
+            * Infinite-scroll now works across different category selections and should be more responsive
+            * Re-added item animations
+                * NOTE: these manifest via infinite-scroll, category changes, sort changes, and resizing the browser
+            * TV Stamps from thetvdb.com finally have images!
         * Header:
             * Subsection polish
             * Hidden subsections aren't visible on page load anymore
         * Navbar:
             * Empty categories are now disabled in the navbar
-            * Category descriptions now include num_stamps in parens
+            * Category descriptions now include number of stamps in parens
     
     * sDetail:
         * Opening sDetail and closing now properly remembers the window's scroll offset
