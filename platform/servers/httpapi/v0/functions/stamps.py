@@ -88,6 +88,7 @@ def collection(request, authUserId, schema, **kwargs):
     stamps = stampedAPI.getStampCollection(schema, authUserId)
     return transformStamps(stamps)
 
+
 # Search
 @handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
 @require_http_methods(["GET"])
@@ -97,7 +98,7 @@ def search(request, authUserId, schema, **kwargs):
 
 
 # Guide
-@handleHTTPRequest(http_schema=HTTPGuideRequest, conversion=HTTPGuideRequest.exportGuideRequest)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPGuideRequest, conversion=HTTPGuideRequest.exportGuideRequest)
 @require_http_methods(["GET"])
 def guide(request, authUserId, schema, **kwargs):
     entities = stampedAPI.getGuide(schema, authUserId)
@@ -114,7 +115,7 @@ def guide(request, authUserId, schema, **kwargs):
 
 
 # Search Guide
-@handleHTTPRequest(http_schema=HTTPGuideSearchRequest, conversion=HTTPGuideSearchRequest.exportGuideSearchRequest)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPGuideSearchRequest, conversion=HTTPGuideSearchRequest.exportGuideSearchRequest)
 @require_http_methods(["GET"])
 def searchGuide(request, authUserId, schema, **kwargs):
     entities = stampedAPI.searchGuide(schema, authUserId)
@@ -128,10 +129,6 @@ def searchGuide(request, authUserId, schema, **kwargs):
             # logs.warning(utils.getFormattedException())
 
     return transformOutput(result)
-
-
-
-
 
 
 @handleHTTPRequest(http_schema=HTTPStampId)

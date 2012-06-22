@@ -52,7 +52,7 @@ class MongoActivityCollection(AActivityDB):
         params = {
             'since'     : kwargs.pop('since', None),
             'before'    : kwargs.pop('before', None),
-            'limit'     : kwargs.pop('limit', 20),
+            'limit'     : kwargs.pop('limit', 0),
             'sort'      : 'timestamp.modified',
             'sortOrder' : pymongo.DESCENDING,
             }
@@ -85,7 +85,7 @@ class MongoActivityCollection(AActivityDB):
         return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
-        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s   kwargs %s' % (verb, kwargs))
+        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s kwargs %s' % (verb, kwargs))
 
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
@@ -100,10 +100,13 @@ class MongoActivityCollection(AActivityDB):
         groupRange      = kwargs.pop('groupRange', None)
 
         now             = datetime.utcnow()
+        created         = kwargs.pop('created', now) 
+
         alerts          = []
         sentTo          = set()
 
-        objects = objects.dataExport()
+        if isinstance(objects, Schema):
+            objects = objects.dataExport()
 
         activityId      = None
 
@@ -123,8 +126,8 @@ class MongoActivityCollection(AActivityDB):
                 activity.body = body
 
             timestamp           = BasicTimestamp()
-            timestamp.created   = now
-            timestamp.modified  = now
+            timestamp.created   = created
+            timestamp.modified  = created
             activity.timestamp  = timestamp 
 
             return activity
@@ -150,7 +153,7 @@ class MongoActivityCollection(AActivityDB):
 
             if groupRange is not None:
                 # Add time constraint
-                params['since'] = datetime.utcnow() - groupRange
+                params['since'] = created - groupRange
 
             activityIds = self.activity_items_collection.getActivityIds(**params)
 
@@ -160,7 +163,7 @@ class MongoActivityCollection(AActivityDB):
                     logs.warning('WARNING: matched multiple activityIds for verb (%s) & objects (%s)' % (verb, objects))
                 
                 activityId = activityIds[0]
-                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=now)
+                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=created)
                 if benefit is not None:
                     self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
 
@@ -174,7 +177,7 @@ class MongoActivityCollection(AActivityDB):
             if recipientId in sentTo:
                 continue
             
-            self.activity_links_collection.saveActivityLink(activityId, recipientId)
+            self.activity_links_collection.saveActivityLink(activityId, recipientId, created=created)
 
             sentTo.add(recipientId)
 
@@ -187,7 +190,7 @@ class MongoActivityCollection(AActivityDB):
                 alert.activity_id   = activityId
                 alert.user_id       = subject
                 alert.genre         = verb
-                alert.created       = now
+                alert.created       = created
                 alerts.append(alert)
 
         if len(alerts): 

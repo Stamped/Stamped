@@ -20,7 +20,6 @@ from django.http        import HttpResponseRedirect
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
-    logs.info('### %s' % linkedAccounts)
     if linkedAccounts is None:
         result = None
     else:
@@ -46,9 +45,17 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPLinkedAccount)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.updateLinkedAccount(authUserId, http_schema.service_name)
+    result = stampedAPI.updateLinkedAccount(authUserId, http_schema)
 
     return transformOutput(True)
+
+@handleHTTPRequest(http_schema=HTTPUpdateLinkedAccountShareSettingsForm,
+                   conversion=HTTPUpdateLinkedAccountShareSettingsForm.exportLinkedAccountShareSettings)
+@require_http_methods(["POST"])
+def updateShareSettings(request, authUserId, http_schema, schema, **kwargs):
+    result = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, schema)
+    return transformOutput(True)
+
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])
@@ -123,12 +130,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
-            # return login endpoint action
-        else:
-            raise e
+    except StampedThirdPartyInvalidCredentialsError:
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
     if result == None:
         return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
@@ -147,18 +150,4 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     #TODO return an HTTPAction
     return transformOutput(response.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPNetflixId)
-@require_http_methods(["POST"])
-def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
-    try:
-        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            #redirect to sign in
-            raise e
-        else:
-            raise e
-        #TODO throw status codes on error
-    #TODO return an HTTPAction
-    return transformOutput(True)
 

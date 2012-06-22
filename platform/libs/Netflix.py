@@ -9,6 +9,7 @@ import httplib
 import json
 import utils
 import logs
+from errors import *
 
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
@@ -125,21 +126,23 @@ class Netflix(object):
         if response.status < 300:
             return json.loads(response.read())
         else:
-            responseData = response.read()
-            failData = json.loads(responseData)['status']
-            # if already in queue at the top, then just return True
-            if failData['status_code'] == 412 and failData['sub_code'] == 710:
-                return True
             logs.info('Failed with status code %d' % response.status)
+            responseData = response.read()
             try:
-                msg = 'Netflix returned a failure response.  status: %d  sub_code %d.  %s' % \
-                     (failData['status_code'], failData['sub_code'], failData['message']), failData['status_code']
-                status_code = failData['status_code']
+                failData = json.loads(responseData)['status']
+                status = failData['status_code']
+                subcode = failData.get('sub_code', None)
+                message = failData['message']
             except:
-                msg = 'Netflix returned a failure response: %s' % responseData
-                status_code = response.status
-            finally:
-                raise Exception(msg)
+                raise StampedThirdPartyError("Error parsing Netflix error response")
+
+            # For the full list of possible status codes, see: http://developer.netflix.com/docs/HTTP_Status_Codes
+            if status == 401:
+                raise StampedThirdPartyInvalidCredentialsError(message)
+            elif status == 412 and subcode == 710:
+                return True
+            else:
+                return StampedThirdPartyError(message)
 
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
@@ -149,7 +152,7 @@ class Netflix(object):
 
     def __delete(self, service, user_id=None, token=None, **parameters):
         return self.__http('DELETE', service, user_id, token, **parameters)
-
+    
     def __asList(self, elmt):
         if isinstance(elmt, list):
             return elmt

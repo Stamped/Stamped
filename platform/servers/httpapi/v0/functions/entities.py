@@ -127,6 +127,7 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPActionComplete)
 @require_http_methods(["POST"])
 def completeAction(request, http_schema, **kwargs):
+    'rdio', 'spotify', 'amazon', 'itunes'
     authUserId, authClientId = checkOAuth(request)
     
     #schema      = parseRequest(HTTPActionComplete(), request)

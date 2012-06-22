@@ -140,3 +140,12 @@ class StampedDuplicateScreenNameError(StampedDuplicationError):
         StampedDuplicationError.__init__(self, msg)
 
 
+# Third Party Stamped Exceptions
+
+class StampedThirdPartyError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedThirdPartyInvalidCredentialsError(StampedInvalidCredentialsError):
+    def __init__(self, msg=None):
+        StampedInvalidCredentialsError.__init__(self, msg)

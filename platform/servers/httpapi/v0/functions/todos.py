@@ -38,7 +38,8 @@ def remove(request, authUserId, http_schema, **kwargs):
     # Hack to force 'entity' to null for Bons
     ### TODO: Come up with a long-term solution
     result   = todo.dataExport()
-    result['entity'] = None
+    if result != True:
+        result['entity'] = None
 
     return transformOutput(result)
 

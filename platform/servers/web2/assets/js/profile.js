@@ -8,6 +8,10 @@
 
 var g_update_stamps = null;
 
+/* TODO:
+    * gallery infinite scroll doesn't reset properly
+ */
+
 (function() {
     $(document).ready(function() {
         
@@ -18,6 +22,7 @@ var g_update_stamps = null;
         
         var client                  = new StampedClient();
         var screen_name             = STAMPED_PRELOAD.user.screen_name;
+        var user_id                 = STAMPED_PRELOAD.user.user_id;
         var $body                   = $('body');
         var selected                = 'selected';
         var selected_sel            = '.' + selected;
@@ -28,6 +33,7 @@ var g_update_stamps = null;
         var metadata_item_expanded  = 'metadata-item-expanded';
         var collapsed               = 'collapsed';
         var collapsing              = 'collapsing';
+        var STAMP_GALLERY_PAGE_SIZE = 10;
         
         var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
         var update_navbar_layout    = null;
@@ -82,7 +88,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=10";
+            var limit = "limit=" + STAMP_GALLERY_PAGE_SIZE;
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
@@ -266,12 +272,25 @@ var g_update_stamps = null;
         var infinite_scroll = null;
         
         var destroy_infinite_scroll = function() {
-            if (infinite_scroll !== null) {
-                if ($gallery !== null) {
+            if (!!infinite_scroll) {
+                if (!!$gallery) {
                     $gallery.infinitescroll('destroy');
+                    $gallery.data('infinitescroll', null);
                 }
                 
                 infinite_scroll = null;
+            }
+        };
+        
+        var pause_infinite_scroll = function() {
+            if (!!infinite_scroll && !!$gallery) {
+                $gallery.infinitescroll('pause');
+            }
+        };
+        
+        var resume_infinite_scroll = function() {
+            if (!!infinite_scroll && !!$gallery) {
+                $gallery.infinitescroll('resume');
             }
         };
         
@@ -328,11 +347,7 @@ var g_update_stamps = null;
         var last_layout = null;
         var gallery_is_visible = false;
         
-        // lazily relayout the stamp gallery using isotope
-        // NOTE: we apply time-based coalescing here s.t. if this function is 
-        // called several times, it will attempt to only update the layout once
-        // to avoid doing extra, unnecessary work / rendering that could result 
-        // in a choppier end-user experience.
+        // relayout the stamp gallery using isotope
         var update_gallery_layout = function(is_visible, callback) {
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
             gallery_is_visible |= is_visible;
@@ -492,7 +507,9 @@ var g_update_stamps = null;
                     // TODO: modify static-map-small for sDetail to not be crinkled
                     // TODO: experiment w/ initial scale at .25 scale and tween to this transform
                     var width = "200px";
-                    var t = "perspective(600) scaleX(1.15) scaleY(1.15) rotateZ(25deg) rotateX(25deg) rotateY(-25deg)";
+                    var angle = "20deg";
+                    var t = "perspective(600) rotateZ(" + angle + ") rotateX(" + angle + ") rotateY(-" + angle + ")";
+                    
                     $preview.css({
                         'width'     : width, 
                         'max-width' : width, 
@@ -578,15 +595,16 @@ var g_update_stamps = null;
                     
                     href = href.replace('http://www.stamped.com', '');
                     href = href + "?ajax=true";
-                    href = href + "&" + new Date().getTime();
+                    //href = href + "&" + new Date().getTime();
                     
                     $(sdetail_wrapper_sel).remove();
                     var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
                     
                     console.debug("AJAX: " + href);
                     
-                    // TODO: disable infinite scroll for sdetail popup
-                    destroy_infinite_scroll();
+                    // TODO: disable infinite scroll and gallery animations during sdetail popup
+                    pause_infinite_scroll();
+                    enable_gallery_animations(false);
                     
                     $(sdetail_wrapper_sel).hide().remove();
                     $target.insertAfter($('#main-page-content-body').get(0));
@@ -605,13 +623,16 @@ var g_update_stamps = null;
                         $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                         
                         var close_sdetail_inner_func = function() {
-                            init_infinite_scroll();
+                            resume_infinite_scroll();
                             update_dynamic_header();
                             update_navbar_layout();
+                            g_init_social_sharing();
                             
                             // reset window's vertical scroll position to where it was 
                             // before the sDetail popup
                             $window.scrollTop(scroll_top);
+                            // reenable gallery animations
+                            enable_gallery_animations(true);
                             
                             resize_sdetail_wrapper($target, 'closing', function() {
                                 $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -703,7 +724,7 @@ var g_update_stamps = null;
             }
             
             if ($sdetail_wrapper.length === 1) {
-                var offset = cur_header_height + 16;
+                var offset = cur_header_height + 15;
                 var hidden = window.innerHeight + "px";
                 
                 if (!!$body && $body.hasClass('map')) {
@@ -713,7 +734,7 @@ var g_update_stamps = null;
                 offset += "px";
                 
                 //var offset = $window.scrollTop()  + "px";
-                //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 16));
+                //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
@@ -786,29 +807,79 @@ var g_update_stamps = null;
         var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
         var init_infinite_scroll = function() {
-            if (!!$gallery) {
-                // TODO: customize loading image
-                infinite_scroll = $gallery.infinitescroll({
-                    debug           : STAMPED_PRELOAD.DEBUG, 
-                    bufferPx        : window.innerHeight * .8, 
+            if (!!$gallery && !infinite_scroll) {
+                var $next = $(infinite_scroll_next_selector);
+                var init  = false;
+                
+                //console.debug("NEXT: " + .length);
+                //console.debug("NAV:  " + $("div.stamp-gallery-nav").length);
+                //console.debug("ITEM: " + $("div.stamp-gallery div.stamp-gallery-item").length);
+                
+                // only initialize infinite scroll if the page's content calls for it
+                if ($next.length === 1) {
+                    var href = $next.attr('href');
                     
-                    navSelector     : "div.stamp-gallery-nav", 
-                    nextSelector    : infinite_scroll_next_selector, 
-                    itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
-                    
-                    loading         : {
-                        finishedMsg : "No more stamps to load.", 
-                        msgText     : "<em>Loading more stamps...</em>", 
-                        img         : "/assets/img/loading.gif", 
-                        selector    : "div.stamp-gallery-loading"
+                    if (!!href && href.length > 1) {
+                        init = true;
                     }
-                }, function(new_elements) {
-                    var $elements = $(new_elements);
+                }
+                
+                if (init) {
+                    // TODO: customize loading image
+                    infinite_scroll = $gallery.infinitescroll({
+                        bufferPx        : window.innerHeight * .2, 
+                        debug           : true, 
+                        
+                        navSelector     : "div.stamp-gallery-nav", 
+                        nextSelector    : infinite_scroll_next_selector, 
+                        itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+                        
+                        pathParse       : function(path, page) {
+                            var offset_re = /([?&])offset=([\d]+)/;
+                            var match = path.match(offset_re);
+                            
+                            if (!!match) {
+                                offset = parseInt(match[2]);
+                                
+                                // TODO: this is a hack..
+                                return {
+                                    'join' : function(page) {
+                                        var cur_offset = offset + (page - 2) * STAMP_GALLERY_PAGE_SIZE;
+                                        cur_offset = "offset=" + cur_offset;
+                                        
+                                        return path.replace(offset_re, "$1" + cur_offset);
+                                    }
+                                };
+                            } else {
+                                return [ path ];
+                            }
+                        }, 
+                        
+                        dataType        : 'html', 
+                        
+                        loading         : {
+                            finishedMsg : "No more stamps to load.", 
+                            msgText     : "<em>Loading more stamps...</em>", 
+                            img         : "/assets/img/loading.gif", 
+                            selector    : "div.stamp-gallery-loading"
+                        }, 
+                        
+                        state           : {
+                            isDuringAjax: false,
+                            isInvalidPage: false,
+                            isDestroyed : false,
+                            isDone      : false
+                        }
+                    }, function(new_elements) {
+                        var $elements = $(new_elements);
+                        
+                        //$elements.emoji();
+                        $gallery.isotope('appended', $elements);
+                        update_stamps();
+                    });
                     
-                    //$elements.emoji();
-                    $gallery.isotope('appended', $elements);
-                    update_stamps();
-                });
+                    $gallery.infinitescroll('bind');
+                }
             }
         };
         
@@ -830,6 +901,36 @@ var g_update_stamps = null;
                 });
                 
                 init_infinite_scroll();
+            }
+        };
+        
+        var enable_gallery_animations = function(b) {
+            var enabled = (typeof(b) === 'undefined' ? true : b);
+            
+            if (!enabled) {
+                $('.isotope,.isotope .isotope-item').css({
+                    '-webkit-transition-duration' : '0s'
+                });
+                
+                if (!!$gallery) {
+                    $gallery.isotope({
+                        animationOptions : {
+                            duration : 0
+                        }
+                    });
+                }
+            } else {
+                $('.isotope,.isotope .isotope-item').css({
+                    '-webkit-transition-duration' : '.8s'
+                });
+                
+                if (!!$gallery) {
+                    $gallery.isotope({
+                        animationOptions : {
+                            duration : 800
+                        }
+                    });
+                }
             }
         };
         
@@ -1154,7 +1255,7 @@ var g_update_stamps = null;
                 // ensure main body content's vertical offset respects the dynamic 
                 // header's height
                 $content.css({
-                    top : cur_header_height + 16
+                    top : cur_header_height + 15
                 });
                 
                 // layout and style the header's login / join content
@@ -1223,7 +1324,9 @@ var g_update_stamps = null;
             History.Adapter.bind(window, 'statechange', function() {
                 var State    = History.getState();
                 var category = 'default';
-                var custom_params = {}
+                var custom_params = {
+                    'ajax' : true
+                };
                 
                 for (var key in State.data) {
                     if (State.data.hasOwnProperty(key)) {
@@ -1236,6 +1339,7 @@ var g_update_stamps = null;
                 }
                 
                 console.debug("NEW CATEGORY: " + category);
+                console.debug("user_id: " + user_id);
                 
                 History.log(State.data, State.title, State.url);
                 var orig_category = category;
@@ -1279,7 +1383,7 @@ var g_update_stamps = null;
                             
                             g_category = category;
                             set_body_class(orig_category);
-                            window.g_init_social_sharing();
+                            g_init_social_sharing();
                         };
                         
                         if (category === null) {
@@ -1320,6 +1424,7 @@ var g_update_stamps = null;
                         return;
                     }
                     
+                    // TODO: optimize!!
                     var $elements = $target.find('.stamp-gallery-item').remove();
                     
                     //$('.stamp-gallery-nav').show();
@@ -1329,9 +1434,16 @@ var g_update_stamps = null;
                     if (typeof(href) === 'undefined') {
                         href = "#";
                     }
-                    console.debug("NEW HREF: " + href);
+                    //log("NEW HREF: " + href);
+                    //console.debug("NEW HREF: " + href);
                     
-                    $(infinite_scroll_next_selector).attr('href', href);
+                    var $next = $(infinite_scroll_next_selector);
+                    if ($next.length === 1) {
+                        $next.attr('href', href);
+                    } else {
+                        // no previous next selector, so add one
+                        $(".stamp-gallery-nav ul").append("<li><a href='" + href + "'>Next</a></li>");
+                    }
                     
                     destroy_infinite_scroll();
                     
@@ -1343,9 +1455,8 @@ var g_update_stamps = null;
                     });
                     
                     $gallery.isotope('appended', $elements, function() {
+                        init_infinite_scroll();
                     });
-                    
-                    init_infinite_scroll();
                     
                     $gallery.stop(true, false).css({
                         visibility : 'visible'
@@ -1416,9 +1527,7 @@ var g_update_stamps = null;
                 category = null;
             }
             
-            var params   = get_custom_params({
-                category : category
-            });
+            var params   = { category : category };
             
             if (History && History.enabled) {
                 var params_str = get_custom_params_string(params);
@@ -1444,6 +1553,10 @@ var g_update_stamps = null;
                     }
                     
                     title += " - " + text;
+                }
+                
+                if (!params['category']) {
+                    delete params['category'];
                 }
                 
                 History.pushState(params, title, params_str);
@@ -1759,7 +1872,7 @@ var g_update_stamps = null;
             }
             
             // initialize reserve action
-            var $action_reserve = $sdetail.find('.action-reserve');
+            /*var $action_reserve = $sdetail.find('.action-reserve');
             
             if ($action_reserve.length == 1) {
                 var $link = $action_reserve.parent('a.action-link');
@@ -1791,7 +1904,7 @@ var g_update_stamps = null;
                         }).fancybox(popup_options);
                     });
                 }
-            }
+            }*/
             
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
@@ -1827,6 +1940,24 @@ var g_update_stamps = null;
                             return false;
                         });
                     }
+                }
+            });
+            
+            $sdetail.find(".stamp-card .entity-image-wrapper").each(function(i, elem) {
+                var $elem = $(elem);
+                var $img  = $elem.find('img');
+                
+                if (!!$elem && !!$img) {
+                    var width  = $img.width();
+                    var height = $img.height();
+                    
+                    $elem.css({
+                        'width'         : width, 
+                        'height'        : height, 
+                        
+                        'max-width'     : width, 
+                        'max-height'    : height, 
+                    });
                 }
             });
             
@@ -1868,7 +1999,7 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        window.g_init_social_sharing();
+        g_init_social_sharing();
         update_dynamic_header();
         update_stamps();
         init_gallery();

@@ -294,6 +294,14 @@ class AccountAlertSettings(Schema):
         cls.addProperty('email_alert_reply',                bool)
         cls.addProperty('email_alert_follow',               bool)
 
+class LinkedAccountShareSettings(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
 class LinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
@@ -304,6 +312,7 @@ class LinkedAccount(Schema):
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
+        cls.addNestedProperty('share_settings',             LinkedAccountShareSettings)
 
 class LinkedAccounts(Schema):
     @classmethod

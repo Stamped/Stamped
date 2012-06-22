@@ -108,15 +108,49 @@ def profile(request, schema, **kwargs):
         
         stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
     else:
-        user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-        user_id     = user['user_id']
+        if ajax and schema.user_id is not None:
+            user        = None
+            user_id     = schema.user_id
+        else:
+            user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+            user_id     = user['user_id']
+        
+        """
+        r = "4e57048accc2175fcd000001"
+        utils.log(user_id)
+        utils.log(r)
+        assert user_id == r
+        """
+        
+        # simple sanity check validation of user_id
+        if utils.tryGetObjectId(user_id) is None:
+            raise StampedInputError("invalid user_id")
         
         #utils.log(pprint.pformat(schema.dataExport()))
-        s = schema.dataExport()
-        del s['screen_name']
-        s['user_id'] = user_id
+        schema_data = schema.dataExport()
+        del schema_data['screen_name']
+        schema_data['user_id'] = user_id
         
-        stamps      = stampedAPIProxy.getUserStamps(s)
+        stamps = stampedAPIProxy.getUserStamps(schema_data)
+        
+        if user is None:
+            user = {
+                'user_id' : user_id
+            }
+            
+            if len(stamps) > 0:
+                user2    = stamps[0]['user']
+                user2_id = user2['user_id']
+                
+                if user2_id is None or user2_id != user_id:
+                    raise StampedInputError("mismatched user_id")
+                else:
+                    user.update(user2)
+            else:
+                user = stampedAPIProxy.getUser(dict(user_id=user_id))
+                
+                if user['user_id'] is None or user['user_id'] != user_id:
+                    raise StampedInputError("mismatched user_id")
     
     if not ajax:
         if ENABLE_TRAVIS_TEST:
@@ -142,7 +176,9 @@ def profile(request, schema, **kwargs):
     #utils.log("FOLLOWERS:")
     #utils.log(pprint.pformat(followers))
     
-    schema.ajax = True
+    # modify schema for purposes of next / prev gallery nav links
+    schema.ajax    = True
+    schema.user_id = user['user_id']
     
     if schema.offset > 0:
         prev_url = format_url(url_format, schema, {
@@ -153,6 +189,9 @@ def profile(request, schema, **kwargs):
         next_url = format_url(url_format, schema, {
             'offset' : schema.offset + len(stamps), 
         })
+    
+    #utils.log("PREV: %s" % prev_url)
+    #utils.log("NEXT: %s" % next_url)
     
     body_classes = _get_body_classes('profile', schema)
     
@@ -189,12 +228,24 @@ def map(request, schema, **kwargs):
         user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
         user_id     = user['user_id']
         
+        # simple sanity check validation of user_id
+        if utils.tryGetObjectId(user_id) is None:
+            raise StampedInputError("invalid user_id")
+        
         s = schema.dataExport()
         del s['screen_name']
         s['user_id']  = user_id
         s['category'] = 'place'
         
         stamps      = stampedAPIProxy.getUserStamps(s)
+    
+    stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
+    
+    for stamp in stamps:
+        subcategory = stamp['entity']['subcategory']
+        
+        if '_' in subcategory:
+            stamp['entity']['subcategory'] = subcategory.replace('_', ' ')
     
     body_classes = _get_body_classes('map collapsed-header', schema)
     

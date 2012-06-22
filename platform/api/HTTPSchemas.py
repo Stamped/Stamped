@@ -480,6 +480,27 @@ class HTTPRemoveLinkedAccountForm(Schema):
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
 
+class HTTPUpdateLinkedAccountShareSettingsForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
+    def exportLinkedAccountShareSettings(self):
+        shareSettings = LinkedAccountShareSettings().dataImport(self.dataExport(), overflow=True)
+        return shareSettings
+
+class HTTPLinkedAccountShareSettings(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('share_stamps',                     bool)
+        cls.addProperty('share_likes',                      bool)
+        cls.addProperty('share_todos',                      bool)
+        cls.addProperty('share_follows',                    bool)
+
 class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
@@ -490,6 +511,7 @@ class HTTPLinkedAccount(Schema):
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
+        cls.addNestedProperty('share_settings',                   HTTPLinkedAccountShareSettings)
 
     def importLinkedAccount(self, linked):
         self.dataImport(linked.dataExport(), overflow=True)
@@ -2697,36 +2719,36 @@ class HTTPActivity(Schema):
             del(self.benefit)
 
         def _addUserObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.users is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 userobjects = []
                 for user in activity.objects.users:
                     userobjects.append(HTTPUserMini().importUserMini(user))
                 self.objects.users = userobjects 
 
         def _addStampObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.stamps is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 stampobjects = []
                 for stamp in activity.objects.stamps:
                     stampobjects.append(HTTPStamp().importStamp(stamp))
                 self.objects.stamps = stampobjects
 
         def _addEntityObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.entities is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 entityobjects = []
                 for entity in activity.objects.entities:
                     entityobjects.append(HTTPEntityMini().importEntity(entity))
                 self.objects.entities = entityobjects 
 
         def _addCommentObjects():
+            if self.objects is None:
+                self.objects = HTTPActivityObjects()
             if activity.objects is not None and activity.objects.comments is not None:
-                if self.objects is None:
-                    self.objects = HTTPActivityObjects()
                 commentobjects = []
                 for comment in activity.objects.comments:
                     comment = HTTPComment().importComment(comment)
@@ -2812,7 +2834,6 @@ class HTTPActivity(Schema):
             return text, [ ref0, ref1 ]
 
         def _formatStampObjects(stamps, required=True, offset=0):
-            logs.info('### formatStampObjects  offset: %s' % offset)
             if stamps is None or len(stamps) == 0:
                 if required:
                     raise Exception("No stamp objects!")
@@ -3070,25 +3091,27 @@ class HTTPActivity(Schema):
 
             if self.source is not None:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to ###%(objects)s on %(source)s.',
-                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist on %(source)s.',
-                    'download'  : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'reserve'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
-                    'buy'       : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'watch'     : '%(subjects)s checked out ###%(objects)s on %(source)s.',
-                    'tickets'   : '%(subjects)s checked out ###%(objects)s on %(source)s.',
+                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
+                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue on %(source)s.',
                     }
             else:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to ###%(objects)s.',
-                    'playlist'  : '%(subjects)s added ###%(objects)s to a playlist.',
-                    'download'  : '%(subjects)s checked out ###%(objects)s.',
-                    'reserve'   : '%(subjects)s checked out ###%(objects)s.',
-                    'menu'      : '%(subjects)s viewed the menu for ###%(objects)s.',
-                    'buy'       : '%(subjects)s checked out ###%(objects)s.',
-                    'watch'     : '%(subjects)s checked out ###%(objects)s.',
-                    'tickets'   : '%(subjects)s checked out ###%(objects)s.',
+                    'listen'    : '%(subjects)s listened to %(objects)s.',
+                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
+                    'download'  : '%(subjects)s checked out %(objects)s.',
+                    'reserve'   : '%(subjects)s checked out %(objects)s.',
+                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'       : '%(subjects)s checked out %(objects)s.',
+                    'watch'     : '%(subjects)s checked out %(objects)s.',
+                    'tickets'   : '%(subjects)s checked out %(objects)s.',
+                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue.',
                     }
 
 #            actionMapping = {
@@ -3108,8 +3131,7 @@ class HTTPActivity(Schema):
             if self.verb[7:] in actionMapping.keys():
                 verbs = actionMapping[self.verb[7:]]
 
-            offset = verbs.find('###') - len('%(subjects)s') + len(subjects)
-            verbs = re.sub("###", "", verbs)
+            offset = verbs.index('%(objects)s') - len('%(subjects)s') + len(subjects)
             assert(offset < len(verbs))
 
             #offset = len(subjects) + len(verbs) + 2
@@ -3125,6 +3147,21 @@ class HTTPActivity(Schema):
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+
+            ### TEMP ICON WORK
+            if self.source in set(['rdio', 'opentable', 'itunes', 'fandango', 'amazon']):
+                if self.source == 'itunes' and self.verb[7:] == 'download':
+                    self.icon = _getIconURL('news_appstore')
+                else:
+                    self.icon = _getIconURL('news_%s' % self.source)
+            elif self.verb[7:] in set(['watch', 'playlist', 'menu', 'listen']):
+                self.icon = _getIconURL('news_%s' % self.verb[7:])
+            elif self.verb[7:] == 'add_to_instant_queue':
+                self.icon = _getIconURL('news_queue')
+
+            ### TEMP HACK TO SET IMAGE TO ICON - NEED TO GET ASSETS
+            if len(self.subjects) > 1:
+                self.image = self.icon
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)
