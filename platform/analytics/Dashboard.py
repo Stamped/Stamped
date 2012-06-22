@@ -70,11 +70,19 @@ while True:
     print "Unique users today: %s\n\n" % users
    
     print "Most Stamped Today:"
-    getTopStamped(None,str(today().date()))
+    dailyTop = getTopStamped(None,str(today().date()),stamp_collection)
+    count = 1
+    for i in dailyTop[0:25]:
+        print "%s) %s: %s stamps" % (count, i['_id'], int(i['value']))
+        count += 1
     
     print "\nTrending this Week:"
     past_week = today() - timedelta(days=6)
-    getTopStamped(None,str(past_week.date()))
+    weeklyTop = getTopStamped(None,str(past_week.date()),stamp_collection)
+    count = 1
+    for i in dailyTop[0:25]:
+        print "%s) %s" % (count, i['_id'])
+        count += 1
     
     #Show me the top stamped this week by vertical
     
