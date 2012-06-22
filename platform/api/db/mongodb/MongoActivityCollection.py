@@ -52,7 +52,7 @@ class MongoActivityCollection(AActivityDB):
         params = {
             'since'     : kwargs.pop('since', None),
             'before'    : kwargs.pop('before', None),
-            'limit'     : kwargs.pop('limit', 20),
+            'limit'     : kwargs.pop('limit', 0),
             'sort'      : 'timestamp.modified',
             'sortOrder' : pymongo.DESCENDING,
             }

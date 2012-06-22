@@ -2914,7 +2914,7 @@ class HTTPActivity(Schema):
         def _formatCommentObjects(comments, required=True, offset=0):
             if comments is None or len(comments) == 0:
                 if required:
-                    raise Exception("No comment objects! Activity object: %s" % activity)
+                    raise Exception("No comment objects!")
                 return None, []
 
             if len(comments) == 1:
