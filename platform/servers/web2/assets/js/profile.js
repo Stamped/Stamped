@@ -507,7 +507,10 @@ var g_update_stamps = null;
                     // TODO: modify static-map-small for sDetail to not be crinkled
                     // TODO: experiment w/ initial scale at .25 scale and tween to this transform
                     var width = "200px";
-                    var t = "perspective(600) scaleX(1.15) scaleY(1.15) rotateZ(25deg) rotateX(25deg) rotateY(-25deg)";
+                    var scale = 1.0;
+                    var angle = "20deg";
+                    var t = "perspective(600) scaleX(" + scale + ") scaleY(" + scale + ") rotateZ(" + angle + ") rotateX(" + angle + ") rotateY(-" + angle + ")";
+                    
                     $preview.css({
                         'width'     : width, 
                         'max-width' : width, 
