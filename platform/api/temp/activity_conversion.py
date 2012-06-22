@@ -91,6 +91,7 @@ for item in oldActivity:
         group               = True
         groupRange          = timedelta(days=1)
         unique              = True
+        objects['user_ids'] = [ item['recipient_id'] ]
 
     if verb == 'restamp':
         pass
