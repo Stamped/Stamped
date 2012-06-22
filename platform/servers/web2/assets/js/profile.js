@@ -8,6 +8,10 @@
 
 var g_update_stamps = null;
 
+/* TODO:
+    * gallery infinite scroll doesn't reset properly
+ */
+
 (function() {
     $(document).ready(function() {
         
@@ -29,6 +33,7 @@ var g_update_stamps = null;
         var metadata_item_expanded  = 'metadata-item-expanded';
         var collapsed               = 'collapsed';
         var collapsing              = 'collapsing';
+        var STAMP_GALLERY_PAGE_SIZE = 10;
         
         var static_prefix           = 'http://maps.gstatic.com/mapfiles/place_api/icons';
         var update_navbar_layout    = null;
@@ -83,7 +88,7 @@ var g_update_stamps = null;
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
-            var limit = "limit=10";
+            var limit = "limit=" + STAMP_GALLERY_PAGE_SIZE;
             
             if (href.match(limit_re)) {
                 href = href.replace(limit_re, "$1" + limit);
@@ -267,9 +272,10 @@ var g_update_stamps = null;
         var infinite_scroll = null;
         
         var destroy_infinite_scroll = function() {
-            if (infinite_scroll !== null) {
-                if ($gallery !== null) {
+            if (!!infinite_scroll) {
+                if (!!$gallery) {
                     $gallery.infinitescroll('destroy');
+                    $gallery.data('infinitescroll', null);
                 }
                 
                 infinite_scroll = null;
@@ -787,29 +793,79 @@ var g_update_stamps = null;
         var infinite_scroll_next_selector = "div.stamp-gallery-nav a:last";
         
         var init_infinite_scroll = function() {
-            if (!!$gallery) {
-                // TODO: customize loading image
-                infinite_scroll = $gallery.infinitescroll({
-                    debug           : STAMPED_PRELOAD.DEBUG, 
-                    bufferPx        : window.innerHeight * .8, 
+            if (!!$gallery && !infinite_scroll) {
+                var $next = $(infinite_scroll_next_selector);
+                var init  = false;
+                
+                //console.debug("NEXT: " + .length);
+                //console.debug("NAV:  " + $("div.stamp-gallery-nav").length);
+                //console.debug("ITEM: " + $("div.stamp-gallery div.stamp-gallery-item").length);
+                
+                // only initialize infinite scroll if the page's content calls for it
+                if ($next.length === 1) {
+                    var href = $next.attr('href');
                     
-                    navSelector     : "div.stamp-gallery-nav", 
-                    nextSelector    : infinite_scroll_next_selector, 
-                    itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
-                    
-                    loading         : {
-                        finishedMsg : "No more stamps to load.", 
-                        msgText     : "<em>Loading more stamps...</em>", 
-                        img         : "/assets/img/loading.gif", 
-                        selector    : "div.stamp-gallery-loading"
+                    if (!!href && href.length > 1) {
+                        init = true;
                     }
-                }, function(new_elements) {
-                    var $elements = $(new_elements);
+                }
+                
+                if (init) {
+                    // TODO: customize loading image
+                    infinite_scroll = $gallery.infinitescroll({
+                        bufferPx        : window.innerHeight * .8, 
+                        debug           : true, 
+                        
+                        navSelector     : "div.stamp-gallery-nav", 
+                        nextSelector    : infinite_scroll_next_selector, 
+                        itemSelector    : "div.stamp-gallery div.stamp-gallery-item", 
+                        
+                        pathParse       : function(path, page) {
+                            var offset_re = /([?&])offset=([\d]+)/;
+                            var match = path.match(offset_re);
+                            
+                            if (!!match) {
+                                offset = parseInt(match[2]);
+                                
+                                // TODO: this is a hack..
+                                return {
+                                    'join' : function(page) {
+                                        var cur_offset = offset + (page - 2) * STAMP_GALLERY_PAGE_SIZE;
+                                        cur_offset = "offset=" + cur_offset;
+                                        
+                                        return path.replace(offset_re, "$1" + cur_offset);
+                                    }
+                                };
+                            } else {
+                                return [ path ];
+                            }
+                        }, 
+                        
+                        dataType        : 'html', 
+                        
+                        loading         : {
+                            finishedMsg : "No more stamps to load.", 
+                            msgText     : "<em>Loading more stamps...</em>", 
+                            img         : "/assets/img/loading.gif", 
+                            selector    : "div.stamp-gallery-loading"
+                        }, 
+                        
+                        state           : {
+                            isDuringAjax: false,
+                            isInvalidPage: false,
+                            isDestroyed : false,
+                            isDone      : false
+                        }
+                    }, function(new_elements) {
+                        var $elements = $(new_elements);
+                        
+                        //$elements.emoji();
+                        $gallery.isotope('appended', $elements);
+                        update_stamps();
+                    });
                     
-                    //$elements.emoji();
-                    $gallery.isotope('appended', $elements);
-                    update_stamps();
-                });
+                    $gallery.infinitescroll('bind');
+                }
             }
         };
         
@@ -1337,7 +1393,13 @@ var g_update_stamps = null;
                     //log("NEW HREF: " + href);
                     //console.debug("NEW HREF: " + href);
                     
-                    $(infinite_scroll_next_selector).attr('href', href);
+                    var $next = $(infinite_scroll_next_selector);
+                    if ($next.length === 1) {
+                        $next.attr('href', href);
+                    } else {
+                        // no previous next selector, so add one
+                        $(".stamp-gallery-nav ul").append("<li><a href='" + href + "'>Next</a></li>");
+                    }
                     
                     destroy_infinite_scroll();
                     
@@ -1349,9 +1411,8 @@ var g_update_stamps = null;
                     });
                     
                     $gallery.isotope('appended', $elements, function() {
+                        init_infinite_scroll();
                     });
-                    
-                    init_infinite_scroll();
                     
                     $gallery.stop(true, false).css({
                         visibility : 'visible'
@@ -1422,9 +1483,7 @@ var g_update_stamps = null;
                 category = null;
             }
             
-            var params   = get_custom_params({
-                category : category
-            });
+            var params   = { category : category };
             
             if (History && History.enabled) {
                 var params_str = get_custom_params_string(params);
@@ -1450,6 +1509,10 @@ var g_update_stamps = null;
                     }
                     
                     title += " - " + text;
+                }
+                
+                if (!params['category']) {
+                    delete params['category'];
                 }
                 
                 History.pushState(params, title, params_str);

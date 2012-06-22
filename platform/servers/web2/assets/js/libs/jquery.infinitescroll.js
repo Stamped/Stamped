@@ -114,7 +114,7 @@
             var opts = $.extend(true, {}, $.infinitescroll.defaults, options);
 
             // Validate selectors
-            if (!this._validate(options)) { return false; }
+            //if (!this._validate(options)) { return false; }
             this.options = opts;
 
             // Validate page fragment path
@@ -197,13 +197,13 @@
 
             if (!!opts.pathParse) {
 
-                this._debug('pathParse manual');
+                this._debug('pathParse manual: ' + path);
                 return opts.pathParse(path, this.options.state.currPage+1);
 
             } else if (path.match(/^(.*?)\b2\b(.*?$)/)) {
                 path = path.match(/^(.*?)\b2\b(.*?$)/).slice(1);
 
-                // if there is any 2 in the url at all.    
+                // if there is any 2 in the url at all.
             } else if (path.match(/^(.*?)2(.*?$)/)) {
 
                 // page= is used in django:
@@ -258,7 +258,6 @@
             opts.state.currPage = 1; // if you need to go back to this instance
             opts.state.isPaused = false;
             this._binding('unbind');
-
         },
 
         // Load Callback

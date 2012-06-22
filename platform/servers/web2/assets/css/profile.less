@@ -462,7 +462,7 @@
                     min-height: 75px;
                     z-index: 55;
                     
-                    margin: 0 auto;
+                    margin:  0 auto;
                     padding: 18px 20px 0;
                     
                     .stamp-count {
@@ -1606,25 +1606,16 @@ body.sdetail_popup {
     }
 }
 
-@-webkit-keyframes spin {  
-from {  
-    -webkit-transform: rotate(0deg);  
-}  
-to {  
-    -webkit-transform: rotate(360deg);  
-    }  
-}  
-
 @-webkit-keyframes map-profile-inner-bounce {
-    0%   { -webkit-transform: perspective(600px) translate(0, 0); }
-    50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
-    100% { -webkit-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+    0%   { .transform(perspective(600px) translate(0, 0)); }
+    50%  { .transform(perspective(600px) rotateY(180deg) translate(0, -12px)); }
+    100% { .transform(perspective(600px) rotateY(360deg) translate(0, 0)); }
 }
 
 @-webkit-keyframes map-profile-inner-shadow-bounce {
-    0%   { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
-    50%  { -webkit-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
-    100% { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
+    0%   { .transform(perspective(600px) scale(1.0, 1.0)); opacity: 1.0; }
+    50%  { .transform(perspective(600px) scale(0.8, 0.8)); opacity: .75; }
+    100% { .transform(perspective(600px) scale(1.0, 1.0)); opacity: 1.0; }
 }
 
 a.map-profile-link {
@@ -1709,18 +1700,12 @@ a.map-profile-link {
                 @timing: easeInOutCubic;
                 
                 .inner {
-                    // TODO: tie this animation start to hover but
-                    -webkit-animation-name: map-profile-inner-bounce;
-                    -webkit-animation-iteration-count: 1;
-                    -webkit-animation-timing-function: @timing;
-                    -webkit-animation-duration: @duration;
+                    // TODO: tie this animation start to hover
+                    .animation(map-profile-inner-bounce, 1, @timing, @duration);
                 }
                 
                 .inner-shadow {
-                    -webkit-animation-name: map-profile-inner-shadow-bounce;
-                    -webkit-animation-iteration-count: 1;
-                    -webkit-animation-timing-function: @timing;
-                    -webkit-animation-duration: @duration;
+                    .animation(map-profile-inner-shadow-bounce, 1, @timing, @duration);
                 }
             }
         }
