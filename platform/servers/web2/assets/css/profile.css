@@ -548,7 +548,7 @@ footer,
   margin: 0 0 .5em;
   color: #000;
 }
-.stamp-count {
+.stamp-count-dependent {
   display: none;
 }
 .profile-header-body:hover .header-overlay {
@@ -1093,7 +1093,6 @@ a.lightbox .zoom {
 }
 .subtitle-line .icon {
   display: inline-block;
-  margin: 0 4px 0 0;
 }
 .loading {
   background: url(/assets/img/loading.gif) no-repeat;
