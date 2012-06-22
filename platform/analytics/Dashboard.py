@@ -80,7 +80,7 @@ while True:
     past_week = today() - timedelta(days=6)
     weeklyTop = getTopStamped(None,str(past_week.date()),stamp_collection)
     count = 1
-    for i in dailyTop[0:25]:
+    for i in weeklyTop[0:25]:
         print "%s) %s" % (count, i['_id'])
         count += 1
     
