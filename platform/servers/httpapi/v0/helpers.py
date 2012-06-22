@@ -144,9 +144,10 @@ def handleHTTPRequest(requires_auth=True,
                 
                 params = {}
                 
+                ### TODO: Fix this so that if the user passes an expired token, it fails appropriately
                 try:
                     params['authUserId'], params['authClientId'] = checkOAuth(request)
-                except Exception:
+                except StampedInputError:
                     if requires_auth:
                         raise
                     
@@ -154,7 +155,7 @@ def handleHTTPRequest(requires_auth=True,
                 
                 try:
                     params['client_id'] = checkClient(request)
-                except Exception:
+                except StampedInputError:
                     if requires_client:
                         raise
                     
@@ -280,7 +281,7 @@ def checkClient(request):
         client_id       = request.POST['client_id']
         client_secret   = request.POST['client_secret']
     except Exception:
-        raise StampedAuthError("invalid_request", "Client credentials not included")
+        raise StampedInputError("Client credentials not included")
     
     ### Validate Client Credentials
     try:
@@ -316,7 +317,7 @@ def checkOAuth(request):
         
         logs.token(oauth_token)
     except Exception:
-        raise StampedAuthError("invalid_request", "Access token not found")
+        raise StampedInputError("Access token not found")
     
     ### Validate OAuth Access Token
     try:

@@ -17,7 +17,11 @@ def collection(request, authUserId, http_schema, **kwargs):
 
     result = []
     for item in activity:
-        result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+        try:
+            result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+        except Exception as e:
+            logs.warning("Failed to enrich activity: %s" % e)
+            logs.debug("Activity: %s" % item)
     return transformOutput(result)
 
 @handleHTTPRequest()

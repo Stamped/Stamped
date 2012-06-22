@@ -57,9 +57,11 @@
                                                 {% if item.prices and item.prices|length > 0 %}
                                                     <div class='item-prices'>
                                                         {% for price in item.prices %}
-                                                            <div class='price'>
-                                                                {{price.price}}
-                                                            </div>
+                                                            {% if price.price and price.price|length > 0 %}
+                                                                <div class='price'>
+                                                                    {{price.price}}
+                                                                </div>
+                                                            {% endif %}
                                                         {% endfor %}
                                                     </div>
                                                 {% endif %}

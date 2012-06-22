@@ -262,17 +262,23 @@
                         </div>
                         
                         <div class="inset-stamp">
-                            <div class="stamp-count user-primary stamp-count-default">
-                                {{user.num_stamps}}
+                            <div class="stamp-count-dependent stamp-count-default">
+                                <div class="stamp-count user-primary">
+                                    {{user.num_stamps}}
+                                </div>
+                                
+                                <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                             </div>
                             
                             {% for distro in user.distribution %}
-                                <div class="stamp-count user-primary stamp-count-{{distro.category}}">
-                                    {{distro.count}}
+                                <div class="stamp-count-dependent stamp-count-{{distro.category}}">
+                                    <div class="stamp-count user-primary">
+                                        {{distro.count}}
+                                    </div>
+                                    
+                                    <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                                 </div>
                             {% endfor %}
-                            
-                            <p>STAMPS</p>
                         </div>
                     </div>
                 {% endwith %}

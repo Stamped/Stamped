@@ -190,8 +190,8 @@ def profile(request, schema, **kwargs):
             'offset' : schema.offset + len(stamps), 
         })
     
-    utils.log("PREV: %s" % prev_url)
-    utils.log("NEXT: %s" % next_url)
+    #utils.log("PREV: %s" % prev_url)
+    #utils.log("NEXT: %s" % next_url)
     
     body_classes = _get_body_classes('profile', schema)
     
@@ -238,6 +238,14 @@ def map(request, schema, **kwargs):
         s['category'] = 'place'
         
         stamps      = stampedAPIProxy.getUserStamps(s)
+    
+    stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
+    
+    for stamp in stamps:
+        subcategory = stamp['entity']['subcategory']
+        
+        if '_' in subcategory:
+            stamp['entity']['subcategory'] = subcategory.replace('_', ' ')
     
     body_classes = _get_body_classes('map collapsed-header', schema)
     

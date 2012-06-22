@@ -185,7 +185,7 @@ def stamped_view(schema=None,
                 return response
             
             except StampedHTTPError as e:
-                logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+                logs.warning("%s Error: %s" % (e.code, e.msg))
                 logs.warning(utils.getFormattedException())
                 
                 response = HttpResponse(e.msg, status=e.code)
@@ -266,7 +266,11 @@ def stamped_render(request, template, context, **kwargs):
     context = get_stamped_context(context, preload)
     
     #utils.log(pprint.pformat(context));
-    return render_to_response(template, context, **kwargs)
+    r = render_to_response(template, context, **kwargs)
+    f=open('t.html', 'w')
+    f.write(r.content)
+    f.close()
+    return r
 
 def get_stamped_context(context, preload=None):
     context = copy.copy(context)

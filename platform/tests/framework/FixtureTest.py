@@ -24,12 +24,16 @@ class AStampedFixtureTestCase(AStampedTestCase):
     @classmethod
     def setUpClass(cls):
         MongoDBConfig.getInstance().database_name = 'stamped_fixtures'
+        from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+        MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
         MongoCache.disableStaleness = True
 
     @classmethod
     def tearDownClass(cls):
         # Put things back the way they were in case another test needs to hit the real database.
         MongoDBConfig.getInstance().database_name = 'stamped'
+        from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+        MongoDBConfig2.getInstance().database_name = 'stamped'
         MongoCache.disableStaleness = False
 
 
