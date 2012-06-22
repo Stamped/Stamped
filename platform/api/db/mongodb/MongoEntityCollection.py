@@ -112,7 +112,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return result
 
     def getEntitiesByQuery(self, queryDict):
-        return [self._convertFromMongo(item) for item in self._collection.find(queryDict)]
+        return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
 
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
