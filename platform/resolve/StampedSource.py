@@ -29,6 +29,12 @@ try:
     from datetime                   import datetime
     from bson                       import ObjectId
     from Entity                     import buildEntity
+
+    # TODO GET RID OF SEARCH IMPORTS
+    from search.SearchResult import SearchResult
+    from search.ScoringUtils import *
+    from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+
 except:
     report()
     raise
@@ -548,7 +554,7 @@ class StampedSource(GenericSource):
                 yield {
                     '$or': [
                         { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
-                            for album in query.albums[20:]
+                            for album in query.albums[:20]
                     ],
                     'types'         : 'track',
                 }
@@ -559,7 +565,7 @@ class StampedSource(GenericSource):
                 yield {
                     '$or': [
                         { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
-                            for artist in query.artists[20:]
+                            for artist in query.artists[:20]
                     ],
                     'types'         : 'track',
                 }
@@ -585,7 +591,7 @@ class StampedSource(GenericSource):
                 yield {
                     '$or': [
                         { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
-                            for artist in query.artists[20:]
+                            for artist in query.artists[:20]
                     ],
                     'types'         : 'album',
                 }
@@ -596,7 +602,7 @@ class StampedSource(GenericSource):
                 yield {
                     '$or': [
                         { 'tracks': {'$elemMatch':{ 'title': track['name'] } } }
-                            for track in query.tracks[20:]
+                            for track in query.tracks[:20]
                     ],
                     'types'         : 'album',
                 }
@@ -625,28 +631,28 @@ class StampedSource(GenericSource):
                 yield {
                     '$or': [
                         { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
-                            for album in query.albums[20:]
+                            for album in query.albums[:20]
                     ],
                     'types'         : 'artist',
                 }
                 yield {
                     '$or': [
                         { 'tracks': {'$elemMatch':{ 'title': track['name'] } } }
-                            for track in query.tracks[20:]
+                            for track in query.tracks[:20]
                     ],
                     'types'         : 'artist',
                 }
                 yield {
                     '$or': [
                         { 'details.artist.albums': {'$elemMatch':{ 'album_name': album['name'] } } }
-                            for album in query.albums[20:]
+                            for album in query.albums[:20]
                     ],
                     'subcategory'   : 'artist',
                 }
                 yield {
                     '$or': [
                         { 'details.artist.songs': {'$elemMatch':{ 'song_name': track['name'] } } }
-                            for track in query.tracks[20:]
+                            for track in query.tracks[:20]
                     ],
                     'subcategory'   : 'artist',
                 }
@@ -698,7 +704,7 @@ class StampedSource(GenericSource):
                 yield {
                     '$or': [
                         { 'authors': {'$elemMatch':{ 'title': author['name'] } } }
-                            for author in query.authors[20:]
+                            for author in query.authors[:20]
                     ],
                     'types'         : 'book',
                 }
@@ -742,6 +748,86 @@ class StampedSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.__querySource(query_gen(), query)
+
+    def searchLite(self, queryCategory, queryText, timeout=None, **queryParams):
+        simplifiedText = queryText.lower()
+        if queryCategory == 'film':
+            query = {
+                'titlel' : simplifiedText,
+                '$and' : [ {
+                    '$or' : [
+                        { 'types' : { '$in' : [ 'tv', 'movie' ] } },
+                        { 'subcategory' : { '$in' : [ 'tv', 'movie' ] } },
+                    ]
+                } ],
+            }
+        elif queryCategory == 'music':
+            query = {
+                'titlel' : simplifiedText,
+                '$and' : [ {
+                    '$or' : [
+                            { 'types' : { '$in' : [ 'artist', 'album', 'track' ] } },
+                            { 'subcategory' : { '$in' : [ 'artist', 'album', 'song' ] } },
+                    ]
+                } ],
+            }
+        elif queryCategory == 'place':
+            query = {
+                'titlel' : simplifiedText,
+                '$and' : [ {
+                    '$or' : [
+                            { 'kind' : 'place' },
+                            { 'subcategory' : { '$in' : [ 'bar', 'restaurant' ] } },
+                    ]
+                } ],
+            }
+        elif queryCategory == 'app':
+            query = {
+                'titlel' : simplifiedText,
+                '$and' : [ {
+                    '$or' : [
+                            { 'types' : 'app' },
+                            { 'subcategory' : 'app' },
+                    ]
+                } ],
+            }
+        elif queryCategory == 'book':
+            query = {
+                'titlel' : simplifiedText,
+                '$and' : [ {
+                    '$or' : [
+                            { 'types' : 'book' },
+                            { 'subcategory' : 'book' },
+                    ]
+                } ],
+            }
+        else:
+            raise NotImplementedError()
+        # Exclude tombstoned listings.
+        and_list = query.setdefault('$and',[])
+        and_list.append( {
+            '$or' : [
+                    {'sources.tombstone_id' : { '$exists':False }},
+                    {'sources.tombstone_id' : None},
+            ]
+        } )
+        matches = list(self.__id_query(query))
+        entityIds = [ match['_id'] for match in matches ]
+        # TODO: Should just retrieve all of this from the initial query!
+        entityProxies = [ self.entityProxyFromKey(entityId) for entityId in entityIds ]
+        entityStats = MongoEntityStatsCollection().getStatsForEntities(entityIds)
+        statsByEntityId = dict([(stats.entity_id, stats) for stats in entityStats])
+        results = []
+        for entityProxy in entityProxies:
+            stats = statsByEntityId.get(entityProxy.key, None)
+            # Use fairly conservative scoring now for StampedSource on the assumption that it will probably cluster
+            # with other stuff.
+            num_stamps = 0 if stats is None else stats.num_stamps
+            resultScore = 0.3 + 0.2 * (num_stamps ** 0.5)
+            results.append(SearchResult(resultScore, entityProxy))
+        sortByScore(results)
+        return results
+
 
     def searchAllSource(self, query, timeout=None):
         def query_gen():
@@ -824,7 +910,7 @@ class StampedSource(GenericSource):
             except GeneratorExit:
                 pass
         return self.__querySource(query_gen(), query, constructor_proxy=EntitySearchAll)
-    
+
     """
     def enrichEntity(self, entity, controller, decorations, timestamps):
         if controller.shouldEnrich('tombstone', self.sourceName, entity):
