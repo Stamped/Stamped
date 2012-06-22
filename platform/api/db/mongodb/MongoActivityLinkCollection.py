@@ -24,8 +24,10 @@ class MongoActivityLinkCollection(AMongoCollection):
     
     ### PUBLIC
 
-    def saveActivityLink(self, activityId, userId):
-        now = datetime.utcnow()
+    def saveActivityLink(self, activityId, userId, **kwargs):
+        # Note: 'created' is necessary for backfilling data from v1
+        now = kwargs.pop('created', datetime.utcnow())
+        
         query = {'activity_id': activityId, 'user_id': userId}
         if self._collection.find(query).count() > 0:
             item = self._collection.update(query, { '$set' : { 'timestamp.modified' : now } }, safe=True )

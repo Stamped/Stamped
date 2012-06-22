@@ -105,7 +105,8 @@ class MongoActivityCollection(AActivityDB):
         alerts          = []
         sentTo          = set()
 
-        objects = objects.dataExport()
+        if isinstance(objects, Schema):
+            objects = objects.dataExport()
 
         activityId      = None
 
@@ -126,7 +127,7 @@ class MongoActivityCollection(AActivityDB):
 
             timestamp           = BasicTimestamp()
             timestamp.created   = created
-            timestamp.modified  = now
+            timestamp.modified  = created
             activity.timestamp  = timestamp 
 
             return activity
@@ -152,7 +153,7 @@ class MongoActivityCollection(AActivityDB):
 
             if groupRange is not None:
                 # Add time constraint
-                params['since'] = datetime.utcnow() - groupRange
+                params['since'] = created - groupRange
 
             activityIds = self.activity_items_collection.getActivityIds(**params)
 
@@ -162,7 +163,7 @@ class MongoActivityCollection(AActivityDB):
                     logs.warning('WARNING: matched multiple activityIds for verb (%s) & objects (%s)' % (verb, objects))
                 
                 activityId = activityIds[0]
-                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=now)
+                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=created)
                 if benefit is not None:
                     self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
 
