@@ -23,9 +23,9 @@ query = {'recipient_id': '4e570489ccc2175fcd000000'}
 oldActivity = activityDB._collection.find(query).sort('timestamp.created', pymongo.ASCENDING)
 
 for item in oldActivity:
-    print '\n%s\n' % ('='*80)
-    pprint(item)
-    print
+    # print '\n%s\n' % ('='*80)
+    # pprint(item)
+    # print
     
     userId          = None
     objects         = {}
@@ -53,7 +53,10 @@ for item in oldActivity:
     if genre in mapGenreToVerb:
         verb = mapGenreToVerb[genre]
     else:
+        print '--------------------------'
         print 'UNKNOWN GENRE: %s' % genre
+        pprint(item)
+        print
         continue
 
     created         = item['timestamp']['created']
@@ -100,6 +103,16 @@ for item in oldActivity:
         requireRecipient    = True
         group               = True
         groupRange          = timedelta(days=1)
+
+        try:
+            stamp = api._stampDB.getStamp(stampId)
+            objects['entity_ids'] = [ stamp.entity.entity_id ]
+        except Exception:
+            print '--------------------------'
+            print 'FAILED TO GET ENTITY FOR TODO'
+            pprint(item)
+            print
+            continue
 
     if verb == 'comment':
         pass 
