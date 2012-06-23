@@ -41,7 +41,7 @@ class EntitySearch(object):
         for category in allCategories:
             self.__categories_to_sources_and_priorities[category] = []
 
-        #self.__registerSource(StampedSource(), allCategories)
+        self.__registerSource(StampedSource(), music=10, film=10, book=10, app=10, place=10)
         self.__registerSource(iTunesSource(), music=10, film=10, book=3, app=10)
         # TODO: Enable film for Amazon. Amazon film results blend TV and movies and have better retrieval than
         # iTunes. On the other hand, they're pretty dreadful -- no clear distinction between TV and movies, no
@@ -67,11 +67,20 @@ class EntitySearch(object):
                     continue
                 logs.warning('JUST NOW SEEING SOURCE: ' + source.sourceName)
                 sources_seen.add(source)
-                logs.warning('SOURCES_SEEN IS ' + str([source for source in sources_seen]))
+                logs.warning('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
                 # If a source returns at least 5 results, we assume we got a good result set from it. If it
                 # returns less, we're more inclined to wait for straggling sources.
                 total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
+                logs.warning('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
                 total_potential_value_outstanding -= sources_to_priorities[source]
+            logs.warning('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+                    elapsed_seconds, total_value_received, total_potential_value_outstanding
+                ))
+
+            if total_potential_value_outstanding <= 0:
+                logs.warning('ALL SOURCES DONE')
+                return
+
             if total_value_received:
                 marginal_value_of_outstanding_sources = total_potential_value_outstanding / total_value_received
                 # Comes out to:
@@ -97,6 +106,7 @@ class EntitySearch(object):
                         ))
                     pool.kill()
                     return
+
             gevent.sleep(0.01)
 
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
@@ -107,6 +117,7 @@ class EntitySearch(object):
             resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
         except:
             logs.report()
+            resultsDict[source] = []
         after = datetime.datetime.now()
         timesDict[source] = after - before
         logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
