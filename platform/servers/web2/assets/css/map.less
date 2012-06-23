@@ -65,15 +65,49 @@ footer {
             z-index: 100;
         }
         
+        .stamp-map-item-wrapper {
+            position: relative;
+            
+            .stamp-map-item-shadow {
+                position: absolute;
+                left:    12px;
+                bottom: -24px;
+                
+                background: url(/assets/img/mapstamp-shadow.png) no-repeat;
+                
+                width:  377px;
+                height: 123px;
+                z-index: 25;
+            }
+            
+            .stamp-map-item-arrow {
+                position: absolute;
+                left:   32px;
+                bottom: -12px;
+                
+                width:  27px;
+                height: 12px;
+                z-index: 26;
+                
+                background: url(/assets/img/mapstamp-arrow.png) no-repeat;
+            }
+        }
+        
         .stamp-map-item {
             @marker_space: 12px;
             
             position: relative;
+            z-index: 26;
+            
             background: #fff;
             padding: @marker_space;
             
             .box-shadow(0, 0, 4px, 0, @shadow);
             .rounded(4px);
+            
+            &:hover {
+                cursor: pointer;
+            }
             
             .stamp-map-item-overlay {
                 position: absolute;

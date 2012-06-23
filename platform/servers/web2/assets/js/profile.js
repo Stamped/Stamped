@@ -1951,13 +1951,15 @@ var g_update_stamps = null;
                     var width  = $img.width();
                     var height = $img.height();
                     
-                    $elem.css({
-                        'width'         : width, 
-                        'height'        : height, 
-                        
-                        'max-width'     : width, 
-                        'max-height'    : height, 
-                    });
+                    if (width > 0 && height > 0) {
+                        $elem.css({
+                            'width'         : width, 
+                            'height'        : height, 
+                            
+                            'max-width'     : width, 
+                            'max-height'    : height, 
+                        });
+                    }
                 }
             });
             
