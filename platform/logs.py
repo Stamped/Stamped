@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import datetime, logging, logging.handlers, os, threading, hashlib, random, time
-import sys, traceback, string
+import sys, traceback, string, utils
 import inspect, pprint
 
 # Log
@@ -18,7 +18,7 @@ formatter = logging.Formatter('%(asctime)s | %(message)s', datefmt='%Y-%m-%d %H:
 
 # Stream handler
 stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.INFO)
+stream_handler.setLevel(logging.DEBUG)
 stream_handler.setFormatter(formatter)
 log.addHandler(stream_handler)
 
@@ -66,7 +66,7 @@ def _log(level, msg, *args, **kwargs):
         localData.log[level] = True
 
     # else:
-    msg = u"{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, msg)
+    msg = u"{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, utils.normalize(msg,strict=True))
     if level == 'warning':
         log.warning(msg, *args, **kwargs)
     elif level == 'info':

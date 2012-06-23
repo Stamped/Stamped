@@ -96,7 +96,7 @@
         var popup = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
-            pixelOffset: new google.maps.Size(-48, -32), 
+            pixelOffset: new google.maps.Size(-44, -50), 
             zIndex: null, 
             boxStyle: {
                 width: "340px"
@@ -354,8 +354,8 @@
         
         var set_temp_max_zoom = function(zoom) {
             var bc = google.maps.event.addListener(map, 'idle', function() {
-                if (this.getZoom() > 13) {
-                    this.setZoom(13);
+                if (this.getZoom() > zoom) {
+                    this.setZoom(zoom);
                 }
                 
                 google.maps.event.removeListener(bc);
@@ -379,8 +379,8 @@
                         
                         var clusters = marker_clusterer.getClusters();
                         var max_mark = null;
-                        var max_size = -1;
                         var max_pos  = null;
+                        var max_size = -1;
                         
                         $.each(clusters, function(i, cluster) {
                             var size = cluster.getSize();
@@ -392,7 +392,7 @@
                             }
                         });
                         
-                        if (max_pos !== null && max_size > 0 && (depth == 0 || max_size > 10)) {
+                        if (max_pos !== null && max_size >= 4 && (depth == 0 || max_size > 10)) {
                             var max_cluster_bounds = new google.maps.LatLngBounds();
                             var total_dist  = 0.0;
                             var total_dist2 = 0.0;
@@ -426,6 +426,8 @@
                             if (pts.length == 1) {
                                 map.setCenter(pts[0]);
                             } else {
+                                //console.debug(pts.length + " vs " + max_size);
+                                //console.debug(max_cluster_bounds.toString());
                                 map.fitBounds(max_cluster_bounds);
                             }
                             
@@ -448,7 +450,7 @@
             }
             
             var nav_header_height = $stamp_map_nav_wrapper.find('.nav-header').height();
-            var list_height       = (height - footer_height - 64 - nav_header_height);
+            var list_height       = (height - footer_height - 24 - nav_header_height);
             var list_height_px    = list_height + "px";
             
             list_height_expanded_px = list_height_px;
@@ -584,8 +586,9 @@
                 }
             });
             
-            var duration = 100;
-            var done = 0;
+            var duration = 200;
+            var easing   = 'easeOutCubic';
+            var done     = 0;
              
             var complete = function() {
                 if (++done >= 2) {
@@ -595,9 +598,26 @@
                 }
             };
             
-            // TODO: animate only height and opacity
-            $to_show.stop(true, false).show(duration, 'easeOutCubic', complete);
-            $to_hide.stop(true, false).hide(duration, 'easeOutCubic', complete);
+            // animate width, height, and opacity
+            //$to_show.stop(true, false).show(duration, easing, complete);
+            //$to_hide.stop(true, false).hide(duration, easing, complete);
+            
+            // animate height and opacity
+            $to_show.stop(true, false).slideDown(duration, easing, complete).animate({
+                'opacity' : 1
+            }, {
+                duration : duration, 
+                easing   : easing, 
+                queue    : false
+            });
+            
+            $to_hide.stop(true, false).slideUp(duration, easing, complete).animate({
+                'opacity' : 0
+            }, {
+                duration : duration, 
+                easing   : easing, 
+                queue    : false
+            });
         };
         
         

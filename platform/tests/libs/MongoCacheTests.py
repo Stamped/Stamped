@@ -18,6 +18,7 @@ from logs import log, report
 
 from AStampedAPIHttpTestCase            import *
 from libs.MongoCache                import mongoCachedFn, SerializationError
+from schema                    import Schema
 from api.db.mongodb.AMongoCollection import MongoDBConfig
 
 class UsageCounters(object):
@@ -98,6 +99,11 @@ def randomTestFn(*args, **kwargs):
 def sumValues(**kwargs):
     return sum(kwargs.values())
 
+@mongoCachedFn(memberFn=False)
+@usageCountingFunction()
+def returnTheArguments(*args):
+    return args
+
 class MongoCacheHttpTest(AStampedAPIHttpTestCase):
     def test_basic_calls(self):
         self.assertEqual(0, usageCounters.sumThree)
@@ -161,7 +167,7 @@ class MongoCacheHttpTest(AStampedAPIHttpTestCase):
         self.assertEqual(dummy1Sibling.specialSum(1, 20, 300), 1-20+300)
         self.assertEqual(1, usageCounters.DummyClass1_specialSum)
 
-    # Dummy 2 should hit a different cache key.
+        # Dummy 2 should hit a different cache key.
         self.assertEqual(dummy2.specialSum(1, 20, 300), 1+20-300)
         self.assertEqual(1, usageCounters.DummyClass1_specialSum)
         self.assertEqual(1, usageCounters.DummyClass2_specialSum)
@@ -180,17 +186,137 @@ class MongoCacheHttpTest(AStampedAPIHttpTestCase):
         self.assertEqual(1, usageCounters.DummyClass2_specialSum)
         self.assertEqual(1, usageCounters.specialSum)
 
+    def test_with_complicated_values(self):
+        arg1 = {'1': [2, set([3, 'four'])], '5':None}
+        arg2 = ('a', 'b', (12, 'DEE', {'five':6}))
+        result1 = returnTheArguments(arg1, arg2)
+        result2 = returnTheArguments(arg1, arg2)
+        self.assertEqual(1, usageCounters.returnTheArguments)
+        self.assertTrue(len(result1) == 2)
+        self.assertTrue(result1[0] is arg1)
+        self.assertTrue(result1[1] is arg2)
+        self.assertTrue(len(result2) == 2)
+        self.assertTrue(result2[0] is not arg1)
+        self.assertTrue(result2[1] is not arg2)
+
+        arg1v2 = result2[0]
+        arg2v2 = result2[1]
+
+        self.assertTrue(isinstance(arg1v2, dict))
+        self.assertEqual(len(arg1v2), 2)
+        self.assertTrue('1' in arg1v2)
+        self.assertTrue('5' in arg1v2)
+        self.assertTrue(arg1v2['5'] is None)
+        self.assertTrue(isinstance(arg1v2['1'], list))
+        self.assertEqual(len(arg1v2['1']), 2)
+        self.assertEqual(arg1v2['1'][0], 2)
+        self.assertTrue(isinstance(arg1v2['1'][1], set))
+        self.assertEqual(len(arg1v2['1'][1]), 2)
+        self.assertTrue(3 in arg1v2['1'][1])
+        self.assertTrue('four' in arg1v2['1'][1])
+
+        self.assertTrue(isinstance(arg2v2, tuple))
+        self.assertEqual(len(arg2v2), 3)
+        self.assertEqual('a', arg2v2[0])
+        self.assertEqual('b', arg2v2[1])
+        self.assertTrue(isinstance(arg2v2[2], tuple))
+        self.assertEqual(3, len(arg2v2[2]))
+        self.assertEqual(12, arg2v2[2][0])
+        self.assertEqual('DEE', arg2v2[2][1])
+        self.assertTrue(isinstance(arg2v2[2][2], dict))
+        self.assertEqual(len(arg2v2[2][2]), 1)
+        self.assertEqual(arg2v2[2][2]['five'], 6)
+
+    def test_with_schema_values(self):
+        class MySimpleSchema(Schema):
+            @classmethod
+            def setSchema(cls):
+                cls.addProperty('name', basestring)
+                cls.addProperty('favorite_director', basestring)
+                cls.addProperty('randnum', float)
+                cls.addProperty('missing_property', basestring)
+
+        schemaElement = MySimpleSchema()
+        schemaElement.name = 'Mike'
+        schemaElement.favorite_director = 'Joss Whedon'  # Totally.
+        schemaElement.randnum = 0.137
+
+        @mongoCachedFn(memberFn=False, schemaClasses=(MySimpleSchema,))
+        @usageCountingFunction()
+        def returnMySchemaElement():
+            return schemaElement
+
+        self.assertEqual(0, usageCounters.returnMySchemaElement)
+        result1 = returnMySchemaElement()
+        self.assertEqual(1, usageCounters.returnMySchemaElement)
+        result2 = returnMySchemaElement()
+        self.assertEqual(1, usageCounters.returnMySchemaElement)
+
+        self.assertTrue(result1 is schemaElement)
+        self.assertTrue(result2 is not schemaElement)
+        self.assertTrue(isinstance(result2, MySimpleSchema))
+        self.assertEqual(result2.name, 'Mike')
+        self.assertEqual(result2.favorite_director, 'Joss Whedon')
+        self.assertEqual(result2.randnum, 0.137)
+        self.assertEqual(result2.missing_property, None)
+
+    def test_with_nested_schema_values(self):
+        class InnerSchema(Schema):
+            @classmethod
+            def setSchema(cls):
+                cls.addProperty('name', basestring)
+                cls.addProperty('num', int)
+
+        class OuterSchema(Schema):
+            @classmethod
+            def setSchema(cls):
+                cls.addProperty('name', basestring)
+                cls.addNestedProperty('inner1', InnerSchema)
+                cls.addNestedProperty('inner2', InnerSchema)
+
+            def __init__(self):
+                Schema.__init__(self)
+                self.inner1 = InnerSchema()
+                self.inner2 = InnerSchema()
+
+        schemaElement = OuterSchema()
+        schemaElement.name = 'outer'
+        schemaElement.inner1.name = 'inner1'
+        schemaElement.inner2.num = 2
+
+        @mongoCachedFn(memberFn=False, schemaClasses=(OuterSchema,))
+        @usageCountingFunction()
+        def returnMyNestedSchemaElement():
+            return schemaElement
+
+        self.assertEqual(0, usageCounters.returnMyNestedSchemaElement)
+        result1 = returnMyNestedSchemaElement()
+        self.assertEqual(1, usageCounters.returnMyNestedSchemaElement)
+        result2 = returnMyNestedSchemaElement()
+        self.assertEqual(1, usageCounters.returnMyNestedSchemaElement)
+
+        self.assertTrue(result1 is schemaElement)
+        self.assertTrue(result2 is not schemaElement)
+        self.assertEqual(result2.name, 'outer')
+        self.assertEqual(result2.inner1.name, 'inner1')
+        self.assertEqual(result2.inner1.num, None)
+        self.assertEqual(result2.inner2.name, None)
+        self.assertEqual(result2.inner2.num, 2)
+
     def expect_failure(self, *args, **kwargs):
+        testFn = kwargs.pop('testFn', randomTestFn)
         try:
-            randomTestFn(*args, **kwargs)
+            testFn(*args, **kwargs)
         except SerializationError:
             pass # expected
         else:
             self.assertFalse("Expected SerializationError with args: (%s), kwargs: (%s)" % (str(args), str(kwargs)))
 
     def test_with_failures(self):
-        self.expect_failure(1,2,[3,4,[5]])
-        self.expect_failure(1,2,{3:set([4,5,6])})
+        # Dict keys must be strings.
+        self.expect_failure({1:2})
+        self.expect_failure(('a', 'b', 2.345, {'x':'y', (1, 2):27.4}))
+
         class Foo(object):
             pass
 
@@ -199,7 +325,22 @@ class MongoCacheHttpTest(AStampedAPIHttpTestCase):
         self.expect_failure(foo)
         self.expect_failure(1, "a", x=foo)
 
-    def test_force_recalculate(self):
+        class MySimplerSchema(Schema):
+            @classmethod
+            def setSchema(cls):
+                cls.addProperty('name', basestring)
+
+        mySchemaElement = MySimplerSchema()
+        mySchemaElement.name = 'foo'
+
+        @mongoCachedFn(memberFn=False)
+        def failToReturnSchemaElementsWithoutPassingToDecorator():
+            return mySchemaElement
+
+        self.expect_failure(testFn=failToReturnSchemaElementsWithoutPassingToDecorator)
+
+
+def test_force_recalculate(self):
         self.assertEqual(12, sumValues(x=4, y=3, z=5))
         self.assertEqual(12, sumValues(x=4, z=5, y=3))
         self.assertEqual(12, sumValues(z=5, y=3, x=4))

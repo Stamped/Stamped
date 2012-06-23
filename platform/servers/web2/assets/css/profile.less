@@ -13,6 +13,7 @@
 
 
 @import "common.less";
+@import "libs/isotope.less";
 
 
 /* **************************************************************************
@@ -209,6 +210,7 @@
                             display: block;
                             width: 100%;
                             opacity: 0;
+                            display: none;
                             
                             .transition(opacity, .3s, ease-out);
                         }
@@ -218,6 +220,7 @@
                             top:  0;
                             left: 0;
                             height: auto;
+                            display: block;
                             
                             /* NOTE: height and min-height dynamically set to MAX(s0/s1/s2-heights);*/
                             
@@ -284,26 +287,24 @@
                             }
                             
                             .user-stamp-distribution {
-                                font-size: 80%;
                                 margin-top: 1em;
+                                font-weight: 700;
+                                font-size: 80%;
+                                color: #000;
                                 
                                 .section {
                                     position: relative;
                                     
+                                    @b0: #3b84eb;
+                                    @b1: #438fed;
+                                    
                                     .category-name {
                                         display: inline-block;
-                                        min-width: 7em;
+                                        min-width: 6em;
                                     }
                                     
-                                    .icon-wrapper {
-                                        display: inline-block;
-                                        min-width:  22px;
-                                        min-height: 16px;
-                                        height:     16px;
-                                        
-                                        .icon {
-                                            margin: 0 auto;
-                                        }
+                                    .icon {
+                                        margin: 0;
                                     }
                                     
                                     .bargraph-row {
@@ -313,9 +314,6 @@
                                         
                                         width:  70%;
                                         height: 1em;
-                                        
-                                        @b0: #3b84eb;
-                                        @b1: #438fed;
                                         
                                         .bargraph-row-value {
                                             /*.transition(all, .5s, easeOutCubic);*/
@@ -330,10 +328,10 @@
                                             width:  0%;
                                             height: 100%;
                                         }
-                                        
-                                        &:hover .bargraph-row-value {
-                                            .linear-gradient2(left, @b0, @b1);
-                                        }
+                                    }
+                                    
+                                    &:hover .bargraph-row .bargraph-row-value {
+                                        .linear-gradient2(left, @b0, @b1);
                                     }
                                 }
                             }
@@ -449,7 +447,9 @@
             .profile-header-post {
                 position: relative;
                 z-index: 54;
-                height:  16px;
+                width:  100%;
+                height:  15px;
+                background: #fff;
                 
                 .box-shadow(0, -3px, 3px, 0, @shadow);
                 
@@ -463,7 +463,7 @@
                     min-height: 75px;
                     z-index: 55;
                     
-                    margin: 0 auto;
+                    margin:  0 auto;
                     padding: 18px 20px 0;
                     
                     .stamp-count {
@@ -485,7 +485,7 @@
     }
 }
 
-.stamp-count {
+.stamp-count-dependent {
     display: none;
 }
 
@@ -627,7 +627,7 @@ body.app {
     .stamp-gallery-view-map {
         float: right;
         
-        a {
+        /*a {
             //display: block;
             //-moz-box-align: center;
             //-webkit-box-align: center;
@@ -656,7 +656,7 @@ body.app {
                     background-position: -82px 0;
                 }
             }
-        }
+        }*/
     }
     
     .expanded {
@@ -738,26 +738,12 @@ body.music, body.book, body.film, body.app {
 }
 
 .stamp-gallery-item {
-    /*.transition(background-color, .5s, ease-in);*/
     display: block;
     width:  100%;
     min-width: @stamp-gallery-item-min-width;
     
     /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
-    
-    /*@args: 0.8s ease-out;
-    
-    -webkit-transition: top @args, left @args, width @args, height @args;
-    -moz-transition: top @args, left @args, width @args, height @args;
-    transition: top @args, left @args, width @args, height @args;*/
-
-    /*.transition(all, 0.8s, ease-out);*/
-    
-    /* TODO: keep this to enable GPU acceleration or not? Profile! */
-    /*.transform(perspective(200px) translate(0,0));*/
-    
-    /*background-color: #FEFEFE;*/
     
     &:hover {
         .content .content_2 .timestamp {
@@ -883,6 +869,13 @@ body.music, body.book, body.film, body.app {
 
 .timestamp_raw {
     display: none;
+}
+
+.stamp-card {
+    .entity-image-wrapper {
+        position: relative;
+        margin: 0 auto;
+    }
 }
 
 a.lightbox {
@@ -1080,7 +1073,6 @@ a.lightbox {
     
     .icon {
         display: inline-block;
-        margin: 0 4px 0 0;
     }
 }
 
@@ -1205,7 +1197,8 @@ a.lightbox {
     -moz-transition: @targets;
     transition: @targets;*/
     
-    margin: -180px 0 0;
+    // TODO: update this size
+    margin: -198px 0 0;
     padding: 0;
     
     .stamp-category-nav-bar-pre {
@@ -1291,7 +1284,9 @@ a.lightbox {
                     .transform(translatex(-72px));
                     .transition-transform2(.3s, ease-out, opacity, .3s, ease-out);
                 }
-                
+            }
+            
+            a.active {
                 &:hover, &:active {
                     .icon {
                         .transform(scale(1.0, 1.0));
@@ -1318,68 +1313,79 @@ a.lightbox {
                     }
                 }
             }
+            
+            a.disabled {
+                opacity: .5;
+                pointer-events: none;
+                cursor: default;
+            }
         }
         
         li.default .icon {
             background-position: -3px -3px;
         }
-        li.default a:hover .icon {
+        li.default a.active:hover .icon {
             background-position: -3px -75px;
         }
-        li.default a:active .icon {
+        li.default a.active:active .icon {
             background-position: -3px -39px;
         }
         
         li.place .icon {
             background-position: -36px -3px;
         }
-        li.place a:hover .icon {
+        li.place a.active:hover .icon {
             background-position: -36px -75px;
         }
-        li.place a:active .icon {
+        li.place a.active:active .icon {
             background-position: -36px -39px;
         }
         
         li.music .icon {
             background-position: -69px -3px;
         }
-        li.music a:hover .icon {
+        li.music a.active:hover .icon {
             background-position: -69px -75px;
         }
-        li.music a:active .icon {
+        li.music a.active:active .icon {
             background-position: -69px -39px;
         }
         
         li.book .icon {
             background-position: -102px -3px;
         }
-        li.book a:hover .icon {
+        li.book a.active:hover .icon {
             background-position: -102px -75px;
         }
-        li.book a:active .icon {
+        li.book a.active:active .icon {
             background-position: -102px -39px;
         }
         
         li.film .icon {
             background-position: -135px -3px;
         }
-        li.film a:hover .icon {
+        li.film a.active:hover .icon {
             background-position: -135px -75px;
         }
-        li.film a:active .icon {
+        li.film a.active:active .icon {
             background-position: -135px -39px;
         }
         
         li.app .icon {
             background-position: -168px -3px;
         }
-        li.app a:hover .icon {
+        li.app a.active:hover .icon {
             background-position: -168px -75px;
         }
-        li.app a:active .icon {
+        li.app a.active:active .icon {
             background-position: -168px -39px;
         }
     }
+}
+
+.stamp-category-nav-bar-clamped {
+    // clamp the top of the nav-bar
+    top: (250px + 198px) !important;
 }
 
 body.default #stamp-category-nav-bar ol li.default div {
@@ -1553,11 +1559,11 @@ ul.user-category-distribution {
 }
 
 
+.post-header {
+    .transition(background, .6s, ease-out);
+}
+
 body.sdetail_popup_animation, body.sdetail_popup {
-    .post-header {
-        background: #fff;
-    }
-    
     #main-page-content-body {
         display: block;
         visibility: visible !important;
@@ -1589,6 +1595,112 @@ body.sdetail_popup {
         #main-content {
             display: none;
             //visibility: hidden !important;
+        }
+    }
+}
+
+@-webkit-keyframes map-profile-inner-bounce {
+    0%   { .transform(perspective(600px) translate(0, 0)); }
+    50%  { .transform(perspective(600px) rotateY(180deg) translate(0, -12px)); }
+    100% { .transform(perspective(600px) rotateY(360deg) translate(0, 0)); }
+}
+
+@-webkit-keyframes map-profile-inner-shadow-bounce {
+    0%   { .transform(perspective(600px) scale(1.0, 1.0)); opacity: 1.0; }
+    50%  { .transform(perspective(600px) scale(0.8, 0.8)); opacity: .75; }
+    100% { .transform(perspective(600px) scale(1.0, 1.0)); opacity: 1.0; }
+}
+
+a.map-profile-link {
+    font: bold 12pt "Helvetica", "Arial", sans-serif;
+    color: #999;
+    display: inline-block;
+    min-width: 10em;
+    
+    .map-profile-icon-wrapper {
+        display: inline-block;
+        position: relative;
+        
+        width:  58px;
+        height: 27px;
+        
+        border: 2px solid transparent;
+        .rounded(2px);
+        
+        .map-profile-icon {
+            background: url(/assets/img/map_profile_sprite.png) no-repeat;
+            
+            width:  58px;
+            height: 27px;
+            .rounded(2px);
+            
+            .inner, .inner-shadow {
+                position: absolute;
+                background: url(/assets/img/map_profile_sprite.png) no-repeat;
+                width:  58px;
+                height: 33px;
+                top: -6px;
+                
+                //.transition-transform(.3s, easeOutCubic);
+            }
+        }
+    }
+    
+    .desc {
+        position: relative;
+        top: -8px;
+    }
+    
+    .profile-icon {
+        margin-right: .75em;
+        
+        .map-profile-icon {
+            background-position: 0 -41px;
+            
+            .inner {
+                background-position: -60px -35px;
+            }
+            
+            .inner-shadow {
+                background-position: -120px -35px;
+            }
+        }
+    }
+    
+    .map-icon {
+        margin-left: .75em;
+        
+        .map-profile-icon {
+            background-position: 0 -6px;
+            
+            .inner {
+                background-position: -60px 0;
+            }
+            
+            .inner-shadow {
+                background-position: -120px 0;
+            }
+        }
+    }
+    
+    &:hover {
+        cursor: pointer;
+        text-decoration: none !important;
+        
+        .map-profile-icon-wrapper {
+            .map-profile-icon {
+                @duration: .6s;
+                @timing: easeInOutCubic;
+                
+                .inner {
+                    // TODO: tie this animation start to hover
+                    .animation(map-profile-inner-bounce, 1, @timing, @duration);
+                }
+                
+                .inner-shadow {
+                    .animation(map-profile-inner-shadow-bounce, 1, @timing, @duration);
+                }
+            }
         }
     }
 }

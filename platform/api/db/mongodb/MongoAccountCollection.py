@@ -48,7 +48,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             return
 
         if 'linked' in document:
-            logs.error("Account contains both 'linked' and 'linked_account' fields.  Should only have one")
+            logs.warning("Account contains both 'linked' and 'linked_account' fields.  Should only have one")
             return document
 
         document['linked'] = {}
@@ -144,9 +144,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         except DuplicateKeyError as e:
             logs.warning("Unable to add account: %s" % e)
             if self._collection.find_one({"email": user.email}) is not None:
-                raise StampedDuplicationError("An account already exists with email '%s'" % user.email)
+                raise StampedDuplicateEmailError("An account already exists with email '%s'" % user.email)
             elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
-                raise StampedDuplicationError("An account already exists with screen name '%s'" % user.screen_name)
+                raise StampedDuplicateScreenNameError("An account already exists with screen name '%s'" % user.screen_name)
             else:
                 raise StampedDuplicationError("Account information already exists: %s" % e)
     
@@ -312,6 +312,19 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         )
 
         return newLinkedAccount
+
+    def updateLinkedAccount(self, userId, linkedAccount):
+        fields = {}
+        validFields = ['twitter', 'facebook', 'netflix' ]
+        if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix'] :
+            raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
+
+        logs.info('### linkedAccount: %s' % linkedAccount)
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)},
+            {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
+        )
+
 
     def removeLinkedAccount(self, userId, linkedAccount):
         fields = {}

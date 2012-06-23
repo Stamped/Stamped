@@ -48,13 +48,16 @@ class StampedAPIProxy(object):
             params['scope'] = 'user'
             return self._handle_get("stamps/collection.json", params)
     
-    def getFriends(self, params):
+    def getFriends(self, params, limit=None):
         if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/friends.json", params)
             
             if 'user_ids' in response and len(response['user_ids']) > 0:
+                if limit is not None:
+                    response['user_ids'] = response['user_ids'][:limit]
+                
                 # TODO: this only returns max 100 at a time
                 return self._handle_post("users/lookup.json", {
                     'user_ids' : ",".join(response['user_ids']), 
@@ -62,13 +65,16 @@ class StampedAPIProxy(object):
             else:
                 return []
     
-    def getFollowers(self, params):
+    def getFollowers(self, params, limit=None):
         if self._prod:
             raise NotImplementedError
         else:
             response = self._handle_get("friendships/followers.json", params)
             
             if 'user_ids' in response and len(response['user_ids']) > 0:
+                if limit is not None:
+                    response['user_ids'] = response['user_ids'][:limit]
+                
                 # TODO: this only returns max 100 at a time
                 return self._handle_post("users/lookup.json", {
                     'user_ids' : ",".join(response['user_ids']), 
@@ -179,7 +185,7 @@ def stamped_view(schema=None,
                 return response
             
             except StampedHTTPError as e:
-                logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+                logs.warning("%s Error: %s" % (e.code, e.msg))
                 logs.warning(utils.getFormattedException())
                 
                 response = HttpResponse(e.msg, status=e.code)
@@ -260,7 +266,11 @@ def stamped_render(request, template, context, **kwargs):
     context = get_stamped_context(context, preload)
     
     #utils.log(pprint.pformat(context));
-    return render_to_response(template, context, **kwargs)
+    r = render_to_response(template, context, **kwargs)
+    f=open('t.html', 'w')
+    f.write(r.content)
+    f.close()
+    return r
 
 def get_stamped_context(context, preload=None):
     context = copy.copy(context)

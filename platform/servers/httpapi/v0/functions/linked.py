@@ -13,13 +13,13 @@ from errors             import *
 from HTTPSchemas        import *
 from Netflix            import *
 from Facebook           import *
+from django.http        import HttpResponseRedirect
 
 
 @handleHTTPRequest(parse_request=False)
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
-    logs.info('### %s' % linkedAccounts)
     if linkedAccounts is None:
         result = None
     else:
@@ -45,9 +45,17 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPLinkedAccount)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.updateLinkedAccount(authUserId, http_schema.service_name)
+    result = stampedAPI.updateLinkedAccount(authUserId, http_schema)
 
     return transformOutput(True)
+
+@handleHTTPRequest(http_schema=HTTPUpdateLinkedAccountShareSettingsForm,
+                   conversion=HTTPUpdateLinkedAccountShareSettingsForm.exportLinkedAccountShareSettings)
+@require_http_methods(["POST"])
+def updateShareSettings(request, authUserId, http_schema, schema, **kwargs):
+    result = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, schema)
+    return transformOutput(True)
+
 
 @handleHTTPRequest()
 @require_http_methods(["POST"])
@@ -71,9 +79,9 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
-def createNetflixLoginResponse(authUserId):
+def createNetflixLoginResponse(authUserId, netflixAddId=None):
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(authUserId)
+    secret, url = netflix.getLoginUrl(authUserId, netflixAddId)
 
     response                = HTTPEndpointResponse()
     source                  = HTTPActionSource()
@@ -84,10 +92,10 @@ def createNetflixLoginResponse(authUserId):
 
     return transformOutput(response.dataExport())
 
-@handleHTTPRequest()
+@handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["GET"])
-def netflixLogin(request, authUserId, http_schema, **kwargs):
-    return createNetflixLoginResponse(authUserId)
+def netflixLogin(request, authUserId, **kwargs):
+    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
     parse_request_kwargs={'allow_oauth_token': True})
@@ -96,8 +104,10 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
     authUserId = http_schema.stamped_oauth_token
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
-    result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
-
+    try:
+        result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
+    except Exception as e:
+        return HttpResponseRedirect("stamped://netflix/link/fail")
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
     linked.user_id                  = result['user_id']
@@ -105,47 +115,39 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
 
-    return createNetflixLoginResponse(authUserId)
-
+    if http_schema.netflix_add_id is not None:
+        try:
+            result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
+        except Exception as e:
+            return HttpResponseRedirect("stamped://netflix/add/fail")
+        if result == None:
+            return HttpResponseRedirect("stamped://netflix/add/fail")
+        return HttpResponseRedirect("stamped://netflix/add/success")
+    return HttpResponseRedirect("stamped://netflix/link/success")
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["POST"])
-def addToNetflixInstant(request, authUserId, http_schema, **kwargs):
-    logs.info('adding to netflix instant id: %s' % http_schema.netflix_id)
+def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            return createNetflixLoginResponse(authUserId)
-            # return login endpoint action
-        else:
-            raise e
+    except StampedThirdPartyInvalidCredentialsError:
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
     if result == None:
-        return createNetflixLoginResponse(authUserId)
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
     response = HTTPEndpointResponse()
 
-    source                  = HTTPActionSource()
-    source.source           = 'stamped_confirm'
-    source.source_data      = 'The item is now added to your Netflix Queue.'
+    source                              = HTTPActionSource()
+    source.name                         = 'Added to Netflix Instant Queue'
+    source.source                       = 'stamped'
+    source.source_data                  = dict()
+    source.source_data['title']         = 'Added to Netflix'
+    source.source_data['subtitle']      = 'Instant Queue'
+    source.setIcon('act_response_netflix', stampedAuth.getClientDetails(authClientId))
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
-    response.setAction('netflix_login', 'Login to Netflix', [source])
+    response.setAction('stamped_confirm', 'Added to Netflix', [source])
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(response.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPNetflixId)
-@require_http_methods(["POST"])
-def removeFromNetflixInstant(request, authUserId, http_schema, **kwargs):
-    try:
-        result = stampedAPI.addToNetflixQueue(authUserId, http_schema.netflix_id)
-    except StampedHTTPError as e:
-        if e.code == 401:
-            #redirect to sign in
-            raise e
-        else:
-            raise e
-        #TODO throw status codes on error
-    #TODO return an HTTPAction
-    return transformOutput(True)
 

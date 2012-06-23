@@ -278,17 +278,17 @@ class StampedAPI(AStampedAPI):
         # Validate screen name
         account.screen_name = account.screen_name.strip()
         if not utils.validate_screen_name(account.screen_name):
-            raise StampedInputError("Invalid format for screen name")
+            raise StampedInvalidScreenNameError("Invalid format for screen name: %s" % account.screen_name)
 
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
-            raise StampedInputError("Blacklisted screen name")
+            raise StampedInvalidScreenNameError("Blacklisted screen name: %s" % account.screen_name)
 
         # Validate email address
         if account.email is not None and account.auth_service == 'stamped':
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
-                raise StampedInputError("Invalid format for email address")
+                raise StampedInvalidEmailError("Invalid format for email address: %s" % account.email)
 
         # Add image timestamp if exists
         if tempImageUrl is not None:
@@ -310,6 +310,28 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.addAccount, args=[account.user_id])
 
         return account
+
+    def upgradeAccount(self, authUserId, email, password):
+        account = self.getAccount(authUserId)
+
+        if account.auth_service == 'stamped':
+            logs.warning('Cannot upgrade an account that is already using stamped auth')
+            raise StampedIllegalActionError("Account is already using Stamped authorization")
+
+        if account.email != email:
+            email = str(email).lower().strip()
+            if not utils.validate_email(email):
+                raise StampedInputError("Invalid format for email address")
+            account.email = email
+
+        if password is None:
+            raise StampedInputError("A password must be provided")
+
+        account.password = convertPasswordForStorage(password)
+        account.auth_service = 'stamped'
+
+        return self._accountDB.updateAccount(account)
+
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
@@ -344,7 +366,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedIllegalActionError("The facebook user id is already linked to an existing account", 400)
+        raise StampedLinkedAccountExistsError("Account already exists for facebookId: %s" % facebookId)
 
     def _verifyTwitterAccount(self, twitterId):
         # Check that no Stamped account is linked to the twitterId
@@ -352,7 +374,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedIllegalActionError("The twitter user id is already linked to an existing account", 400)
+        raise StampedLinkedAccountExistsError("Account already exists for twitterId: %s" % twitterId)
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -704,7 +726,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using facebook_id: %s" % facebookId)
+            raise StampedLinkedAccountExistsError("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
 
     @API_CALL
@@ -713,7 +735,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using twitter_id: %s" % twitterId)
+            raise StampedLinkedAccountExistsError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
 
     @API_CALL
@@ -722,7 +744,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
-            raise StampedIllegalActionError("More than one account exists using netflix_id: %s" % netflixId)
+            raise StampedLinkedAccountExistsError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
 
     @API_CALL
@@ -869,9 +891,33 @@ class StampedAPI(AStampedAPI):
         return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
+    def updateLinkedAccountShareSettings(self, authUserId, service_name, linkedAccountShareSettings):
+        if service_name not in ['facebook', 'twitter', 'netflix']:
+            logs.warning('Attempted to update share settings of invalid linked account: %s' % service_name)
+            raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
+
+        account = self.getAccount(authUserId)
+        if getattr(account.linked, service_name, None) == None:
+            logs.warning('Could not find linked account to update: %s' % service_name)
+            raise StampedIllegalActionError("There was an error updating share settings")
+
+        linkedAccount = getattr(account.linked, service_name)
+        logs.info('### share_settings: %s' % linkedAccountShareSettings)
+        linkedAccount.share_settings = linkedAccountShareSettings
+
+        self._accountDB.updateLinkedAccount(authUserId, linkedAccount)
+        return True
+
+    @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
         if service_name not in ['facebook', 'twitter', 'netflix']:
+            logs.warning('Attempted to remove invalid linked account: %s' % service_name)
             raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
+
+        account = self.getAccount(authUserId)
+        if account.auth_service == service_name:
+            logs.warning('Attempted to remove linked account used for auth service')
+            raise StampedIllegalActionError('Cannot remove a third-party account used for authorization.')
 
         self._accountDB.removeLinkedAccount(authUserId, service_name)
         return True
@@ -1223,6 +1269,9 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_friends',   increment=1)
         self._userDB.updateUserStats(userId,     'num_followers', increment=1)
 
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
         user                    = self.getUserFromIdOrScreenName(userRequest)
@@ -1518,8 +1567,13 @@ class StampedAPI(AStampedAPI):
         return entity
 
     @lazyProperty
-    def _entitySearch(self):
-        from EntitySearch import EntitySearch
+    def _oldEntitySearch(self):
+        from resolve.EntitySearch import EntitySearch
+        return EntitySearch()
+
+    @lazyProperty
+    def _newEntitySearch(self):
+        from search.EntitySearch import EntitySearch
         return EntitySearch()
 
     @API_CALL
@@ -1529,10 +1583,14 @@ class StampedAPI(AStampedAPI):
                        authUserId=None,
                        category=None):
 
-        entities = self._entitySearch.searchEntities(query,
-                                                     limit=10,
-                                                     coords=coords,
-                                                     category=category)
+        #entities = self._oldEntitySearch.searchEntities(query,
+        #                                                limit=10,
+        #                                                coords=coords,
+        #                                                category=category)
+        queryLatLng = None
+        if coords:
+            queryLatLng = (coords.lat, coords.lng)
+        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=queryLatLng)
 
         results = []
         process = 5
@@ -1541,7 +1599,7 @@ class StampedAPI(AStampedAPI):
             distance = None
             try:
                 if coords is not None and entity.coordinates is not None:
-                    a = (coords['lat'], coords['lng'])
+                    a = (coords.lat, coords.lng)
                     b = (entity.coordinates.lat, entity.coordinates.lng)
                     distance = abs(utils.get_spherical_distance(a, b) * 3959)
             except Exception:
@@ -1637,7 +1695,7 @@ class StampedAPI(AStampedAPI):
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
             if action in actions and authUserId != stamp.user.user_id:
-                self._addActionCompleteActivity(authUserId, action, stamp.stamp_id, stamp.user.user_id)
+                self._addActionCompleteActivity(authUserId, action, source, stamp.stamp_id, stamp.user.user_id)
 
         return True
 
@@ -1703,14 +1761,28 @@ class StampedAPI(AStampedAPI):
         return stampedby
 
     def updateEntityStatsAsync(self, entityId):
-        numStamps = self._stampDB.countStampsForEntity(entityId)
+        entity = self._entityDB.getEntity(entityId)
+        if entity.sources.tombstone_id is not None:
+            # Call async process to update references
+            tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
+        numStamps = self._stampDB.countStampsForEntity(entityId)
         popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+
+        # If for some reason popularStampIds doesn't include all stamps, recalculate them
+        if numStamps < 1000 and len(popularStampIds) < numStamps:
+            logs.warning("Recalculating stamp stats for entityId=%s" % entityId)
+            allStampIds = self._stampDB.getStampIdsForEntity(entityId)
+            for stampId in allStampIds:
+                if stampId not in popularStampIds:
+                    stat = self.updateStampStatsAsync(stampId)
+            popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
-        logs.info('Popular User Ids: %s' % popularUserIds)
+        logs.debug('Popular User Ids: %s' % popularUserIds)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
@@ -1727,6 +1799,28 @@ class StampedAPI(AStampedAPI):
             stats.popular_stamps = popularStampIds
             self._entityStatsDB.addEntityStats(stats)
         return stats
+
+    def updateTombstonedEntityReferencesAsync(self, oldEntityId):
+        """
+        Basic function to update all references to an entity_id that has been tombstoned.
+        """
+        oldEntity = self._entityDB.getEntity(oldEntityId)
+        newEntity = self._entityDB.getEntity(oldEntity.sources.tombstone_id)
+        newEntityId = newEntity.entity_id 
+        newEntityMini = newEntity.minimize()
+
+        # Stamps
+        stampIds = self._stampDB.getStampIdsForEntity(oldEntityId)
+        for stampId in stampIds:
+            self._stampDB.updateStampEntity(stampId, newEntityMini)
+            r = self.updateStampStatsAsync(stampId)
+
+        # Todos
+        todoIds = self._todoDB.getTodoIdsFromEntityId(oldEntityId)
+        for todoId in todoIds:
+            self._todoDB.updateTodoEntity(todoId, newEntityMini)
+
+        self.updateEntityStatsAsync(newEntityId)
 
 
     """
@@ -1853,7 +1947,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -2051,7 +2146,6 @@ class StampedAPI(AStampedAPI):
                             except KeyError, e:
                                 logs.warning("Key error for credit (stamp_id = %s)" % i)
                                 logs.warning("Error: %s" % e)
-                                logs.debug("Stamp preview: %s" % stampPreview)
                                 continue
                     previews.credits = creditPreviews
 
@@ -2296,8 +2390,6 @@ class StampedAPI(AStampedAPI):
         except Exception:
             pass
 
-        ### TODO: Update stamp with new entity_id if old one is tombstoned
-
         creditedUserIds = set()
 
         # Give credit
@@ -2353,6 +2445,10 @@ class StampedAPI(AStampedAPI):
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id})
+
 
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, stampId, content_id):
@@ -2765,6 +2861,10 @@ class StampedAPI(AStampedAPI):
             stats.lat           = entity.coordinates.lat
             stats.lng           = entity.coordinates.lng
 
+        if entity.sources.tombstone_id is not None:
+            # Call async process to update references
+            tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
+
         score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
@@ -2773,6 +2873,102 @@ class StampedAPI(AStampedAPI):
         self._stampStatsDB.saveStampStats(stats)
         
         return stats
+
+    # TODO: Move this helper function to a more centralizated location?
+
+    def _kindTypeToOpenGraphType(self, kind, types):
+        if kind == 'place':
+            if 'bar' in types:
+                return 'bar'
+            elif 'restaurant' in types:
+                return 'restaurant'
+            else:
+                return 'place'
+
+        elif kind == 'person':
+            if 'artist' in types:
+                return 'artist'
+
+        elif kind == 'media_collection':
+            if 'tv' in types:
+                return 'tv_show'
+            elif 'album' in types:
+                return 'album'
+
+        elif kind == 'media_item':
+            if 'track' in types:
+                return 'track'
+            elif 'movie' in types:
+                return 'movie'
+            elif 'book' in types:
+                return 'book'
+
+        elif kind == 'software':
+            if 'app' in types:
+                return 'app'
+
+        else:
+            return 'other'
+
+    def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
+        #TODO: fill this with something other than the dummy url
+        if stampId is not None:
+            return "http://static.stamped.com/assets/movies6.html"
+
+
+    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
+        account = self.getAccount(authUserId)
+
+        logs.info('######')
+        import pprint
+        logs.info(pprint.pformat(account))
+
+        if account.linked is None or account.linked.facebook is None or account.linked.facebook.share_settings is None\
+           or account.linked.facebook.token is None:
+            return
+
+        share_settings = account.linked.facebook.share_settings
+
+        token = account.linked.facebook.token
+        action = None
+        ogType = None
+        url = None
+
+        logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
+
+        if stampId is not None and share_settings.share_stamps == True:
+            action = 'stamp'
+            stamp = self.getStamp(stampId)
+            kind = stamp.entity.kind
+            types = stamp.entity.types
+            ogType = self._kindTypeToOpenGraphType(kind, types)
+            url = self._getOpenGraphUrl(stampId = stampId)
+        elif likeStampId is not None and share_settings.share_likes == True:
+            action = 'like'
+            stamp = self.getStamp(stampid)
+            kind = stamp.entity.kind
+            types = stamp.entity.types
+            ogType = self._kindTypeToOpenGraphType(kind, types)
+            url = self._getOpenGraphUrl(stampId = stampId)
+        elif todoEntityId is not None and share_settings.share_todos == True:
+            action = 'todo'
+            entity = self.getEntity({'entity_id': todoEntityId})
+            kind = entity.kind
+            types = entity.types
+            ogType = self._kindTypeToOpenGraphType(kind, types)
+            url = self._getOpenGraphUrl(entityId = entity.entity_id)
+        elif followUserId is not None and share_settings.share_follows == True:
+            action = 'follow'
+            user = self.getUser({'user_id' : followUserId})
+            ogType = 'user'
+            url = self._getOpenGraphUrl(userId = user.user_id)
+
+        if action is None or ogType is None or url is None:
+            return
+
+        logs.info('### about to call postToGraph on facebook lib')
+        self._facebook.postToOpenGraph(token, ogType, url)
+
 
 
     """
@@ -2905,10 +3101,6 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.getStamp(comment.stamp_id)
             if stamp.user.user_id != authUserId:
                 raise StampedPermissionsError("Insufficient privileges to remove comment")
-
-        # Don't allow user to delete comment for restamp notification
-        if comment.restamp_id is not None:
-            raise StampedIllegalActionError("Cannot remove 'restamp' comment")
 
         # Remove comment
         self._commentDB.removeComment(comment.comment_id)
@@ -3046,6 +3238,9 @@ class StampedAPI(AStampedAPI):
 
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
         return stamp
 
@@ -3190,7 +3385,7 @@ class StampedAPI(AStampedAPI):
         if userId is not None:
             self._collectionDB.getUserStampIds(userId)
 
-        if scope == 'everyone':
+        if scope == 'popular':
             return None
 
         if authUserId is None:
@@ -3210,7 +3405,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getStampCollection(self, timeSlice, authUserId=None):
         # Special-case "tastemakers"
-        if timeSlice.scope == 'everyone':
+        if timeSlice.scope == 'popular':
             stampIds = []
             limit = timeSlice.limit
             if limit <= 0:
@@ -3290,7 +3485,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3394,7 +3590,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3466,7 +3663,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3521,20 +3719,22 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
-        if guideRequest.scope == 'me':
+        if guideRequest.scope == 'me' and authUserId is not None:
             return self.getPersonalGuide(guideRequest, authUserId)
 
-        if guideRequest.scope == 'inbox':
+        if guideRequest.scope == 'inbox' and authUserId is not None:
             return self.getUserGuide(guideRequest, authUserId)
 
-        if guideRequest.scope == 'everyone':
+        if guideRequest.scope == 'popular':
             return self.getTastemakerGuide(guideRequest)
+
+        raise StampedInputError("Invalid scope for guide: %s" % guideRequest.scope)
 
     @API_CALL
     def searchGuide(self, guideSearchRequest, authUserId):
-        if guideSearchRequest.scope == 'inbox':
+        if guideSearchRequest.scope == 'inbox' and authUserId is not None:
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
-        elif guideSearchRequest.scope == 'everyone':
+        elif guideSearchRequest.scope == 'popular':
             stampIds = None
         else:
             # TODO: What should we return for other search queries (not inbox and not popular)?
@@ -3565,7 +3765,8 @@ class StampedAPI(AStampedAPI):
                 # Convert to newer entity
                 replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
-                ### TODO: Async process to replace reference
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
             else:
                 entityIds[entity.entity_id] = entity
 
@@ -3847,7 +4048,8 @@ class StampedAPI(AStampedAPI):
             exists = False
 
         if exists:
-            raise StampedDuplicationError("Todo already exists")
+            return testTodo
+            #raise StampedDuplicationError("Todo already exists")
 
         # Check if user has already stamped the todo entity, mark as complete and provide stamp_id, if so
         users_stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
@@ -3904,6 +4106,9 @@ class StampedAPI(AStampedAPI):
         for friendStamp in friendStamps:
             tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
 
+        # Post to Facebook Open Graph if enabled
+        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoEntityId':entity.entity_id})
+
         return todo
 
     @API_CALL
@@ -3939,7 +4144,8 @@ class StampedAPI(AStampedAPI):
         RawTodo = self._todoDB.getTodo(authUserId, entityId)
 
         if not RawTodo or not RawTodo.todo_id:
-            raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
+            return True
+            #raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.removeTodo(authUserId, entityId)
 
@@ -4051,7 +4257,8 @@ class StampedAPI(AStampedAPI):
         self._addActivity('todo', userId, objects,
                                           recipientIds = recipientIds,
                                           requireRecipient = True,
-                                          group=True)
+                                          group=True,
+                                          groupRange=timedelta(days=1))
 
     def _addCommentActivity(self, userId, recipientIds, stampId, commentId):
         objects = ActivityObjectIds()
@@ -4105,11 +4312,12 @@ class StampedAPI(AStampedAPI):
                                                               requireRecipient = True,
                                                               unique = True)
 
-    def _addActionCompleteActivity(self, userId, action_name, stampId, friendId, body=None):
+    def _addActionCompleteActivity(self, userId, action_name, source, stampId, friendId, body=None):
         objects = ActivityObjectIds()
         objects.user_ids        = [ friendId ]
         objects.stamp_ids       = [ stampId ]
         self._addActivity('action_%s' % action_name, userId, objects,
+                                                             source = source,
                                                              body = body,
                                                              group = True,
                                                              groupRange = timedelta(days=1),
@@ -4118,6 +4326,7 @@ class StampedAPI(AStampedAPI):
     def _addActivity(self, verb,
                            userId,
                            objects,
+                           source=None,
                            body=None,
                            recipientIds=[],
                            requireRecipient=False,
@@ -4143,6 +4352,7 @@ class StampedAPI(AStampedAPI):
         self._activityDB.addActivity(verb           = verb,
                                      subject        = userId,
                                      objects        = objects,
+                                     source         = source,
                                      body           = body,
                                      recipientIds   = recipientIds,
                                      benefit        = benefit,
@@ -4158,7 +4368,6 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
-        #activityData, final = self._getActivityFromCache(authUserId, scope, offset, limit)
 
         # Append user objects
         userIds     = {}

@@ -144,9 +144,10 @@ def handleHTTPRequest(requires_auth=True,
                 
                 params = {}
                 
+                ### TODO: Fix this so that if the user passes an expired token, it fails appropriately
                 try:
                     params['authUserId'], params['authClientId'] = checkOAuth(request)
-                except Exception:
+                except StampedInputError:
                     if requires_auth:
                         raise
                     
@@ -154,7 +155,7 @@ def handleHTTPRequest(requires_auth=True,
                 
                 try:
                     params['client_id'] = checkClient(request)
-                except Exception:
+                except StampedInputError:
                     if requires_client:
                         raise
                     
@@ -188,11 +189,17 @@ def handleHTTPRequest(requires_auth=True,
                 return ret
             
             except StampedHTTPError as e:
-                logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+                if e.kind is None:
+                    e.kind = 'stamped_error'
+
+                logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
                 logs.warning(utils.getFormattedException())
                 logs.error(e.code)
 
-                error = {'error': e.msg}
+                error = {'error': e.kind}
+                if e.msg is not None:
+                    error['message'] = unicode(e.msg)
+
                 return transformOutput(error, status=e.code)
             
             except StampedAuthError as e:
@@ -219,6 +226,8 @@ def handleHTTPRequest(requires_auth=True,
                 logs.error(403)
 
                 error = {'error': 'illegal_action'}
+                if e.msg is not None:
+                    error['message'] = unicode(e.msg)
                 return transformOutput(error, status=403)
             
             except StampedPermissionsError as e:
@@ -272,7 +281,7 @@ def checkClient(request):
         client_id       = request.POST['client_id']
         client_secret   = request.POST['client_secret']
     except Exception:
-        raise StampedAuthError("invalid_request", "Client credentials not included")
+        raise StampedInputError("Client credentials not included")
     
     ### Validate Client Credentials
     try:
@@ -308,7 +317,7 @@ def checkOAuth(request):
         
         logs.token(oauth_token)
     except Exception:
-        raise StampedAuthError("invalid_request", "Access token not found")
+        raise StampedInputError("Access token not found")
     
     ### Validate OAuth Access Token
     try:
@@ -375,7 +384,7 @@ def parseRequest(schema, request, **kwargs):
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
         
-        raise StampedHTTPError("invalid_form", 400, msg)
+        raise StampedHTTPError(400, kind="invalid_form")
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -433,7 +442,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.warning(msg)
         utils.printException()
         
-        raise StampedHTTPError("invalid_form", 400)
+        raise StampedHTTPError(400, kind="invalid_form")
 
 def transformOutput(value, **kwargs):
     """

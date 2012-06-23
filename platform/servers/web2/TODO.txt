@@ -43,15 +43,31 @@
 
 TODO:
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
-    * fix broken thetvdb images
-    * fix glitch w/ hover state on entity stamp images in gallery shifting text
-    * clicking on map in stamp gallery => selection in map view
-    * remove ribbons from map list-view nav
-    * TODO: disable navigation to empty category-sections
     
-    * headers:
-        * change profile header image and share widget to remain constant
-        * transition between subheader sections
+    * profile:
+        * category nav:
+            * DONE - fix bug where sometimes URL params get in inconsistent state and you can't click on default
+            * DONE - disable navigation to empty category-sections
+        * gallery:
+            * DONE - fix sDetail bug where opening sDetail scrolls back to top of page
+            * clicking on map in stamp gallery => selection in map view
+            * BETA - FIX INFINITE SCROLL
+            * optimize infinite scroll
+            * adaptive layout improvements
+            * NOREPRO - fix glitch w/ hover state on entity stamp images in gallery shifting text
+        * headers:
+            * change profile header image and share widget to remain constant
+            * DONE - experiment w/ different transitions between subheader sections
+            * expanded friend view
+                * mock? possibly interesting popup gallery of user profile images?
+        * sDetail:
+            * user feedback images inline and expanded view
+            * fixes to user-generated-image w/ zoom icon placement
+            * DONE  - nuance 3D transform applied to entity image
+            * DONE  - change crinkled map => larger, non-crinkled map
+    * map:
+        * add spiffy icon to return to profile
+        * remove ribbons from map list-view nav
     
     * FIX CORS WebGL canvas issue
         * texImage2D
@@ -66,7 +82,7 @@ TODO:
         * DONE - Opening / closing animations
         * DONE - Comment collapsing ala Google Plus
         * ALPHA - Relayout according to sdetail spec
-        * Transformed entity image
+        * DONE - Transformed entity image
         * Move like / todo / comment counters to their own section
     * Map view:
         * DONE - Refactor profile.js w/ map.js in mind
@@ -76,14 +92,14 @@ TODO:
         * DONE - Autocentering based on user's location
         * DONE - Share this map widget
         * DONE - Customize stamp popup
-        * Incorporate closest geocoded metropolitan area in marker cluster hover
+        * PASS - Incorporate closest geocoded metropolitan area in marker cluster hover
     * Profile Page:
         * header:
             * DONE - Dynamic, category-dependent header titles
             * DONE - Separate # STAMPS header from user.num_stamps
-            * BETA - Header functionality w/ temp header images
+            * DONE - Header functionality w/ temp header images
             * DONE - Share this collection
-            * Customized user-specific, category-dependent header collages
+            * DONE - Customized user-specific, category-dependent header collages
             * Header images:
                 * Category and user dependent
                 * Offline:
@@ -95,12 +111,12 @@ TODO:
                     * overlay user gradient w/ screen blend mode at .7 opacity
                     * add perspective transform
                     * overlay blur that fades out on mouseover
-            * View histogram
-            * View bio / friends
+            * DONE - View histogram
+            * DONE - View bio / friends
         * gallery:
             * DONE - Sort stamps by popularity
     
-    * experiment with 'screen' blending mode for header cover images
+    * DONE - experiment with 'screen' blending mode for header cover images
     
     * fix infinite scroll after returning to default category
     * hide stamp blurb quotes if blurb is empty
@@ -119,9 +135,6 @@ TODO:
         * customize google maps style
         * need a way to pop back once you jump into a stack
         * animation for when you click on a marker cluster
-    
-    * implement user stamp category distribution
-        * TODO: figure out bargraph height issue
     
     * debug blurb and comment references via blurb_formatted
     * figure out why font-faces aren't loading on chrome
@@ -188,8 +201,12 @@ OLD:
     * link stamp image to lightboxed full-resolution version
     * fix opacity of lower profile header ribbon
     * modify update_stamps to be more efficient and only process new stamps!!!
+    * user stamp category distribution
+    * fix broken thetvdb images
+
 
 ChangeList 6/8/2012:
+-------------------
     * Map:
         * Map's initial bounds are now calculated from the user's largest stamp cluster
         * My location button implemented as a copy of the Google Maps version
@@ -208,4 +225,29 @@ ChangeList 6/8/2012:
     
     * sDetail:
         * if a lightbox is active, ESC will now only close the lightbox, and then you have to press ESC again to close the sDetail overlay
+
+
+ChangeList 6/22/2012:
+--------------------
+    * Map:
+        * Centers on most stamped cluster (much better algorithm now)
+        * Misc polish
+        * @anthony Header ribbon now goes to a 10% opacity gradient instead of white s.t. the change is slightly less jarring
+    
+    * Profile:
+        * Gallery:
+            * Infinite-scroll now works across different category selections and should be more responsive
+            * Re-added item animations
+                * NOTE: these manifest via infinite-scroll, category changes, sort changes, and resizing the browser
+            * TV Stamps from thetvdb.com finally have images!
+        * Header:
+            * Subsection polish
+            * Hidden subsections aren't visible on page load anymore
+        * Navbar:
+            * Empty categories are now disabled in the navbar
+            * Category descriptions now include number of stamps in parens
+            * Fixed bug where sometimes URL params was in inconsistent state and you can't click on default category
+    
+    * sDetail:
+        * Opening sDetail and closing now properly remembers the window's scroll offset
 

@@ -86,7 +86,7 @@ class StampedAuth(AStampedAuth):
                 return True
             raise
         except Exception:
-            raise StampedHTTPError('invalid_client', 401, "Invalid client credentials")
+            raise StampedInvalidClientError("Invalid client credentials")
     
     def removeClient(self, params):
         raise NotImplementedError
@@ -109,7 +109,7 @@ class StampedAuth(AStampedAuth):
             if account.auth_service != 'stamped':
                 msg = "Attempting a stamped login for an account that doesn't use stamped for auth'"
                 logs.warning(msg)
-                raise StampedHTTPError("invalid_credentials", 401, msg)
+                raise StampedInvalidCredentialsError("Invalid credentials")
 
             if not auth.comparePasswordToStored(password, account.password):
                 logs.warning('Invalid password for user: %s' % userIdentifier)
@@ -135,10 +135,10 @@ class StampedAuth(AStampedAuth):
             logs.info("Token created")
 
             return account, token
-        except Exception:
-            msg = "Invalid user credentials"
+        except Exception as e:
+            msg = "Invalid user credentials: %s" % e
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
 
 # TODO: Consolidate facebook credentials verifications with twitter?
 
@@ -146,7 +146,8 @@ class StampedAuth(AStampedAuth):
         try:
             fb_user = self._facebook.getUserInfo(fb_token)
         except StampedInputError as e:
-            raise StampedHTTPError('facebook_login_failed', 400, e.message)
+            logs.warning("Facebook login failed: %s" % e)
+            raise
 
         # TODO: remove repetitious code here (same as api.getAccountByFacebookId()
         accounts = self._accountDB.getAccountsByFacebookId(fb_user['id'])
@@ -154,23 +155,18 @@ class StampedAuth(AStampedAuth):
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % fb_user['id'])
         elif len(accounts) > 1:
             logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
-            raise StampedIllegalActionError("More than one account exists using facebook_id: %s" % fb_user['id'])
+            raise StampedLinkedAccountExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
         account = accounts[0]
-
-#        if account.auth_service != 'facebook':
-#            msg = "Attempting to do a facebook login for an account that doesn't use facebook auth'"
-#            logs.warning(msg)
-#            raise StampedHTTPError("invalid_credentials", 401, msg)
 
         if account.linked.facebook is None or account.linked.facebook.user_id is None:
             msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
 
         if fb_user['id'] != account.linked.facebook.user_id:
             msg = "Invalid credentials: Facebook id does not match Stamped user"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
 
         logs.info("Login successful")
 
@@ -197,7 +193,8 @@ class StampedAuth(AStampedAuth):
         try:
             tw_user = self._twitter.getUserInfo(user_token, user_secret)
         except StampedInputError as e:
-            raise StampedHTTPError('twitter_login_failed', 400, e.message)
+            logs.warning("Twitter login failed: %s" % e)
+            raise
 
         # TODO: remove repetitious code here (same as api.getAccountByTwitterId()
         accounts = self._accountDB.getAccountsByTwitterId(tw_user['id'])
@@ -211,17 +208,17 @@ class StampedAuth(AStampedAuth):
         if account.auth_service != 'twitter':
             msg = "Attempting to do a twitter login for an account that doesn't use twitter auth'"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
 
         if account.linked.twitter is None or account.linked.twitter.user_id is None:
             msg = "Invalid credentials: Attempting to login via twitter with an account that has no twitter linked account"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
 
         if tw_user['id'] != account.linked.twitter.user_id:
             msg = "Invalid credentials: twitter id does not match Stamped user"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
 
         logs.info("Login successful")
 
@@ -244,7 +241,6 @@ class StampedAuth(AStampedAuth):
 
         return account, token
 
-
     
     def verifyPassword(self, userId, password):
         try:
@@ -257,7 +253,7 @@ class StampedAuth(AStampedAuth):
         except Exception:
             msg = "Invalid password"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_credentials", 401, msg)
+            raise StampedInvalidCredentialsError("Invalid credentials")
     
     def forgotPassword(self, email):
         email = str(email).lower().strip()

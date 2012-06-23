@@ -18,13 +18,22 @@ from Facebook           import *
                    requires_client=True, 
                    http_schema=HTTPAccountNew, 
                    conversion=HTTPAccountNew.convertToAccount,
-                   upload='profile_image')
+                   upload='profile_image',
+                   parse_request_kwargs={'obfuscate':['password' ]})
 @require_http_methods(["POST"])
 def create(request, client_id, http_schema, schema, **kwargs):
-    logs.info('account schema passed in: %s' % schema)
-    schema = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    try:
+        account = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    except StampedInvalidEmailError:
+        raise StampedHTTPError(400, msg="Invalid email address")
+    except StampedInvalidScreenNameError:
+        raise StampedHTTPError(400, msg="Invalid screen name")
+    except StampedDuplicateEmailError:
+        raise StampedHTTPError(409, msg="An account already exists with that email address")
+    except StampedDuplicateScreenNameError:
+        raise StampedHTTPError(409, msg="An account already exists with that screen name")
 
-    user   = HTTPUser().importAccount(schema)
+    user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
     
     token  = stampedAuth.addRefreshToken(client_id, user.user_id)
@@ -32,14 +41,40 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
+# upgrade account from third party auth to stamped auth
+@handleHTTPRequest(requires_client=True,
+                   http_schema=HTTPAccountUpgradeForm,
+                   parse_request_kwargs={'obfuscate':['password']})
+@require_http_methods(["POST"])
+def upgrade(request, client_id, authUserId, http_schema, **kwargs):
+    account = stampedAPI.upgradeAccount(authUserId, http_schema.email, http_schema.password)
+
+    user   = HTTPUser().importAccount(account)
+
+    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+    output = { 'user': user.dataExport(), 'token': token }
+
+    return transformOutput(output)
+
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPFacebookAccountNew,
                    conversion=HTTPFacebookAccountNew.convertToFacebookAccountNew,
-                   upload='profile_image')
+                   parse_request_kwargs={'obfuscate':['user_token']})
 @require_http_methods(["POST"])
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    try:
+        account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    except StampedLinkedAccountExistsError:
+        raise StampedHTTPError(409, msg="An account already exists for this Facebook user")
+    except StampedInvalidEmailError:
+        raise StampedHTTPError(400, msg="Invalid email address")
+    except StampedInvalidScreenNameError:
+        raise StampedHTTPError(400, msg="Invalid screen name")
+    except StampedDuplicateEmailError:
+        raise StampedHTTPError(409, msg="An account already exists with that email address")
+    except StampedDuplicateScreenNameError:
+        raise StampedHTTPError(409, msg="An account already exists with that screen name")
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -50,13 +85,24 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     return transformOutput(output)
 
 @handleHTTPRequest(requires_auth=False,
-    requires_client=True,
-    http_schema=HTTPTwitterAccountNew,
-    conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
-    upload='profile_image')
+                   requires_client=True,
+                   http_schema=HTTPTwitterAccountNew,
+                   conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
+                   parse_request_kwargs={'obfuscate':['user_token', 'user_secret']})
 @require_http_methods(["POST"])
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    try:
+        account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    except StampedLinkedAccountExistsError:
+        raise StampedHTTPError(409, msg="An account already exists for this Twitter user")
+    except StampedInvalidEmailError:
+        raise StampedHTTPError(400, msg="Invalid email address")
+    except StampedInvalidScreenNameError:
+        raise StampedHTTPError(400, msg="Invalid screen name")
+    except StampedDuplicateEmailError:
+        raise StampedHTTPError(409, msg="An account already exists with that email address")
+    except StampedDuplicateScreenNameError:
+        raise StampedHTTPError(409, msg="An account already exists with that screen name")
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -183,7 +229,11 @@ def changePassword(request, authUserId, http_schema, **kwargs):
     new = http_schema.new_password
     old = http_schema.old_password
     
-    stampedAuth.verifyPassword(authUserId, old)
+    try:
+        stampedAuth.verifyPassword(authUserId, old)
+    except StampedInvalidCredentialsError:
+        raise StampedHTTPError(401, kind="invalid_credentials")
+
     result = stampedAuth.updatePassword(authUserId, new)
     
     return transformOutput(True)

@@ -8,15 +8,23 @@ __license__   = "TODO"
 
 import Globals, utils
 from utils                  import lazyProperty
+from pymongo.errors          import *
 from framework.FixtureTest  import *
 from AStampedAPITestCase    import *
 from AStampedAPIHttpTestCase import *
 from MongoStampedAPI import MongoStampedAPI
+from pprint import pprint
 
 import logs
 
 CLIENT_ID = DEFAULT_CLIENT_ID
 CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
+
+TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
+TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
+
+TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
+TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
 
 # ####### #
 # ACCOUNT #
@@ -127,6 +135,48 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         with expected_exception():
             form.color_primary = COLOR_PRIMARY
 
+class StampedAPIAccountUpdateTest(AStampedAPITestCase):
+    def setUp(self):
+        self.accountA = self.createTwitterAccount(TWITTER_USER_A0_TOKEN, TWITTER_USER_A0_SECRET, 'TestUserA')
+        self.accountB = self.createTwitterAccount(TWITTER_USER_B0_TOKEN, TWITTER_USER_B0_SECRET, 'TestUserB',
+                                                  email="devbot2@stamped.com")
+        self.accountC = self.createAccount('TestUserC')
+
+    def tearDown(self):
+        self.deleteAccount(self.accountA.user_id)
+        self.deleteAccount(self.accountB.user_id)
+
+    def test_upgrade_account(self):
+        account = self.api.upgradeAccount(self.accountA.user_id, 'devbot@stamped.com', '12345')
+        self.assertEqual(account.auth_service, 'stamped')
+        self.assertEqual(account.email, 'devbot@stamped.com')
+        self.assertTrue(account.password is not None)
+
+    def test_upgrade_account_invalid_email(self):
+        with expected_exception(StampedInputError):
+            self.api.upgradeAccount(self.accountA.user_id, 'devbot', '12345')
+
+    def test_upgrade_account_invalid_password(self):
+        with expected_exception(StampedInputError):
+            self.api.upgradeAccount(self.accountA.user_id, 'devbot', None)
+
+        with expected_exception(StampedInputError):
+            self.api.upgradeAccount(self.accountA.user_id, 'devbot', '')
+
+    def test_upgrade_account_same_email(self):
+        account = self.api.upgradeAccount(self.accountB.user_id, 'devbot2@stamped.com', '12345')
+        self.assertEqual(account.auth_service, 'stamped')
+        self.assertEqual(account.email, 'devbot2@stamped.com')
+        self.assertTrue(account.password is not None)
+
+    def test_upgrade_account_taken_email(self):
+        with expected_exception(DuplicateKeyError):
+            self.api.upgradeAccount(self.accountA.user_id, 'devbot2@stamped.com', '12345')
+
+    def test_upgrade_account_already_stamped_auth(self):
+        with expected_exception(DuplicateKeyError):
+            self.api.upgradeAccount(self.accountC.user_id, 'devbot2@stamped.com', '12345')
+
 class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):
     def setUp(self):
         (self.user, self.token) = self.createAccount(name='devbot') 
@@ -156,6 +206,8 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
         with expected_exception():
             self.handlePOST(path, data)
 
+"""
+# Disabled for now - Mike is rewriting due to implementation changes
 class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
     def test_update_profile_image(self):
         path = "account/update_profile_image.json"
@@ -174,7 +226,7 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
             }
         with expected_exception():
             result = self.handlePOST(path, data)
-
+"""
 
 class StampedAPIAccountCustomizeStamp(StampedAPIAccountHttpTest):
     def test_customize_stamp(self):

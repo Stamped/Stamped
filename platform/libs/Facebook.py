@@ -10,7 +10,7 @@ APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAEbCTAZCAz1FIfRenqwJnbXgLQhmBGYyHfngZBXP7hZBHoxr93lUWF8BauyVV8ahCZB9YQM5OobPyCkTKEDHZCuApSxK9eAZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -163,6 +163,13 @@ class Facebook(object):
                     continue
             break
 
+    def getOpenGraphActivity(self, access_token):
+        path = "me/stampedapp:stamp"
+        return self._get(
+            access_token,
+            path,
+        )
+
     def postToOpenGraph(self, access_token, object_type, object_url):
         path = "me/stampedapp:stamp"
         args = {}
@@ -207,12 +214,13 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
                                                    picture="http://static.stamped.com/users/ml.jpg"))
     if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph(access_token,
                                                    'movie', 'http://www.imdb.com/title/tt1190536/'))
+    if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToOpenGraph'
+    methods = 'getOpenGraphActivity'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

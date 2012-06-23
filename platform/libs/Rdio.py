@@ -38,7 +38,6 @@ try:
     from CachedFunction         import cachedFn
     from urlparse               import parse_qsl
     from urllib2                import HTTPError
-    from errors                 import StampedHTTPError
     from urllib                 import quote_plus
     from django.utils.encoding  import iri_to_uri
     
@@ -92,13 +91,15 @@ class Rdio(object):
                                           urlencode_utf8(kwargs),
                                           headers={'Accept-encoding':'gzip'})
         except HTTPError as e:
-            raise StampedHTTPError('rdio threw an exception',e.code,e.message)
+            logs.warning("Rdio threw an exception (%s): %s" % (e.code, e.message))
+            raise
         
         status = int(response[0]['status'])
         if status == 200:
             return json.loads(response[1])
         else:
-            raise StampedHTTPError('rdio returned a failure response %d' % status ,status , response[1]) 
+            logs.warning("Rdio returned a failure response (%s): %s" % (status, response[1]))
+            raise Exception('rdio returned a failure response %d' % status) 
     
     def userMethod(self, token, token_secret, method, **kwargs): 
         kwargs['method'] = method 

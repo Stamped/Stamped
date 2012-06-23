@@ -21,6 +21,7 @@ try:
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
+    from search.ScoringUtils        import *
 except:
     report()
     raise
@@ -117,11 +118,10 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     
     @lazyProperty 
     def genres(self):
-        try:
-            return self.data.genres
-        except Exception:
+        if self.data.genres is None:
             return []
-    
+        return self.data.genres
+
     @lazyProperty
     def description(self):
         try:
@@ -224,6 +224,17 @@ class TheTVDBSource(GenericSource):
                 pass
         
         return gen()
+
+    def searchLite(self, queryCategory, queryText, timeout=None):
+        # TODO: USE TIMEOUT.
+        if queryCategory != 'film':
+            raise NotImplementedError()
+        # Ugh. Why are we using entities?
+        entities = self.__thetvdb.search(queryText, transform=True, detailed=False)
+        results = [TheTVDBShow(data=entity) for entity in entities]
+        # TheTVDB has a higher source score than TMDB because it is strict with its retrieval. If you don't match
+        # closely, it won't return anything.
+        return scoreResultsWithBasicDropoffScoring(results, sourceScore=1.1)
 
 if __name__ == '__main__':
     demo(TheTVDBSource(), 'Archer')

@@ -48,6 +48,10 @@ class _RdioObject(object):
             if rdio_id is None:
                 raise ValueError('data or rdio_id must not be None')
             try:
+                # NOTE: The fact that I'm (disgracefully) calling a ResolverObject method from within _RdioObject's
+                # __init__ means that all subclassers must first init ResolverObject or a subclass before initing
+                # _RdioObject.
+                self.countLookupCall('main data')
                 data = rdio.method('get',keys=rdio_id,extras=extras)['result'][rdio_id]
             except KeyError:
                 raise ValueError('bad rdio_id')
@@ -100,13 +104,16 @@ class RdioArtist(_RdioObject, ResolverPerson):
     Rdio artist proxy
     """
     def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
-        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='albumCount')  
         ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
+        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='albumCount')
 
     @lazyProperty
     def albums(self):
-        self.countLookupCall('albums')
-        album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
+        try:
+            self.countLookupCall('albums')
+            album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
+        except LookupRequiredError:
+            return []
         return [ 
             {
                 'name'  : entry['name'],
@@ -118,8 +125,11 @@ class RdioArtist(_RdioObject, ResolverPerson):
 
     @lazyProperty
     def tracks(self):
-        self.countLookupCall('tracks')
-        track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
+        try:
+            self.countLookupCall('tracks')
+            track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
+        except LookupRequiredError:
+            return []
         return [ 
             {
                 'name'  : entry['name'],
@@ -134,8 +144,8 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
     Rdio album proxy
     """
     def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
-        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
+        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
 
     @lazyProperty
     def artists(self):
@@ -150,9 +160,12 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
 
     @lazyProperty
     def tracks(self):
-        keys = ','.join(self.data['trackKeys'])
-        self.countLookupCall('tracks')
-        track_dict = self.rdio.method('get',keys=keys)['result']
+        try:
+            keys = ','.join(self.data['trackKeys'])
+            self.countLookupCall('tracks')
+            track_dict = self.rdio.method('get',keys=keys)['result']
+        except LookupRequiredError:
+            return []
         return [ 
             {
                 'name'  : entry['name'],
@@ -168,8 +181,8 @@ class RdioTrack(_RdioObject, ResolverMediaItem):
     Rdio track proxy
     """
     def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
-        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
+        _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
 
     @lazyProperty
     def artists(self):

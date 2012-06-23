@@ -39,11 +39,11 @@ def passwordReset(request, **kwargs):
             # Verify passwords match and len > 0
             if not data['password']:
                 logs.warning("Invalid password: %s" % data['password'])
-                raise StampedHTTPError('invalid_password', 400, "Invalid password")
+                raise StampedInvalidPasswordError("Invalid password")
 
             if data['password'] != data['confirm']:
                 logs.warning("Password match failed")
-                raise StampedHTTPError('match_failed', 400, "Password match failed")
+                raise StampedInvalidPasswordError("Invalid password")
             
             # Store password            
             stampedAuth.updatePassword(authUserId, data['password'])
@@ -91,7 +91,7 @@ def passwordForgot(request):
             if not utils.validate_email(email):
                 msg = "Invalid format for email address"
                 logs.warning(msg)
-                raise StampedHTTPError('invalid_input', 400, "Invalid email address")
+                raise StampedInvalidEmailError("Invalid email address")
             
             # Verify account exists
             try:
@@ -99,7 +99,7 @@ def passwordForgot(request):
             except:
                 ### TODO: Display appropriate error message
                 errorMsg = 'No account information was found for that email address.'
-                raise StampedHTTPError('invalid_input', 404, "Email address not found")
+                raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
 
             # Send email
             stampedAuth.forgotPassword(email)

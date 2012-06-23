@@ -15,27 +15,25 @@ from errors                 import *
 from bson.objectid          import ObjectId
 from boto.sdb.connection    import SDBConnection
 from boto.exception         import SDBResponseError
+from hashlib                import sha1
 
 class SimpleDB(object):
     
     def __init__(self, domain=None):
-        conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+        self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+        self.domain_name = None
+        self.domains = {}
 
         if domain is None:
             if is_prod_stack():
-                domain = 'stats-prod'
+                self.domain_name = 'stats_prod'
             elif is_ec2():
-                domain = 'stats-dev'
-            # else:
-            #     domain = 'stats-test'
-
-        try:
-            self.domain = conn.get_domain(domain)
-        except SDBResponseError:
-            self.domain = conn.create_domain(domain)
+                self.domain_name = 'stats_dev'
+        else:
+            self.domain_name = domain
 
     def addStat(self, stat):
-        if self.domain is None:
+        if self.domain_name is None:
             return
 
         try:
@@ -79,7 +77,18 @@ class SimpleDB(object):
 
             if len(data) > 0:
                 statId = str(ObjectId())
-                self.domain.put_attributes(statId, data, replace=False)
+                if data['uri'] != '/v0/ping.json' and data['uri'] != '/v0/temp/ping.json':
+                    suffix = '0%s' % (sha1(statId).hexdigest()[0])
+                    if suffix in self.domains:
+                        domain = self.domains[suffix]
+                    else:
+                        try:
+                            domain = self.conn.get_domain('%s_%s' % (self.domain_name, suffix))
+                        except SDBResponseError:
+                            domain = self.conn.create_domain('%s_%s' % (self.domain_name, suffix))
+                        self.domains[suffix] = domain
+                    domain.put_attributes(statId, data, replace=False)
+
 
         except Exception as e:
             print e

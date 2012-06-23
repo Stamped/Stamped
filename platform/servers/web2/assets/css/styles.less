@@ -13,6 +13,8 @@
 
 
 @import "libs/h5bp.min.css";
+@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
+
 @import "common.less";
 
 
@@ -165,7 +167,7 @@ a.follow-button {
     position: relative;
     display:  block;
     
-    height: 16px;
+    height: 15px;
 }
 
 .user-logo-large {
@@ -205,13 +207,13 @@ a.follow-button {
 }
 
 .ribbon-top {
-    background: url(/assets/img/ribbon-top.png) left top repeat-x;
-    height: 16px;
+    background: url(/assets/img/ribbon-top.png) repeat-x;
+    height: 15px;
 }
 
 .ribbon-bottom {
-    background: url(/assets/img/ribbon-bottom.png) left top repeat-x;
-    height: 16px;
+    background: url(/assets/img/ribbon-bottom.png) repeat-x 0 -1px;
+    height: 15px;
 }
 
 #main-page-content {
@@ -607,19 +609,6 @@ a.sdetail, .pronounced-title a {
     font-style: italic;
 }
 
-.shadow {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: #000;
-    background: rgba(0,0,0,0.65);
-    z-index: 100;
-    display: none;
-    filter: alpha(opacity=65);
-}
-
 .brand {
     background: url(/assets/img/stamped-logo.png) left top no-repeat;
     width: 180px;
@@ -696,46 +685,67 @@ footer .copyright a, footer .copyright a {
     margin-top:  -405px;
 }
 
-.stamp-category-book .icon {
-    background: url(/assets/img/entity-type-book.png) no-repeat;
+.icon {
+    background: url('/assets/img/categoryicons18px.png') no-repeat;
     display: inline-block;
-    width:  19px;
-    height: 15px;
+    width:  18px;
+    height: 18px;
+}
+
+.dark-icon {
+    background: url('/assets/img/categoryicons18px-dark.png') no-repeat;
+}
+
+.stamp-category-book .icon {
+    background-position: -40px -20px;
 }
 
 .stamp-category-film .icon {
-    background: url(/assets/img/entity-type-film.png) no-repeat;
-    display: inline-block;
-    width:  15px;
-    height: 15px;
+    background-position: 0 -20px;
+}
+
+.stamp-category-place .icon {
+    background-position: -60px 0;
 }
 
 .stamp-category-food .icon {
-    background: url(/assets/img/entity-type-food.png) no-repeat;
-    display: inline-block;
-    width:  21px;
-    height: 15px;
+    background-position: 0 0;
 }
 
 .stamp-category-music .icon {
-    background: url(/assets/img/entity-type-music.png) no-repeat;
-    display: inline-block;
-    width:  15px;
-    height: 15px;
+    background-position: -80px 0;
 }
 
 .stamp-category-other .icon, .stamp-category- .icon {
-    background: url(/assets/img/entity-type-other.png) no-repeat;
-    display: inline-block;
-    width:  12px;
-    height: 15px;
+    background-position: -80px -20px;
+}
+
+.stamp-subcategory-restaurant .icon {
+    background-position: 0 0;
+}
+
+.stamp-subcategory-bar .icon {
+    background-position: -20px 0;
+}
+
+.stamp-subcategory-cafe .icon {
+    background-position: -40px 0;
+}
+
+.stamp-subcategory-tv .icon {
+    background-position: -20px -20px;
+}
+
+.stamp-subcategory-song .icon {
+    background-position: -100px 0;
+}
+
+.stamp-subcategory-artist .icon {
+    background-position: -120px 0;
 }
 
 .stamp-subcategory-app .icon {
-    background: url(/assets/img/entity-type-app.png) no-repeat;
-    display: inline-block;
-    width:  16px;
-    height: 16px;
+    background-position: -60px -20px;
 }
 
 
@@ -757,9 +767,5 @@ footer .copyright a, footer .copyright a {
     font-size: 3em;
     letter-spacing: .05em;
     color: #000;
-    
-    /*text-shadow: 0.05em 0.05em 0.03em #aaa;
-    font-smooth: always;
-    -webkit-font-smoothing: antialiased;*/
 }
 
