@@ -15,6 +15,7 @@
 #import "STButton.h"
 #import "STConfiguration.h"
 #import "STConsumptionMapViewController.h"
+#import "STMenuController.h"
 
 @interface STIWantToViewController ()
 
@@ -23,25 +24,42 @@
 @implementation STIWantToViewController
 
 - (id)init {
-  self = [super init];
-  if (self) {
-  }
-  return self;
+    self = [super init];
+    if (self) {
+    }
+    return self;
+}
+
+- (void)login:(id)sender {
+    
+    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    [controller showSignIn];
+    
 }
 
 - (void)viewDidLoad {
-  [super viewDidLoad];
- 
-    [Util addCreateStampButtonToController:self];
+    [super viewDidLoad];
+    
+    if (!LOGGED_IN) {
+        
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        self.navigationItem.rightBarButtonItem = button;
+        [button release];
+        
+    } else {
+        
+        [Util addCreateStampButtonToController:self];
+        
+    }
     
     self.view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-   
+    
     CGFloat cellWidth = (self.scrollView.frame.size.width-10.0f)/2;
     NSArray *categories = [Util categories];
     UIImage *image = [UIImage imageNamed:@"want_btn_bg.png"];
     UIImage *imageHi = [UIImage imageNamed:@"want_btn_bg_hi.png"];
     CGRect buttonFrame = CGRectMake(5, 8, cellWidth, image.size.height);
-
+    
     for (NSInteger i = 0; i < categories.count; i++) {
         
         NSString *category = [categories objectAtIndex:i];
@@ -65,21 +83,21 @@
         }
         
     }
-
+    
 }
 
 - (void)viewDidUnload {
-  [super viewDidUnload];
+    [super viewDidUnload];
 }
 
 
 #pragma mark - Actions
 
 - (void)buttonHit:(UIButton*)sender {
- 
+    
     NSString *category = [[Util categories] objectAtIndex:sender.tag];
     UIViewController *controller = nil;
-  
+    
     NSDictionary* categoryMapping = [NSDictionary dictionaryWithObjectsAndKeys:
                                      @"food", @"food",
                                      @"book", @"book",
@@ -103,7 +121,7 @@
     } else {
         [Util warnWithMessage:[NSString stringWithFormat:@"controller for %@ not implemented yet...", category] andBlock:nil];
     }
- 
+    
 }
 
 + (void)setupConfigurations {

@@ -15,4 +15,7 @@
 @property (nonatomic, readonly, retain) id<STAction> action;
 @property (nonatomic, readonly, copy) NSDictionary* format;
 
+@property (nonatomic, readonly, copy) NSNumber* start;
+@property (nonatomic, readonly, copy) NSNumber* end;
+
 @end

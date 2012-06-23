@@ -62,6 +62,8 @@ typedef enum STGradientStyle {
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary andStyle:(STGradientStyle)style;
 
++ (NSString*)userStringWithBackendType:(NSString*)string andArticle:(BOOL)article;
+
 + (UIImage*)categoryIconForCategory:(NSString*)category subcategory:(NSString*)subcategory filter:(NSString*)filter andSize:(STCategoryIconSize)size;
 
 + (UIImage*)creditImageForUser:(id<STUser>)user creditUser:(id<STUser>)creditedUser andSize:(STStampImageSize)size;
@@ -91,6 +93,8 @@ typedef enum STGradientStyle {
             lineHeight:(CGFloat)lineHeight 
                   mode:(UILineBreakMode)mode 
             andMaxSize:(CGSize)size;
+
++ (NSString*)titleForCategory:(NSString*)category;
 
 
 + (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message;

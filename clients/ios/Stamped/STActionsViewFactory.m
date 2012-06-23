@@ -19,6 +19,8 @@
 #import "STImageCache.h"
 #import "STActionManager.h"
 #import "STConfiguration.h"
+#import "STStampedActions.h"
+#import "STSimpleActionItem.h"
 
 @interface ActionItemView : STButton
 
@@ -166,9 +168,9 @@
 
 @implementation STActionsViewFactory
 
-- (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)detail
-                        withState:(id)asyncState
-                      andDelegate:(id<STViewDelegate>)delegate {
+- (UIView*)viewWithActions:(NSArray<STActionItem>*)actionItems
+              entityDetail:(id<STEntityDetail>)detail
+               andDelegate:(id<STViewDelegate>)delegate  {
     STViewContainer* view = nil;
     if (detail.actions) {
         view = [[[STViewContainer alloc] initWithDelegate:delegate andFrame:CGRectMake(0, 0, 320, 10)] autorelease];
@@ -176,7 +178,7 @@
         CGFloat cell_padding_h = 5;
         CGFloat cell_width = 290;
         CGFloat cell_padding_w = (320 - cell_width) / 2.0;
-        for (id<STActionItem> action in detail.actions) {
+        for (id<STActionItem> action in actionItems) {
             id<STAction> actualAction = action.action;
             STActionContext* context = [STActionContext context];
             context.entityDetail = detail;
@@ -195,6 +197,23 @@
         }
     }
     return view;
+}
+
+- (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)detail
+                        withState:(id)asyncState
+                      andDelegate:(id<STViewDelegate>)delegate {
+    return [self viewWithActions:detail.actions entityDetail:detail andDelegate:delegate];
+}
+
++ (UIView*)moreInformationEntityDetail:(id<STEntityDetail>)entityDetail andDelegate:(id<STViewDelegate>)delegate {
+    STActionContext* context = [STActionContext context];
+    context.entityDetail = entityDetail;
+    id<STAction> action = [STStampedActions actionViewEntity:entityDetail.entityID withOutputContext:context];
+    STSimpleActionItem* item = [[[STSimpleActionItem alloc] init] autorelease];
+    item.action = action;
+    item.name = @"View more information";
+    STActionsViewFactory* factory = [[[STActionsViewFactory alloc] init] autorelease];
+    return [factory viewWithActions:[NSArray arrayWithObject:item] entityDetail:entityDetail andDelegate:delegate];
 }
 
 @end

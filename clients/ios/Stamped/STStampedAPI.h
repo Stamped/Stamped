@@ -53,6 +53,7 @@ typedef enum {
 
 extern NSString* const STStampedAPILoginNotification;
 extern NSString* const STStampedAPILogoutNotification;
+extern NSString* const STStampedAPIRefreshedTokenNotification;
 extern NSString* const STStampedAPIUserUpdatedNotification;
 extern NSString* const STStampedAPILocalStampModificationNotification;
 
@@ -240,6 +241,15 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)registerAPNSToken:(NSString*)token 
                          andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)createLogWithKey:(NSString*)key 
+                              value:(NSString*)value 
+                            stampID:(NSString*)stampID
+                           entityID:(NSString*)entityID
+                             todoID:(NSString*)todoID
+                          commentID:(NSString*)commentID 
+                         activityID:(NSString*)activityID
+                        andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;

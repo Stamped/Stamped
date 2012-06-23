@@ -18,6 +18,8 @@
 #import "STPhotoViewController.h"
 #import "STCreateStampViewController.h"
 #import "CreateStampViewController.h"
+#import "STImageCache.h"
+#import "STConfirmationView.h"
 
 @interface STStampedActions ()
 
@@ -182,6 +184,23 @@ static STStampedActions* _sharedInstance;
           STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:source.sourceID]];
           [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }
+    }
+    else if ([action isEqualToString:@"stamped_confirm"] && source.sourceData != nil) {
+        handled = YES;
+        if (flag) {
+            NSString* title = [source.sourceData objectForKey:@"title"];
+            NSString* subtitle = [source.sourceData objectForKey:@"subtitle"];
+            NSString* iconURL = [source.sourceData objectForKey:@"icon"];
+            UIImage* icon = [[STImageCache sharedInstance] cachedImageForImageURL:iconURL];
+            STConfirmationView* view = [[[STConfirmationView alloc] initWithTille:title subtitle:subtitle andIconImage:icon] autorelease];
+            view.frame = [Util centeredAndBounded:view.frame.size inFrame:[Util fullscreenFrameAdjustedForStatusBar]];
+            [Util setFullScreenPopUp:view dismissible:YES withBackground:[UIColor colorWithWhite:0 alpha:.1]];
+            if (!icon && iconURL) {
+                [[STImageCache sharedInstance] imageForImageURL:iconURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                    view.image = image; 
+                }];
+            }
+        }
     }
     else if ([action isEqualToString:@"stamped_view_create_stamp"] && source.sourceID != nil && context.entity) {
         handled = YES;

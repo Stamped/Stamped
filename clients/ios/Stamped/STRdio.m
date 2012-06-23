@@ -144,6 +144,7 @@ static STRdio* _sharedInstance;
       handled = TRUE;
       if (flag) {
         //NSLog(@"playing song:%@",context.entityDetail);
+          NSLog(@"Headfkslfkdlasklfads");
         [self ensureLoginWithCompletionBlock:^{
           if (self.loggedIn) {
             [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 

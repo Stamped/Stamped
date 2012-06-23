@@ -244,7 +244,9 @@ static STRestKitLoader* _sharedInstance;
         if (post) {
             objectLoader.method = RKRequestMethodPOST;
         }
-        
+        if (params.count == 0) {
+            NSLog(@"No params: %@", path);
+        }
         NSMutableDictionary* paramsCopy = [NSMutableDictionary dictionaryWithDictionary:params];
         if (authenticated) {
             NSString* accessToken = self.authToken.accessToken;
@@ -382,11 +384,43 @@ static STRestKitLoader* _sharedInstance;
             }
         }
         else if ([loginType isEqualToString:_loginTypeFacebook]) {
-            return nil;
+            NSString* path = @"/oauth2/login/facebook.json";
+            NSString* userToken = [_facebookUserTokenKeychainItem objectForKey:(id)kSecValueData];
+            if (userToken) {
+                [params setObject:userToken forKey:@"user_token"];
+                return [self loadOneWithPath:path
+                                        post:YES
+                               authenticated:NO
+                                      params:params
+                                     mapping:[STSimpleLoginResponse mapping]
+                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                     block(result, error, cancellation);
+                                 }];
+            }
+            else {
+                return nil;
+            }
         }
         else {
             NSAssert1([loginType isEqualToString:_loginTypeTwitter], @"Unrecognized login type %@", loginType);
-            return nil;
+            NSString* path = @"/oauth2/login/twitter.json";
+            NSString* userToken = [_twitterUserTokenKeychainItem objectForKey:(id)kSecValueData];
+            NSString* userSecret = [_twitterUserSecretKeychainItem objectForKey:(id)kSecValueData];
+            if (userToken) {
+                [params setObject:userToken forKey:@"user_token"];
+                [params setObject:userSecret forKey:@"user_secret"];
+                return [self loadOneWithPath:path
+                                        post:YES
+                               authenticated:NO
+                                      params:params
+                                     mapping:[STSimpleLoginResponse mapping]
+                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                     block(result, error, cancellation);
+                                 }];
+            }
+            else {
+                return nil;
+            }
         }
     }
 }
@@ -583,15 +617,24 @@ static STRestKitLoader* _sharedInstance;
 }
 
 - (void)refreshToken {
-    if (!self.refreshTokenCancellation) {
+    if (!self.refreshTokenCancellation && self.authToken.refreshToken) {
         STCancellation* cancellation = [self sendTokenRefreshRequestWithCallback:^(id<STOAuthToken> token, NSError *error, STCancellation *cancellation) {
             self.refreshTokenCancellation = nil;
             if (token) {
                 self.authToken.accessToken = token.accessToken;
+                [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIRefreshedTokenNotification object:nil];
+            }
+            else {
+                [self clearAuthState];
             }
         }];
         if (cancellation) {
             self.refreshTokenCancellation = cancellation;
+        }
+        else {
+            [self clearAuthState];
+            [STDebug log:@"REPORT THIS: Refresh Token failed!"];
+            [Util launchFirstRun];
         }
     }
 }
@@ -608,21 +651,24 @@ static STRestKitLoader* _sharedInstance;
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     if (queue == _authRequestQueue) {
+        //NSLog(@"releasing auth lock");
         [RKClient sharedClient].requestQueue.suspended = YES;
     } else if (queue == [RKClient sharedClient].requestQueue) {
         if (!self.authToken.accessToken) {
             [self refreshToken];
-            return;
         }
-        
         if ([request.params isKindOfClass:[RKParams class]]) {
             return;
         }
-        
         NSMutableDictionary* params = [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
         if (request.isGET && [request.URL isKindOfClass:[RKURL class]]) {
             request.resourcePath = [request.resourcePath appendQueryParams:params];
             request.params = nil;
+        }
+        
+        if (request.isPOST && request.params) {
+            //NSLog(@"NOT GOOD, %@ %@", request.URL, request.params);
+            request.params = [RKParams paramsWithDictionary:(id)request.params];
         }
     }
     else {
@@ -635,23 +681,28 @@ static STRestKitLoader* _sharedInstance;
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     }
     if (queue == _authRequestQueue && queue.count == 0) {
+        //NSLog(@"releasing auth lock");
         [RKClient sharedClient].requestQueue.suspended = NO;
     }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didLoadResponse:(RKResponse*)response {
     if (queue == _authRequestQueue) {
+        //NSLog(@"releasing auth lock");
         [RKClient sharedClient].requestQueue.suspended = NO;
     }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didCancelRequest:(RKRequest*)request {
-    if (queue == _authRequestQueue)
+    if (queue == _authRequestQueue) {
+        //NSLog(@"releasing auth lock");
         [RKClient sharedClient].requestQueue.suspended = NO;
+    }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
     if (queue == _authRequestQueue) {
+        //NSLog(@"releasing auth lock");
         [RKClient sharedClient].requestQueue.suspended = NO;
     }
 }

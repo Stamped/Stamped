@@ -52,4 +52,26 @@
   return mapping;
 }
 
+- (NSNumber *)start {
+    if (self.indices.count == 2) {
+        id object = [self.indices objectAtIndex:0];
+        if ([object respondsToSelector:@selector(integerValue)]) {
+            NSInteger value = [object integerValue];
+            return [NSNumber numberWithInteger:value];
+        }
+    }
+    return nil;
+}
+
+- (NSNumber *)end {
+    if (self.indices.count == 2) {
+        id object = [self.indices objectAtIndex:1];
+        if ([object respondsToSelector:@selector(integerValue)]) {
+            NSInteger value = [object integerValue];
+            return [NSNumber numberWithInteger:value];
+        }
+    }
+    return nil;
+}
+
 @end

@@ -118,9 +118,19 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     id<STEntity> entity = todo.source.entity;
     _titleView.text = entity.title;
     [_titleView sizeToFit];
+    if (_titleView.frame.size.width > 225) {
+        CGRect frame = _titleView.frame;
+        frame.size.width = 225;
+        _titleView.frame = frame;
+    }
     _subtitleView.text = entity.subtitle;
     _subtitleView.textColor = [todo.complete boolValue] ? [UIColor stampedLightGrayColor] : [UIColor stampedGrayColor];
     [_subtitleView sizeToFit];
+    if (_subtitleView.frame.size.width > 200) {
+        CGRect frame = _subtitleView.frame;
+        frame.size.width = 200;
+        _subtitleView.frame = frame;
+    }
     _categoryImageView.image = [Util imageForCategory:entity.category];
     NSString* imageName = nil;
     STTodoState state = [STTodoViewController todoState:todo];

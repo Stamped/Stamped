@@ -10,7 +10,7 @@
 #import "STStampedAPI.h"
 #import "STActivity.h"
 #import "STActionManager.h"
-#import "STActivityCell.h"
+#import "STFastActivityCell.h"
 #import "Util.h"
 #import "STSliderScopeView.h"
 #import "STUnreadActivity.h"
@@ -75,6 +75,10 @@
 - (void)viewDidAppear:(BOOL)animated {
     if (scope_ == STStampedAPIScopeYou) {
         [STUnreadActivity sharedInstance].count = 0;
+    }
+    NSIndexPath* selection = [self.tableView indexPathForSelectedRow];
+    if (selection) {
+        [self.tableView deselectRowAtIndexPath:selection animated:YES];
     }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -162,7 +166,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
-    return [STActivityCell heightForCellWithActivity:activity andScope:self.scope];
+    return [STFastActivityCell heightForCellWithActivity:activity andScope:self.scope];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -172,7 +176,7 @@
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
-    return [[[STActivityCell alloc] initWithActivity:activity andScope:self.scope] autorelease];
+    return [[[STFastActivityCell alloc] initWithActivity:activity andScope:self.scope] autorelease];
     
 }
 

@@ -13,5 +13,6 @@
 @interface STInboxPageSource : NSObject <STCachePageSource>
 
 - (id)initWithScope:(STStampedAPIScope)scope;
+- (id)initWithUserID:(STStampedAPIScope)scope;
 
 @end

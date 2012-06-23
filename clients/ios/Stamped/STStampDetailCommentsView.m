@@ -65,126 +65,6 @@ static const CGFloat _bodyWidth = 214;
 
 @end
 
-@interface STAStampDetailCommentView : UIView
-
-- (id)initWithUser:(id<STUser>)user andProfileImageSize:(STProfileImageSize)size;
-
-@property (nonatomic, readonly, retain) UIView* userImage;
-
-@end
-
-@implementation STAStampDetailCommentView
-
-@synthesize userImage = _userImage;
-
-- (id)initWithUser:(id<STUser>)user andProfileImageSize:(STProfileImageSize)size {
-    self = [super initWithFrame:CGRectMake(0, 0, _totalWidth, size + 2 * _imagePaddingY)];
-    if (self) {
-        UIView* imageView = [Util profileImageViewForUser:user withSize:size];
-        [Util reframeView:imageView withDeltas:CGRectMake(_imagePaddingX, _imagePaddingY, 0, 0)];
-        [self addSubview:imageView];
-        UIView* imageButton = [Util tapViewWithFrame:imageView.frame target:self selector:@selector(userImageClicked:) andMessage:user];
-        [self addSubview:imageButton];
-        _userImage = [imageView retain];
-    }
-    return self;
-}
-
-- (void)userImageClicked:(id<STUser>)user {
-    STUserViewController* controller = [[[STUserViewController alloc] initWithUser:user] autorelease];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
-}
-
-- (void)dealloc
-{
-    [_userImage release];
-    [super dealloc];
-}
-
-/*
- TODO
- - (void)userImageTapped:(id)button {
- STActionContext* context = [STActionContext context];
- id<STAction> action = [STStampedActions actionViewUser:self.user.userID withOutputContext:context];
- [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
- NSLog(@"action not enabled");
- }
- */
-
-@end
-
-@interface STAStampDetailCommentWithText : STAStampDetailCommentView
-
-- (id)initWithUser:(id<STUser>)user 
-           created:(NSDate*)created 
-              text:(NSString*)text 
-andProfileImageSize:(STProfileImageSize)size;
-
-@property (nonatomic, readonly, retain) UIView* userNameView;
-@property (nonatomic, readonly, retain) UIView* dateView;
-@property (nonatomic, readonly, retain) UIView* blurbView;
-
-@end
-
-@implementation STAStampDetailCommentWithText
-
-@synthesize userNameView = _userNameView;
-@synthesize dateView = _dateView;
-@synthesize blurbView = _blurbView;
-
-- (id)initWithUser:(id<STUser>)user  
-           created:(NSDate*)created 
-              text:(NSString*)text 
-andProfileImageSize:(STProfileImageSize)size {
-    self = [super initWithUser:user andProfileImageSize:size];
-    if (self) {
-        CGFloat boundsX = CGRectGetMaxX(self.userImage.frame) + 5;
-        CGFloat dateX = _totalWidth - 30;
-        CGRect textBounds = CGRectMake( boundsX, self.userImage.frame.origin.y, dateX - boundsX , CGFLOAT_MAX);
-        UIFont* userNameFont = size == STProfileImageSize31 ? [UIFont stampedBoldFontWithSize:14] : [UIFont stampedBoldFontWithSize:16];
-        _userNameView = [[Util viewWithText:user.screenName 
-                                       font:userNameFont 
-                                      color:[UIColor stampedGrayColor] 
-                                       mode:UILineBreakModeClip 
-                                 andMaxSize:textBounds.size] retain];
-        _userNameView.frame = CGRectOffset(_userNameView.frame, textBounds.origin.x, textBounds.origin.y);
-        [self addSubview:_userNameView];
-        
-        UIFont* dateFont = size == STProfileImageSize31 ? [UIFont stampedFontWithSize:12] : [UIFont stampedFontWithSize:14];
-        _dateView = [[Util viewWithText:[Util shortUserReadableTimeSinceDate:created]
-                                   font:dateFont 
-                                  color:[UIColor stampedLightGrayColor] 
-                                   mode:UILineBreakModeClip 
-                             andMaxSize:CGSizeMake(30, 25)] retain];
-        _dateView.frame = CGRectOffset(_dateView.frame, dateX, textBounds.origin.y);
-        [self addSubview:_dateView];
-        textBounds.origin.y = CGRectGetMaxY(_userNameView.frame) + 2;
-        
-        
-        _blurbView = [[Util viewWithText:(text ? text : @" ")
-                                    font:[UIFont stampedFontWithSize:14]  
-                                   color:[UIColor stampedDarkGrayColor] 
-                                    mode:UILineBreakModeWordWrap 
-                              andMaxSize:textBounds.size] retain];
-        _blurbView.frame = CGRectOffset(_blurbView.frame, textBounds.origin.x, textBounds.origin.y);
-        [self addSubview:_blurbView];
-        
-        CGRect frame = self.frame;
-        frame.size.height = MAX(CGRectGetMaxY(self.userImage.frame), CGRectGetMaxY(self.blurbView.frame))+5;
-        self.frame = frame;
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [_blurbView release];
-    [_userNameView release];
-    [_dateView release];
-    [super dealloc];
-}
-
-@end
-
 @interface STStampDetailCommentView : UIView
 
 -(id)initWithComment:(id<STComment>)comment;
@@ -401,7 +281,7 @@ andProfileImageSize:(STProfileImageSize)size {
         UIView* blurbView = [[[STStampDetailBlurbView alloc] initWithStamp:stamp andDelegate:self] autorelease];
         [self appendChildView:blurbView];
         if (index == 0 || YES) {
-            NSInteger limit = stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
+            NSInteger limit = MIN(20, stamp.previews.comments.count);//stamp.previews.comments.count > 3 ? 2 : stamp.previews.comments.count;
             for (NSInteger i = 0; i < limit; i++) {
                 NSInteger index = limit - (i + 1);
                 id<STComment> comment = [stamp.previews.comments objectAtIndex:index];
@@ -541,7 +421,6 @@ andProfileImageSize:(STProfileImageSize)size {
         [chunks addObject:firstCreditScreenNameChunk];
         
         if (creditCount > 1) {
-            NSLog(@"%f, %f, %d",firstCreditScreenNameChunk.end, firstCreditScreenNameChunk.start, firstCreditScreenNameChunk.lineCount);
             STTextChunk* andChunk = [[[STTextChunk alloc] initWithPrev:firstCreditScreenNameChunk
                                                                   text:@" and "
                                                                   font:[UIFont stampedFontWithSize:10]

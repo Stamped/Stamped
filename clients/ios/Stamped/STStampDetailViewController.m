@@ -31,6 +31,7 @@
 #import "STCommentButton.h"
 #import "STShareButton.h"
 #import "STCreateCommentView.h"
+#import "STHoverToolbar.h"
 
 typedef enum {
     CommentPanDirectionUp = 0,
@@ -67,6 +68,7 @@ typedef enum {
 @property (nonatomic, assign) CommentPanDirection direction;
 @property (nonatomic, assign) CGRect beginFrame;
 @property (nonatomic, assign) CGRect commentBeginFrame;
+@property (nonatomic, readwrite, retain) UIView* entityDetailView;
 
 @end
 
@@ -80,7 +82,7 @@ typedef enum {
 - (id)initWithParent:(UIView*)view controller:(STStampDetailViewController*)controller andStamp:(id<STStamp>)stamp {
     
     UIImage *image = [UIImage imageNamed:@"st_detail_action_bg"];
-
+    
     CGFloat xPadding = 5;
     CGFloat yPadding = 10;
     CGFloat height = image.size.height;
@@ -97,7 +99,7 @@ typedef enum {
         frame.size.width = self.bounds.size.width;
         background.frame = frame;
         [background release];
-
+        
         UIImageView* imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sDetailBar_btn_more"]] autorelease];
         UIImageView* imageView2 = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"sDetailBar_btn_more_active"]] autorelease];
         expandButton_ = [[STButton alloc] initWithFrame:imageView.frame 
@@ -148,7 +150,7 @@ typedef enum {
 }
 
 - (void)toggleToolbar:(id)notImportant {
-       
+    
     CGFloat delta = 190.0f;
     
     CGRect frame = self.frame;
@@ -160,7 +162,7 @@ typedef enum {
     }];
     
     [UIView animateWithDuration:self.expanded ? 0.1f : 0.15f delay:self.expanded ? 0.0f : 0.1f options:UIViewAnimationCurveEaseInOut animations:^{
-       
+        
         CGFloat originX = 4.0f;
         
         for (NSInteger i = 0; i < buttons_.count; i++) {
@@ -178,11 +180,11 @@ typedef enum {
             }
             
         }
-
+        
     } completion:^(BOOL finished){}];
-
+    
     self.expanded = !self.expanded;
-
+    
 }
 
 - (void)reloadStampedData {
@@ -208,6 +210,7 @@ typedef enum {
 @synthesize direction;
 @synthesize beginFrame;
 @synthesize commentBeginFrame;
+@synthesize entityDetailView = _entityDetailView;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stamp.stampID];
@@ -229,6 +232,7 @@ typedef enum {
     [_toolbar release];
     [entityDetailCancellation_ cancel];
     [entityDetailCancellation_ release];
+    [_entityDetailView release];
     [_commentView release], _commentView=nil;
     [_panGesture release], _panGesture=nil;
     [super dealloc];
@@ -239,7 +243,7 @@ typedef enum {
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     if (!_headerView) {
         _headerView = [[STStampDetailHeaderView alloc] initWithStamp:self.stamp];
         [self.scrollView appendChildView:_headerView];
@@ -250,24 +254,21 @@ typedef enum {
         [self.scrollView appendChildView:_commentsView];
     }
     
-    if ([STStampedAPI.sharedInstance.currentUser.screenName isEqualToString:self.stamp.user.screenName]) {
+    if ([STStampedAPI.sharedInstance.currentUser.userID isEqualToString:self.stamp.user.userID]) {
         STNavigationItem* rightButton = [[[STNavigationItem alloc] initWithTitle:@"Delete" style:UIBarButtonItemStylePlain target:self action:@selector(_deleteStampButtonPressed:)] autorelease];
         self.navigationItem.rightBarButtonItem = rightButton;
     }
     
-    UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view controller:self andStamp:self.stamp] autorelease];
-    [self.view addSubview:newToolbar];
-    
-    self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
-        
-        STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
-        [self.scrollView appendChildView:wrapper];
-        self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
-        UIView* padding = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 60)] autorelease];
-        [self.scrollView appendChildView:padding];
-                                                                                   
-                                                                              
-    }];
+    //UIView* newToolbar = [[[STStampDetailToolbar alloc] initWithParent:self.view controller:self andStamp:self.stamp] autorelease];
+    //[self.view addSubview:newToolbar];
+    if (LOGGED_IN) {
+        STHoverToolbar* toolbar = [[[STHoverToolbar alloc] initWithStamp:self.stamp] autorelease];
+        toolbar.target = self;
+        toolbar.commentAction = @selector(commentButtonPressed);
+        toolbar.shareAction = @selector(shareButtonPressed);
+        [self.view addSubview:toolbar];
+        [toolbar positionInParent];
+    }
     
     if (!_panGesture) {
         UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
@@ -287,6 +288,26 @@ typedef enum {
         [view release];        
     }
     
+    [self loadEntityDetail];
+}
+
+- (void)loadEntityDetail {
+    if (!self.entityDetailCancellation) {
+        
+        self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
+            self.entityDetailCancellation = nil;
+            STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
+            [self.scrollView appendChildView:wrapper];
+            self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
+            
+            
+            
+        }];
+    }
+}
+
+- (void)shareButtonPressed {
+    [Util warnWithMessage:@"☝ No leaking Stamped 2.0!" andBlock:nil];
 }
 
 - (void)viewDidUnload {
@@ -302,7 +323,7 @@ typedef enum {
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [[STActionManager sharedActionManager] setStampContext:self.stamp];
-  
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localModification:) name:STStampedAPILocalStampModificationNotification object:nil];
@@ -413,7 +434,7 @@ typedef enum {
 - (void)commentButtonPressed {
     
     [self showCommentView:YES];
-
+    
 }
 
 - (void)cancelPendingRequests {
@@ -558,26 +579,26 @@ typedef enum {
     CGFloat newHeight = (self.scrollView.frame.size.height - keyboardFrame.size.height);
     contentOffset = MIN(contentOffset+40, self.scrollView.contentSize.height - newHeight);
     /*
-    BOOL _enabled = [UIView areAnimationsEnabled];
-    [UIView setAnimationsEnabled:YES];
-    
-    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-
-        self.scrollView.contentInset = UIEdgeInsetsMake(0, 0, keyboardFrame.size.height + 44.0f , 0);
-        self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
-        if (self.scrollView.contentSize.height > newHeight) {
-            self.scrollView.contentOffset = CGPointMake(0, contentOffset);
-        }
-        
-    } completion:^(BOOL finished){
-        [self.panGesture setEnabled:YES];
-    }];
-    
-    //if (!_animateKeyboard) {
-    //    self.scrollView.contentOffset = CGPointZero;
-   // }
-    [UIView setAnimationsEnabled:_enabled];
-   // _animateKeyboard = YES;
+     BOOL _enabled = [UIView areAnimationsEnabled];
+     [UIView setAnimationsEnabled:YES];
+     
+     [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
+     
+     self.scrollView.contentInset = UIEdgeInsetsMake(0, 0, keyboardFrame.size.height + 44.0f , 0);
+     self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
+     if (self.scrollView.contentSize.height > newHeight) {
+     self.scrollView.contentOffset = CGPointMake(0, contentOffset);
+     }
+     
+     } completion:^(BOOL finished){
+     [self.panGesture setEnabled:YES];
+     }];
+     
+     //if (!_animateKeyboard) {
+     //    self.scrollView.contentOffset = CGPointZero;
+     // }
+     [UIView setAnimationsEnabled:_enabled];
+     // _animateKeyboard = YES;
      */
     
 }
@@ -588,14 +609,14 @@ typedef enum {
         [self.commentView keyboardWillHide:[notification userInfo]];
     }
     /*
-    [self.panGesture setEnabled:NO];
-    //if (_animateKeyboard) {
-        [UIView animateWithDuration:0.3 animations:^{
-            self.scrollView.contentInset = UIEdgeInsetsZero;
-            self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
-        }];
-    //}
-    */
+     [self.panGesture setEnabled:NO];
+     //if (_animateKeyboard) {
+     [UIView animateWithDuration:0.3 animations:^{
+     self.scrollView.contentInset = UIEdgeInsetsZero;
+     self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
+     }];
+     //}
+     */
     
 }
 

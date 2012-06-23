@@ -27,6 +27,7 @@
 #import "STDetailTableCell.h"
 #import "STDescriptionTableCell.h"
 #import "STTableViewSectionBackground.h"
+#import "STCache.h"
 
 @interface STUserViewController ()
 @property(nonatomic,readonly) BOOL loadingUser;
@@ -35,6 +36,8 @@
 @property(nonatomic,copy) NSString *userIdentifier;
 @property(nonatomic,retain,readonly) STUserGraphView *graphView;
 @property(nonatomic,retain,readonly) UITableView *infoTableView;
+
+
 @end
 
 @implementation STUserViewController

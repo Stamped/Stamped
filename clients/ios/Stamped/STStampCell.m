@@ -71,10 +71,10 @@
           
           if (_username && _subcategory) {
               [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f] setFill];
-              UIFont *font = [UIFont boldSystemFontOfSize:10];
+              UIFont *font = [UIFont stampedBoldFontWithSize:12];
               CGSize size = [_username sizeWithFont:font];
               [_username drawInRect:CGRectMake(rect.origin.x, rect.origin.y, size.width, size.height) withFont:font lineBreakMode:UILineBreakModeTailTruncation];
-              [_subcategory drawAtPoint:CGPointMake(size.width, rect.origin.y) withFont:[UIFont systemFontOfSize:10]];
+              [_subcategory drawAtPoint:CGPointMake(size.width, rect.origin.y) withFont:[UIFont stampedFontWithSize:12]];
           }
           
           if (_category) {
@@ -99,7 +99,7 @@
                   
               }
               [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f] setFill];
-              [_category drawAtPoint:CGPointMake((_categoryImage!=nil) ? _categoryImage.size.width + 5.0f : 0.0f, 54.0f) withFont:[UIFont systemFontOfSize:10]];
+              [_category drawAtPoint:CGPointMake((_categoryImage!=nil) ? _categoryImage.size.width + 5.0f : 0.0f, 54.0f) withFont:[UIFont stampedFontWithSize:12]];
           }
           
           if (_title) {
@@ -184,7 +184,7 @@
       
       // date label
       UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-      label.font = [UIFont systemFontOfSize:10];
+      label.font = [UIFont stampedFontWithSize:12];
       label.textColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
       label.highlightedTextColor = [UIColor whiteColor];
       label.backgroundColor = [UIColor whiteColor];
@@ -230,7 +230,7 @@
                   [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.521f green:0.635f blue:0.8f alpha:1.0f] setFill];
                   NSString *comments = [NSString stringWithFormat:@"%i", _commentCount];
                   CGFloat width = [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
-                  UIFont *font = [UIFont systemFontOfSize:10];
+                  UIFont *font = [UIFont stampedFontWithSize:12];
                   [comments drawInRect:CGRectMake(offset, -1.0f, width, font.lineHeight) withFont:font];
                   offset += (width+2.0f);
               }
@@ -282,10 +282,12 @@
     _username = [stamp.user.screenName copy];
     
     [_subcategory release], _subcategory = nil;
-    _subcategory =  [[NSString stringWithFormat:@" stamped a %@", stamp.entity.subcategory] copy];
+    _subcategory =  [[NSString stringWithFormat:@" stamped %@", [Util userStringWithBackendType:stamp.entity.subcategory andArticle:YES]] copy];
     
     [_categoryImage release], _categoryImage=nil;
-    _categoryImage = [[Util imageForCategory:stamp.entity.category] retain];
+    UIImage* catIcon = [Util categoryIconForCategory:stamp.entity.category subcategory:stamp.entity.subcategory filter:nil andSize:STCategoryIconSize9];
+    catIcon = [Util gradientImage:catIcon withPrimaryColor:@"b2b2b2" secondary:@"999999" andStyle:STGradientStyleVertical];
+    _categoryImage = [catIcon retain];
     
     [Util splitHexString:stamp.user.primaryColor toRed:&r green:&g blue:&b];
     [Util splitHexString:stamp.user.secondaryColor toRed:&r1 green:&g1 blue:&b1];
@@ -329,7 +331,7 @@
     [_headerView setNeedsDisplay];
     
     // date
-    _dateLabel.text = [Util userReadableTimeSinceDate:stamp.created];
+    _dateLabel.text = [Util shortUserReadableTimeSinceDate:stamp.created];
     [_dateLabel sizeToFit];
     CGRect frame = _dateLabel.frame;
     frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 10);

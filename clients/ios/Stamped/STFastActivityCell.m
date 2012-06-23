@@ -1,12 +1,12 @@
 //
-//  STActivityCell.m
+//  STFastActivityCell.m
 //  Stamped
 //
-//  Created by Landon Judkins on 4/22/12.
+//  Created by Landon Judkins on 6/20/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
-#import "STActivityCell.h"
+#import "STFastActivityCell.h"
 #import "Util.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
@@ -16,8 +16,10 @@
 #import "STStampedActions.h"
 #import "STImageCache.h"
 #import "STTextChunk.h"
+#import "STChunkGroup.h"
+#import "STChunksView.h"
 
-@interface STActivityCellConfiguration : NSObject
+@interface STFastActivityCellConfiguration : NSObject
 
 - (id)initWithActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope;
 
@@ -35,29 +37,28 @@
 @property (nonatomic, readonly, assign) BOOL hasIcon;
 @property (nonatomic, readonly, assign) BOOL useStampIcon;
 @property (nonatomic, readonly, assign) BOOL useUserImage;
+@property (nonatomic, readonly, assign) BOOL isFollow;
 @property (nonatomic, readonly, assign) CGFloat imagesSpacing;
 
-@property (nonatomic, readonly, assign) CGFloat headerPadding;
-@property (nonatomic, readonly, assign) CGFloat bodyPadding;
-@property (nonatomic, readonly, assign) CGFloat imagesPadding;
-@property (nonatomic, readonly, assign) CGFloat footerPadding;
+@property (nonatomic, readonly, assign) CGFloat topPadding;
+@property (nonatomic, readonly, assign) CGFloat imagePadding;
 @property (nonatomic, readonly, assign) CGFloat bottomPadding;
+@property (nonatomic, readonly, assign) CGFloat contentYOffset;
 
-@property (nonatomic, readonly, assign) CGFloat headerWidth;
-@property (nonatomic, readonly, assign) CGFloat bodyWidth;
-@property (nonatomic, readonly, assign) CGFloat footerWidth;
+@property (nonatomic, readonly, assign) CGFloat contentWidth;
 
 @property (nonatomic, readonly, retain) NSString* header;
 @property (nonatomic, readonly, retain) NSString* body;
 @property (nonatomic, readonly, retain) NSString* footer;
-@property (nonatomic, readonly, assign) NSInteger bodyReferenceOffset;
 
-@property (nonatomic, readonly, retain) STTextChunk* bodyChunk;
+@property (nonatomic, readonly, retain) STChunk* headerChunk;
+@property (nonatomic, readonly, retain) STChunk* bodyChunk;
+@property (nonatomic, readonly, retain) STChunk* footerChunk;
 
-@property (nonatomic, readonly, copy) NSNumber* headerHeight;
-@property (nonatomic, readonly, copy) NSNumber* bodyHeight;
-@property (nonatomic, readonly, copy) NSNumber* imagesHeight;
-@property (nonatomic, readonly, copy) NSNumber* footerHeight;
+@property (nonatomic, readonly, assign) CGFloat headerHeight;
+@property (nonatomic, readonly, assign) CGFloat bodyHeight;
+@property (nonatomic, readonly, assign) CGFloat imagesHeight;
+@property (nonatomic, readonly, assign) CGFloat footerHeight;
 
 @property (nonatomic, readonly, retain) UIFont* headerFontNormal;
 @property (nonatomic, readonly, retain) UIFont* headerFontAction;
@@ -80,17 +81,14 @@
 
 @end
 
-@implementation STActivityCellConfiguration
+@implementation STFastActivityCellConfiguration
 
 @synthesize activity = _activity;
 @synthesize scope = _scope;
 
-@synthesize headerHeight = _headerHeight;
-@synthesize bodyHeight = _bodyHeight;
-@synthesize imagesHeight = _imagesHeight;
-@synthesize footerHeight = _footerHeight;
-
+@synthesize headerChunk = _headerChunk;
 @synthesize bodyChunk = _bodyChunk;
+@synthesize footerChunk = _footerChunk;
 
 
 - (id)init {
@@ -111,12 +109,9 @@
 {
     [_activity release];
     
-    [_headerHeight release];
-    [_bodyHeight release];
-    [_imagesHeight release];
-    [_footerHeight release];
-    
+    [_headerChunk release];
     [_bodyChunk release];
+    [_footerChunk release];
     
     [super dealloc];
 }
@@ -154,6 +149,10 @@
     return self.activity.benefit.integerValue > 0;
 }
 
+- (BOOL)isFollow {
+    return [self.activity.verb isEqualToString:@"follow"];
+}
+
 - (CGFloat)imagesSpacing {
     return self.scope == STStampedAPIScopeYou ? 34 : 55;
 }
@@ -168,7 +167,7 @@
 }
 
 - (BOOL)hasImages {
-    return self.usersForImages.count > 0 && !(self.scope != STStampedAPIScopeYou && [self.activity.verb isEqualToString:@"follow"]);
+    return self.usersForImages.count > 0 && !(self.scope != STStampedAPIScopeYou && self.isFollow);
 }
 
 - (BOOL)useUserImage {
@@ -188,9 +187,7 @@
 }
 
 - (NSString *)body {
-    if (!self.activity.body) return nil;
-    NSString* filler = [@"" stringByPaddingToLength:self.bodyReferenceOffset withString:@" " startingAtIndex:0];
-    return [NSString stringWithFormat:@"%@%@", filler, self.activity.body];
+    return self.activity.body;
 }
 
 - (NSString *)footer {
@@ -213,24 +210,122 @@
     return nil;
 }
 
-- (STTextChunk *)bodyChunk {
-    if (!_bodyChunk) {
-        STChunk* bodyStart = [[[STChunk alloc] initWithLineHeight:16
-                                                            start:0 
-                                                              end:0 
-                                                            width:self.bodyWidth 
-                                                        lineCount:1 lineLimit:NSIntegerMax] autorelease];
+- (STChunk*)_chunkWithPrev:(STChunk*)prev
+                      text:(NSString*)text
+                references:(NSArray<STActivityReference>*)references
+                      font:(UIFont*)font 
+                     color:(UIColor*)color 
+             referenceFont:(UIFont*)referenceFont 
+            referenceColor:(UIColor*)referenceColor {
+    NSMutableArray* chunks = [NSMutableArray arrayWithObject:prev];
+    NSInteger normalIndex = 0;
+    if (references) {
+        for (id<STActivityReference> reference in references) {
+            NSNumber* start = reference.start;
+            NSNumber* end = reference.end;
+            if (start && end && start.integerValue >= normalIndex && start.integerValue < end.integerValue && end.integerValue <= text.length) {
+                NSString* before = [text substringWithRange:NSMakeRange(normalIndex, start.integerValue - normalIndex)];
+                if (before.length > 0) {
+                    STChunk* normalChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+                                                                         text:before
+                                                                         font:font
+                                                                        color:color] autorelease];
+                    [chunks addObject:normalChunk];
+                }
+                NSString* active = [text substringWithRange:NSMakeRange(start.integerValue, end.integerValue - start.integerValue)];
+                NSAssert1(active.length > 0, @"active length should be non-zero: %@", active);
+                STChunk* activeChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+                                                                     text:active
+                                                                     font:referenceFont
+                                                                    color:referenceColor] autorelease];
+                [chunks addObject:activeChunk];
+                normalIndex = end.integerValue;
+                if (activeChunk.lineCount > 1) {
+                    NSLog(@"end:%f", activeChunk.end);
+                }
+            }
+        }
+    }
+    if (normalIndex < text.length) {
+        STChunk* lastChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+                                                           text:[text substringWithRange:NSMakeRange(normalIndex, text.length - normalIndex)]
+                                                           font:font
+                                                          color:color] autorelease];
+        [chunks addObject:lastChunk];
+    }
+    return [[[STChunkGroup alloc] initWithChunks:chunks] autorelease];
+}
+
+- (STChunk*)_contentStartWithYOffset:(CGFloat)y end:(CGFloat)end {
+    
+    STChunk* start = [[[STChunk alloc] initWithLineHeight:16
+                                                    start:0 
+                                                      end:end
+                                                    width:self.contentWidth
+                                                lineCount:1
+                                                lineLimit:NSIntegerMax] autorelease];
+    y += self.topPadding;
+    start.topLeft = CGPointMake(self.contentOffset, y);
+    return start;
+}
+
+- (STChunk*)headerChunk {
+    
+    if (!_headerChunk && self.header) {
+        STChunk* start = [self _contentStartWithYOffset:0 end:0];
+        _headerChunk = [[self _chunkWithPrev:start
+                                        text:self.header
+                                  references:self.activity.headerReferences
+                                        font:self.headerFontNormal
+                                       color:self.headerColorNormal
+                               referenceFont:self.headerFontAction
+                              referenceColor:self.headerColorAction] retain];
+    }
+    return _headerChunk;
+}
+
+- (STChunk*)bodyChunk {
+    if (!_bodyChunk && self.body) {
+        STChunk* start = [self _contentStartWithYOffset:self.headerHeight end:self.offsetBodyForIcon ? 15 : 0];
+        _bodyChunk = [[self _chunkWithPrev:start
+                                      text:self.body
+                                references:self.activity.bodyReferences
+                                      font:self.bodyFontNormal
+                                     color:self.bodyColorNormal
+                             referenceFont:self.bodyFontAction
+                            referenceColor:self.bodyColorAction] retain];
     }
     return _bodyChunk;
 }
 
-- (NSInteger)bodyReferenceOffset {
-    if (self.offsetBodyForIcon) {
-        return 5;
+- (STChunk*)footerChunk {
+    if (!_footerChunk) {
+        STChunk* start = [self _contentStartWithYOffset:self.headerHeight + self.bodyHeight + self.imagesHeight end:0];
+        STChunk* mainChunk = nil;
+        NSString* timeString = [Util userReadableTimeSinceDate:self.activity.created];
+        if (self.footer) {
+            mainChunk = [self _chunkWithPrev:start
+                                        text:self.footer
+                                  references:self.activity.footerReferences
+                                        font:self.footerFontNormal
+                                       color:self.footerColorNormal
+                               referenceFont:self.footerFontAction
+                              referenceColor:self.footerColorAction];
+            timeString = [NSString stringWithFormat:@"    %@", timeString];
+        }
+        
+        STChunk* timeChunk = [[[STTextChunk alloc] initWithPrev:mainChunk ? mainChunk : start
+                                                           text:timeString
+                                                           font:self.footerFontTimestamp
+                                                          color:self.footerColorTimestamp] autorelease];
+        if (mainChunk) {
+            _footerChunk = [[STChunkGroup alloc] initWithChunks:[NSArray arrayWithObjects:mainChunk, timeChunk, nil]];
+        }
+        else {
+            _footerChunk = [timeChunk retain];
+        }
     }
-    else {
-        return 0;
-    }
+    return _footerChunk;
 }
 
 - (CGSize)imagesSize {
@@ -242,16 +337,8 @@
     }
 }
 
-- (CGFloat)headerWidth {
-    return 216;
-}
-
-- (CGFloat)bodyWidth {
-    return self.headerWidth;
-}
-
-- (CGFloat)footerWidth {
-    return self.headerWidth;
+- (CGFloat)contentWidth {
+    return self.isFollow ? 180 : 216;
 }
 
 - (CGFloat)heightWithText:(NSString*)text font:(UIFont*)font andWidth:(CGFloat)width {
@@ -265,48 +352,52 @@
     return value;
 }
 
-- (NSNumber *)headerHeight {
-    if (!_headerHeight) {
-        _headerHeight = [[NSNumber numberWithFloat:[self heightWithText:self.header font:self.headerFontNormal andWidth:self.headerWidth]] retain];
+- (CGFloat)headerHeight {
+    if (self.headerChunk) {
+        return self.headerChunk.frame.size.height;
     }
-    return _headerHeight;
+    else {
+        return 0;
+    }
 }
 
-- (NSNumber *)bodyHeight {
-    if (!_bodyHeight) {
-        _bodyHeight = [[NSNumber numberWithFloat:[self heightWithText:self.body font:self.bodyFontNormal andWidth:self.bodyWidth]] retain];
+- (CGFloat)bodyHeight {
+    if (self.bodyChunk) {
+        return self.bodyChunk.frame.size.height;
     }
-    return _bodyHeight;
+    else {
+        return 0;
+    }
 }
 
-- (NSNumber *)imagesHeight {
-    if (!_imagesHeight) {
-        CGFloat value = 0;
-        if (self.hasImages) {
-            value = self.imagesSize.height;
-        }
-        _imagesHeight = [[NSNumber numberWithFloat:value] retain];
-    }
-    return _imagesHeight;
+- (CGFloat)imagePadding {
+    return 12;
 }
 
-- (NSNumber *)footerHeight {
-    if (!_footerHeight) {
-        _footerHeight = [[NSNumber numberWithFloat:[self heightWithText:self.footer font:self.footerFontNormal andWidth:self.footerWidth]] retain];
-        if (_footerHeight.floatValue < 1) { 
-            [_footerHeight release];
-            _footerHeight = [[NSNumber numberWithFloat:[self heightWithText:@"time" font:self.footerFontTimestamp andWidth:self.footerWidth]] retain];
-        }
+- (CGFloat)imagesHeight {
+    if (self.hasImages) {
+        return self.imagesSize.height + self.imagePadding;
     }
-    return _footerHeight;
+    else {
+        return 0;
+    }
+}
+
+- (CGFloat)footerHeight {
+    if (self.footerChunk) {
+        return self.footerChunk.frame.size.height;
+    }
+    else {
+        return 0;
+    }
 }
 
 - (UIFont *)headerFontNormal {
-    return [UIFont stampedFontWithSize:12];
+    return [UIFont stampedFontWithSize:10];
 }
 
 - (UIFont *)headerFontAction {
-    return [UIFont stampedBoldFontWithSize:12];
+    return [UIFont stampedBoldFontWithSize:10];
 }
 
 - (UIFont *)bodyFontNormal {
@@ -318,15 +409,15 @@
 }
 
 - (UIFont *)footerFontNormal {
-    return [UIFont stampedFontWithSize:12];
+    return [UIFont stampedFontWithSize:10];
 }
 
 - (UIFont *)footerFontAction {
-    return [UIFont stampedBoldFontWithSize:12];
+    return [UIFont stampedBoldFontWithSize:10];
 }
 
 - (UIFont *)footerFontTimestamp {
-    return [UIFont stampedFontWithSize:12];
+    return [UIFont stampedFontWithSize:10];
 }
 
 - (UIColor *)headerColorNormal {
@@ -362,68 +453,33 @@
     return [UIColor colorWithWhite:191/255.0 alpha:1];
 }
 
-- (CGFloat)headerPadding {
-    if (self.header) {
-        return 20 -  self.headerFontNormal.ascender - 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-- (CGFloat)bodyPadding {
-    if (self.header) {
-        return 16 - self.headerFontNormal.descender - self.bodyFontNormal.ascender - 6; //compensated
-    }
-    else {
-        if (self.scope == STStampedAPIScopeYou) {
-            if (self.bodyHeight.integerValue > 16 || self.hasImages) {
-                return 24 - self.bodyFontNormal.ascender - 1;
-            }
-            else {
-                return 28 - self.bodyFontNormal.ascender - 1;
-            }
-        }
-        else {
-            return 20 - self.bodyFontNormal.ascender - 1;
-        }
-    }
-}
-
-- (CGFloat)imagesPadding {
-    if (self.hasImages) {
-        return 12 - self.bodyFontNormal.descender - 6;
-    }
-    else {
-        return 0;
-    }
-}
-
-- (CGFloat)footerPadding {
-    if (self.hasImages) {
-        return 16 - self.footerFontNormal.ascender;
-    }
-    else {
-        return 16 - self.bodyFontNormal.descender - self.footerFontNormal.ascender - 6; //compensated
-    }
+- (CGFloat)topPadding {
+    return 4;
 }
 
 - (CGFloat)bottomPadding {
-    return 12 - self.footerFontNormal.descender - 1;
+    return 12;
+}
+
+- (CGFloat)_baseHeight {
+    
+    CGFloat height = 0;
+    height += self.topPadding;
+    height += self.headerHeight;
+    height += self.bodyHeight;
+    height += self.imagesHeight;
+    height += self.footerHeight;
+    height += self.bottomPadding;
+    return height;
+}
+
+- (CGFloat)contentYOffset {
+    return (self.height - self._baseHeight) / 2;
 }
 
 - (CGFloat)height {
-    CGFloat height = 0;
-    height += self.headerPadding;
-    height += self.headerHeight.floatValue;
-    height += self.bodyPadding;
-    height += self.bodyHeight.floatValue;
-    height += self.imagesPadding;
-    height += self.imagesHeight.floatValue;
-    height += self.footerPadding;
-    height += self.footerHeight.floatValue;
-    height += self.bottomPadding;
-    return height;
+    CGFloat min = self.scope == STStampedAPIScopeYou ? 68 : 52;
+    return MAX(min, self._baseHeight);
 }
 
 - (NSArray<STUser> *)usersForImages {
@@ -442,71 +498,28 @@
 
 @end
 
-@interface STActivityCell () <TTTAttributedLabelDelegate>
+@interface STFastActivityCell () <TTTAttributedLabelDelegate>
 
 @property (nonatomic, readonly, retain) NSMutableArray* actions;
 @property (nonatomic, readonly, retain) id<STActivity> activity;
-@property (nonatomic, readonly, retain) STActivityCellConfiguration* configuration;
+@property (nonatomic, readonly, retain) STFastActivityCellConfiguration* configuration;
 @property (nonatomic, readonly, assign) STStampedAPIScope scope;
 
 @end
 
-@implementation STActivityCell
+@implementation STFastActivityCell
 
 @synthesize actions = actions_;
 @synthesize activity = activity_;
 @synthesize configuration = _configuration;
 @synthesize scope = scope_;
 
-- (CGFloat)addAttributedText:(NSString*)text 
-                       frame:(CGRect)frame 
-                        font:(UIFont*)font 
-                       color:(UIColor*)color 
-                      offset:(NSInteger)offset
-                  references:(NSArray<STActivityReference>*)references 
-                      toView:(UIView*)view {
-    TTTAttributedLabel* bodyView = [[[TTTAttributedLabel alloc] initWithFrame:frame] autorelease];
-    bodyView.backgroundColor = [UIColor clearColor];
-    bodyView.delegate = self;
-    bodyView.userInteractionEnabled = YES;
-    bodyView.textColor = color;
-    // TODO Figure out font bug and repair LEAK
-    bodyView.font = [font retain];
-    bodyView.dataDetectorTypes = UIDataDetectorTypeLink;
-    bodyView.lineBreakMode = UILineBreakModeWordWrap;
-    bodyView.text = text;
-    bodyView.layer.shadowColor = [UIColor whiteColor].CGColor;
-    bodyView.layer.shadowOpacity = .6;
-    bodyView.layer.shadowOffset = CGSizeMake(0, 1);
-    bodyView.layer.shadowRadius = 0;
-    if (references.count > 0) { 
-        NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
-        CTFontRef font2 = CTFontCreateWithName((CFStringRef)@"HelveticaNeue-Bold", font.pointSize, NULL);
-        [linkAttributes setValue:(id)font2 forKey:(NSString*)kCTFontAttributeName];
-        CFRelease(font);
-        bodyView.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
-        for (id<STActivityReference> reference in references) {
-            if (reference.indices.count == 2) {
-                NSInteger start = [[reference.indices objectAtIndex:0] integerValue] + offset;
-                NSInteger end = [[reference.indices objectAtIndex:1] integerValue] + offset;
-                NSRange range = NSMakeRange(start, end-start);
-                if (end <= text.length) {
-                    NSString* key;
-                    if (reference.action) {
-                        key = [NSString stringWithFormat:@"%d", self.actions.count];
-                        [self.actions addObject:reference.action];
-                    }
-                    else {
-                        key = @"-1";
-                    }
-                    [bodyView addLinkToURL:[NSURL URLWithString:key] withRange:range];
-                }
-            }
-        }
+- (void)_addChunk:(STChunk*)chunk {
+    if (chunk) {
+        UIView* chunkView = [[[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:chunk]] autorelease];
+        [Util reframeView:chunkView withDeltas:CGRectMake(0, self.configuration.contentYOffset, 0, 0)];
+        [self addSubview:chunkView];
     }
-    [bodyView sizeToFit];
-    [view addSubview:bodyView];
-    return CGRectGetMaxX(bodyView.frame);
 }
 
 - (id)initWithActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {
@@ -515,7 +528,7 @@
         actions_ = [[NSMutableArray alloc] init];
         activity_ = [activity retain];
         scope_ = scope;
-        _configuration = [[STActivityCellConfiguration alloc] initWithActivity:activity andScope:scope];
+        _configuration = [[STFastActivityCellConfiguration alloc] initWithActivity:activity andScope:scope];
         self.accessoryType = UITableViewCellAccessoryNone;
         UIView* imageView = nil;
         if (self.configuration.hasCredit && self.scope == STStampedAPIScopeYou) {
@@ -543,27 +556,13 @@
             }
             [self addSubview:imageView];
         }
-        CGFloat y = self.configuration.headerPadding;
-        if (self.configuration.header) {
-            [self addAttributedText:self.configuration.header
-                              frame:CGRectMake(self.configuration.contentOffset, y, self.configuration.headerWidth, self.configuration.headerHeight.floatValue)
-                               font:self.configuration.headerFontNormal
-                              color:self.configuration.headerColorNormal 
-                             offset:0
-                         references:self.activity.headerReferences
-                             toView:self];
-        }
-        y += self.configuration.headerHeight.floatValue + self.configuration.bodyPadding;
-        if (self.configuration.body) {
-            [self addAttributedText:self.configuration.body
-                              frame:CGRectMake(self.configuration.contentOffset, y, self.configuration.bodyWidth, self.configuration.bodyHeight.floatValue)
-                               font:self.configuration.bodyFontNormal
-                              color:self.configuration.bodyColorNormal
-                             offset:self.configuration.bodyReferenceOffset
-                         references:self.activity.bodyReferences
-                             toView:self];
-        }
-        y += self.configuration.bodyHeight.floatValue + self.configuration.imagesPadding;
+        [self _addChunk:self.configuration.headerChunk];
+        [self _addChunk:self.configuration.bodyChunk];
+        CGFloat y = self.configuration.topPadding;
+        y += self.configuration.contentYOffset;
+        y += self.configuration.headerHeight;
+        y += self.configuration.bodyHeight;
+        y += self.configuration.imagePadding;
         if (self.configuration.hasImages) {
             NSArray* users = self.configuration.usersForImages;
             NSInteger max = users.count;
@@ -621,34 +620,7 @@
                 [self addSubview:screennameView];
             }
         }
-        y += self.configuration.imagesHeight.floatValue + self.configuration.footerPadding;
-        UIView* timestampView = [Util viewWithText:[Util userReadableTimeSinceDate:self.activity.created]
-                                              font:self.configuration.footerFontTimestamp
-                                             color:self.configuration.footerColorTimestamp
-                                              mode:UILineBreakModeClip
-                                        andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-        CGFloat timestampX = self.configuration.contentOffset;
-        CGFloat footerX;
-        if (self.scope == STStampedAPIScopeYou) {
-            footerX = self.configuration.contentOffset;
-        }
-        else {
-            footerX = self.configuration.contentOffset + timestampView.frame.size.width + 13;
-        }
-        if (self.configuration.footer) {
-            CGFloat maxFooterX = 11 + [self addAttributedText:self.configuration.footer
-                                                        frame:CGRectMake(footerX, y, self.configuration.footerWidth, self.configuration.footerHeight.floatValue)
-                                                         font:self.configuration.footerFontNormal
-                                                        color:self.configuration.footerColorNormal
-                                                       offset:0
-                                                   references:self.activity.footerReferences
-                                                       toView:self];
-            if (self.scope == STStampedAPIScopeYou) {
-                timestampX = maxFooterX;
-            }
-        }
-        [Util reframeView:timestampView withDeltas:CGRectMake(timestampX, y, 0, 0)];
-        [self addSubview:timestampView];
+        [self _addChunk:self.configuration.footerChunk];
         
         if (!self.configuration.iconOnImages && self.configuration.hasIcon) {
             UIImageView* iconView = [[[UIImageView alloc] initWithFrame:self.configuration.iconFrame] autorelease];
@@ -669,6 +641,9 @@
                 }
             }
             [self addSubview:iconView];
+        }
+        if (self.configuration.isFollow && self.scope == STStampedAPIScopeYou) {
+            
         }
     }
     return self;
@@ -703,7 +678,7 @@
 }
 
 + (CGFloat)heightForCellWithActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope {
-    STActivityCellConfiguration* configuration = [[[STActivityCellConfiguration alloc] initWithActivity:activity andScope:scope] autorelease];
+    STFastActivityCellConfiguration* configuration = [[[STFastActivityCellConfiguration alloc] initWithActivity:activity andScope:scope] autorelease];
     return configuration.height;
 }
 

@@ -233,8 +233,8 @@ static Rdio* _rdio;
     UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
     CGContextRef context = UIGraphicsGetCurrentContext();
     
-    CGContextDrawImage(context, CGRectMake(0, 0, stampSize, stampSize), userStamp.CGImage);
-    CGContextDrawImage(context, CGRectMake(.5 * stampSize, 0, stampSize, stampSize), creditedUserStamp.CGImage);
+    CGContextDrawImage(context, CGRectMake(0, 0, stampSize, stampSize), creditedUserStamp.CGImage);
+    CGContextDrawImage(context, CGRectMake(.5 * stampSize, 0, stampSize, stampSize), userStamp.CGImage);
     
     UIImage* result = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -719,6 +719,23 @@ static Rdio* _rdio;
     view.frame = frame;
 }
 
+
++ (NSString*)titleForCategory:(NSString*)category {
+    //OPTIMIZE
+    NSDictionary* aliases = [NSDictionary dictionaryWithObjectsAndKeys:
+                             @"Places", @"place",
+                             @"Movies and TV", @"film",
+                             @"Books", @"book",
+                             @"Music", @"music",
+                             @"Apps", @"app",
+                             nil];
+    NSString* result = [aliases objectForKey:category];
+    if (!result) {
+        result = @"Other";
+    }
+    return result;
+}
+
 + (CGSize)size:(CGSize)a unionedWith:(CGSize)b
 {
     return CGSizeMake(MAX(a.width, b.width), MAX(a.height, b.height));
@@ -801,7 +818,6 @@ static Rdio* _rdio;
                 image = [UIImage imageNamed:filterPath];
             }
             if (!image) {
-                NSLog(@"Subpath:%@", subcategoryPath);
                 image = [UIImage imageNamed:subcategoryPath];
             }
         }
@@ -812,7 +828,6 @@ static Rdio* _rdio;
     if (!image && !([category isEqualToString:@"other"] && subcategory == nil && filter == nil)) {
         image = [self categoryIconForCategory:@"other" subcategory:nil filter:nil andSize:size];
     }
-    NSLog(@"CatIcon:%@,%@,%@,%@", category, subcategory, filter, image);
     return image;
 }
 
@@ -1097,7 +1112,6 @@ static Rdio* _rdio;
                            @"music",
                            @"film",
                            @"download",
-                           @"other",
                            nil];
     return categories;
 }
@@ -1163,11 +1177,18 @@ static Rdio* _rdio;
         if (count && count.numberUnread.integerValue >0) {
             UIView* countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 19, 19)] autorelease];
             countView.userInteractionEnabled = NO;
-            UILabel* label = [Util viewWithText:[NSString stringWithFormat:@"%d", count.numberUnread.integerValue ]
+            NSString* badgeString;
+            if (count.numberUnread.integerValue < 100) {
+                badgeString = [NSString stringWithFormat:@"%d", count.numberUnread.integerValue ];
+            }
+            else {
+                badgeString = @"99+";
+            }
+            UILabel* label = [Util viewWithText:badgeString
                                            font:[UIFont boldSystemFontOfSize:10]
                                           color:[UIColor whiteColor]
                                            mode:UILineBreakModeTailTruncation
-                                     andMaxSize:countView.frame.size];
+                                     andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
             label.frame = CGRectMake(ceilf((countView.bounds.size.width-label.bounds.size.width)/2), floorf((countView.bounds.size.height-label.bounds.size.height)/2), label.bounds.size.width, label.bounds.size.height);
             label.userInteractionEnabled = NO;
             label.shadowOffset = CGSizeMake(0.0f, -1.0f);
@@ -1314,7 +1335,7 @@ static Rdio* _rdio;
     CTFramesetterRef theFramesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)inString);
     if (theFramesetter == NULL)
     {
-        NSLog(@"Could not create CTFramesetter");
+        NSLog(@"Could not create CTFramesetter with %@", inString);
         return(CGSizeZero);
     }
     
@@ -1335,13 +1356,12 @@ static Rdio* _rdio;
 }
 
 + (CGFloat)endForString:(NSAttributedString*)string withSize:(CGSize)bounds {
-    
     // Create a path to render text in
     // create the framesetter and render text
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string); 
     CGSize size = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, (CFRange){}, NULL, bounds, NULL);
     CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, CGRectMake(0, 0, size.width, size.height) );
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, bounds.width, size.height) );
     
     CTFrameRef frame = CTFramesetterCreateFrame(framesetter,
                                                 CFRangeMake(0, [string length]), path, NULL);
@@ -1351,7 +1371,12 @@ static Rdio* _rdio;
         CTLineRef lastLine = CFArrayGetValueAtIndex(lines, CFArrayGetCount(lines)-1);
         CFRange range = CTLineGetStringRange(lastLine);
         if (range.length > 0) {
-            result = [self sizeForString:[string attributedSubstringFromRange:NSMakeRange(range.location, range.length)] thatFits:bounds].width;
+            //OPTIMIZE
+            UIGraphicsBeginImageContextWithOptions(CGSizeMake(bounds.width, 40), NO, 0.0);
+            CGContextRef context = UIGraphicsGetCurrentContext();
+            CGRect imageBounds = CTLineGetImageBounds(lastLine, context);
+            CGContextRelease(context);
+            result = imageBounds.size.width;
         }
     }
     // Clean up
@@ -1381,7 +1406,7 @@ static Rdio* _rdio;
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierFirstLineHeadIndent, sizeof(float_t), (float_t[]){ indent } },
-            //(CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineBreakMode, sizeof(CTLineBreakMode), (CTLineBreakMode[]){ kCTLineBreakByTruncatingTail } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineBreakMode, sizeof(CTLineBreakMode), (CTLineBreakMode[]){ kCTLineBreakByWordWrapping } },
         };
         
         CTParagraphStyleRef paragraphStyleRef = CTParagraphStyleCreate(paragraphStyles, sizeof(paragraphStyles) / sizeof(CTParagraphStyleSetting));
@@ -1403,6 +1428,7 @@ static Rdio* _rdio;
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
     CGSize size = [Util sizeForString:string thatFits:CGSizeMake(width, height)];
+    
     size.width = width;
     // Flip the coordinate system
     CGContextSetTextMatrix(context, CGAffineTransformIdentity);
@@ -1448,6 +1474,36 @@ static Rdio* _rdio;
     CGFloat deltaX = -(newWidth - original.size.width) / 2.0;
     CGFloat deltaY = -(newHeight - original.size.height) / 2.0;
     return CGRectMake(original.origin.x + deltaX, original.origin.y + deltaY, newWidth, newHeight);
+}
+
++ (NSString*)userStringWithBackendType:(NSString*)string andArticle:(BOOL)withArticle {
+    //OPTIMIZE
+    NSString* article = @"a";
+    NSString* noun = string;
+    if ([string isEqualToString:@"tv"]) {
+        noun = @"tv show";
+    }
+    else if ([string isEqualToString:@"app"]) {
+        article = @"an";
+    }
+    else if ([string isEqualToString:@"artist"]) {
+        article = @"an";
+    }
+    else if ([string isEqualToString:@"album"]) {
+        article = @"an";
+    }
+    else if ([string isEqualToString:@"establishment"]) {
+        article = @"an";
+    }
+    else if ([string isEqualToString:@"other"]) {
+        noun = @"thing";
+    }
+    if (withArticle) {
+        return [NSString stringWithFormat:@"%@ %@", article, noun];
+    }
+    else {
+        return noun;
+    }
 }
 
 @end

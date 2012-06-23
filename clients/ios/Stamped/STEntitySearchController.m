@@ -64,8 +64,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         if (!category) {
             category = @"music";
         }
-
-        self.title = [category capitalizedString];
+        self.title = [Util titleForCategory:category];
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
@@ -95,10 +94,11 @@ static const CGFloat _offscreenCancelPadding = 5;
     
     self.showsSearchBar = YES;
     
+    /*
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
     self.navigationItem.leftBarButtonItem = button;
     [button release];
-    
+    */
     BOOL loadResults = YES;
     CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
     if ([_category isEqualToString:@"place"]) {
@@ -452,11 +452,11 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.autoCompleteCancellation = [[STStampedAPI sharedInstance] entityAutocompleteResultsForQuery:text coordinates:self.coordinates category:self.category andCallback:^(NSArray<STEntityAutoCompleteResult> *results, NSError *error, STCancellation *cancellation) {
         
         self.autoCompleteCancellation = nil;
-        if (results) {
-            [self.autoCompleteResults removeAllObjects];
+        [self.autoCompleteResults removeAllObjects];
+        if (results.count) {
             [self.autoCompleteResults addObjectsFromArray:results];
-            [self.searchResultsTableView reloadData];
         }
+        [self.searchResultsTableView reloadData];
         [self.searchView setLoading:NO];
         
     }];

@@ -66,6 +66,7 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILoginNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPIRefreshedTokenNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
@@ -120,7 +121,8 @@
     [self.searchView setPlaceholderTitle:@"Search stamps"];
     [self.tableView reloadData];
     [self updateCache];
-    
+    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    controller.pan.enabled = NO;
     
 }
 
@@ -213,9 +215,15 @@
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
     self.scope = scope;
-    [self updateCache];
-    if (self.showsSearchBar) {
-        [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
+}
+
+- (void)setScope:(STStampedAPIScope)scope {
+    if (_scope != scope) {
+        _scope = scope;
+        [self updateCache];
+        if (self.showsSearchBar) {
+            [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
+        }
     }
 }
 
@@ -608,11 +616,9 @@
         
     } 
     else {
-        
         [Util addCreateStampButtonToController:self];
         self.slider.scope = STStampedAPIScopeFriends;
         self.scope = STStampedAPIScopeFriends;
-        
     }
     
     [self reloadDataSource];

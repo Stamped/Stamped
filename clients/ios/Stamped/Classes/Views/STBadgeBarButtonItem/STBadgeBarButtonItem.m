@@ -36,7 +36,7 @@
             UIView *countView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 19, 19)] autorelease];
             countView.userInteractionEnabled = NO;
             UILabel *label = [Util viewWithText:[NSString stringWithFormat:@"%d", activityCount]
-                                           font:[UIFont boldSystemFontOfSize:10]
+                                           font:[UIFont boldSystemFontOfSize:12]
                                           color:[UIColor whiteColor]
                                            mode:UILineBreakModeTailTruncation
                                      andMaxSize:countView.frame.size];

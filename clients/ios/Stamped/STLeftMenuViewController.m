@@ -45,23 +45,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (id)init {
     if ((self = [super init])) {
-        
         _selectedIndexPath = [[NSIndexPath indexPathForRow:0 inSection:0] retain];
-        
-        NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    @"Root.inbox", _inboxNameKey,
-                                    @"Root.iWantTo", _iWantToNameKey,
-                                    @"Root.news", _newsNameKey,
-                                    @"Root.findFriends", _addFriendsNameKey,
-                                    @"Root.user", _userNameKey,
-                                    @"Root.debug", _debugNameKey,
-                                    nil];
-        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _newsNameKey, _addFriendsNameKey, _userNameKey, _debugNameKey, nil] retain];
-        _controllerStore = [navigators retain];
-        
-        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", _todoNameKey, @"Root.settings", _settingsNameKey,
-                      nil] retain];
-        _anchorDataSource = [[NSArray arrayWithObjects:_todoNameKey, _settingsNameKey, nil] retain];
+        [self loginStatusChanged:nil];
         
     }
     return self;
@@ -118,11 +103,11 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         corner.layer.transform = CATransform3DMakeScale(1.0f, -1.0f, 0.0f);
         [self.view addSubview:corner];
         [corner release];
-
+        
         frame = corner.frame;
         frame.origin.y = (self.view.bounds.size.height-corner.bounds.size.height);
         corner.frame = frame;
-
+        
     }
     
     if (!_anchorTableView) {
@@ -147,21 +132,21 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         shadow.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self.view addSubview:shadow];
         [shadow release];
-
+        
         frame = shadow.bounds;
         frame.size.width = self.view.bounds.size.width;
         frame.origin.y = (tableView.frame.origin.y - frame.size.height);
         shadow.frame = frame;
-
+        
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         view.contentMode = UIViewContentModeRedraw;
         view.alpha = 0.1f;
         view.backgroundColor = [UIColor clearColor];
         [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
-
+            
             drawGradient([UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, [UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, ctx);
-
+            
         }];
         tableView.backgroundView = view;
         [view release];
@@ -169,6 +154,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILoginNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
 }
 
 - (void)viewDidUnload {
@@ -314,7 +301,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [cell setTop:(indexPath.row!=0) bottom:YES];
     cell.titleLabel.text = [STConfiguration value:[_anchorDataSource objectAtIndex:indexPath.row]];
     cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
-
+    
     return cell;
     
 }
@@ -343,12 +330,12 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     NSString *value = (tableView == self.tableView) ? [_controllerStore objectForKey:key] : [_anchorControllerStore objectForKey:key];
     
     UIViewController *controller = nil;
-
+    
     if ([[STConfiguration value:value] isEqual:[STUserViewController class]]) {
         
         id user = [[STStampedAPI sharedInstance] currentUser];
         controller = [[STUserViewController alloc] initWithUser:(STSimpleUserDetail*)user];
-
+        
     } else {
         
         controller = [[[STConfiguration value:value] alloc] init];
@@ -369,9 +356,9 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
         controller.navigationItem.rightBarButtonItem = item;
         [item release];
-
+        
         [menuController presentModalViewController:navController animated:YES];
-
+        
     }
     [controller release];
     [navController release];
@@ -387,7 +374,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         _selectedIndexPath = [indexPath retain];
         
     }
-    
+    [self performSelector:@selector(loginStatusChanged:) withObject:nil afterDelay:.3];
 }
 
 
@@ -420,18 +407,56 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 #pragma mark - Configurations
 
 + (void)setupConfigurations {
-    [STConfiguration addString:@"Feed" forKey:_inboxNameKey];
+    [STConfiguration addString:@"The Feed" forKey:_inboxNameKey];
     [STConfiguration addString:@"The Guide" forKey:_iWantToNameKey];
     [STConfiguration addString:@"Activity" forKey:_newsNameKey];
     [STConfiguration addString:@"Debug" forKey:_debugNameKey];
     [STConfiguration addString:@"To-Do" forKey:_todoNameKey];
     [STConfiguration addString:@"Settings" forKey:_settingsNameKey];
-    [STConfiguration addString:@"Add friends" forKey:_addFriendsNameKey];
+    [STConfiguration addString:@"Add Friends" forKey:_addFriendsNameKey];
     [STConfiguration addString:@"User" forKey:_userNameKey];
 }
 
 - (void)configurationChanged:(id)notImportant {
     [self.tableView reloadData];
+}
+
+- (void)loginStatusChanged:(id)notImportant {
+    
+    [_dataSource release];
+    [_controllerStore release];
+    [_anchorControllerStore release];
+    [_anchorDataSource release];
+    if (LOGGED_IN || YES) {
+        NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    @"Root.inbox", _inboxNameKey,
+                                    @"Root.iWantTo", _iWantToNameKey,
+                                    @"Root.news", _newsNameKey,
+                                    @"Root.findFriends", _addFriendsNameKey,
+                                    @"Root.user", _userNameKey,
+                                    @"Root.debug", _debugNameKey,
+                                    nil];
+        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _newsNameKey, _addFriendsNameKey, _userNameKey, _debugNameKey, nil] retain];
+        _controllerStore = [navigators retain];
+        
+        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", _todoNameKey, @"Root.settings", _settingsNameKey,
+                                   nil] retain];
+        _anchorDataSource = [[NSArray arrayWithObjects:_todoNameKey, _settingsNameKey, nil] retain];
+    }
+    else {
+        NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    @"Root.inbox", _inboxNameKey,
+                                    @"Root.iWantTo", _iWantToNameKey,
+                                    @"Root.debug", _debugNameKey,
+                                    nil];
+        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _debugNameKey, nil] retain];
+        _controllerStore = [navigators retain];
+        
+        _anchorControllerStore = [[NSDictionary dictionary] retain];
+        _anchorDataSource = [[NSArray array] retain];
+    }
+    [self.tableView reloadData];
+    [self.anchorTableView reloadData];
 }
 
 

@@ -222,7 +222,7 @@
             self.layer.shadowRadius = 1;
             self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
             [Util addGradientToLayer:self.layer 
-                          withColors:[NSArray arrayWithObjects:[UIColor colorWithWhite:.95 alpha:1], [UIColor colorWithWhite:.90 alpha:1], nil]
+                          withColors:[UIColor stampedLightGradient]
                             vertical:YES];
         }
     }

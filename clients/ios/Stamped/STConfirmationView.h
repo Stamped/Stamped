@@ -14,4 +14,6 @@
 
 + (void)displayConfirmationWithTitle:(NSString*)title subtitle:(NSString*)subtitle andIconImage:(UIImage*)image;
 
+@property (nonatomic, readwrite, retain) UIImage* image;
+
 @end

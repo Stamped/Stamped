@@ -134,7 +134,7 @@
         case FriendsRequestTypeContacts:{
             NSString *addresses = [[self emailAddresses] componentsJoinedByString:@","];
             addresses = [addresses stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-            self.requestParameters = [NSDictionary dictionaryWithObject:addresses forKey:@"q"];
+            self.requestParameters = [NSDictionary dictionaryWithObject:addresses forKey:@"query"];
         }
             break;
         case FriendsRequestTypeTwitter:
