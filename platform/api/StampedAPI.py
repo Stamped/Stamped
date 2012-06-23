@@ -1767,13 +1767,22 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
         numStamps = self._stampDB.countStampsForEntity(entityId)
-
         popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+
+        # If for some reason popularStampIds doesn't include all stamps, recalculate them
+        if numStamps < 1000 and len(popularStampIds) < numStamps:
+            logs.warning("Recalculating stamp stats for entityId=%s" % entityId)
+            allStampIds = self._stampDB.getStampIdsForEntity(entityId)
+            for stampId in allStampIds:
+                if stampId not in popularStampIds:
+                    stat = self.updateStampStatsAsync(stampId)
+            popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
-        logs.info('Popular User Ids: %s' % popularUserIds)
+        logs.debug('Popular User Ids: %s' % popularUserIds)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
