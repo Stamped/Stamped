@@ -61,21 +61,26 @@ class EntitySearch(object):
         sources_seen = set()
         logs.debug("RESTARTING")
         while True:
-            elapsed_seconds = (datetime.datetime.now() - start_time).total_seconds()
-            for (source, results) in resultsDict.items():
-                if source in sources_seen:
-                    continue
-                logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
-                sources_seen.add(source)
-                logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
-                # If a source returns at least 5 results, we assume we got a good result set from it. If it
-                # returns less, we're more inclined to wait for straggling sources.
-                total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
-                logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
-                total_potential_value_outstanding -= sources_to_priorities[source]
-            logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
-                    elapsed_seconds, total_value_received, total_potential_value_outstanding
-                ))
+            try:
+                elapsed_seconds = (datetime.datetime.now() - start_time).total_seconds()
+                for (source, results) in resultsDict.items():
+                    if source in sources_seen:
+                        continue
+                    logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                    sources_seen.add(source)
+                    logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
+                    # If a source returns at least 5 results, we assume we got a good result set from it. If it
+                    # returns less, we're more inclined to wait for straggling sources.
+                    total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
+                    logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
+                    total_potential_value_outstanding -= sources_to_priorities[source]
+                logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+                        elapsed_seconds, total_value_received, total_potential_value_outstanding
+                    ))
+            except Exception:
+                logs.warning('TERMINATE_WARNING SHIT IS FUCKED')
+                logs.report()
+                raise
 
             if total_potential_value_outstanding <= 0:
                 logs.debug('ALL SOURCES DONE')
@@ -142,7 +147,7 @@ class EntitySearch(object):
         pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
-        logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
+        logs.debug("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
 
         logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
         logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
