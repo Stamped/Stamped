@@ -59,26 +59,26 @@ class EntitySearch(object):
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
         sources_seen = set()
-        logs.warning("RESTARTING")
+        logs.debug("RESTARTING")
         while True:
             elapsed_seconds = (datetime.datetime.now() - start_time).total_seconds()
             for (source, results) in resultsDict.items():
                 if source in sources_seen:
                     continue
-                logs.warning('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
                 sources_seen.add(source)
-                logs.warning('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
+                logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
                 # If a source returns at least 5 results, we assume we got a good result set from it. If it
                 # returns less, we're more inclined to wait for straggling sources.
                 total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
-                logs.warning('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
+                logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
                 total_potential_value_outstanding -= sources_to_priorities[source]
-            logs.warning('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+            logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
                     elapsed_seconds, total_value_received, total_potential_value_outstanding
                 ))
 
             if total_potential_value_outstanding <= 0:
-                logs.warning('ALL SOURCES DONE')
+                logs.debug('ALL SOURCES DONE')
                 return
 
             if total_value_received:
@@ -100,7 +100,7 @@ class EntitySearch(object):
                     if sources_not_seen:
                         log_template = 'QUITTING EARLY: At %f second elapsed, bailing on sources [%s] because with ' + \
                             'value received %f, value outstanding %f, marginal value %f, min marginal value %f'
-                        logs.warning(log_template % (
+                        logs.debug(log_template % (
                             elapsed_seconds, ', '.join(sources_not_seen), total_value_received,
                             total_potential_value_outstanding, marginal_value_of_outstanding_sources, min_marginal_value
                         ))
