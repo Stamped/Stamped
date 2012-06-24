@@ -125,7 +125,6 @@ class EntitySearch(object):
         ))
 
     def search(self, category, text, timeout=None, limit=10, **queryParams):
-        logs.debug('In search')
         if category not in Entity.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -172,7 +171,6 @@ class EntitySearch(object):
     def searchEntities(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
         if queryLatLng:
             queryParams['queryLatLng'] = queryLatLng
-        logs.debug('In searchEntities')
         stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
         entityResults = []
