@@ -2463,6 +2463,7 @@ class StampedAPI(AStampedAPI):
 
         # Generate image
         sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
+        sizes.sort(key=lambda x: x.height, reverse=True)
         image = ImageSchema()
         image.sizes = sizes
 
