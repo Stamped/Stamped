@@ -175,7 +175,7 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
             self.api.upgradeAccount(self.accountA.user_id, 'devbot2@stamped.com', '12345')
 
     def test_upgrade_account_already_stamped_auth(self):
-        with expected_exception(DuplicateKeyError):
+        with expected_exception(StampedIllegalActionError):
             self.api.upgradeAccount(self.accountC.user_id, 'devbot2@stamped.com', '12345')
 
 class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):

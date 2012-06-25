@@ -187,7 +187,7 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         data = {
             "oauth_token"   : self.token['access_token'],
             'service_name'   : 'facebook',
-            'share_stamps'   : True,
+            'share_stamps'      : True,
             }
         self.handlePOST(path, data)
 
@@ -202,15 +202,18 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         print('###')
         pprint.pprint(account)
 
-        entity = self.createEntity(self.token)
-        stamp = self.createStamp(self.token, entity['entity_id'], blurb='ASDF')
-        self.createLike(self.token, stamp['stamp_id'])
+        #entity = self.createEntity(self.token)
+        #stamp = self.createStamp(self.token, entity['entity_id'], blurb='ASDF')
+        #self.createTodo(self.token, entity['entity_id'])
+        #self.createLike(self.token, stamp['stamp_id'])
 
         import time
         time.sleep(5)
 
         result = self._getOpenGraphActivity(self.fb_user_token_a)
         pprint.pprint(result)
+
+
 
 
 #        self.async(lambda: self.stamp = self.createStamp(self.token, self.entity['entity_id'], blurb='ASDF'), [
