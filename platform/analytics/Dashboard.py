@@ -55,6 +55,8 @@ def totalStamps():
     for i in range (0,5):
         bgn = yesterday(bgn)
         end = yesterday(end)
+        print bgn
+        print end
         print weeklyAgg
         weeklyAgg += stamp_collection.find({'timestamp.created': {'$gte': bgn, '$lt': end}}).count()
         
