@@ -25,16 +25,16 @@ api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
 acct_collection = api._userDB._collection
 
-conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+query = logsQuery()
 
 
 v1_init = datetime(2011,11,21)
 
 def now():
-    return datetime.today()
+    return datetime.utcnow()
 
 def today():
-    now = datetime.today()
+    now = datetime.utcnow()
     diff = timedelta(days=0,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
     return now - diff
 
@@ -44,7 +44,7 @@ def yesterday(date):
 def weekAgo(date):
     return date - timedelta(days=6)
 
-def totalStamps():
+def newStamps():
     todays = stamp_collection.find({'timestamp.created': {'$gte': today()}}).count()
     yesterdays = stamp_collection.find({'timestamp.created': {'$gte': yesterday(today()), '$lt': yesterday(now())}}).count()
     
@@ -55,9 +55,6 @@ def totalStamps():
     for i in range (0,5):
         bgn = yesterday(bgn)
         end = yesterday(end)
-        print bgn
-        print end
-        print weeklyAgg
         weeklyAgg += stamp_collection.find({'timestamp.created': {'$gte': bgn, '$lt': end}}).count()
         
     weeklyAvg = weeklyAgg / 6.0
@@ -73,39 +70,93 @@ def totalStamps():
         deltaWeek = 'N/A'
     
     
-    return (now(),todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
+    return (todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
 
-def totalAccounts():
-    total = acct_collection.count()
-    new = acct_collection.find({'timestamp.created': {'$gte': today()}}).count()
-    delta = float(new) / (total - new) *100.0
-    return (total,new,delta)
+def newAccounts():
+    todays = acct_collection.find({'timestamp.created': {'$gte': today()}}).count()
+    yesterdays = acct_collection.find({'timestamp.created': {'$gte': yesterday(today()), '$lt': yesterday(now())}}).count()
+    
+    
+    weeklyAgg = yesterdays
+    bgn = yesterday(today())
+    end = yesterday(now())
+    for i in range (0,5):
+        bgn = yesterday(bgn)
+        end = yesterday(end)
+        weeklyAgg += acct_collection.find({'timestamp.created': {'$gte': bgn, '$lt': end}}).count()
+        
+    weeklyAvg = weeklyAgg / 6.0
+    
+    try:
+        deltaDay = float(todays - yesterdays)/(yesterdays)*100.0
+    except ZeroDivisionError:
+        deltaDay = 'N/A'
+    
+    try: 
+        deltaWeek = float(todays - weeklyAvg)/(weeklyAvg)*100
+    except ZeroDivisionError:
+        deltaWeek = 'N/A'
+    
+    
+    return (todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
 
 def todaysUsers():
-    query = logsQuery()
-    users = logsQuery.activeUsers(query, today(), datetime.today())
-    return users
+    todays = query.activeUsers(today(), now())
+    yesterdays = query.activeUsers(yesterday(today()), yesterday(now()))
+    
+    weeklyAgg = yesterdays
+    bgn = yesterday(today())
+    end = yesterday(now())
+    for i in range (0,5):
+        bgn = yesterday(bgn)
+        end = yesterday(end)
+        weeklyAgg += query.activeUsers(bgn, end)
+        
+    weeklyAvg = weeklyAgg / 6.0
+    
+    try:
+        deltaDay = float(todays - yesterdays)/(yesterdays)*100.0
+    except ZeroDivisionError:
+        deltaDay = 'N/A'
+    
+    try: 
+        deltaWeek = float(todays - weeklyAvg)/(weeklyAvg)*100
+    except ZeroDivisionError:
+        deltaWeek = 'N/A'
+    
+    return (todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
     
     
 while True:
     
-    hour,todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = totalStamps()
+    todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = newStamps()
     
-    print hour
+    print now()
     print "Stamps Today: %s" % todays
     print "Stamps Yesterday: %s" % yesterdays
     print "D2D Change: %s%%" % deltaDay
     print "Weekly Avg: %s" % weeklyAvg
     print "W2D Change: %s%%" % deltaWeek
     
-#    totalA,newA,deltaA = totalAccounts()
-#    print "Total Accounts: %s" % totalA
-#    print "New Accounts Today: %s" % newA
-#    print "Change: %s%%\n\n" % deltaA
-#    
-#    users = todaysUsers()
-#    print "Unique users today: %s\n\n" % users
-#   
+    todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = newAccounts()
+    
+
+    print "New Accounts Today: %s" % todays
+    print "New Accounts Yesterday: %s" % yesterdays
+    print "D2D Change: %s%%" % deltaDay
+    print "Weekly Avg: %s" % weeklyAvg
+    print "W2D Change: %s%%" % deltaWeek
+    
+    todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = todaysUsers()
+    
+
+    print "Active Users Today: %s" % todays
+    print "Active Users Yesterday: %s" % yesterdays
+    print "D2D Change: %s%%" % deltaDay
+    print "Weekly Avg: %s" % weeklyAvg
+    print "W2D Change: %s%%" % deltaWeek
+    
+   
 #    print "Most Stamped Today:"
 #    dailyTop = getTopStamped(None,str(today().date()),stamp_collection)
 #    count = 1
