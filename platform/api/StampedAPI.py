@@ -2443,10 +2443,10 @@ class StampedAPI(AStampedAPI):
 
         maxSize = (960, 960)
         supportedSizes   = {
-            '-ios1x'  : (200, None),
-            '-ios2x'  : (400, None),
-            '-web'    : (580, None),
-            '-mobile' : (572, None),
+            'ios1x'  : (200, None),
+            'ios2x'  : (400, None),
+            'web'    : (580, None),
+            'mobile' : (572, None),
             }
 
         # Get stamp using stampId
