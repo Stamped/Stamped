@@ -176,7 +176,7 @@ class EntitySearch(object):
         return dedupedResults[:limit]
 
 
-    def searchEntities(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
+    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
         if queryLatLng:
             queryParams['queryLatLng'] = queryLatLng
         stampedSource = StampedSource()
@@ -213,7 +213,11 @@ class EntitySearch(object):
 
             entityResults.append(entity)
 
-        return entityResults
+        return zip(entityResults, clusters)
+
+
+    def searchEntities(self, *args, **kwargs):
+        return [entity for entity, _ in self.searchEntitiesAndClusters(*args, **kwargs)]
 
 
 from optparse import OptionParser

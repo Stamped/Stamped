@@ -170,7 +170,7 @@ class SearchResultCluster(object):
         else:
             return CompareResult.match(match_score)
 
-    def __str__(self):
+    def __repr__(self):
         # TODO: Indicate which one is the "primary"
         return 'Cluster, "%s", of %d elements with score %f.\n%s' % \
             (self.primary_result.resolverObject.name.encode('utf-8'),
