@@ -25,6 +25,7 @@
 @synthesize reloading=_reloading;
 @synthesize moreData=_moreData;
 @synthesize requestParameters;
+@synthesize query = _query;
 
 - (id)init {
     if ((self = [super init])) {
@@ -43,6 +44,7 @@
     
     self.requestParameters=nil;
     [_data release], _data=nil;
+    [_query release];
     [super dealloc];
 }
 
@@ -51,11 +53,14 @@
 
 - (void)loadWithPath:(NSString*)path params:(NSDictionary*)params {
             
-    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:(params!=nil) authenticated:YES params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping] andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
+    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path 
+                                                               post:(params!=nil) 
+                                                      authenticated:YES 
+                                                             params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping]
+                                                        andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
 
         _moreData = NO;
         if (users) {
-            
             _moreData = ([users count] == kUserLimit);            
             NSMutableArray *array = [_data mutableCopy];
             NSMutableArray *identifiers = [_identifiers mutableCopy];
@@ -83,29 +88,24 @@
         [STEvents postEvent:EventTypeFriendsFinished identifier:[NSString stringWithFormat:@"friends-%i", _requestType] object:nil];
         
     }] retain];
-    
-    
 }
 
 - (NSString*)path {
-    
     switch (_requestType) {
         case FriendsRequestTypeContacts:
             return @"/users/find/email.json";
-            break;
         case FriendsRequestTypeTwitter:
             return @"/users/find/twitter.json";
-            break;
         case FriendsRequestTypeFacebook:
             return @"/users/find/facebook.json";
-            break;
         case FriendsRequestTypeSuggested:
             return @"/users/suggested.json";
-            break;
+        case FriendsRequestTypeSearch:
+            return @"/users/search.json";
         default:
             break;
     }
-    
+    return nil;
 }
 
 - (void)reloadData {
@@ -134,7 +134,7 @@
         case FriendsRequestTypeContacts:{
             NSString *addresses = [[self emailAddresses] componentsJoinedByString:@","];
             addresses = [addresses stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-            self.requestParameters = [NSDictionary dictionaryWithObject:addresses forKey:@"q"];
+            self.requestParameters = [NSDictionary dictionaryWithObject:addresses forKey:@"query"];
         }
             break;
         case FriendsRequestTypeTwitter:
@@ -156,6 +156,13 @@
     
     
     
+}
+
+- (void)setQuery:(NSString *)query {
+    _requestType = FriendsRequestTypeSearch;
+    [_query release];
+    _query = [query copy];
+    self.requestParameters = [NSDictionary dictionaryWithObject:query forKey:@"query"];
 }
 
 

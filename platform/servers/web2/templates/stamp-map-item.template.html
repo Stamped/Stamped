@@ -1,33 +1,39 @@
 
-<div class="stamp-map-item clearfix">
-    <div class="stamp-map-item-overlay user-primary-selection"></div>
+<div class="stamp-map-item-wrapper">
+    <div class="stamp-map-item-shadow"></div>
     
-    <div class="profile-image-small">
-        <img src="{{user.image_url}}" />
-    </div>
-    
-    <div class="entity-header">
-        <div class="stamp-category-{{entity.category}}">
-            <div class='title clearfloat'>
-                <div class="pronounced-title">
-                    <a class='sdetail' href="{{#url}}{{.}}{{/url}}" title="{{entity.title}}">{{entity.title}}</a>
-                </div>
-                
-                <span class='user-logo-small'></span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="content">
-        <div class="blurbs">
-            {{#contents}}
-            <div class="stamped-content">
-                {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
-            </div>
-            {{/contents}}
+    <div class="stamp-map-item clearfix">
+        <div class="stamp-map-item-overlay user-primary-selection"></div>
+        
+        <div class="profile-image-small">
+            <img src="{{user.image_url}}" />
         </div>
         
-        {{>social-feedback}}
+        <div class="entity-header">
+            <div class="stamp-category-{{entity.category}}">
+                <div class='title clearfloat'>
+                    <div class="pronounced-title">
+                        <a class='sdetail' href="{{#url}}{{.}}{{/url}}" title="{{entity.title}}">{{entity.title}}</a>
+                    </div>
+                    
+                    <span class='user-logo-small'></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="blurbs">
+                {{#contents}}
+                <div class="stamped-content">
+                    {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
+                </div>
+                {{/contents}}
+            </div>
+            
+            {{> social-feedback}}
+        </div>
     </div>
+    
+    <div class="stamp-map-item-arrow"></div>
 </div>
 

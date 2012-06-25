@@ -8,15 +8,11 @@
 
 #import "UIImageHelper.h"
 
+#import "Util.h"
+
 @implementation UIImage (Helper)
 
 - (void)aspectDrawInRect:(CGRect)rect {
-    
-    if (self.size.width == self.size.height) {
-        [self drawInRect:rect];
-        return;
-    }
-    
     CGSize size = self.size;
     CGFloat width = MIN(size.width, rect.size.width);
     BOOL widthIsGreater = (size.width > size.height);
@@ -35,14 +31,32 @@
     
 }
 
-- (UIImage*)aspectScaleToSize:(CGSize)size {
-	
-	UIGraphicsBeginImageContext(CGSizeMake(size.width, size.height));
-    [self aspectDrawInRect:CGRectMake(0.0f, 0.0f, size.width, size.height)];
-	UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-	
-	return scaledImage;	
+- (UIImage*)aspectScaleToSize:(CGSize)bounds {
+	CGRect rect = [Util centeredAndBounded:self.size inFrame:CGRectMake(0, 0, bounds.width, bounds.height)];
+    CGSize size = rect.size;
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(NULL, size.width, size.height, 8, 0, colorSpace, kCGImageAlphaPremultipliedLast);
+    CGContextClearRect(context, CGRectMake(0, 0, size.width, size.height));
+    
+    if(self.imageOrientation == UIImageOrientationRight)
+    {
+        CGContextRotateCTM(context, -M_PI_2);
+        CGContextTranslateCTM(context, -size.height, 0.0f);
+        CGContextDrawImage(context, CGRectMake(0, 0, size.height, size.width), self.CGImage);
+    }
+    else
+        CGContextDrawImage(context, CGRectMake(0, 0, size.width, size.height), self.CGImage);
+    
+    CGImageRef scaledImage=CGBitmapContextCreateImage(context);
+    
+    CGColorSpaceRelease(colorSpace);
+    CGContextRelease(context);
+    
+    UIImage *image = [UIImage imageWithCGImage: scaledImage];
+    
+    CGImageRelease(scaledImage);
+    
+    return image;
 }
 
 

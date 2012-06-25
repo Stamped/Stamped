@@ -33,6 +33,8 @@
 
 - (UIImage*)cachedImageForImageURL:(NSString*)URL;
 
+- (void)cacheImage:(UIImage*)image forImageURL:(NSString*)url;
+
 - (void)fastPurge;
 
 @end

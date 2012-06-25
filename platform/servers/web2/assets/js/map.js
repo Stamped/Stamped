@@ -96,7 +96,7 @@
         var popup = new InfoBox({
             disableAutoPan: false, 
             maxWidth: 0, 
-            pixelOffset: new google.maps.Size(-48, -32), 
+            pixelOffset: new google.maps.Size(-44, -50), 
             zIndex: null, 
             boxStyle: {
                 width: "340px"

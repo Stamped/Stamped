@@ -80,18 +80,21 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
         movie.value = @"movie";
         movie.type = STConsumptionToolbarItemTypeSubsection;
         [array addObject:movie];
-        STConsumptionToolbarItem* movieInTheaters = [[[STConsumptionToolbarItem alloc] init] autorelease];
-        movieInTheaters.name = [STConfiguration value:_inTheatersNameKey];
-        movieInTheaters.value = [STConfiguration value:_inTheatersFilterKey];
-        movieInTheaters.iconValue = @"in_theaters";
         
-        movieInTheaters.type = STConsumptionToolbarItemTypeFilter;
-        STConsumptionToolbarItem* movieOnlineAndDVD = [[[STConsumptionToolbarItem alloc] init] autorelease];
-        movieOnlineAndDVD.name = [STConfiguration value:_onlineAndDVDNameKey];
-        movieOnlineAndDVD.value = [STConfiguration value:_onlineAndDVDFilterKey];
-        movieOnlineAndDVD.type = STConsumptionToolbarItemTypeFilter;
-        movieOnlineAndDVD.iconValue = @"online_dvd";
-        movie.children = [NSArray arrayWithObjects:movieInTheaters, movieOnlineAndDVD, nil];
+        /*
+         STConsumptionToolbarItem* movieInTheaters = [[[STConsumptionToolbarItem alloc] init] autorelease];
+         movieInTheaters.name = [STConfiguration value:_inTheatersNameKey];
+         movieInTheaters.value = [STConfiguration value:_inTheatersFilterKey];
+         movieInTheaters.iconValue = @"in_theaters";
+         
+         movieInTheaters.type = STConsumptionToolbarItemTypeFilter;
+         STConsumptionToolbarItem* movieOnlineAndDVD = [[[STConsumptionToolbarItem alloc] init] autorelease];
+         movieOnlineAndDVD.name = [STConfiguration value:_onlineAndDVDNameKey];
+         movieOnlineAndDVD.value = [STConfiguration value:_onlineAndDVDFilterKey];
+         movieOnlineAndDVD.type = STConsumptionToolbarItemTypeFilter;
+         movieOnlineAndDVD.iconValue = @"online_dvd";
+         movie.children = [NSArray arrayWithObjects:movieInTheaters, movieOnlineAndDVD, nil];
+         */
         
         STConsumptionToolbarItem* tv = [[[STConsumptionToolbarItem alloc] init] autorelease];
         tv.name = [STConfiguration value:_tvNameKey];
@@ -138,7 +141,12 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
     if (self) {
         category_ = [category retain];
         // Custom initialization
-        scope_ = STStampedAPIScopeFriends;
+        if (LOGGED_IN) {
+            scope_ = STStampedAPIScopeFriends;
+        }
+        else {
+            scope_ = STStampedAPIScopeEveryone;
+        }
         tableDelegate_ = [[STGenericTableDelegate alloc] init];
         tableDelegate_.style = STCellStyleConsumption;
         tableDelegate_.lazyList = lazyList_;
@@ -181,7 +189,12 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 }
 
 - (UIView *)loadToolbar {
-    return self.consumptionToolbar;
+    if (LOGGED_IN) {
+        return self.consumptionToolbar;
+    }
+    else {
+        return nil;
+    }
 }
 
 - (void)setScope:(STStampedAPIScope)scope {

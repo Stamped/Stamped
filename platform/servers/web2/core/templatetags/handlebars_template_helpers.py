@@ -48,7 +48,7 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     url  = scope.get('image_url', "http://static.stamped.com/users/default.jpg")
     
     if not url.endswith('default.jpg'):
-        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
+        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name.lower(), size, size)
     
     return pybars.strlist('<img %s src="%s" />' % (alt, url))
 
@@ -58,15 +58,10 @@ def entity_image(template_name, pad, scope, *args, **kwargs):
     if len(args) == 1 and isinstance(size, (basestring, int)):
         size = int(args[0])
     
-    name  = scope.get('name')
-    screen_name = scope.get('screen_name')
-    alt   = "@%s" % screen_name
+    alt   = scope.get('title', "")
     url   = None
     large = None
     width = -1
-    
-    if name is not None:
-        alt = "%s (%s)" % (name, alt)
     
     images = scope.get('images')
     
@@ -96,7 +91,7 @@ def entity_image(template_name, pad, scope, *args, **kwargs):
         return ""
     
     onerror = "this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }"
-    pre     = '<div><img alt="%s" src="%s" onerror="%s" />' % (alt, url, onerror)
+    pre     = '<div class="entity-image-wrapper"><img alt="%s" src="%s" onerror="%s" />' % (alt, url, onerror)
     body    = '<a class="lightbox" href="%s"><div class="zoom"></div></a></div>' % large
     
     return pybars.strlist(pre + "\n" + body)

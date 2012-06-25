@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
 #import "STPlaylistItem.h"
-#import "STAction.h"
 
 @interface STSimplePlaylistItem : NSObject<STPlaylistItem, NSCoding>
 
@@ -17,6 +16,7 @@
 @property (nonatomic, readwrite, assign) NSInteger length;
 @property (nonatomic, readwrite, retain) NSString* icon;
 @property (nonatomic, readwrite, retain) NSString* entityID;
+@property (nonatomic, readwrite, retain) id<STImage> image;
 @property (nonatomic, readwrite, retain) id<STAction> action;
 
 + (RKObjectMapping*)mapping;

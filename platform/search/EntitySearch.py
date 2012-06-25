@@ -23,6 +23,9 @@ from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
 
 
+def total_seconds(timedelta):
+    return timedelta.seconds + (timedelta.microseconds / 1000000.0)
+
 
 class EntitySearch(object):
     def __registerSource(self, source, **categoriesToPriorities):
@@ -41,7 +44,7 @@ class EntitySearch(object):
         for category in allCategories:
             self.__categories_to_sources_and_priorities[category] = []
 
-        #self.__registerSource(StampedSource(), allCategories)
+        self.__registerSource(StampedSource(), music=10, film=10, book=10, app=10, place=10)
         self.__registerSource(iTunesSource(), music=10, film=10, book=3, app=10)
         # TODO: Enable film for Amazon. Amazon film results blend TV and movies and have better retrieval than
         # iTunes. On the other hand, they're pretty dreadful -- no clear distinction between TV and movies, no
@@ -59,19 +62,33 @@ class EntitySearch(object):
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
         sources_seen = set()
-        logs.warning("RESTARTING")
+        logs.debug("RESTARTING")
         while True:
-            elapsed_seconds = (datetime.datetime.now() - start_time).total_seconds()
-            for (source, results) in resultsDict.items():
-                if source in sources_seen:
-                    continue
-                logs.warning('JUST NOW SEEING SOURCE: ' + source.sourceName)
-                sources_seen.add(source)
-                logs.warning('SOURCES_SEEN IS ' + str([source for source in sources_seen]))
-                # If a source returns at least 5 results, we assume we got a good result set from it. If it
-                # returns less, we're more inclined to wait for straggling sources.
-                total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
-                total_potential_value_outstanding -= sources_to_priorities[source]
+            try:
+                elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
+                for (source, results) in resultsDict.items():
+                    if source in sources_seen:
+                        continue
+                    logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                    sources_seen.add(source)
+                    logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
+                    # If a source returns at least 5 results, we assume we got a good result set from it. If it
+                    # returns less, we're more inclined to wait for straggling sources.
+                    total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
+                    logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
+                    total_potential_value_outstanding -= sources_to_priorities[source]
+                logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+                        elapsed_seconds, total_value_received, total_potential_value_outstanding
+                    ))
+            except Exception:
+                logs.warning('TERMINATE_WARNING SHIT IS FUCKED')
+                logs.report()
+                raise
+
+            if total_potential_value_outstanding <= 0:
+                logs.debug('ALL SOURCES DONE')
+                return
+
             if total_value_received:
                 marginal_value_of_outstanding_sources = total_potential_value_outstanding / total_value_received
                 # Comes out to:
@@ -91,12 +108,13 @@ class EntitySearch(object):
                     if sources_not_seen:
                         log_template = 'QUITTING EARLY: At %f second elapsed, bailing on sources [%s] because with ' + \
                             'value received %f, value outstanding %f, marginal value %f, min marginal value %f'
-                        logs.warning(log_template % (
+                        logs.debug(log_template % (
                             elapsed_seconds, ', '.join(sources_not_seen), total_value_received,
                             total_potential_value_outstanding, marginal_value_of_outstanding_sources, min_marginal_value
                         ))
                     pool.kill()
                     return
+
             gevent.sleep(0.01)
 
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
@@ -107,6 +125,7 @@ class EntitySearch(object):
             resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
         except:
             logs.report()
+            resultsDict[source] = []
         after = datetime.datetime.now()
         timesDict[source] = after - before
         logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
@@ -114,7 +133,6 @@ class EntitySearch(object):
         ))
 
     def search(self, category, text, timeout=None, limit=10, **queryParams):
-        logs.debug('In search')
         if category not in Entity.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -132,7 +150,7 @@ class EntitySearch(object):
         pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
         logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
-        logs.debug("TIME CHECK GOT ALL RESPONSES AT" + str(datetime.datetime.now()))
+        logs.debug("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
 
         logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
         logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
@@ -161,7 +179,6 @@ class EntitySearch(object):
     def searchEntities(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
         if queryLatLng:
             queryParams['queryLatLng'] = queryLatLng
-        logs.debug('In searchEntities')
         stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
         entityResults = []

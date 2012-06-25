@@ -34,11 +34,14 @@
 #import "STSimpleLoginResponse.h"
 #import "STSimpleEntityAutoCompleteResult.h"
 #import "STSimpleBooleanResponse.h"
+#import "STSimpleAccount.h"
+
 
 NSString* const STStampedAPILoginNotification = @"STStampedAPILoginNotification";
 NSString* const STStampedAPILogoutNotification = @"STStampedAPILogoutNotification";
 NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedNotification";
 NSString* const STStampedAPILocalStampModificationNotification = @"STStampedAPILocalStampModification";
+NSString* const STStampedAPIRefreshedTokenNotification = @"STStampedAPIRefreshTokenNotification";
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -143,7 +146,11 @@ static STStampedAPI* _sharedInstance;
     [_entityCache release];
     [entityDetailCache_ release];
     [lastCount_ release];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
+}
+
+- (void)_didLogout:(id)notImportant {
 }
 
 - (id<STUser>)cachedUserForUserID:(NSString*)userID {
@@ -162,7 +169,7 @@ static STStampedAPI* _sharedInstance;
     [self.entityCache setObject:entity forKey:entity.entityID];
 }
 
-- (id<STUser>)currentUser {
+- (id<STUserDetail>)currentUser {
     return [[STRestKitLoader sharedInstance] currentUser];
 }
 
@@ -218,6 +225,7 @@ static STStampedAPI* _sharedInstance;
                     [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
                     [array addObject:stamp];
                 }
+                [self.stampedByCache removeObjectForKey:stamp.entity.entityID];
             }
             block(array, error, cancellation);
         }
@@ -263,6 +271,11 @@ static STStampedAPI* _sharedInstance;
         [params setObject:[params objectForKey:@"category"] forKey:@"section"];
         [params removeObjectForKey:@"category"];
     }
+    if ([params objectForKey:@"subcategory"]) {
+        [params setObject:[params objectForKey:@"subcategory"] forKey:@"subsection"];
+        [params removeObjectForKey:@"subcategory"];
+    }
+    
     if ([params objectForKey:@"query"]) {
         path = @"/guide/search.json";
     }
@@ -286,6 +299,7 @@ static STStampedAPI* _sharedInstance;
                                                      mapping:[STSimpleStamp mapping]
                                                  andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
                                                      if (stamp) {
+                                                         [self.stampedByCache removeObjectForKey:[stamp entity].entityID];
                                                          [self.stampCache setObject:stamp forKey:[stamp stampID]];
                                                          [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification
                                                                                                              object:[stamp stampID]];
@@ -383,7 +397,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)entityDetailForSearchID:(NSString*)searchID 
                                andCallback:(void(^)(id<STEntityDetail>, NSError*, STCancellation*))block {
-    NSString* path = @"/v0/entities/show.json";
+    NSString* path = @"/entities/show.json";
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
                                                         post:NO
                                                authenticated:YES
@@ -410,6 +424,7 @@ static STStampedAPI* _sharedInstance;
                                                           if (activity.objects.stamps.count > 0) {
                                                               for (id<STStamp> stamp in activity.objects.stamps) {
                                                                   [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                                  [self.stampedByCache removeObjectForKey:stamp.entity.entityID];
                                                               }
                                                           }
                                                       }
@@ -517,11 +532,11 @@ static STStampedAPI* _sharedInstance;
     NSDictionary* params = [NSDictionary dictionaryWithObject:stampID forKey:@"stamp_id"];
     if (![Util isOffline]) {
         [Util executeOnMainThread:^{
-        [self _updateLocalStampWithStampID:stampID
-                                      todo:nil
-                                      like:[self currentUser]
-                                   comment:nil
-                                 andCredit:nil];
+            [self _updateLocalStampWithStampID:stampID
+                                          todo:nil
+                                          like:[self currentUser]
+                                       comment:nil
+                                     andCredit:nil];
         }];
     }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path
@@ -562,11 +577,14 @@ static STStampedAPI* _sharedInstance;
                           entityID:(NSString*)entityID 
                        andCallback:(void(^)(id<STTodo>,NSError*,STCancellation*))block {
     NSString* path = @"/todos/create.json";
-    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
-                            stampID, @"stamp_id",
-                            entityID, @"entity_id",
-                            nil];
-    if (![Util isOffline]) { 
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    if (stampID) {
+        [params setObject:stampID forKey:@"stamp_id"];
+    }
+    if (entityID) {
+        [params setObject:entityID forKey:@"entity_id"];
+    }
+    if (![Util isOffline] && stampID) { 
         id<STUser> currentUser = self.currentUser;
         [Util executeOnMainThread:^ {
             [self _updateLocalStampWithStampID:stampID
@@ -617,7 +635,7 @@ static STStampedAPI* _sharedInstance;
                                           like:nil
                                        comment:nil
                                      andCredit:nil];
-
+            
         }];
     }
     return [[STRestKitLoader sharedInstance] loadOneWithPath:path 
@@ -864,6 +882,9 @@ static STStampedAPI* _sharedInstance;
                                  withKey:(NSString *)key
                             withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
     NSAssert1(key, @"Key should not be none for cache %@", cache);
+    if (key == nil) {
+        return nil;
+    }
     if (cache == self.stampCache) {
         NSDictionary* params = [NSDictionary dictionaryWithObject:key forKey:@"stamp_id"];
         NSString* path = @"/stamps/show.json";
@@ -922,7 +943,7 @@ static STStampedAPI* _sharedInstance;
         return @"user";
     }
     else {
-        return @"everyone";
+        return @"popular";
     }
 }
 
@@ -976,6 +997,7 @@ static STStampedAPI* _sharedInstance;
                                                   if (results) {
                                                       for (id<STStamp> stamp in results) {
                                                           [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                          [self.stampedByCache removeObjectForKey:stamp.entity.entityID];
                                                       }
                                                   }
                                                   block((id)results, error, cancellation);
@@ -989,9 +1011,10 @@ static STStampedAPI* _sharedInstance;
                         andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
     NSString* path = @"/stamps/collection.json";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   userID, @"userID",
+                                   userID, @"user_id",
                                    [NSNumber numberWithInteger:limit], @"limit",
                                    [NSNumber numberWithInteger:[date timeIntervalSince1970]], @"before",
+                                   @"user", @"scope",
                                    nil];
     if (offset != 0) {
         [params setObject:[NSNumber numberWithInteger:offset] forKey:@"offset"];
@@ -1006,6 +1029,7 @@ static STStampedAPI* _sharedInstance;
                                                   if (results) {
                                                       for (id<STStamp> stamp in results) {
                                                           [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                          [self.stampedByCache removeObjectForKey:stamp.entity.entityID];
                                                       }
                                                   }
                                                   block((id)results, error, cancellation);
@@ -1106,6 +1130,64 @@ static STStampedAPI* _sharedInstance;
                                                      block(YES, error, cancellation); 
                                                  }];
 }
+
+- (STCancellation*)createLogWithKey:(NSString*)key 
+                              value:(NSString*)value 
+                            stampID:(NSString*)stampID
+                           entityID:(NSString*)entityID
+                             todoID:(NSString*)todoID
+                          commentID:(NSString*)commentID 
+                         activityID:(NSString*)activityID
+                        andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    if (key) {
+        [params setObject:key forKey:@"key"];
+    }
+    if (value) {
+        [params setObject:value forKey:@"value"];
+    }
+    if (stampID) {
+        [params setObject:stampID forKey:@"stamp_id"];
+    }
+    if (entityID) {
+        [params setObject:entityID forKey:@"entity_id"];
+    }
+    if (todoID) {
+        [params setObject:todoID forKey:@"todo_id"];
+    }
+    if (commentID) {
+        [params setObject:commentID forKey:@"comment_id"];
+    }
+    if (activityID) {
+        [params setObject:activityID forKey:@"activity_id"];
+    }
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/private/logs/create.json"
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:params
+                                                     mapping:[STSimpleBooleanResponse mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     if (result) {
+                                                         block(YES, nil, cancellation);
+                                                     }
+                                                     else {
+                                                         block(NO, error, cancellation);
+                                                     }
+                                                 }];
+}
+
+
+- (STCancellation*)accountWithCallback:(void (^)(id<STAccount> account, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/accounts/show.json"
+                                                        post:NO
+                                               authenticated:YES
+                                                      params:[NSDictionary dictionary]
+                                                     mapping:[STSimpleAccount mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation); 
+                                                 }];
+}
+
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];

@@ -49,6 +49,8 @@
 @property(nonatomic, assign, getter = isShowingSearch) BOOL showsSearchBar;
 @property(nonatomic, readonly, getter = isSearching) BOOL searching;
 
+- (void)setShowSearchTable:(BOOL)visible;
+
 - (void)setContentInset:(UIEdgeInsets)inset;
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView;
 

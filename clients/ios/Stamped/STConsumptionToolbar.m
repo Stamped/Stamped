@@ -49,13 +49,14 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
         root_ = [item retain];
         toolbarContents_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width * 2, self.frame.size.height)];
         [self addSubview:toolbarContents_];
+        if (LOGGED_IN) {
         CGPoint buttonOrigin = CGPointMake(280, 10);
         UIImage* normalImage = [UIImage imageNamed:@"scope_drag_inner_friends"];
         UIImage* activeImage = [Util whiteMaskedImageUsingImage:normalImage];
         STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(viewScopeButtonClicked:)];
         [Util reframeView:button withDeltas:CGRectMake(buttonOrigin.x, buttonOrigin.y, 0, 0)];
         [toolbarContents_ addSubview:button];
-        
+        }
         UIImage* categoryImage = [UIImage imageNamed:@"scope_drag_inner_fof"];
         UIImage* activeCategory = [Util whiteMaskedImageUsingImage:categoryImage];
         STButton* backButton = [STButton buttonWithNormalImage:categoryImage activeImage:activeCategory target:self andAction:@selector(categoriesButtonClicked:)];
@@ -66,7 +67,7 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
         
         slider_ = [[STSliderScopeView alloc] initWithFrame:CGRectMake(self.frame.size.width + 60, 0.0f, self.bounds.size.width - 120, self.bounds.size.height)];
         slider_.layer.shadowOpacity = 0.0f;
-        slider_.scope = STStampedAPIScopeFriends;
+        slider_.scope = LOGGED_IN ? STStampedAPIScopeFriends : STStampedAPIScopeEveryone;
         slider_.hidden = YES;
         [toolbarContents_ addSubview:slider_];
         [self updateWithItem:item animated:NO];

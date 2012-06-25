@@ -5,6 +5,16 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+/* common.less - styles shared across multiple stamped stylesheets
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
 /* elements.less
  * 
  * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
@@ -15,6 +25,47 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
+/* **************************************************************************
+                              STYLING CONSTANTS
+   ************************************************************************** */
+/* **************************************************************************
+                             REUSABLE COMPONENTS
+   ************************************************************************** */
+.replaced {
+  display: block;
+  text-indent: -9999em;
+  overflow: hidden;
+}
+.fullwidth {
+  position: relative;
+  width: 100%;
+}
+.fullsize {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.floatleft {
+  float: left;
+}
+.floatright {
+  float: right;
+}
+footer,
+.fixedwidth {
+  position: relative;
+  display: block;
+  max-width: 1000px;
+  min-width: 360px;
+  width: 1000px;
+  margin: 0 auto;
+}
+@font-face {
+  font-family: StampedFallbackFont;
+  font-style: normal;
+  font-weight: 400;
+  src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+}
 /* **************************************************************************
                                 SDETAIL CORE
    ************************************************************************** */
@@ -510,6 +561,9 @@
   text-align: center;
 }
 .entity-menu .entity-title {
+  font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+  font-style: normal;
+  font-weight: normal;
   font-size: 250%;
   font-weight: bold;
 }

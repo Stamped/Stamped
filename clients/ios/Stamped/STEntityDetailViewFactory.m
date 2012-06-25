@@ -127,6 +127,10 @@
                                                                      andFrame:CGRectMake(0, 0, 320, 200)] autorelease];
             [view appendChildView:wrapper];
         }
+        if (self.context.stamp) {
+            UIView* seeMore = [STActionsViewFactory moreInformationEntityDetail:self.entityDetail andDelegate:view];
+            [view appendChildView:seeMore];
+        }
         [view appendChildView:[[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 10)] autorelease]];
         NSSet* blacklist = [NSSet set];
         if (self.context.stamp) {
@@ -135,9 +139,9 @@
         id<STStampedBy> stampedBy = [[STStampedAPI sharedInstance] cachedStampedByForEntityID:self.entityDetail.entityID];
         if (stampedBy) {
             UIView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedBy 
-                                                             blacklist:blacklist 
-                                                              entityID:self.entityDetail.entityID
-                                                           andDelegate:delegate] autorelease];
+                                                                      blacklist:blacklist 
+                                                                       entityID:self.entityDetail.entityID
+                                                                    andDelegate:delegate] autorelease];
             [view appendChildView:stampedByView];
         }
         else {
@@ -166,7 +170,7 @@
                                                                                        andCompletion:nil] autorelease];
             [view appendChildView:stampedByWrapper];    
         }
-        [view appendChildView:[[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 20)] autorelease]];
+        [view appendChildView:[[[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 60)] autorelease]];
         return view;
     }
     else {

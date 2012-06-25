@@ -38,6 +38,7 @@
 #import "STUnreadActivity.h"
 #import "STActionManager.h"
 #import "STCalloutView.h"
+#import "STConfirmationView.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -116,7 +117,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
     self.menuController = menuController;
-    
+    self.menuController.pan.enabled = NO;
     [Util addHomeButtonToController:inboxController withBadge:YES];
     
     [inboxController release];
@@ -144,7 +145,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     } completion:^(BOOL finished) {
         [imageView removeFromSuperview];
     }];
- 
+    
     
     [[STUnreadActivity sharedInstance] update];
     return YES;
@@ -180,9 +181,35 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     
     if ([[url host] isEqualToString:@"twitter"] && [url query].length > 0) {
         [[STTwitter sharedInstance] handleOpenURL:url];
-	}  else if ([[url description] hasPrefix:@"fb297022226980395"]) {
+	}  
+    else if ([[url description] hasPrefix:@"fb297022226980395"]) {
         [[[STFacebook sharedInstance] facebook] handleOpenURL:url];
 	}
+    else if ([[url scheme] isEqualToString:@"stamped"]) {
+        NSString* message = [url.resourceSpecifier stringByReplacingCharactersInRange:NSMakeRange(0, 2) withString:@""];
+        NSString* netflixPrefix = @"netflix/";
+        if ([message hasPrefix:netflixPrefix]) {
+            NSString* netflixMessage = [message stringByReplacingCharactersInRange:NSMakeRange(0, netflixPrefix.length) withString:@""];
+            NSString* subtitle = nil;
+            NSString* title = @"";
+            UIImage* icon = [UIImage imageNamed:@"3rd_icon_netflix"];
+            if ([netflixMessage isEqualToString:@"link/success"]) {
+                title = @"Connected to Netflix";
+            }
+            else if ([netflixMessage isEqualToString:@"link/fail"]) {
+                title = @"Problem connecting to Netflix";
+            }
+            else if ([netflixMessage isEqualToString:@"add/success"]) {
+                title = @"Added to Instant Queue";
+            }
+            else if ([netflixMessage isEqualToString:@"add/fail"]) {
+                title = @"Problem connecting to Netflix";
+            }
+            STConfirmationView* view = [[[STConfirmationView alloc] initWithTille:title subtitle:subtitle andIconImage:icon] autorelease];
+            view.frame = [Util centeredAndBounded:view.frame.size inFrame:[Util fullscreenFrameAdjustedForStatusBar]];
+            [Util setFullScreenPopUp:view dismissible:YES withBackground:[UIColor colorWithWhite:0 alpha:.1]];
+        }
+    }
     
     return YES;
 }
@@ -197,6 +224,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [STStampedAPI sharedInstance].currentUserLocation = nil;
+    [[STUnreadActivity sharedInstance] update];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
@@ -337,8 +365,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STConfiguration addColor:[UIColor colorWithRed:.75 green:.75 blue:0.75 alpha:1.0] forKey:@"UIColor.stampedLightGrayColor" inSection:@"UIColor"];
     [STConfiguration addColor:[UIColor colorWithRed:.2 green:.2 blue:.7 alpha:1] forKey:@"UIColor.stampedLinkColor" inSection:@"UIColor"];
     
-    [STConfiguration addColor:[UIColor colorWithRed:.99 green:.99 blue:.99 alpha:1] forKey:@"UIColor.stampedLightGradientStart" inSection:@"UIColor"];
-    [STConfiguration addColor:[UIColor colorWithRed:.90 green:.90 blue:.90 alpha:1] forKey:@"UIColor.stampedLightGradientEnd" inSection:@"UIColor"];
+    [STConfiguration addColor:[UIColor colorWithRed:1 green:1 blue:1 alpha:.8] forKey:@"UIColor.stampedLightGradientStart" inSection:@"UIColor"];
+    [STConfiguration addColor:[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:.6] forKey:@"UIColor.stampedLightGradientEnd" inSection:@"UIColor"];
     
     [STConfiguration addColor:[UIColor colorWithRed:.95 green:.95 blue:.95 alpha:1] forKey:@"UIColor.stampedGradientStart" inSection:@"UIColor"];
     [STConfiguration addColor:[UIColor colorWithRed:.85 green:.85 blue:.85 alpha:1] forKey:@"UIColor.stampedGradientEnd" inSection:@"UIColor"];

@@ -28,19 +28,19 @@
 @synthesize categoryMapping = _categoryMapping;
 
 - (id)init {
-  if ((self = [super init])) {
-      //_categories = [[NSArray alloc] initWithObjects:@"music", @"food", @"book", @"film", @"other", nil];
-      _categories = [[NSArray alloc] initWithObjects:@"places", @"books", @"music", @"movies", @"apps", nil];
-      _categoryMapping = [[NSDictionary alloc] initWithObjectsAndKeys:
-                          @"place", @"places",
-                          @"book", @"books",
-                          @"music", @"music",
-                          @"film", @"movies",
-                          @"app", @"apps",
-                          nil];
-      _buttons = [[NSMutableArray alloc] init];
-  }
-  return self;
+    if ((self = [super init])) {
+        //_categories = [[NSArray alloc] initWithObjects:@"music", @"food", @"book", @"film", @"other", nil];
+        _categories = [[NSArray alloc] initWithObjects:@"places", @"books", @"music", @"movies", @"apps", nil];
+        _categoryMapping = [[NSDictionary alloc] initWithObjectsAndKeys:
+                            @"place", @"places",
+                            @"book", @"books",
+                            @"music", @"music",
+                            @"film", @"movies",
+                            @"app", @"apps",
+                            nil];
+        _buttons = [[NSMutableArray alloc] init];
+    }
+    return self;
 }
 
 - (void)dealloc {
@@ -51,7 +51,7 @@
 }
 
 - (void)viewDidLoad {
-  [super viewDidLoad];
+    [super viewDidLoad];
     
     if (!_scrollView) {
         
@@ -96,20 +96,20 @@
             button.tag = i;
             [_scrollView addSubview:button];
             [_buttons addObject:button];
-
+            
         }
         
         frame.origin.y = floorf(frame.origin.y + 48.0f);
-
-        // more
-        button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-        [button setImage:[UIImage imageNamed:@"create_menu_more.png"] forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(more:) forControlEvents:UIControlEventTouchUpInside];
-        button.frame = frame;
-        [_scrollView addSubview:button];
-        [_buttons addObject:button];
-        
+        /*
+         // more
+         button = [UIButton buttonWithType:UIButtonTypeCustom];
+         button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+         [button setImage:[UIImage imageNamed:@"create_menu_more.png"] forState:UIControlStateNormal];
+         [button addTarget:self action:@selector(more:) forControlEvents:UIControlEventTouchUpInside];
+         button.frame = frame;
+         [_scrollView addSubview:button];
+         [_buttons addObject:button];
+         */      
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_right.png"]];
         [self.view addSubview:corner];
         [corner release];
@@ -117,11 +117,11 @@
         frame = corner.frame;
         frame.origin.x = (self.view.bounds.size.width - corner.frame.size.width);
         corner.frame = frame;
-
+        
     }
-
     
-
+    
+    
 }
 
 - (void)viewDidUnload {
@@ -191,34 +191,34 @@
                      }];
     
     
-//    [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
-//
-//    [CATransaction begin];
-//    [CATransaction setAnimationDuration:0.15f];
-//    [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
-//    [CATransaction setCompletionBlock:^{
-//        [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
-//        [view.layer removeAllAnimations];
-//    }];
-//    
-//    CAAnimationGroup *groupAnimation = [CAAnimationGroup animation];
-//    groupAnimation.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
-//    groupAnimation.removedOnCompletion = NO;
-//    groupAnimation.fillMode = kCAFillModeForwards;
-//    
-//    CGPoint fromPos = view.layer.position;
-//    fromPos.x += 40.0f;
-//    CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
-//    position.fromValue = [NSValue valueWithCGPoint:fromPos];
-//
-//    CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
-//    opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
-//    opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
-//
-//    [groupAnimation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
-//    [view.layer addAnimation:groupAnimation forKey:nil];
-//
-//    [CATransaction commit];
+    //    [view.layer setValue:[NSNumber numberWithFloat:0.0f] forKeyPath:@"opacity"];
+    //
+    //    [CATransaction begin];
+    //    [CATransaction setAnimationDuration:0.15f];
+    //    [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut]];
+    //    [CATransaction setCompletionBlock:^{
+    //        [view.layer setValue:[NSNumber numberWithFloat:1.0f] forKeyPath:@"opacity"];
+    //        [view.layer removeAllAnimations];
+    //    }];
+    //    
+    //    CAAnimationGroup *groupAnimation = [CAAnimationGroup animation];
+    //    groupAnimation.beginTime = [view.layer convertTime:CACurrentMediaTime() toLayer:nil] + delay;
+    //    groupAnimation.removedOnCompletion = NO;
+    //    groupAnimation.fillMode = kCAFillModeForwards;
+    //    
+    //    CGPoint fromPos = view.layer.position;
+    //    fromPos.x += 40.0f;
+    //    CABasicAnimation *position = [CABasicAnimation animationWithKeyPath:@"position"];
+    //    position.fromValue = [NSValue valueWithCGPoint:fromPos];
+    //
+    //    CAKeyframeAnimation *opacity = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    //    opacity.values = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:1.0f], [NSNumber numberWithFloat:1.0f], nil];
+    //    opacity.keyTimes = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f], [NSNumber numberWithFloat:0.01f], [NSNumber numberWithFloat:1.0f], nil];
+    //
+    //    [groupAnimation setAnimations:[NSArray arrayWithObjects:position, opacity, nil]];
+    //    [view.layer addAnimation:groupAnimation forKey:nil];
+    //
+    //    [CATransaction commit];
 }
 
 - (void)animateIn:(BOOL)animated {
@@ -261,7 +261,7 @@
 #pragma mark - Actions
 
 - (void)close:(id)sender  {
-
+    
     STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     [controller showRootController:YES];
     
@@ -285,19 +285,17 @@
     [button.layer addAnimation:animation forKey:nil];
     
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-
+    
     NSString *category = [self.categories objectAtIndex:button.tag];
     //Map to BE category strings
     category = [self.categoryMapping objectForKey:category];
     STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
-    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-    [menuController presentModalViewController:navController animated:YES];
-    [navController release];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    //STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
+    //[menuController presentModalViewController:navController animated:YES];
+    //[navController release];
     [controller release];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.6f * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
-        [menuController showRootController:NO];
-    });
+    [menuController showRootController:YES];
     
 }
 

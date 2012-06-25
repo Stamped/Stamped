@@ -100,14 +100,14 @@
         
         CGFloat maxTextWidth = 300;
         CGFloat maxTitleWidth = 200;
-        UIFont* titleFont = [UIFont stampedBoldFontWithSize:10];
+        UIFont* titleFont = [UIFont stampedBoldFontWithSize:12];
         UIColor* textColor = [UIColor stampedGrayColor];
         UIView* titleView = [Util viewWithText:entityDetail_.title
                                           font:titleFont
                                          color:textColor
                                           mode:UILineBreakModeTailTruncation
                                     andMaxSize:CGSizeMake(maxTitleWidth, [Util lineHeightForFont:titleFont])];
-        UIFont* subtitleFont = [UIFont stampedFontWithSize:10];
+        UIFont* subtitleFont = [UIFont stampedFontWithSize:12];
         UIView* subtitleView = [Util viewWithText:[NSString stringWithFormat:@" - %@", entityDetail_.subtitle]
                                              font:subtitleFont
                                             color:textColor
@@ -120,7 +120,7 @@
         [self addSubview:titleView];
         [self addSubview:subtitleView];
         
-        [Util addGradientToLayer:self.layer withColors:[UIColor stampedLightGradient] vertical:YES];
+        //[Util addGradientToLayer:self.layer withColors:[UIColor stampedLightGradient] vertical:YES];
         
         NSString* imageURL = [Util entityImageURLForEntity:self.entityDetail];
         if (imageURL) {
@@ -142,10 +142,10 @@
     return self;
 }
 
-- (void)rightButtonClicked:(id<STEntityDetail>)entityDetail {
+- (void)rightButtonClicked:(id)notImportant {
     STActionContext* context = [STActionContext context];
-    context.entityDetail = entityDetail;
-    id<STAction> action = [STStampedActions actionViewEntity:entityDetail.entityID withOutputContext:context];
+    context.entityDetail = self.entityDetail;
+    id<STAction> action = [STStampedActions actionViewEntity:self.entityDetail.entityID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
@@ -159,7 +159,7 @@
 }
 
 - (void)handleCombo {
-    
+    BOOL addedAction = NO;
     if (self.entityDetail.actions.count > 0 && [self.entityDetail.category isEqualToString:@"music"]) {
         id<STActionItem> actionItem = [self.entityDetail.actions objectAtIndex:0];
         id<STAction> action = [actionItem action];
@@ -196,8 +196,31 @@
                 [button addSubview:playView];
                 button.frame = [Util centeredAndBounded:button.frame.size inFrame:self.imageView.frame];
                 [self addSubview:button];
+                addedAction = YES;
             }
         }
+    }
+    if (!addedAction) {
+        UIView* views[2];
+        for (NSInteger i = 0; i < 2; i++) {
+            UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, self.imageView.frame.size.width, self.imageView.frame.size.height)] autorelease];
+            if (i == 0) {
+                view.hidden = YES;
+                view.userInteractionEnabled = NO;
+            }
+            else {
+                [Util addGradientToLayer:view.layer 
+                              withColors:[NSArray arrayWithObjects:[UIColor colorWithWhite:.3 alpha:.5], [UIColor colorWithWhite:.2 alpha:.7], nil]
+                                vertical:YES];
+            }
+            views[i] = view;
+        }
+        STButton* button = [[[STButton alloc] initWithFrame:self.imageView.frame
+                                                 normalView:views[0]
+                                                 activeView:views[1]
+                                                     target:self 
+                                                  andAction:@selector(rightButtonClicked:)] autorelease];
+        [self addSubview:button];
     }
 }
 
@@ -216,6 +239,8 @@
             CGSize newSize = [Util size:imageView.frame.size withScale:[Util legacyImageScale]];
             imageView.frame = CGRectMake(0, 0, newSize.width, newSize.height);
         }
+        [self.activityView stopAnimating];
+        self.activityView.hidden = YES;
         imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:imageBounds];
         imageView.layer.shadowOpacity = .5;
         imageView.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -237,6 +262,7 @@
         }
     }
     else {
+        [self handleImage:[UIImage imageNamed:@"TEMP_noImage"] withError:nil];
         [STDebug log:@"Failed to load entity image"];
     }
 }
@@ -260,9 +286,9 @@
 
 + (CGFloat)cellHeightForEntityDetail:(id<STEntityDetail>)entityDetail {
     if ([entityDetail.category isEqualToString:@"music"]) {
-        return 270;
+        return 275;
     }
-    return 310;
+    return 315;
 }
 
 - (CGFloat)imageHeight {

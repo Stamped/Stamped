@@ -13,5 +13,6 @@
 @interface STTodoButton : STAStampButton
 
 - (id)initWithStamp:(id<STStamp>)stamp;
+- (id)initWithEntityID:(NSString*)entityID;
 
 @end

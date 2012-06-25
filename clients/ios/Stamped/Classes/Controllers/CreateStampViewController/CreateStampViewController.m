@@ -22,8 +22,8 @@
 #define kRemovePhotoActionSheetTag 201
 
 @interface CreateStampViewController ()
-@property(nonatomic,readonly) CreateHeaderView *headerView; // weak
-@property(nonatomic,readonly) CreateFooterView *footerView; // weak
+@property(nonatomic,readonly, retain) CreateHeaderView* headerView; // weak
+@property(nonatomic,readonly, retain) CreateFooterView* footerView; // weak
 @property(nonatomic,retain) CreateEditView *editView;
 @property(nonatomic,retain) STS3Uploader *imageUploader;
 @property(nonatomic,copy) NSString *tempImagePath;
@@ -32,6 +32,7 @@
 @property(nonatomic,retain) EntityDetailViewController *todoViewController;
 @property(nonatomic,retain) UIButton *todoStampButton;
 @property(nonatomic,assign) BOOL waiting;
+@property(nonatomic, readwrite, retain) UITableViewCell* tableViewCell;
 @end
 
 @implementation CreateStampViewController
@@ -46,6 +47,7 @@
 @synthesize todoViewController;
 @synthesize todoStampButton;
 @synthesize waiting;
+@synthesize tableViewCell = _tableViewCell;
 
 - (void)commonInit {
     
@@ -75,14 +77,15 @@
 }
 
 - (void)dealloc {
-    _headerView=nil;
-    _footerView=nil;
+    [_headerView release];
+    [_footerView release];
     self.tempImagePath=nil;
     self.editView=nil;
     self.searchResult=nil;
     self.entity=nil;
     self.imageUploader=nil;
     self.creditUsers=nil;
+    self.tableViewCell = nil;
     [super dealloc];
 }
 
@@ -124,7 +127,6 @@
         self.tableView.tableHeaderView = view;
         [view setupWithItem:self.entity==nil ? (id)self.searchResult : (id)self.entity];
         _headerView = view;
-        [view release];
     }
     
     if (!_footerView) {
@@ -133,17 +135,9 @@
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableView.tableFooterView = view;
         _footerView = view;
-        [view release];
     }
     
 }
-
-- (void)viewDidUnload {
-    
-    _headerView=nil;
-    [super viewDidUnload];
-}
-
 
 #pragma mark - Stamp Posting
 
@@ -345,10 +339,12 @@
 
 - (void)createFooterView:(CreateFooterView*)view twitterSelected:(UIButton*)button {
     button.selected = !button.selected;
+    [Util warnWithMessage:@"Sharing is disabled" andBlock:nil];
 }
 
 - (void)createFooterView:(CreateFooterView*)view facebookSelected:(UIButton*)button {
     button.selected = !button.selected;
+    [Util warnWithMessage:@"Sharing is disabled" andBlock:nil];
 }
 
 - (void)createFooterView:(CreateFooterView*)view stampIt:(UIButton*)button {
@@ -464,11 +460,9 @@
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    NSString *CellIdentifier = @"CellIdentifier";
-    
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
+    if (!self.tableViewCell) {
+        
+        UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
         
         STStampContainerView *view = [[[STStampContainerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 270.0f)] autorelease];
         view.tag = kEditContainerViewTag;
@@ -483,11 +477,11 @@
         if (self.creditUsers) {
             [self.editView setupWithCreditUsernames:[self creditUsernames]];
         }
-        
+        self.tableViewCell = cell;
     }
 
     
-    return cell;
+    return self.tableViewCell;
     
 }
 
@@ -535,6 +529,20 @@
     }
     
     self.editView.keyboardType = CreateEditKeyboardTypeText;
+    
+    if (!self.tableView.tableFooterView) {
+        [[STStampedAPI sharedInstance] createLogWithKey:@"Compose Stamp"
+                                                  value:@"tableFooterView nulled out; repairing"
+                                                stampID:nil
+                                               entityID:self.entity.entityID
+                                                 todoID:nil
+                                              commentID:nil
+                                             activityID:nil
+                                            andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                                            }];
+        self.tableView.tableFooterView = self.footerView;
+        [self.tableView reloadData];
+    }
 
 }
 

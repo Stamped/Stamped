@@ -16,5 +16,7 @@
 
 - (id)initWithType:(FriendsRequestType)type;
 
+- (id)initWithQuery:(NSString*)query;
+
 
 @end

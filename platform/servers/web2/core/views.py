@@ -241,6 +241,12 @@ def map(request, schema, **kwargs):
     
     stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
     
+    for stamp in stamps:
+        subcategory = stamp['entity']['subcategory']
+        
+        if '_' in subcategory:
+            stamp['entity']['subcategory'] = subcategory.replace('_', ' ')
+    
     body_classes = _get_body_classes('map collapsed-header', schema)
     
     return stamped_render(request, 'map.html', {

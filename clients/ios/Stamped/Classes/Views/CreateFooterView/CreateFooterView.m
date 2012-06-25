@@ -32,7 +32,7 @@
         
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
         label.textColor = [UIColor colorWithWhite:0.689f alpha:1.0f];
-        label.font = [UIFont systemFontOfSize:10];
+        label.font = [UIFont systemFontOfSize:12];
         label.backgroundColor = self.backgroundColor;
         [self addSubview:label];
         [label release];

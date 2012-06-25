@@ -17,6 +17,7 @@
 #import "STActionPair.h"
 #import "ImageLoader.h"
 #import "UserStampView.h"
+#import "STUsersViewController.h"
 
 #define kPreviewCellWidth 33.0f
 #define kPreviewCellHeight 33.0f
@@ -35,10 +36,13 @@
 
 @interface STPreviewsView ()
 @property (nonatomic, readonly, retain) NSMutableArray *views;
+@property (nonatomic, readwrite, retain) id<STPreviews> previews;
 @end
 
 @implementation STPreviewsView
-@synthesize views=_views;
+
+@synthesize views = _views;
+@synthesize previews = _previews;
 
 static const CGFloat _cellWidth = 35;
 static const CGFloat _cellHeight = 35;
@@ -61,17 +65,9 @@ static const NSInteger _cellsPerRow = 7;
 
 - (void)dealloc {
     [_views release], _views=nil;
+    [_previews release];
     [super dealloc];
 }
-/*
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    //NSLog(@"touches began");
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    //NSLog(@"touches moved");
-}
-*/
 
 #pragma mark - Reuse
 
@@ -94,7 +90,7 @@ static const NSInteger _cellsPerRow = 7;
 #pragma mark - Setup
 
 - (void)setupWithPreview:(id<STPreviews>)previews maxRows:(NSInteger)maxRows {
-    
+    self.previews = previews;
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
     NSInteger index = 0;
@@ -176,6 +172,7 @@ static const NSInteger _cellsPerRow = 7;
                 
                 UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
                 [button setImage:[UIImage imageNamed:@"previews_more_icon.png"] forState:UIControlStateNormal];
+                [button addTarget:self action:@selector(seeAllClicked:) forControlEvents:UIControlEventTouchUpInside];
                 button.frame = CGRectMake(xOffset, yOffset, 33, 33);
                 [self addSubview:button];
                 
@@ -193,6 +190,35 @@ static const NSInteger _cellsPerRow = 7;
     }
     
     
+}
+
+- (void)seeAllClicked:(id)notImportant {
+    NSMutableArray* userIDs = [NSMutableArray array];
+    NSMutableDictionary* stamps = [NSMutableDictionary dictionary];
+    if (self.previews.credits.count) {
+        for (id<STStampPreview> credit in self.previews.credits) {
+            [userIDs addObject:credit.user.userID];
+        }
+    }
+    if (self.previews.stamps.count) {
+        for (id<STStampPreview> stamp in self.previews.stamps) {
+            [userIDs addObject:stamp.user.userID];
+            [stamps setObject:stamp.stampID forKey:stamp.user.userID];
+        }
+    }
+    if (self.previews.likes.count) {
+        for (id<STUser> user in self.previews.likes) {
+            [userIDs addObject:user.userID];
+        }
+    }
+    if (self.previews.todos.count) {
+        for (id<STUser> user in self.previews.todos) {
+            [userIDs addObject:user.userID];
+        }
+    }
+    STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+    controller.userIDToStampID = stamps;
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
 }
 
 - (void)setupWithStamp:(id<STStamp>)stamp maxRows:(NSInteger)maxRows {

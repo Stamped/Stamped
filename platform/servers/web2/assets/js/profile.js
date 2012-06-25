@@ -1943,6 +1943,26 @@ var g_update_stamps = null;
                 }
             });
             
+            $sdetail.find(".stamp-card .entity-image-wrapper").each(function(i, elem) {
+                var $elem = $(elem);
+                var $img  = $elem.find('img');
+                
+                if (!!$elem && !!$img) {
+                    var width  = $img.width();
+                    var height = $img.height();
+                    
+                    if (width > 0 && height > 0) {
+                        $elem.css({
+                            'width'         : width, 
+                            'height'        : height, 
+                            
+                            'max-width'     : width, 
+                            'max-height'    : height, 
+                        });
+                    }
+                }
+            });
+            
             update_stamps($sdetail);
             init_social_sharing();
         };

@@ -20,6 +20,7 @@ except:
 from AImageDB           import AImageDB
 from StringIO           import StringIO
 from errors             import *
+from api.Schemas        import ImageSizeSchema
 
 from boto.cloudfront    import CloudFrontConnection
 from boto.s3.connection import S3Connection
@@ -39,6 +40,8 @@ class S3ImageDB(AImageDB):
             self.bucket = conn.create_bucket(bucket_name)
         
         self.bucket_name = bucket_name
+
+        self.base_url = 'http://static.stamped.com'
 
         # find or create distribution
         # ---------------------------
@@ -197,15 +200,11 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size)
         return url
     
-    def addResizedStampImages(self, image_url, imageId, max_size, sizes):
-        """
-            image_url is the temp url
-        """
-        
-        image    = self.getWebImage(image_url, "stamp")
+    def addResizedStampImages(self, sourceUrl, imageId, maxSize, sizes):
+        image    = self.getWebImage(sourceUrl, "stamp")
         prefix   = 'stamps/%s' % imageId
 
-        self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
+        return self._addImageSizes(prefix, image, maxSize, sizes, original_url=sourceUrl)
     
     def changeProfileImageName(self, oldScreenName, newScreenName):
         # Filename is lowercase screen name
@@ -228,6 +227,8 @@ class S3ImageDB(AImageDB):
     
     def _addImageSizes(self, prefix, image, max_size, sizes=None, original_url=None):
         assert isinstance(image, Image.Image)
+
+        result = []
         
         def resizeImage(image, size):
             ratio = 1.0
@@ -258,14 +259,26 @@ class S3ImageDB(AImageDB):
         # Save original
         if original_url is None or original_url.lower() != ("%s.jpg" % prefix).lower():
             original = resizeImage(image, max_size)
-            self._addJPG(prefix, original)
+            url = self._addJPG(prefix, original)
+            output = ImageSizeSchema()
+            output.width = original.size[0]
+            output.height = original.size[1]
+            output.url = url
+            result.append(output)
         
         # Save resized versions
         if sizes is not None:
             for name, size in sizes.iteritems():
                 resized = resizeImage(image, size)
                 name = '%s%s' % (prefix, name)
-                self._addJPG(name, resized)
+                url = self._addJPG(name, resized)
+                output = ImageSizeSchema()
+                output.width = resized.size[0]
+                output.height = resized.size[1]
+                output.url = url
+                result.append(output)
+
+        return result
     
     def addWebEntityImage(self, image_url):
         utils.log("downloading '%s'" % image_url)
@@ -337,7 +350,7 @@ class S3ImageDB(AImageDB):
                 #key.set_contents_from_file(data, policy='public-read')
                 key.close()
                 
-                return "http://static.stamped.com/%s" % name
+                return "%s/%s" % (self.base_url, name)
 
             except Exception as e:
                 logs.warning('S3 Exception: %s' % e)

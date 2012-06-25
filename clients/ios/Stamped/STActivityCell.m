@@ -15,6 +15,7 @@
 #import "STImageView.h"
 #import "STStampedActions.h"
 #import "STImageCache.h"
+#import "STTextChunk.h"
 
 @interface STActivityCellConfiguration : NSObject
 
@@ -50,6 +51,8 @@
 @property (nonatomic, readonly, retain) NSString* body;
 @property (nonatomic, readonly, retain) NSString* footer;
 @property (nonatomic, readonly, assign) NSInteger bodyReferenceOffset;
+
+@property (nonatomic, readonly, retain) STTextChunk* bodyChunk;
 
 @property (nonatomic, readonly, copy) NSNumber* headerHeight;
 @property (nonatomic, readonly, copy) NSNumber* bodyHeight;
@@ -87,6 +90,8 @@
 @synthesize imagesHeight = _imagesHeight;
 @synthesize footerHeight = _footerHeight;
 
+@synthesize bodyChunk = _bodyChunk;
+
 
 - (id)init {
     NSAssert1(NO, @"Shouldn't use init() with %@", self);
@@ -110,6 +115,8 @@
     [_bodyHeight release];
     [_imagesHeight release];
     [_footerHeight release];
+    
+    [_bodyChunk release];
     
     [super dealloc];
 }
@@ -152,7 +159,7 @@
 }
 
 - (BOOL)iconOnImages {
-    if (self.scope != STStampedAPIScopeYou && self.hasIcon) {
+    if (self.scope == STStampedAPIScopeYou && self.hasIcon && self.hasImages) {
         return YES;
     }
     else {
@@ -169,7 +176,7 @@
 }
 
 - (BOOL)useStampIcon {
-    return self.activity.icon == nil && self.activity.subjects.count > 0 && self.hasIcon;
+    return self.activity.icon == nil && [self.activity.verb isEqualToString:@"credit"];
 }
 
 - (BOOL)hasIcon {
@@ -204,6 +211,17 @@
         }
     }
     return nil;
+}
+
+- (STTextChunk *)bodyChunk {
+    if (!_bodyChunk) {
+        STChunk* bodyStart = [[[STChunk alloc] initWithLineHeight:16
+                                                            start:0 
+                                                              end:0 
+                                                            width:self.bodyWidth 
+                                                        lineCount:1 lineLimit:NSIntegerMax] autorelease];
+    }
+    return _bodyChunk;
 }
 
 - (NSInteger)bodyReferenceOffset {
@@ -284,11 +302,11 @@
 }
 
 - (UIFont *)headerFontNormal {
-    return [UIFont stampedFontWithSize:10];
+    return [UIFont stampedFontWithSize:12];
 }
 
 - (UIFont *)headerFontAction {
-    return [UIFont stampedBoldFontWithSize:10];
+    return [UIFont stampedBoldFontWithSize:12];
 }
 
 - (UIFont *)bodyFontNormal {
@@ -300,15 +318,15 @@
 }
 
 - (UIFont *)footerFontNormal {
-    return [UIFont stampedFontWithSize:10];
+    return [UIFont stampedFontWithSize:12];
 }
 
 - (UIFont *)footerFontAction {
-    return [UIFont stampedBoldFontWithSize:10];
+    return [UIFont stampedBoldFontWithSize:12];
 }
 
 - (UIFont *)footerFontTimestamp {
-    return [UIFont stampedFontWithSize:10];
+    return [UIFont stampedFontWithSize:12];
 }
 
 - (UIColor *)headerColorNormal {
@@ -416,11 +434,8 @@
         if (self.activity.objects.users.count > 1) {
             return self.activity.objects.users;
         }
-        else if (self.activity.subjects.count > 1) {
-            return self.activity.subjects;
-        }
         else {
-            return self.activity.objects.users;
+            return [NSArray array];
         }
     }
 }
@@ -475,15 +490,17 @@
                 NSInteger start = [[reference.indices objectAtIndex:0] integerValue] + offset;
                 NSInteger end = [[reference.indices objectAtIndex:1] integerValue] + offset;
                 NSRange range = NSMakeRange(start, end-start);
-                NSString* key;
-                if (reference.action) {
-                    key = [NSString stringWithFormat:@"%d", self.actions.count];
-                    [self.actions addObject:reference.action];
+                if (end <= text.length) {
+                    NSString* key;
+                    if (reference.action) {
+                        key = [NSString stringWithFormat:@"%d", self.actions.count];
+                        [self.actions addObject:reference.action];
+                    }
+                    else {
+                        key = @"-1";
+                    }
+                    [bodyView addLinkToURL:[NSURL URLWithString:key] withRange:range];
                 }
-                else {
-                    key = @"-1";
-                }
-                [bodyView addLinkToURL:[NSURL URLWithString:key] withRange:range];
             }
         }
     }
@@ -633,7 +650,7 @@
         [Util reframeView:timestampView withDeltas:CGRectMake(timestampX, y, 0, 0)];
         [self addSubview:timestampView];
         
-        if (!self.configuration.iconOnImages && self.configuration.hasIcon && !self.activity.image) {
+        if (!self.configuration.iconOnImages && self.configuration.hasIcon) {
             UIImageView* iconView = [[[UIImageView alloc] initWithFrame:self.configuration.iconFrame] autorelease];
             if (self.configuration.useStampIcon) {
                 id<STUser> user = [self.activity.subjects objectAtIndex:0];

@@ -1,13 +1,13 @@
 //
-//  STMapCache.h
+//  STPlayer.h
 //  Stamped
 //
-//  Created by Landon Judkins on 5/7/12.
+//  Created by Landon Judkins on 6/24/12.
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-@interface STMapCache : NSObject
+@interface STPlayer : NSObject
 
 @end

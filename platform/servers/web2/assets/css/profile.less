@@ -871,6 +871,13 @@ body.music, body.book, body.film, body.app {
     display: none;
 }
 
+.stamp-card {
+    .entity-image-wrapper {
+        position: relative;
+        margin: 0 auto;
+    }
+}
+
 a.lightbox {
     position: absolute;
     z-index: 101;
@@ -1593,15 +1600,27 @@ body.sdetail_popup {
 }
 
 @-webkit-keyframes map-profile-inner-bounce {
-    0%   { .transform(perspective(600px) translate(0, 0)); }
-    50%  { .transform(perspective(600px) rotateY(180deg) translate(0, -12px)); }
-    100% { .transform(perspective(600px) rotateY(360deg) translate(0, 0)); }
+    0%   { -webkit-transform: perspective(600px) translate(0, 0); }
+    50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
+    100% { -webkit-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
 }
 
 @-webkit-keyframes map-profile-inner-shadow-bounce {
-    0%   { .transform(perspective(600px) scale(1.0, 1.0)); opacity: 1.0; }
-    50%  { .transform(perspective(600px) scale(0.8, 0.8)); opacity: .75; }
-    100% { .transform(perspective(600px) scale(1.0, 1.0)); opacity: 1.0; }
+    0%   { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
+    50%  { -webkit-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
+    100% { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
+}
+
+@-moz-keyframes map-profile-inner-bounce {
+    0%   { -moz-transform: perspective(600px) translate(0, 0); }
+    50%  { -moz-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
+    100% { -moz-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+}
+
+@-moz-keyframes map-profile-inner-shadow-bounce {
+    0%   { -moz-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
+    50%  { -moz-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
+    100% { -moz-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
 }
 
 a.map-profile-link {
