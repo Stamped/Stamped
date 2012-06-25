@@ -3254,19 +3254,20 @@ class StampedAPI(AStampedAPI):
             friendship              = Friendship()
             friendship.user_id      = stamp.user.user_id
             friendship.friend_id    = authUserId
-
+            
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
                     raise StampedPermissionsError("Insufficient privileges to add comment")
-
-            # Check if block exists between user and stamp owner
-            if self._friendshipDB.blockExists(friendship) == True:
-                raise StampedIllegalActionError("Block exists")
-
+            
+            if authUserId is not None:
+                # Check if block exists between user and stamp owner
+                if self._friendshipDB.blockExists(friendship) == True:
+                    raise StampedIllegalActionError("Block exists")
+        
         # Get user ids
         userIds = self._stampDB.getStampLikes(stampId)
-
+        
         return userIds
 
 
