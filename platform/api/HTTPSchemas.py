@@ -2485,7 +2485,7 @@ class HTTPStamp(Schema):
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)
         self.num_todos      = getattr(stamp.stats, 'num_todos', 0)
-        self.num_credits    = getattr(stamp.stats, 'num_credits', 0)
+        self.num_credits    = getattr(stamp.stats, 'num_credit', 0)
 
         url_title = encodeStampTitle(stamp.entity.title)
         self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\

@@ -2149,6 +2149,12 @@ class StampedAPI(AStampedAPI):
                                 continue
                     previews.credits = creditPreviews
 
+                    # Stats
+                    stamp.stats.num_comments    = stat.num_comments 
+                    stamp.stats.num_todos       = stat.num_todos 
+                    stamp.stats.num_credit      = stat.num_credits
+                    stamp.stats.num_likes       = stat.num_likes 
+
                 else:
                     tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
 
