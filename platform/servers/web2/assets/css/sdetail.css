@@ -434,8 +434,66 @@ footer,
   display: block;
   margin-bottom: 1em;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback {
-  margin-bottom: 12px;
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .social-feedback {
+  margin-bottom: .75em;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews {
+  margin-bottom: .75em;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .user-preview {
+  position: relative;
+  margin: 0 4px 4px 0;
+  float: left;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .user-preview .profile-image-tiny {
+  position: relative;
+  z-index: 25;
+  float: none;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .user-preview-icon {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  position: absolute;
+  z-index: 26;
+  right: -6px;
+  bottom: -6px;
+  width: 17px;
+  height: 17px;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: url(/assets/img/user-gallery-expand.png) no-repeat;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand:active {
+  border-color: #666;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand .user-preview-icon {
+  right: -8px;
+  bottom: -8px;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand:hover .context-popup,
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand:active .context-popup {
+  display: block;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .likes,
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .todos {
+  display: inline-block;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .likes {
+  margin-right: 1em;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .likes .user-preview-icon {
+  background-position: 0 0;
+}
+.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .todos .user-preview-icon {
+  background-position: -19px 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits {
   border-top: 1px solid #bbb;
@@ -601,4 +659,80 @@ footer,
 .entity-menu .attribution {
   font-style: italic;
   font-size: 70%;
+}
+/* **************************************************************************
+                                POPUP VIEWS
+   ************************************************************************** */
+.popup {
+  width: 366px;
+  background-color: #fff;
+}
+.popup .popup-body {
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.popup .popup-body .popup-header {
+  padding: 12px 24px;
+  white-space: nowrap;
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+}
+.popup .popup-body .popup-header .rhs-icon {
+  background: url(/assets/img/popup_icons_sprite.png) no-repeat;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  float: right;
+}
+.popup .popup-body .popup-header .rhs-icon .tongue {
+  background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
+  position: absolute;
+  display: none;
+  top: -8px;
+  width: 36px;
+  height: 36px;
+  -webkit-transition: top 0.3s ease-out;
+  -moz-transition: top 0.3s ease-out;
+  -ms-transition: top 0.3s ease-out;
+  -o-transition: top 0.3s ease-out;
+  transition: top 0.3s ease-out;
+}
+.popup .popup-body .popup-header .rhs-icon:hover .tongue {
+  display: block;
+  top: 0;
+}
+.popup .popup-body .popup-body-inner .user {
+  background-color: #fff;
+  -webkit-transition: background-color 0.1s ease-out;
+  -moz-transition: background-color 0.1s ease-out;
+  -ms-transition: background-color 0.1s ease-out;
+  -o-transition: background-color 0.1s ease-out;
+  transition: background-color 0.1s ease-out;
+  border-bottom: 1px solid #c2c2c2;
+  white-space: nowrap;
+  padding: 12px 24px;
+}
+.popup .popup-body .popup-body-inner .user .profile-image-small,
+.popup .popup-body .popup-body-inner .user .stamp,
+.popup .popup-body .popup-body-inner .user .name {
+  float: left;
+}
+.popup .popup-body .popup-body-inner .user .profile-image-small {
+  margin-right: 16px;
+}
+.popup .popup-body .popup-body-inner .user .stamp {
+  margin-right: 6px;
+}
+.popup .popup-body .popup-body-inner .user .name {
+  margin-right: 6px;
+  color: #999;
+}
+.popup .popup-body .popup-body-inner .user .name .fullname {
+  font-weight: 700;
+}
+.popup .popup-body .popup-body-inner .user .rhs {
+  float: right;
 }

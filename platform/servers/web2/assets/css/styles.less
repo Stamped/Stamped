@@ -228,11 +228,6 @@ a.follow-button {
    ************************************************************************** */
 
 
-.profile-image-border(@size) {
-    border: @size solid #fff;
-    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
-}
-
 .profile-image(@size: 128px, @border: 4px) {
     .floatleft;
     
@@ -245,6 +240,10 @@ a.follow-button {
         height: @size;
         
         .profile-image-border(@border);
+    }
+    
+    &:hover .context-popup {
+        display: block;
     }
 }
 
@@ -303,7 +302,7 @@ a.follow-button {
             width:  24px;
             height: 24px;
             
-            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
+            background: url(/assets/img/user-gallery-expand.png) no-repeat;
         }
         
         &:hover {
@@ -767,5 +766,22 @@ footer .copyright a, footer .copyright a {
     font-size: 3em;
     letter-spacing: .05em;
     color: #000;
+}
+
+.context-popup {
+    position: absolute;
+    top:  -32px;
+    left: -16px;
+    font-size: .9em;
+    font-weight: 700;
+    padding: 4px 8px;
+    z-index: 10001;
+    
+    display:  none;
+    background: rgba(10, 10, 10, 0.75);
+    color: #fff;
+    white-space: nowrap;
+    
+    .rounded(4px);
 }
 

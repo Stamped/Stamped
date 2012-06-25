@@ -444,8 +444,73 @@
                             margin-bottom: 1em;
                         }
                         
-                        .social-feedback {
-                            margin-bottom: 12px;
+                        .social-feedback-expanded {
+                            .social-feedback {
+                                margin-bottom: .75em;
+                            }
+                            
+                            .user-previews {
+                                margin-bottom: .75em;
+                                
+                                .user-preview {
+                                    position: relative;
+                                    margin: 0 4px 4px 0;
+                                    float: left;
+                                    
+                                    .profile-image-tiny {
+                                        position: relative;
+                                        z-index: 25;
+                                        float: none;
+                                    }
+                                }
+                                
+                                .user-preview-icon {
+                                    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+                                    position: absolute;
+                                    z-index: 26;
+                                    right:  -6px;
+                                    bottom: -6px;
+                                    
+                                    width:  17px;
+                                    height: 17px;
+                                }
+                                
+                                .expand {
+                                    display: block;
+                                    
+                                    width:  24px;
+                                    height: 24px;
+                                    
+                                    background: url(/assets/img/user-gallery-expand.png) no-repeat;
+                                    .profile-image-border(2px);
+                                    
+                                    .user-preview-icon {
+                                        right:  -8px;
+                                        bottom: -8px;
+                                    }
+                                    
+                                    &:hover, &:active {
+                                        .context-popup {
+                                            display: block;
+                                        }
+                                    }
+                                }
+                                
+                                .likes, .todos {
+                                    display: inline-block;
+                                }
+                                .likes {
+                                    margin-right: 1em;
+                                }
+                                
+                                .likes .user-preview-icon {
+                                    background-position: 0 0;
+                                }
+                                
+                                .todos .user-preview-icon {
+                                    background-position: -19px 0;
+                                }
+                            }
                         }
                     }
                     
@@ -673,6 +738,96 @@
     .attribution {
         font-style: italic;
         font-size: 70%;
+    }
+}
+
+
+/* **************************************************************************
+                                POPUP VIEWS
+   ************************************************************************** */
+
+
+.popup {
+    width: 366px;
+    @padding: 24px;
+    
+    background-color: #fff;
+    
+    .popup-body {
+        overflow-x: hidden;
+        overflow-y: scroll;
+        
+        .popup-header {
+            padding: (@padding / 2) @padding;
+            white-space: nowrap;
+            
+            .box-shadow(0, 3px, 3px, 0, @shadow);
+            
+            .rhs-icon {
+                background: url(/assets/img/popup_icons_sprite.png) no-repeat;
+                position: relative;
+                
+                width:  36px;
+                height: 36px;
+                float:  right;
+                
+                .tongue {
+                    background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
+                    position: absolute;
+                    display:  none;
+                    
+                    top:   -8px;
+                    width:  36px;
+                    height: 36px;
+                    
+                    .transition(top, .3s, ease-out);
+                }
+                
+                &:hover .tongue {
+                    display: block;
+                    top: 0;
+                }
+            }
+        }
+        
+        .popup-body-inner {
+            .user {
+                // very slight background-color transition on mouse-out
+                // (immediate transition on mouse-over)
+                background-color: #fff;
+                .transition(background-color, 0.1s, ease-out);
+                
+                border-bottom: 1px solid #c2c2c2;
+                white-space: nowrap;
+                
+                padding: (@padding / 2) @padding;
+                
+                .profile-image-small, .stamp, .name {
+                    float: left;
+                }
+                
+                .profile-image-small {
+                    margin-right: 16px;
+                }
+                
+                .stamp {
+                    margin-right: 6px;
+                }
+                
+                .name {
+                    margin-right: 6px;
+                    color: #999;
+                    
+                    .fullname {
+                        font-weight: 700;
+                    }
+                }
+                
+                .rhs {
+                    float: right;
+                }
+            }
+        }
     }
 }
 

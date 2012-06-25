@@ -262,6 +262,12 @@ a.follow-button:active {
   -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
 }
+.profile-image-large img:active {
+  border-color: #666;
+}
+.profile-image-large:hover .context-popup {
+  display: block;
+}
 .profile-image-large-ish {
   float: left;
   display: block;
@@ -277,6 +283,12 @@ a.follow-button:active {
   -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-large-ish img:active {
+  border-color: #666;
+}
+.profile-image-large-ish:hover .context-popup {
+  display: block;
 }
 .profile-image-medium-ish {
   float: left;
@@ -294,6 +306,12 @@ a.follow-button:active {
   -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
 }
+.profile-image-medium-ish img:active {
+  border-color: #666;
+}
+.profile-image-medium-ish:hover .context-popup {
+  display: block;
+}
 .profile-image-medium {
   float: left;
   display: block;
@@ -309,6 +327,12 @@ a.follow-button:active {
   -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-medium img:active {
+  border-color: #666;
+}
+.profile-image-medium:hover .context-popup {
+  display: block;
 }
 .profile-image-small {
   float: left;
@@ -326,6 +350,12 @@ a.follow-button:active {
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
 }
+.profile-image-small img:active {
+  border-color: #666;
+}
+.profile-image-small:hover .context-popup {
+  display: block;
+}
 .profile-image-tiny {
   float: left;
   display: block;
@@ -341,6 +371,12 @@ a.follow-button:active {
   -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+.profile-image-tiny img:active {
+  border-color: #666;
+}
+.profile-image-tiny:hover .context-popup {
+  display: block;
 }
 /* **************************************************************************
                                 USER GALLERY
@@ -359,7 +395,7 @@ a.follow-button:active {
             width:  24px;
             height: 24px;
             
-            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
+            background: url(/assets/img/user-gallery-expand.png) no-repeat;
         }
         
         &:hover {
@@ -1516,4 +1552,23 @@ a.pronounced-title {
   font-size: 3em;
   letter-spacing: .05em;
   color: #000;
+}
+.context-popup {
+  position: absolute;
+  top: -32px;
+  left: -16px;
+  font-size: .9em;
+  font-weight: 700;
+  padding: 4px 8px;
+  z-index: 10001;
+  display: none;
+  background: rgba(10, 10, 10, 0.75);
+  color: #fff;
+  white-space: nowrap;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
 }

@@ -149,7 +149,7 @@ def likesRemove(request, authUserId, http_schema, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampId)
 @require_http_methods(["GET"])
 def likesShow(request, authUserId, http_schema, **kwargs):
     userIds = stampedAPI.getLikes(authUserId, http_schema.stamp_id)

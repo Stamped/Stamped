@@ -1,0 +1,36 @@
+
+<div class="popup popup-likes">
+    <div class="ribbon-top"></div>
+    <div class="close-button"></div>
+    
+    <div class="popup-header clearfix">
+        <div class="pronounced-title">{{num_likes}} Likes</div>
+        <div class="rhs-icon">
+            <div class="tongue"></div>
+        </div>
+    </div>
+    
+    <div class="popup-body">
+        <div class="popup-body-inner">
+            {% for user in users %}
+                <div class="user user-primary-selection clearfix">
+                    {% handlebars_template "profile-image-small" user %}
+                    
+                    <img class="stamp" src="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png" />
+                    
+                    <div class="name">
+                        <p class="fullname">{{user.name}}</p>
+                        <p class="screen-name">{{user.screen_name}}</p>
+                    </div>
+                    
+                    <div class="rhs">
+                        <a class="follow-button"></a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="ribbon-bottom"></div>
+</div>
+
