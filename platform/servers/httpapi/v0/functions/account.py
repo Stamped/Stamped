@@ -139,10 +139,10 @@ def show(request, authUserId, **kwargs):
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, schema, **kwargs):
-    stampedAPI.updateAccount(authUserId, schema)
+    account = stampedAPI.updateAccount(authUserId, schema)
 
-    return transformOutput(True)
-
+    user    = HTTPUser().importUser(account)
+    return transformOutput(user.dataExport())
 
 #@handleHTTPRequest(parse_request=False)
 #@require_http_methods(["POST"])
@@ -183,7 +183,7 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 def updateProfileImage(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.updateProfileImage(authUserId, http_schema.temp_image_url)
     user = HTTPUser().importUser(user)
-    
+
     return transformOutput(user.dataExport())
 
 

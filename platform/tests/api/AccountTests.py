@@ -145,6 +145,7 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
     def tearDown(self):
         self.deleteAccount(self.accountA.user_id)
         self.deleteAccount(self.accountB.user_id)
+        self.deleteAccount(self.accountC.user_id)
 
     def test_upgrade_account(self):
         account = self.api.upgradeAccount(self.accountA.user_id, 'devbot@stamped.com', '12345')
@@ -193,7 +194,6 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
             "name": "Pimpbot 5000",
             }
         result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
         account = self.showAccount(self.token)
         self.assertEqual(account['name'], "Pimpbot 5000")
 

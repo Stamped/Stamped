@@ -200,21 +200,21 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def getAccountsByFacebookId(self, facebookId):
         documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
-        documents = self._collection.find({"linked.facebook.user_id" : facebookId })
+        documents = self._collection.find({"linked.facebook.linked_user_id" : facebookId })
         accounts.extend([self._convertFromMongo(doc) for doc in documents])
         return accounts
 
     def getAccountsByTwitterId(self, twitterId):
         documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
-        documents = self._collection.find({"linked.twitter.user_id" : twitterId })
+        documents = self._collection.find({"linked.twitter.linked_user_id" : twitterId })
         accounts.extend([self._convertFromMongo(doc) for doc in documents])
         return accounts
 
     def getAccountsByNetflixId(self, netflixId):
         documents = self._collection.find({"linked_accounts.twitter.netflix_user_id" : netflixId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
-        documents = self._collection.find({"linked.netflix.user_id" : netflixId })
+        documents = self._collection.find({"linked.netflix.linked_user_id" : netflixId })
         accounts.extend([self._convertFromMongo(doc) for doc in documents])
         return accounts
 
@@ -254,27 +254,27 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         # create a dict of all twitter fields and bools indicating if required
         valid_twitter = {
-            'service_name'      : True,
-            'user_id'           : True,
-            'screen_name'       : True,
-            'token'             : True,
-            'secret'            : True,
+            'service_name'          : True,
+            'linked_user_id'        : True,
+            'linked_screen_name'    : True,
+            'token'                 : True,
+            'secret'                : True,
         }
 
         valid_facebook = {
-            'service_name'      : True,
-            'user_id'           : True,
-            'name'              : True,
-            'screen_name'       : False,
-            'token'             : True,
-            'token_expiration'  : False,
+            'service_name'          : True,
+            'linked_user_id'        : True,
+            'linked_name'           : True,
+            'linked_screen_name'    : False,
+            'token'                 : True,
+            'token_expiration'      : False,
         }
 
         valid_netflix = {
-            'service_name'      : True,
-            'user_id'           : True,
-            'token'             : True,
-            'secret'            : True,
+            'service_name'          : True,
+            'linked_user_id'        : True,
+            'token'                 : True,
+            'secret'                : True,
         }
         
         fields = {}

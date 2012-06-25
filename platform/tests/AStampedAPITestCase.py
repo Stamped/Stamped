@@ -115,9 +115,9 @@ class AStampedAPITestCase(AStampedFixtureTestCase):
     def addLinkedAccount(self, authUserId, service_name, **kwargs):
         linked                          = LinkedAccount()
         linked.service_name             = service_name
-        linked.user_id                  = kwargs.pop('user_id', None)
-        linked.screen_name              = kwargs.pop('screen_name', None)
-        linked.name                     = kwargs.pop('name', None)
+        linked.linked_user_id           = kwargs.pop('linked_user_id', None)
+        linked.linked_screen_name       = kwargs.pop('linked_screen_name', None)
+        linked.linked_name              = kwargs.pop('linked_name', None)
         linked.token                    = kwargs.pop('token', None)
         linked.secret                   = kwargs.pop('secret', None)
         linked.token_expiration         = kwargs.pop('token_expiration', None)

@@ -306,9 +306,9 @@ class LinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('name',                             basestring)
+        cls.addProperty('linked_user_id',                          basestring)
+        cls.addProperty('linked_screen_name',                      basestring)
+        cls.addProperty('linked_name',                             basestring)
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
