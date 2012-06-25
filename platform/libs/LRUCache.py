@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 
+import copy
 import logs
 import collections
 import functools, operator
@@ -51,12 +52,16 @@ def lru_cache(maxsize=100):
                     arg = arg.dataExport()
                 except Exception:
                     pass
+                # TODO: Should really complain if this isn't a type that's going to serialize meaningfully
+                # to string.
                 key = "%s - %s" % (key, arg)
             for k, v in sorted(kwds.iteritems()):
                 try:
                     v = v.dataExport()
                 except Exception:
                     pass
+                # TODO: Should really complain if this isn't a type that's going to serialize meaningfully
+                # to string.
                 key = "%s - %s (%s)" % (key, k, v)
 
             if key == '':
@@ -101,8 +106,8 @@ def lru_cache(maxsize=100):
                                         iter(queue_pop, sentinel)):
                     queue_appendleft(key)
                     refcount[key] = 1
-            
-            return result
+
+            return copy.deepcopy(result)
         
         def clear():
             cache.clear()
@@ -153,7 +158,7 @@ def lfu_cache(maxsize=100):
                                             key=itemgetter(1)):
                         del cache[key], use_count[key]
 
-            return result
+            return copy.deepcopy(result)
 
         def clear():
             cache.clear()
