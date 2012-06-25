@@ -172,7 +172,12 @@ NSInteger zoom;
     if (self) {
         consumptionToolbar_ = [[STConsumptionToolbar alloc] initWithRootItem:[self rootItem] andScope:STStampedAPIScopeFriends];
         caches_ = [[NSMutableDictionary alloc] init];
-        scope_ = STStampedAPIScopeFriends;
+        if (LOGGED_IN) {
+            scope_ = STStampedAPIScopeFriends;
+        }
+        else {
+            scope_ = STStampedAPIScopeEveryone;
+        }
         annotations_ = [[NSMutableArray alloc] init];
         cancellations_ = [[NSMutableArray alloc] init];
         tileOverlays_ = [[NSMutableArray alloc] init];

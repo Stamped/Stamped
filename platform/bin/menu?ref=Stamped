@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html itemscope itemtype="http://schema.org/LocalBusiness" xmlns:fb="http://ogp.me/ns/fb#" xml:lang="en" lang="en">
+<head>
+  <script type="text/javascript">var NREUMQ=NREUMQ||[];NREUMQ.push(["mark","firstbyte",new Date().getTime()]);</script>
+<title>Menus for Ninth Street Espresso</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <!-- Facebook Like Metas -->
+  <meta property="og:title" content="Check out Ninth Street Espresso" />
+  <meta property="og:type" content="activity" />
+  <meta property="og:url" content="http://www.singlepage.com/ninth-street-espresso-2/menu?ref=facebookshare" />
+  <meta property="og:image" content="" />
+  <meta property="og:site_name" content="SinglePlatform" />
+  <meta property="fb:admins" content="100001562376818" />
+  <meta property="og:description" content="" />
+  <!-- // Facebook Like Metas -->
+  <!-- Google +1 Metas -->
+  <meta itemprop="name" content="Check out Ninth Street Espresso">
+  <meta itemprop="description" content="">
+  <meta itemprop="image" content="">
+  <!-- // Google +1 Metas -->
+  <link href='http://fonts.googleapis.com/css?family=Enriqueta:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="http://s.singlepage.com/css/menu-v2.css">
+  <link rel="stylesheet" href="http://s.singlepage.com/css/menu_p.css">
+  <script src="http://s.singlepage.com/js/mobile_redirect.js"></script>
+  <script>
+        redirect_mobile_browser(navigator.userAgent||navigator.vendor||window.opera,'http://m.singlepage.com/ninth-street-espresso-2');
+  </script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="http://cdn.jquerytools.org/1.2.6/tiny/jquery.tools.min.js"></script>
+</head>
+<body>
+<div id="fb-root"></div>
+<script>
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=189494964400412";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+</script>
+<div id="singlepage">
+    <div class="sp_mainWrapper" id="sp_mainWrapper">
+        <div class="sp_poweredByLogo">
+            <a href="http://www.singleplatform.com" target="_blank" ><img src="http://s.singlepage.com/images/single_power.png" /></a>
+        </div>
+        <h1>Ninth Street Espresso</h1>
+    </div>
+    <div id="leftcol">
+        <div class="module no_bot_marg">
+            <div class="right" style="display:none;">
+                <img src="http://s.singlepage.com/images/twitter.png" />
+                <img src="http://s.singlepage.com/images/facebook.png" />
+            </div>
+            <div class="clear"></div>
+        </div>
+
+        <!-- Share this section -->
+        <div id="social_share_links">
+          <span class="sub_copy_title">Share this</span>
+          <!-- Facebook -->
+          <div id="social_facebook" class="stb">
+            <fb:like send="false" width="60" height="20" show_faces="false" action="like" colorscheme="light"></fb:like>
+          </div>
+          <!-- // Facebook -->
+          <!-- Twitter -->
+          <div id="social_twitter" class="share_popup stb">
+            <a href="javascript:(function(){window.twttr=window.twttr||{};var D=550,A=450,C=screen.height,B=screen.width,H=Math.round((B/2)-(D/2)),G=0,F=document,E;if(C>A){G=Math.round((C/2)-(A/2))}window.twttr.shareWin=window.open('https://twitter.com/share?url=&text=Check%20out%20the%20menu%20for%20Ninth+Street+Espresso%3A%20http://www.singlepage.com/ninth-street-espresso-2/menu?ref=othersshare%20via%20%40singleplatform.','Ninth+Street+Espresso','left='+H+',top='+G+',width='+D+',height='+A+',
+personalbar=0,toolbar=0,scrollbars=1,resizable=1');E=F.createElement('script');E.src='http://platform.twitter.com/widgets.js';F.getElementsByTagName('head')[0].appendChild(E)}());"></a>
+          </div>
+          <!-- // Twitter -->
+          <!-- Google +1 -->
+          <div id="social_google_plus_one" class="stb">
+              <g:plusone annotation="none" size="tall" href="http://www.singlepage.com/ninth-street-espresso-2/menu?ref=othersshare"></g:plusone>
+              <script type="text/javascript">
+              (function() {
+                var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+                po.src = 'https://apis.google.com/js/plusone.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+              })();
+              </script>
+          </div>
+          <!-- // Google +1 -->
+          <!-- Email -->
+          <div id="email_share_btn_wrapper" class="sw stb">
+            <a href="#" id="share_email_btn" class="sb"></a>
+            <div id="email_form_share" class="sd">
+              <div class="pop_close"></div>
+              <p class="email_sms_form_header">EMAIL</p>
+              <form method="POST" id="form_send_email" action="http://w.singlepage.com/ninth-street-espresso-2/sendemail">
+                <label for="send_to_email">To:</label>
+                <input type="text" name="send_to_email" id="send_to_email" value="Email Address" class="hasplaceholder placeholder" />
+                <span>Separate multiple addresses with a comma.</span>
+                <label for="send_from_email">From:</label>
+                <input type="text" name="send_from_email" id="send_from_email" value="Email Address" class="hasplaceholder placeholder"/>
+                <label for="email_subject">Subject:</label>
+                <input type="text" name="email_subject" id="email_subject" value="Check out Ninth Street Espresso" />
+                <label for="email_content">Message:</label>
+                <textarea name="email_content" id="email_content">Take a look at Ninth Street Espresso: http://www.singlepage.com/ninth-street-espresso-2/menu?ref=othersshare. I thought you might like this.</textarea>
+                <input type="submit" value="Send" class="sp_submit" />
+                <div class="clear"></div>
+              </form>
+            </div>
+          </div>
+          <!-- // Email -->
+          <!-- SMS -->
+          <div id="sms_share_btn_wrapper" class="sw stb">
+            <a href="#" id="share_sms_btn" class="sb"></a>
+            <div id="sms_form_share" class="sd">
+              <div class="pop_close"></div>
+              <p class="email_sms_form_header">SEND TO MOBILE</p>
+              <form method="POST" id="form_send_sms" action="http://w.singlepage.com/ninth-street-espresso-2/sendsms">
+                <label for="send_from_name">Your Name:</label>
+                <input type="text" name="send_from_name" id="send_from_name" />
+                <label for="send_to_sms">Mobile Number(s):</label>
+                <input type="text" name="send_to_sms" id="send_to_sms" />
+                <span>Separate multiple phone numbers with a comma.</span>
+                <label for="sms_content">Add Personal Note:</label>
+                <textarea name="sms_content" id="sms_content" class="max140">Check out the menu for Ninth Street Espresso: http://www.singlepage.com/ninth-street-espresso-2/menu?ref=othersshare</textarea>
+                <span class="charleft">140 Characters Left</span>
+                <span>Note: Your mobile carrier may charge for SMS messages. Contact info@singleplatform.com with any questions.</span>
+                <input type="submit" value="Send" class="sp_submit" />
+                <div class="clear"></div>
+              </form>
+            </div>
+          </div>
+          <!-- // SMS -->
+          <div class="clear"></div>
+        </div>
+        <!-- // Share this section -->
+                <div id="display_menu">
+                            <div id="sp_main_frame">
+<img id="no_image" src="http://s.singlepage.com/images/imgsicon.png" style="display:none;" />
+<ul id="tab_nav"><li id="tab_nav_li"><span id="nav_left">&#9664;</span><span id="nav_right">&#9654;</span></li></ul>
+<div class="clear"></div>
+<ul class="tabs" id="tabs"><li><span href="#photos" id="tab_photos" class="tab_span">Photos</span></li><li><span href="#menu0" id="tab_menus0" class="tab_span">
+Main Menu</span></li></ul>
+<div class="clear"></div>
+<div class="panes" id="panes">
+<div id="sp_photos" class="container rg-gallery">
+<div class="rg-thumbs" id="rg-thumbs">
+<div class="es-carousel-wrapper" id="es-carousel-wrapper">		
+<div class="es-nav"><span class="es-nav-prev">&#9664;</span><span class="es-nav-next">&#9654;</span></div>
+<div class="es-carousel" id="es-carousel"><ul id="thumb_ul"></ul></div>
+</div>
+</div>
+</div>
+<div id="sp_menus0" class="sp_menus">
+<div id="main" class="sp_menu sp_pb">
+<div class="sp_mt sp_pb" id="sp_top_links"><span>Mark your favorites&nbsp;</span><img src="http://s.singlepage.com/images/greenthumb.png" alt="Mark your favorites" title="Mark your favorites" /></div>
+<div class="sp_i sp_in"><div class="sp_ip"><p>[[$2.50]] </p></div>
+<div class="sp_it">
+<p class="sp_itt">Espresso</p><p class="sp_id">triple shot. served in porcelain only.</p></div>
+</div>
+<div class="sp_i"><div class="sp_ip"><p>[[$2.50]] </p></div>
+<div class="sp_it">
+<p class="sp_itt">Americano</p><p class="sp_id">espresso over hot water. 8oz ~ 12oz</p></div>
+</div>
+<div class="sp_i"><div class="sp_ip"><p>[[$3.50]] </p></div>
+<div class="sp_it">
+<p class="sp_itt">Macchiato</p><p class="sp_id">espresso marked with steamed milk. 3oz</p></div>
+</div>
+<div class="sp_i"><div class="sp_ip"><p>[[$4.00]] </p></div>
+<div class="sp_it">
+<p class="sp_itt">Cappuccino</p><p class="sp_id">espresso with textured steamed milk. 8oz</p></div>
+</div>
+<div class="sp_i"><div class="sp_ip"><p>[[$4.25]] </p></div>
+<div class="sp_it">
+<p class="sp_itt">Latte</p><p class="sp_id">espresso with textured steamed milk. 12oz</p></div>
+</div>
+<div class="sp_i"><div class="sp_ip"><p>[[$1.50]] </p><p>[[$2.00]] </p></div>
+<div class="sp_it">
+<p class="sp_itt">House Coffee</p><p class="sp_id">urn brewed american coffee. 8oz ~ 12oz</p></div>
+</div>
+<div class="sp_i"><div class="sp_ip"><p></p></div>
+<div class="sp_it">
+<p class="sp_itt">Iced Coffee</p><p class="sp_id">cold infusion brewed 16oz</p></div>
+</div>
+<div class="sp_mf sp_pb">&nbsp;</div>
+</div>
+</div>
+</div>
+<div id="sp_menu_footer" class="sp_sb">
+<div id="sp_suggest_a_change">Menu out of date?&nbsp;<span id="sp_edit_this_arrow"></span></div>
+<form id="sp_contact" method="POST" action="http://www.singleplatform.co/feedback/contact?apiKey=k2et8n3q46ee5454v337uf2x0" class="sp_feedbackBackground">
+<p>Thank you for your feedback. Please fill out this form, and SinglePlatform's account management team will update the menu as soon as possible.</p><br/>
+<select name="ur" id="sp_contact_status"><option value="Blank">I am a</option><option value="Owner">Business Owner/Manager</option><option value="Customer">Customer</option></select>
+<label for="sp_contact_name">Name</label><input type="text" name="n" id="sp_contact_name" />
+<div class="sp_half_left"><label for="sp_contact_email">Email</label><input type="text" name="e" id="sp_contact_email" /></div>
+<div class="sp_half_right"><label for="sp_contact_phone">Phone</label><input type="text" name="p" id="sp_contact_phone" /></div>
+<select name="s" id="sp_contact_subject"><option value="Blank">Subject</option><option value="I am the business owner">I am the business owner.</option><option value="Suggested menu edit">Suggested menu edit.</option><option value="Other">Other</option></select>
+<label for="sp_contact_comments">Write your comment here</label><textarea name="c" id="sp_contact_comments" cols="36" rows="4" ></textarea>
+<div class="sp_contact_buttons"><span class="sp_feedbackSubmit" id="sp_contact_submit">Submit</span>&nbsp;&nbsp;<span  class="sp_feedbackCancel" id="sp_contact_cancel">Cancel</span></div>
+<input type="hidden" name="apiKey" id="sp_contact_key" value="k2et8n3q46ee5454v337uf2x0" /><input type="hidden" name="l" id="sp_contact_location" value="ninth-street-espresso-2" />
+</form>
+<a href="http://www.singlepage.com/ninth-street-espresso-2/menu?ref=SP-Properties" target="_blank" id="at_link" ></a><div id="at_src">http://a.singleplatform.com/SPProperties/ninth-street-espresso-2/provided_by.png</div>
+<div class="sp_pf sp_dw sp_sb"><span class="sp_di">Disclaimer:&nbsp;&nbsp;</span><span class="sp_dt">Always check with the business for pricing and availability of menu items. SinglePlatform is not responsible for menu or pricing changes, but the information is believed to be accurate when posted. Listing of a menu does not mean that there is any affiliation, endorsement or sponsorship between SinglePlatform and the listed business.</span></div>
+</div>
+</div>
+<script type="text/javascript">function getParameterByName(name){name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");var regexS = "[\\?&]" + name + "=([^&#]*)";var regex = new RegExp(regexS);var results = regex.exec(window.location.href);if(results == null){return "";}else {return decodeURIComponent(results[1].replace(/\+/g, " "));}}var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-18767921-3']);_gaq.push(['_setCustomVar', 1, 'i', 'ninth.street.espresso.2']);_gaq.push(['_setCustomVar', 2, 'n', 'Ninth Street Espresso/2122282930']);var refvar = getParameterByName('ref');if (refvar == ''){_gaq.push(['_setCustomVar', 3, 'r', 'not-found']);}else{_gaq.push(['_setCustomVar', 3, 'r', refvar]);}_gaq.push(['_setCustomVar', 4, 'd', '10011/New York/NY']);_gaq.push(['_trackPageview', 'web-menu-singlepage']);
+var prevvar = getParameterByName('prev');if (prevvar == 'sm'){_gaq.push(['_trackEvent', 'Short Menu', 'Click', 'View Full Menu']);}</script>                    </div>
+    </div>
+    <div id="rightcol">
+        <div id="location_address" class="module module_border">
+            75 Ninth Ave<br />New York,&nbsp;NY 10011<br />212-228-2930                                       <a href="http://maps.google.com/maps?q= 75 Ninth Ave New York NY 10011&t=m&z=16" target="_blank"><img src="http://maps.googleapis.com/maps/api/staticmap?size=278x200&maptype=roadmap&markers=color:green%7C 75 Ninth Ave New York NY 10011&sensor=false" width="280px" height="200px" style="border:0;margin-top:15px;" /></a>
+        </div>
+                <img src="http://s.singlepage.com/images/single_arrow.png" id="single_arrow" />
+    </div>
+    <div class="clear"></div>
+</div>	
+<script type="text/javascript">
+      var pre_val = $("#sms_content").val();
+      function updateSMS() {
+        if ($.trim($('input#send_from_name').val()).length > 0) {
+            $("#sms_content").val("Hey, it's " + $.trim($('input#send_from_name').val()) + ". " + pre_val);
+        }
+        else {
+            $("#sms_content").val(pre_val);
+        }
+      }
+      $(document).ready(function($) {
+        /** Share functionality */
+        $('document').click(function() {
+          $('.sd').hide();
+        });
+        $(".sd").click(function(e) {
+          e.stopPropagation();
+        });
+        $('.sb').click(function(){
+          $('.sd').hide();
+          $(this).next().show();
+          return false;
+        });
+        $('.pop_close').click(function(){
+          $('.sd').hide();
+        });
+        $('#social_twitter a').click(function(){
+            _gaq.push(['_trackEvent', 'Menu', 'Share This', 'Twitter']);
+        });
+        $('#share_email_btn').click(function(){
+            _gaq.push(['_trackEvent', 'Menu', 'Share This', 'Email']);
+        });
+        $('#share_sms_btn').click(function(){
+            $('span.charleft').html((140-$('.max140').val().length) + ' Characters Left');
+            _gaq.push(['_trackEvent', 'Menu', 'Share This', 'Text']);
+        });
+        $('#form_send_sms').submit(function() {
+          var send_to_sms = $('#send_to_sms').val();
+          var sms_content = $('#sms_content').val();
+          if ($.trim(send_to_sms).length == 0) {
+            alert ('Please enter phone number(s).');
+            return false;
+          }
+          if ($.trim(sms_content).length > 140) {
+            alert('Your sms message must be shorter than 140 characters.');
+            return false;
+          }
+        });
+        $('#form_send_email').submit(function() {
+          var send_to_email = $('#send_to_email').val();
+          var send_from_email = $('#send_from_email').val();
+          if ($.trim(send_to_email).length == 0) {
+            alert ('Please enter email(s) to send the message to.');
+            return false;
+          }
+          if ($.trim(send_from_email).length == 0) {
+            alert('Please enter the email address used to send the messages.');
+            return false;
+          }
+        });
+        $('.placeholder').live('focus', function(){
+           $(this).removeClass('placeholder').val('');
+        });
+        $('.hasplaceholder').live('blur', function(){
+           if ($(this).val() == '') {
+               $(this).addClass('placeholder').val("Email Address");
+           }
+        });
+        /** // Share functionality */
+        $('textarea.max140').live('keyup', function() {
+            if ($(this).val().length > 140) {
+                $(this).val($(this).val().substring(0,140)) 
+            }
+            $(this).parent().children('span.charleft').html((140-$(this).val().length) + ' Characters Left');
+        });
+        /** // SMS send from name functionality */
+        $('input#send_from_name').live('keyup', function() {
+            updateSMS();
+        });
+        $('input#send_from_name').live('blur', function() {
+            updateSMS();
+        });
+
+        var didscroll = 0;
+        var elemTop;
+        var elemBottom;
+        $('#single_arrow').addClass('fixedposition').hide();
+
+        $("#single_arrow").live('click', function(){
+          $('html, body').animate({scrollTop: '0px'}, 800);
+        });
+        $(window).scroll(function() {
+          if (didscroll == 0 ) {
+                didscroll = 1;
+                elemTop = $('#single_arrow').offset().top;
+                elemBottom = elemTop + $('#single_arrow').height();
+          }
+          if (isScrolledIntoView('#single_arrow') == true)
+                $('#single_arrow').fadeIn();
+          else
+                $('#single_arrow').fadeOut();
+          });
+
+          function isScrolledIntoView(elem)
+          {
+              var docViewTop = $(window).scrollTop();
+              var docViewBottom = docViewTop + $(window).height();
+
+              return (docViewTop > 0 && docViewBottom > ($('#rightcol').height() + $('#sp_mainWrapper').height() + 56) );
+          }
+      });
+</script>
+<script src="http://s.singlepage.com/restaurants/js/storefrontViewer.js"></script>
+<script type="text/javascript">if(!NREUMQ.f){NREUMQ.f=function(){NREUMQ.push(["load",new Date().getTime()]);var e=document.createElement("script");e.type="text/javascript";e.async=true;e.src="https://d1ros97qkrwjf5.cloudfront.net/38/eum/rum-staging.js";document.body.appendChild(e);if(NREUMQ.a)NREUMQ.a();};NREUMQ.a=window.onload;window.onload=NREUMQ.f;};NREUMQ.push(["nrf2","beacon-1.newrelic.com","2966dcd102",65532,"ZQRbZhMADUYFBhZRDFxObEAITgpbAAAaFhNaEQ==",0,67,new Date().getTime()]);</script>
+</body>
+</html>

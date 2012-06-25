@@ -321,7 +321,7 @@
     }
     cell.textField.secureTextEntry = (indexPath.row==3);
     cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
-    cell.textField.autocapitalizationType = (indexPath.row==0) ? UITextAutocapitalizationTypeAllCharacters : UITextAutocapitalizationTypeNone;
+    cell.textField.autocapitalizationType = (indexPath.row==0) ? UITextAutocapitalizationTypeWords : UITextAutocapitalizationTypeNone;
     
     if (indexPath.row == 1) {
         cell.textField.keyboardType = UIKeyboardTypeEmailAddress;

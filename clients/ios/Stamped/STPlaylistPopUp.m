@@ -83,6 +83,7 @@ static CGFloat _rowHeight = 44;
         if (tableHeight < self.table.frame.size.height) {
           [self childView:self.table shouldChangeHeightBy:tableHeight-self.table.frame.size.height overDuration:0];
         }
+          //self.table.editing = YES;
         self.table.rowHeight = _rowHeight;
         [self.table reloadData];
         [self.table selectRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:0] animated:NO scrollPosition:UITableViewScrollPositionTop];
@@ -105,13 +106,29 @@ static CGFloat _rowHeight = 44;
   return 1;
 }
 
+- (void)test:(id)notImportant {
+    self.table.editing = !self.table.editing;
+}
+
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   id<STPlaylistItem> item = [self.playlistItems objectAtIndex:indexPath.row];
   UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"track"] autorelease];
-  cell.textLabel.text = item.name ? item.name : @"?";
-  return cell;
+  
+    //UISwipeGestureRecognizer* recognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(test:)] autorelease];
+    //recognizer.direction = UISwipeGestureRecognizerDirectionRight;
+    //cell.showsReorderControl = YES;
+    //[cell addGestureRecognizer:recognizer];
+    cell.textLabel.text = item.name ? item.name : @"?";
+    return cell;
 }
 
+- (BOOL)tableView:(UITableView *)tableview canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;	
+}
+
+- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+	
+}
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   
 }

@@ -312,7 +312,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
             return sectionObject.title;
         }
-        return @"Search results";
+        return nil;
     }
     
     if (self.suggestedSections) {

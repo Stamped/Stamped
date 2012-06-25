@@ -28,35 +28,56 @@
 #import "STDescriptionTableCell.h"
 #import "STTableViewSectionBackground.h"
 #import "STCache.h"
+#import "STGenericCacheConfiguration.h"
+#import "STInboxPageSource.h"
+#import "STSharedCaches.h"
 
 @interface STUserViewController ()
-@property(nonatomic,readonly) BOOL loadingUser;
-@property(nonatomic,retain,readonly) STUserStamps *stamps;
-@property(nonatomic,retain) id<STUser> user;
-@property(nonatomic,copy) NSString *userIdentifier;
-@property(nonatomic,retain,readonly) STUserGraphView *graphView;
-@property(nonatomic,retain,readonly) UITableView *infoTableView;
+
+@property (nonatomic, readonly, assign) BOOL loadingUser;
+@property (nonatomic, readonly, retain) STCache* stampCache;
+@property (nonatomic, readwrite, retain) STCacheSnapshot* stampSnapshot;
+@property (nonatomic, readwrite, retain) id<STUser> user;
+@property (nonatomic, readwrite, copy) NSString *userIdentifier;
+@property (nonatomic, retain, readonly) STUserGraphView *graphView;
+@property (nonatomic, retain, readonly) UITableView *infoTableView;
+@property (nonatomic, readwrite, retain) STCancellation* stampCacheCreationCancellation;
+@property (nonatomic, readwrite, assign) BOOL loadingStamps;
 
 
 @end
 
 @implementation STUserViewController
 @synthesize userIdentifier;
-@synthesize user=_user;
-@synthesize graphView=_graphView;
-@synthesize stamps=_stamps;
-@synthesize loadingUser=_loadingUser;
-@synthesize infoTableView=_infoTableView;
+@synthesize user = _user;
+@synthesize graphView = _graphView;
+@synthesize stampCache = _stampCache;
+@synthesize stampSnapshot = _stampSnapshot;
+@synthesize loadingUser = _loadingUser;
+@synthesize infoTableView = _infoTableView;
+@synthesize stampCacheCreationCancellation = _stampCacheCreationCancellation;
+@synthesize loadingStamps = _loadingStamps;
 
 - (void)commonInit {
     
     _sectionViews = [[NSMutableArray alloc] initWithObjects:[NSNull null], [NSNull null], nil];
     _infoDataSource = [[NSArray array] retain];
+    _loadingStamps = YES;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
+    
+}
 
-    _stamps = [[STUserStamps alloc] init];
-    _stamps.userIdentifier = self.userIdentifier;
-    [STEvents addObserver:self selector:@selector(stampsFinished:) event:EventTypeUserStampsFinished identifier:self.userIdentifier];
-
+- (void)handleStampCache:(STCache*)cache error:(NSError*)error cancellation:(STCancellation*)cancellation {
+    self.stampCacheCreationCancellation = nil;
+    if (cache) {
+        _stampCache = [cache retain];
+        self.stampSnapshot = _stampCache.snapshot;
+    }
+    NSLog(@"loaded %@: %d", cache, self.stampSnapshot.count);
+    [self reloadDataSource];
+    [self reloadTableView:NO];
 }
 
 - (id)initWithUserIdentifier:(NSString*)identifier {
@@ -73,34 +94,39 @@
     
     if (self = [super init]) {
         _user = [user retain];
-        
-        if ([user isKindOfClass:NSClassFromString(@"STSimpleSource")]) {
-#warning What the fuck, seriously?
-            [_user release];
-            _user = nil;
-            STSimpleSource *source = (STSimpleSource*)_user;
-            self.userIdentifier = source.sourceID;
-            self.title = source.name;
-            
-        } else {
-            
-            self.userIdentifier = user.userID;
-            self.title = user.screenName;
-       
-        }
-
+        self.userIdentifier = user.userID;
+        self.title = user.screenName;
         [self commonInit];
-
+        
     }
     return self;
     
+}
+
+- (void)dealloc {
+    [_stampCacheCreationCancellation cancel];
+    [_stampCacheCreationCancellation release];
+    [STEvents removeObserver:self];
+    if (_graphView) {
+        [_graphView release], _graphView=nil;
+    }
+    self.userIdentifier = nil;
+    [_user release], _user = nil;    
+    
+    [_stampCache saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        //Nothing 
+    }];
+    [_stampSnapshot release];
+    [_stampCache release];
+    [_sectionViews release], _sectionViews=nil;
+    [super dealloc];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
-
+    self.tableView.showsVerticalScrollIndicator = NO;
     if (!self.tableView.tableHeaderView) {
         STUserHeaderView *view = [[STUserHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 155.0f)];
         view.delegate = (id<STUserHeaderViewDelegate>)self;
@@ -118,12 +144,24 @@
         self.navigationItem.rightBarButtonItem = button;
         [button release];
     }
-    
-    [self reloadDataSource];
-    
-    if (_user && [self.navigationController.navigationBar isKindOfClass:[STNavigationBar class]] && [_user respondsToSelector:@selector(primaryColor)]) {
-        [(STNavigationBar*)self.navigationController.navigationBar showUserStrip:YES forUser:_user];
+    STGenericCacheConfiguration* config = [[[STGenericCacheConfiguration alloc] init] autorelease];
+    config.pageSource = [[[STInboxPageSource alloc] initWithUserID:self.userIdentifier] autorelease];
+    NSString* name = [NSString stringWithFormat:@"ProfileStamps_%@", self.userIdentifier];
+    if ([[STStampedAPI sharedInstance].currentUser.userID isEqualToString:self.userIdentifier]) {
+        self.stampCacheCreationCancellation = [STSharedCaches cacheForInboxScope:STStampedAPIScopeYou
+                                                                    withCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
+                                                                        [self handleStampCache:cache error:error cancellation:cancellation]; 
+                                                                    }];
     }
+    else {
+        self.stampCacheCreationCancellation = [STCache cacheForName:name 
+                                                        accelerator:nil
+                                                      configuration:config
+                                                        andCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
+                                                            [self handleStampCache:cache error:error cancellation:cancellation];
+                                                        }];
+    }
+    [self reloadDataSource];
     
     if (!_infoTableView) {
         
@@ -143,8 +181,17 @@
     
 }
 
-- (void)viewDidUnload {
+- (void)viewDidUnload {    
     [super viewDidUnload];
+}
+
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    if (_user && [self.navigationController.navigationBar isKindOfClass:[STNavigationBar class]] && [_user respondsToSelector:@selector(primaryColor)]) {
+        [(STNavigationBar*)self.navigationController.navigationBar showUserStrip:YES forUser:_user];
+    }
+    
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -154,18 +201,6 @@
         [(STNavigationBar*)self.navigationController.navigationBar showUserStrip:NO forUser:nil];
     }
     
-}
-
-- (void)dealloc {
-    [STEvents removeObserver:self];
-    if (_graphView) {
-        [_graphView release], _graphView=nil;
-    }
-    self.userIdentifier = nil;
-    [_user release], _user = nil;    
-    [_stamps release], _stamps=nil;
-    [_sectionViews release], _sectionViews=nil;
-    [super dealloc];
 }
 
 
@@ -188,12 +223,8 @@
 
 - (void)editProfile:(id)sender {
     
-    STEditProfileViewController *controller = [[STEditProfileViewController alloc] init];
-    controller.delegate = (id<STEditProfileViewControllerDelegate>)self;
-    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-    [self presentModalViewController:navController animated:YES];
-    [controller release];
-    [navController release];
+    STEditProfileViewController *controller = [[[STEditProfileViewController alloc] init] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
     
 }
 
@@ -234,7 +265,7 @@
 - (void)setUser:(id<STUser>)user {
     [_user release], _user = nil;    
     _user = [user retain];
-
+    
     if (self.tableView.tableHeaderView) {
         STUserHeaderView *view = (STUserHeaderView*)self.tableView.tableHeaderView;
         [view setupWithUser:_user];
@@ -257,7 +288,7 @@
             [dataSource addObject:[NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:remaining, @"detail", @"Stamps remaining", @"title", @"STDetailTableCell", @"class", nil]]];
             
         }
-
+        
         NSMutableArray *array = [[NSMutableArray alloc] init];
         NSDictionary *dictionary = nil;
         
@@ -270,12 +301,12 @@
         // web profile
         dictionary = [NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"stamped.com/%@", tempuser.screenName] , @"detail", @"Web Profile", @"title", @"STDetailTableCell", @"class", nil];
         [array addObject:dictionary];
-
+        
         // followers
         NSString *value = [NSString stringWithFormat:@"%i", [[tempuser numFollowers] integerValue]];
         dictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"detail", @"Followers", @"title", @"STDetailTableCell", @"class", nil];
         [array addObject:dictionary];
-
+        
         // following
         value = [NSString stringWithFormat:@"%i", [[tempuser numFriends] integerValue]];
         dictionary = [NSDictionary dictionaryWithObjectsAndKeys:value, @"detail", @"Following", @"title", @"STDetailTableCell", @"class", nil];
@@ -284,7 +315,7 @@
         
         [_infoDataSource release], _infoDataSource=nil;
         _infoDataSource = [dataSource retain];
-                
+        
         [array release];
         [dataSource release];
         [self.infoTableView reloadData];
@@ -312,7 +343,7 @@
 }
 
 - (void)stUserHeaderView:(STUserHeaderView*)view selectedTab:(STUserHeaderTab)tab {
-        
+    
     CGPoint offset = self.tableView.contentOffset;
     if (tab != STUserHeaderTabInfo) {
         if (self.tableView.tableHeaderView==nil && _infoTableView.tableHeaderView!=nil) {
@@ -334,7 +365,7 @@
             [_graphView setupWithUser:self.user];
             [view release];
         }
-
+        
         
     } else if (tab == STUserHeaderTabInfo) {
         
@@ -345,7 +376,7 @@
         [_infoTableView reloadData];
         [header release];
         self.infoTableView.contentOffset = offset;
-
+        
     } else {
         
         UIView *header = [self.tableView.tableHeaderView retain];
@@ -367,16 +398,16 @@
     }
     
     [self dataSourceDidFinishLoading];
-
+    
 }
 
 - (void)stUserHeaderView:(STUserHeaderView*)view selectedStat:(STUserHeaderStat)stat {
     
     switch (stat) {
         case STUserHeaderStatCredit:
-
+            
             [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
-
+            
             break;
         case STUserHeaderStatFollowers:
             
@@ -411,7 +442,7 @@
 }
 
 - (void)stUserHeaderViewHeightChanged:(STUserHeaderView *)view {
- 
+    
     [self.tableView reloadData];
     
 }
@@ -448,7 +479,7 @@
     cell.expanded = _expanded;
     [self.infoTableView endUpdates];
     [self setupSectionAtIndex:0];
-
+    
 }
 
 
@@ -491,14 +522,14 @@
         if ([[dictionary objectForKey:@"class"] isEqualToString:@"STDescriptionTableCell"]) {
             return [STDescriptionTableCell heightForText:[dictionary objectForKey:@"detail"] expanded:_expanded];
         }
-
+        
         return 40.0f;
-
+        
     }
-
-    id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
+    
+    id<STStamp> stamp = [self.stampSnapshot objectAtIndex:indexPath.row];
     return [STStampCell heightForStamp:stamp];
-
+    
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
@@ -508,7 +539,7 @@
     }
     
     if ([self selectedTab] != STUserHeaderTabStamps) return 0;
-    return [_stamps isEmpty] ? 0 : 1;
+    return self.stampSnapshot.count == 0 ? 0 : 1;
     
 }
 
@@ -519,7 +550,7 @@
         return [array count];
     }
     
-    return [self.stamps numberOfObject];
+    return self.stampSnapshot.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -532,9 +563,9 @@
         
         NSArray *section = [_infoDataSource objectAtIndex:indexPath.section];
         NSDictionary *dictionary = [section objectAtIndex:indexPath.row];
-       
+        
         if ([[dictionary objectForKey:@"class"] isEqualToString:@"STDescriptionTableCell"]) {
-
+            
             static NSString *DetailCellIdentifier = @"DecriptionIdentifier";
             STDescriptionTableCell *cell = [tableView dequeueReusableCellWithIdentifier:DetailCellIdentifier];
             if (cell == nil) {
@@ -568,7 +599,7 @@
         } else {
             cell.detailTitleLabel.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
         }
-
+        
         return cell;
         
     }
@@ -582,7 +613,7 @@
         cell.layer.zPosition = 10;
     }
     
-    id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
+    id<STStamp> stamp = [self.stampSnapshot objectAtIndex:indexPath.row];
     [cell setupWithStamp:stamp];
     
     return cell;
@@ -600,7 +631,7 @@
         NSArray *section = [_infoDataSource objectAtIndex:indexPath.section];
         NSDictionary *dictionary = [section objectAtIndex:indexPath.row];
         if ([[dictionary objectForKey:@"title"] isEqualToString:@"Web Profile"]) {
-
+            
             UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:[dictionary objectForKey:@"detail"] delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Copy Link", @"Email Link", nil];
             actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
             [actionSheet showInView:self.view];
@@ -611,7 +642,7 @@
     }
     
     
-    id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
+    id<STStamp> stamp = [self.stampSnapshot objectAtIndex:indexPath.row];
     STActionContext *context = [STActionContext context];
     context.stamp = stamp;
     id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
@@ -625,7 +656,7 @@
 - (void)stStampCellAvatarTapped:(STStampCell*)cell {
     
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    id<STStamp> stamp = [self.stamps objectAtIndex:indexPath.row];
+    id<STStamp> stamp = [self.stampSnapshot objectAtIndex:indexPath.row];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
@@ -646,23 +677,27 @@
 #pragma mark - STRestController 
 
 - (BOOL)dataSourceReloading {
-    return [self.stamps isReloading] || _loadingUser;
+    return self.loadingStamps || _loadingUser;
 }
 
 - (void)loadNextPage {
-    [self.stamps loadNextPage];
+    [self.stampCache refreshAtIndex:self.stampSnapshot.count force:NO];
 }
 
 - (BOOL)dataSourceHasMoreData {
-    return [self.stamps hasMore] && [self selectedTab] == STUserHeaderTabStamps;
+    return self.stampCache.hasMore && [self selectedTab] == STUserHeaderTabStamps;
 }
 
 - (void)reloadDataSource {
+    if ([self selectedTab] == STUserHeaderTabStamps) {
+        [self.stampCache refreshAtIndex:-1 force:YES];
+    }
+    
     if (!self.userIdentifier || _loadingUser) return; // show failed..
     
     _loadingUser = YES;
     [[STStampedAPI sharedInstance] userDetailForUserID:self.userIdentifier andCallback:^(id<STUserDetail> aUser, NSError *error) {
-      
+        
         if (aUser) {
             self.user = aUser;
         }
@@ -688,18 +723,14 @@
                 
             }];
         }
-
+        
     }];
-    
-    if ([self selectedTab] == STUserHeaderTabStamps) {
-        [self.stamps reloadData];
-    }
     
     [super reloadDataSource];
 }
 
 - (BOOL)dataSourceIsEmpty {
-    return [self.stamps isEmpty] && [self selectedTab] == STUserHeaderTabStamps;
+    return self.stampSnapshot.count == 0 && [self selectedTab] == STUserHeaderTabStamps;
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
@@ -710,7 +741,40 @@
     frame.size.height -= height;
     view.frame = frame;
     [view setupWithTitle:@"No stamps" detailTitle:[NSString stringWithFormat:@"No stamps found for %@.", (self.user==nil) ? @"this user" : self.user.screenName]];
+    
+}
+#pragma mark - Cache Methods
 
+- (void)reloadTableView:(BOOL)preserveOffset {
+    
+    if (preserveOffset) {
+        
+        CGPoint offset = self.tableView.contentOffset;
+        [self.tableView reloadData];
+        self.tableView.contentOffset = offset;
+        
+    } else {
+        [self.tableView reloadData];
+    }
+    
+}
+
+- (void)cacheWillLoadPage:(NSNotification *)notification {
+    self.loadingStamps = YES;
+    [self.tableView reloadData];
+}
+
+- (void)cacheDidLoadPage:(NSNotification *)notification {
+    self.loadingStamps = NO;
+    [self dataSourceDidFinishLoading];
+    [self.tableView reloadData];
+}
+
+- (void)cacheUpdate:(NSNotification *)notification {
+    if (self.stampCache) {
+        self.stampSnapshot = self.stampCache.snapshot;
+        [self reloadTableView:YES];
+    }
 }
 
 @end
