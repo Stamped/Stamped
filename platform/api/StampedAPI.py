@@ -3245,6 +3245,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getLikes(self, authUserId, stampId):
+        ### TODO: Add paging
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
 
