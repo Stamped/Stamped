@@ -1,3 +1,4 @@
+{% load stamped_tags %}
 
 <div class="popup popup-likes">
     <div class="ribbon-top"></div>
@@ -19,8 +20,8 @@
                     <img class="stamp" src="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png" />
                     
                     <div class="name">
-                        <p class="fullname">{{user.name}}</p>
-                        <p class="screen-name">{{user.screen_name}}</p>
+                        <p class="fullname"><a href="/{{user.screen_name}}">{{user.name}}</a></p>
+                        <p class="screen-name"><a href="/{{user.screen_name}}">{{user.screen_name}}</a></p>
                     </div>
                     
                     <div class="rhs">

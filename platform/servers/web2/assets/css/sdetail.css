@@ -664,14 +664,13 @@ footer,
                                 POPUP VIEWS
    ************************************************************************** */
 .popup {
-  width: 366px;
+  max-width: 366px;
+  max-height: 366px;
   background-color: #fff;
 }
-.popup .popup-body {
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-.popup .popup-body .popup-header {
+.popup .popup-header {
+  position: relative;
+  z-index: 5000;
   padding: 12px 24px;
   white-space: nowrap;
   -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
@@ -679,15 +678,21 @@ footer,
   -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
   -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
   box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
 }
-.popup .popup-body .popup-header .rhs-icon {
+.popup .popup-header .rhs-icon {
   background: url(/assets/img/popup_icons_sprite.png) no-repeat;
   position: relative;
   width: 36px;
   height: 36px;
   float: right;
 }
-.popup .popup-body .popup-header .rhs-icon .tongue {
+.popup .popup-header .rhs-icon .tongue {
   background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
   position: absolute;
   display: none;
@@ -700,9 +705,14 @@ footer,
   -o-transition: top 0.3s ease-out;
   transition: top 0.3s ease-out;
 }
-.popup .popup-body .popup-header .rhs-icon:hover .tongue {
+.popup .popup-header .rhs-icon:hover .tongue {
   display: block;
   top: 0;
+}
+.popup .popup-body {
+  overflow-y: scroll;
+  position: relative;
+  z-index: 4999;
 }
 .popup .popup-body .popup-body-inner .user {
   background-color: #fff;
@@ -713,7 +723,7 @@ footer,
   transition: background-color 0.1s ease-out;
   border-bottom: 1px solid #c2c2c2;
   white-space: nowrap;
-  padding: 12px 24px;
+  padding: 6px 24px;
 }
 .popup .popup-body .popup-body-inner .user .profile-image-small,
 .popup .popup-body .popup-body-inner .user .stamp,
@@ -728,11 +738,19 @@ footer,
 }
 .popup .popup-body .popup-body-inner .user .name {
   margin-right: 6px;
-  color: #999;
 }
 .popup .popup-body .popup-body-inner .user .name .fullname {
   font-weight: 700;
 }
+.popup .popup-body .popup-body-inner .user .name a {
+  color: #999;
+}
+.popup .popup-body .popup-body-inner .user .name a:hover {
+  color: #595959;
+}
 .popup .popup-body .popup-body-inner .user .rhs {
   float: right;
+}
+.popup-todos .rhs-icon {
+  background-position: -76px 0;
 }

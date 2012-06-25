@@ -748,47 +748,53 @@
 
 
 .popup {
-    width: 366px;
+    max-width:  366px;
+    max-height: 366px;
     @padding: 24px;
     
     background-color: #fff;
     
-    .popup-body {
-        overflow-x: hidden;
-        overflow-y: scroll;
+    .popup-header {
+        position: relative;
+        z-index: 5000;
         
-        .popup-header {
-            padding: (@padding / 2) @padding;
-            white-space: nowrap;
+        padding: (@padding / 2) @padding;
+        white-space: nowrap;
+        
+        .box-shadow(0, 3px, 3px, 0, @shadow);
+        .rounded(2px);
+        
+        .rhs-icon {
+            background: url(/assets/img/popup_icons_sprite.png) no-repeat;
+            position: relative;
             
-            .box-shadow(0, 3px, 3px, 0, @shadow);
+            width:  36px;
+            height: 36px;
+            float:  right;
             
-            .rhs-icon {
-                background: url(/assets/img/popup_icons_sprite.png) no-repeat;
-                position: relative;
+            .tongue {
+                background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
+                position: absolute;
+                display:  none;
                 
+                top:   -8px;
                 width:  36px;
                 height: 36px;
-                float:  right;
                 
-                .tongue {
-                    background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
-                    position: absolute;
-                    display:  none;
-                    
-                    top:   -8px;
-                    width:  36px;
-                    height: 36px;
-                    
-                    .transition(top, .3s, ease-out);
-                }
-                
-                &:hover .tongue {
-                    display: block;
-                    top: 0;
-                }
+                .transition(top, .3s, ease-out);
+            }
+            
+            &:hover .tongue {
+                display: block;
+                top: 0;
             }
         }
+    }
+    
+    .popup-body {
+        overflow-y: scroll;
+        position: relative;
+        z-index: 4999;
         
         .popup-body-inner {
             .user {
@@ -800,7 +806,7 @@
                 border-bottom: 1px solid #c2c2c2;
                 white-space: nowrap;
                 
-                padding: (@padding / 2) @padding;
+                padding: (@padding / 4) @padding;
                 
                 .profile-image-small, .stamp, .name {
                     float: left;
@@ -816,10 +822,17 @@
                 
                 .name {
                     margin-right: 6px;
-                    color: #999;
                     
                     .fullname {
                         font-weight: 700;
+                    }
+                    
+                    a {
+                        color: #999;
+                        
+                        &:hover {
+                            color: #595959;
+                        }
                     }
                 }
                 
@@ -828,6 +841,11 @@
                 }
             }
         }
+    }
+}
+.popup-todos {
+    .rhs-icon {
+        background-position: -76px 0;
     }
 }
 

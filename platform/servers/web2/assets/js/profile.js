@@ -1963,6 +1963,28 @@ var g_update_stamps = null;
                 }
             });
             
+            $sdetail.find(".expand").click(function(event) {
+                event.preventDefault();
+                
+                var $this = $(this);
+                var href  = $this.attr('href');
+                
+                var popup_options = get_fancybox_options({
+                    href            : href, 
+                    type            : "ajax", 
+                    maxWidth        : 366, 
+                    scrolling       : 'no', 
+                    
+                    afterShow       : function() {
+                        // TODO: why is this scrollbar not scrolling the entire content area?
+                        $('.popup-body').jScrollPane();
+                    }
+                });
+                
+                $.fancybox.open(popup_options);
+                return false;
+            });
+            
             update_stamps($sdetail);
             init_social_sharing();
         };

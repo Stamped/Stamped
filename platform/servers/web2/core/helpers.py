@@ -57,6 +57,10 @@ class StampedAPIProxy(object):
     def getLikes(self, params, limit=None):
         return self._get_users("stamps/likes/show.json", params, limit)
     
+    def getTodos(self, params, limit=None):
+        # TODO: this endpoint doesn't yet
+        return self._get_users("stamps/todos/show.json", params, limit)
+    
     def _get_users(self, path, params, limit=None):
         if self._prod:
             raise NotImplementedError
