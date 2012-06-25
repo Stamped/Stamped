@@ -5,6 +5,7 @@
 #
 #    This file contains common variable declarations used by the 
 # Makefile subsytem.
+
 ifndef __COMMON_MK__
 __COMMON_MK__ := # Guard against multiple includes
 

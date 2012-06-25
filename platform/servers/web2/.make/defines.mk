@@ -5,6 +5,7 @@
 #
 #    This file contains variable and function definitions used by the 
 # Makefile subsystem
+
 ifndef __DEFINES_MK__
 __DEFINES_MK__ := # Guard against multiple includes
 

@@ -4,6 +4,7 @@
 # @version 1.0
 #
 #    This file contains function definitions used by the Makefile subsytem.
+
 ifndef __FUNCTIONS_MK__
 __FUNCTIONS_MK__ := # Guard against multiple includes
 
