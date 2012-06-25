@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs, gevent, pprint
+import sys, datetime, logs, gevent
 from api                        import Entity
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
@@ -244,7 +244,7 @@ def main():
     searcher = EntitySearch()
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
-        pprint.pprint(result.dataExport())
+        print "\n\n", result
 
 
 if __name__ == '__main__':
