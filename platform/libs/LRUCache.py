@@ -112,8 +112,9 @@ def lru_cache(maxsize=100):
 
             try:
                 result = copy.deepcopy(result)
-            except TypeError:
-                logs.report()
+            except Exception:
+                logs.warning('Calling @lru_cach\'ed function %s with arguments that are not deep-copyable!' %
+                             user_function.__name__)
             return result
 
         def clear():
@@ -167,8 +168,9 @@ def lfu_cache(maxsize=100):
 
             try:
                 result = copy.deepcopy(result)
-            except TypeError:
-                logs.report()
+            except Exception:
+                logs.warning('Calling @lru_cach\'ed function %s with arguments that are not deep-copyable!' %
+                             user_function.__name__)
             return result
 
         def clear():
