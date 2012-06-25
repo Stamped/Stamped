@@ -23,6 +23,9 @@ from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
 
 
+def total_seconds(timedelta):
+    return timedelta.seconds + (timedelta.microseconds / 1000000.0)
+
 
 class EntitySearch(object):
     def __registerSource(self, source, **categoriesToPriorities):
@@ -62,7 +65,7 @@ class EntitySearch(object):
         logs.debug("RESTARTING")
         while True:
             try:
-                elapsed_seconds = (datetime.datetime.now() - start_time).total_seconds()
+                elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
                 for (source, results) in resultsDict.items():
                     if source in sources_seen:
                         continue
