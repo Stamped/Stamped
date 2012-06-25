@@ -258,8 +258,15 @@ class TrackSearchResultCluster(SearchResultCluster):
         if track_name_sim <= 0.9:
             return CompareResult.unknown()
         # TODO: Handle case with multiple artists? Does this come up?
-        artist1_name_simple = cached_artist_simplify(track1.artists[0]['name'])
-        artist2_name_simple = cached_artist_simplify(track2.artists[0]['name'])
+
+        try:
+            artist1_name_simple = cached_artist_simplify(track1.artists[0]['name'])
+            artist2_name_simple = cached_artist_simplify(track2.artists[0]['name'])
+        except IndexError:
+            # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
+            # 'Various Artists' or whatever.
+            return CompareResult.unknown()
+
         artist_name_sim = cached_string_comparison(artist1_name_simple, artist2_name_simple)
         if artist_name_sim <= 0.9:
             return CompareResult.unknown()
@@ -310,6 +317,7 @@ class PlaceSearchResultCluster(SearchResultCluster):
             return None
 
         first_term = address_string.split(',')[0]
+
         # If there's a number in it, it's not a city. It's likely a street address. In the off-chance it's something
         # like a P.O. box we're not really in trouble -- this is used for comparisons, and the real danger is returning
         # something that too many things will have in common, like a city name.
