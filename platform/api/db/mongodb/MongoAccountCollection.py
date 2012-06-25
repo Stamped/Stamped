@@ -54,10 +54,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         document['linked'] = {}
         if 'twitter' in linkedAccounts:
             twitterAcct = {
-                'service_name'      : 'twitter',
-                'user_id'           : linkedAccounts['twitter'].pop('twitter_id', None),
-                'name'              : linkedAccounts['twitter'].pop('twitter_name', None),
-                'screen_name'       : linkedAccounts['twitter'].pop('twitter_screen_name', None),
+                'service_name'          : 'twitter',
+                'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
+                'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
+                'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
             }
             twitterAcctSparse = {}
             for k,v in twitterAcct.iteritems():
@@ -67,10 +67,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         if 'facebook' in linkedAccounts:
             facebookAcct = {
-                'service_name'      : 'facebook',
-                'user_id'           : linkedAccounts['facebook'].pop('facebook_id', None),
-                'name'              : linkedAccounts['facebook'].pop('facebook_name', None),
-                'screen_name'       : linkedAccounts['facebook'].pop('facebook_screen_name', None),
+                'service_name'          : 'facebook',
+                'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
+                'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
+                'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
                 }
             facebookAcctSparse = {}
             for k,v in facebookAcct.iteritems():
@@ -80,10 +80,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         if 'netflix' in linkedAccounts:
             netflixAcct = {
-                'service_name'      : 'netflix',
-                'user_id'           : linkedAccounts['netflix'].pop('netflix_user_id', None),
-                'token'             : linkedAccounts['netflix'].pop('netflix_token', None),
-                'secret'            : linkedAccounts['netflix'].pop('netflix_secret', None),
+                'service_name'          : 'netflix',
+                'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
+                'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
+                'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
                 }
             netflixAcctSparse = {}
             for k,v in netflixAcct.iteritems():
