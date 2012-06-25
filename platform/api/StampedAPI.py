@@ -2870,7 +2870,10 @@ class StampedAPI(AStampedAPI):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
             return "http://static.stamped.com/assets/movies6.html"
-
+        if entityId is not None:
+            return "http://static.stamped.com/assets/movies6.html"
+        if userId is not None:
+            return "http://static.stamped.com/assets/movies6.html"
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
         account = self.getAccount(authUserId)
@@ -2922,7 +2925,6 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
-        logs.info('### about to call postToGraph on facebook lib')
         self._facebook.postToOpenGraph(token, ogType, url)
 
 
@@ -3196,7 +3198,6 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        logs.info('### About to call postToOpenGraph for like')
         tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
         return stamp
