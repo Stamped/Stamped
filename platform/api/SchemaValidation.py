@@ -14,6 +14,8 @@ import Entity
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 
+from bson.objectid          import ObjectId
+
 # ########## #
 # VALIDATION #
 # ########## #
@@ -47,7 +49,21 @@ def validateURL(url):
         raise StampedInputError("Invalid URL.")
     return url
 
+def validateObjectId(string):
+    if string is None:
+        return None
+    try:
+        r = ObjectId(string)
+    except Exception as e:
+        logs.warning("Invalid id: %s" % e)
+        raise StampedInputError("Invalid id")
+    return string
 
+def validateUserId(userId):
+    return validateObjectId(userId)
+
+def validateStampId(stampId):
+    return validateObjectId(stampId)
 
 def validateViewport(string):
     # Structure: "lat0,lng0,lat1,lng1"
