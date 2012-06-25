@@ -13,6 +13,7 @@ typedef enum {
     FriendsRequestTypeFacebook,
     FriendsRequestTypeTwitter,
     FriendsRequestTypeSuggested,
+    FriendsRequestTypeSearch,
 } FriendsRequestType;
 
 @interface Friends : NSObject {
@@ -21,10 +22,11 @@ typedef enum {
     STCancellation *_cancellation;
 }
 
-@property(nonatomic,assign) FriendsRequestType requestType;
-@property(nonatomic,readonly,getter = isReloading) BOOL reloading;
-@property(nonatomic,readonly,getter = hasMore) BOOL moreData;
-@property(nonatomic,retain) NSDictionary *requestParameters;
+@property (nonatomic, assign) FriendsRequestType requestType;
+@property (nonatomic, readwrite, copy) NSString* query;
+@property (nonatomic, readonly, getter = isReloading) BOOL reloading;
+@property (nonatomic, readonly, getter = hasMore) BOOL moreData;
+@property (nonatomic, retain) NSDictionary *requestParameters;
 
 
 - (void)reloadData;

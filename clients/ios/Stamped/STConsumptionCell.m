@@ -239,6 +239,8 @@
             CGSize newSize = [Util size:imageView.frame.size withScale:[Util legacyImageScale]];
             imageView.frame = CGRectMake(0, 0, newSize.width, newSize.height);
         }
+        [self.activityView stopAnimating];
+        self.activityView.hidden = YES;
         imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:imageBounds];
         imageView.layer.shadowOpacity = .5;
         imageView.layer.shadowColor = [UIColor blackColor].CGColor;

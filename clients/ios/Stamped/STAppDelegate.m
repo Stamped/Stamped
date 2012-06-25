@@ -224,6 +224,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [STStampedAPI sharedInstance].currentUserLocation = nil;
+    [[STUnreadActivity sharedInstance] update];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {

@@ -11,10 +11,19 @@
 #import "FriendsViewController.h"
 
 
+@interface FindFriendsViewController ()
+
+@property (nonatomic, readwrite, assign) BOOL firstAppearance;
+
+@end
+
 @implementation FindFriendsViewController
+
+@synthesize firstAppearance = _firstAppearance;
 
 - (id)init {
     if ((self = [super initWithType:FriendsRequestTypeSuggested])) {
+        _firstAppearance = YES;
         self.title = @"Add Friends";
     }
     return self;
@@ -28,13 +37,20 @@
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search users"];
     [Util addHomeButtonToController:self withBadge:YES];
-    
 }
 
 - (void)viewDidUnload {
     [super viewDidUnload];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    
+    [super viewDidAppear:animated];
+    if (self.firstAppearance) {
+        self.tableView.contentOffset = CGPointZero;
+    }
+    self.firstAppearance = NO;
+}
 
 #pragma mark - Table view data source
 
@@ -103,6 +119,14 @@
     return nil;
 }
 
+#pragma mark - STSearchViewDelegate
+
+- (void)stSearchViewHitSearch:(STSearchView*)view withText:(NSString*)text {
+    FriendsViewController *controller = [[FriendsViewController alloc] initWithQuery:text];
+    [self.navigationController pushViewController:controller animated:YES];
+    [controller release];
+}
+
 
 #pragma mark - FindFriendsHeaderViewDelegate
 
@@ -118,7 +142,11 @@
     
     if (type == FindFriendsSelectionTypeContacts) {
         
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Allow Stamped to access your Address Book?" message:@"Contacts are sent securely and never stored." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Don't Allow" otherButtonTitles:@"OK", nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Allow Stamped to access your Address Book?" 
+                                                        message:@"Contacts are sent securely and never stored."
+                                                       delegate:(id<UIAlertViewDelegate>)self
+                                              cancelButtonTitle:@"Don't Allow" 
+                                              otherButtonTitles:@"OK", nil];
         [alert show];
         [alert release];
         

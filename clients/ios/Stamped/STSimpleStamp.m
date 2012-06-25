@@ -163,7 +163,7 @@
      @"image_url", @"imageURL",
      @"is_liked", @"isLiked",
      @"num_comments", @"numComments",
-     @"is_fav", @"isTodod",
+     @"is_todo", @"isTodod",
      @"stamp_id", @"stampID",
      @"url", @"URL",
      nil];

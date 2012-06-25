@@ -74,7 +74,7 @@
 		textView.scrollEnabled = NO;
         textView.delegate = (id<UITextViewDelegate>)self;
 		textView.backgroundColor = [UIColor clearColor];
-        textView.textColor = [UIColor colorWithWhite:0.149f alpha:1.0f];
+        textView.textColor = [UIColor stampedBlackColor];
 		[self addSubview:textView];
 		_textView = textView;
         [textView release];
@@ -176,7 +176,7 @@
     self.sendButton.hidden = _loading;
     
     if (_loading) {
-        
+        _textView.textColor = [UIColor stampedLightGrayColor];
         if (!_activityView) {
             
             UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
@@ -192,7 +192,7 @@
         [self showPlaceholder:NO];
         
     } else {
-        
+        _textView.textColor = [UIColor stampedBlackColor];
         if (_activityView) {
             [_activityView removeFromSuperview];
             _activityView=nil;
@@ -280,7 +280,7 @@
     
     [self updateTextViewFrame:_textView];
     _textStore = _textView.text;
-    _textView.text = @"";
+    //_textView.text = @"";
     
     
 }
@@ -305,6 +305,13 @@
 
 
 #pragma mark - UITextViewDelegate
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    if (_loading) {
+        return NO;
+    }
+    return YES;
+}
 
 - (void)updateTextViewFrame:(UITextView*)textView {
     

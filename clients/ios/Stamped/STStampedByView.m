@@ -65,18 +65,18 @@
         NSString* formatString = nil;
         NSString* imagePath = nil;
         if (scope == STStampedAPIScopeFriends) {
-            formatString = @"%@ friends";
+            formatString = @"%@ friend%@";
             imagePath = @"TEMP_friends_icon";
         }
         else if (scope == STStampedAPIScopeEveryone) {
-            formatString = @"%@ users on Stamped";
+            formatString = @"%@ user%@ on Stamped";
             imagePath = @"TEMP_everyone_icon";
         }
         UIImageView* iconView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imagePath]] autorelease];
         iconView.frame = [Util centeredAndBounded:iconView.frame.size inFrame:CGRectMake(xOffset, yOffset, 15, 15)];
         [self addSubview:iconView];
         NSString* countString = [NSString stringWithFormat:@"%d", group.count.integerValue];
-        UILabel* headerText = [Util viewWithText:[NSString stringWithFormat:formatString, countString]
+        UILabel* headerText = [Util viewWithText:[NSString stringWithFormat:formatString, countString, group.count.integerValue == 1 ? @"" : @"s"]
                                             font:[UIFont stampedSubtitleFont]
                                            color:[UIColor stampedGrayColor]
                                             mode:UILineBreakModeClip
