@@ -17,9 +17,9 @@ import time
 from logs import log, report
 
 from AStampedAPIHttpTestCase            import *
-from libs.MongoCache                import mongoCachedFn, SerializationError
-from schema                    import Schema
-from api.db.mongodb.AMongoCollection import MongoDBConfig
+from libs.MongoCache                    import mongoCachedFn, SerializationError
+from schema                             import Schema
+from api.db.mongodb.AMongoCollection    import MongoDBConfig
 
 class UsageCounters(object):
     def __init__(self):
