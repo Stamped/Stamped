@@ -343,7 +343,7 @@ class StampedAPI(AStampedAPI):
                 logs.warning("Unable to get user info from facebook %s" % e)
                 raise StampedInputError('Unable to connect to Facebook')
             logs.info('### facebookUser id: %s' % facebookUser['id'])
-            if facebookUser['id'] != linkedAccount.user_id:
+            if facebookUser['id'] != linkedAccount.linked_user_id:
                 logs.warning("The facebook id associated with the facebook token is different from the id provided")
                 raise StampedAuthError('Unable to connect to Facebook')
             self._verifyFacebookAccount(facebookUser['id'])
@@ -354,7 +354,7 @@ class StampedAPI(AStampedAPI):
                 logs.warning("Unable to get user info from facebook %s" % e)
                 raise StampedInputError('Unable to connect to Twitter')
             logs.info('### twitterUser id: %s' % twitterUser['id'])
-            if twitterUser['id'] != linkedAccount.user_id:
+            if twitterUser['id'] != linkedAccount.linked_user_id:
                 logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
                 raise StampedAuthError('Unable to connect to Twitter')
             self._verifyTwitterAccount(twitterUser['id'])
@@ -404,9 +404,9 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
         fb_acct.service_name                = 'facebook'
-        fb_acct.user_id                     = facebookUser['id']
-        fb_acct.name                        = facebookUser['name']
-        fb_acct.screen_name                 = facebookUser.pop('username', None)
+        fb_acct.linked_user_id              = facebookUser['id']
+        fb_acct.linked_name                 = facebookUser['name']
+        fb_acct.linked_screen_name          = facebookUser.pop('username', None)
         account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
@@ -445,9 +445,9 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
         tw_acct.service_name                = 'twitter'
-        tw_acct.user_id                     = twitterUser['id']
-        tw_acct.screen_name                 = twitterUser['screen_name']
-        tw_acct.name                        = twitterUser.pop('name', None)
+        tw_acct.linked_user_id              = twitterUser['id']
+        tw_acct.linked_screen_name          = twitterUser['screen_name']
+        tw_acct.linked_name                 = twitterUser.pop('name', None)
         account.linked.twitter              = tw_acct
         account.auth_service                = 'twitter'
 
@@ -661,7 +661,7 @@ class StampedAPI(AStampedAPI):
             self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
             tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, fields['temp_image_url']])
 
-        self._accountDB.updateAccount(account)
+        return self._accountDB.updateAccount(account)
 
 
     @API_CALL
@@ -927,7 +927,7 @@ class StampedAPI(AStampedAPI):
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Twitter)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id):
+        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
             return False
 
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
@@ -946,8 +946,8 @@ class StampedAPI(AStampedAPI):
         # Generate activity item
         if len(userIds) > 0:
             self._addLinkedFriendActivity(authUserId, 'twitter', userIds,
-                                                 body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.screen_name)
-            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.user_id)
+                                                 body = 'Your Twitter friend %s joined Stamped.' % account.linked.twitter.linked_screen_name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id)
 
         return True
 
@@ -956,7 +956,7 @@ class StampedAPI(AStampedAPI):
         account   = self._accountDB.getAccount(authUserId)
 
         # Only send alert once (when the user initially connects to Facebook)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id):
+        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
             return False
 
         # Grab friend list from Facebook API
@@ -972,8 +972,8 @@ class StampedAPI(AStampedAPI):
         # Generate activity item
         if len(userIds) > 0:
             self._addLinkedFriendActivity(authUserId, 'facebook', userIds,
-                                          body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.name)
-            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.user_id)
+                                          body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.linked_name)
+            self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id)
 
     @API_CALL
     def addToNetflixInstant(self, authUserId, netflixId):
@@ -988,7 +988,7 @@ class StampedAPI(AStampedAPI):
         nf_secret   = None
 
         if account.linked is not None and account.linked.netflix is not None:
-            nf_user_id  = account.linked.netflix.user_id
+            nf_user_id  = account.linked.netflix.linked_user_id
             nf_token    = account.linked.netflix.token
             nf_secret   = account.linked.netflix.secret
 
@@ -2901,11 +2901,11 @@ class StampedAPI(AStampedAPI):
             url = self._getOpenGraphUrl(stampId = stampId)
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
-            stamp = self.getStamp(stampid)
+            stamp = self.getStamp(likeStampid)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = stampId)
+            url = self._getOpenGraphUrl(stampId = likeStampId)
         elif todoEntityId is not None and share_settings.share_todos == True:
             action = 'todo'
             entity = self.getEntity({'entity_id': todoEntityId})
@@ -3196,6 +3196,7 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
+        logs.info('### About to call postToOpenGraph for like')
         tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
         return stamp
