@@ -4185,6 +4185,11 @@ class StampedAPI(AStampedAPI):
 
         return result
 
+    @API_CALL 
+    def getStampTodos(self, stampId):
+        userIds = self._todoDB.getTodosFromStampId(stamp.stamp_id)
+        return userIds
+
     """
        #
       # #    ####  ##### # #    # # ##### #   #
