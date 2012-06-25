@@ -28,7 +28,10 @@ def lru_cache(maxsize=100):
     Cache performance statistics stored in f.hits and f.misses.
     Clear the cache with f.clear().
     http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used
-    
+
+    WARNING: You should not be using this for functions with arguments of types where equality can't be easily tested by
+    str(arg1) == str(arg2). You should not be using this for functions where the return types are both mutable and
+    not deep-copyable.
     '''
     maxqueue = maxsize * 10
     def decorating_function(user_function, len=len, iter=iter, tuple=tuple, 
@@ -107,8 +110,12 @@ def lru_cache(maxsize=100):
                     queue_appendleft(key)
                     refcount[key] = 1
 
-            return copy.deepcopy(result)
-        
+            try:
+                result = copy.deepcopy(result)
+            except TypeError:
+                logs.report()
+            return result
+
         def clear():
             cache.clear()
             queue.clear()
@@ -158,7 +165,11 @@ def lfu_cache(maxsize=100):
                                             key=itemgetter(1)):
                         del cache[key], use_count[key]
 
-            return copy.deepcopy(result)
+            try:
+                result = copy.deepcopy(result)
+            except TypeError:
+                logs.report()
+            return result
 
         def clear():
             cache.clear()

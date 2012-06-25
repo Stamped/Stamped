@@ -109,6 +109,19 @@ class LRUCacheTests(AStampedAPIHttpTestCase):
         result1.append(-1)
         self.assertEqual([1, 2, 3, 4], reverseArgs(4, 3, 2, 1))
 
+    def test_uncopyable_values(self):
+        def myGeneratorFn():
+            for i in range(10):
+                yield i
+
+        myGenerator = myGeneratorFn()
+        myGenerator.next()
+        myGenerator.next()
+        result = reverseArgs(12, myGenerator)
+        self.assertEqual(2, len(result))
+        self.assertEqual(12, result[1])
+        generatorCopy = result[0]
+        self.assertTrue(myGenerator is generatorCopy)
 
 if __name__ == '__main__':
     _verbose = True
