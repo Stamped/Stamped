@@ -84,6 +84,7 @@ def newAccounts():
         bgn = yesterday(bgn)
         end = yesterday(end)
         weeklyAgg += acct_collection.find({'timestamp.created': {'$gte': bgn, '$lt': end}}).count()
+        print "%s thru %s: %s" % (bgn,end,weeklyAgg)
         
     weeklyAvg = weeklyAgg / 6.0
     
