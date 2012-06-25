@@ -41,6 +41,7 @@
         tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
             [weak.tableView reloadData];
         };
+        self.tableView.rowHeight = [[STUserCellFactory sharedInstance] loadingCellHeightForTableView:self.tableView andStyle:nil];
         tableDelegate_.selectedCallback = ^(STGenericTableDelegate* tableDelegate, UITableView* tableView, NSIndexPath* path) {
             id<STUserDetail> userDetail = [tableDelegate_.lazyList objectAtIndex:path.row];
             if (userDetail) {

@@ -22,8 +22,8 @@
 #define kRemovePhotoActionSheetTag 201
 
 @interface CreateStampViewController ()
-@property(nonatomic,readonly, assign) CreateHeaderView *headerView; // weak
-@property(nonatomic,readonly, assign) CreateFooterView *footerView; // weak
+@property(nonatomic,readonly, retain) CreateHeaderView* headerView; // weak
+@property(nonatomic,readonly, retain) CreateFooterView* footerView; // weak
 @property(nonatomic,retain) CreateEditView *editView;
 @property(nonatomic,retain) STS3Uploader *imageUploader;
 @property(nonatomic,copy) NSString *tempImagePath;
@@ -77,14 +77,15 @@
 }
 
 - (void)dealloc {
-    _headerView=nil;
-    _footerView=nil;
+    [_headerView release];
+    [_footerView release];
     self.tempImagePath=nil;
     self.editView=nil;
     self.searchResult=nil;
     self.entity=nil;
     self.imageUploader=nil;
     self.creditUsers=nil;
+    self.tableViewCell = nil;
     [super dealloc];
 }
 
@@ -126,7 +127,6 @@
         self.tableView.tableHeaderView = view;
         [view setupWithItem:self.entity==nil ? (id)self.searchResult : (id)self.entity];
         _headerView = view;
-        [view release];
     }
     
     if (!_footerView) {
@@ -135,17 +135,9 @@
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableView.tableFooterView = view;
         _footerView = view;
-        [view release];
     }
     
 }
-
-- (void)viewDidUnload {
-    self.tableViewCell = nil;
-    _headerView=nil;
-    [super viewDidUnload];
-}
-
 
 #pragma mark - Stamp Posting
 

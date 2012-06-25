@@ -27,8 +27,8 @@ class Facebook(object):
         max_retries = 5
         if accessToken is not None:
             params['access_token'] = accessToken
-        #if method != 'get':
-        #    params['method'] = method
+        if method != 'get':
+            params['method'] = method
 
         data = None
         while True:
@@ -43,7 +43,7 @@ class Facebook(object):
                         url += "?%s" % encoded_params
                     else:
                         data = encoded_params
-                logs.info('url: %s' % url)
+                logs.info("'%s'  url: %s" % (method,url))
                 logs.info('encoded_params: %s' % encoded_params)
                 if parse_json:
                     result  = json.load(urllib2.urlopen(url, data))
@@ -57,7 +57,7 @@ class Facebook(object):
                         # OAuth exception
                         msg = result['error']['message']
 
-                logs.info('Facebook API Error: code: %s  message: %s' % (e.code, e.message))
+                logs.info('Facebook API Error: code: %s  message: %s' % (e.code, e))
                 num_retries += 1
                 if num_retries > max_retries:
                     if e.code == 400:
@@ -146,21 +146,29 @@ class Facebook(object):
         path = test_user_id
         return self._delete(access_token, path)
 
+    def getTestUsers(self, app_id=APP_ID, app_secret=APP_SECRET, app_access_token=None):
+        if app_access_token is None:
+            app_access_token = self.getAppAccessToken(app_id, app_secret)
+        path = "%s/accounts/test-users" % app_id
+        return self._get(app_access_token, path)
+
     def clearTestUsers(self, app_id=APP_ID, app_secret=APP_SECRET, app_access_token=None):
         if app_access_token is None:
             app_access_token = self.getAppAccessToken(app_id, app_secret)
         path = "%s/accounts/test-users" % app_id
         while True:
-            result = self._get(app_access_token, path)
+            result = self._get(app_access_token, path, limit=50)
             users = result['data']
             for user in users:
-                self.deleteTestUser(app_access_token, user['id'])
+                assert(self.deleteTestUser(app_access_token, user['id']))
             if 'paging' in result and 'next' in result['paging']:
                 path = result['paging']['next']
                 url = urlparse.urlparse(result['paging']['next'])
                 params = dict([part.split('=') for part in url[4].split('&')])
-                if 'offset' in params and int(params['offset']) == len(users):
+                if len(users) == 50:
                     continue
+#                if 'offset' in params and int(params['offset']) == len(users):
+#                    continue
             break
 
     def getOpenGraphActivity(self, access_token):
@@ -171,6 +179,9 @@ class Facebook(object):
         )
 
     def postToOpenGraph(self, access_token, object_type, object_url):
+        logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
+
+
         path = "me/stampedapp:stamp"
         args = {}
         args[object_type] = object_url
@@ -215,12 +226,13 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph(access_token,
                                                    'movie', 'http://www.imdb.com/title/tt1190536/'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
+    if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getOpenGraphActivity'
+    methods = 'clearTestUsers'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

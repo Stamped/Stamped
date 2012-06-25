@@ -241,7 +241,6 @@
         // you
         if (indexPath.row == 0) {
             STEditProfileViewController *controller = [[STEditProfileViewController alloc] init];
-            controller.delegate = (id<STEditProfileViewControllerDelegate>)self;
             [self.navigationController pushViewController:controller animated:YES];
             [controller release];
         } else {

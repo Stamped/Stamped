@@ -24,42 +24,61 @@
 @implementation FriendsViewController
 @synthesize friends=_friends;
 
+- (void)commonInitWithType:(FriendsRequestType)type andQuery:(NSString*)query {
+    _friends = [[Friends alloc] init];
+    if (query) {
+        _friends.query = query;
+    }
+    else {
+        _friends.requestType = type;
+    }
+    [STEvents addObserver:self selector:@selector(friendsFinished:) event:EventTypeFriendsFinished identifier:[NSString stringWithFormat:@"friends-%i", type]];
+    
+    if (type == FriendsRequestTypeTwitter) {
+        
+        [STEvents addObserver:self selector:@selector(twitterAuthFinished:) event:EventTypeTwitterAuthFinished];
+        [STEvents addObserver:self selector:@selector(twitterAuthFailed:) event:EventTypeTwitterAuthFailed];
+        
+    } else if (type == FriendsRequestTypeFacebook) {
+        
+        [STEvents addObserver:self selector:@selector(facebookAuthFinished:) event:EventTypeFacebookAuthFinished];
+        [STEvents addObserver:self selector:@selector(facebookAuthFailed:) event:EventTypeFacebookAuthFailed];
+        
+    }
+    
+    switch (type) {
+        case FriendsRequestTypeContacts:
+            self.title = @"Contacts";
+            break;
+        case FriendsRequestTypeTwitter:
+            self.title = @"Twitter";
+            break;
+        case FriendsRequestTypeFacebook:
+            self.title = @"Facebook";
+            break;
+        case FriendsRequestTypeSuggested:
+            self.title = @"Suggestions";
+            break;
+        case FriendsRequestTypeSearch:
+            self.title = @"Results";
+            break;
+        default:
+            break;
+    }
+
+}
+
 - (id)initWithType:(FriendsRequestType)type {
     if ((self = [super init])) {
-        _friends = [[Friends alloc] init];
-        _friends.requestType = type;
-        
-        [STEvents addObserver:self selector:@selector(friendsFinished:) event:EventTypeFriendsFinished identifier:[NSString stringWithFormat:@"friends-%i", type]];
-        
-        if (type == FriendsRequestTypeTwitter) {
-            
-            [STEvents addObserver:self selector:@selector(twitterAuthFinished:) event:EventTypeTwitterAuthFinished];
-            [STEvents addObserver:self selector:@selector(twitterAuthFailed:) event:EventTypeTwitterAuthFailed];
-            
-        } else if (type == FriendsRequestTypeFacebook) {
-            
-            [STEvents addObserver:self selector:@selector(facebookAuthFinished:) event:EventTypeFacebookAuthFinished];
-            [STEvents addObserver:self selector:@selector(facebookAuthFailed:) event:EventTypeFacebookAuthFailed];
-            
-        }
-        
-        switch (type) {
-            case FriendsRequestTypeContacts:
-                self.title = @"Contacts";
-                break;
-            case FriendsRequestTypeTwitter:
-                self.title = @"Twitter";
-                break;
-            case FriendsRequestTypeFacebook:
-                self.title = @"Facebook";
-                break;
-            case FriendsRequestTypeSuggested:
-                self.title = @"Suggestions";
-                break;
-            default:
-                break;
-        }
-        
+        [self commonInitWithType:type andQuery:nil];
+    }
+    return self;
+}
+
+- (id)initWithQuery:(NSString *)query {
+    self = [super init];
+    if (self) {
+        [self commonInitWithType:FriendsRequestTypeSearch andQuery:query];
     }
     return self;
 }
@@ -106,7 +125,8 @@
             
         }
          
-    } else if (_friends.requestType == FriendsRequestTypeTwitter) {
+    } 
+    else if (_friends.requestType == FriendsRequestTypeTwitter) {
         
         if (![[STTwitter sharedInstance] isSessionValid]) {
             

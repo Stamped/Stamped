@@ -42,7 +42,7 @@ class StampedAPILinkedAccountHttpTest(AStampedAPIHttpTestCase):
 
 
         # Next generate the test user for our app on Facebook
-        fb_test_user            = self.fb.createTestUser(name, self.fb_app_access_token, permissions='email') #publish_actions
+        fb_test_user            = self.fb.createTestUser(name, self.fb_app_access_token, permissions='email,publish_actions')
 
         fb_user_id              = fb_test_user['id']
         fb_user_token           = fb_test_user['access_token']
@@ -126,9 +126,9 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         # add the linked account
         data = {
             'service_name'   : 'facebook',
-            'user_id'        : self.fb_user_id_a,
-            'screen_name'    : 'fbusera',
-            'name'           : 'Test User',
+            'linked_user_id'        : self.fb_user_id_a,
+            'linked_screen_name'    : 'fbusera',
+            'linked_name'           : 'Test User',
             'token'          : self.fb_user_token_a,
             }
         self.addLinkedAccount(self.token, **data)
@@ -202,8 +202,9 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         print('###')
         pprint.pprint(account)
 
-        self.entity = self.createEntity(self.token)
-        self.stamp = self.createStamp(self.token, self.entity['entity_id'], blurb='ASDF')
+        entity = self.createEntity(self.token)
+        stamp = self.createStamp(self.token, entity['entity_id'], blurb='ASDF')
+        self.createLike(self.token, stamp['stamp_id'])
 
         import time
         time.sleep(5)
@@ -386,11 +387,14 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
         data = {
             "oauth_token"   : self.fUserAToken['access_token'],
             "user_token"    : self.fb_user_token_a,
-            }
-        result = self.handlePOST(path, data)
+        }
 
-        self.assertLength(result, 1)
-        self.assertEqual(result[0]['user_id'], self.fUserB['user_id'])
+        logs.info("self.fb_user_token_a %s" % self.fb_user_token_a)
+
+        self.async(lambda: self.handlePOST(path, data), [
+            lambda x: self.assertEqual(len(x), 1),
+            lambda x: self.assertEqual(x[0]['user_id'], self.fUserB['user_id']),
+            ])
 
     def test_friend_joined_activity_alert(self):
         self.async(lambda: self.showActivity(self.fUserAToken), [
