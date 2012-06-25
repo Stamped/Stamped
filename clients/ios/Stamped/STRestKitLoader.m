@@ -244,9 +244,6 @@ static STRestKitLoader* _sharedInstance;
         if (post) {
             objectLoader.method = RKRequestMethodPOST;
         }
-        if (params.count == 0) {
-            NSLog(@"No params: %@", path);
-        }
         NSMutableDictionary* paramsCopy = [NSMutableDictionary dictionaryWithDictionary:params];
         if (authenticated) {
             NSString* accessToken = self.authToken.accessToken;

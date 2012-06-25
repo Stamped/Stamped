@@ -34,6 +34,7 @@
 #import "STSimpleLoginResponse.h"
 #import "STSimpleEntityAutoCompleteResult.h"
 #import "STSimpleBooleanResponse.h"
+#import "STSimpleAccount.h"
 
 
 NSString* const STStampedAPILoginNotification = @"STStampedAPILoginNotification";
@@ -168,7 +169,7 @@ static STStampedAPI* _sharedInstance;
     [self.entityCache setObject:entity forKey:entity.entityID];
 }
 
-- (id<STUser>)currentUser {
+- (id<STUserDetail>)currentUser {
     return [[STRestKitLoader sharedInstance] currentUser];
 }
 
@@ -1010,9 +1011,10 @@ static STStampedAPI* _sharedInstance;
                         andCallback:(void(^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
     NSString* path = @"/stamps/collection.json";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   userID, @"userID",
+                                   userID, @"user_id",
                                    [NSNumber numberWithInteger:limit], @"limit",
                                    [NSNumber numberWithInteger:[date timeIntervalSince1970]], @"before",
+                                   @"user", @"scope",
                                    nil];
     if (offset != 0) {
         [params setObject:[NSNumber numberWithInteger:offset] forKey:@"offset"];
@@ -1171,6 +1173,18 @@ static STStampedAPI* _sharedInstance;
                                                      else {
                                                          block(NO, error, cancellation);
                                                      }
+                                                 }];
+}
+
+
+- (STCancellation*)accountWithCallback:(void (^)(id<STAccount> account, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/accounts/show.json"
+                                                        post:NO
+                                               authenticated:YES
+                                                      params:[NSDictionary dictionary]
+                                                     mapping:[STSimpleAccount mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation); 
                                                  }];
 }
 

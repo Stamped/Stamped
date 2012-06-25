@@ -287,21 +287,17 @@ typedef enum {
         _commentView = [view retain];
         [view release];        
     }
-    
-    [self loadEntityDetail];
+
 }
 
 - (void)loadEntityDetail {
     if (!self.entityDetailCancellation) {
-        
         self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.stamp.entity.entityID andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
             self.entityDetailCancellation = nil;
             STSynchronousWrapper* wrapper = [STSynchronousWrapper wrapperForStampDetail:detail withFrame:CGRectMake(0, 0, 320, 200) stamp:self.stamp delegate:self.scrollView];
             [self.scrollView appendChildView:wrapper];
             self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width, self.scrollView.contentSize.height);
-            
-            
-            
+            self.entityDetailView = wrapper;
         }];
     }
 }
@@ -327,6 +323,9 @@ typedef enum {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localModification:) name:STStampedAPILocalStampModificationNotification object:nil];
+    if (!self.entityDetailView) {
+        [self loadEntityDetail];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -441,6 +440,7 @@ typedef enum {
     [self.stampCancellation cancel];
     self.stampCancellation = nil;
     [self.entityDetailCancellation cancel];
+    self.entityDetailCancellation = nil;
 }
 
 

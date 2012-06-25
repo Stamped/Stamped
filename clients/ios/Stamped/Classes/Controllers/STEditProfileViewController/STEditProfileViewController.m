@@ -22,7 +22,6 @@
 
 @implementation STEditProfileViewController
 @synthesize avatarUploader;
-@synthesize delegate;
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
@@ -42,21 +41,23 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
     
-    if (!self.navigationItem.leftBarButtonItem) {
-        
-        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
-        self.navigationItem.leftBarButtonItem = button;
-        [button release];
-        
-    }
-
-
+    /*
+     if (!self.navigationItem.leftBarButtonItem) {
+     
+     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
+     self.navigationItem.leftBarButtonItem = button;
+     [button release];
+     
+     }
+     */
+    
+    
     if (!self.navigationItem.rightBarButtonItem) {
         
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Save", @"Save") style:UIBarButtonItemStyleDone target:self action:@selector(save:)];
         self.navigationItem.rightBarButtonItem = button;
         [button release];
-    
+        
     }
     
     STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
@@ -94,19 +95,10 @@
 #pragma mark - Actions
 
 - (void)save:(id)sender {
-    
-    if ([(id)delegate respondsToSelector:@selector(stEditProfileViewControllerSaved:)]) {
-        [self.delegate stEditProfileViewControllerSaved:self];
-    }
-    
 }
 
 - (void)cancel:(id)sender {
-
-    if ([(id)delegate respondsToSelector:@selector(stEditProfileViewControllerCancelled:)]) {
-        [self.delegate stEditProfileViewControllerCancelled:self];
-    }
-    
+    [[Util sharedNavigationController] popViewControllerAnimated:YES];
 }
 
 
@@ -116,6 +108,7 @@
     
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want delete your account?" delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Delete Account" otherButtonTitles:nil];
     actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    actionSheet.tag = kDeleteActionSheetTag;
     [actionSheet showInView:self.view];
     [actionSheet release];
     
@@ -168,9 +161,9 @@
     if ([self.tableView.tableHeaderView respondsToSelector:@selector(setStampColors:)]) {
         [(EditProfileHeaderView*)self.tableView.tableHeaderView setStampColors:colors];
     }
-
+    
     [self dismissModalViewControllerAnimated:YES];
-
+    
 }
 
 
@@ -250,11 +243,10 @@
     
     NSArray *array = [_dataSource objectAtIndex:indexPath.section];
     
-    cell.textField.returnKeyType = (indexPath.row == [_dataSource count]-1) ? UIReturnKeyDone : UIReturnKeyNext;
+    cell.textField.returnKeyType = UIReturnKeyDone;
     cell.titleLabel.text = [array objectAtIndex:indexPath.row];
     cell.textField.secureTextEntry = [cell.titleLabel.text isEqualToString:@"password"];
     cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
-    cell.textField.autocapitalizationType = (indexPath.section==0 && indexPath.row==0) ? UITextAutocapitalizationTypeAllCharacters : UITextAutocapitalizationTypeNone;
     
     if (indexPath.section == 1 && indexPath.row == 1) {
         cell.textField.keyboardType = UIKeyboardTypeEmailAddress;
@@ -262,11 +254,9 @@
         cell.textField.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
     }
     
-    
-    
 #warning tempoary code to fill fields
     
-    id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
+    id<STUserDetail> user = [[STStampedAPI sharedInstance] currentUser];
     if (indexPath.section == 0) {
         
         switch (indexPath.row) {
@@ -274,19 +264,13 @@
                 cell.textField.text = user.name;
                 break;
             case 1:
-                if ([user respondsToSelector:@selector(location)]) {
-                    cell.textField.text = [(id)user location];
-                }
+                cell.textField.text = user.location;
                 break;
             case 2:
-                if ([user respondsToSelector:@selector(website)]) {
-                    cell.textField.text = [(id)user website];
-                }
+                cell.textField.text = user.website;
                 break;
             case 3:
-                if ([user respondsToSelector:@selector(bio)]) {
-                    cell.textField.text = [(id)user bio];
-                }
+                cell.textField.text = user.bio;
                 break;
             default:
                 break;
@@ -378,7 +362,7 @@
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
     if (section != 1) return nil;
-        
+    
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 60.0f)];
     
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -450,7 +434,13 @@
         
     }
     
- 
+    else if (actionSheet.tag == kDeleteActionSheetTag) {
+        if (actionSheet.cancelButtonIndex == buttonIndex) return;
+        
+        
+    }
+    
+    
     
 }
 
