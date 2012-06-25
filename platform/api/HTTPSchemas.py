@@ -1332,7 +1332,7 @@ class HTTPEntity(Schema):
             self._addAction(actionType, 'Watch trailer', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
-            actionType  = 'add_to_instant_queue'
+            actionType  = 'queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
@@ -1450,7 +1450,7 @@ class HTTPEntity(Schema):
 
             # Actions: Add to Netflix Instant Queue
 
-            actionType  = 'add_to_instant_queue'
+            actionType  = 'queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
@@ -1813,8 +1813,8 @@ class HTTPEntity(Schema):
 
             if getattr(entity.sources, 'itunes_id', None) is not None:
                 source              = HTTPActionSource()
-                source.name         = 'Download from iTunes'
-                source.source       = 'itunes'
+                source.name         = 'Download from the App Store'
+                source.source       = 'appstore'
                 source.source_id    = entity.sources.itunes_id
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if getattr(entity.sources, 'itunes_url', None) is not None:
@@ -2485,7 +2485,7 @@ class HTTPStamp(Schema):
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)
         self.num_todos      = getattr(stamp.stats, 'num_todos', 0)
-        self.num_credits    = getattr(stamp.stats, 'num_credits', 0)
+        self.num_credits    = getattr(stamp.stats, 'num_credit', 0)
 
         url_title = encodeStampTitle(stamp.entity.title)
         self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
@@ -2984,9 +2984,12 @@ class HTTPActivity(Schema):
             self.body = '%s gave you credit for %s.' % (subjects, stampObjects)
             self.body_references = subjectReferences
             if len(self.subjects) > 1:
-                self.image = _getIconURL('news_stamp_group')
+                self.image = _getIconURL('news_credit_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
+
+            ### TEMP: Switch verb to be "credit" until we can make underlying changes
+            self.verb = 'credit'
 
         elif self.verb == 'like':
             _addStampObjects()
@@ -3091,39 +3094,28 @@ class HTTPActivity(Schema):
 
             if self.source is not None:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
-                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
-                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
-                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue on %(source)s.',
+                    'listen'            : '%(subjects)s listened to %(objects)s on %(source)s.',
+                    'playlist'          : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
+                    'download'          : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'reserve'           : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'menu'              : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'               : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'watch'             : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'tickets'           : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'queue'             : '%(subjects)s added %(objects)s to queue on %(source)s.',
                     }
             else:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to %(objects)s.',
-                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
-                    'download'  : '%(subjects)s checked out %(objects)s.',
-                    'reserve'   : '%(subjects)s checked out %(objects)s.',
-                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
-                    'buy'       : '%(subjects)s checked out %(objects)s.',
-                    'watch'     : '%(subjects)s checked out %(objects)s.',
-                    'tickets'   : '%(subjects)s checked out %(objects)s.',
-                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue.',
+                    'listen'            : '%(subjects)s listened to %(objects)s.',
+                    'playlist'          : '%(subjects)s added %(objects)s to a playlist.',
+                    'download'          : '%(subjects)s checked out %(objects)s.',
+                    'reserve'           : '%(subjects)s checked out %(objects)s.',
+                    'menu'              : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'               : '%(subjects)s checked out %(objects)s.',
+                    'watch'             : '%(subjects)s checked out %(objects)s.',
+                    'tickets'           : '%(subjects)s checked out %(objects)s.',
+                    'queue'             : '%(subjects)s added %(objects)s to queue.',
                     }
-
-#            actionMapping = {
-#                'listen'    : ('listened to', ''),
-#                'playlist'  : ('added', 'to a playlist'),
-#                'download'  : ('downloaded', ''),
-#                'reserve'   : ('checked out', ''),
-#                'menu'      : ('viewed the menu for', ''),
-#                'buy'       : ('checked out', ''),
-#                'watch'     : ('watched', ''),
-#                'tickets'   : ('bought tickets for', ''),
-#            }
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verbs = ('completed', '')
@@ -3140,28 +3132,57 @@ class HTTPActivity(Schema):
             msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
             self.body = verbs % msgDict
 
-#            if len(verbs[1]) > 0:
-#                self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
-#            else:
-#                self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
-
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
-            ### TEMP ICON WORK
-            if self.source in set(['rdio', 'opentable', 'itunes', 'fandango', 'amazon']):
-                if self.source == 'itunes' and self.verb[7:] == 'download':
-                    self.icon = _getIconURL('news_appstore')
-                else:
-                    self.icon = _getIconURL('news_%s' % self.source)
-            elif self.verb[7:] in set(['watch', 'playlist', 'menu', 'listen']):
-                self.icon = _getIconURL('news_%s' % self.verb[7:])
-            elif self.verb[7:] == 'add_to_instant_queue':
-                self.icon = _getIconURL('news_queue')
+            # Action Icons
+            actionIcons = set([
+                'news_amazon',
+                'news_appstore',
+                'news_fandango',
+                'news_itunes',
+                'news_menu',
+                'news_netflix_queue',
+                'news_netflix_watch',
+                'news_opentable',
+                'news_rdio',
+                'news_rdio_listen',
+                'news_rdio_playlist',
+                'news_spotify',
+                'news_spotify_listen',
+                'news_spotify_playlist',
+            ])
 
-            ### TEMP HACK TO SET IMAGE TO ICON - NEED TO GET ASSETS
+            if 'news_%s_%s' % (self.source, self.verb[7:]) in actionIcons:
+                self.icon = _getIconURL('news_%s_%s' % (self.source, self.verb[7:]))
+            elif 'news_%s' % (self.source) in actionIcons:
+                self.icon = _getIconURL('news_%s' % (self.source))
+            elif 'news_%s' % (self.verb[7:]) in actionIcons:
+                self.icon = _getIconURL('news_%s' % (self.verb[7:]))
+            else:
+                logs.warning("Unable to set icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
+
+            # Action Group Icons
             if len(self.subjects) > 1:
-                self.image = self.icon
+                actionGroupIcons = set([
+                    'news_amazon_group',
+                    'news_appstore_group',
+                    'news_fandango_group',
+                    'news_listen_group',
+                    'news_opentable_group',
+                    'news_playlist_group',
+                    'news_queue_group',
+                    'news_rdio_group',
+                    'news_spotify_group',
+                    'news_watch_group',
+                ])
+
+                if 'news_%s_group' % (self.source) in actionIcons:
+                    self.image = _getIconURL('news_%s_group' % (self.source))
+                elif 'news_%s_group' % (self.verb[7:]) in actionIcons:
+                    self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
+                else:
+                    logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

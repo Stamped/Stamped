@@ -1678,11 +1678,6 @@ class StampedAPI(AStampedAPI):
         stampId     = kwargs.pop('stamp_id', None)
 
         actions = set([
-            # 'link',
-            # 'phone',
-            # 'stamped_view_entity',
-            # 'stamped_view_stamp',
-            # 'stamped_view_user',
             'listen',
             'playlist',
             'download',
@@ -1691,6 +1686,7 @@ class StampedAPI(AStampedAPI):
             'buy',
             'watch',
             'tickets',
+            'queue',
         ])
 
         # For now, only complete the action if it's associated with an entity and a stamp
@@ -2153,6 +2149,12 @@ class StampedAPI(AStampedAPI):
                                 logs.warning("Error: %s" % e)
                                 continue
                     previews.credits = creditPreviews
+
+                    # Stats
+                    stamp.stats.num_comments    = stat.num_comments 
+                    stamp.stats.num_todos       = stat.num_todos 
+                    stamp.stats.num_credit      = stat.num_credits
+                    stamp.stats.num_likes       = stat.num_likes 
 
                 else:
                     tasks.invoke(tasks.APITasks.updateStampStats, args=[str(stamp.stamp_id)])
