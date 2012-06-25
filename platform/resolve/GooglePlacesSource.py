@@ -236,7 +236,7 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
 
     @property
     def key(self):
-        return self.__data['id']
+        return self.__data['reference']
 
     @lazyProperty
     def __terms(self):
