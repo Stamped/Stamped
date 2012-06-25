@@ -154,7 +154,7 @@
 
 - (NSInteger)setupWithGroup:(id<STStampedByGroup>)group count:(NSInteger)count cap:(BOOL)cap {
     
-    for (NSInteger i = 0; i < group.count.integerValue; i++) {
+    for (NSInteger i = 0; i < group.stampPreviews.count; i++) {
         
         STAvatarView *view = [_views objectAtIndex:count];
         id <STStampPreview> preview = [[group stampPreviews] objectAtIndex:i];

@@ -27,6 +27,7 @@
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search users"];
+    [Util addHomeButtonToController:self withBadge:YES];
     
 }
 

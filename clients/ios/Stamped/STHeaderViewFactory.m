@@ -14,6 +14,7 @@
 #import "STSimpleAction.h"
 #import "STPhotoViewController.h"
 #import "STEntityAnnotation.h"
+#import "STImageCache.h"
 
 static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
 
@@ -41,10 +42,28 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
     [super dealloc];
 }
 
+- (id)generateAsynchronousState:(id<STEntityDetail>)anEntityDetail withOperation:(NSOperation*)operation {
+    NSString* url = [Util entityImageURLForEntity:anEntityDetail];
+    if (url) {
+        UIImage* image = [[STImageCache sharedInstance] cachedImageForImageURL:url];
+        if (image) {
+            return image;
+        }
+        NSData* data = [[[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:url]] autorelease];
+        image = [UIImage imageWithData:data];
+        if (image) {
+            [[STImageCache sharedInstance] cacheImage:image forImageURL:url];
+        }
+        return image;
+    }
+    return nil;
+}
+
 - (UIView*)generateViewOnMainLoop:(id<STEntityDetail>)entity
                         withState:(id)asyncState
                       andDelegate:(id<STViewDelegate>)delegate {
     UIView* view = nil;
+    UIImage* image = asyncState;
     if (entity) {
         CGFloat padding_h = 15;
         CGFloat maxWidth = 200;
@@ -52,18 +71,10 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
         if ([self.style isEqualToString:@"StampDetail"]) {
             maxImageWidth = 200;
         }
-        NSString* imagePath = nil;
-        if (entity.images && [entity.images count] > 0) {
-            id<STImageList> imageList = [entity.images objectAtIndex:0];
-            if (imageList.sizes.count > 0) {
-                id<STImage> firstImage = [imageList.sizes objectAtIndex:0];
-                imagePath = firstImage.url;
-            }
-        }
         UIView* imageView = nil;
         CGRect imageFrame = CGRectZero;
-        if (imagePath) {
-            imageView = [Util imageViewWithURL:[NSURL URLWithString:imagePath] andFrame:CGRectNull];
+        if (image) {
+            imageView = [[[UIImageView alloc] initWithImage:image] autorelease];
             imageFrame = imageView.frame;
             if (imageFrame.size.width > maxImageWidth) {
                 CGFloat factor = maxImageWidth / imageFrame.size.width;
@@ -85,6 +96,7 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
                                      color:[UIColor stampedDarkGrayColor]
                                       mode:UILineBreakModeWordWrap
                                 andMaxSize:CGSizeMake(maxWidth, CGFLOAT_MAX)];
+            titleView.clipsToBounds = NO;
             
             captionView = [Util viewWithText:entity.caption ? entity.caption : entity.subtitle
                                         font:captionFont
@@ -134,7 +146,7 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
         if (imageView) {
             [view addSubview:imageView];
             UIView* imageButtom = [Util tapViewWithFrame:imageView.frame andCallback:^{
-                STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:imagePath]] autorelease];
+                STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:[Util entityImageURLForEntity:entity]]] autorelease];
                 [[Util sharedNavigationController] pushViewController:controller animated:YES];
             }];
             [view addSubview:imageButtom];

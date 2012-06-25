@@ -108,7 +108,7 @@
     }
     
     NSString *ordinalText = [NSString ordinalString:relevantItem.count];
-    NSString *title = [NSString stringWithFormat:@"That's your %@ stamp in %@", ordinalText, [relevantItem.category capitalizedString]];
+    NSString *title = [NSString stringWithFormat:@"That's your %@ stamp in %@", ordinalText, [Util titleForCategory:relevantItem.category]];
  
     UIColor *textColor = [UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f];
     UIColor *boldTextColor = [UIColor colorWithRed:0.349f green:0.349f blue:0.349f alpha:1.0f];

@@ -48,6 +48,10 @@ static STImageCache* _sharedInstance;
     [super dealloc];
 }
 
+- (void)cacheImage:(UIImage*)image forImageURL:(NSString*)url {
+    [self.cache setObject:image forKey:url];
+}
+
 - (STCancellation *)objectForHybridCache:(STHybridCacheSource *)cache
                                  withKey:(NSString *)key 
                             withCallback:(void (^)(id<NSCoding>, NSError *, STCancellation *))block {
@@ -99,7 +103,7 @@ static STImageCache* _sharedInstance;
 
 - (UIImage*)cachedImageForImageURL:(NSString*)URL {
     NSAssert(URL != nil, @"Requested nil URL");
-    return (UIImage*)[self.cache cachedObjectForKey:URL];
+    return (UIImage*)[self.cache fastCachedObjectForKey:URL];
 }
 
 - (void)fastPurge {

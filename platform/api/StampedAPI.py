@@ -1767,13 +1767,22 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
         numStamps = self._stampDB.countStampsForEntity(entityId)
-
         popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+
+        # If for some reason popularStampIds doesn't include all stamps, recalculate them
+        if numStamps < 1000 and len(popularStampIds) < numStamps:
+            logs.warning("Recalculating stamp stats for entityId=%s" % entityId)
+            allStampIds = self._stampDB.getStampIdsForEntity(entityId)
+            for stampId in allStampIds:
+                if stampId not in popularStampIds:
+                    stat = self.updateStampStatsAsync(stampId)
+            popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
-        logs.info('Popular User Ids: %s' % popularUserIds)
+        logs.debug('Popular User Ids: %s' % popularUserIds)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
@@ -2235,21 +2244,8 @@ class StampedAPI(AStampedAPI):
 
 
         # Add image to stamp
-        if imageData is not None:
-            raise NotImplementedError()
-            """
-            if image_url is not None:
-                raise StampedInputError("either an image may be uploaded with the stamp itself or an " +
-                                 "external image may be referenced, but not both")
-
-            ### TODO: Rollback: Delete Image
-            image     = self._imageDB.getImage(imageData)
-            image_url = self._imageDB.addStampImage(stamp.stamp_id, image)
-
-            image_width, image_height = image.size
-            """
-        elif imageUrl is not None:
-            ### TODO: Ensure external image exists
+        if imageUrl is not None:
+            ### TODO: Verify external image exists via head request?
             """
             # TODO:
             response = utils.getHeadRequest(image_url)
@@ -2442,10 +2438,10 @@ class StampedAPI(AStampedAPI):
 
 
     @API_CALL
-    def addResizedStampImagesAsync(self, imageUrl, stampId, content_id):
+    def addResizedStampImagesAsync(self, imageUrl, stampId, contentId):
         assert imageUrl is not None, "stamp image url unavailable!"
 
-        max_size = (960, 960)
+        maxSize = (960, 960)
         supportedSizes   = {
             '-ios1x'  : (200, None),
             '-ios2x'  : (400, None),
@@ -2453,41 +2449,29 @@ class StampedAPI(AStampedAPI):
             '-mobile' : (572, None),
             }
 
-
-        # get stamp using stamp_id
+        # Get stamp using stampId
         stamp = self._stampDB.getStamp(stampId)
-        # find the blurb using the content_id and update the images field
+
+        # Find the blurb using the contentId to generate an imageId
         for i, c in enumerate(stamp.contents):
-            if c.content_id == content_id:
-
+            if c.content_id == contentId:
                 imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
-                # Add image dimensions to stamp object
-                image = ImageSchema()
-
-                images = c.images
-                if images is None:
-                    images = ()
-                sizes = []
-                for k,v in supportedSizes.iteritems():
-                    size            = ImageSizeSchema()
-                    size.url        = 'http://stamped.com.static.images.s3.amazonaws.com/stamps/%s%s.jpg' % (imageId, k)
-                    size.width      = v[0]
-                    size.height     = v[1] if v[1] is not None else v[0]
-                    sizes.append(size)
-                image.sizes = sizes
-                images += (image,)
-                c.images = images
-
-                # update the actual stamp content, then update the db
-                contents = list(stamp.contents)
-                contents[i] = c
-                stamp.contents = contents
-                self._stampDB.updateStamp(stamp)
+                contentsKey = i
                 break
         else:
             raise StampedInputError('Could not find stamp blurb for image resizing')
 
-        self._imageDB.addResizedStampImages(imageUrl, imageId, max_size, supportedSizes)
+        # Generate image
+        sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
+        sizes.sort(key=lambda x: x.height, reverse=True)
+        image = ImageSchema()
+        image.sizes = sizes
+
+        # Update stamp contents with sizes
+        contents = list(stamp.contents)
+        contents[contentsKey].images = [ image ] # Note: assumes only one image can exist
+        stamp.contents = contents
+        self._stampDB.updateStamp(stamp)
 
 
     @API_CALL
@@ -2757,25 +2741,6 @@ class StampedAPI(AStampedAPI):
         # TODO: if authUserId == stamp.user.user_id, then the privacy should be disregarded
         if stamp.user.privacy == True:
             raise StampedPermissionsError("Insufficient privileges to view stamp")
-
-        return stamp
-
-    @API_CALL
-    def updateStampImage(self, authUserId, stampId, data):
-        stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
-
-        # Verify user has permission to add image
-        if stamp.user.user_id != authUserId:
-            raise StampedPermissionsError("Insufficient privileges to update stamp image")
-
-        image = self._imageDB.getImage(data)
-        self._imageDB.addStampImage(stampId, image)
-
-        # Add image dimensions to stamp object (width,height)
-        width, height           = image.size
-        stamp.image_dimensions  = "%s,%s" % (width, height)
-        stamp                   = self._stampDB.updateStamp(stamp)
 
         return stamp
 

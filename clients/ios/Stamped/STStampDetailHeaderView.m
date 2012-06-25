@@ -42,6 +42,10 @@
         UIImage* arrowImage;
         UIColor* titleColor;
         UIColor* subtitleColor;
+        UIImage* categoryImage = [Util categoryIconForCategory:_stamp.entity.category
+                                                   subcategory:_stamp.entity.subcategory
+                                                        filter:nil
+                                                       andSize:STCategoryIconSize9];
         
         if (i == 0) {
             arrowImage = [UIImage imageNamed:@"TEMP_eDetailBox_arrow_right"];
@@ -49,6 +53,7 @@
             titleColor = [UIColor stampedBlackColor];
             subtitleColor = [UIColor stampedGrayColor];
             view.backgroundColor = [UIColor clearColor];
+            categoryImage = [Util gradientImage:categoryImage withPrimaryColor:@"b2b2b2" secondary:@"b2b2b2" andStyle:STGradientStyleVertical];
         }
         else {
             arrowImage = [UIImage imageNamed:@"TEMP_eDetailBox_arrow_right"];
@@ -56,6 +61,7 @@
             titleColor = [UIColor whiteColor];
             subtitleColor = [UIColor whiteColor];
             [Util addGradientToLayer:view.layer withColors:[UIColor stampedBlueGradient] vertical:YES];
+            categoryImage = [Util whiteMaskedImageUsingImage:categoryImage];
         }
         
         UIFont* titleFont = [UIFont stampedTitleFontWithSize:32];
@@ -81,7 +87,6 @@
         [view addSubview:subtitleView];
         
         
-        UIImage* categoryImage = [Util imageForCategory:self.stamp.entity.category];
         UIImageView* categoryView = [[[UIImageView alloc] initWithImage:categoryImage] autorelease];
         [Util reframeView:categoryView withDeltas:CGRectMake(15,
                                                              43,

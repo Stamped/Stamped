@@ -74,10 +74,10 @@
 }
 
 - (void)setupWithItem:(id)item {
-
     _titleLabel.text = [item title];
     _detailTitleLabel.text = [item subtitle];
-    _imageView.image = [Util imageForCategory:[item category]];
+    UIImage* rawImage = [Util categoryIconForCategory:[item category] subcategory:nil filter:nil andSize:STCategoryIconSize9];
+    _imageView.image = [Util gradientImage:rawImage withPrimaryColor:@"b2b2b2" secondary:@"b2b2b2" andStyle:STGradientStyleVertical];
     [self setNeedsLayout];
 
 }

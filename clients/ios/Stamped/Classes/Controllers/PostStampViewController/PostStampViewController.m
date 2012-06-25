@@ -115,10 +115,10 @@
         [view release];        
     }
     
+    
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
     self.navigationItem.rightBarButtonItem = button;
     [button release];
-    
     [self reloadDataSource];
     
 }
@@ -137,8 +137,7 @@
 #pragma mark - Actions
 
 - (void)done:(id)sender {
-    
-    [self dismissModalViewControllerAnimated:YES];
+    [[Util sharedNavigationController] popToRootViewControllerAnimated:YES];
     
 }
 

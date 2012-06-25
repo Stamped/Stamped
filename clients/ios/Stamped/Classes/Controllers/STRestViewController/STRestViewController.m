@@ -450,7 +450,8 @@
                 label.font = [UIFont boldSystemFontOfSize:15];
                 label.backgroundColor = [UIColor clearColor];
                 label.textColor = [UIColor grayColor];
-                label.text = NSLocalizedString(@"No results.", @"No results.");
+                label.text = @"";
+                //label.text = NSLocalizedString(@"No results.", @"No results.");
                 [label sizeToFit];
                 [_searchResultsTableView addSubview:label];
                 _searchNoResultsLabel = label;
@@ -596,6 +597,10 @@
     
 }
 
+- (void)setShowSearchTable:(BOOL)visible {
+    _searchOverlay.hidden = !visible;
+    _searchResultsTableView.hidden = visible;
+}
 
 #pragma mark - UIKeyboard Notfications
 

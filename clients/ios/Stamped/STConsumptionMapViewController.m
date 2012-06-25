@@ -263,7 +263,12 @@ NSInteger zoom;
 }
 
 - (UIView *)loadToolbar {
-    return self.consumptionToolbar;
+    if (LOGGED_IN) {
+        return self.consumptionToolbar;
+    }
+    else {
+        return nil;
+    }
 }
 
 
@@ -415,7 +420,7 @@ NSInteger zoom;
         [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
     }
 }
- 
+
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
     if (![annotation isKindOfClass:[STEntityAnnotation class]])
         return nil;
@@ -606,9 +611,9 @@ NSInteger zoom;
     [STConfiguration addFlag:NO forKey:_cacheOverlayKey];
     
     [STConfiguration addString:@"Restaurants" forKey:_restaurantNameKey];
-   
+    
     [STConfiguration addString:@"Bars" forKey:_barNameKey];
-   
+    
     [STConfiguration addString:@"Cafes" forKey:_cafeNameKey];
 }
 
@@ -734,13 +739,13 @@ NSInteger zoom;
             scope = @"inbox";
         }
         else if (self.scope == STStampedAPIScopeEveryone) {
-            scope = @"everyone";
+            scope = @"popular";
         }
         slice.scope = scope;
-        //slice.subcategory = self.subcategory;
+        slice.subcategory = self.subcategory;
         slice.filter = self.filter;
         slice.query = self.query;
-       
+        
         slice.viewport = [NSString stringWithFormat:@"%f,%f,%f,%f", 
                           actualFrame.origin.y + actualFrame.size.height,
                           actualFrame.origin.x,

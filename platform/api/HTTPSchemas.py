@@ -332,7 +332,7 @@ class HTTPTextReference(Schema):
 class HTTPAccount(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
         cls.addProperty('email',                            basestring, required=True)
@@ -505,7 +505,7 @@ class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
-        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('user_id',                          basestring, cast=validateUserId)
         cls.addProperty('screen_name',                      basestring)
         cls.addProperty('name',                             basestring)
         cls.addProperty('token',                            basestring)
@@ -617,7 +617,7 @@ class HTTPAPNSToken(Schema):
 class HTTPUserId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('user_id',                          basestring, cast=validateUserId)
         cls.addProperty('screen_name',                      basestring, cast=validateScreenName)
 
 class HTTPUserIds(Schema):
@@ -636,9 +636,9 @@ class HTTPUserSearch(Schema):
 class HTTPUserRelationship(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id_a',                        basestring)
+        cls.addProperty('user_id_a',                        basestring, cast=validateUserId)
         cls.addProperty('screen_name_a',                    basestring, cast=validateScreenName)
-        cls.addProperty('user_id_b',                        basestring)
+        cls.addProperty('user_id_b',                        basestring, cast=validateUserId)
         cls.addProperty('screen_name_b',                    basestring, cast=validateScreenName)
 
 class HTTPFindUser(Schema):
@@ -694,7 +694,7 @@ class HTTPCategoryDistribution(Schema):
 class HTTPUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
@@ -778,7 +778,7 @@ class HTTPSuggestedUser(HTTPUser):
 class HTTPUserMini(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('color_primary',                    basestring, cast=validateHexColor)
@@ -858,7 +858,7 @@ class HTTPComment(Schema):
 class HTTPCommentNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True, cast=validateStampId)
         cls.addProperty('blurb',                            basestring, required=True)
 
 class HTTPCommentId(Schema):
@@ -2106,7 +2106,7 @@ class HTTPTimeSlice(Schema):
         cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
-        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('user_id',                          basestring, cast=validateUserId)
         cls.addProperty('scope',                            basestring, cast=validateScope, required=True) 
 
     def exportTimeSlice(self):
@@ -2163,7 +2163,7 @@ class HTTPSearchSlice(Schema):
         cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
-        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('user_id',                          basestring, cast=validateUserId)
         cls.addProperty('scope',                            basestring, cast=validateScope)
         cls.addProperty('query',                            basestring, required=True)
 
@@ -2210,7 +2210,7 @@ class HTTPRelevanceSlice(Schema):
         cls.addProperty('viewport',                         basestring, cast=validateViewport)
 
         # Scope
-        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('user_id',                          basestring, cast=validateUserId)
         cls.addProperty('scope',                            basestring, cast=validateScope)
 
     def exportRelevanceSlice(self):
@@ -2244,7 +2244,7 @@ class HTTPCommentSlice(Schema):
         cls.addProperty('offset',                           int)
 
         # Scope
-        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('stamp_id',                         basestring, cast=validateStampId)
 
     def exportBefore(self):
         if self.before is not None:
@@ -2353,7 +2353,7 @@ class HTTPStampContent(Schema):
 class HTTPBadge(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id',                          basestring, required=True)
+        cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('genre',                            basestring, required=True)
 
 class HTTPStampMini(Schema):
@@ -2555,14 +2555,14 @@ class HTTPStampNew(Schema):
 class HTTPStampEdit(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',                         basestring, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True, cast=validateStampId)
         cls.addProperty('blurb',                            basestring)
         cls.addProperty('credits',                          basestring) # comma-separated screen names
 
 class HTTPStampId(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('stamp_id',                         basestring, cast=validateStampId)
 
 class HTTPStampRef(Schema):
     @classmethod
@@ -2649,7 +2649,7 @@ class HTTPTodoNew(Schema):
     def setSchema(cls):
         cls.addProperty('entity_id',                        basestring)
         cls.addProperty('search_id',                        basestring)
-        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('stamp_id',                         basestring, cast=validateStampId)
 
 class HTTPTodoComplete(Schema):
     @classmethod

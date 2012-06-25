@@ -13,4 +13,6 @@
 
 @interface STActionsViewFactory : STAEntityDetailComponentFactory
 
++ (UIView*)moreInformationEntityDetail:(id<STEntityDetail>)entityDetail andDelegate:(id<STViewDelegate>)delegate;
+
 @end
