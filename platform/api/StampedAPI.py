@@ -607,6 +607,10 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
 
+#        for k,v in fields.iteritems():
+#            if v == '':
+#                fields[k] = None
+
         if 'screen_name' in fields and account.screen_name != fields['screen_name']:
             old_screen_name = account.screen_name
             account.screen_name = fields['screen_name']
@@ -654,6 +658,7 @@ class StampedAPI(AStampedAPI):
         if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
             account.color_secondary = fields['color_secondary']
         if 'temp_image_url' in fields:
+            logs.info('### changing profile image')
             user = self._userDB.getUser(authUserId)
             screen_name = user.screen_name
             image_cache = datetime.utcnow()
@@ -664,45 +669,45 @@ class StampedAPI(AStampedAPI):
         return self._accountDB.updateAccount(account)
 
 
-    @API_CALL
-    def updateAccountSettings(self, authUserId, data):
-
-        ### TODO: Reexamine how updates are done
-        ### TODO: Verify that email address is unique, confirm it
-
-        account = self._accountDB.getAccount(authUserId)
-
-        old_screen_name = account.screen_name
-
-        # Import each item
-        for k, v in data.iteritems():
-            if k == 'password':
-                v = convertPasswordForStorage(v)
-            setattr(account, k, v)
-
-        ### TODO: Carve out "validate account" function
-
-        # Validate Screen Name
-        account.screen_name = account.screen_name.strip()
-        if not utils.validate_screen_name(account.screen_name):
-            raise StampedInputError("Invalid format for screen name")
-
-        # Check blacklist
-        if account.screen_name.lower() in Blacklist.screen_names:
-            raise StampedInputError("Blacklisted screen name")
-
-        # Validate email address
-        if account.email is not None:
-            account.email = str(account.email).lower().strip()
-            if not utils.validate_email(account.email):
-                raise StampedInputError("Invalid format for email address")
-
-        self._accountDB.updateAccount(account)
-
-        # Asynchronously update profile picture link if screen name has changed
-        if account.screen_name.lower() != old_screen_name.lower():
-            tasks.invoke(tasks.APITasks.changeProfileImageNameAsync, args=[
-                         old_screen_name.lower(), account.screen_name.lower()])
+#    @API_CALL
+#    def updateAccountSettings(self, authUserId, data):
+#
+#        ### TODO: Reexamine how updates are done
+#        ### TODO: Verify that email address is unique, confirm it
+#
+#        account = self._accountDB.getAccount(authUserId)
+#
+#        old_screen_name = account.screen_name
+#
+#        # Import each item
+#        for k, v in data.iteritems():
+#            if k == 'password':
+#                v = convertPasswordForStorage(v)
+#            setattr(account, k, v)
+#
+#        ### TODO: Carve out "validate account" function
+#
+#        # Validate Screen Name
+#        account.screen_name = account.screen_name.strip()
+#        if not utils.validate_screen_name(account.screen_name):
+#            raise StampedInputError("Invalid format for screen name")
+#
+#        # Check blacklist
+#        if account.screen_name.lower() in Blacklist.screen_names:
+#            raise StampedInputError("Blacklisted screen name")
+#
+#        # Validate email address
+#        if account.email is not None:
+#            account.email = str(account.email).lower().strip()
+#            if not utils.validate_email(account.email):
+#                raise StampedInputError("Invalid format for email address")
+#
+#        self._accountDB.updateAccount(account)
+#
+#        # Asynchronously update profile picture link if screen name has changed
+#        if account.screen_name.lower() != old_screen_name.lower():
+#            tasks.invoke(tasks.APITasks.changeProfileImageNameAsync, args=[
+#                         old_screen_name.lower(), account.screen_name.lower()])
 
         return account
 
