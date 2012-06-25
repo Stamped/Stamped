@@ -387,6 +387,10 @@ class PlaceSearchResultCluster(SearchResultCluster):
             if distance_in_km > 10:
                 # print "CRAPPING OUT"
                 return CompareResult.unknown()
+
+            # Min of 0.01m away.
+            distance_in_km = max(distance_in_km, 0.01)
+
             # .08 if 1km apart, .35 if 0.1km, 0.622 if 0.01km.
             similarity_score += math.log(1.0 / distance_in_km, 5000)
             compared_locations = True
