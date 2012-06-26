@@ -16,15 +16,6 @@ class TrackSearchTests(ASearchTestSuite):
     def test_basic(self):
         """ Test basic track searches """
         
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = [
             ({ 'query' : 'Simple As...', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='simple as...', 
@@ -72,20 +63,11 @@ class TrackSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_track_album_artist_combos(self):
         """ Test track searches also containing the artist and/or album name """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = [
             ({ 'query' : 'to look like you john butler trio april uprising', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='to look like you',    types='track', 
@@ -165,20 +147,11 @@ class TrackSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_international(self):
         """ Test international track support.  """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = [
             ({ 'query' : 'katy perry part of me', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='part of me', 
@@ -218,7 +191,7 @@ class TrackSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_top_tracks(self):
         """ Test the top tracks from iTunes """
@@ -247,15 +220,6 @@ class TrackSearchTests(ASearchTestSuite):
     '''
     
     def __test_tracks(self, tracks):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = []
         
         for track in tracks:
@@ -285,7 +249,7 @@ class TrackSearchTests(ASearchTestSuite):
                 utils.printException()
             """
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
 
 if __name__ == '__main__':
     StampedTestRunner().run()

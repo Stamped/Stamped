@@ -62,31 +62,37 @@ class EntitySearch(object):
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
         sources_seen = set()
-        logs.debug("RESTARTING")
+        #logs.debug("RESTARTING")
         while True:
             try:
                 elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
+
+                if elapsed_seconds >= 20:
+                    logs.warning('Search completely timed out at 20s!')
+                    pool.kill()
+                    return
+
                 for (source, results) in resultsDict.items():
                     if source in sources_seen:
                         continue
-                    logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                    #logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
                     sources_seen.add(source)
-                    logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
+                    #logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
                     # If a source returns at least 5 results, we assume we got a good result set from it. If it
                     # returns less, we're more inclined to wait for straggling sources.
                     total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
-                    logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
+                    #logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
                     total_potential_value_outstanding -= sources_to_priorities[source]
-                logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
-                        elapsed_seconds, total_value_received, total_potential_value_outstanding
-                    ))
+                #logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+                #        elapsed_seconds, total_value_received, total_potential_value_outstanding
+                #    ))
             except Exception:
                 logs.warning('TERMINATE_WARNING SHIT IS FUCKED')
                 logs.report()
                 raise
 
             if total_potential_value_outstanding <= 0:
-                logs.debug('ALL SOURCES DONE')
+                #logs.debug('ALL SOURCES DONE')
                 return
 
             if total_value_received:
@@ -128,11 +134,11 @@ class EntitySearch(object):
             resultsDict[source] = []
         after = datetime.datetime.now()
         timesDict[source] = after - before
-        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
-            source.sourceName, str(after - before), len(resultsDict.get(source, []))
-        ))
+        #logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
+        #    source.sourceName, str(after - before), len(resultsDict.get(source, []))
+        #))
 
-    def search(self, category, text, timeout=None, limit=10, **queryParams):
+    def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -145,42 +151,41 @@ class EntitySearch(object):
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, **queryParams)
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
         pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
-        logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
+        #logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
-        logs.debug("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
+        #logs.debug("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
 
-        logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
-        logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
+        #logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
+        #logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
         for source in self.__all_sources:
             if source in results and results[source]:
-                logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
+                #logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
                 for result in results[source]:
                     #print unicode(result).encode('utf-8'), "\n\n"
                     pass
 
-        logs.debug("DEDUPING")
+        #logs.debug("DEDUPING")
         beforeDeduping = datetime.datetime.now()
         dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
         afterDeduping = datetime.datetime.now()
-        logs.debug("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
-        logs.debug("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
-        logs.debug("ELAPSED:" + str(afterDeduping - start))
+        #logs.debug("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
+        #logs.debug("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
+        #logs.debug("ELAPSED:" + str(afterDeduping - start))
 
-        logs.debug("\n\nDEDUPED RESULTS\n\n")
-        for dedupedResult in dedupedResults[:limit]:
-            logs.debug("\n\n%s\n\n" % str(dedupedResult))
+        #logs.debug("\n\nDEDUPED RESULTS\n\n")
+        #for dedupedResult in dedupedResults[:limit]:
+        #    logs.debug("\n\n%s\n\n" % str(dedupedResult))
+
 
         return dedupedResults[:limit]
 
 
-    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
-        if queryLatLng:
-            queryParams['queryLatLng'] = queryLatLng
+    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
         stampedSource = StampedSource()
-        clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
+        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
         entityResults = []
         for cluster in clusters:
             entityId = None
@@ -233,9 +238,9 @@ def main():
     
     queryParams = {}
     if options.latlng:
-        queryParams['queryLatLng'] = options.latlng.split(',')
+        queryParams['coords'] = options.latlng.split(',')
     elif options.address:
-        queryParams['queryLatLng'] = Geocoder().addressToLatLng(options.address)
+        queryParams['coords'] = Geocoder().addressToLatLng(options.address)
 
     if len(args) < 2 or args[0] not in Entity.categories:
         categories = '[ %s ]' % (', '.join(Entity.categories))

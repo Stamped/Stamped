@@ -749,7 +749,7 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query)
 
-    def searchLite(self, queryCategory, queryText, timeout=None, **queryParams):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         simplifiedText = queryText.lower()
         if queryCategory == 'film':
             query = {

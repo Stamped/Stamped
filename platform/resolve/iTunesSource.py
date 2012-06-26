@@ -888,7 +888,7 @@ class iTunesSource(GenericSource):
         except Exception:
             logs.report()
 
-    def searchLite(self, queryCategory, queryText, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         if queryCategory not in ('music', 'film', 'app', 'book'):
             raise NotImplementedError()
 
