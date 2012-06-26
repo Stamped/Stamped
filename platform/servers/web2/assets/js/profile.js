@@ -663,7 +663,8 @@ var g_update_stamps = null;
                             console.debug(response);
                             console.debug(xhr);
                             
-                            //alert("TODO: handle AJAX and backend errors gracefuly");
+                            alert("TODO: handle AJAX and backend errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
+                            
                             return;
                         }
                         
