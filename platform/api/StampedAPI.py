@@ -2882,6 +2882,10 @@ class StampedAPI(AStampedAPI):
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
         account = self.getAccount(authUserId)
 
+        # for now, only post to open graph for mike and kevin
+        if account.user_id not in ['ml', 'kevin']:
+            return
+
         logs.info('######')
         import pprint
         logs.info(pprint.pformat(account))
