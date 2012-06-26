@@ -3199,9 +3199,9 @@ class HTTPActivity(Schema):
                     'news_watch_group',
                 ])
 
-                if 'news_%s_group' % (self.source) in actionIcons:
+                if 'news_%s_group' % (self.source) in actionGroupIcons:
                     self.image = _getIconURL('news_%s_group' % (self.source))
-                elif 'news_%s_group' % (self.verb[7:]) in actionIcons:
+                elif 'news_%s_group' % (self.verb[7:]) in actionGroupIcons:
                     self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
                 else:
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
