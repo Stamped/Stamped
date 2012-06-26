@@ -1970,13 +1970,15 @@ var g_update_stamps = null;
                 var href  = $this.attr('href');
                 
                 var popup_options = get_fancybox_options({
-                    href            : href, 
-                    type            : "ajax", 
-                    maxWidth        : 366, 
-                    scrolling       : 'no', 
+                    href        : href, 
+                    type        : "ajax", 
+                    scrolling   : 'no', 
+                    wrapCSS     : '', 
+                    closeBtn    : false, 
+                    padding     : 0, 
                     
-                    afterShow       : function() {
-                        // TODO: why is this scrollbar not scrolling the entire content area?
+                    afterShow   : function() {
+                        // TODO: why is this scrollbar not scrolling the content area?
                         $('.popup-body').jScrollPane();
                     }
                 });

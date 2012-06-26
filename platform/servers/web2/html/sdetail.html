@@ -79,7 +79,7 @@
                                                 
                                                 {% if stamp.previews.likes|length > 3 %}
                                                     <a class="user-preview expand expand-likes" href="/popups/likes.html?stamp_id={{stamp.stamp_id}}">
-                                                        <div class="context-popup">Expand likes...</div>
+                                                        <div class="context-popup">Expand {{stamp.num_likes}} likes...</div>
                                                         <div class='user-preview-icon'></div>
                                                     </a>
                                                 {% endif %}
@@ -97,7 +97,7 @@
                                                 
                                                 {% if stamp.previews.todos|length > 3 %}
                                                     <a class="user-preview expand expand-todos" href="/popups/todos.html?stamp_id={{stamp.stamp_id}}">
-                                                        <div class="context-popup">Expand todos...</div>
+                                                        <div class="context-popup">Expand {{stamp.num_todos}} todos...</div>
                                                         <div class='user-preview-icon'></div>
                                                     </a>
                                                 {% endif %}
