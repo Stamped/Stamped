@@ -3016,7 +3016,6 @@ class HTTPActivity(Schema):
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
-
         elif self.verb == 'todo':
             _addEntityObjects()
 
@@ -3050,9 +3049,15 @@ class HTTPActivity(Schema):
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
-            self.icon = _getIconURL('news_comment')
+
+            if activity.personal:
+                self.icon = _getIconURL('news_comment')
 
         elif self.verb == 'reply':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+                
             _addStampObjects()
             _addCommentObjects()
 
@@ -3068,6 +3073,10 @@ class HTTPActivity(Schema):
             self.icon = _getIconURL('news_reply')
 
         elif self.verb == 'mention':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+
             _addStampObjects()
             _addCommentObjects()
 
@@ -3090,10 +3099,18 @@ class HTTPActivity(Schema):
             self.icon = _getIconURL('news_mention')
 
         elif self.verb.startswith('friend_'):
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+                
             self.icon = _getIconURL('news_friend')
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+                
             _addStampObjects()
 
             if self.source is not None:
