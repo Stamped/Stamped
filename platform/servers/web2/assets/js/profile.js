@@ -402,6 +402,7 @@ var g_update_stamps = null;
                 closeSpeed      : 300, 
                 
                 tpl             : {
+				    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
                     closeBtn    : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
                 }, 
                 
