@@ -201,7 +201,7 @@ class Schema(object):
         return str(self)
 
     def __str__(self):
-        return '<%s %s>' % (self.__class__.__name__, json.dumps(self.dataExport(), sort_keys=True))
+        return '<%s %s>' % (self.__class__.__name__, self.dataExport())
 
     def __unicode__(self):
         return u'<%s %s>' % (self.__class__.__name__, self.dataExport())

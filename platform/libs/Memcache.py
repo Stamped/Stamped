@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json
+import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json, datetime
 
 from schema import Schema
 
@@ -180,7 +180,8 @@ def memcached_function(time=0, min_compress_len=0):
             def encode_arg(arg):
                 if isinstance(arg, Schema):
                     # Convert to JSON to efficiently convert to string / sort by keys
-                    return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'))
+                    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
+                    return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
                 else:
                     # Convert any unicode characters to string representation
                     return unicode(arg).encode('utf8')
