@@ -437,7 +437,7 @@ var g_update_stamps = null;
                 }
             }
             
-            return options;
+            return output;
         };
         
         var get_fancybox_popup_options = function(options) {
