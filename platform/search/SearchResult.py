@@ -30,7 +30,6 @@ class SearchResult(object):
         return self
 
     def __repr__(self):
-        scoreDetails = ''
-        # scoreDetails = '\n'.join(['  %s: %f' % componentInfo for componentInfo in self.__scoreDebugInfo])
+        scoreDetails = '\n'.join(['  %s: %f' % componentInfo for componentInfo in self.__scoreDebugInfo])
         return 'Score: %f\nSource: %s\nScore details: %s\nResult:\n%s' % \
                (self.score, self.resolverObject.source, scoreDetails, indentText(str(self.resolverObject), 4))
