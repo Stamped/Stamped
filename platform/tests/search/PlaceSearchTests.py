@@ -14,16 +14,7 @@ class PlaceSearchTests(ASearchTestSuite):
     
     def test_basic(self):
         """ Test basic place searches """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         """
         TODO:
             * target national search
@@ -234,7 +225,7 @@ class PlaceSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args, test_coords=False)
+        self._run_tests(tests, {}, test_coords=False)
 
 if __name__ == '__main__':
     StampedTestRunner().run()
