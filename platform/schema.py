@@ -5,11 +5,8 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals
-import copy
-import pprint
-import logs
-import utils
+import Globals, logs, utils
+import copy, json, pprint
 
 class SchemaException(Exception):
     pass
@@ -204,7 +201,7 @@ class Schema(object):
         return str(self)
 
     def __str__(self):
-        return '<%s %s>' % (self.__class__.__name__, self.dataExport())
+        return '<%s %s>' % (self.__class__.__name__, json.dumps(self.dataExport(), sort_keys=True))
 
     def __unicode__(self):
         return u'<%s %s>' % (self.__class__.__name__, self.dataExport())

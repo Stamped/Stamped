@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, logs, utils, pylibmc
+import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json
 
 from schema import Schema
 
@@ -164,26 +164,32 @@ def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
 
-        ### 6/7/12 (Kevin): Disabling this for now, since it's causing issues with iTunes. 
-        """
         key_prefix = user_function.func_name
 
         @functools.wraps(user_function)
-        def wrapper(*args, **kwds):
+        def wrapper(*args, **kwargs):
             # note: treat args[0] specially (self)
             self  = args[0].__class__.__name__
             args2 = args[1:]
             cache = __global_memcache()
             mark  = ';'
             
-            # cache key records both positional and keyword args
+            # Cache key records both positional and keyword args
             key   = "%s::%s(" % (self, key_prefix)
             
-            if len(args2) > 0:
-                key += mark.join(map(str, args2))
+            def encode_arg(arg):
+                if isinstance(arg, Schema):
+                    # Convert to JSON to efficiently convert to string / sort by keys
+                    return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'))
+                else:
+                    # Convert any unicode characters to string representation
+                    return arg.encode('utf8')
+
+            if len(args) > 0:
+                key += mark.join(map(encode_arg, args2))
             
-            if kwds:
-                suffix = mark.join(('%s=%s' % kv for kv in sorted(kwds.items())))
+            if kwargs:
+                suffix = mark.join(('%s=%s' % (k, encode_arg(v)) for k, v in sorted(kwargs.items())))
                 
                 if len(args2) > 0 and not key.endswith(mark):
                     key += "%s%s" % (mark, suffix)
@@ -191,6 +197,8 @@ def memcached_function(time=0, min_compress_len=0):
                     key += suffix
             
             key += ')'
+
+            logs.debug("Memcached Key: %s" % key)
             
             # get cache entry or compute if not found
             store   = False
@@ -208,7 +216,7 @@ def memcached_function(time=0, min_compress_len=0):
                 store = False
             
             if compute:
-                result = user_function(*args, **kwds)
+                result = user_function(*args, **kwargs)
                 wrapper.misses += 1
             
             if store:
@@ -218,7 +226,7 @@ def memcached_function(time=0, min_compress_len=0):
                     try:
                         cache_set(key, result, time=time, min_compress_len=min_compress_len)
                     except Exception, e:
-                        logs.warn(str(e))
+                        logs.warning(str(e))
             
             return result
         
@@ -234,12 +242,13 @@ def memcached_function(time=0, min_compress_len=0):
         
         return wrapper
         """
-
+        # Temporary replacement to nullify actions
         @functools.wraps(user_function)
         def wrapper(*args, **kwargs):
             return user_function(*args, **kwargs)
 
         return wrapper
+        """
     
     return decorating_function
 
