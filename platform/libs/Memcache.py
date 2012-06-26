@@ -59,8 +59,6 @@ class Memcache(object):
             self._client.flush_all()
     
     def set(self, key, value, *args, **kwargs):
-        value = self._import_value(value)
-        
         try:
             self._client.set(key, value, *args, **kwargs)
         except Exception, e:
@@ -73,11 +71,11 @@ class Memcache(object):
     
     def __setitem__(self, key, value):
         if self._client:
-            self._client[key] = self._import_value(value)
+            self._client[key] = value
     
     def __getitem__(self, key):
         if self._client:
-            return self._export_value(self._client[key])
+            return self._client[key]
 
         raise KeyError(key)
 
@@ -90,42 +88,6 @@ class Memcache(object):
             return key in self._client
         
         return False
-    
-    def _import_value(self, value):
-        """
-            returns a custom, pickleable version of the given value for storage
-            within memcached.
-        """
-        
-        if isinstance(value, Schema):
-            return {
-                "__schema__" : value.__class__, 
-                "__value__"  : value.dataExport(), 
-            }
-        elif isinstance(value, (list, tuple)):
-            value = map(self._import_value, value)
-        elif isinstance(value, dict):
-            value = dict(map(lambda (k, v): (k, self._import_value(v)), value.iteritems()))
-        
-        return value
-    
-    def _export_value(self, value):
-        """
-            converts the custom, pickleable version of the given value stored 
-            within memcached into our own, pythonic version that is returned.
-        """
-        
-        if isinstance(value, dict):
-            if '__schema__' in value and '__value__' in value:
-                # reinstantiate the Schema subclass with its prior data
-                return value['__schema__']().dataImport(value['__value__'])
-            else:
-                return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
-        elif isinstance(value, (list, tuple)):
-            value = map(self._export_value, value)
-            return value
-        else:
-            return value
     
     def __str__(self):
         if self._client:
