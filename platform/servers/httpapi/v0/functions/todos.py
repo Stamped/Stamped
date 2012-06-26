@@ -46,7 +46,7 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPTodoTimeSlice,
                    conversion=HTTPTodoTimeSlice.exportTimeSlice)
 @require_http_methods(["GET"])
-def show(request, authUserId, schema, **kwargs):
+def collection(request, authUserId, schema, **kwargs):
     todos = stampedAPI.getTodos(authUserId, schema)
 
     result = []
