@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs, gevent
+import sys, datetime, logs, gevent, utils
 from api                        import Entity
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
@@ -25,6 +25,24 @@ from SearchResultDeduper        import SearchResultDeduper
 
 def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
+
+
+# Editable via command-line flags.
+shouldLogSourceResults = False
+shouldLogTiming = False
+shouldLogClusters = False
+
+def logClusterData(msg):
+    if shouldLogClusters:
+        logs.debug(msg)
+
+def logTimingData(msg):
+    if shouldLogTiming:
+        logs.debug(msg)
+
+def logSourceResultsData(msg):
+    if shouldLogSourceResults:
+        logs.debug(msg)
 
 
 class EntitySearch(object):
@@ -62,7 +80,6 @@ class EntitySearch(object):
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
         sources_seen = set()
-        #logs.debug("RESTARTING")
         while True:
             try:
                 elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
@@ -75,24 +92,23 @@ class EntitySearch(object):
                 for (source, results) in resultsDict.items():
                     if source in sources_seen:
                         continue
-                    #logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                    logTimingData('JUST NOW SEEING SOURCE: ' + source.sourceName)
                     sources_seen.add(source)
-                    #logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
                     # If a source returns at least 5 results, we assume we got a good result set from it. If it
                     # returns less, we're more inclined to wait for straggling sources.
                     total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
-                    #logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
+                    logTimingData('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
                     total_potential_value_outstanding -= sources_to_priorities[source]
-                #logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
-                #        elapsed_seconds, total_value_received, total_potential_value_outstanding
-                #    ))
+                logTimingData('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+                        elapsed_seconds, total_value_received, total_potential_value_outstanding
+                    ))
             except Exception:
                 logs.warning('TERMINATE_WARNING SHIT IS FUCKED')
                 logs.report()
                 raise
 
             if total_potential_value_outstanding <= 0:
-                #logs.debug('ALL SOURCES DONE')
+                logTimingData('ALL SOURCES DONE')
                 return
 
             if total_value_received:
@@ -112,6 +128,7 @@ class EntitySearch(object):
                         source.sourceName for source in sources_to_priorities.keys() if source not in sources_seen
                     ]
                     if sources_not_seen:
+                        # This is interesting information whether we want the full timing data logged or not.
                         log_template = 'QUITTING EARLY: At %f second elapsed, bailing on sources [%s] because with ' + \
                             'value received %f, value outstanding %f, marginal value %f, min marginal value %f'
                         logs.debug(log_template % (
@@ -134,9 +151,9 @@ class EntitySearch(object):
             resultsDict[source] = []
         after = datetime.datetime.now()
         timesDict[source] = after - before
-        #logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
-        #    source.sourceName, str(after - before), len(resultsDict.get(source, []))
-        #))
+        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
+            source.sourceName, str(after - before), len(resultsDict.get(source, []))
+        ))
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
@@ -154,31 +171,28 @@ class EntitySearch(object):
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
         pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
-        #logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
+        logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
-        #logs.debug("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
+        logTimingData("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
 
-        #logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
-        #logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
+        logTimingData('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
         for source in self.__all_sources:
             if source in results and results[source]:
-                #logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
+                logSourceResultsData("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
                 for result in results[source]:
-                    #print unicode(result).encode('utf-8'), "\n\n"
+                    logSourceResultsData(utils.normalize(repr(result)))
                     pass
 
-        #logs.debug("DEDUPING")
         beforeDeduping = datetime.datetime.now()
         dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
         afterDeduping = datetime.datetime.now()
-        #logs.debug("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
-        #logs.debug("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
-        #logs.debug("ELAPSED:" + str(afterDeduping - start))
+        logTimingData("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
+        logTimingData("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
+        logTimingData("ELAPSED:" + str(afterDeduping - start))
 
-        #logs.debug("\n\nDEDUPED RESULTS\n\n")
-        #for dedupedResult in dedupedResults[:limit]:
-        #    logs.debug("\n\n%s\n\n" % str(dedupedResult))
-
+        logClusterData("\n\nDEDUPED RESULTS\n\n")
+        for dedupedResult in dedupedResults[:limit]:
+            logClusterData("\n\n%s\n\n" % str(dedupedResult))
 
         return dedupedResults[:limit]
 
@@ -234,8 +248,19 @@ def main():
     parser = OptionParser(usage=usage, version=version)
     parser.add_option('--latlng', action='store', dest='latlng', default=None)
     parser.add_option('--address', action='store', dest='address', default=None)
+    parser.add_option('-t', '--log_timing', action='store_true', dest='log_timing', default=False)
+    parser.add_option('-r', '--log_source_results', action='store_true', dest='log_source_results', default=False)
+    parser.add_option('-c', '--log_clusters', action='store_true', dest='log_clusters', default=False)
     (options, args) = parser.parse_args()
-    
+
+    global shouldLogSourceResults
+    shouldLogSourceResults = options.log_source_results
+    global shouldLogTiming
+    shouldLogTiming = options.log_timing
+    global shouldLogClusters
+    shouldLogClusters = options.log_clusters
+
+
     queryParams = {}
     if options.latlng:
         queryParams['coords'] = options.latlng.split(',')
