@@ -1881,19 +1881,15 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
 .popup .popup-body {
   overflow: scroll;
   max-height: 300px;
+  width: 366px;
+  min-width: 366px;
 }
 .popup .popup-body:focus {
   outline: none;
 }
 .popup .popup-body .jspVerticalBar {
-  margin: 0 6px 0 24px;
+  margin: 0 6px;
   padding-top: 8px;
-  max-height: 284px !important;
-  height: 284px !important;
-}
-.popup .popup-body .jspVerticalBar .jspTrack {
-  max-height: 284px !important;
-  height: 284px !important;
 }
 .popup .popup-body .popup-body-inner .user {
   background-color: #fff;

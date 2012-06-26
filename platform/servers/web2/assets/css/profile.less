@@ -1786,22 +1786,16 @@ a.map-profile-link {
     .popup-body {
         overflow: scroll;
         max-height: 300px;
+        width: 366px;
+        min-width: 366px;
         
         &:focus {
             outline: none;
         }
         
         .jspVerticalBar {
-            margin: 0 6px 0 @padding;
-            padding-top:  8px;
-            
-            max-height: 284px !important;
-            height:     284px !important;
-            
-            .jspTrack {
-                max-height: 284px !important;
-                height:     284px !important;
-            }
+            margin: 0 6px;
+            padding-top: 8px;
         }
         
         .popup-body-inner {

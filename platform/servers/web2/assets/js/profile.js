@@ -450,14 +450,15 @@ var g_update_stamps = null;
                 minWidth    : 366, 
                 maxWidth    : 366, 
                 
-                afterShow   : function() {
-                    $('.popup-body').jScrollPane();
+                beforeShow  : function() {
+                    $('.popup-body').jScrollPane({
+                        verticalPadding : 8
+                    });
+                    
+                    $("html").css('overflow', 'hidden');
                 }, 
-                onStart     : function() {
-                    $("body,html").css('overflow', 'hidden');
-                }, 
-                onClosed    : function() {
-                    $("body,html").css('overflow', 'scroll');
+                beforeClose : function() {
+                    $("html").css('overflow-y', 'scroll');
                 }
             });
             
