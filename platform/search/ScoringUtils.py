@@ -15,8 +15,10 @@ def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dro
     """
     currScore = sourceScore
     scoredResults = []
-    for resolverObject in resolverObjectList:
-        scoredResults.append(SearchResult(currScore, resolverObject))
+    for rank, resolverObject in enumerate(resolverObjectList):
+        result = SearchResult(currScore, resolverObject)
+        result.addScoreComponentDebugInfo('Initial scoring for ranking at %d' % (rank + 1), currScore)
+        scoredResults.append(result)
         currScore *= dropoffFactor
     return scoredResults
 
