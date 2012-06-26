@@ -8,10 +8,6 @@
 
 var g_update_stamps = null;
 
-/* TODO:
-    * gallery infinite scroll doesn't reset properly
- */
-
 (function() {
     $(document).ready(function() {
         
@@ -663,7 +659,7 @@ var g_update_stamps = null;
                             console.debug(response);
                             console.debug(xhr);
                             
-                            alert("TODO: handle AJAX and backend errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
+                            alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
                             
                             return;
                         }

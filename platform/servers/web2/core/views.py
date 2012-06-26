@@ -330,9 +330,10 @@ def popup_likes(request, schema, **kwargs):
     users = stampedAPIProxy.getLikes(schema.dataExport())
     num_likes = len(users)
     
-    return stamped_render(request, 'popup-likes.html', {
-        'num_likes' : num_likes, 
-        'users'     : users, 
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : "%d Likes" % num_likes, 
+        'popup_class' : 'popup-likes', 
+        'users'       : users, 
     })
 
 @stamped_view(schema=HTTPStampId)
@@ -340,8 +341,9 @@ def popup_todos(request, schema, **kwargs):
     users = stampedAPIProxy.getTodos(schema.dataExport())
     num_todos = len(users)
     
-    return stamped_render(request, 'popup-todos.html', {
-        'num_todos' : num_todos, 
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : "%d Todos" % num_todos, 
+        'popup_class' : 'popup-todos', 
         'users'     : users, 
     })
 

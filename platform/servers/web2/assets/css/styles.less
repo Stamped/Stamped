@@ -785,3 +785,30 @@ footer .copyright a, footer .copyright a {
     .rounded(4px);
 }
 
+.close-button {
+    position: relative;
+    
+    border: 4px solid #bfbfbf;
+    width:  36px;
+    height: 36px;
+    .rounded(18px);
+    
+    .close-button-inner {
+        background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+        position: absolute;
+        top:  11px;
+        left: 11px;
+        
+        width:  14px;
+        height: 14px;
+    }
+    
+    &:hover {
+        border-color: #666;
+        
+        .close-button-inner {
+            background-position: -48px 0;
+        }
+    }
+}
+
