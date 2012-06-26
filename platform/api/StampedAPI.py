@@ -658,13 +658,10 @@ class StampedAPI(AStampedAPI):
         if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
             account.color_secondary = fields['color_secondary']
         if 'temp_image_url' in fields:
-            logs.info('### changing profile image')
-            user = self._userDB.getUser(authUserId)
-            screen_name = user.screen_name
-            image_cache = datetime.utcnow()
-            user.timestamp.image_cache = image_cache
-            self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
-            tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, fields['temp_image_url']])
+            image_cache_timestamp = datetime.utcnow()
+            account.timestamp.image_cache = image_cache_timestamp
+            self._accountDB.updateUserTimestamp(account.user_id, 'image_cache', image_cache_timestamp)
+            tasks.invoke(tasks.APITasks.updateProfileImage, args=[account.screen_name, fields['temp_image_url']])
 
         return self._accountDB.updateAccount(account)
 
