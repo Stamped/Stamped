@@ -115,20 +115,18 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             writeCompareEntity(entity, newEntity, outputDir, diffFileName)
 
             cellId = "diff" + str(i)
-            anchorTextTpl = """<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">
-                <a href="%s">%%s</a>
-            </td>""" % (cellId, cellId, cellId, diffFileName)
+            anchorTextTpl = '%s<a href="%s">%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName)
             linksLeft.append(anchorTextTpl % extractLinkText(entity))
             linksRightIndexed[destination] = anchorTextTpl % extractLinkText(newEntity)
         else:
-            linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i)))
+            linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), 'l%d' % i))
 
     linksRight = []
     for i, entity in enumerate(newResults):
         if i in linksRightIndexed:
             linksRight.append(linksRightIndexed[i])
         else:
-            linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i)))
+            linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), 'r%d' % i))
 
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
     for links in zip(linksLeft, linksRight):
@@ -146,14 +144,18 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     return (same, moved, addDrop), filenameBase + '.html'
 
 
-def writeSingleEntity(entity, outputDir, filename):
+def writeSingleEntity(entity, outputDir, filename, cellId):
     with open(path.join(outputDir, filename), 'w') as fout:
         # TODO(geoff): This doesn't produce proper HTML
         print >> fout, '<pre>'
         pprint.pprint(entity, fout)
         print >> fout, '</pre>'
-    return '<td><a href="%s">%s</a></td>' % (filename, extractLinkText(entity))
+    return '%s<a href="%s">%s</a></td>' % (
+            makeHighlightingTableCell(cellId), filename, extractLinkText(entity))
 
+
+def makeHighlightingTableCell(name):
+    return '<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">' % ((name,) * 3)
 
 def writeCompareEntity(left, right, outputDir, filename):
     leftLines = pprint.pformat(left).split('\n')
