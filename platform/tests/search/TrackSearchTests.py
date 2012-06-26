@@ -164,11 +164,12 @@ class TrackSearchTests(ASearchTestSuite):
             ({ 'query' : 'Ai Se Eu Te Pego', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='Ai Se Eu Te Pego', 
                                        types='track'), 
-            ]), 
-            ({ 'query' : '21 adele', 'category' : 'music', }, [ 
-                SearchResultConstraint(title='21', 
-                                       types='track'), 
-            ]), 
+            ]),
+            # 21 is totally not a track, I have no idea what's going on here.
+            #({ 'query' : '21 adele', 'category' : 'music', }, [
+            #    SearchResultConstraint(title='21',
+            #                           types='track'),
+            #]),
             ({ 'query' : 'i follow rivers lykke li', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='i follow rivers',     types='track'), 
                 SearchResultConstraint(title='i follow rivers',     types='album'), 

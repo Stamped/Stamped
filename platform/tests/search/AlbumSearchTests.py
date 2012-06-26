@@ -47,8 +47,13 @@ class AlbumSearchTests(ASearchTestSuite):
                 SearchResultConstraint(title='wolfgang amadeus phoenix', 
                                        types='album', 
                                        index=0), 
-            ]), 
-            ({ 'query' : 'the young machines', 'category' : 'music', }, [ 
+            ]),
+            ({ 'query' : '21 adele', 'category' : 'music', }, [
+                SearchResultConstraint(title='21',
+                                       types='album',
+                                       index=0),
+            ]),
+            ({ 'query' : 'the young machines', 'category' : 'music', }, [
                 SearchResultConstraint(title='the young machines', 
                                        types='album'), 
             ]), 
