@@ -2959,6 +2959,7 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
+                self.icon = _getIconURL('news_follow')
 
                 if len(self.subjects) == 1:
                     self.action = _buildUserAction(self.subjects[0])
@@ -3049,6 +3050,7 @@ class HTTPActivity(Schema):
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_comment')
 
         elif self.verb == 'reply':
             _addStampObjects()
@@ -3063,6 +3065,7 @@ class HTTPActivity(Schema):
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_reply')
 
         elif self.verb == 'mention':
             _addStampObjects()
@@ -3084,6 +3087,7 @@ class HTTPActivity(Schema):
                 self.body_references = stampBlurbObjectReferences
 
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_mention')
 
         elif self.verb.startswith('friend_'):
             self.icon = _getIconURL('news_friend')

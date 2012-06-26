@@ -210,7 +210,7 @@ def memcached_function(time=0, min_compress_len=0):
                 compute = False
                 
                 wrapper.hits += 1
-                logs.debug("Cache hit: %s" % key)
+                logs.debug("Memcached Hit")
             except KeyError:
                 store = True
             except Exception:
@@ -225,6 +225,7 @@ def memcached_function(time=0, min_compress_len=0):
                 
                 if cache_set is not None:
                     try:
+                        logs.debug("Store in Memcached")
                         cache_set(key, result, time=time, min_compress_len=min_compress_len)
                     except Exception, e:
                         logs.warning(str(e))
