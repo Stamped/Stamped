@@ -14,7 +14,7 @@ from tests.framework.FixtureTest import *
 
 class RunEvalQueries(AStampedFixtureTestCase):
     @fixtureTest()
-    def test_run_book_quries(self):
+    def test_run_book_queries(self):
         bookQueries = [
                 '1Q84 book',
                 '1Q84',
@@ -38,7 +38,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('book', bookQueries)
 
-    def test_run_film_quries(self):
+    def test_run_film_queries(self):
         filmQueries = [
                 '90210',
                 'LOST',
@@ -90,7 +90,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('film', filmQueries)
 
-    def test_run_music_quries(self):
+    def test_run_music_queries(self):
         musicQueries = [
                 '1980 rehab graffiti the world',
                 '1980 rehab',
@@ -195,7 +195,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('music', musicQueries)
 
-    def test_run_place_quries(self):
+    def test_run_place_queries(self):
         placeQueries = [
                 ('A16', (37.806528, -122.406511)),
                 ('Galata Balikcisi', (41.025593, 28.974618)),
