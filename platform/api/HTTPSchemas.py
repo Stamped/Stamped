@@ -1464,7 +1464,7 @@ class HTTPEntity(Schema):
                 source.source_id        = entity.sources.netflix_id
                 source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
-                source.icon             = _getIconURL('src_itunes', client=client)
+                source.icon             = _getIconURL('src_netflix', client=client)
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
