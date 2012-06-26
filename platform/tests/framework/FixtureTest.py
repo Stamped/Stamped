@@ -27,6 +27,8 @@ class AStampedFixtureTestCase(AStampedTestCase):
         from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
         MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
         MongoCache.disableStaleness = True
+        if FixtureTestRuntimeSettings.getInstance().useCacheFixture:
+            MongoCache.exceptionOnCacheMiss = True
         
         db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
         [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
@@ -38,6 +40,7 @@ class AStampedFixtureTestCase(AStampedTestCase):
         from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
         MongoDBConfig2.getInstance().database_name = 'stamped'
         MongoCache.disableStaleness = False
+        MongoCache.exceptionOnCacheMiss = False
 
 
 class FixtureTestRuntimeSettings(Singleton):
