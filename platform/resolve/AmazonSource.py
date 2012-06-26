@@ -1145,13 +1145,14 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByScore([albums, tracks])
 
-    def __scoreBookResults(self, unscoredResultsLists):
-        assert(len(unscoredResultsLists) <= 1)
+    def __scoreBookResults(self, unscoredResultsLists, queryText):
+        assert len(unscoredResultsLists) <= 1 
         if len(unscoredResultsLists) == 0:
             return []
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
         scoredResults = scoreResultsWithBasicDropoffScoring(unscoredResultsLists['Books'], dropoffFactor=0.9)
+        augmentScoreForRelevance(scoredResults, queryText, lambda r: r.resolverObject.name, 2)
         self.__adjustScoresBySalesRank(scoredResults)
         for scoredResult in scoredResults:
             if not scoredResult.resolverObject.authors:
@@ -1235,7 +1236,7 @@ class AmazonSource(GenericSource):
                     AmazonSource.SearchIndexData('Books', 'Medium,Reviews', createBook),
                 )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
-            return self.__scoreBookResults(resultSets)
+            return self.__scoreBookResults(resultSets, queryText)
         #elif queryCategory == 'film':
         #    searchIndexes = (
         #        AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),

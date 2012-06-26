@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 
+from __future__ import division
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals
 from SearchResult import SearchResult
+from resolve.Resolver import simplify
 from difflib import SequenceMatcher
+
+import math
 
 def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dropoffFactor=0.7):
     """
@@ -21,6 +27,7 @@ def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dro
         scoredResults.append(result)
         currScore *= dropoffFactor
     return scoredResults
+
 
 def smoothScores(searchResultList, minGrowthFactor=1.05):
     """
@@ -61,13 +68,31 @@ def smoothScores(searchResultList, minGrowthFactor=1.05):
                                                   lastScore - nextResult.score)
             nextResult.score = lastScore
 
+
 def sortByScore(results):
-    results.sort(lambda r1, r2:cmp(r1.score, r2.score), reverse=True)
+    results.sort(key=lambda r: r.score, reverse=True)
+
+
+def stringRelevance(a, b):
+    """Returns a number between 0 and 1, measuring how "relevant" they are to each other.
+
+    Note that this differs from similarity, in that one string could be much longer than the other,
+    but if the shorter matches substrings of the longer, they are still considered relevant.
+    """
+    a = simplify(a)
+    b = simplify(b)
+    bestMatch = min(len(a), len(b))
+    matchingBlocks = SequenceMatcher(a=a, b=b).get_matching_blocks()
+    ratios = (matchSize / bestMatch for _, _, matchSize in matchingBlocks if matchSize > 1)
+    # sqrt(2), pulled out of an ass.
+    return sum(r ** 1.414 for r in ratios)
+
 
 def interleaveResultsByScore(resultLists):
     allResults = [result for resultList in resultLists for result in resultList]
     sortByScore(allResults)
     return allResults
+
 
 def dedupeById(scoredResults, boostFactor=1.0):
     keysToResults = {}
@@ -86,7 +111,6 @@ def dedupeById(scoredResults, boostFactor=1.0):
     return keysToResults.values()
 
 
-import math
 def geoDistance((lat1, lng1), (lat2, lng2)):
     radius = 6371 # km
 
@@ -98,6 +122,14 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     d = radius * c
 
     return d
+
+
+def augmentScoreForRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
+    for result in results:
+        resultText = resultTextExtractor(result)
+        titleBoost = maxRelevanceBoost ** stringRelevance(resultText, queryText)
+        result.score *= titleBoost
+        result.addScoreComponentDebugInfo('title similarity factor', titleBoost)
 
 
 def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
@@ -124,3 +156,4 @@ def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
             distance_boost = 1 + math.log(100 / distance, 1000)
             result.score *= distance_boost
             result.addScoreComponentDebugInfo('proximity score factor', distance_boost)
+
