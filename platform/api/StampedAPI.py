@@ -2873,11 +2873,11 @@ class StampedAPI(AStampedAPI):
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/movies7.html"
         if entityId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/movies7.html"
         if userId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/user.html"
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
         account = self.getAccount(authUserId)
