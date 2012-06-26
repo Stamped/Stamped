@@ -139,28 +139,16 @@ def handleHTTPRequest(requires_auth=True,
                            nodeName=stampedAPI.node_name)
                 logs.info("%s %s" % (request.method, request.path))
                 
-                if not valid_origin:
-                    logs.warning("INVALID ORIGIN: %s" % origin)
+                if valid_origin is None:
+                    if origin is not None:
+                        logs.warning("Invalid origin: %s" % origin)
+                    else:
+                        logs.debug("Origin not included")
                 
                 params = {}
+                params['authUserId'], params['authClientId'] = checkOAuth(request, required=requires_auth)
+                params['client_id'] = checkClient(request, required=requires_client)
                 
-                ### TODO: Fix this so that if the user passes an expired token, it fails appropriately
-                try:
-                    params['authUserId'], params['authClientId'] = checkOAuth(request)
-                except StampedInputError:
-                    if requires_auth:
-                        raise
-                    
-                    params['authUserId'], params['authClientId'] = None, None
-                
-                try:
-                    params['client_id'] = checkClient(request)
-                except StampedInputError:
-                    if requires_client:
-                        raise
-                    
-                    params['client_id'] = None
-
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or {}
 
@@ -275,12 +263,14 @@ def handleHTTPRequest(requires_auth=True,
         return wrapper
     return decorator
 
-def checkClient(request):
+def checkClient(request, required=True):
     ### Parse Request for Client Credentials
     try:
         client_id       = request.POST['client_id']
         client_secret   = request.POST['client_secret']
     except Exception:
+        if not required:
+            return None 
         raise StampedInputError("Client credentials not included")
     
     ### Validate Client Credentials
@@ -305,7 +295,7 @@ def optionalOAuth(request):
     
     return authUserId
 
-def checkOAuth(request):
+def checkOAuth(request, required=True):
     ### Parse Request for Access Token
     try:
         if request.method == 'GET':
@@ -317,6 +307,8 @@ def checkOAuth(request):
         
         logs.token(oauth_token)
     except Exception:
+        if not required:
+            return None, None 
         raise StampedInputError("Access token not found")
     
     ### Validate OAuth Access Token

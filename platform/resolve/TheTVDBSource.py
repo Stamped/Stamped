@@ -225,7 +225,7 @@ class TheTVDBSource(GenericSource):
         
         return gen()
 
-    def searchLite(self, queryCategory, queryText, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         # TODO: USE TIMEOUT.
         if queryCategory != 'film':
             raise NotImplementedError()

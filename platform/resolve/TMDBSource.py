@@ -279,7 +279,7 @@ class TMDBSource(GenericSource):
                 pass
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
-    def searchLite(self, queryCategory, queryText, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         raw_results = self.__tmdb.movie_search(queryText)['results']
         # 20 results is good enough for us. No second requests.
         resolver_objects = [ TMDBMovie(result['id'], data=result, maxLookupCalls=0) for result in raw_results ]

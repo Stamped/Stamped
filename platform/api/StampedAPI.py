@@ -1589,10 +1589,8 @@ class StampedAPI(AStampedAPI):
         #                                                limit=10,
         #                                                coords=coords,
         #                                                category=category)
-        queryLatLng = None
-        if coords:
-            queryLatLng = (coords.lat, coords.lng)
-        entities = self._newEntitySearch.searchEntities(category, query, limit=10, queryLatLng=queryLatLng)
+        coordsAsTuple = None if coords is None else (coords.lat, coords.lng)
+        entities = self._newEntitySearch.searchEntities(category, query, limit=10, coords=coordsAsTuple)
 
         results = []
         process = 5
@@ -1640,6 +1638,8 @@ class StampedAPI(AStampedAPI):
                 latLng = [ coordinates.lat, coordinates.lng ]
             results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'})
             #make list of names from results, remove duplicate entries, limit to 10
+            if results is None:
+                return []
             names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
             completions = []
             for name in names:
@@ -2873,14 +2873,18 @@ class StampedAPI(AStampedAPI):
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/movies7.html"
         if entityId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/movies7.html"
         if userId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/user.html"
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
         account = self.getAccount(authUserId)
+
+        # for now, only post to open graph for mike and kevin
+        if account.screen_name_lower not in ['ml', 'kevin']:
+            return
 
         logs.info('######')
         import pprint

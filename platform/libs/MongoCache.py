@@ -164,7 +164,14 @@ def hashFunctionCall(fnName, args, kwargs):
 cacheTableError = None
 # This one is used for testing so we know not to use timestamps when we're running in testing mode.
 disableStaleness = False
+# This one is used for testing also. For tests, we throw a CacheMissException on cache misses. This is to make sure that
+# (a) the test runs the same whether or not you have an internet connection and (b) that if a third-party call failed
+# in the first run it fails in the second, though not necessarily with the same error.
+exceptionOnCacheMiss = False
 
+class CacheMissException(Exception):
+    def __init__(self, functionName):
+        super(CacheMissException, self).__init__('Got cache miss for call to MongoCached function: ' + functionName)
 
 ONE_WEEK = datetime.timedelta(7)
 def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
@@ -209,6 +216,8 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
                 logs.warning("Couldn't connect to Mongo cache table; disabling Mongo cache.")
                 return userFunction(*fullArgs, **kwargs)
 
+            if result is None and exceptionOnCacheMiss:
+                raise CacheMissException(fnName)
             if result and result['expiration'] is None and not disableStaleness:
                 raise ValueError('We should never be using non-expiring cache entries outside of test fixtures!')
             if result and result['expiration'] is not None and disableStaleness:

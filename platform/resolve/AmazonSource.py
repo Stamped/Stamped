@@ -1217,7 +1217,7 @@ class AmazonSource(GenericSource):
             except KeyError:
                 pass
 
-    def searchLite(self, queryCategory, queryText, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         if queryCategory == 'music':
             # We're not passing a constructor, so this will return the raw results. This is because we're not sure if
             # they're songs or albums yet, so there's no straightforward constructor we can pass.
