@@ -59,23 +59,30 @@ def differenceScore(left, right):
 
 
 def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
-    indexTableRows = []
+    changedTableRows = []
+    allTableRows = []
     statsText = '%d same position, %d moved, %d added/droped'
     linkText = '<a href="%s">%s</a>'
     for key in sorted(oldResults.keys()):
         (same, moved, addDrop), filename = compareSingleSearch(
                 key, oldResults[key], newResults[key], outputDir, diffThreshold)
+        row = linkText % (filename, key), statsText % (same, moved, addDrop)
         if moved or addDrop:
-            indexTableRows.append((linkText % (filename, key), statsText % (same, moved, addDrop)))
-    random.shuffle(indexTableRows)
-    htmlRowTpl = '<tr><td>%s</td><td>%s</td></tr>'
-    tableContent = ''.join(htmlRowTpl % row for row in indexTableRows)
+            changedTableRows.append(row)
+        allTableRows.append(row)
+    random.shuffle(changedTableRows)
 
     summary = "%d out of %d queries had changes (%f%%). Here's a random list of them" % (
-            len(indexTableRows), len(oldResults), len(indexTableRows) / len(oldResults) * 100)
+            len(changedTableRows), len(oldResults), len(changedTableRows) / len(oldResults) * 100)
+    summary += ' <a href="index_all.html">show all</a>'
 
+    htmlRowTpl = '<tr><td>%s</td><td>%s</td></tr>'
     with open(path.join(outputDir, 'index.html'), 'w') as fout:
-        print >> fout, EntitiesSxSTemplates.SUMMARY_TPL % (summary, tableContent)
+        print >> fout, EntitiesSxSTemplates.SUMMARY_TPL % (
+                summary, ''.join(htmlRowTpl % row for row in changedTableRows))
+    with open(path.join(outputDir, 'index_all.html'), 'w') as fout:
+        print >> fout, EntitiesSxSTemplates.SUMMARY_TPL % (
+                'All queries', ''.join(htmlRowTpl % row for row in allTableRows))
 
 
 def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold):
@@ -130,7 +137,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
 
     with open(path.join(outputDir, filenameBase) + '.html', 'w') as fout:
         for line in fileContent:
-            print >> fout, line
+            print >> fout, line.encode('utf-8')
 
     # Now compute the stats:
     same = sum(1 for i, j in movements.iteritems() if i == j)
