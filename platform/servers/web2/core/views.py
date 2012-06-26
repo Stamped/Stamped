@@ -328,10 +328,10 @@ def test_view(request, **kwargs):
 @stamped_view(schema=HTTPStampId)
 def popup_likes(request, schema, **kwargs):
     users = stampedAPIProxy.getLikes(schema.dataExport())
-    num_likes = len(users)
+    num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Likes" % num_likes, 
+        'popup_title' : "%d Likes" % num_users, 
         'popup_class' : 'popup-likes', 
         'users'       : users, 
     })
@@ -339,11 +339,33 @@ def popup_likes(request, schema, **kwargs):
 @stamped_view(schema=HTTPStampId)
 def popup_todos(request, schema, **kwargs):
     users = stampedAPIProxy.getTodos(schema.dataExport())
-    num_todos = len(users)
+    num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Todos" % num_todos, 
+        'popup_title' : "%d Todos" % num_users, 
         'popup_class' : 'popup-todos', 
-        'users'     : users, 
+        'users'       : users, 
+    })
+
+@stamped_view(schema=HTTPUserId)
+def popup_followers(request, schema, **kwargs):
+    users = stampedAPIProxy.getFollowers(schema.dataExport())
+    num_users = len(users)
+    
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : "%d Followers" % num_users, 
+        'popup_class' : 'popup-followers', 
+        'users'       : users, 
+    })
+
+@stamped_view(schema=HTTPUserId)
+def popup_following(request, schema, **kwargs):
+    users = stampedAPIProxy.getFriends(schema.dataExport())
+    num_users = len(users)
+    
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : "Following %d" % num_users, 
+        'popup_class' : 'popup-following', 
+        'users'       : users, 
     })
 

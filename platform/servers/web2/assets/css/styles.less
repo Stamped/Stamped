@@ -229,6 +229,7 @@ a.follow-button {
 
 
 .profile-image(@size: 128px, @border: 4px) {
+    position: relative;
     .floatleft;
     
     display: block;
@@ -283,35 +284,25 @@ a.follow-button {
     
     .user-gallery-item {
         display: inline-block;
-        
-        .overlay {
-            display: none;
-            z-index: 23;
-            position: relative;
-        }
     }
     
-    /*:nth-child(3) {
+    .expand-friends {
+        width:  24px;
+        height: 24px;
         position: absolute;
-        right: 0;
-        top: 50%;
-        margin-top: -12px;
+        display: block;
+        right: 4px;
+        top:   50%;
+        margin-top: -14px;
         
-        .overlay {
-            display: block;
-            width:  24px;
-            height: 24px;
-            
-            background: url(/assets/img/user-gallery-expand.png) no-repeat;
-        }
+        background: url(/assets/img/user-gallery-expand.png) no-repeat;
+        .profile-image-border(2px);
         
-        &:hover {
-            background: lighten(@stamped-base-color, 10%);
+        &:hover, &:active {
+            .context-popup {
+                display: block;
+            }
         }
-    }*/
-    
-    :nth-child(n+4) {
-        display: none;
     }
 }
 
@@ -774,9 +765,10 @@ footer .copyright a, footer .copyright a {
     left: -16px;
     font-size: .9em;
     font-weight: 700;
-    padding: 4px 8px;
+    padding: 8px;
     z-index: 10001;
     
+    line-height: 100%;
     display:  none;
     background: rgba(10, 10, 10, 0.75);
     color: #fff;
@@ -788,10 +780,12 @@ footer .copyright a, footer .copyright a {
 .close-button {
     position: relative;
     
+    display: block;
     border: 4px solid #bfbfbf;
     width:  36px;
     height: 36px;
-    .rounded(18px);
+    background: #fff;
+    .rounded(36px);
     
     .close-button-inner {
         background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
@@ -805,6 +799,7 @@ footer .copyright a, footer .copyright a {
     
     &:hover {
         border-color: #666;
+        cursor: pointer;
         
         .close-button-inner {
             background-position: -48px 0;

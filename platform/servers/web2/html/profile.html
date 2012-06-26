@@ -79,7 +79,9 @@
                                                 <span class='friend-count'>{{user.num_followers}}</span>
                                                 
                                                 {% with users=followers %}
-                                                    {% handlebars_template "user-gallery" %}
+                                                {% with title="followers" %}
+                                                    {% include "user-gallery.html" %}
+                                                {% endwith %}
                                                 {% endwith %}
                                             </div>
                                         </div>
@@ -90,7 +92,9 @@
                                                 <span class='friend-count'>{{user.num_friends}}</span>
                                                 
                                                 {% with users=friends %}
-                                                    {% handlebars_template "user-gallery" %}
+                                                {% with title="following" %}
+                                                    {% include "user-gallery.html" %}
+                                                {% endwith %}
                                                 {% endwith %}
                                             </div>
                                         </div>
