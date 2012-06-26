@@ -181,9 +181,9 @@ def memcached_function(time=0, min_compress_len=0):
                 if isinstance(arg, Schema):
                     # Convert to JSON to efficiently convert to string / sort by keys
                     return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'))
-                else:
+                elif arg is not None:
                     # Convert any unicode characters to string representation
-                    return arg.encode('utf8')
+                    return unicode(arg).encode('utf8')
 
             if len(args) > 0:
                 key += mark.join(map(encode_arg, args2))
