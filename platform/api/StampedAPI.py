@@ -607,6 +607,10 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
 
+#        for k,v in fields.iteritems():
+#            if v == '':
+#                fields[k] = None
+
         if 'screen_name' in fields and account.screen_name != fields['screen_name']:
             old_screen_name = account.screen_name
             account.screen_name = fields['screen_name']
@@ -654,55 +658,53 @@ class StampedAPI(AStampedAPI):
         if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
             account.color_secondary = fields['color_secondary']
         if 'temp_image_url' in fields:
-            user = self._userDB.getUser(authUserId)
-            screen_name = user.screen_name
-            image_cache = datetime.utcnow()
-            user.timestamp.image_cache = image_cache
-            self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
-            tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, fields['temp_image_url']])
+            image_cache_timestamp = datetime.utcnow()
+            account.timestamp.image_cache = image_cache_timestamp
+            self._accountDB.updateUserTimestamp(account.user_id, 'image_cache', image_cache_timestamp)
+            tasks.invoke(tasks.APITasks.updateProfileImage, args=[account.screen_name, fields['temp_image_url']])
 
         return self._accountDB.updateAccount(account)
 
 
-    @API_CALL
-    def updateAccountSettings(self, authUserId, data):
-
-        ### TODO: Reexamine how updates are done
-        ### TODO: Verify that email address is unique, confirm it
-
-        account = self._accountDB.getAccount(authUserId)
-
-        old_screen_name = account.screen_name
-
-        # Import each item
-        for k, v in data.iteritems():
-            if k == 'password':
-                v = convertPasswordForStorage(v)
-            setattr(account, k, v)
-
-        ### TODO: Carve out "validate account" function
-
-        # Validate Screen Name
-        account.screen_name = account.screen_name.strip()
-        if not utils.validate_screen_name(account.screen_name):
-            raise StampedInputError("Invalid format for screen name")
-
-        # Check blacklist
-        if account.screen_name.lower() in Blacklist.screen_names:
-            raise StampedInputError("Blacklisted screen name")
-
-        # Validate email address
-        if account.email is not None:
-            account.email = str(account.email).lower().strip()
-            if not utils.validate_email(account.email):
-                raise StampedInputError("Invalid format for email address")
-
-        self._accountDB.updateAccount(account)
-
-        # Asynchronously update profile picture link if screen name has changed
-        if account.screen_name.lower() != old_screen_name.lower():
-            tasks.invoke(tasks.APITasks.changeProfileImageNameAsync, args=[
-                         old_screen_name.lower(), account.screen_name.lower()])
+#    @API_CALL
+#    def updateAccountSettings(self, authUserId, data):
+#
+#        ### TODO: Reexamine how updates are done
+#        ### TODO: Verify that email address is unique, confirm it
+#
+#        account = self._accountDB.getAccount(authUserId)
+#
+#        old_screen_name = account.screen_name
+#
+#        # Import each item
+#        for k, v in data.iteritems():
+#            if k == 'password':
+#                v = convertPasswordForStorage(v)
+#            setattr(account, k, v)
+#
+#        ### TODO: Carve out "validate account" function
+#
+#        # Validate Screen Name
+#        account.screen_name = account.screen_name.strip()
+#        if not utils.validate_screen_name(account.screen_name):
+#            raise StampedInputError("Invalid format for screen name")
+#
+#        # Check blacklist
+#        if account.screen_name.lower() in Blacklist.screen_names:
+#            raise StampedInputError("Blacklisted screen name")
+#
+#        # Validate email address
+#        if account.email is not None:
+#            account.email = str(account.email).lower().strip()
+#            if not utils.validate_email(account.email):
+#                raise StampedInputError("Invalid format for email address")
+#
+#        self._accountDB.updateAccount(account)
+#
+#        # Asynchronously update profile picture link if screen name has changed
+#        if account.screen_name.lower() != old_screen_name.lower():
+#            tasks.invoke(tasks.APITasks.changeProfileImageNameAsync, args=[
+#                         old_screen_name.lower(), account.screen_name.lower()])
 
         return account
 
@@ -1671,11 +1673,6 @@ class StampedAPI(AStampedAPI):
         stampId     = kwargs.pop('stamp_id', None)
 
         actions = set([
-            # 'link',
-            # 'phone',
-            # 'stamped_view_entity',
-            # 'stamped_view_stamp',
-            # 'stamped_view_user',
             'listen',
             'playlist',
             'download',
@@ -1684,6 +1681,7 @@ class StampedAPI(AStampedAPI):
             'buy',
             'watch',
             'tickets',
+            'queue',
         ])
 
         # For now, only complete the action if it's associated with an entity and a stamp
@@ -2873,14 +2871,18 @@ class StampedAPI(AStampedAPI):
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/movies7.html"
         if entityId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/movies7.html"
         if userId is not None:
-            return "http://static.stamped.com/assets/movies6.html"
+            return "http://static.stamped.com/assets/user.html"
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
         account = self.getAccount(authUserId)
+
+        # for now, only post to open graph for mike and kevin
+        if account.screen_name_lower not in ['ml', 'kevin']:
+            return
 
         logs.info('######')
         import pprint
@@ -3242,6 +3244,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getLikes(self, authUserId, stampId):
+        ### TODO: Add paging
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
 
@@ -3250,19 +3253,20 @@ class StampedAPI(AStampedAPI):
             friendship              = Friendship()
             friendship.user_id      = stamp.user.user_id
             friendship.friend_id    = authUserId
-
+            
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
                     raise StampedPermissionsError("Insufficient privileges to add comment")
-
-            # Check if block exists between user and stamp owner
-            if self._friendshipDB.blockExists(friendship) == True:
-                raise StampedIllegalActionError("Block exists")
-
+            
+            if authUserId is not None:
+                # Check if block exists between user and stamp owner
+                if self._friendshipDB.blockExists(friendship) == True:
+                    raise StampedIllegalActionError("Block exists")
+        
         # Get user ids
         userIds = self._stampDB.getStampLikes(stampId)
-
+        
         return userIds
 
 
@@ -4180,6 +4184,10 @@ class StampedAPI(AStampedAPI):
 
         return result
 
+    @API_CALL 
+    def getStampTodos(self, authUserId, stamp_id):
+        return self._todoDB.getTodosFromStampId(stamp_id)
+    
     """
        #
       # #    ####  ##### # #    # # ##### #   #

@@ -7,8 +7,10 @@ urlpatterns = patterns('',
     url(r'^blog$',                              'core.views.blog'), 
     url(r'^test$',                              'core.views.test_view'), 
     
-    # menu
+    # sub-views
     url(r'^entities/menu$',                     'core.views.menu'), 
+    url(r'^popups/likes.html$',                 'core.views.popup_likes'), 
+    url(r'^popups/todos.html$',                 'core.views.popup_todos'), 
     
     # index
     url(r'^index$',                             'core.views.index'), 

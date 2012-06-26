@@ -36,3 +36,9 @@ class HTTPWebTimeSlice(Schema):
         # Web-specific
         cls.addProperty('ajax',                             bool)
 
+class HTTPObjectId(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                         basestring)
+

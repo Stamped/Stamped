@@ -857,7 +857,7 @@ body.app .stamp-gallery-view-map {
   position: relative;
   top: -4px;
 }
-.social-feedback div.social-feedback-like {
+.social-feedback .social-feedback-like {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: 0 0;
   display: inline-block;
@@ -865,10 +865,10 @@ body.app .stamp-gallery-view-map {
   height: 17px;
   z-index: 100;
 }
-.social-feedback .count_0 div.social-feedback-like {
+.social-feedback .count_0 .social-feedback-like {
   background-position: 0 -20px;
 }
-.social-feedback div.social-feedback-todo {
+.social-feedback .social-feedback-todo {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -19px 0;
   display: inline-block;
@@ -876,10 +876,10 @@ body.app .stamp-gallery-view-map {
   height: 17px;
   z-index: 100;
 }
-.social-feedback .count_0 div.social-feedback-todo {
+.social-feedback .count_0 .social-feedback-todo {
   background-position: -19px -20px;
 }
-.social-feedback div.social-feedback-comments {
+.social-feedback .social-feedback-comments {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -38px 0;
   display: inline-block;
@@ -887,7 +887,7 @@ body.app .stamp-gallery-view-map {
   height: 17px;
   z-index: 100;
 }
-.social-feedback .count_0 div.social-feedback-comments {
+.social-feedback .count_0 .social-feedback-comments {
   background-position: -38px -20px;
 }
 .timestamp_raw {

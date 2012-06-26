@@ -663,7 +663,8 @@ var g_update_stamps = null;
                             console.debug(response);
                             console.debug(xhr);
                             
-                            //alert("TODO: handle AJAX and backend errors gracefuly");
+                            alert("TODO: handle AJAX and backend errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
+                            
                             return;
                         }
                         
@@ -1961,6 +1962,30 @@ var g_update_stamps = null;
                         });
                     }
                 }
+            });
+            
+            $sdetail.find(".expand").click(function(event) {
+                event.preventDefault();
+                
+                var $this = $(this);
+                var href  = $this.attr('href');
+                
+                var popup_options = get_fancybox_options({
+                    href        : href, 
+                    type        : "ajax", 
+                    scrolling   : 'no', 
+                    wrapCSS     : '', 
+                    closeBtn    : false, 
+                    padding     : 0, 
+                    
+                    afterShow   : function() {
+                        // TODO: why is this scrollbar not scrolling the content area?
+                        $('.popup-body').jScrollPane();
+                    }
+                });
+                
+                $.fancybox.open(popup_options);
+                return false;
             });
             
             update_stamps($sdetail);

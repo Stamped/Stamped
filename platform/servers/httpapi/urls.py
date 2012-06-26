@@ -138,6 +138,7 @@ urlpatterns = patterns('',
     (r'v0/stamps/likes/create.json',                        'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                        'v0.functions.stamps.likesRemove'),
     (r'v0/stamps/likes/show.json',                          'v0.functions.stamps.likesShow'),
+    (r'v0/stamps/todos/show.json',                          'v0.functions.stamps.todosShow'),
     
     ### COMMENTS
     (r'v0/comments/create.json',                            'v0.functions.comments.create'),
@@ -148,7 +149,7 @@ urlpatterns = patterns('',
     (r'v0/todos/create.json',                               'v0.functions.todos.create'),
     (r'v0/todos/complete.json',                             'v0.functions.todos.complete'),
     (r'v0/todos/remove.json',                               'v0.functions.todos.remove'),
-    (r'v0/todos/show.json',                                 'v0.functions.todos.show'),
+    (r'v0/todos/collection.json',                           'v0.functions.todos.collection'),
 
     ### GUIDE
     (r'v0/guide/collection.json',                           'v0.functions.stamps.guide'),

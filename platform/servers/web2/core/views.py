@@ -325,3 +325,23 @@ def menu(request, schema, **kwargs):
 def test_view(request, **kwargs):
     return stamped_render(request, 'test.html', { })
 
+@stamped_view(schema=HTTPStampId)
+def popup_likes(request, schema, **kwargs):
+    users = stampedAPIProxy.getLikes(schema.dataExport())
+    num_likes = len(users)
+    
+    return stamped_render(request, 'popup-likes.html', {
+        'num_likes' : num_likes, 
+        'users'     : users, 
+    })
+
+@stamped_view(schema=HTTPStampId)
+def popup_todos(request, schema, **kwargs):
+    users = stampedAPIProxy.getTodos(schema.dataExport())
+    num_todos = len(users)
+    
+    return stamped_render(request, 'popup-todos.html', {
+        'num_todos' : num_todos, 
+        'users'     : users, 
+    })
+
