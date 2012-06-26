@@ -171,7 +171,7 @@ def memcached_function(time=0, min_compress_len=0):
             # note: treat args[0] specially (self)
             self  = args[0].__class__.__name__
             args2 = args[1:]
-            cache = __global_memcache()
+            cache = __globalMemcache()
             mark  = ';'
             
             # Cache key records both positional and keyword args
