@@ -5,11 +5,8 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals
-import copy
-import pprint
-import logs
-import utils
+import Globals, logs, utils
+import copy, json, pprint
 
 class SchemaException(Exception):
     pass
