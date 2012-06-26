@@ -3102,8 +3102,14 @@ class HTTPActivity(Schema):
             if not activity.personal:
                 logs.debug(self)
                 raise Exception("Invalid universal news item: %s" % self.verb)
-                
-            self.icon = _getIconURL('news_friend')
+            
+            if self.verb == 'friend_twitter':
+                self.icon = _getIconURL('news_twitter')
+            elif self.verb == 'friend_facebook':
+                self.icon = _getIconURL('news_facebook')
+            else:
+                self.icon = _getIconURL('news_friend')
+
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
