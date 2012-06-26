@@ -846,6 +846,8 @@
                 .name {
                     margin-right: 6px;
                     max-width: 136px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                     
                     p {
                         margin:  0;
@@ -878,9 +880,12 @@
         }
     }
 }
+
 .popup-todos {
-    .rhs-icon {
-        background-position: -76px 0;
+    .popup-header {
+        .rhs-icon {
+            background-position: -76px 0 !important;
+        }
     }
 }
 
