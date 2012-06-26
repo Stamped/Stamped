@@ -238,7 +238,22 @@ class RunEvalQueries(AStampedFixtureTestCase):
             ]
         self.__runQueries('place', placeQueries)
 
-    def __runQueries(category, queries):
+    def test_run_app_queries(self):
+        appQueries = [
+                'Stamped',
+                'Instagram',
+                'doodle jump',
+                'tiny wings',
+                'flipboard',
+                'facebook app',
+                'facebook',
+                'temple run',
+                'pandora radio',
+                ]
+        self.__runQueries('app', appQueries)
+
+
+    def __runQueries(self, category, queries):
         searcher = EntitySearch()
 
         def runSearch(query):
