@@ -2974,7 +2974,7 @@ class HTTPActivity(Schema):
 
                 self.action = _buildUserAction(self.objects.users[0])
 
-        elif self.verb == 'restamp':
+        elif self.verb == 'restamp' or self.verb == 'credit':
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -3057,7 +3057,7 @@ class HTTPActivity(Schema):
             if not activity.personal:
                 logs.debug(self)
                 raise Exception("Invalid universal news item: %s" % self.verb)
-                
+
             _addStampObjects()
             _addCommentObjects()
 
