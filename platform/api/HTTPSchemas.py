@@ -3129,7 +3129,22 @@ class HTTPActivity(Schema):
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
-            msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
+            sourceMapping = {
+                'appstore'      : 'the App Store',
+                'itunes'        : 'iTunes',
+                'amazon'        : 'Amazon',
+                'rdio'          : 'rdio',
+                'spotify'       : 'Spotify',
+                'netflix'       : 'Netflix',
+                'opentable'     : 'OpenTable',
+                'fandango'      : 'Fandango',
+            }
+
+            source = self.source
+            if self.source in sourceMapping:
+                source = sourceMapping[self.source]
+
+            msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : source }
             self.body = verbs % msgDict
 
             self.body_references = subjectReferences + stampObjectReferences

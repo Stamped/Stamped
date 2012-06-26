@@ -3242,6 +3242,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getLikes(self, authUserId, stampId):
+        ### TODO: Add paging
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
 
@@ -3250,19 +3251,20 @@ class StampedAPI(AStampedAPI):
             friendship              = Friendship()
             friendship.user_id      = stamp.user.user_id
             friendship.friend_id    = authUserId
-
+            
             # Check if stamp is private; if so, must be a follower
             if stamp.user.privacy == True:
                 if not self._friendshipDB.checkFriendship(friendship):
                     raise StampedPermissionsError("Insufficient privileges to add comment")
-
-            # Check if block exists between user and stamp owner
-            if self._friendshipDB.blockExists(friendship) == True:
-                raise StampedIllegalActionError("Block exists")
-
+            
+            if authUserId is not None:
+                # Check if block exists between user and stamp owner
+                if self._friendshipDB.blockExists(friendship) == True:
+                    raise StampedIllegalActionError("Block exists")
+        
         # Get user ids
         userIds = self._stampDB.getStampLikes(stampId)
-
+        
         return userIds
 
 
@@ -4179,6 +4181,11 @@ class StampedAPI(AStampedAPI):
                 continue
 
         return result
+
+    @API_CALL 
+    def getStampTodos(self, stampId):
+        userIds = self._todoDB.getTodosFromStampId(stamp.stamp_id)
+        return userIds
 
     """
        #

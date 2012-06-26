@@ -84,3 +84,12 @@ footer, .fixedwidth {
     font-weight: normal;
 }
 
+.profile-image-border(@size) {
+    border: @size solid #fff;
+    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
+    
+    &:active {
+        border-color: #666;
+    }
+}
+

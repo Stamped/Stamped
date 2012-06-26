@@ -149,10 +149,21 @@ def likesRemove(request, authUserId, http_schema, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampId)
 @require_http_methods(["GET"])
 def likesShow(request, authUserId, http_schema, **kwargs):
+    ### TODO: Add paging
     userIds = stampedAPI.getLikes(authUserId, http_schema.stamp_id)
+    output  = { 'user_ids': userIds }
+    
+    return transformOutput(output)
+
+
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampId)
+@require_http_methods(["GET"])
+def todosShow(request, authUserId, http_schema, **kwargs):
+    ### TODO: Add paging
+    userIds = stampedAPI.getStampTodos(authUserId, http_schema.stamp_id)
     output  = { 'user_ids': userIds }
     
     return transformOutput(output)

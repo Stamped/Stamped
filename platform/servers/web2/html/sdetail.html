@@ -63,7 +63,49 @@
                                 {% handlebars_template "stamp-card-image" stamp %}
                             {% endif %}
                             
-                            {% handlebars_template "social-feedback" stamp %}
+                            <div class='social-feedback-expanded'>
+                                {% handlebars_template "social-feedback" stamp %}
+                                
+                                {% if stamp.previews %}
+                                    <div class='user-previews'>
+                                        {% if stamp.previews.likes and stamp.preview.likes|length > 0 %}
+                                            <div class='likes clearfix'>
+                                                {% for user_mini in stamp.previews.likes|slice:":3" %}
+                                                    <div class='user-preview'>
+                                                        {% handlebars_template "profile-image-tiny" user_mini %}
+                                                        <div class='user-preview-icon'></div>
+                                                    </div>
+                                                {% endfor %}
+                                                
+                                                {% if stamp.previews.likes|length > 3 %}
+                                                    <a class="user-preview expand" href="#">
+                                                        <div class="context-popup">Expand likes...</div>
+                                                        <div class='user-preview-icon'></div>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if stamp.previews.todos and stamp.preview.todos|length > 0 %}
+                                            <div class='todos clearfix'>
+                                                {% for user_mini in stamp.previews.todos|slice:":3" %}
+                                                    <div class='user-preview'>
+                                                        {% handlebars_template "profile-image-tiny" user_mini %}
+                                                        <div class='user-preview-icon'></div>
+                                                    </div>
+                                                {% endfor %}
+                                                
+                                                {% if stamp.previews.todos|length > 3 %}
+                                                    <a class="user-preview expand" href="#">
+                                                        <div class="context-popup">Expand todos...</div>
+                                                        <div class='user-preview-icon'></div>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         {% with credits=stamp.previews.credits %}
