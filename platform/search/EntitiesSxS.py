@@ -158,7 +158,7 @@ def writeSingleEntity(entity, outputDir, filename):
 def writeCompareEntity(left, right, outputDir, filename):
     leftLines = pprint.pformat(left).split('\n')
     rightLines = pprint.pformat(right).split('\n')
-    differ = difflib.HtmlDiff()
+    differ = difflib.HtmlDiff(wrapcolumn=100)
     with open(path.join(outputDir, filename), 'w') as fout:
         print >> fout, differ.make_file(leftLines, rightLines)
 
