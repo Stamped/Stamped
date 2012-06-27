@@ -881,6 +881,8 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
                          args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
+        return linkedAccount
+
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
         # Before we do anything, verify that the account is valid
