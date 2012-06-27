@@ -11,12 +11,12 @@ __license__   = "TODO"
 __all__ = [ 'AmazonSource' ]
 
 import Globals
-import numpy
 from logs import report
 
 try:
     import logs, re
     from GenericSource              import GenericSource, multipleSource
+    from TitleUtils                 import *
     from Resolver                   import *
     from ResolverObject             import *
     from datetime                   import datetime
@@ -59,7 +59,7 @@ class _AmazonObject(object):
         self.__data = xp(raw, 'ItemLookupResponse','Items','Item')
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return xp(self.attributes, 'Title')['v']
 
     @lazyProperty
@@ -96,6 +96,9 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
 
     @lazyProperty
     def artists(self):
@@ -147,6 +150,9 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
 
     @lazyProperty
     def artists(self):
@@ -220,6 +226,9 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='AlternateVersions,Large')
         ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+
+    def _cleanName(self, rawName):
+        return cleanBookTitle(rawName)
 
     @lazyProperty
     def authors(self):
@@ -335,29 +344,8 @@ class AmazonMovie(_AmazonObject, ResolverMediaItem):
         ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
 
-    TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'\sHD'),
-        re.compile(r'\sBlu-?ray', re.IGNORECASE),
-        ]
-
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:
-                logs.warning("Avoiding transformation to AmazonMovie title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon movie title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
+    def _cleanName(self, rawName):
+        return cleanMovieTitle(rawName)
 
     @lazyProperty
     def cast(self):
@@ -458,33 +446,8 @@ class AmazonTvShow(_AmazonObject, ResolverMediaCollection):
         ResolverMediaCollection.__init__(self, types=['tv'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
 
-    TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?complete.*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(volumes?|vol\.)\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'^(the )?best (\w+ )?of ', re.IGNORECASE),
-    ]
-
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:
-                logs.warning("Avoiding transformation to AmazonTvShow title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon TV title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
+    def _cleanName(self, rawName):
+        return cleanTvTitle(rawName)
 
     @lazyProperty
     def cast(self):
@@ -1083,8 +1046,9 @@ class AmazonSource(GenericSource):
         salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
                 for searchResult in resultList)
         logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
-        rankMean = numpy.mean(logSalesRanks)
-        rankStdDev = numpy.std(logSalesRanks)
+        # TODO(geoff): Use numpy for these computations
+        rankMean = float(sum(logSalesRanks)) / len(logSalesRanks)
+        rankStdDev = math.sqrt(sum((r - rankMean) ** 2 for r in logSalesRanks) / len(logSalesRanks))
         
         for logRank, searchResult in zip(logSalesRanks, resultList):
             factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
