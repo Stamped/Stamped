@@ -1584,7 +1584,7 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True, key='artist')
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
@@ -1601,7 +1601,8 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True, key='artist')
+                    ### TODO: Add album
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
