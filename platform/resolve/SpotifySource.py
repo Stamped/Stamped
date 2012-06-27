@@ -23,6 +23,7 @@ try:
     from gevent.pool                import Pool
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from search.ScoringUtils        import *
 except:
     report()
@@ -99,7 +100,7 @@ class _SpotifyObject(object):
         return "spotify"
 
     @property
-    def name(self):
+    def raw_name(self):
         return self.data['name']
 
     def __repr__(self):
@@ -118,6 +119,9 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
         _SpotifyObject.__init__(self, spotify_id, data=data)
         ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
         self._properties.extend(['popularity'])
+
+    def _cleanName(self, rawName):
+        return cleanArtistTitle(rawName)
 
     def lookup_data(self):
         return self.spotify.lookup(self.key, "albumdetail")['artist']
@@ -182,6 +186,9 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
         self._properties.extend(['popularity'])
 
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
+
     def lookup_data(self):
         return self.spotify.lookup(self.key, 'trackdetail')['album']
 
@@ -223,6 +230,9 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
         _SpotifyObject.__init__(self, spotify_id, data=data)
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
         self._properties.extend(['popularity'])
+
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
 
     def lookup_data(self):
         return self.spotify.lookup(self.key)['track']

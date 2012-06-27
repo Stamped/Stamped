@@ -22,6 +22,7 @@ try:
     from pprint                     import pformat
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from libs.LibUtils              import parseDateString
     from StampedSource              import StampedSource
     from Entity                     import mapCategoryToTypes
@@ -158,8 +159,11 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanArtistTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['artistName']
 
     @lazyProperty
@@ -234,8 +238,11 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         suffix = ''
         try:
             if self.data['contentAdvisoryRating'] == 'Clean':
@@ -314,8 +321,11 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         suffix = ''
         try:
             if self.data['contentAdvisoryRating'] == 'Clean':
@@ -402,8 +412,11 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanMovieTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['trackName']
 
     @lazyProperty
@@ -479,9 +492,12 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
     def __init__(self, itunes_id=None, data=None, itunes=None, maxLookupCalls=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaCollection.__init__(self, types=['tv'], maxLookupCalls=maxLookupCalls)
-    
+
+    def _cleanName(self, rawName):
+        return cleanTvTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['artistName']
 
     @lazyProperty
@@ -530,13 +546,15 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
             return ''
 
 class iTunesBook(_iTunesObject, ResolverMediaItem):
-
     def __init__(self, itunes_id=None, data=None, itunes=None, maxLookupCalls=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanBookTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['trackName']
 
     @lazyProperty
@@ -581,13 +599,15 @@ class iTunesBook(_iTunesObject, ResolverMediaItem):
         return None
 
 class iTunesApp(_iTunesObject, ResolverSoftware):
-
     def __init__(self, itunes_id=None, data=None, itunes=None, maxLookupCalls=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverSoftware.__init__(self, types=['app'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanAppTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['trackName']
 
     @lazyProperty

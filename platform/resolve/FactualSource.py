@@ -19,6 +19,7 @@ try:
     from libs.Factual               import globalFactual
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from utils                      import lazyProperty
     from functools                  import partial
     from urllib2                    import HTTPError
@@ -57,6 +58,9 @@ class FactualPlace(ResolverPlace):
         self.__factual_id = factual_id
         self.__data = data
 
+    def _cleanName(self, rawName):
+        return cleanPlaceTitle(rawName)
+
     @lazyProperty
     def factual(self):
         return globalFactual()
@@ -77,7 +81,7 @@ class FactualPlace(ResolverPlace):
             return self.__data
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['name']
 
     @lazyProperty
