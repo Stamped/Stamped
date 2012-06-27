@@ -73,19 +73,22 @@ def sortByScore(results):
     results.sort(key=lambda r: r.score, reverse=True)
 
 
-def stringRelevance(a, b):
-    """Returns a number between 0 and 1, measuring how "relevant" they are to each other.
+def stringRelevance(queryText, resultText):
+    """Returns a number between 0 and 1, measuring how "relevant" the resultText is for queryText.
 
-    Note that this differs from similarity, in that one string could be much longer than the other,
-    but if the shorter matches substrings of the longer, they are still considered relevant.
+    Note that this differs from similarity, in that it is not symmetric. It only matters now much of
+    the query text is "fulfilled" by the result text. The result text could have a lot more
+    irrelevant terms without affecting the result.
     """
-    a = simplify(a)
-    b = simplify(b)
-    bestMatch = min(len(a), len(b))
-    matchingBlocks = SequenceMatcher(a=a, b=b).get_matching_blocks()
-    ratios = (matchSize / bestMatch for _, _, matchSize in matchingBlocks if matchSize > 1)
+    queryText = simplify(queryText)
+    resultText = simplify(resultText)
+
     # sqrt(2), pulled out of an ass.
-    return sum(r ** 1.414 for r in ratios)
+    nonContinuityPenalty = 1.414
+    matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
+    totalMatch = sum(matchSize ** nonContinuityPenalty
+            for _, _, matchSize in matchingBlocks if matchSize > 1)
+    return totalMatch / (len(queryText) ** nonContinuityPenalty)
 
 
 def interleaveResultsByScore(resultLists):
@@ -124,10 +127,10 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     return d
 
 
-def augmentScoreForRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
+def augmentScoreForTextRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
     for result in results:
         resultText = resultTextExtractor(result)
-        titleBoost = maxRelevanceBoost ** stringRelevance(resultText, queryText)
+        titleBoost = maxRelevanceBoost ** stringRelevance(queryText, resultText)
         result.score *= titleBoost
         result.addScoreComponentDebugInfo('title similarity factor', titleBoost)
 
