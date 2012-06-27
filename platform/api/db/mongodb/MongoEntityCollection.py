@@ -31,19 +31,19 @@ except:
 
 
 class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
-    
+
     def __init__(self, collection='entities'):
         AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', overflow=True)
         AEntityDB.__init__(self)
-    
+
     @lazyProperty
     def places_collection(self):
         return MongoPlacesEntityCollection()
-    
+
     @lazyProperty
     def seed_collection(self):
         return MongoEntitySeedCollection()
-    
+
     def _convertFromMongo(self, document):
         if document is None:
             return None
@@ -66,7 +66,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         entity = buildEntity(document)
 
         return entity
-    
+
     def _convertToMongo(self, entity):
         if entity.entity_id is not None and entity.entity_id.startswith('T_'):
             del entity.entity_id
@@ -76,32 +76,32 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if 'title' in document:
             document['titlel'] = getSimplifiedTitle(document['title'])
         return document
-    
+
     ### PUBLIC
-    
+
     def addEntity(self, entity):
         entity = self._addObject(entity)
         self.seed_collection.addEntity(entity)
         return entity
-    
+
     def getEntity(self, entityId):
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)
-        
+
         # if entity.tombstone_id is not None:
         #     documentId  = self._getObjectIdFromString(entity.tombstone_id)
         #     document    = self._getMongoDocumentFromId(documentId)
         #     entity      = self._convertFromMongo(document)
 
         return entity
-    
+
     def getEntities(self, entityIds):
         documentIds = []
         for entityId in entityIds:
             documentIds.append(self._getObjectIdFromString(entityId))
         data = self._getMongoDocumentsFromIds(documentIds)
-        
+
         result = []
         for item in data:
             entity = self._convertFromMongo(item)
@@ -110,17 +110,20 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             result.append(entity)
 
         return result
-    
+
+    def getEntitiesByQuery(self, queryDict):
+        return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
+
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
         document = self._updateMongoDocument(document)
-        
+
         return self._convertFromMongo(document)
-    
+
     def removeEntity(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
         return self._removeMongoDocument(documentId)
-    
+
     def removeCustomEntity(self, entityId, userId):
         try:
             query = {'_id': self._getObjectIdFromString(entityId), 'sources.user_generated_id': userId}
@@ -131,7 +134,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         except Exception:
             logs.warning("Cannot remove custom entity")
             raise
-    
+
     def addEntities(self, entities):
         return self._addObjects(entities)
 
