@@ -975,16 +975,21 @@ class StampedAPI(AStampedAPI):
                                           body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.linked_name)
             self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id)
 
+
+
     @API_CALL
-    def addToNetflixInstant(self, authUserId, netflixId):
-        """
-         Asynchronously add an entity to the user's netflix queue
-        """
+    def addToNetflixInstant(self, nf_user_id, nf_token, nf_secret, netflixId):
+        if (nf_user_id is None or nf_token is None or nf_secret is None):
+            logs.info('Returning because of missing account credentials')
+            return None
+
+        netflix = globalNetflix()
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
+
+    @API_CALL
+    def addToNetflixInstantWithUserId(self, authUserId, netflixId):
         account   = self._accountDB.getAccount(authUserId)
 
-        logs.info('### addToNetflixInstant account: %s' % account)
-
-        # TODO return HTTPAction to invoke sign in if credentials are unavailable
         nf_user_id  = None
         nf_token    = None
         nf_secret   = None
@@ -994,24 +999,7 @@ class StampedAPI(AStampedAPI):
             nf_token    = account.linked.netflix.token
             nf_secret   = account.linked.netflix.secret
 
-
-        logs.info('### addToNetflixInstant nf_user_id: %s  nf_token: %s  nf_secret: %s  netflixId: %s' %
-                  (nf_user_id, nf_token, nf_secret, netflixId))
-
-        if (nf_user_id is None or nf_token is None or nf_secret is None):
-            logs.info('Returning because of missing account credentials')
-            return None
-
-        netflix = globalNetflix()
-
-        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
-
-    @API_CALL
-    def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
-
-        account   = self._accountDB.getAccount(authUserId)
-
-        return True
+        return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
 
     """

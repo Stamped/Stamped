@@ -126,8 +126,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
     if http_schema.netflix_add_id is not None:
         try:
-            logs.info('### authUserId: %s' % authUserId)
-            result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
+            result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_id)
         except Exception as e:
             return HttpResponseRedirect("stamped://netflix/add/fail")
         if result == None:
@@ -139,7 +138,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:
-        result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
+        result = stampedAPI.addToNetflixInstantWithUserId(authUserId, http_schema.netflix_id)
     except StampedThirdPartyInvalidCredentialsError:
         return createNetflixLoginResponse(request, http_schema.netflix_id)
     if result == None:
