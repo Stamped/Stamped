@@ -240,9 +240,9 @@
                                                                     color:referenceColor] autorelease];
                 [chunks addObject:activeChunk];
                 normalIndex = end.integerValue;
-                if (activeChunk.lineCount > 1) {
-                    NSLog(@"end:%f", activeChunk.end);
-                }
+//                if (activeChunk.lineCount > 1) {
+//                    NSLog(@"end:%f", activeChunk.end);
+//                }
             }
         }
     }

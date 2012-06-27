@@ -206,10 +206,8 @@ static STStampedActions* _sharedInstance;
         handled = YES;
         if (flag) {
             CreateStampViewController* controller = [[[CreateStampViewController alloc] initWithEntity:context.entity] autorelease];
-            STRootViewController *navController = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
             controller.creditUsers = context.creditedUsers;
-            id menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-            [menuController presentModalViewController:navController animated:YES];
+            [[Util sharedNavigationController] pushViewController:controller animated:YES];
         }
     }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {

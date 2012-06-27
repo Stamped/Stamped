@@ -103,14 +103,14 @@
     id<STUser> user = STStampedAPI.sharedInstance.currentUser;
     if (user) {
         
-        UIImage *image = [[STImageCache sharedInstance] cachedUserImageForUser:user size:STProfileImageSize46];
+        UIImage *image = [[STImageCache sharedInstance] cachedUserImageForUser:user size:STProfileImageSize24];
         if (image) {
             
             [self setUserImageViewImage:image];
             
         } else {
             
-            [[STImageCache sharedInstance] userImageForUser:(id<STUser>)user size:STProfileImageSize46 andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            [[STImageCache sharedInstance] userImageForUser:(id<STUser>)user size:STProfileImageSize24 andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
                 [self setUserImageViewImage:image];
             }];
             

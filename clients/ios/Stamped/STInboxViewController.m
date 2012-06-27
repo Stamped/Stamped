@@ -67,6 +67,7 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILoginNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPIRefreshedTokenNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logginStatusChanged:) name:STStampedAPIUserUpdatedNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
@@ -529,12 +530,8 @@
         
     } else {
         
-        FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
-        STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-        [self presentModalViewController:navController animated:YES];
-        [controller release];
-        [navController release];
-        
+        FindFriendsViewController *controller = [[[FindFriendsViewController alloc] init] autorelease];
+        [[Util sharedNavigationController] pushViewController:controller animated:YES];
     }
     
 }

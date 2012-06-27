@@ -11,6 +11,7 @@
 #import "STRestKitLoader.h"
 #import "STDebug.h"
 #import "STStampedAPI.h"
+#import "STSimpleUserDetail.h"
 
 static id __instance;
 
@@ -209,13 +210,20 @@ static id __instance;
      POST /v0/account/customize_stamp.json
      Takes two fields (color_primary and color_secondary) that are the hex values of the two colors. Returns the full user object.
      */
-    
+    NSLog(@"testing");
     NSString *path = @"/account/customize_stamp.json";
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary", secondary, @"color_secondary", nil];
-    [[STRestKitLoader sharedInstance] loadWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+    [[STRestKitLoader sharedInstance] loadOneWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleUserDetail mapping] andCallback:^(id result, NSError *error, STCancellation *cancellation) {
         
         completion(error);
-        
+        if (result) {
+            id<STUserDetail> userDetail = result;
+            if (userDetail) {
+                [STRestKitLoader sharedInstance].currentUser = userDetail;
+                [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:userDetail];
+            }
+            
+        }
     }];
     
 }
@@ -227,7 +235,7 @@ static id __instance;
      Takes one field (temp_image_url) that has the url of the image. Returns the full user object.
      */
     
-    NSString *path = @"/account/update_profile_image.json";
+    NSString *path = @"/account/update.json";
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:tempPath, @"temp_image_url", nil];
     [[STRestKitLoader sharedInstance] loadWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleLoginResponse mapping] andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
         

@@ -17,22 +17,57 @@
 #define kCaptureActionSheetTag 201
 
 @interface STEditProfileViewController ()
-@property(nonatomic,retain) STS3Uploader *avatarUploader;
+
+@property (nonatomic, retain) STS3Uploader *avatarUploader;
+@property (nonatomic, readwrite, retain) STAccountParameters* data;
+@property (nonatomic, readonly, retain) NSArray* dataSource;
+@property (nonatomic, readonly, retain) NSDictionary* namesForKeyPaths;
+@property (nonatomic, readwrite, retain) id<STAccount> account;
+
+- (NSString*)titleForKeyPath:(NSString*)keyPath;
+- (NSInteger)totalIndexForKeyPath:(NSString*)keyPath;
+- (NSString*)keyPathForTotalIndex:(NSInteger)index;
+
 @end
 
+
+
 @implementation STEditProfileViewController
-@synthesize avatarUploader;
+
+@synthesize data = _data;
+@synthesize account = _account;
+@synthesize dataSource = _dataSource;
+@synthesize avatarUploader = _avatarUploader;
+@synthesize namesForKeyPaths = _namesForKeyPaths;
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
-        
         self.title = NSLocalizedString(@"Edit Profile", @"Edit Profile");
-        NSArray *secion1 = [NSArray arrayWithObjects:@"full name", @"location", @"link", @"bio", nil];
-        NSArray *secion2 = [NSArray arrayWithObjects:@"username", @"email", @"password", @"phone number", nil];
+        _namesForKeyPaths = [[NSDictionary dictionaryWithObjectsAndKeys:
+                              @"link", @"website",
+                              @"phone number", @"phone",
+                              @"username", @"screenName",
+                              nil] retain];
+        NSArray *secion1 = [NSArray arrayWithObjects:@"name", @"location", @"website", @"bio", nil];
+        NSArray *secion2 = [NSArray arrayWithObjects:@"screenName", @"email", @"phone", nil];
         _dataSource = [[NSArray arrayWithObjects:secion1, secion2, nil] retain];
-        
+        _data = [[STAccountParameters alloc] init];
+        id<STUserDetail> currentUser = [STStampedAPI sharedInstance].currentUser;
+        NSArray* sharedKeys = [NSArray arrayWithObjects:@"name", @"location", @"website", @"bio", @"screenName", nil];
+        for (NSString* sharedKey in sharedKeys) {
+            [_data setValue:[(id)currentUser valueForKey:sharedKey] forKey:sharedKey];
+        }
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [_data release];
+    [_account release];
+    [_dataSource release];
+    [_avatarUploader release];
+    [super dealloc];
 }
 
 - (void)viewDidLoad {
@@ -41,24 +76,17 @@
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     self.tableView.allowsSelection = NO;
     
-    /*
-     if (!self.navigationItem.leftBarButtonItem) {
-     
-     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Cancel", @"Cancel") style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
-     self.navigationItem.leftBarButtonItem = button;
-     [button release];
-     
-     }
-     */
     
-    
-    if (!self.navigationItem.rightBarButtonItem) {
-        
-        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Save", @"Save") style:UIBarButtonItemStyleDone target:self action:@selector(save:)];
-        self.navigationItem.rightBarButtonItem = button;
-        [button release];
-        
-    }
+    [[STStampedAPI sharedInstance] accountWithCallback:^(id<STAccount> account, NSError *error, STCancellation *cancellation) {
+        self.account = account; 
+        NSLog(@"account:%@", account);
+        if (!self.navigationItem.rightBarButtonItem) {
+            STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Save", @"Save") style:UIBarButtonItemStyleDone target:self action:@selector(save:)];
+            self.navigationItem.rightBarButtonItem = button;
+            [button release];
+        }
+        [self.tableView reloadData];
+    }];
     
     STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
     background.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -85,10 +113,6 @@
         [view release];
     }
     
-}
-
-- (void)viewDidUnload {
-    [super viewDidUnload];
 }
 
 
@@ -182,7 +206,7 @@
         
         if (self.tableView.tableHeaderView) {
             EditProfileHeaderView *header = (EditProfileHeaderView*)self.tableView.tableHeaderView;
-            header.imageView.imageView.image = image;
+            header.image = image;
         }
         
         [self.avatarUploader cancel];
@@ -220,7 +244,12 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return [_dataSource count];
+    if (self.account) {
+        return 2;
+    }
+    else {
+        return 1;
+    }
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
@@ -243,59 +272,20 @@
     
     NSArray *array = [_dataSource objectAtIndex:indexPath.section];
     
+    NSString* keyPath = [array objectAtIndex:indexPath.row];
+    NSString* title = [self titleForKeyPath:keyPath];
+    NSString* value = [self.data valueForKey:keyPath];
     cell.textField.returnKeyType = UIReturnKeyDone;
-    cell.titleLabel.text = [array objectAtIndex:indexPath.row];
-    cell.textField.secureTextEntry = [cell.titleLabel.text isEqualToString:@"password"];
+    cell.titleLabel.text = title;
+    cell.textField.text = value ? value : @"";
+    cell.textField.tag = [self totalIndexForKeyPath:keyPath];
     cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
     
-    if (indexPath.section == 1 && indexPath.row == 1) {
+    if ([keyPath isEqualToString:@"email"]) {
         cell.textField.keyboardType = UIKeyboardTypeEmailAddress;
-    } else if (indexPath.section == 1 && indexPath.row == 3) {
+    } else if ([keyPath isEqualToString:@"phone"]) {
         cell.textField.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
     }
-    
-#warning tempoary code to fill fields
-    
-    id<STUserDetail> user = [[STStampedAPI sharedInstance] currentUser];
-    if (indexPath.section == 0) {
-        
-        switch (indexPath.row) {
-            case 0:
-                cell.textField.text = user.name;
-                break;
-            case 1:
-                cell.textField.text = user.location;
-                break;
-            case 2:
-                cell.textField.text = user.website;
-                break;
-            case 3:
-                cell.textField.text = user.bio;
-                break;
-            default:
-                break;
-        }
-        
-    } else if (indexPath.section == 1) {
-        
-        switch (indexPath.row) {
-            case 0:
-                cell.textField.text = user.screenName;
-                break;
-            case 1:
-                if ([user respondsToSelector:@selector(email)]) {
-                    cell.textField.text = [(id)user email];
-                }
-                break;
-            case 2:
-            case 3:
-                break;
-            default:
-                break;
-        }
-        
-    }
-    
     
     return cell;
     
@@ -391,24 +381,11 @@
 
 #pragma mark - UITextFieldDelegate
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+- (void)textFieldDidEndEditing:(UITextField *)textField {
     
-    if (textField.returnKeyType == UIReturnKeyDone) {
-        [textField resignFirstResponder];
-        return YES;;
-    }
-    
-    NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell*)textField.superview];
-    if (indexPath && indexPath.row < [_dataSource count]) {
-        STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row+1 inSection:0]];
-        if (cell) {
-            [cell.textField becomeFirstResponder];
-            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:indexPath.row+1 inSection:0] atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
-        }
-    }
-    
-    return YES;
-    
+    NSInteger index = textField.tag;
+    NSString* keypath = [self keyPathForTotalIndex:index];
+    [self.data setValue:textField.text forKey:keypath];
 }
 
 
@@ -444,6 +421,48 @@
     
 }
 
+#pragma mark - Private
 
+- (NSString *)titleForKeyPath:(NSString *)keyPath {
+    NSString* alias = [self.namesForKeyPaths objectForKey:keyPath];
+    if (alias) {
+        return alias;
+    }
+    else {
+        return keyPath;
+    }
+}
+
+//TODO optimize
+- (NSInteger)totalIndexForKeyPath:(NSString *)keyPath {
+    NSInteger i = 0;
+    for (NSInteger s = 0; s < self.dataSource.count; s++) {
+        NSArray* array = [self.dataSource objectAtIndex:s];
+        for (NSInteger r = 0; r < array.count; r++) {
+            NSString* key = [array objectAtIndex:r];
+            if ([key isEqualToString:keyPath]) {
+                return i;
+            }
+            i++;
+        }
+    }
+    return -1;
+}
+
+//OPTIMIZE
+- (NSString *)keyPathForTotalIndex:(NSInteger)index {
+    
+    NSInteger i = 0;
+    for (NSInteger s = 0; s < self.dataSource.count; s++) {
+        NSArray* array = [self.dataSource objectAtIndex:s];
+        for (NSInteger r = 0; r < array.count; r++) {
+            if (i == index) {
+                return [array objectAtIndex:r];
+            }
+            i++;
+        }
+    }
+    return @"";
+}
 
 @end

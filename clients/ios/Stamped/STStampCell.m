@@ -39,14 +39,16 @@
       
       CGFloat originY = 10.0f;
       UIImage *image = [UIImage imageNamed:@"stamp_cell_shadow_footer.png"];
-      UIImageView *footer = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
+      UIImageView *footer = [[[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]] autorelease];
       footer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-      [self addSubview:footer];
-      [footer release];
       CGRect frame = footer.frame;
       frame.size.width = self.frame.size.width;
       frame.origin.y = floorf(self.bounds.size.height-frame.size.height);
       footer.frame = frame;
+      
+      [self addSubview:footer];
+      
+      
       _footerImageView = footer;
       
       // user image view
@@ -107,6 +109,7 @@
               UIFont *font = [UIFont stampedTitleLightFontWithSize:36];
               CGContextSetFillColorWithColor(ctx, [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.149f green:0.149f blue:0.149f alpha:1.0f] CGColor]);
               
+              CGContextSetCharacterSpacing(ctx, 10);
               CGPoint point = CGPointMake(0.0f, 18.0f);
               CGFloat maxWidth = rect.size.width - 36.0f;
               BOOL _drawn = NO;
@@ -160,8 +163,9 @@
                       CGContextRestoreGState(ctx);
                       
                   }
-
                   [subString drawAtPoint:point withFont:font];
+                  
+                  CGContextShowTextAtPoint(ctx, point.x, point.y, "Test", 4);
                   point.x = originX;
 
                   if (truncate) {
@@ -338,21 +342,20 @@
     _dateLabel.frame = frame;
     
     // user avatar
-    _userImageView.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize46]];
+    _userImageView.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize96]];
     
 }
 
 - (void)toggleHightlighted:(BOOL)highlighted {
-    
     if (highlighted) {
         _statsDots.fillColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.0f].CGColor;
         _statsDots.strokeColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor;
         _footerImageView.hidden = YES;
-    } else {
+    }
+    else {
         _statsDots.fillColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f].CGColor;
         _statsDots.strokeColor = [UIColor colorWithRed:0.8509f green:0.8509f blue:0.8509f alpha:1.0f].CGColor;
     }
-    
 }
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
@@ -381,7 +384,6 @@
 }
 
 + (CGFloat)heightForStamp:(id<STStamp>)stamp {
-
     if (stamp) {
         NSInteger count = stamp.previews.credits.count + stamp.previews.likes.count + stamp.previews.todos.count; //stamp.previews.comments.count;
         if (count > 0) {
@@ -389,12 +391,11 @@
         }
     }
     return 92.0f;
-    
 }
 
 + (STCancellation*)prepareForStamp:(id<STStamp>)stamp withCallback:(void (^)(NSError* error, STCancellation* cancellation))block {
     NSArray* images = [STPreviewsView imagesForPreviewWithStamp:stamp andMaxRows:1];
-    NSMutableArray* allImages = [NSMutableArray arrayWithObject:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize46]];
+    NSMutableArray* allImages = [NSMutableArray arrayWithObject:[Util profileImageURLForUser:stamp.user withSize:STProfileImageSize48]];
     [allImages addObjectsFromArray:images];
     return [STCancellation loadImages:allImages withCallback:block];
 }

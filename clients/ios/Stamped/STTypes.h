@@ -27,12 +27,10 @@ typedef enum {
 // These are represented using points, but downscaling is handled for
 // non-retina displays.
 typedef enum {
-    STProfileImageSize28 = 28,
-    STProfileImageSize31 = 31,
-    STProfileImageSize37 = 37,
-    STProfileImageSize46 = 46,
-    STProfileImageSize55 = 55,
-    STProfileImageSize72 = 72,
+    STProfileImageSize24 = 24,
+    STProfileImageSize48 = 48,
+    STProfileImageSize60 = 60,
+    STProfileImageSize96 = 96,
     STProfileImageSize144 = 144,
 } STProfileImageSize;
 

@@ -607,7 +607,7 @@ static STStampedAPI* _sharedInstance;
 
 - (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                                        andCallback:(void(^)(NSArray<STTodo>*, NSError*, STCancellation*))block {
-    NSString* path = @"/todos/show.json";
+    NSString* path = @"/todos/collection.json";
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
                                             authenticated:YES

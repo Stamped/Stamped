@@ -229,6 +229,13 @@ typedef enum STGradientStyle {
                                        lineHeight:(CGFloat)lineHeight 
                                            indent:(CGFloat)indent;
 
++ (NSAttributedString *)attributedStringForString:(NSString *)aString 
+                                             font:(UIFont *)aFont 
+                                            color:(UIColor *)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent 
+                                          kerning:(CGFloat)kerning;
+
 + (CGFloat)endForString:(NSAttributedString*)string withSize:(CGSize)bounds;
 
 + (void)drawAttributedString:(NSAttributedString*)string atPoint:(CGPoint)origin withWidth:(CGFloat)width andMaxHeight:(CGFloat)height;
@@ -238,5 +245,7 @@ typedef enum STGradientStyle {
 + (void)setBottomLeftForView:(UIView*)view toPoint:(CGPoint)point;
 
 + (CGRect)scaledRectWithRect:(CGRect)original andScale:(CGFloat)scale;
+
++ (id<STImage>)bestImageFromImages:(NSArray<STImage>*)images forSize:(CGSize)size;
 
 @end

@@ -75,7 +75,6 @@
         _stampCache = [cache retain];
         self.stampSnapshot = _stampCache.snapshot;
     }
-    NSLog(@"loaded %@: %d", cache, self.stampSnapshot.count);
     [self reloadDataSource];
     [self reloadTableView:NO];
 }

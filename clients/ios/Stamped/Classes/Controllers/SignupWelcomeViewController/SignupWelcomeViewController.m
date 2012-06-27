@@ -20,6 +20,8 @@
 #import "STAccountParameters.h"
 #import "LoginLoadingView.h"
 #import "STS3Uploader.h"
+#import "STInboxViewController.h"
+#import "STMenuController.h"
 
 @interface SignupWelcomeViewController ()
 @property(nonatomic,readonly) SignupWelcomeType signupType;

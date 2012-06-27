@@ -36,11 +36,15 @@
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search users"];
-    [Util addHomeButtonToController:self withBadge:YES];
+    //[Util addHomeButtonToController:self withBadge:YES];
+    self.tableView.contentOffset = CGPointZero;
 }
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
 }
 
 - (void)viewDidAppear:(BOOL)animated {
