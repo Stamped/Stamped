@@ -88,6 +88,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'raiders of the lost ark',
                 'saturday night live',
                 'south park',
+                'superman',
                 'spongebob squarepants',
                 'spongebob',
                 'teenage mutant ninja turtles II',
