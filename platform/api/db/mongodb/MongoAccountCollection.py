@@ -34,9 +34,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         
         if 'screen_name' in document:
             document['screen_name_lower'] = str(document['screen_name']).lower()
-        if 'name' in document:
+        if 'name' in document and document['name'] is not None:
             document['name_lower'] = unicode(document['name']).lower()
-        if 'phone' in document:
+        if 'phone' in document and document['phone'] is not None:
             document['phone'] = str(document['phone'])
 
         return document

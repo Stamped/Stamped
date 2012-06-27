@@ -16,17 +16,17 @@ from MongoStampedAPI                    import MongoStampedAPI
 from boto.sdb.connection                import SDBConnection
 from boto.exception                     import SDBResponseError
 from db.mongodb.MongoStatsCollection    import MongoStatsCollection
-from gevent.pool                        import Pool
-from datetime                           import datetime
-from datetime                           import timedelta
+from datetime                           import datetime, timedelta
 from topStamped                         import getTopStamped
- 
+
+
+utils.init_db_config('peach.db2')
+
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
 acct_collection = api._userDB._collection
 
 query = logsQuery()
-
 
 v1_init = datetime(2011,11,21)
 
@@ -46,8 +46,8 @@ def weekAgo(date):
 
 def newStamps():
     todays = stamp_collection.find({'timestamp.created': {'$gte': today()}}).count()
-    yesterdays = stamp_collection.find({'timestamp.created': {'$gte': yesterday(today()), '$lt': yesterday(now())}}).count()
     
+    yesterdays = stamp_collection.find({'timestamp.created': {'$gte': yesterday(today()), '$lt': yesterday(now())}}).count()
     
     weeklyAgg = yesterdays
     bgn = yesterday(today())
@@ -62,15 +62,15 @@ def newStamps():
     try:
         deltaDay = float(todays - yesterdays)/(yesterdays)*100.0
     except ZeroDivisionError:
-        deltaDay = 'N/A'
+        deltaDay = 0.0
     
     try: 
         deltaWeek = float(todays - weeklyAvg)/(weeklyAvg)*100
     except ZeroDivisionError:
-        deltaWeek = 'N/A'
+        deltaWeek = 0.0
     
     
-    return (todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
+    return todays,yesterdays,weeklyAvg,deltaDay,deltaWeek
 
 def newAccounts():
     todays = acct_collection.find({'timestamp.created': {'$gte': today()}}).count()
@@ -84,19 +84,18 @@ def newAccounts():
         bgn = yesterday(bgn)
         end = yesterday(end)
         weeklyAgg += acct_collection.find({'timestamp.created': {'$gte': bgn, '$lt': end}}).count()
-        print "%s thru %s: %s" % (bgn,end,weeklyAgg)
         
     weeklyAvg = weeklyAgg / 6.0
     
     try:
         deltaDay = float(todays - yesterdays)/(yesterdays)*100.0
     except ZeroDivisionError:
-        deltaDay = 'N/A'
+        deltaDay = 0.0
     
     try: 
         deltaWeek = float(todays - weeklyAvg)/(weeklyAvg)*100
     except ZeroDivisionError:
-        deltaWeek = 'N/A'
+        deltaWeek = 0.0
     
     
     return (todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
@@ -118,65 +117,15 @@ def todaysUsers():
     try:
         deltaDay = float(todays - yesterdays)/(yesterdays)*100.0
     except ZeroDivisionError:
-        deltaDay = 'N/A'
+        deltaDay = 0.0
     
     try: 
         deltaWeek = float(todays - weeklyAvg)/(weeklyAvg)*100
     except ZeroDivisionError:
-        deltaWeek = 'N/A'
+        deltaWeek = 0.0
     
     return (todays,yesterdays,weeklyAvg,deltaDay,deltaWeek)
     
-    
-while True:
-    
-    todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = newStamps()
-    
-    print now()
-    print "Stamps Today: %s" % todays
-    print "Stamps Yesterday: %s" % yesterdays
-    print "D2D Change: %s%%" % deltaDay
-    print "Weekly Avg: %s" % weeklyAvg
-    print "W2D Change: %s%%" % deltaWeek
-    
-    todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = newAccounts()
-    
-
-    print "New Accounts Today: %s" % todays
-    print "New Accounts Yesterday: %s" % yesterdays
-    print "D2D Change: %s%%" % deltaDay
-    print "Weekly Avg: %s" % weeklyAvg
-    print "W2D Change: %s%%" % deltaWeek
-    
-    todays,yesterdays,weeklyAvg,deltaDay,deltaWeek = todaysUsers()
-    
-
-    print "Active Users Today: %s" % todays
-    print "Active Users Yesterday: %s" % yesterdays
-    print "D2D Change: %s%%" % deltaDay
-    print "Weekly Avg: %s" % weeklyAvg
-    print "W2D Change: %s%%" % deltaWeek
-    
-   
-#    print "Most Stamped Today:"
-#    dailyTop = getTopStamped(None,str(today().date()),stamp_collection)
-#    count = 1
-#    for i in dailyTop[0:25]:
-#        print "%s) %s: %s stamps" % (count, i['_id'], int(i['value']))
-#        count += 1
-#    
-#    print "\nTrending this Week:"
-#    past_week = today() - timedelta(days=6)
-#    weeklyTop = getTopStamped(None,str(past_week.date()),stamp_collection)
-#    count = 1
-#    for i in weeklyTop[0:25]:
-#        print "%s) %s" % (count, i['_id'])
-#        count += 1
-    
-    #Show me the top stamped this week by vertical
-    
-    raw_input("Press Enter to refresh...")
-
 
 
 

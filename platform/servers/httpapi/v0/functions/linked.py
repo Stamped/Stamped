@@ -79,9 +79,17 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
-def createNetflixLoginResponse(authUserId, netflixAddId=None):
+def createNetflixLoginResponse(request, netflixAddId=None):
+    if 'oauth_token' in request.GET:
+        oauth_token = request.GET['oauth_token']
+    elif 'oauth_token' in request.POST:
+        oauth_token = request.POST['oauth_token']
+    else:
+        raise StampedInputError("Access token not found")
+
+
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(authUserId, netflixAddId)
+    secret, url = netflix.getLoginUrl(oauth_token, netflixAddId)
 
     response                = HTTPEndpointResponse()
     source                  = HTTPActionSource()
@@ -95,10 +103,9 @@ def createNetflixLoginResponse(authUserId, netflixAddId=None):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["GET"])
 def netflixLogin(request, authUserId, **kwargs):
-    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+    return createNetflixLoginResponse(request, http_schema.netflix_id)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
-    parse_request_kwargs={'allow_oauth_token': True})
+@handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
@@ -108,9 +115,10 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
         result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
+
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
-    linked.user_id                  = result['user_id']
+    linked.linked_user_id                  = result['user_id']
     linked.token                    = result['oauth_token']
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
@@ -131,9 +139,9 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     try:
         result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
     except StampedThirdPartyInvalidCredentialsError:
-        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+        return createNetflixLoginResponse(request, http_schema.netflix_id)
     if result == None:
-        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+        return createNetflixLoginResponse(request, http_schema.netflix_id)
 
     response = HTTPEndpointResponse()
 

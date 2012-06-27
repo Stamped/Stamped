@@ -687,6 +687,21 @@ class HTTPAPNSToken(Schema):
     def setSchema(cls):
         cls.addProperty('token',                            basestring, required=True)
 
+class HTTPSettingsToggle(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('toggle_id',                        basestring, required=True)
+        cls.addProperty('type',                             basestring, required=True)
+        cls.addProperty('value',                            bool, required=True)
+
+class HTTPSettingsGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('group_id',                         basestring, required=True)
+        cls.addProperty('name',                             basestring, required=True) # Used for display
+        cls.addProperty('desc',                             basestring) # Used for display
+        cls.addNestedPropertyList('toggles',                HTTPSettingsToggle)
+
 
 # ##### #
 # Users #
