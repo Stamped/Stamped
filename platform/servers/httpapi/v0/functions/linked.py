@@ -109,7 +109,6 @@ def netflixLogin(request, authUserId, **kwargs):
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
-    authUserId = http_schema.stamped_oauth_token
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
         result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
@@ -118,7 +117,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
-    linked.linked_user_id                  = result['user_id']
+    linked.linked_user_id           = result['user_id']
     linked.token                    = result['oauth_token']
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
