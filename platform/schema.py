@@ -200,6 +200,8 @@ class Schema(object):
         return self.dataExport()
 
     def __setstate__(self, state):
+        self.__properties = {}
+        self.__required_count = 0
         self.dataImport(state)
 
     #TODO: make this a true repr string

@@ -29,7 +29,7 @@ def loadSearchResultsFromFile(filename):
     with open(filename) as f:
         fullResults = pickle.load(f)
     for query, resultList in fullResults.iteritems():
-        stripedList = [(stripEntity(entity), cluster) for entity, cluster in resultList]
+        stripedList = [(entity, stripEntity(entity.dataExport()), cluster) for entity, cluster in resultList]
         returnDict[query] = stripedList
     return returnDict
 
@@ -45,7 +45,7 @@ def stripEntity(entityDict):
     if 'sources' in entityDict:
         entityDict['sources'] = stripTimestamps(entityDict['sources'])
     return entityDict
-    
+
 
 def differenceScore(left, right):
     commonKeys = left.viewkeys() & right.viewkeys()
@@ -89,7 +89,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     diffScores = []
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
-            score = differenceScore(left[0].dataExport(), right[0].dataExport())
+            score = differenceScore(left[1], right[1])
             if score <= diffThreshold:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
@@ -148,7 +148,7 @@ def writeSingleEntity(entity, outputDir, filename, cellId):
     with open(path.join(outputDir, filename), 'w') as fout:
         # TODO(geoff): This doesn't produce proper HTML
         print >> fout, '<pre>'
-        pprint.pprint(entity.dataExport(), fout)
+        pprint.pprint(entity[1], fout)
         print >> fout, '</pre>'
     return '%s<a href="%s">%s</a></td>' % (
             makeHighlightingTableCell(cellId), filename, extractLinkText(entity))
@@ -158,8 +158,8 @@ def makeHighlightingTableCell(name):
     return '<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">' % ((name,) * 3)
 
 def writeCompareEntity(left, right, outputDir, filename):
-    leftLines = pprint.pformat(left.dataExport()).split('\n')
-    rightLines = pprint.pformat(right.dataExport()).split('\n')
+    leftLines = pprint.pformat(left[1]).split('\n')
+    rightLines = pprint.pformat(right[1]).split('\n')
     differ = difflib.HtmlDiff(wrapcolumn=100)
     with open(path.join(outputDir, filename), 'w') as fout:
         print >> fout, differ.make_file(leftLines, rightLines)
