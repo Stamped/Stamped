@@ -16,20 +16,21 @@ import math
 
 def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dropoffFactor=0.7):
     """
-    Takes a list of unscored resolver objects and does the initial pass of scoring, just accounting for base source
+    Takes a list of resolver objects and does the initial pass of relevance scoring, just accounting for base source
     credibility and position in the list.
     """
     currScore = sourceScore
-    scoredResults = []
+    searchResults = []
     for rank, resolverObject in enumerate(resolverObjectList):
-        result = SearchResult(currScore, resolverObject)
-        result.addScoreComponentDebugInfo('Initial scoring for ranking at %d' % (rank + 1), currScore)
-        scoredResults.append(result)
+        result = SearchResult(resolverObject)
+        result.relevance = currScore
+        result.addRelevanceComponentDebugInfo('Initial score for ranking at %d' % (rank + 1), currScore)
+        searchResults.append(result)
         currScore *= dropoffFactor
-    return scoredResults
+    return searchResults
 
 
-def smoothScores(searchResultList, minGrowthFactor=1.05):
+def smoothRelevanceScores(searchResultList, minGrowthFactor=1.05):
     """
     For several sources and verticals -- the biggest example is music -- we have to issue several requests to the same
     source to capture different subsets of the vertical. (For music, we often have to request tracks/songs/albums
@@ -47,30 +48,30 @@ def smoothScores(searchResultList, minGrowthFactor=1.05):
     2. Call scoreResultsWithBasicDropoffScoring() on each.
     3. Use other insights to adjust scores to address issues with prominence between the result sets. (Correlate songs
        with albums, etc.)
-    4. Call smoothScores on each result set that has been augmented.
+    4. Call smoothRelevanceScores on each result set that has been augmented.
     5. Optionally adjust scores to correct for known issues with ranking WITHIN result sets. (For instance, if iTunes
        always overestimates the values of indie artists without AMG IDs, you'd want to correct for that here, because
        if you penalize the indie artists badly in #3 it might get undone in #4 if there's an artist below that you
        didn't devalue.)
-    6. Combine results with interleaveResultsByScore.
+    6. Combine results with interleaveResultsByRelevance.
     """
     if len(searchResultList) <= 1:
         return
 
     resultsBackwards = list(reversed(searchResultList))
-    lastScore = resultsBackwards[0].score
+    lastScore = resultsBackwards[0].relevance
     for nextResult in resultsBackwards[1:]:
         lastScore = lastScore * minGrowthFactor
-        if nextResult.score >= lastScore:
-            lastScore = nextResult.score
+        if nextResult.relevance >= lastScore:
+            lastScore = nextResult.relevance
         else:
-            nextResult.addScoreComponentDebugInfo('Smoothing from %f to %f' % (nextResult.score, lastScore),
-                                                  lastScore - nextResult.score)
-            nextResult.score = lastScore
+            nextResult.addRelevanceComponentDebugInfo('Smoothing from %f to %f' % (nextResult.relevance, lastScore),
+                                                  lastScore - nextResult.relevance)
+            nextResult.relevance = lastScore
 
 
-def sortByScore(results):
-    results.sort(key=lambda result: result.score, reverse=True)
+def sortByRelevance(results):
+    results.sort(key=lambda result: result.relevance, reverse=True)
 
 
 def stringRelevance(queryText, resultText):
@@ -91,26 +92,26 @@ def stringRelevance(queryText, resultText):
     return totalMatch / (len(queryText) ** nonContinuityPenalty)
 
 
-def interleaveResultsByScore(resultLists):
+def interleaveResultsByRelevance(resultLists):
     allResults = [result for resultList in resultLists for result in resultList]
-    sortByScore(allResults)
+    sortByRelevance(allResults)
     return allResults
 
 
-def dedupeById(scoredResults, boostFactor=1.0):
+def dedupeById(searchResults, boostFactor=1.0):
     keysToResults = {}
-    for scoredResult in scoredResults:
-        key = scoredResult.resolverObject.key
+    for searchResult in searchResults:
+        key = searchResult.resolverObject.key
         if key in keysToResults:
             priorResult = keysToResults[key]
             # For several sources we send several different types of queries out, and often they can have some overlap.
             # If two queries sent to one source for a specific query both return something with the same key, it's a
             # good sign that the result is relevant.
-            priorResult.score += scoredResult.score * boostFactor
-            priorResult.addScoreComponentDebugInfo('boost from dupe by ID within results from single source',
+            priorResult.relevance += searchResult.relevance * boostFactor
+            priorResult.addRelevanceComponentDebugInfo('boost from dupe by ID within results from single source',
                                                    boostFactor)
         else:
-            keysToResults[key] = scoredResult
+            keysToResults[key] = searchResult
     return keysToResults.values()
 
 
@@ -131,11 +132,11 @@ def augmentScoreForTextRelevance(results, queryText, resultTextExtractor, maxRel
     for result in results:
         resultText = resultTextExtractor(result)
         titleBoost = maxRelevanceBoost ** stringRelevance(queryText, resultText)
-        result.score *= titleBoost
-        result.addScoreComponentDebugInfo('title similarity factor', titleBoost)
+        result.relevance *= titleBoost
+        result.addRelevanceComponentDebugInfo('title similarity factor', titleBoost)
 
 
-def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
+def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, queryLatLng):
     """
     What I'm really looking for here are hints as to how I should blend between search and autocomplete results.
     TODO: We should do text matching that extends past the title and into the address as well -- queries like
@@ -150,13 +151,13 @@ def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
             # Maxes out at 1.5 if it's identical.
             if titleSimilarity == 1:
                 factor += 0.1
-            result.score *= factor
-            result.addScoreComponentDebugInfo('title similarity factor', factor)
+            result.relevance *= factor
+            result.addRelevanceComponentDebugInfo('title similarity factor', factor)
 
         if queryLatLng and result.resolverObject.coordinates:
             distance = geoDistance(queryLatLng, result.resolverObject.coordinates)
             # Works out to about x2 for being right fucking next to something and x1.2 for being 25km away.
             distance_boost = 1 + math.log(100 / distance, 1000)
-            result.score *= distance_boost
-            result.addScoreComponentDebugInfo('proximity score factor', distance_boost)
+            result.relevance *= distance_boost
+            result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
 

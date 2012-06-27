@@ -640,48 +640,6 @@ class HTTPAccountChangePassword(Schema):
         cls.addProperty('old_password',                     basestring, required=True)
         cls.addProperty('new_password',                     basestring, required=True)
 
-class HTTPAccountAlerts(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('ios_alert_credit',                 bool)
-        cls.addProperty('ios_alert_like',                   bool)
-        cls.addProperty('ios_alert_todo',                   bool)
-        cls.addProperty('ios_alert_mention',                bool)
-        cls.addProperty('ios_alert_comment',                bool)
-        cls.addProperty('ios_alert_reply',                  bool)
-        cls.addProperty('ios_alert_follow',                 bool)
-        cls.addProperty('email_alert_credit',               bool)
-        cls.addProperty('email_alert_like',                 bool)
-        cls.addProperty('email_alert_todo',                 bool)
-        cls.addProperty('email_alert_mention',              bool)
-        cls.addProperty('email_alert_comment',              bool)
-        cls.addProperty('email_alert_reply',                bool)
-        cls.addProperty('email_alert_follow',               bool)
-
-    def __init__(self):
-        Schema.__init__(self)
-        self.ios_alert_credit           = False
-        self.ios_alert_like             = False
-        self.ios_alert_todo             = False
-        self.ios_alert_mention          = False
-        self.ios_alert_comment          = False
-        self.ios_alert_reply            = False
-        self.ios_alert_follow           = False
-        self.email_alert_credit         = False
-        self.email_alert_like           = False
-        self.email_alert_todo           = False
-        self.email_alert_mention        = False
-        self.email_alert_comment        = False
-        self.email_alert_reply          = False
-        self.email_alert_follow         = False
-
-    def importAccount(self, account):
-        alerts = getattr(account, 'alert_settings', None)
-        if alerts is not None:
-            self.dataImport(alerts.dataExport(), overflow=True)
-
-        return self
-
 class HTTPAPNSToken(Schema):
     @classmethod
     def setSchema(cls):
@@ -701,6 +659,12 @@ class HTTPSettingsGroup(Schema):
         cls.addProperty('name',                             basestring, required=True) # Used for display
         cls.addProperty('desc',                             basestring) # Used for display
         cls.addNestedPropertyList('toggles',                HTTPSettingsToggle)
+
+class HTTPSettingsToggleRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('on',                               basestring)
+        cls.addProperty('off',                              basestring)
 
 
 # ##### #
