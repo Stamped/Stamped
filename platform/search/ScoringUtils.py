@@ -62,7 +62,7 @@ def smoothScores(searchResultList, minGrowthFactor=1.05):
             nextResult.score = lastScore
 
 def sortByScore(results):
-    results.sort(lambda r1, r2:cmp(r1.score, r2.score), reverse=True)
+    results.sort(key=lambda result: result.score, reverse=True)
 
 def interleaveResultsByScore(resultLists):
     allResults = [result for resultList in resultLists for result in resultList]
