@@ -83,7 +83,8 @@ class StampedAPICommentsMentions(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[0])
+        self.assertTrue(len(result[0]['blurb_references']) == 1)
+        self.assertTrue(result[0]['blurb_references'][0]['indices'] == [9, 15])
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -99,8 +100,7 @@ class StampedAPICommentsMentions(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[0])
-        self.assertTrue(len(result[0]['mentions']) == 2)
+        self.assertTrue(len(result[0]['blurb_references']) == 2)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -116,7 +116,7 @@ class StampedAPICommentsReply(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[0])
+        self.assertTrue(len(result[0]['blurb_references']) == 1)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -131,7 +131,7 @@ class StampedAPICommentsReply(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[0])
+        self.assertTrue(len(result[0]['blurb_references']) == 1)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -146,7 +146,7 @@ class StampedAPICommentsReply(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertIn('mentions', result[0])
+        self.assertTrue(len(result[0]['blurb_references']) == 1)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -161,7 +161,7 @@ class StampedAPICommentsReply(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue('mentions' not in result[0] or len(result[0]['mentions']) == 0)
+        self.assertTrue('blurb_references' not in result[0] or len(result[0]['blurb_references']) == 0)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
@@ -176,7 +176,7 @@ class StampedAPICommentsReply(StampedAPICommentHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertTrue('mentions' not in result[0] or len(result[0]['mentions']) == 0)
+        self.assertTrue('blurb_references' not in result[0] or len(result[0]['blurb_references']) == 0)
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 

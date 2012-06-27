@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -34,6 +35,8 @@ AMAZON_TOKEN    = 'stamped01-20'
 amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
 non_numeric_re  = re.compile('\D')
 mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
+# URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
+url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -226,6 +229,81 @@ def _convertViewport(string):
     except Exception as e:
         logs.warning("Unable to convert viewport (%s): %s" % (string, e))
         raise StampedInputError("Invalid viewport: %s" % string)
+
+def _buildTextReferences(text):
+    """
+    Extract @mention and URL references from a blurb (e.g. stamp blurb or comment blurb)
+
+    This creates a "view" action for any user mentions extracted. It also creates a "link" action
+    for any URLs it can parse. Additionally, it attempts to replace the full URL with a "prettified"
+    URL that's shorter. This is the only complex part of this section, since the indices of any 
+    after a shortened URL need to be updated.
+    """
+    refs = []
+    offsets = {}
+
+    # Mentions
+    mentions = mention_re.finditer(text)
+    for item in mentions:
+        source = HTTPActionSource()
+        source.name = 'View profile'
+        source.source = 'stamped'
+        source.source_id = item.groups()[0]
+
+        action = HTTPAction()
+        action.type = 'stamped_view_screen_name'
+        action.name = 'View profile'
+        action.sources = [ source ]
+
+        reference = HTTPTextReference()
+        reference.indices = [ item.start(), item.end() ]
+        reference.action = action
+
+        refs.append(reference)
+
+    # URL
+    urls = url_re.finditer(text)
+    for item in url_re.finditer(text):
+        url = item.groups()[0]
+        formatted = url.split('://')[-1].split('?')[0]
+        if '/' in formatted:
+            truncated = "%s..." % formatted[:formatted.index('/')+4]
+            if len(truncated) < len(formatted):
+                formatted = truncated
+        offsets[item.end()] = len(formatted) - len(url)
+        text = string.replace(text, url, formatted)
+
+        source = HTTPActionSource()
+        source.link = url
+        source.name = 'Go to %s' % formatted
+        source.source = 'link'
+
+        action = HTTPAction()
+        action.type = 'link'
+        action.name = 'Go to %s' % formatted
+        action.sources = [ source ]
+
+        reference = HTTPTextReference()
+        reference.indices = [ item.start(), item.end() ]
+        reference.action = action
+
+        refs.append(reference)
+
+    # Update any references affected by changing the URL text
+    for ref in refs:
+        indices = ref.indices
+        for position, offset in offsets.items():
+            if position <= ref.indices[0]:
+                indices = (indices[0] + offset, indices[1] + offset)
+            elif position <= ref.indices[1]:
+                indices = (indices[0], indices[1] + offset)
+        ref.indices = indices
+
+    # Sort by index
+    refs.sort(key=lambda x: x.indices[0])
+
+    return refs
+
 
 # ######### #
 # OAuth 2.0 #
@@ -846,13 +924,16 @@ class HTTPComment(Schema):
         cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
-        cls.addNestedPropertyList('mentions',               MentionSchema) ### TODO: Switch to references
+        cls.addNestedPropertyList('blurb_references',       HTTPTextReference)
         cls.addProperty('created',                          basestring)
 
     def importComment(self, comment):
         self.dataImport(comment.dataExport(), overflow=True)
         self.created = comment.timestamp.created
         self.user = HTTPUserMini().importUserMini(comment.user)
+        references = _buildTextReferences(self.blurb)
+        if len(references) > 0:
+            self.blurb_references = references
         return self
 
 class HTTPCommentNew(Schema):
@@ -1077,12 +1158,12 @@ class HTTPEntity(Schema):
             if 'link' in kwargs:
                 actionSource = HTTPActionSource()
                 actionSource.link = kwargs['link']
-                actionSource.name = 'View link'
+                actionSource.name = 'Go to URL'
                 actionSource.source = 'link'
 
                 action = HTTPAction()
                 action.type = 'link'
-                action.name = 'View link'
+                action.name = 'Go to URL'
                 action.sources = [actionSource]
 
                 item.action = action
@@ -2446,40 +2527,21 @@ class HTTPStamp(Schema):
             item                    = HTTPStampContent()
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
-            #item.modified          = content.timestamp.modified
 
-            blurb_references        = []
-            for screenName in mention_re.finditer(content.blurb):
-                source                  = HTTPActionSource()
-                source.name             = 'View profile'
-                source.source           = 'stamped'
-                source.source_id        = screenName.groups()[0]
-
-                action              = HTTPAction()
-                action.type         = 'stamped_view_screen_name'
-                action.name         = 'View profile'
-                action.sources      = [ source ]
-
-                reference           = HTTPTextReference()
-                reference.indices   = [ screenName.start(), screenName.end() ]
-                reference.action    = action
-
-                blurb_references.append(reference)
-
-            if len(blurb_references) > 0:
-                item.blurb_references = blurb_references
+            references = _buildTextReferences(content.blurb)
+            if len(references) > 0:
+                item.blurb_references = references
 
             if content.images is not None:
                 newImages = []
                 for image in content.images:
                     img = HTTPImage().dataImport(image.dataExport())
-                    # quick fix for now
-                    # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     newImages.append(img)
                 item.images = newImages
 
             # Return contents in chronological order
             contents.append(item)
+
         self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
