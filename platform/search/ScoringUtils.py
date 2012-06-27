@@ -70,7 +70,7 @@ def smoothScores(searchResultList, minGrowthFactor=1.05):
 
 
 def sortByScore(results):
-    results.sort(key=lambda r: r.score, reverse=True)
+    results.sort(key=lambda result: result.score, reverse=True)
 
 
 def stringRelevance(queryText, resultText):

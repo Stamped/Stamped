@@ -1064,6 +1064,8 @@ class AmazonSource(GenericSource):
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
+        if not resultList:
+            return
         # TODO: This math needs some work.
         defaultFactor = 0.2
         def calculateFactor(salesRank):
