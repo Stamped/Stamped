@@ -79,6 +79,14 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = created
 
+        elif 'contents' in document:
+            contents = []
+            for content in document['contents']:
+                if 'mentions' in content:
+                    del(content['mentions'])
+                contents.append(content)
+            document['contents'] = contents
+
         if 'credit' in document:
             document['credits'] = document['credit']
             del(document['credit'])

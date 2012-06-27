@@ -427,7 +427,7 @@ class StampedAPI(AStampedAPI):
         # First, get user information from Twitter using the passed in token
         try:
             twitterUser = self._twitter.getUserInfo(new_tw_account.user_token, new_tw_account.user_secret)
-        except (StampedInputError, StampedUnavailableError):
+        except (StampedInputError, StampedUnavailableError) as e:
             logs.warning("Unable to get user info from Twitter %s" % e)
             raise StampedInputError('Unable to connect to Twitter')
         self._verifyTwitterAccount(twitterUser['id'])
@@ -606,10 +606,6 @@ class StampedAPI(AStampedAPI):
     def updateAccount(self, authUserId, updateAcctForm):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
-
-#        for k,v in fields.iteritems():
-#            if v == '':
-#                fields[k] = None
 
         if 'screen_name' in fields and account.screen_name != fields['screen_name']:
             old_screen_name = account.screen_name
@@ -2667,12 +2663,15 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            else:
-                return 'place'
+            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
+                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
+                return 'store'
+            return 'place'
 
         elif kind == 'person':
             if 'artist' in types:
                 return 'artist'
+            return 'person'
 
         elif kind == 'media_collection':
             if 'tv' in types:
@@ -2682,25 +2681,27 @@ class StampedAPI(AStampedAPI):
 
         elif kind == 'media_item':
             if 'track' in types:
-                return 'track'
+                return 'song'
             elif 'movie' in types:
                 return 'movie'
             elif 'book' in types:
                 return 'book'
+            elif 'song' in types:
+                return 'song'
 
         elif kind == 'software':
             if 'app' in types:
                 return 'app'
-
-        else:
-            return 'other'
+            elif 'video_game' in types:
+                return 'video_game'
+        return 'other'
 
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
+            return "http://static.stamped.com/assets/movie7.html"
         if entityId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
+            return "http://static.stamped.com/assets/movie7.html"
         if userId is not None:
             return "http://static.stamped.com/assets/user.html"
 
