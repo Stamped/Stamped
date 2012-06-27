@@ -124,6 +124,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
 
+    logs.info('### http_schema.netflix_add_id: %s' % http_schema.netflix_add_id)
+
     if http_schema.netflix_add_id is not None:
         try:
             logs.info('### linked.linked_user_id: %s  linked.token: %s  linked.secret: %s  netflix_id: %s' % (linked.linked_user_id, linked.token, linked.secret))
