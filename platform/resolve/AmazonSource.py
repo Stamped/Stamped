@@ -11,6 +11,7 @@ __license__   = "TODO"
 __all__ = [ 'AmazonSource' ]
 
 import Globals
+import numpy
 from logs import report
 
 try:
@@ -1028,34 +1029,31 @@ class AmazonSource(GenericSource):
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
-        if not resultList:
+        """Adjusts the relevance scores of each result based on the sales rank from Amazon.
+
+        The gist of the algorithm is this:
+          - Take the log of all sales ranks. These range from 1 to ~1300000 at the time of writing,
+            so we end up with ranks in roughly [1, 6].
+          - Find mean and stddev of the log of ranks.
+          - The relevance adjustment for each result is then how many stddevs is the log of its
+            sales rank lower than the mean. Being three stddevs lower will give a boost factor of
+            2.0, whereas three stddevs higher will nerf the relevance to 0.
+        """
+        if len(resultList) < 2:
             return
-        # TODO: This math needs some work.
-        defaultFactor = 0.2
-        def calculateFactor(salesRank):
-            return min(2.0, max(0.3, (5000 / salesRank) ** 0.1))
 
-        factors = []
-        for searchResult in resultList:
-            if not searchResult.resolverObject.salesRank:
-                factors.append(defaultFactor)
-            else:
-                factors.append(calculateFactor(searchResult.resolverObject.salesRank))
-        meanFactor = sum(factors) / float(len(resultList))
-        # We want to normalize by the mean because for some searches the results aren't super high salesRank and in
-        # those cases we don't want to ditch Amazon results compared to other sources.
-
-        for searchResult in resultList:
-            salesRank = searchResult.resolverObject.salesRank
-            if salesRank:
-                factor = calculateFactor(salesRank) / meanFactor
-                searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
-                searchResult.relevance *= factor
-            else:
-                # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
-                factor = defaultFactor / meanFactor
-                searchResult.addRelevanceComponentDebugInfo('Amazon missing salesRank factor', factor)
-                searchResult.relevance *= factor
+        # The max rank across a sample was around 1300000 at the time of writing.
+        defaultSalesRank = 2000000
+        salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
+                for searchResult in resultList)
+        logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
+        rankMean = numpy.mean(logSalesRanks)
+        rankStdDev = numpy.std(logSalesRanks)
+        
+        for logRank, searchResult in zip(logSalesRanks, resultList):
+            factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
+            searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
+            searchResult.relevance *= factor
 
     def __scoreFilmResults(self, resolverObjectsLists):
         scoredTvShows = []

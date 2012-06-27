@@ -3015,7 +3015,7 @@ class HTTPActivity(Schema):
 
                 self.action = _buildUserAction(self.objects.users[0])
 
-        elif self.verb == 'restamp' or self.verb == 'credit':
+        elif self.verb == 'credit':
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -3029,9 +3029,6 @@ class HTTPActivity(Schema):
                 self.image = _getIconURL('news_credit_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
-
-            ### TEMP: Switch verb to be "credit" until we can make underlying changes
-            self.verb = 'credit'
 
         elif self.verb == 'like':
             _addStampObjects()
