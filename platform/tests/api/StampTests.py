@@ -35,7 +35,6 @@ class StampedAPIStampConsumeHttpTest(AStampedAPIHttpTestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-
 # CREATE STAMP
 
 class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
@@ -345,96 +344,44 @@ class StampedAPIStampsUserDetails(StampedAPIStampConsumeHttpTest):
         self.assertEqual(result['user']['color_primary'], '123456')
         self.assertEqual(result['user']['color_secondary'], '123456')
 
-# class StampedAPIStampMentionsTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         (self.userC, self.tokenC) = self.createAccount('UserC')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entity = self.createEntity(self.tokenA)
-#         self.stampData = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "entity_id": self.entity['entity_id'],
-#             "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
-#             "credits": self.userB['screen_name']
-#         }
-#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], \
-#             self.stampData)
 
-#     def tearDown(self):
-#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
-#         self.deleteAccount(self.tokenC)
+class StampedAPIStampMentionsTest(AStampedAPIHttpTestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
+            "credits": self.userB['screen_name']
+        }
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], \
+            self.stampData)
 
-# class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
-#     def test_show(self):
-#         path = "stamps/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['contents'][-1]['blurb'], self.stamp['contents'][-1]['blurb'])
-#         self.assertEqual(
-#             result['credits'][0]['screen_name'], 
-#             self.stampData['credits']
-#             )
-#         self.assertTrue(len(result['mentions']) == 1)
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
-# class StampedAPIStampsMentionsUpdate(StampedAPIStampMentionsTest):
-#     def test_no_mentions(self):
-#         path = "stamps/update.json"
-#         blurb = "Really, really delicious."
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
-#         # self.assertTrue(len(result['mentions']) == 0)
-#         self.assertTrue('mentions' not in result)
+class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
+    def test_show(self):
+        path = "stamps/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result['contents'][-1]['blurb'] == self.stamp['contents'][-1]['blurb'])
+        self.assertTrue(result['credits'][0]['user']['screen_name'] == self.stampData['credits'])
+        self.assertTrue(len(result['contents'][-1]['blurb_references']) == 1)
+        self.assertTrue(result['contents'][-1]['blurb_references'][0]['indices'] == [19, 25])
 
-#     def test_two_mentions(self):
-#         path = "stamps/update.json"
-#         blurb = "Thanks again @%s! --@%s" % \
-#                 (self.userB['screen_name'], self.userA['screen_name'])
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
-#         self.assertTrue(len(result['mentions']) == 2)
-
-# class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
-#     def test_no_credit(self):
-#         path = "stamps/update.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "credits": None
-#         }
-#         result = self.handlePOST(path, data)
-#         # self.assertTrue(len(result['credits']) == 0)
-#         self.assertTrue('credits' not in result)
-
-#     def test_two_credits(self):
-#         path = "stamps/update.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "credits": "%s,%s" % (
-#                 self.userB['screen_name'],
-#                 self.userC['screen_name']
-#             )
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertTrue(len(result['credits']) == 2)
 
 class StampedAPIStampsLimits(StampedAPIStampConsumeHttpTest):
     def test_show(self):
@@ -690,7 +637,6 @@ class StampedAPIEntitiesStampedBy(StampedAPIStampConsumeHttpTest):
 
 #        import time
 #        time.sleep(100000)
-
 
 if __name__ == '__main__':
     main()

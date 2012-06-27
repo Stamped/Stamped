@@ -897,28 +897,35 @@ body.app .stamp-gallery-view-map {
   position: relative;
   margin: 0 auto;
 }
-a.lightbox {
+.zoom {
   position: absolute;
   z-index: 101;
   top: 8px;
   right: 16px;
+  display: block;
+  width: 25px;
+  height: 25px;
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
   -ms-transition: opacity 0.2s ease-out;
   -o-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
+  background: url(/assets/img/entityimagehover-sprite.png) no-repeat;
 }
-a.lightbox .zoom {
-  background: url(/assets/img/zoom-icon.png) no-repeat;
-  pointer-events: none;
+.zoom:hover {
+  background-position: 0 -27px;
   cursor: pointer;
-  display: block;
-  width: 25px;
-  height: 25px;
 }
-.stamp-user-image:hover a.lightbox,
-.stamp-entity-image:hover a.lightbox {
+.zoom-map {
+  background-position: -27px 0;
+}
+.zoom-map:hover {
+  background-position: -27px -27px;
+}
+.stamp-user-image:hover .zoom,
+.stamp-entity-image:hover .zoom,
+.static-map-small:hover .zoom {
   opacity: 1;
 }
 .entity-header {

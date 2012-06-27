@@ -83,7 +83,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         except StampedUnavailableError:
             return False
     
-    def lookupUsers(self, userIds, screenNames=None, limit=0):
+    def lookupUsers(self, userIds=None, screenNames=None, limit=0):
         assert userIds is None or isinstance(userIds, list)
         assert screenNames is None or isinstance(screenNames, list)
         
