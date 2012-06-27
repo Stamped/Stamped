@@ -1080,6 +1080,7 @@ class HTTPEntity(Schema):
         cls.addProperty('category',                         basestring, required=True)
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('caption',                          basestring)
+        cls.addProperty('desc',                             basestring)
         cls.addNestedPropertyList('images',                 HTTPImage)
         cls.addProperty('last_modified',                    basestring)
         cls.addNestedProperty('previews',                   HTTPPreviews)
@@ -1197,6 +1198,7 @@ class HTTPEntity(Schema):
         self.subcategory        = entity.subcategory
 
         self.caption            = self.subtitle # Default
+        self.desc               = entity.desc
         self.last_modified      = entity.timestamp.created
 
         subcategory             = self._formatSubcategory(self.subcategory)
