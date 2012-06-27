@@ -52,6 +52,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('book', bookQueries)
 
+    @fixtureTest()
     def test_run_film_queries(self):
         filmQueries = [
                 '1984',  # This one is a DISASTER.
@@ -118,6 +119,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('film', filmQueries)
 
+    @fixtureTest()
     def test_run_music_queries(self):
         musicQueries = [
                 '1980 rehab graffiti the world',
@@ -230,6 +232,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('music', musicQueries)
 
+    @fixtureTest()
     def test_run_place_queries(self):
         placeQueries = [
                 ('A16', (37.806528, -122.406511)),
@@ -286,6 +289,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
             ]
         self.__runQueries('place', placeQueries)
 
+    @fixtureTest()
     def test_run_app_queries(self):
         appQueries = [
                 'Stamped',
