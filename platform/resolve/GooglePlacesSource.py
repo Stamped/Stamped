@@ -236,7 +236,7 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
 
     @property
     def key(self):
-        return self.__data['id']
+        return self.__data['reference']
 
     @lazyProperty
     def __terms(self):
@@ -383,25 +383,25 @@ class GooglePlacesSource(GenericSource):
         
         return self.generatorSource(gen())
 
-    def searchLite(self, queryCategory, queryText, timeout=None, queryLatLng=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         if (queryCategory != 'place'):
             raise NotImplementedError()
 
         print "queryText is", queryText
         print "queryCategory is", queryCategory
-        print "queryLatLng is", queryLatLng
+        print "coords is", coords
 
         localResults = []
         nationalResults = []
         def searchLocally():
-            results = self.__places.getSearchResultsByLatLng(queryLatLng, params={'name': queryText, 'radius': 20000})
+            results = self.__places.getSearchResultsByLatLng(coords, params={'name': queryText, 'radius': 20000})
             if results:
                 localResults.extend(results)
         def searchNationally():
-            results = self.__places.getAutocompleteResults(queryLatLng, queryText)
+            results = self.__places.getAutocompleteResults(coords, queryText)
             if results:
                 nationalResults.extend(results)
-        if queryLatLng:
+        if coords:
             pool = Pool(2)
             pool.spawn(searchLocally)
             pool.spawn(searchNationally)
@@ -419,8 +419,8 @@ class GooglePlacesSource(GenericSource):
         localResults = scoreResultsWithBasicDropoffScoring(localResults, sourceScore=0.4, dropoffFactor=0.9)
         nationalResults = scoreResultsWithBasicDropoffScoring(nationalResults, sourceScore=0.6, dropoffFactor=0.9)
 
-        augmentPlaceScoresForRelevanceAndProximity(localResults, queryText, queryLatLng)
-        augmentPlaceScoresForRelevanceAndProximity(nationalResults, queryText, queryLatLng)
+        augmentPlaceScoresForRelevanceAndProximity(localResults, queryText, coords)
+        augmentPlaceScoresForRelevanceAndProximity(nationalResults, queryText, coords)
 
         smoothScores(localResults)
         smoothScores(nationalResults)

@@ -162,7 +162,7 @@
 				} else {
 					contentWidth = pane[0].scrollWidth;
 				}
-				contentHeight = pane[0].scrollHeight;
+				contentHeight = pane[0].scrollHeight - settings.verticalPadding * 2;
 				pane.css('overflow', '');
 
 				percentInViewH = contentWidth / paneWidth;
@@ -272,7 +272,7 @@
 						appendArrows(verticalTrack, settings.verticalArrowPositions, arrowUp, arrowDown);
 					}
 
-					verticalTrackHeight = paneHeight;
+					verticalTrackHeight = paneHeight - settings.verticalPadding * 2;
 					container.find('>.jspVerticalBar>.jspCap:visible,>.jspVerticalBar>.jspArrow').each(
 						function()
 						{
@@ -1426,9 +1426,10 @@
 		enableKeyboardNavigation	: true,
 		hideFocus					: false,
 		keyboardSpeed				: 0,
-		initialDelay                : 300,        // Delay before starting repeating
-		speed						: 30,		// Default speed when others falsey
-		scrollPagePercent			: .8		// Percent of visible area scrolled when pageUp/Down or track area pressed
+		initialDelay                : 300,      // Delay before starting repeating
+		speed						: 30,       // Default speed when others falsey
+		scrollPagePercent			: .8,       // Percent of visible area scrolled when pageUp/Down or track area pressed
+        verticalPadding             : 0
 	};
 
 })(jQuery,this);

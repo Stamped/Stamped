@@ -24,7 +24,7 @@ def login(request, client_id, http_schema, **kwargs):
     try:
         account, token = stampedAuth.verifyUserCredentials(client_id, http_schema.login, http_schema.password)
     except StampedInvalidCredentialsError:
-        raise StampedHTTPError(409, kind="invalid_credentials")
+        raise StampedHTTPError(401, kind="invalid_credentials")
     
     user = HTTPUser().importAccount(account)
     logs.user(user.user_id)

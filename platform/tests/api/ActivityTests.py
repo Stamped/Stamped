@@ -207,7 +207,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityHttpTest):
 
         self.async(lambda: self.showActivity(self.tokenB), [
             lambda x: self.assertEqual(len(x), 2),
-            lambda x:self.assertTrue(x[0]['verb'] == 'restamp'),
+            lambda x:self.assertTrue(x[0]['verb'] == 'credit'),
         ])
 
         self.deleteStamp(self.tokenA, stamp['stamp_id'])

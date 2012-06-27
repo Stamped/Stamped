@@ -15,16 +15,7 @@ class AppSearchTests(ASearchTestSuite):
     
     def test_basic(self):
         """ Test basic app searches """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = [
             ({ 'query' : 'Stamped', 'category': 'app', }, [ 
                 SearchResultConstraint(title='stamped', types='app', 
@@ -64,7 +55,7 @@ class AppSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_top_free_apps(self):
         """ Test the top free apps from iTunes """
@@ -91,15 +82,6 @@ class AppSearchTests(ASearchTestSuite):
         self.__test_apps(apps)
     
     def __test_apps(self, apps):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = []
         
         for app in apps:
@@ -114,7 +96,7 @@ class AppSearchTests(ASearchTestSuite):
                 SearchResultConstraint(title=name, types='app'), 
             ]))
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
 
 if __name__ == '__main__':
     StampedTestRunner().run()

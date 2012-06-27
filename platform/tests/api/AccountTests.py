@@ -145,6 +145,7 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
     def tearDown(self):
         self.deleteAccount(self.accountA.user_id)
         self.deleteAccount(self.accountB.user_id)
+        self.deleteAccount(self.accountC.user_id)
 
     def test_upgrade_account(self):
         account = self.api.upgradeAccount(self.accountA.user_id, 'devbot@stamped.com', '12345')
@@ -174,7 +175,7 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
             self.api.upgradeAccount(self.accountA.user_id, 'devbot2@stamped.com', '12345')
 
     def test_upgrade_account_already_stamped_auth(self):
-        with expected_exception(DuplicateKeyError):
+        with expected_exception(StampedIllegalActionError):
             self.api.upgradeAccount(self.accountC.user_id, 'devbot2@stamped.com', '12345')
 
 class StampedAPIAccountHttpTest(AStampedAPIHttpTestCase):
@@ -193,7 +194,6 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
             "name": "Pimpbot 5000",
             }
         result = self.handlePOST(path, data)
-        self.assertTrue(result['result'])
         account = self.showAccount(self.token)
         self.assertEqual(account['name'], "Pimpbot 5000")
 

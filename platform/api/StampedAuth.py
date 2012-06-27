@@ -158,12 +158,12 @@ class StampedAuth(AStampedAuth):
             raise StampedLinkedAccountExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
         account = accounts[0]
 
-        if account.linked.facebook is None or account.linked.facebook.user_id is None:
+        if account.linked.facebook is None or account.linked.facebook.linked_user_id is None:
             msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
             logs.warning(msg)
             raise StampedInvalidCredentialsError("Invalid credentials")
 
-        if fb_user['id'] != account.linked.facebook.user_id:
+        if fb_user['id'] != account.linked.facebook.linked_user_id:
             msg = "Invalid credentials: Facebook id does not match Stamped user"
             logs.warning(msg)
             raise StampedInvalidCredentialsError("Invalid credentials")
@@ -210,12 +210,12 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise StampedInvalidCredentialsError("Invalid credentials")
 
-        if account.linked.twitter is None or account.linked.twitter.user_id is None:
+        if account.linked.twitter is None or account.linked.twitter.linked_user_id is None:
             msg = "Invalid credentials: Attempting to login via twitter with an account that has no twitter linked account"
             logs.warning(msg)
             raise StampedInvalidCredentialsError("Invalid credentials")
 
-        if tw_user['id'] != account.linked.twitter.user_id:
+        if tw_user['id'] != account.linked.twitter.linked_user_id:
             msg = "Invalid credentials: twitter id does not match Stamped user"
             logs.warning(msg)
             raise StampedInvalidCredentialsError("Invalid credentials")

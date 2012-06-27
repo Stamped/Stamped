@@ -1,0 +1,47 @@
+{% load stamped_tags %}
+
+{% block pre-popup %}
+<div class="popup {{popup_class}}">
+    <div class="ribbon-top"></div>
+    {% endblock pre-popup %}
+    
+    {% block popup-header %}
+    <div class="popup-header clearfix">
+        <div class="pronounced-title">{{popup_title}}</div>
+        
+        <div class="rhs-icon">
+            {% if popup_class == "popup-likes" %}
+                <div class="tongue"></div>
+            {% endif %}
+        </div>
+    </div>
+    {% endblock popup-header %}
+    
+    {% block popup-body %}
+    <div class="popup-body">
+        <div class="popup-body-inner">
+            {% for user in users %}
+                <div class="user user-primary-selection clearfix">
+                    {% handlebars_template "profile-image-small" user %}
+                    
+                    <img class="stamp" src="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png" />
+                    
+                    <div class="name">
+                        <p class="fullname"><a href="/{{user.screen_name}}">{{user.name}}</a></p>
+                        <p class="screen-name"><a href="/{{user.screen_name}}">{{user.screen_name}}</a></p>
+                    </div>
+                    
+                    <div class="rhs">
+                        <a class="follow-button"></a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endblock popup-body %}
+    
+    {% block post-popup %}
+    <div class="ribbon-bottom"></div>
+</div>
+{% endblock post-popup %}
+

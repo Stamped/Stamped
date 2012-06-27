@@ -58,10 +58,12 @@ class Twitter(object):
     def getUserInfo(self, user_token, user_secret):
         print ('calling verifyCredentials with user_token: %s  user_secret: %s' % (user_token, user_secret))
         result = self.__get(
-            'account/verify_credentials.json',
+            '1/account/verify_credentials.json',
             user_token,
             user_secret,
         )
+        if 'id' not in result:
+            raise StampedThirdPartyError('An error occurred while retrieving user information from Twitter')
         # id is returned as an int, but we'll use it as a string for consistency
         result['id'] = str(result['id'])
         return result
@@ -132,14 +134,14 @@ def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_S
     if 'user_secret' in params:             user_secret = params['user_secret']
 
     #headers = utils.getTwitter('https://api.twitter.com/account/verify_credentials.json', user_token, user_secret)
-    if 'verifyCredentials' in methods:      pprint(twitter.verifyCredentials(user_token, user_secret))
+    if 'getUserInfo' in methods:            pprint(twitter.getUserInfo(user_token, user_secret))
     if 'getFriendIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
     if 'getFollowerIds' in methods:         pprint(twitter.getFollowerIds(user_token, user_secret))
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getFollowerIds'
+    methods = 'getUserInfo'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:
