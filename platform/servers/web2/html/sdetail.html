@@ -181,8 +181,8 @@
     </div>
     
     <div class="section section-entity entity-id entity-id-{{stamp.entity.entity_id}}">
-        <div class="close-button">
-            <a href="#">Close</a>
+        <div class="clearfix">
+            {% handlebars_template "close-button" %}
         </div>
         
         {% handlebars_template "stamp-image-sdetail" stamp %}
@@ -206,7 +206,7 @@
                         {% else %}
                             <a class='action-link' href="">
                         {% endif %}
-                        
+                            
                             <div class="action action-{{action.type}} clearfix">
                                 <div class='entity-title' style="display: none;">
                                     {{stamp.entity.title}}

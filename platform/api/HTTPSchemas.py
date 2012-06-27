@@ -2959,6 +2959,7 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
+                self.icon = _getIconURL('news_follow')
 
                 if len(self.subjects) == 1:
                     self.action = _buildUserAction(self.subjects[0])
@@ -2973,7 +2974,7 @@ class HTTPActivity(Schema):
 
                 self.action = _buildUserAction(self.objects.users[0])
 
-        elif self.verb == 'restamp':
+        elif self.verb == 'restamp' or self.verb == 'credit':
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -3015,7 +3016,6 @@ class HTTPActivity(Schema):
 
             self.action = _buildStampAction(self.objects.stamps[0])
 
-
         elif self.verb == 'todo':
             _addEntityObjects()
 
@@ -3050,7 +3050,14 @@ class HTTPActivity(Schema):
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
+            if activity.personal:
+                self.icon = _getIconURL('news_comment')
+
         elif self.verb == 'reply':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+
             _addStampObjects()
             _addCommentObjects()
 
@@ -3063,8 +3070,13 @@ class HTTPActivity(Schema):
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_reply')
 
         elif self.verb == 'mention':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+
             _addStampObjects()
             _addCommentObjects()
 
@@ -3084,12 +3096,27 @@ class HTTPActivity(Schema):
                 self.body_references = stampBlurbObjectReferences
 
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_mention')
 
         elif self.verb.startswith('friend_'):
-            self.icon = _getIconURL('news_friend')
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+            
+            if self.verb == 'friend_twitter':
+                self.icon = _getIconURL('news_twitter')
+            elif self.verb == 'friend_facebook':
+                self.icon = _getIconURL('news_facebook')
+            else:
+                self.icon = _getIconURL('news_friend')
+
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+                
             _addStampObjects()
 
             if self.source is not None:
@@ -3195,9 +3222,9 @@ class HTTPActivity(Schema):
                     'news_watch_group',
                 ])
 
-                if 'news_%s_group' % (self.source) in actionIcons:
+                if 'news_%s_group' % (self.source) in actionGroupIcons:
                     self.image = _getIconURL('news_%s_group' % (self.source))
-                elif 'news_%s_group' % (self.verb[7:]) in actionIcons:
+                elif 'news_%s_group' % (self.verb[7:]) in actionGroupIcons:
                     self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
                 else:
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))

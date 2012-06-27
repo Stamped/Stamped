@@ -52,12 +52,10 @@
     .section-entity {
         float: right;
         width: 35%;
-        //border: 2px solid red;
         padding: .25em;
         
         .close-button {
-            text-align: right;
-            width: 100%;
+            float: right;
         }
         
         .stamp-preview {
@@ -473,6 +471,7 @@
                                     
                                     width:  17px;
                                     height: 17px;
+                                    pointer-events: none;
                                 }
                                 
                                 .expand {
@@ -738,154 +737,6 @@
     .attribution {
         font-style: italic;
         font-size: 70%;
-    }
-}
-
-
-/* **************************************************************************
-                                POPUP VIEWS
-   ************************************************************************** */
-
-
-.popup {
-    max-width: 382px;
-    @padding:  24px;
-    
-    // TODO: add large 50px drop shadow
-    
-    background-color: #fff;
-    
-    .popup-header {
-        position: relative;
-        z-index: 5000;
-        
-        padding: (@padding / 2) @padding;
-        white-space: nowrap;
-        
-        .box-shadow(0, 3px, 3px, 0, @shadow);
-        .rounded(2px);
-        
-        .pronounced-title {
-            float: left;
-        }
-        
-        .rhs-icon {
-            background: url(/assets/img/popup_icons_sprite.png) no-repeat;
-            position: relative;
-            float: right;
-            
-            margin-top: 16px;
-            width:  36px;
-            height: 36px;
-            
-            .tongue {
-                background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
-                position: absolute;
-                
-                width:  36px;
-                height: 36px;
-                opacity: 0;
-                
-                // TODO: figure out why this transform is only working in webkit
-                .transform(perspective(600) scaleX(.01) scaleY(.01) rotateX(20deg));
-                .transition-transform2(.2s, ease-out, opacity, .2s, ease-out);
-            }
-            
-            &:hover .tongue {
-                opacity: 1;
-                .transform(perspective(600));
-            }
-        }
-    }
-    
-    .popup-body {
-        overflow: scroll;
-        max-height: 300px;
-        
-        &:focus {
-            outline: none;
-        }
-        
-        .jspVerticalBar {
-            margin: 0 6px 0 @padding;
-            padding-top:  8px;
-            
-            max-height: 284px !important;
-            height:     284px !important;
-            
-            .jspTrack {
-                max-height: 284px !important;
-                height:     284px !important;
-            }
-        }
-        
-        .popup-body-inner {
-            .user {
-                // very slight background-color transition on mouse-out
-                // (immediate transition on mouse-over)
-                background-color: #fff;
-                .transition(background-color, 0.1s, ease-out);
-                
-                border-bottom: 1px solid #c2c2c2;
-                white-space: nowrap;
-                
-                padding: (@padding / 2) @padding;
-                
-                .profile-image-small, .stamp, .name {
-                    float: left;
-                }
-                
-                .profile-image-small {
-                    margin-right: 16px;
-                }
-                
-                .stamp {
-                    margin-right: 6px;
-                }
-                
-                .name {
-                    margin-right: 6px;
-                    max-width: 136px;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    
-                    p {
-                        margin:  0;
-                        padding: 0;
-                    }
-                    
-                    .fullname {
-                        font-weight: 700;
-                        margin: 0 0 .5em;
-                        padding: 0;
-                    }
-                    
-                    a {
-                        color: #999;
-                        
-                        &:hover {
-                            text-decoration: none !important;
-                        }
-                    }
-                }
-                
-                .rhs {
-                    float: right;
-                }
-                
-                &:hover .name a {
-                    color: #595959;
-                }
-            }
-        }
-    }
-}
-
-.popup-todos {
-    .popup-header {
-        .rhs-icon {
-            background-position: -76px 0 !important;
-        }
     }
 }
 

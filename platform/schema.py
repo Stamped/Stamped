@@ -196,6 +196,12 @@ class Schema(object):
         else:
             return False
 
+    def __getstate__(self):
+        return self.dataExport()
+
+    def __setstate__(self, state):
+        self.dataImport(state)
+
     #TODO: make this a true repr string
     def __repr__(self):
         return str(self)

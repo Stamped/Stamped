@@ -1638,6 +1638,8 @@ class StampedAPI(AStampedAPI):
                 latLng = [ coordinates.lat, coordinates.lng ]
             results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'})
             #make list of names from results, remove duplicate entries, limit to 10
+            if results is None:
+                return []
             names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
             completions = []
             for name in names:

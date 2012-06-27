@@ -8,10 +8,6 @@
 
 var g_update_stamps = null;
 
-/* TODO:
-    * gallery infinite scroll doesn't reset properly
- */
-
 (function() {
     $(document).ready(function() {
         
@@ -239,6 +235,20 @@ var g_update_stamps = null;
             return false;
         });
         
+        $(".expand-friends").click(function(event) {
+            event.preventDefault();
+            
+            var $this = $(this);
+            var href  = $this.attr('href');
+            
+            var popup_options = get_fancybox_popup_options({
+                href  : href
+            });
+            
+            $.fancybox.open(popup_options);
+            return false;
+        });
+        
         var $header_subsections = $('.header-subsection');
         var header_subsection_height = 0;
         var $header_subsection_0 = null;
@@ -391,6 +401,11 @@ var g_update_stamps = null;
                 closeEasing     : 'easeInBack', 
                 closeSpeed      : 300, 
                 
+                tpl             : {
+				    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    closeBtn    : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                }, 
+                
                 helpers         : {
                     overlay     : {
                         speedIn  : 150, 
@@ -423,7 +438,39 @@ var g_update_stamps = null;
                 }
             }
             
-            return options;
+            return output;
+        };
+        
+        var get_fancybox_popup_options = function(options) {
+            var output = get_fancybox_options({
+                type        : "ajax", 
+                scrolling   : 'no', 
+                wrapCSS     : '', 
+                padding     : 0, 
+                minWidth    : 366, 
+                maxWidth    : 366, 
+                
+                beforeShow  : function() {
+                    $('.popup-body').jScrollPane({
+                        verticalPadding : 8
+                    });
+                    
+                    $("html").css('overflow', 'hidden');
+                }, 
+                beforeClose : function() {
+                    $("html").css('overflow-y', 'scroll');
+                }
+            });
+            
+            if (!!options) {
+                for (var key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        output[key] = options[key];
+                    }
+                }
+            }
+            
+            return output;
         };
         
         var find_valid_image = function($elem, selector, is_sdetail) {
@@ -663,24 +710,13 @@ var g_update_stamps = null;
                             console.debug(response);
                             console.debug(xhr);
                             
-                            alert("TODO: handle AJAX and backend errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
+                            alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
                             
                             return;
                         }
                         
                         $target.removeClass('sdetail-loading');
                         init_sdetail($target);
-                        
-                        // initialize sDetail close button logic
-                        $target.find('.close-button a').click(function(event) {
-                            event.preventDefault();
-                            
-                            if (!!close_sdetail_func) {
-                                close_sdetail_func();
-                            }
-                            
-                            return false;
-                        });
                     });
                     
                     return false;
@@ -1944,6 +1980,7 @@ var g_update_stamps = null;
                 }
             });
             
+            // sanitize sizing of user-generated image embedded in stamp card
             $sdetail.find(".stamp-card .entity-image-wrapper").each(function(i, elem) {
                 var $elem = $(elem);
                 var $img  = $elem.find('img');
@@ -1970,21 +2007,22 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
-                var popup_options = get_fancybox_options({
-                    href        : href, 
-                    type        : "ajax", 
-                    scrolling   : 'no', 
-                    wrapCSS     : '', 
-                    closeBtn    : false, 
-                    padding     : 0, 
-                    
-                    afterShow   : function() {
-                        // TODO: why is this scrollbar not scrolling the content area?
-                        $('.popup-body').jScrollPane();
-                    }
+                var popup_options = get_fancybox_popup_options({
+                    href  : href
                 });
                 
                 $.fancybox.open(popup_options);
+                return false;
+            });
+            
+            // initialize sDetail close button
+            $sdetail.find('.close-button').click(function(event) {
+                event.preventDefault();
+                
+                if (!!close_sdetail_func) {
+                    close_sdetail_func();
+                }
+                
                 return false;
             });
             
