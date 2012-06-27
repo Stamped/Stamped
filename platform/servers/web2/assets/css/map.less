@@ -121,6 +121,19 @@ footer {
                 pointer-events: none;
             }
             
+            .stamp-map-item-close-button {
+                background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+                display: block;
+                width:  14px;
+                height: 14px;
+                float: right;
+                
+                &:hover {
+                    background-position: -48px 0;
+                    cursor: pointer;
+                }
+            }
+            
             .profile-image-small {
                 margin: 0 @marker_space @marker_space 0;
                 float: left;
@@ -141,7 +154,7 @@ footer {
                 
                 margin-left: 0;
                 
-                @width: 340px - (40px + @marker_space * 2) - (@marker_space * 4);
+                @width: 340px - (40px + @marker_space * 2) - (@marker_space * 4) - 16px;
                 max-width: @width;
                 width:     @width;
                 

@@ -16,6 +16,7 @@
         
         // TODO: load in preloaded stamps
         
+        var init_stamp_id = STAMPED_PRELOAD.stamp_id;
         var center   = new google.maps.LatLng(40.707913, -74.013696);
         var user_pos = null;
         
@@ -282,6 +283,14 @@
                         if (!!g_update_stamps) {
                             setTimeout(function() {
                                 var $s = $('.stamp-map-item');
+                                
+                                $s.find('.stamp-map-item-close-button').click(function(event) {
+                                    event.preventDefault();
+                                    close_popup();
+                                    
+                                    return false;
+                                });
+                                
                                 g_update_stamps($s);
                             }, 150);
                         }
@@ -372,7 +381,24 @@
             $canvas.height(height_px);
             
             if (!!center_main_cluster && !centered_main_cluster) {
-                if (!!marker_clusterer) {
+                // optionally center map on specific stamp
+                if (!!init_stamp_id) {
+                    var stamp = get_stamp(init_stamp_id);
+                    
+                    if (!!stamp) {
+                        center_main_cluster   = false;
+                        centered_main_cluster = true;
+                        
+                        map.setCenter(stamp.pos);
+                        map.setZoom(14);
+                        
+                        // open initial stamp popup and repaint marker clusterer
+                        open_stamp_map_popup(init_stamp_id);
+                        if (!!marker_clusterer) {
+                            marker_clusterer.repaint();
+                        }
+                    }
+                } else if (!!marker_clusterer) {
                     var init_clusterer = function(depth) {
                         if (depth >= 2) {
                             return;

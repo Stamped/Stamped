@@ -8,23 +8,23 @@
                 {{/contents}}
             </div>
             
-            {{#entity}}
-                <div class='preview-image stamp-entity-image'>
+            <div class='preview-image stamp-entity-image'>
+                {{#entity}}
                     {{entity_image}}
-                </div>
-                
-                {{#if coordinates}}
-                    <div>
-                        <div class='preview-image stamp-map'>
-                            {{> static-map-small}}
-                        </div>
-                    </div>
-                {{/if}}
-                
+                {{/entity}}
+            </div>
+            
+            {{#if entity.coordinates}}
                 <div>
-                    <div class="preview-image stamp-icon"></div>
+                    <div class='preview-image stamp-map'>
+                        {{> static-map-small}}
+                    </div>
                 </div>
-            {{/entity}}
+            {{/if}}
+            
+            <div>
+                <div class="preview-image stamp-icon"></div>
+            </div>
         </div>
     </div>
 </div>

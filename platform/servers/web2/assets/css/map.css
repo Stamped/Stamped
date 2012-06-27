@@ -168,6 +168,17 @@ footer {
   background: transparent;
   pointer-events: none;
 }
+.stamp-map .stamp-map-canvas .stamp-map-item .stamp-map-item-close-button {
+  background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+  display: block;
+  width: 14px;
+  height: 14px;
+  float: right;
+}
+.stamp-map .stamp-map-canvas .stamp-map-item .stamp-map-item-close-button:hover {
+  background-position: -48px 0;
+  cursor: pointer;
+}
 .stamp-map .stamp-map-canvas .stamp-map-item .profile-image-small {
   margin: 0 12px 12px 0;
   float: left;
@@ -183,8 +194,8 @@ footer {
   position: relative;
   top: 0;
   margin-left: 0;
-  max-width: 228px;
-  width: 228px;
+  max-width: 212px;
+  width: 212px;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .entity-header .title .pronounced-title {
   line-height: 100%;

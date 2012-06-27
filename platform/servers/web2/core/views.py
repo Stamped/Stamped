@@ -208,14 +208,17 @@ def profile(request, schema, **kwargs):
         'body_classes'          : body_classes, 
     }, preload=[ 'user' ])
 
-@stamped_view(schema=HTTPWebTimeSlice)
+@stamped_view(schema=HTTPWebTimeMapSlice)
 def map(request, schema, **kwargs):
     # TODO: enforce stricter validity checking on offset and limit
     
     schema.offset = schema.offset or 0
     schema.limit  = 1000 # TODO: customize this
-    screen_name = schema.screen_name
+    screen_name   = schema.screen_name
+    stamp_id      = schema.stamp_id
+    
     del schema.ajax
+    del schema.stamp_id
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         # useful debugging utility -- circumvent dev server to speed up reloads
@@ -253,8 +256,9 @@ def map(request, schema, **kwargs):
         'user'          : user, 
         'stamps'        : stamps, 
         
+        'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
-    }, preload=[ 'user', 'stamps' ])
+    }, preload=[ 'user', 'stamps', 'stamp_id' ])
 
 @stamped_view(schema=HTTPStampDetail)
 def sdetail(request, schema, **kwargs):
