@@ -311,7 +311,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 location = None
                 readableQuery = query
             results = searcher.searchEntitiesAndClusters(category, query, coords=location)
-            return readableQuery, [(entity.dataExport(), cluster) for entity, cluster in results]
+            return readableQuery, list(results)
 
         results = dict(runSearch(query) for query in queries)
 
