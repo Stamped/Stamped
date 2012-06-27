@@ -1104,12 +1104,12 @@ class HTTPEntity(Schema):
         cls.addNestedPropertyList('images',                 HTTPImage)
         cls.addProperty('last_modified',                    basestring)
         cls.addNestedProperty('previews',                   HTTPPreviews)
-
+        
         # Location
         cls.addProperty('address',                          basestring)
         cls.addProperty('neighborhood',                     basestring)
         cls.addProperty('coordinates',                      basestring)
-
+        
         # Components
         cls.addNestedProperty('playlist',                   HTTPEntityPlaylist)
         cls.addNestedPropertyList('actions',                HTTPEntityAction)
@@ -2480,7 +2480,7 @@ class HTTPStamp(Schema):
         cls.addProperty('created',                          basestring)
         cls.addProperty('modified',                         basestring)
         cls.addProperty('stamped',                          basestring)
-
+        
         cls.addProperty('num_comments',                     int)
         cls.addProperty('num_likes',                        int)
         cls.addProperty('num_todos',                        int)
@@ -2599,11 +2599,17 @@ class HTTPStamp(Schema):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 
 class HTTPStampDetail(Schema):
+    
+    def __init__(self, *args, **kwargs):
+        Schema.__init__(self, *args, **kwargs)
+        self.ajax = False
+    
     @classmethod
     def setSchema(cls):
         cls.addProperty('screen_name',                      basestring)
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('stamp_title',                      basestring)
+        cls.addProperty('ajax',                             bool)
 
 class HTTPStampNew(Schema):
     @classmethod

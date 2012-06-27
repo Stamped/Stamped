@@ -1,0 +1,95 @@
+{% load stamped_tags %}
+
+<meta property="fb:app_id"                  content="297022226980395"/>
+<meta property="og:site_name"               content="Stamped"/>
+
+{% if sdetail %}
+    <meta property="og:title"               content="{{entity.title}}"/>
+    
+    {% if entity.desc %}
+        <meta property="og:description"     content="{{entity.desc}}"/>
+    {% endif %}
+    
+    {% if entity.subtitle %}
+        <meta property="stampedapp:subtitle" content="{{entity.subtitle}}"/>
+    {% endif %}
+    
+    {% with img=stamp.contents.0.images.0.sizes.0.url %}
+        {% if img %}
+            <meta property="og:image"       content="{{img}}"/>
+        {% else %}
+            {% with img2=entity.images.0.sizes.0.url %}
+                {% if img2 %}
+                    <meta property="og:image"   content="{{img2}}"/>
+                {% else %}
+                    <meta property="og:image"   content="{{ STATIC_URL }}img/stamped-logo.png"/>
+                {% endif %}
+            {% endwith %}
+        {% endif %}
+    {% endwith %}
+    
+    {% if entity.category == "film" %}
+        {% if entity.subcategory == "movie" %}
+            <meta property="og:type"        content="stampedapp:movie"/>
+        {% else %}{% if entity.subcategory == "tv" %}
+            <meta property="og:type"        content="stampedapp:tv_show"/>
+        {% endif %}{% endif %}
+        
+        {% for item in entity.metadata %}
+            {% if item.name|lower == "director" or item.name|lower == "release_date" %}
+                <meta property="stampedapp:{{item.name|lower}}"  content="{{item.value}}"/>
+            {% endif %}
+        {% endfor %}
+    {% else %}{% if entity.category == "place" %}
+        {% if entity.subcategory == "restaurant" %}
+            <meta property="og:type"        content="stampedapp:restaurant"/>
+        {% else %}{% if entity.subcategory == "bar" %}
+            <meta property="og:type"        content="stampedapp:bar"/>
+        {% else %}{% if entity.subcategory == "cafe" %}
+            <meta property="og:type"        content="stampedapp:cafe"/>
+        {% else %}
+            <meta property="og:type"        content="stampedapp:place"/>
+        {% endif %}{% endif %}{% endif %}
+        
+        {% if entity.coordinates|length > 0 %}
+            <meta property="stampedapp:location:latitude"   content='{{entity.coordinates|split0:","}}'/>
+            <meta property="stampedapp:location:longitude"  content='{{entity.coordinates|split1:","}}'/>
+        {% endif %}
+    {% else %}{% if entity.category == "music" %}
+        {% if entity.subcategory == "artist" %}
+            <meta property="og:type"        content="stampedapp:artist"/>
+        {% else %}{% if entity.subcategory == "album" %}
+            <meta property="og:type"        content="stampedapp:album"/>
+        {% else %}{% if entity.subcategory == "song" %}
+            <meta property="og:type"        content="stampedapp:song"/>
+        {% endif %}{% endif %}{% endif %}
+        
+        {% for item in entity.metadata %}
+            {% if item.name|lower == "artist" or item.name|lower == "album" %}
+                <meta property="stampedapp:{{item.name|lower}}" content="{{item.value}}"/>
+            {% endif %}
+        {% endfor %}
+    {% else %}{% if entity.category == "book" %}
+        <meta property="og:type"            content="stampedapp:book"/>
+        
+        {% for item in entity.metadata %}
+            {% if item.name|lower == "author" %}
+                <meta property="stampedapp:{{item.name|lower}}"  content="{{item.value}}"/>
+            {% endif %}
+        {% endfor %}
+    {% else %}{% if entity.category == "other" %}
+        {% if entity.subcategory == "app" %}
+            <meta property="og:type"        content="stampedapp:app"/>
+        {% else %}
+            <meta property="og:type"        content="stampedapp:other"/>
+        {% endif %}
+    {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+{% else %}
+    <meta property="og:type"                content="stampedap:user"/>
+    <meta property="og:image"               content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
+    <meta property="og:title"               content="Stamped - {{user.screen_name}}"/>
+    
+    <meta property="stampedapp:user_id"     content="{{user.user_id}}"/>
+    <meta property="stampedapp:screen_name" content="{{user.screen_name}}"/>
+{% endif %}
+
