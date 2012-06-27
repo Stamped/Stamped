@@ -4,7 +4,7 @@
 # used by the main Stamped website. Also contains logic for collecting and 
 # deploying assets to our cloud infrastructure (e.g., dev and prod).
 # 
-# @author:    Stamped (dev@stamped.com)
+# @author:    Travis Fischer (travis@stamped.com)
 # @copyright: (c) 2011-2012 Stamped.com
 
 override PROJECT_BASE_DIR	= .
@@ -13,7 +13,8 @@ override PROJECT_BASE_LIB	= $(PROJECT_BASE_DIR)/.make
 LESS_CSS_DIRS				= assets/css assets/css/libs
 LESS_CSS_SOURCE_SUFFIX		= less
 LESS_CSS_TARGET_SUFFIX		= css
-LESS_CSS_PROG				= /stamped/node/node_modules/less/bin/lessc
+GET_LESS_CSS_PROG			= $(if $(call EXISTS,$(1)),$(1),$(2))
+LESS_CSS_PROG				= $(call GET_LESS_CSS_PROG,/stamped/node/node_modules/less/bin/lessc,lessc)
 LESS_CSS_SOURCES			= $(strip \
 	$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
 LESS_CSS_TARGETS			= $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
@@ -21,13 +22,11 @@ LESS_CSS_TARGETS			= $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS
 TEMPLATE_DIRS				= templates
 TEMPLATE_SUFFIX				= template.html
 TEMPLATE_DEST				= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
-TEMPLATE_PROG				= ./process_templates.py
+TEMPLATE_PROG				= bin/process_templates.py
 TEMPLATES 					= $(strip \
 	$(foreach DIR,$(TEMPLATE_DIRS),$(wildcard $(DIR)/*.$(TEMPLATE_SUFFIX))))
 
-DEPENDENCIES				= $(TEMPLATES) $(TEMPLATE_PROG) \
-	assets/js/libs/mustache.js core/templatetags/stamped_tags.py
-
+DEPENDENCIES				= $(TEMPLATES) $(TEMPLATE_PROG) $(wildcard core/templatetags/*.py)
 ALL_TARGETS					= $(TEMPLATE_DEST) $(LESS_CSS_TARGETS)
 
 define ADD_TARGET_PATTERN
@@ -49,7 +48,7 @@ $(TEMPLATE_DEST): $(DEPENDENCIES)
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_TARGET_PATTERN,$(DIR))))
 
 clean:
-	-$(RM) -f $(ALL_TARGETS)
+	$(RM) -f $(ALL_TARGETS)
 	@echo
 
 help::

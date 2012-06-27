@@ -27,6 +27,9 @@ class AStampedFixtureTestCase(AStampedTestCase):
         from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
         MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
         MongoCache.disableStaleness = True
+        
+        db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
+        [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
 
     @classmethod
     def tearDownClass(cls):
@@ -44,7 +47,7 @@ class FixtureTestRuntimeSettings(Singleton):
         self.writeFixtureFiles = False
 
 
-def defaultFixtureFilename(testCaseInstance, testFn):
+def defaultFixtureFilename(testCaseInstance, testFn, fixtureType):
     testClassModuleName = testCaseInstance.__class__.__module__
     if testClassModuleName == '__main__':
         # The test class was declared in the Python file we're running, so we can get it from sys.argv[0].
@@ -54,7 +57,7 @@ def defaultFixtureFilename(testCaseInstance, testFn):
         testClassFilename = os.path.abspath(sys.modules[testClassModule].__file__)
     fixtureFilenameBase = testClassFilename[:testClassFilename.rfind(".")]
     funcName = testFn.func_name
-    result = '%s.%s.fixture.json' % (fixtureFilenameBase, funcName)
+    result = '%s.%s.%s.json' % (fixtureFilenameBase, funcName, fixtureType)
     return result
 
 def loadTestDbDataFromText(text):
@@ -97,18 +100,14 @@ def dumpDbDictToFilename(dbDict, fileName):
 
 def fixtureTest(generateLocalDbFn=None,
                 generateLocalDbQueries=None,
-                fixtureFileName=None,
                 fixtureText=None):
     totalFixtureSources = ((generateLocalDbFn is not None) +
                            (generateLocalDbQueries is not None) +
                            (fixtureText is not None))
     if totalFixtureSources > 1:
         raise Exception('generateLocalDbFn, generateLocalDbQueries, and fixtureText are mutually exclusive!')
-    if fixtureFileName is not None and fixtureText is not None:
-        raise Exception('Only one of fixtureFileName, fixtureText can be passed to fixtureTest!')
 
     def decoratorFn(testFn):
-        fixtureFilename = fixtureFileName
 
         @functools.wraps(testFn)
         def runTest(self, *args, **kwargs):
@@ -124,36 +123,42 @@ def fixtureTest(generateLocalDbFn=None,
             # load fixtures as normal.
             useDbFixture = useDbFixture or (generateLocalDbFn is None and generateLocalDbQueries is None)
 
-            fixtureFilename = fixtureFileName
+            dbFixtureFilename = defaultFixtureFilename
             # Clear out the whole test DB before running the test.
             [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
 
             dbDict = {}
 
-            if fixtureFilename is None:
-                fixtureFilename = defaultFixtureFilename(self, testFn)
+            dbFixtureFilename = defaultFixtureFilename(self, testFn, 'dbfixture')
+            cacheFixtureFilename = defaultFixtureFilename(self, testFn, 'cachefixture')
 
             if useDbFixture or useCacheFixture:
                 if fixtureText is not None:
                     loadTestDbDataFromText(fixtureText)
                 else:
                     try:
-                        loadTestDbDataFromFilename(fixtureFilename)
+                        loadTestDbDataFromFilename(dbFixtureFilename)
                     except IOError:
                         # We wanted to use a fixture, but we didn't find one. In this case we just decide to fall back
                         # to generating data if either a function or query to do so is provided. If neither is provided,
                         # we assume that this function doesn't touch the database at all.
                         useDbFixture = False
 
-                # If we only want database or third-party call cache, get rid of the other.
-                if not useDbFixture:
-                    # TODO: 'cache' should really be a constant somewhere rather than being hard-coded all over the
-                    # place.
-                    [getattr(db, tableName).drop() for tableName in db.collection_names()
-                     if tableName not in ['cache', 'system.indexes']]
-                    pass
-                if not useCacheFixture:
-                    db.cache.drop()
+            if useCacheFixture:
+                try:
+                    loadTestDbDataFromFilename(cacheFixtureFilename)
+                except IOError:
+                    useCacheFixture = False
+
+            # Take anything out of the database that we don't want.
+            if not useDbFixture:
+                # TODO: 'cache' should really be a constant somewhere rather than being hard-coded all over the
+                # place.
+                [getattr(db, tableName).drop() for tableName in db.collection_names()
+                 if tableName not in ['cache', 'system.indexes']]
+                pass
+            if not useCacheFixture:
+                db.cache.drop()
 
             # Generate the DB objects anew if we're not loading them from file.
             if not useDbFixture:
@@ -161,6 +166,9 @@ def fixtureTest(generateLocalDbFn=None,
                     generateLocalDbFn()
                 elif generateLocalDbQueries is not None:
                     issueQueries(generateLocalDbQueries)
+
+            if useCacheFixture:
+                MongoCache.exceptionOnCacheMiss = True
 
             # The actual DB fixtures we want to snapshot before the function runs, because we don't want to incorporate
             # anything written during the function. But the third-party calls cache we want to snapshot after the
@@ -173,9 +181,12 @@ def fixtureTest(generateLocalDbFn=None,
             try:
                 testResult = testFn(self, *args, **kwargs)
             finally:
+                # Clean up after ourselves.
+                MongoCache.exceptionOnCacheMiss = False
                 if writeFixtureFiles:
-                    dbDict['cache'] = list(db.cache.find())
-                    dumpDbDictToFilename(dbDict, fixtureFilename)
+                    dumpDbDictToFilename(dbDict, dbFixtureFilename)
+                    if db.cache.count():
+                        dumpDbDictToFilename({'cache': list(db.cache.find())}, cacheFixtureFilename)
 
             return testResult
 

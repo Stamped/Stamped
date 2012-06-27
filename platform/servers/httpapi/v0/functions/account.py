@@ -135,14 +135,15 @@ def show(request, authUserId, **kwargs):
 
     return transformOutput(account.dataExport())
 
+
 @handleHTTPRequest(http_schema=HTTPAccountUpdateForm,
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, schema, **kwargs):
-    stampedAPI.updateAccount(authUserId, schema)
+    account = stampedAPI.updateAccount(authUserId, schema)
 
-    return transformOutput(True)
-
+    user    = HTTPUser().importUser(account)
+    return transformOutput(user.dataExport())
 
 #@handleHTTPRequest(parse_request=False)
 #@require_http_methods(["POST"])
@@ -164,28 +165,6 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 #
 #    return transformOutput(account.dataExport())
 
-#@handleHTTPRequest(http_schema=HTTPAccountProfile)
-#@require_http_methods(["POST"])
-#def updateProfile(request, authUserId, data, **kwargs):
-#    ### TEMP: Generate list of changes. Need to do something better eventually...
-#    for k, v in data.iteritems():
-#        if v == '':
-#            data[k] = None
-#
-#    account = stampedAPI.updateProfile(authUserId, data)
-#    user    = HTTPUser().importUser(account)
-#
-#    return transformOutput(user.dataExport())
-
-
-@handleHTTPRequest(http_schema=HTTPAccountProfileImage)
-@require_http_methods(["POST"])
-def updateProfileImage(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.updateProfileImage(authUserId, http_schema.temp_image_url)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
-
 
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp)
 @require_http_methods(["POST"])
@@ -194,6 +173,7 @@ def customizeStamp(request, authUserId, data, **kwargs):
     user    = HTTPUser().importUser(account)
     
     return transformOutput(user.dataExport())
+
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 

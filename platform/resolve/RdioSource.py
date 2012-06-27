@@ -376,7 +376,7 @@ class   RdioSource(GenericSource):
     class RequestFailedError(Exception):
         pass
 
-    def searchLite(self, queryCategory, queryText, pool=None, timeout=None):
+    def searchLite(self, queryCategory, queryText, pool=None, timeout=None, coords=None):
         if queryCategory != 'music':
             raise Exception('Rdio only supports music!')
         response = self.__rdio.method('search', query=queryText, count=25, types='Artist,Album,Track',

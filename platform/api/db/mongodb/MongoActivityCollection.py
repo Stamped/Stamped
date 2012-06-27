@@ -163,9 +163,13 @@ class MongoActivityCollection(AActivityDB):
                     logs.warning('WARNING: matched multiple activityIds for verb (%s) & objects (%s)' % (verb, objects))
                 
                 activityId = activityIds[0]
-                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=created)
-                if benefit is not None:
-                    self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
+                
+                # Check if subject already exists
+                item = self.activity_items_collection.getActivityItem(activityId)
+                if subject not in item.subjects:
+                    self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=created)
+                    if benefit is not None:
+                        self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
 
             # Insert new item
             else:

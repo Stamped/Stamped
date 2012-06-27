@@ -1,0 +1,17 @@
+{% load stamped_tags %}
+
+<div class="user-gallery">
+    {% for u in users|slice:":2" %}
+        <div class="user-gallery-item">
+            <a class="profile-link" title="{{u.name}} ({{u.screen_name}})" href="/{{u.screen_name}}">{% handlebars_template "profile-image-tiny" u %}</a>
+        </div>
+    {% endfor %}
+    
+    {% if users|length > 2 %}
+        <a class="user-gallery-item expand-friends expand-{{title}}" href="/popups/{{title}}.html?user_id={{user.user_id}}">
+            <div class="context-popup">Expand {{title}}...</div>
+            <div class='user-preview-icon'></div>
+        </a>
+    {% endif %}
+</div>
+

@@ -857,7 +857,7 @@ body.app .stamp-gallery-view-map {
   position: relative;
   top: -4px;
 }
-.social-feedback div.social-feedback-like {
+.social-feedback .social-feedback-like {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: 0 0;
   display: inline-block;
@@ -865,10 +865,10 @@ body.app .stamp-gallery-view-map {
   height: 17px;
   z-index: 100;
 }
-.social-feedback .count_0 div.social-feedback-like {
+.social-feedback .count_0 .social-feedback-like {
   background-position: 0 -20px;
 }
-.social-feedback div.social-feedback-todo {
+.social-feedback .social-feedback-todo {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -19px 0;
   display: inline-block;
@@ -876,10 +876,10 @@ body.app .stamp-gallery-view-map {
   height: 17px;
   z-index: 100;
 }
-.social-feedback .count_0 div.social-feedback-todo {
+.social-feedback .count_0 .social-feedback-todo {
   background-position: -19px -20px;
 }
-.social-feedback div.social-feedback-comments {
+.social-feedback .social-feedback-comments {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
   background-position: -38px 0;
   display: inline-block;
@@ -887,7 +887,7 @@ body.app .stamp-gallery-view-map {
   height: 17px;
   z-index: 100;
 }
-.social-feedback .count_0 div.social-feedback-comments {
+.social-feedback .count_0 .social-feedback-comments {
   background-position: -38px -20px;
 }
 .timestamp_raw {
@@ -897,28 +897,35 @@ body.app .stamp-gallery-view-map {
   position: relative;
   margin: 0 auto;
 }
-a.lightbox {
+.zoom {
   position: absolute;
   z-index: 101;
   top: 8px;
   right: 16px;
+  display: block;
+  width: 25px;
+  height: 25px;
   opacity: 0;
   -webkit-transition: opacity 0.2s ease-out;
   -moz-transition: opacity 0.2s ease-out;
   -ms-transition: opacity 0.2s ease-out;
   -o-transition: opacity 0.2s ease-out;
   transition: opacity 0.2s ease-out;
+  background: url(/assets/img/entityimagehover-sprite.png) no-repeat;
 }
-a.lightbox .zoom {
-  background: url(/assets/img/zoom-icon.png) no-repeat;
-  pointer-events: none;
+.zoom:hover {
+  background-position: 0 -27px;
   cursor: pointer;
-  display: block;
-  width: 25px;
-  height: 25px;
 }
-.stamp-user-image:hover a.lightbox,
-.stamp-entity-image:hover a.lightbox {
+.zoom-map {
+  background-position: -27px 0;
+}
+.zoom-map:hover {
+  background-position: -27px -27px;
+}
+.stamp-user-image:hover .zoom,
+.stamp-entity-image:hover .zoom,
+.static-map-small:hover .zoom {
   opacity: 1;
 }
 .entity-header {
@@ -1811,4 +1818,141 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
   animation-iteration-count: 1;
   animation-timing-function: easeInOutCubic;
   animation-duration: 0.6s;
+}
+/* **************************************************************************
+                                POPUP VIEWS
+   ************************************************************************** */
+.fancybox-wrap .close-button {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+}
+.popup {
+  position: relative;
+  max-width: 366px;
+  background-color: #fff;
+}
+.popup .popup-header {
+  position: relative;
+  z-index: 5000;
+  padding: 6px 24px;
+  white-space: nowrap;
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.popup .popup-header .pronounced-title {
+  float: left;
+}
+.popup .popup-header .rhs-icon {
+  background: url(/assets/img/popup_icons_sprite.png) no-repeat;
+  position: relative;
+  float: right;
+  margin-top: 16px;
+  width: 36px;
+  height: 36px;
+}
+.popup .popup-header .rhs-icon .tongue {
+  background: url(/assets/img/popup_icons_sprite.png) no-repeat -38px 0;
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  opacity: 0;
+  -webkit-transform: perspective(600) scalex(0.01) scaley(0.01) rotatex(20deg);
+  -moz-transform: perspective(600) scalex(0.01) scaley(0.01) rotatex(20deg);
+  -o-transform: perspective(600) scalex(0.01) scaley(0.01) rotatex(20deg);
+  -ms-transform: perspective(600) scalex(0.01) scaley(0.01) rotatex(20deg);
+  transform: perspective(600) scalex(0.01) scaley(0.01) rotatex(20deg);
+  -webkit-transition: -webkit-transform 0.2s ease-out, opacity 0.2s ease-out;
+  -moz-transition: -moz-transform 0.2s ease-out, opacity 0.2s ease-out;
+  -ms-transition: -ms-transform 0.2s ease-out, opacity 0.2s ease-out;
+  -o-transition: -o-transform 0.2s ease-out, opacity 0.2s ease-out;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+.popup .popup-header .rhs-icon:hover .tongue {
+  opacity: 1;
+  -webkit-transform: perspective(600);
+  -moz-transform: perspective(600);
+  -o-transform: perspective(600);
+  -ms-transform: perspective(600);
+  transform: perspective(600);
+}
+.popup .popup-body {
+  overflow: scroll;
+  max-height: 300px;
+  width: 366px;
+  min-width: 366px;
+}
+.popup .popup-body:focus {
+  outline: none;
+}
+.popup .popup-body .jspVerticalBar {
+  margin: 0 6px;
+  padding-top: 8px;
+}
+.popup .popup-body .popup-body-inner .user {
+  background-color: #fff;
+  -webkit-transition: background-color 0.1s ease-out;
+  -moz-transition: background-color 0.1s ease-out;
+  -ms-transition: background-color 0.1s ease-out;
+  -o-transition: background-color 0.1s ease-out;
+  transition: background-color 0.1s ease-out;
+  border-bottom: 1px solid #c2c2c2;
+  white-space: nowrap;
+  padding: 12px 24px;
+}
+.popup .popup-body .popup-body-inner .user .profile-image-small,
+.popup .popup-body .popup-body-inner .user .stamp,
+.popup .popup-body .popup-body-inner .user .name {
+  float: left;
+}
+.popup .popup-body .popup-body-inner .user .profile-image-small {
+  margin-right: 16px;
+}
+.popup .popup-body .popup-body-inner .user .stamp {
+  margin-right: 6px;
+}
+.popup .popup-body .popup-body-inner .user .name {
+  margin-right: 6px;
+  max-width: 116px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.popup .popup-body .popup-body-inner .user .name p {
+  margin: 0;
+  padding: 0;
+}
+.popup .popup-body .popup-body-inner .user .name .fullname {
+  font-weight: 700;
+  margin: 0 0 .5em;
+  padding: 0;
+}
+.popup .popup-body .popup-body-inner .user .name a {
+  color: #999;
+}
+.popup .popup-body .popup-body-inner .user .name a:hover {
+  text-decoration: none !important;
+}
+.popup .popup-body .popup-body-inner .user .rhs {
+  float: right;
+}
+.popup .popup-body .popup-body-inner .user:hover .name a {
+  color: #595959;
+}
+.popup-todos .popup-header .rhs-icon {
+  background-position: -76px 0 !important;
+}
+.popup-followers .popup-header .rhs-icon {
+  background-position: -114px 0 !important;
+}
+.popup-following .popup-header .rhs-icon {
+  background-position: -152px 0 !important;
 }

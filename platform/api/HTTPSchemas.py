@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -34,6 +35,8 @@ AMAZON_TOKEN    = 'stamped01-20'
 amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
 non_numeric_re  = re.compile('\D')
 mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
+# URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
+url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -226,6 +229,81 @@ def _convertViewport(string):
     except Exception as e:
         logs.warning("Unable to convert viewport (%s): %s" % (string, e))
         raise StampedInputError("Invalid viewport: %s" % string)
+
+def _buildTextReferences(text):
+    """
+    Extract @mention and URL references from a blurb (e.g. stamp blurb or comment blurb)
+
+    This creates a "view" action for any user mentions extracted. It also creates a "link" action
+    for any URLs it can parse. Additionally, it attempts to replace the full URL with a "prettified"
+    URL that's shorter. This is the only complex part of this section, since the indices of any 
+    after a shortened URL need to be updated.
+    """
+    refs = []
+    offsets = {}
+
+    # Mentions
+    mentions = mention_re.finditer(text)
+    for item in mentions:
+        source = HTTPActionSource()
+        source.name = 'View profile'
+        source.source = 'stamped'
+        source.source_id = item.groups()[0]
+
+        action = HTTPAction()
+        action.type = 'stamped_view_screen_name'
+        action.name = 'View profile'
+        action.sources = [ source ]
+
+        reference = HTTPTextReference()
+        reference.indices = [ item.start(), item.end() ]
+        reference.action = action
+
+        refs.append(reference)
+
+    # URL
+    urls = url_re.finditer(text)
+    for item in url_re.finditer(text):
+        url = item.groups()[0]
+        formatted = url.split('://')[-1].split('?')[0]
+        if '/' in formatted:
+            truncated = "%s..." % formatted[:formatted.index('/')+4]
+            if len(truncated) < len(formatted):
+                formatted = truncated
+        offsets[item.end()] = len(formatted) - len(url)
+        text = string.replace(text, url, formatted)
+
+        source = HTTPActionSource()
+        source.link = url
+        source.name = 'Go to %s' % formatted
+        source.source = 'link'
+
+        action = HTTPAction()
+        action.type = 'link'
+        action.name = 'Go to %s' % formatted
+        action.sources = [ source ]
+
+        reference = HTTPTextReference()
+        reference.indices = [ item.start(), item.end() ]
+        reference.action = action
+
+        refs.append(reference)
+
+    # Update any references affected by changing the URL text
+    for ref in refs:
+        indices = ref.indices
+        for position, offset in offsets.items():
+            if position <= ref.indices[0]:
+                indices = (indices[0] + offset, indices[1] + offset)
+            elif position <= ref.indices[1]:
+                indices = (indices[0], indices[1] + offset)
+        ref.indices = indices
+
+    # Sort by index
+    refs.sort(key=lambda x: x.indices[0])
+
+    return refs
+
 
 # ######### #
 # OAuth 2.0 #
@@ -505,9 +583,9 @@ class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
-        cls.addProperty('user_id',                          basestring, cast=validateUserId)
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('name',                             basestring)
+        cls.addProperty('linked_user_id',                   basestring)
+        cls.addProperty('linked_screen_name',               basestring)
+        cls.addProperty('linked_name',                      basestring)
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
@@ -608,6 +686,21 @@ class HTTPAPNSToken(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('token',                            basestring, required=True)
+
+class HTTPSettingsToggle(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('toggle_id',                        basestring, required=True)
+        cls.addProperty('type',                             basestring, required=True)
+        cls.addProperty('value',                            bool, required=True)
+
+class HTTPSettingsGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('group_id',                         basestring, required=True)
+        cls.addProperty('name',                             basestring, required=True) # Used for display
+        cls.addProperty('desc',                             basestring) # Used for display
+        cls.addNestedPropertyList('toggles',                HTTPSettingsToggle)
 
 
 # ##### #
@@ -846,13 +939,16 @@ class HTTPComment(Schema):
         cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
-        cls.addNestedPropertyList('mentions',               MentionSchema) ### TODO: Switch to references
+        cls.addNestedPropertyList('blurb_references',       HTTPTextReference)
         cls.addProperty('created',                          basestring)
 
     def importComment(self, comment):
         self.dataImport(comment.dataExport(), overflow=True)
         self.created = comment.timestamp.created
         self.user = HTTPUserMini().importUserMini(comment.user)
+        references = _buildTextReferences(self.blurb)
+        if len(references) > 0:
+            self.blurb_references = references
         return self
 
 class HTTPCommentNew(Schema):
@@ -1077,12 +1173,12 @@ class HTTPEntity(Schema):
             if 'link' in kwargs:
                 actionSource = HTTPActionSource()
                 actionSource.link = kwargs['link']
-                actionSource.name = 'View link'
+                actionSource.name = 'Go to URL'
                 actionSource.source = 'link'
 
                 action = HTTPAction()
                 action.type = 'link'
-                action.name = 'View link'
+                action.name = 'Go to URL'
                 action.sources = [actionSource]
 
                 item.action = action
@@ -1332,7 +1428,7 @@ class HTTPEntity(Schema):
             self._addAction(actionType, 'Watch trailer', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
-            actionType  = 'add_to_instant_queue'
+            actionType  = 'queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
@@ -1450,7 +1546,7 @@ class HTTPEntity(Schema):
 
             # Actions: Add to Netflix Instant Queue
 
-            actionType  = 'add_to_instant_queue'
+            actionType  = 'queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
@@ -1464,7 +1560,7 @@ class HTTPEntity(Schema):
                 source.source_id        = entity.sources.netflix_id
                 source.endpoint         = 'account/linked/netflix/add_instant.json'
                 source.endpoint_data    = { 'netflix_id': entity.sources.netflix_id }
-                source.icon             = _getIconURL('src_itunes', client=client)
+                source.icon             = _getIconURL('src_netflix', client=client)
                 source.setCompletion(
                     action      = actionType,
                     entity_id   = entity.entity_id,
@@ -1813,8 +1909,8 @@ class HTTPEntity(Schema):
 
             if getattr(entity.sources, 'itunes_id', None) is not None:
                 source              = HTTPActionSource()
-                source.name         = 'Download from iTunes'
-                source.source       = 'itunes'
+                source.name         = 'Download from the App Store'
+                source.source       = 'appstore'
                 source.source_id    = entity.sources.itunes_id
                 source.icon         = _getIconURL('src_itunes', client=client)
                 if getattr(entity.sources, 'itunes_url', None) is not None:
@@ -2446,46 +2542,27 @@ class HTTPStamp(Schema):
             item                    = HTTPStampContent()
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
-            #item.modified          = content.timestamp.modified
 
-            blurb_references        = []
-            for screenName in mention_re.finditer(content.blurb):
-                source                  = HTTPActionSource()
-                source.name             = 'View profile'
-                source.source           = 'stamped'
-                source.source_id        = screenName.groups()[0]
-
-                action              = HTTPAction()
-                action.type         = 'stamped_view_screen_name'
-                action.name         = 'View profile'
-                action.sources      = [ source ]
-
-                reference           = HTTPTextReference()
-                reference.indices   = [ screenName.start(), screenName.end() ]
-                reference.action    = action
-
-                blurb_references.append(reference)
-
-            if len(blurb_references) > 0:
-                item.blurb_references = blurb_references
+            references = _buildTextReferences(content.blurb)
+            if len(references) > 0:
+                item.blurb_references = references
 
             if content.images is not None:
                 newImages = []
                 for image in content.images:
                     img = HTTPImage().dataImport(image.dataExport())
-                    # quick fix for now
-                    # img.sizes[0].url = 'http://static.stamped.com/stamps/%s.jpg' % schema.stamp_id
                     newImages.append(img)
                 item.images = newImages
 
             # Return contents in chronological order
             contents.append(item)
+
         self.contents = contents
 
         self.num_comments   = getattr(stamp.stats, 'num_comments', 0)
         self.num_likes      = getattr(stamp.stats, 'num_likes', 0)
         self.num_todos      = getattr(stamp.stats, 'num_todos', 0)
-        self.num_credits    = getattr(stamp.stats, 'num_credits', 0)
+        self.num_credits    = getattr(stamp.stats, 'num_credit', 0)
 
         url_title = encodeStampTitle(stamp.entity.title)
         self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
@@ -2959,6 +3036,7 @@ class HTTPActivity(Schema):
             if activity.personal:
                 self.body = '%s %s you.' % (subjects, verb)
                 self.body_references = subjectReferences
+                self.icon = _getIconURL('news_follow')
 
                 if len(self.subjects) == 1:
                     self.action = _buildUserAction(self.subjects[0])
@@ -2973,7 +3051,7 @@ class HTTPActivity(Schema):
 
                 self.action = _buildUserAction(self.objects.users[0])
 
-        elif self.verb == 'restamp':
+        elif self.verb == 'restamp' or self.verb == 'credit':
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -2984,9 +3062,12 @@ class HTTPActivity(Schema):
             self.body = '%s gave you credit for %s.' % (subjects, stampObjects)
             self.body_references = subjectReferences
             if len(self.subjects) > 1:
-                self.image = _getIconURL('news_stamp_group')
+                self.image = _getIconURL('news_credit_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
+
+            ### TEMP: Switch verb to be "credit" until we can make underlying changes
+            self.verb = 'credit'
 
         elif self.verb == 'like':
             _addStampObjects()
@@ -3011,7 +3092,6 @@ class HTTPActivity(Schema):
                 self.image = _getIconURL('news_like_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
-
 
         elif self.verb == 'todo':
             _addEntityObjects()
@@ -3047,7 +3127,14 @@ class HTTPActivity(Schema):
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
+            if activity.personal:
+                self.icon = _getIconURL('news_comment')
+
         elif self.verb == 'reply':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+
             _addStampObjects()
             _addCommentObjects()
 
@@ -3060,8 +3147,13 @@ class HTTPActivity(Schema):
             self.body = '%s' % commentObjects
             self.body_references = commentObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_reply')
 
         elif self.verb == 'mention':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+
             _addStampObjects()
             _addCommentObjects()
 
@@ -3081,49 +3173,53 @@ class HTTPActivity(Schema):
                 self.body_references = stampBlurbObjectReferences
 
             self.action = _buildStampAction(self.objects.stamps[0])
+            self.icon = _getIconURL('news_mention')
 
         elif self.verb.startswith('friend_'):
-            self.icon = _getIconURL('news_friend')
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+            
+            if self.verb == 'friend_twitter':
+                self.icon = _getIconURL('news_twitter')
+            elif self.verb == 'friend_facebook':
+                self.icon = _getIconURL('news_facebook')
+            else:
+                self.icon = _getIconURL('news_friend')
+
             self.action = _buildUserAction(self.subjects[0])
 
         elif self.verb.startswith('action_'):
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+                
             _addStampObjects()
 
             if self.source is not None:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to %(objects)s on %(source)s.',
-                    'playlist'  : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
-                    'download'  : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'reserve'   : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
-                    'buy'       : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'watch'     : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'tickets'   : '%(subjects)s checked out %(objects)s on %(source)s.',
-                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue on %(source)s.',
+                    'listen'            : '%(subjects)s listened to %(objects)s on %(source)s.',
+                    'playlist'          : '%(subjects)s added %(objects)s to a playlist on %(source)s.',
+                    'download'          : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'reserve'           : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'menu'              : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'               : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'watch'             : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'tickets'           : '%(subjects)s checked out %(objects)s on %(source)s.',
+                    'queue'             : '%(subjects)s added %(objects)s to queue on %(source)s.',
                     }
             else:
                 actionMapping = {
-                    'listen'    : '%(subjects)s listened to %(objects)s.',
-                    'playlist'  : '%(subjects)s added %(objects)s to a playlist.',
-                    'download'  : '%(subjects)s checked out %(objects)s.',
-                    'reserve'   : '%(subjects)s checked out %(objects)s.',
-                    'menu'      : '%(subjects)s viewed the menu for %(objects)s.',
-                    'buy'       : '%(subjects)s checked out %(objects)s.',
-                    'watch'     : '%(subjects)s checked out %(objects)s.',
-                    'tickets'   : '%(subjects)s checked out %(objects)s.',
-                    'add_to_instant_queue'  : '%(subjects)s added %(objects)s to queue.',
+                    'listen'            : '%(subjects)s listened to %(objects)s.',
+                    'playlist'          : '%(subjects)s added %(objects)s to a playlist.',
+                    'download'          : '%(subjects)s checked out %(objects)s.',
+                    'reserve'           : '%(subjects)s checked out %(objects)s.',
+                    'menu'              : '%(subjects)s viewed the menu for %(objects)s.',
+                    'buy'               : '%(subjects)s checked out %(objects)s.',
+                    'watch'             : '%(subjects)s checked out %(objects)s.',
+                    'tickets'           : '%(subjects)s checked out %(objects)s.',
+                    'queue'             : '%(subjects)s added %(objects)s to queue.',
                     }
-
-#            actionMapping = {
-#                'listen'    : ('listened to', ''),
-#                'playlist'  : ('added', 'to a playlist'),
-#                'download'  : ('downloaded', ''),
-#                'reserve'   : ('checked out', ''),
-#                'menu'      : ('viewed the menu for', ''),
-#                'buy'       : ('checked out', ''),
-#                'watch'     : ('watched', ''),
-#                'tickets'   : ('bought tickets for', ''),
-#            }
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
             verbs = ('completed', '')
@@ -3137,31 +3233,78 @@ class HTTPActivity(Schema):
             #offset = len(subjects) + len(verbs) + 2
             stampObjects, stampObjectReferences = _formatStampObjects(self.objects.stamps, offset=offset)
 
-            msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : self.source }
-            self.body = verbs % msgDict
+            sourceMapping = {
+                'appstore'      : 'the App Store',
+                'itunes'        : 'iTunes',
+                'amazon'        : 'Amazon',
+                'rdio'          : 'rdio',
+                'spotify'       : 'Spotify',
+                'netflix'       : 'Netflix',
+                'opentable'     : 'OpenTable',
+                'fandango'      : 'Fandango',
+            }
 
-#            if len(verbs[1]) > 0:
-#                self.body = '%s %s %s %s.' % (subjects, verbs[0], stampObjects, verbs[1])
-#            else:
-#                self.body = '%s %s %s.' % (subjects, verbs[0], stampObjects)
+            source = self.source
+            if self.source in sourceMapping:
+                source = sourceMapping[self.source]
+
+            msgDict = {'subjects' : subjects, 'objects' : stampObjects, 'source' : source }
+            self.body = verbs % msgDict
 
             self.body_references = subjectReferences + stampObjectReferences
             self.action = _buildStampAction(self.objects.stamps[0])
 
-            ### TEMP ICON WORK
-            if self.source in set(['rdio', 'opentable', 'itunes', 'fandango', 'amazon']):
-                if self.source == 'itunes' and self.verb[7:] == 'download':
-                    self.icon = _getIconURL('news_appstore')
-                else:
-                    self.icon = _getIconURL('news_%s' % self.source)
-            elif self.verb[7:] in set(['watch', 'playlist', 'menu', 'listen']):
-                self.icon = _getIconURL('news_%s' % self.verb[7:])
-            elif self.verb[7:] == 'add_to_instant_queue':
-                self.icon = _getIconURL('news_queue')
+            # Action Icons
+            actionIcons = set([
+                'news_amazon',
+                'news_appstore',
+                'news_fandango',
+                'news_itunes',
+                'news_itunes_listen',
+                'news_menu',
+                'news_netflix_queue',
+                'news_netflix_watch',
+                'news_opentable',
+                'news_rdio',
+                'news_rdio_listen',
+                'news_rdio_playlist',
+                'news_spotify',
+                'news_spotify_listen',
+                'news_spotify_playlist',
+            ])
 
-            ### TEMP HACK TO SET IMAGE TO ICON - NEED TO GET ASSETS
+            if 'news_%s_%s' % (self.source, self.verb[7:]) in actionIcons:
+                self.icon = _getIconURL('news_%s_%s' % (self.source, self.verb[7:]))
+            elif 'news_%s' % (self.source) in actionIcons:
+                self.icon = _getIconURL('news_%s' % (self.source))
+            elif 'news_%s' % (self.verb[7:]) in actionIcons:
+                self.icon = _getIconURL('news_%s' % (self.verb[7:]))
+            else:
+                logs.warning("Unable to set icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
+
+            # Action Group Icons
             if len(self.subjects) > 1:
-                self.image = self.icon
+                actionGroupIcons = set([
+                    'news_amazon_group',
+                    'news_appstore_group',
+                    'news_fandango_group',
+                    'news_itunes_group',
+                    'news_listen_group',
+                    'news_netflix_group',
+                    'news_opentable_group',
+                    'news_playlist_group',
+                    'news_queue_group',
+                    'news_rdio_group',
+                    'news_spotify_group',
+                    'news_watch_group',
+                ])
+
+                if 'news_%s_group' % (self.source) in actionGroupIcons:
+                    self.image = _getIconURL('news_%s_group' % (self.source))
+                elif 'news_%s_group' % (self.verb[7:]) in actionGroupIcons:
+                    self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
+                else:
+                    logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

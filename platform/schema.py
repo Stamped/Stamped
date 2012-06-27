@@ -5,11 +5,8 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals
-import copy
-import pprint
-import logs
-import utils
+import Globals, logs, utils
+import copy, json, pprint
 
 class SchemaException(Exception):
     pass
@@ -198,6 +195,12 @@ class Schema(object):
                 return True
         else:
             return False
+
+    def __getstate__(self):
+        return self.dataExport()
+
+    def __setstate__(self, state):
+        self.dataImport(state)
 
     #TODO: make this a true repr string
     def __repr__(self):

@@ -63,7 +63,49 @@
                                 {% handlebars_template "stamp-card-image" stamp %}
                             {% endif %}
                             
-                            {% handlebars_template "social-feedback" stamp %}
+                            <div class='social-feedback-expanded'>
+                                {% handlebars_template "social-feedback" stamp %}
+                                
+                                {% if stamp.previews %}
+                                    <div class='user-previews'>
+                                        {% if stamp.previews.likes and stamp.preview.likes|length > 0 %}
+                                            <div class='likes clearfix'>
+                                                {% for user_mini in stamp.previews.likes|slice:":3" %}
+                                                    <div class='user-preview'>
+                                                        {% handlebars_template "profile-image-tiny" user_mini %}
+                                                        <div class='user-preview-icon'></div>
+                                                    </div>
+                                                {% endfor %}
+                                                
+                                                {% if stamp.previews.likes|length > 3 %}
+                                                    <a class="user-preview expand-popup expand-likes" href="/popups/likes.html?stamp_id={{stamp.stamp_id}}">
+                                                        <div class="context-popup">Expand {{stamp.num_likes}} likes...</div>
+                                                        <div class='user-preview-icon'></div>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if stamp.previews.todos and stamp.preview.todos|length > 0 %}
+                                            <div class='todos clearfix'>
+                                                {% for user_mini in stamp.previews.todos|slice:":3" %}
+                                                    <div class='user-preview'>
+                                                        {% handlebars_template "profile-image-tiny" user_mini %}
+                                                        <div class='user-preview-icon'></div>
+                                                    </div>
+                                                {% endfor %}
+                                                
+                                                {% if stamp.previews.todos|length > 3 %}
+                                                    <a class="user-preview expand-popup expand-todos" href="/popups/todos.html?stamp_id={{stamp.stamp_id}}">
+                                                        <div class="context-popup">Expand {{stamp.num_todos}} todos...</div>
+                                                        <div class='user-preview-icon'></div>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         {% with credits=stamp.previews.credits %}
@@ -139,8 +181,8 @@
     </div>
     
     <div class="section section-entity entity-id entity-id-{{stamp.entity.entity_id}}">
-        <div class="close-button">
-            <a href="#">Close</a>
+        <div class="clearfix">
+            {% handlebars_template "close-button" %}
         </div>
         
         {% handlebars_template "stamp-image-sdetail" stamp %}
@@ -164,7 +206,7 @@
                         {% else %}
                             <a class='action-link' href="">
                         {% endif %}
-                        
+                            
                             <div class="action action-{{action.type}} clearfix">
                                 <div class='entity-title' style="display: none;">
                                     {{stamp.entity.title}}

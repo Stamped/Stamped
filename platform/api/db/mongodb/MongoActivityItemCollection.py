@@ -92,6 +92,11 @@ class MongoActivityItemCollection(AMongoCollection):
             if len(v) > 0:
                 query['objects.%s' % k] = { '$in' : v }
 
+        # Sources
+        source = kwargs.pop('source', None)
+        if source is not None:
+            query['source'] = source
+
         # Timestamp
         since = kwargs.pop('since', None)
         if since is not None:

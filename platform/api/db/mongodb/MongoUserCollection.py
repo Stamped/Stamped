@@ -35,8 +35,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         self.api = api
         self._collection.ensure_index('phone')
-        self._collection.ensure_index('linked.twitter.user_id')
-        self._collection.ensure_index('linked.facebook.user_id')
+        self._collection.ensure_index('linked.twitter.linked_user_id')
+        self._collection.ensure_index('linked.facebook.linked_user_id')
 
     ### Note that overflow=True
     def _convertFromMongo(self, document):
@@ -83,7 +83,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         except StampedUnavailableError:
             return False
     
-    def lookupUsers(self, userIds, screenNames=None, limit=0):
+    def lookupUsers(self, userIds=None, screenNames=None, limit=0):
         assert userIds is None or isinstance(userIds, list)
         assert screenNames is None or isinstance(screenNames, list)
         

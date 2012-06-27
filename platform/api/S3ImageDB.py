@@ -270,7 +270,7 @@ class S3ImageDB(AImageDB):
         if sizes is not None:
             for name, size in sizes.iteritems():
                 resized = resizeImage(image, size)
-                name = '%s%s' % (prefix, name)
+                name = '%s-%s' % (prefix, name)
                 url = self._addJPG(name, resized)
                 output = ImageSizeSchema()
                 output.width = resized.size[0]

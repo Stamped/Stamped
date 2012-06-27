@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 
+import copy
 import logs
 import collections
 import functools, operator
@@ -27,7 +28,10 @@ def lru_cache(maxsize=100):
     Cache performance statistics stored in f.hits and f.misses.
     Clear the cache with f.clear().
     http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used
-    
+
+    WARNING: You should not be using this for functions with arguments of types where equality can't be easily tested by
+    str(arg1) == str(arg2). You should not be using this for functions where the return types are both mutable and
+    not deep-copyable.
     '''
     maxqueue = maxsize * 10
     def decorating_function(user_function, len=len, iter=iter, tuple=tuple, 
@@ -51,12 +55,16 @@ def lru_cache(maxsize=100):
                     arg = arg.dataExport()
                 except Exception:
                     pass
+                # TODO: Should really complain if this isn't a type that's going to serialize meaningfully
+                # to string.
                 key = "%s - %s" % (key, arg)
             for k, v in sorted(kwds.iteritems()):
                 try:
                     v = v.dataExport()
                 except Exception:
                     pass
+                # TODO: Should really complain if this isn't a type that's going to serialize meaningfully
+                # to string.
                 key = "%s - %s (%s)" % (key, k, v)
 
             if key == '':
@@ -101,9 +109,14 @@ def lru_cache(maxsize=100):
                                         iter(queue_pop, sentinel)):
                     queue_appendleft(key)
                     refcount[key] = 1
-            
+
+            try:
+                result = copy.deepcopy(result)
+            except Exception:
+                logs.warning('Calling @lru_cach\'ed function %s with arguments that are not deep-copyable!' %
+                             user_function.__name__)
             return result
-        
+
         def clear():
             cache.clear()
             queue.clear()
@@ -153,6 +166,11 @@ def lfu_cache(maxsize=100):
                                             key=itemgetter(1)):
                         del cache[key], use_count[key]
 
+            try:
+                result = copy.deepcopy(result)
+            except Exception:
+                logs.warning('Calling @lru_cach\'ed function %s with arguments that are not deep-copyable!' %
+                             user_function.__name__)
             return result
 
         def clear():

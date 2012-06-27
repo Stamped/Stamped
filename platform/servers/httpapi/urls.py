@@ -34,7 +34,7 @@ show.json           Return one object based on the object's id (e.g. stamp_id).
 lookup.json         Return a list of objects based on a comma-separated list of object ids.
 
 collection.json     Return a list of objects based on a specified scope. Takes a scope param defining the collection
-                    (e.g. "inbox") as well as additional filtering.
+                    (e.g. "inbox") as well as additional filtering. Implies that a subset of data will be returned.
 
 search.json         Return a list of objects based on a sepcified scope and a text query. Typically builds upon the 
                     collection endpoint to overlay search on top of other filtering.
@@ -56,8 +56,6 @@ urlpatterns = patterns('',
     (r'v0/account/remove.json',                             'v0.functions.account.remove'),
     (r'v0/account/update.json',                             'v0.functions.account.update'),
     (r'v0/account/show.json',                               'v0.functions.account.show'),
-    (r'v0/account/update_profile.json',                     'v0.functions.account.updateProfile'),
-    (r'v0/account/update_profile_image.json',               'v0.functions.account.updateProfileImage'),
     (r'v0/account/customize_stamp.json',                    'v0.functions.account.customizeStamp'),
     (r'v0/account/reset_password.json',                     'v0.functions.account.resetPassword'),
     (r'v0/account/change_password.json',                    'v0.functions.account.changePassword'),
@@ -140,6 +138,7 @@ urlpatterns = patterns('',
     (r'v0/stamps/likes/create.json',                        'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',                        'v0.functions.stamps.likesRemove'),
     (r'v0/stamps/likes/show.json',                          'v0.functions.stamps.likesShow'),
+    (r'v0/stamps/todos/show.json',                          'v0.functions.stamps.todosShow'),
     
     ### COMMENTS
     (r'v0/comments/create.json',                            'v0.functions.comments.create'),
@@ -150,7 +149,7 @@ urlpatterns = patterns('',
     (r'v0/todos/create.json',                               'v0.functions.todos.create'),
     (r'v0/todos/complete.json',                             'v0.functions.todos.complete'),
     (r'v0/todos/remove.json',                               'v0.functions.todos.remove'),
-    (r'v0/todos/show.json',                                 'v0.functions.todos.show'),
+    (r'v0/todos/collection.json',                           'v0.functions.todos.collection'),
 
     ### GUIDE
     (r'v0/guide/collection.json',                           'v0.functions.stamps.guide'),

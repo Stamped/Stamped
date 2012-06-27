@@ -61,7 +61,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
-                'mentions'  : document.pop('mentions', None),
                 'timestamp' : { 'created' : created },
             }
             if 'image_dimensions' in document:
@@ -79,6 +78,14 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 ]
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = created
+
+        elif 'contents' in document:
+            contents = []
+            for content in document['contents']:
+                if 'mentions' in content:
+                    del(content['mentions'])
+                contents.append(content)
+            document['contents'] = contents
 
         if 'credit' in document:
             document['credits'] = document['credit']

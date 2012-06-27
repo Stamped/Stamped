@@ -16,15 +16,6 @@ class AlbumSearchTests(ASearchTestSuite):
     def test_basic(self):
         """ Test basic album searches """
         
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = [
             ({ 'query' : 'Deep Cuts', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='deep cuts', 
@@ -56,8 +47,13 @@ class AlbumSearchTests(ASearchTestSuite):
                 SearchResultConstraint(title='wolfgang amadeus phoenix', 
                                        types='album', 
                                        index=0), 
-            ]), 
-            ({ 'query' : 'the young machines', 'category' : 'music', }, [ 
+            ]),
+            ({ 'query' : '21 adele', 'category' : 'music', }, [
+                SearchResultConstraint(title='21',
+                                       types='album',
+                                       index=0),
+            ]),
+            ({ 'query' : 'the young machines', 'category' : 'music', }, [
                 SearchResultConstraint(title='the young machines', 
                                        types='album'), 
             ]), 
@@ -100,20 +96,11 @@ class AlbumSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_international(self):
         """ Test international album support.  """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = [
             ({ 'query' : 'Kimi Ni Saku Hana', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='kimi ni saku hana', 
@@ -158,7 +145,7 @@ class AlbumSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_top_albums(self):
         """ Test top albums from iTunes """
@@ -169,15 +156,7 @@ class AlbumSearchTests(ASearchTestSuite):
         self.__test_albums(albums)
     
     def __test_albums(self, albums):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = []
         
         for album in albums:
@@ -192,7 +171,7 @@ class AlbumSearchTests(ASearchTestSuite):
                 SearchResultConstraint(title=name, types='album', match='contains'), 
             ]))
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
 
 if __name__ == '__main__':
     StampedTestRunner().run()

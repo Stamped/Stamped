@@ -419,7 +419,7 @@ class SpotifySource(GenericSource):
                 albumSearchResult.score += scoreBoost
 
 
-    def searchLite(self, queryCategory, queryText, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         tracks, albums, artists = [], [], []
         def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
             rawResults = self.__spotify.search(typeString, q=queryText)[resultsKey]

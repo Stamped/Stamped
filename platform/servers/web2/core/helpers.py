@@ -49,36 +49,32 @@ class StampedAPIProxy(object):
             return self._handle_get("stamps/collection.json", params)
     
     def getFriends(self, params, limit=None):
-        if self._prod:
-            raise NotImplementedError
-        else:
-            response = self._handle_get("friendships/friends.json", params)
-            
-            if 'user_ids' in response and len(response['user_ids']) > 0:
-                if limit is not None:
-                    response['user_ids'] = response['user_ids'][:limit]
-                
-                # TODO: this only returns max 100 at a time
-                return self._handle_post("users/lookup.json", {
-                    'user_ids' : ",".join(response['user_ids']), 
-                });
-            else:
-                return []
+        return self._get_users("friendships/friends.json", params, limit)
     
     def getFollowers(self, params, limit=None):
+        return self._get_users("friendships/followers.json", params, limit)
+    
+    def getLikes(self, params, limit=None):
+        return self._get_users("stamps/likes/show.json", params, limit)
+    
+    def getTodos(self, params, limit=None):
+        # TODO: this endpoint doesn't yet
+        return self._get_users("stamps/todos/show.json", params, limit)
+    
+    def _get_users(self, path, params, limit=None):
         if self._prod:
             raise NotImplementedError
         else:
-            response = self._handle_get("friendships/followers.json", params)
+            response = self._handle_get(path, params)
             
             if 'user_ids' in response and len(response['user_ids']) > 0:
                 if limit is not None:
                     response['user_ids'] = response['user_ids'][:limit]
                 
-                # TODO: this only returns max 100 at a time
+                # TODO: PAGING -- this only returns max 100 at a time
                 return self._handle_post("users/lookup.json", {
                     'user_ids' : ",".join(response['user_ids']), 
-                });
+                })
             else:
                 return []
     
@@ -265,7 +261,7 @@ def stamped_render(request, template, context, **kwargs):
     preload = kwargs.pop('preload', None)
     context = get_stamped_context(context, preload)
     
-    #utils.log(pprint.pformat(context));
+    #utils.log(pprint.pformat(context))
     r = render_to_response(template, context, **kwargs)
     f=open('t.html', 'w')
     f.write(r.content)

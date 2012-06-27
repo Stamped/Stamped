@@ -14,15 +14,6 @@ from libs.Fandango          import Fandango
 class MovieSearchTests(ASearchTestSuite):
     
     def test_basic(self):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = [
             ({ 'query' : 'teenage mutant ninja turtles', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='teenage mutant ninja turtles', 
@@ -102,18 +93,9 @@ class MovieSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_fuzzy(self):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = [
             ({ 'query' : 'futurama movie', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='futurama: bender\'s game', 
@@ -130,18 +112,9 @@ class MovieSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_international(self):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = [
             ({ 'query' : 'Le ragazze di Piazza di Spagna', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='Le ragazze di Piazza di Spagna', 
@@ -149,10 +122,10 @@ class MovieSearchTests(ASearchTestSuite):
                                        index=0), 
             ]), 
             
-            # TODO: add more internationl movie coverage
+            # TODO: add more international movie coverage
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_top_box_office(self):
         fandango = Fandango(verbose=True)
@@ -180,15 +153,6 @@ class MovieSearchTests(ASearchTestSuite):
     """
     
     def __test_movie_search(self, movies, **extra_constraint_args):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = []
         
         for movie in movies:
@@ -198,7 +162,7 @@ class MovieSearchTests(ASearchTestSuite):
                                        **extra_constraint_args), 
             ]))
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
 
 if __name__ == '__main__':
     StampedTestRunner().run()

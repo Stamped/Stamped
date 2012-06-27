@@ -8,10 +8,6 @@
 
 var g_update_stamps = null;
 
-/* TODO:
-    * gallery infinite scroll doesn't reset properly
- */
-
 (function() {
     $(document).ready(function() {
         
@@ -239,6 +235,20 @@ var g_update_stamps = null;
             return false;
         });
         
+        $(".expand-friends").click(function(event) {
+            event.preventDefault();
+            
+            var $this = $(this);
+            var href  = $this.attr('href');
+            
+            var popup_options = get_fancybox_popup_options({
+                href  : href
+            });
+            
+            $.fancybox.open(popup_options);
+            return false;
+        });
+        
         var $header_subsections = $('.header-subsection');
         var header_subsection_height = 0;
         var $header_subsection_0 = null;
@@ -344,8 +354,8 @@ var g_update_stamps = null;
             });
         };
         
-        var last_layout = null;
         var gallery_is_visible = false;
+        var last_layout = null;
         
         // relayout the stamp gallery using isotope
         var update_gallery_layout = function(is_visible, callback) {
@@ -381,6 +391,7 @@ var g_update_stamps = null;
             return;
         };
         
+        // returns the default fancybox options merged with the optional given options
         var get_fancybox_options = function(options) {
             var default_options = {
                 openEffect      : 'elastic', 
@@ -390,6 +401,11 @@ var g_update_stamps = null;
                 closeEffect     : 'elastic', 
                 closeEasing     : 'easeInBack', 
                 closeSpeed      : 300, 
+                
+                tpl             : {
+				    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    closeBtn    : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                }, 
                 
                 helpers         : {
                     overlay     : {
@@ -423,7 +439,42 @@ var g_update_stamps = null;
                 }
             }
             
-            return options;
+            return output;
+        };
+        
+        // returns the default fancybox popup options merged with the optional given options
+        var get_fancybox_popup_options = function(options) {
+            var output = get_fancybox_options({
+                type        : "ajax", 
+                scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
+                wrapCSS     : '', 
+                padding     : 0, 
+                minWidth    : 366, 
+                maxWidth    : 366, 
+                
+                beforeShow  : function() {
+                    $('.popup-body').jScrollPane({
+                        verticalPadding : 8
+                    });
+                    
+                    // disable page scroll for duration of fancybox popup
+                    $("html").css('overflow', 'hidden');
+                }, 
+                beforeClose : function() {
+                    // reenaable page scroll before fancybox closes
+                    $("html").css('overflow-y', 'scroll');
+                }
+            });
+            
+            if (!!options) {
+                for (var key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        output[key] = options[key];
+                    }
+                }
+            }
+            
+            return output;
         };
         
         var find_valid_image = function($elem, selector, is_sdetail) {
@@ -504,8 +555,8 @@ var g_update_stamps = null;
                         $preview = $preview.parents('.preview-image');
                     }
                     
-                    // TODO: modify static-map-small for sDetail to not be crinkled
                     // TODO: experiment w/ initial scale at .25 scale and tween to this transform
+                    // TODO: move these transformations into CSS!!
                     var width = "200px";
                     var angle = "20deg";
                     var t = "perspective(600) rotateZ(" + angle + ") rotateX(" + angle + ") rotateY(-" + angle + ")";
@@ -582,7 +633,7 @@ var g_update_stamps = null;
             if (!!$items) {
                 $items.click(function(event) {
                     var $target = $(event.target);
-                    if ($target.is('a') && $target.hasClass('lightbox')) {
+                    if ($target.is('a') && $target.hasClass('zoom')) {
                         // override the sdetail popup if a lightbox target was clicked
                         return true;
                     }
@@ -630,7 +681,9 @@ var g_update_stamps = null;
                             
                             // reset window's vertical scroll position to where it was 
                             // before the sDetail popup
+                            // TODO: this is broken on Firefox
                             $window.scrollTop(scroll_top);
+                            
                             // reenable gallery animations
                             enable_gallery_animations(true);
                             
@@ -663,23 +716,13 @@ var g_update_stamps = null;
                             console.debug(response);
                             console.debug(xhr);
                             
-                            //alert("TODO: handle AJAX and backend errors gracefuly");
+                            alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
+                            
                             return;
                         }
                         
                         $target.removeClass('sdetail-loading');
                         init_sdetail($target);
-                        
-                        // initialize sDetail close button logic
-                        $target.find('.close-button a').click(function(event) {
-                            event.preventDefault();
-                            
-                            if (!!close_sdetail_func) {
-                                close_sdetail_func();
-                            }
-                            
-                            return false;
-                        });
                     });
                     
                     return false;
@@ -978,44 +1021,6 @@ var g_update_stamps = null;
             
             return false;
         });
-        
-        $('.stamp-gallery-view-map a').click(function(event) {
-            event.preventDefault();
-            
-            var url   = get_custom_url({}, "/" + screen_name + "/map");
-            var title = "Stamped - " + screen_name + " - map";
-            
-            window.location = url;
-            return false;
-        });
-        
-        /*
-        $('a.map-profile-link').hover(function() {
-            var $this   = $(this);
-            var $inner  = $this.find('.inner');
-            var $shadow = $this.find('.inner-shadow');
-            
-            $inner.stop(true, false);
-            $shadow.stop(true, false);
-            
-            var animate = function() {
-                $inner.animate({
-                    top : -18px
-                }, {
-                    duration : 200, 
-                    specialEasing : { 
-                        width  : 'ease-out', 
-                        height : 'ease-out'
-                    }, 
-                    complete : function() {
-                        animate();
-                    }
-                });
-            };
-        }, function() {
-            var $this = $(this);
-            
-        });*/
         
         
         // ---------------------------------------------------------------------
@@ -1686,11 +1691,13 @@ var g_update_stamps = null;
             
             var clamped = 'stamp-category-nav-bar-clamped';
             
+            // clamp the navbar's vertical offset to never overlap too far into the page's header
             if (window.innerHeight / 2 - 198 <= 250) {
                 if (!$nav_bar.hasClass(clamped)) {
                     $nav_bar.addClass(clamped);
                 }
             } else if ($nav_bar.hasClass(clamped)) {
+                // otherwise, the navbar will be vertically centered on the page
                 $nav_bar.removeClass(clamped);
             }
             
@@ -1943,6 +1950,7 @@ var g_update_stamps = null;
                 }
             });
             
+            // sanitize sizing of user-generated image embedded in stamp card
             $sdetail.find(".stamp-card .entity-image-wrapper").each(function(i, elem) {
                 var $elem = $(elem);
                 var $img  = $elem.find('img');
@@ -1961,6 +1969,31 @@ var g_update_stamps = null;
                         });
                     }
                 }
+            });
+            
+            $sdetail.find(".expand-popup").click(function(event) {
+                event.preventDefault();
+                
+                var $this = $(this);
+                var href  = $this.attr('href');
+                
+                var popup_options = get_fancybox_popup_options({
+                    href  : href
+                });
+                
+                $.fancybox.open(popup_options);
+                return false;
+            });
+            
+            // initialize sDetail close button
+            $sdetail.find('.close-button').click(function(event) {
+                event.preventDefault();
+                
+                if (!!close_sdetail_func) {
+                    close_sdetail_func();
+                }
+                
+                return false;
             });
             
             update_stamps($sdetail);

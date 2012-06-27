@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 from copy import deepcopy
-from utils import indentText, basicNestedObjectToString
+from utils import indentText, basicNestedObjectToString, normalize
 
 class SearchResult(object):
     """
@@ -19,7 +19,9 @@ class SearchResult(object):
         self.resolverObject = resolverObject
 
     def addScoreComponentDebugInfo(self, componentName, componentValue):
-        self.__scoreDebugInfo.append((componentName.encode('utf-8'), componentValue))
+        if isinstance(componentName, unicode):
+            componentName = componentName.encode('utf-8')
+        self.__scoreDebugInfo.append((componentName, componentValue))
 
     @property
     def scoreDebugInfo(self):
@@ -29,7 +31,7 @@ class SearchResult(object):
     def results(self):
         return self
 
-    def __str__(self):
+    def __repr__(self):
         scoreDetails = '\n'.join(['  %s: %f' % componentInfo for componentInfo in self.__scoreDebugInfo])
         return 'Score: %f\nSource: %s\nScore details: %s\nResult:\n%s' % \
                (self.score, self.resolverObject.source, scoreDetails, indentText(str(self.resolverObject), 4))

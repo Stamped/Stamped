@@ -5,18 +5,16 @@
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
-/*---------------------------------------------------
-    LESS Elements 0.6
-    ---------------------------------------------------
-    A set of useful LESS mixins by Dmitry Fadeyev
-    Special thanks for mixin suggestions to:
-      Kris Van Herzeele,
-      Benoit Adam,
-      Portenart Emile-Victor,
-      Ryan Faerman
-
-    More info at: http://lesselements.com
------------------------------------------------------*/
+/* elements.less
+ * 
+ * Uses elements derived from LESS Elements 0.6 by Dmitry Fadeyev 
+ * (http://lesselements.com)
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
 .pitch {
   height: 35px;
   background: url(/assets/img/public-home/text-put-your-stamp-on-the-world.png) left top no-repeat;
