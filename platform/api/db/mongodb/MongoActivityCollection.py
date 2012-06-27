@@ -20,7 +20,7 @@ class MongoActivityCollection(AActivityDB):
     
     """
     Activity Types:
-    * restamp
+    * credit
     * mention
     * comment
     * reply
