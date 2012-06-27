@@ -9,7 +9,7 @@ import Globals, utils
 
 from StampedTestUtils           import *
 from SearchResultConstraints    import *
-from resolve.EntitySearch       import EntitySearch
+from search.EntitySearch        import EntitySearch
 from resolve.Resolver           import simplify
 from gevent.pool                import Pool
 from pprint                     import pprint, pformat
@@ -146,7 +146,7 @@ class ASearchTestSuite(AStampedTestCase):
             
             # optionally run each test twice, once with coordinates enabled, and once with them 
             # disabled and expect the same constraints to be satisfied; note: test_coords should 
-            # not be set to true for non-national place search tests, but all other search tests 
+            # not be set to true for non-national place search tests, but all other search tests
             # should be agnostic to coords (e.g., movies, books, etc.)
             if test_coords:
                 args2  = copy(args)
@@ -169,8 +169,11 @@ class ASearchTestSuite(AStampedTestCase):
                 # perform the actual search itself, validating the results against all constraints 
                 # specified by this test case, and retrying if necessary until either the test case 
                 # satisfies its constraints or the maximum number of allotted retries is exceeded.
-                self.async(lambda: self.searcher.searchEntities(**args), 
-                           lambda r: validate(r, args, constraints), 
+                fullArgs = copy(args)
+                query = args.pop('query')
+                category = args.pop('category')
+                self.async(lambda: self.searcher.searchEntities(category, query, **args),
+                           lambda r: validate(r, fullArgs, constraints),
                            retries=retries, 
                            delay=delay)
             

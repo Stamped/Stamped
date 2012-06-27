@@ -275,7 +275,7 @@ class FactualSource(GenericSource):
         return generatorSource(gen(), constructor=FactualSearchAll)
 
 
-    def searchLite(self, queryCategory, queryText, timeout=None, queryLatLng=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         if queryCategory != 'place':
             raise NotImplementedError()
 
@@ -284,12 +284,12 @@ class FactualSource(GenericSource):
 
         def getLocalResults():
             # Radius is == the radius used with Google Places.
-            results = self.__factual.search(queryText, coordinates=queryLatLng, radius=20000)
+            results = self.__factual.search(queryText, coordinates=coords, radius=20000)
             local_results.extend(results)
         def getNationalResults():
             results = self.__factual.search(queryText)
             national_results.extend(results)
-        if queryLatLng is not None:
+        if coords is not None:
             pool = Pool(2)
             pool.spawn(getLocalResults)
             pool.spawn(getNationalResults)
@@ -306,8 +306,8 @@ class FactualSource(GenericSource):
         local_results = scoreResultsWithBasicDropoffScoring(local_results, sourceScore=0.4)
         national_results = scoreResultsWithBasicDropoffScoring(national_results, sourceScore=0.4)
 
-        augmentPlaceScoresForRelevanceAndProximity(local_results, queryText, queryLatLng)
-        augmentPlaceScoresForRelevanceAndProximity(national_results, queryText, queryLatLng)
+        augmentPlaceScoresForRelevanceAndProximity(local_results, queryText, coords)
+        augmentPlaceScoresForRelevanceAndProximity(national_results, queryText, coords)
 
         smoothScores(local_results)
         smoothScores(national_results)

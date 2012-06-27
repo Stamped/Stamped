@@ -15,16 +15,6 @@ class ArtistSearchTests(ASearchTestSuite):
     
     def test_basic(self):
         """ Test basic artist searches """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = [
             ({ 'query' : 'nicki minaj', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='nicki minaj', 
@@ -125,19 +115,10 @@ class ArtistSearchTests(ASearchTestSuite):
             #]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_international(self):
         """ Test international artist support """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
         
         tests = [
             ({ 'query' : 'the beatles', 'category' : 'music', }, [ 
@@ -212,20 +193,11 @@ class ArtistSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_keywords(self):
         """ Test artist searches containing other keywords (songs, albums, etc.) """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = [
             ({ 'query' : 'adele 21', 'category' : 'music', }, [ 
                 SearchResultConstraint(title='adele', 
@@ -252,7 +224,7 @@ class ArtistSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_top_songs(self):
         """ Test artists from top songs from iTunes """
@@ -271,15 +243,6 @@ class ArtistSearchTests(ASearchTestSuite):
         self.__test_artists(objs)
     
     def __test_artists(self, objs):
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
         tests = []
         
         for obj in objs:
@@ -297,7 +260,7 @@ class ArtistSearchTests(ASearchTestSuite):
                 SearchResultConstraint(title=artist, types='artist'), 
             ]))
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
 
 if __name__ == '__main__':
     StampedTestRunner().run()

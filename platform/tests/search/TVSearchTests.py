@@ -14,16 +14,7 @@ class TVSearchTests(ASearchTestSuite):
     
     def test_basic(self):
         """ Test basic tv searches """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
-        
+
         tests = [
             ({ 'query' : 'game of thrones', 'category' : 'film', }, [ 
                 SearchResultConstraint(title='game of thrones', types='tv'), 
@@ -109,19 +100,10 @@ class TVSearchTests(ASearchTestSuite):
             ]), 
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
     
     def test_international(self):
         """ Test international tv searches """
-        
-        args = {
-            'query'  : '', 
-            'coords' : None, 
-            'full'   : True, 
-            'local'  : False, 
-            'offset' : 0, 
-            'limit'  : 10, 
-        }
         
         tests = [
             ({ 'query' : 'footballer\'s wives', 'category' : 'film', }, [    # popular U.K. TV show (2002)
@@ -140,7 +122,7 @@ class TVSearchTests(ASearchTestSuite):
             # TODO: add more popular foreign shows with exotic names
         ]
         
-        self._run_tests(tests, args)
+        self._run_tests(tests, {})
 
 if __name__ == '__main__':
     StampedTestRunner().run()

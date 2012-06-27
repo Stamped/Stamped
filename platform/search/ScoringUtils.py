@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 
+from __future__ import division
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import Globals
 from SearchResult import SearchResult
+from resolve.Resolver import simplify
 from difflib import SequenceMatcher
+
+import math
 
 def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dropoffFactor=0.7):
     """
@@ -15,10 +21,13 @@ def scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0, dro
     """
     currScore = sourceScore
     scoredResults = []
-    for resolverObject in resolverObjectList:
-        scoredResults.append(SearchResult(currScore, resolverObject))
+    for rank, resolverObject in enumerate(resolverObjectList):
+        result = SearchResult(currScore, resolverObject)
+        result.addScoreComponentDebugInfo('Initial scoring for ranking at %d' % (rank + 1), currScore)
+        scoredResults.append(result)
         currScore *= dropoffFactor
     return scoredResults
+
 
 def smoothScores(searchResultList, minGrowthFactor=1.05):
     """
@@ -59,13 +68,34 @@ def smoothScores(searchResultList, minGrowthFactor=1.05):
                                                   lastScore - nextResult.score)
             nextResult.score = lastScore
 
+
 def sortByScore(results):
-    results.sort(lambda r1, r2:cmp(r1.score, r2.score), reverse=True)
+    results.sort(key=lambda result: result.score, reverse=True)
+
+
+def stringRelevance(queryText, resultText):
+    """Returns a number between 0 and 1, measuring how "relevant" the resultText is for queryText.
+
+    Note that this differs from similarity, in that it is not symmetric. It only matters now much of
+    the query text is "fulfilled" by the result text. The result text could have a lot more
+    irrelevant terms without affecting the result.
+    """
+    queryText = simplify(queryText)
+    resultText = simplify(resultText)
+
+    # sqrt(2), pulled out of an ass.
+    nonContinuityPenalty = 1.414
+    matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
+    totalMatch = sum(matchSize ** nonContinuityPenalty
+            for _, _, matchSize in matchingBlocks if matchSize > 1)
+    return totalMatch / (len(queryText) ** nonContinuityPenalty)
+
 
 def interleaveResultsByScore(resultLists):
     allResults = [result for resultList in resultLists for result in resultList]
     sortByScore(allResults)
     return allResults
+
 
 def dedupeById(scoredResults, boostFactor=1.0):
     keysToResults = {}
@@ -84,7 +114,6 @@ def dedupeById(scoredResults, boostFactor=1.0):
     return keysToResults.values()
 
 
-import math
 def geoDistance((lat1, lng1), (lat2, lng2)):
     radius = 6371 # km
 
@@ -96,6 +125,14 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     d = radius * c
 
     return d
+
+
+def augmentScoreForTextRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
+    for result in results:
+        resultText = resultTextExtractor(result)
+        titleBoost = maxRelevanceBoost ** stringRelevance(queryText, resultText)
+        result.score *= titleBoost
+        result.addScoreComponentDebugInfo('title similarity factor', titleBoost)
 
 
 def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
@@ -122,3 +159,4 @@ def augmentPlaceScoresForRelevanceAndProximity(results, queryText, queryLatLng):
             distance_boost = 1 + math.log(100 / distance, 1000)
             result.score *= distance_boost
             result.addScoreComponentDebugInfo('proximity score factor', distance_boost)
+

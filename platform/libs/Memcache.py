@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, logs, utils, pylibmc
+import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json, datetime
 
 from schema import Schema
 
@@ -59,8 +59,6 @@ class Memcache(object):
             self._client.flush_all()
     
     def set(self, key, value, *args, **kwargs):
-        value = self._import_value(value)
-        
         try:
             self._client.set(key, value, *args, **kwargs)
         except Exception, e:
@@ -73,11 +71,11 @@ class Memcache(object):
     
     def __setitem__(self, key, value):
         if self._client:
-            self._client[key] = self._import_value(value)
+            self._client[key] = value
     
     def __getitem__(self, key):
         if self._client:
-            return self._export_value(self._client[key])
+            return self._client[key]
 
         raise KeyError(key)
 
@@ -90,42 +88,6 @@ class Memcache(object):
             return key in self._client
         
         return False
-    
-    def _import_value(self, value):
-        """
-            returns a custom, pickleable version of the given value for storage
-            within memcached.
-        """
-        
-        if isinstance(value, Schema):
-            return {
-                "__schema__" : value.__class__, 
-                "__value__"  : value.dataExport(), 
-            }
-        elif isinstance(value, (list, tuple)):
-            value = map(self._import_value, value)
-        elif isinstance(value, dict):
-            value = dict(map(lambda (k, v): (k, self._import_value(v)), value.iteritems()))
-        
-        return value
-    
-    def _export_value(self, value):
-        """
-            converts the custom, pickleable version of the given value stored 
-            within memcached into our own, pythonic version that is returned.
-        """
-        
-        if isinstance(value, dict):
-            if '__schema__' in value and '__value__' in value:
-                # reinstantiate the Schema subclass with its prior data
-                return value['__schema__']().dataImport(value['__value__'])
-            else:
-                return dict(map(lambda (k, v): (k, self._export_value(v)), value.iteritems()))
-        elif isinstance(value, (list, tuple)):
-            value = map(self._export_value, value)
-            return value
-        else:
-            return value
     
     def __str__(self):
         if self._client:
@@ -164,26 +126,33 @@ def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
 
-        ### 6/7/12 (Kevin): Disabling this for now, since it's causing issues with iTunes. 
-        """
         key_prefix = user_function.func_name
 
         @functools.wraps(user_function)
-        def wrapper(*args, **kwds):
+        def wrapper(*args, **kwargs):
             # note: treat args[0] specially (self)
             self  = args[0].__class__.__name__
             args2 = args[1:]
-            cache = __global_memcache()
+            cache = globalMemcache()
             mark  = ';'
             
-            # cache key records both positional and keyword args
+            # Cache key records both positional and keyword args
             key   = "%s::%s(" % (self, key_prefix)
             
-            if len(args2) > 0:
-                key += mark.join(map(str, args2))
+            def encode_arg(arg):
+                if isinstance(arg, Schema):
+                    # Convert to JSON to efficiently convert to string / sort by keys
+                    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
+                    return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+                else:
+                    # Convert any unicode characters to string representation
+                    return unicode(arg).encode('utf8')
+
+            if len(args) > 0:
+                key += mark.join(map(encode_arg, args2))
             
-            if kwds:
-                suffix = mark.join(('%s=%s' % kv for kv in sorted(kwds.items())))
+            if kwargs:
+                suffix = mark.join(('%s=%s' % (k, encode_arg(v)) for k, v in sorted(kwargs.items())))
                 
                 if len(args2) > 0 and not key.endswith(mark):
                     key += "%s%s" % (mark, suffix)
@@ -191,6 +160,8 @@ def memcached_function(time=0, min_compress_len=0):
                     key += suffix
             
             key += ')'
+
+            logs.debug("Memcached Key: %s" % key)
             
             # get cache entry or compute if not found
             store   = False
@@ -201,14 +172,14 @@ def memcached_function(time=0, min_compress_len=0):
                 compute = False
                 
                 wrapper.hits += 1
-                logs.debug("Cache hit: %s" % key)
+                logs.debug("Memcached Hit")
             except KeyError:
                 store = True
             except Exception:
                 store = False
             
             if compute:
-                result = user_function(*args, **kwds)
+                result = user_function(*args, **kwargs)
                 wrapper.misses += 1
             
             if store:
@@ -216,9 +187,10 @@ def memcached_function(time=0, min_compress_len=0):
                 
                 if cache_set is not None:
                     try:
+                        logs.debug("Store in Memcached")
                         cache_set(key, result, time=time, min_compress_len=min_compress_len)
                     except Exception, e:
-                        logs.warn(str(e))
+                        logs.warning(str(e))
             
             return result
         
@@ -234,12 +206,13 @@ def memcached_function(time=0, min_compress_len=0):
         
         return wrapper
         """
-
+        # Temporary replacement to nullify actions
         @functools.wraps(user_function)
         def wrapper(*args, **kwargs):
             return user_function(*args, **kwargs)
 
         return wrapper
+        """
     
     return decorating_function
 

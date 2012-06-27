@@ -58,6 +58,85 @@ logs.info("INIT: %s sec" % duration)
 if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
+def handleStampedExceptions(e):
+    if isinstance(e, StampedHTTPError):
+        if e.kind is None:
+            e.kind = 'stamped_error'
+
+        logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(e.code)
+
+        error = {'error': e.kind}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+
+        return transformOutput(error, status=e.code)
+
+    if isinstance(e, StampedAuthError):
+        logs.warning("401 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(401)
+
+        error = {'error': e.msg}
+        return transformOutput(error, status=401)
+
+    if isinstance(e, StampedInputError):
+        logs.warning("400 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(400)
+
+        error = {'error': 'invalid_request'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=400)
+
+    if isinstance(e, StampedIllegalActionError):
+        logs.warning("403 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(403)
+
+        error = {'error': 'illegal_action'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=403)
+
+    if isinstance(e, StampedPermissionsError):
+        logs.warning("403 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(403)
+
+        error = {'error': 'insufficient_privileges'}
+        return transformOutput(error, status=403)
+
+    if isinstance(e, StampedDuplicationError):
+        logs.warning("409 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(409)
+
+        error = {'error': 'already_exists'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=409)
+
+    if isinstance(e, StampedUnavailableError):
+        logs.warning("404 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(404)
+
+        error = {'error': 'not_found'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=404)
+
+    logs.warning("500 Error: %s" % e)
+    logs.warning(utils.getFormattedException())
+    logs.error(500)
+
+    error = {'error': 'internal server error'}
+    return transformOutput(error, status=500)
+
+
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False,
                       http_schema=None,
@@ -105,84 +184,6 @@ def handleHTTPRequest(requires_auth=True,
                              set requires_client to True.
     """
 
-    def handleStampedExceptions(e):
-        if isinstance(e, StampedHTTPError):
-            if e.kind is None:
-                e.kind = 'stamped_error'
-
-            logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(e.code)
-
-            error = {'error': e.kind}
-            if e.msg is not None:
-                error['message'] = unicode(e.msg)
-
-            return transformOutput(error, status=e.code)
-
-        if isinstance(e, StampedAuthError):
-            logs.warning("401 Error: %s" % (e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(401)
-
-            error = {'error': e.msg}
-            return transformOutput(error, status=401)
-
-        if isinstance(e, StampedInputError):
-            logs.warning("400 Error: %s" % (e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(400)
-
-            error = {'error': 'invalid_request'}
-            if e.msg is not None:
-                error['message'] = unicode(e.msg)
-            return transformOutput(error, status=400)
-
-        if isinstance(e, StampedIllegalActionError):
-            logs.warning("403 Error: %s" % (e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(403)
-
-            error = {'error': 'illegal_action'}
-            if e.msg is not None:
-                error['message'] = unicode(e.msg)
-            return transformOutput(error, status=403)
-
-        if isinstance(e, StampedPermissionsError):
-            logs.warning("403 Error: %s" % (e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(403)
-
-            error = {'error': 'insufficient_privileges'}
-            return transformOutput(error, status=403)
-
-        if isinstance(e, StampedDuplicationError):
-            logs.warning("409 Error: %s" % (e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(409)
-
-            error = {'error': 'already_exists'}
-            if e.msg is not None:
-                error['message'] = unicode(e.msg)
-            return transformOutput(error, status=409)
-
-        if isinstance(e, StampedUnavailableError):
-            logs.warning("404 Error: %s" % (e.msg))
-            logs.warning(utils.getFormattedException())
-            logs.error(404)
-
-            error = {'error': 'not_found'}
-            if e.msg is not None:
-                error['message'] = unicode(e.msg)
-            return transformOutput(error, status=404)
-
-        logs.warning("500 Error: %s" % e)
-        logs.warning(utils.getFormattedException())
-        logs.error(500)
-
-        error = {'error': 'internal server error'}
-        return transformOutput(error, status=500)
-
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -191,7 +192,7 @@ def handleHTTPRequest(requires_auth=True,
         @wraps(fn)
         def wrapper(request, *args, **kwargs):
             try:
-                origin = ""
+                origin = None
                 
                 try:
                     origin = request.META['HTTP_ORIGIN']
@@ -217,28 +218,16 @@ def handleHTTPRequest(requires_auth=True,
                            nodeName=stampedAPI.node_name)
                 logs.info("%s %s" % (request.method, request.path))
                 
-                if not valid_origin:
-                    logs.warning("INVALID ORIGIN: %s" % origin)
+                if valid_origin is None:
+                    if origin is not None:
+                        logs.warning("Invalid origin: %s" % origin)
+                    else:
+                        logs.debug("Origin not included")
                 
                 params = {}
+                params['authUserId'], params['authClientId'] = checkOAuth(request, required=requires_auth)
+                params['client_id'] = checkClient(request, required=requires_client)
                 
-                ### TODO: Fix this so that if the user passes an expired token, it fails appropriately
-                try:
-                    params['authUserId'], params['authClientId'] = checkOAuth(request)
-                except StampedInputError:
-                    if requires_auth:
-                        raise
-                    
-                    params['authUserId'], params['authClientId'] = None, None
-                
-                try:
-                    params['client_id'] = checkClient(request)
-                except StampedInputError:
-                    if requires_client:
-                        raise
-                    
-                    params['client_id'] = None
-
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or {}
 
@@ -280,10 +269,10 @@ def handleHTTPRequest(requires_auth=True,
 
 
 def handleHTTPCallbackRequest(
-                      http_schema=None,
-                      conversion=None,
-                      parse_request_kwargs=None,
-                      parse_request=True):
+        http_schema=None,
+        conversion=None,
+        parse_request_kwargs=None,
+        parse_request=True):
 
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the
@@ -300,24 +289,6 @@ def handleHTTPCallbackRequest(
                 logs.info("%s %s" % (request.method, request.path))
 
                 params = {}
-
-                ### TODO: Fix this so that if the user passes an expired token, it fails appropriately
-#                try:
-#                    params['authUserId'], params['authClientId'] = checkOAuth(request)
-#                except StampedInputError:
-#                    if requires_auth:
-#                        raise
-
-#                    params['authUserId'], params['authClientId'] = None, None
-#
-#                try:
-#                    params['client_id'] = checkClient(request)
-#                except StampedInputError:
-#                    if requires_client:
-#                        raise
-
-#                    params['client_id'] = None
-
 
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
@@ -349,13 +320,14 @@ def handleHTTPCallbackRequest(
         return wrapper
     return decorator
 
-
-def checkClient(request):
+def checkClient(request, required=True):
     ### Parse Request for Client Credentials
     try:
         client_id       = request.POST['client_id']
         client_secret   = request.POST['client_secret']
     except Exception:
+        if not required:
+            return None 
         raise StampedInputError("Client credentials not included")
     
     ### Validate Client Credentials
@@ -380,7 +352,7 @@ def optionalOAuth(request):
     
     return authUserId
 
-def checkOAuth(request):
+def checkOAuth(request, required=True):
     ### Parse Request for Access Token
     try:
         if request.method == 'GET':
@@ -392,6 +364,8 @@ def checkOAuth(request):
         
         logs.token(oauth_token)
     except Exception:
+        if not required:
+            return None, None 
         raise StampedInputError("Access token not found")
     
     ### Validate OAuth Access Token

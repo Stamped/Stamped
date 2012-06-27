@@ -89,8 +89,10 @@ class ResolverObject(object):
         lines = []
         for property in self._properties:
             propertyValue = getattr(self, property)
+            if isinstance(propertyValue, unicode):
+                propertyValue = propertyValue.encode('utf-8')
             if propertyValue is not None and propertyValue != [] and propertyValue != '':
-                lines.append('%s\t:%s' % (property, unicode(propertyValue).encode('utf-8')))
+                lines.append('%s\t:%s' % (property, propertyValue))
 
         self.__maxLookupCalls = oldMax
         return '\n'.join(lines)

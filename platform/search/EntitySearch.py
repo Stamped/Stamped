@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs, gevent
+import sys, datetime, logs, gevent, utils
 from api                        import Entity
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
@@ -25,6 +25,24 @@ from SearchResultDeduper        import SearchResultDeduper
 
 def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
+
+
+# Editable via command-line flags.
+shouldLogSourceResults = False
+shouldLogTiming = False
+shouldLogClusters = False
+
+def logClusterData(msg):
+    if shouldLogClusters:
+        logs.debug(msg)
+
+def logTimingData(msg):
+    if shouldLogTiming:
+        logs.debug(msg)
+
+def logSourceResultsData(msg):
+    if shouldLogSourceResults:
+        logs.debug(msg)
 
 
 class EntitySearch(object):
@@ -62,22 +80,26 @@ class EntitySearch(object):
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
         sources_seen = set()
-        logs.debug("RESTARTING")
         while True:
             try:
                 elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
+
+                if elapsed_seconds >= 20:
+                    logs.warning('Search completely timed out at 20s!')
+                    pool.kill()
+                    return
+
                 for (source, results) in resultsDict.items():
                     if source in sources_seen:
                         continue
-                    logs.debug('JUST NOW SEEING SOURCE: ' + source.sourceName)
+                    logTimingData('JUST NOW SEEING SOURCE: ' + source.sourceName)
                     sources_seen.add(source)
-                    logs.debug('SOURCES_SEEN IS ' + str([src for src in sources_seen]))
                     # If a source returns at least 5 results, we assume we got a good result set from it. If it
                     # returns less, we're more inclined to wait for straggling sources.
                     total_value_received += sources_to_priorities[source] * min(5, len(results)) / 5.0
-                    logs.debug('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
+                    logTimingData('DECREMENTING OUTSTANDING BY ' + str(sources_to_priorities[source]) + ' FOR SOURCE ' + source.sourceName)
                     total_potential_value_outstanding -= sources_to_priorities[source]
-                logs.debug('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
+                logTimingData('AT %f seconds elapsed, TOTAL VALUE RECEIVED IS %f, TOTAL OUTSTANDING IS %f' % (
                         elapsed_seconds, total_value_received, total_potential_value_outstanding
                     ))
             except Exception:
@@ -86,7 +108,7 @@ class EntitySearch(object):
                 raise
 
             if total_potential_value_outstanding <= 0:
-                logs.debug('ALL SOURCES DONE')
+                logTimingData('ALL SOURCES DONE')
                 return
 
             if total_value_received:
@@ -106,6 +128,7 @@ class EntitySearch(object):
                         source.sourceName for source in sources_to_priorities.keys() if source not in sources_seen
                     ]
                     if sources_not_seen:
+                        # This is interesting information whether we want the full timing data logged or not.
                         log_template = 'QUITTING EARLY: At %f second elapsed, bailing on sources [%s] because with ' + \
                             'value received %f, value outstanding %f, marginal value %f, min marginal value %f'
                         logs.debug(log_template % (
@@ -132,7 +155,7 @@ class EntitySearch(object):
             source.sourceName, str(after - before), len(resultsDict.get(source, []))
         ))
 
-    def search(self, category, text, timeout=None, limit=10, **queryParams):
+    def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -145,75 +168,108 @@ class EntitySearch(object):
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, **queryParams)
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
         pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
-        logs.debug("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
+        logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
-        logs.debug("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
+        logTimingData("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
 
-        logs.debug("GOT RESULTS: " + (", ".join(['%d from %s' % (len(rList), source.sourceName) for (source, rList) in results.items()])))
-        logs.debug('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
+        logTimingData('TIMES: ' + (', '.join(['%s took %s' % (source.sourceName, str(times[source])) for source in times])))
         for source in self.__all_sources:
             if source in results and results[source]:
-                logs.debug("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
+                logSourceResultsData("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
                 for result in results[source]:
-                    #print unicode(result).encode('utf-8'), "\n\n"
+                    logSourceResultsData(utils.normalize(repr(result)))
                     pass
 
-        logs.debug("DEDUPING")
         beforeDeduping = datetime.datetime.now()
         dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
         afterDeduping = datetime.datetime.now()
-        logs.debug("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
-        logs.debug("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
-        logs.debug("ELAPSED:" + str(afterDeduping - start))
+        logTimingData("DEDUPING TOOK " + str(afterDeduping - beforeDeduping))
+        logTimingData("TIME CHECK DONE AT:" + str(datetime.datetime.now()))
+        logTimingData("ELAPSED:" + str(afterDeduping - start))
 
-        logs.debug("\n\nDEDUPED RESULTS\n\n")
+        logClusterData("\n\nDEDUPED RESULTS\n\n")
         for dedupedResult in dedupedResults[:limit]:
-            logs.debug("\n\n%s\n\n" % str(dedupedResult))
+            logClusterData("\n\n%s\n\n" % str(dedupedResult))
 
         return dedupedResults[:limit]
 
 
-    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, queryLatLng=None, **queryParams):
-        if queryLatLng:
-            queryParams['queryLatLng'] = queryLatLng
-        stampedSource = StampedSource()
-        clusters = self.search(category, text, timeout=timeout, limit=limit, **queryParams)
-        entityResults = []
-        for cluster in clusters:
-            entityId = None
-            for result in cluster.results:
-                if result.resolverObject.source == 'stamped':
-                    entityId = result.resolverObject.key
-                    break
-
-            results = cluster.results[:]
-            results.sort(key = lambda result:result.score, reverse=True)
-            for result in results:
-                if entityId:
-                    break
-                proxy = result.resolverObject
-                # TODO: Batch the database requests into one big OR query. Have appropriate handling for when we get
-                # multiple Stamped IDs back.
-                entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
-                # TODO: Incorporate data fullness here!
-
-            if entityId:
-                proxy = stampedSource.entityProxyFromKey(entityId)
-                entity = EntityProxyContainer(proxy).buildEntity()
-                # TODO: Somehow mark the entity to be enriched with these other IDs I've attached
-                entity.entity_id = entityId
+    def __getEntityIdForCluster(self, cluster):
+        idsFromClusteredEntities = []
+        fastResolvedIds = []
+        for result in cluster.results:
+            if result.resolverObject.source == 'stamped':
+                idsFromClusteredEntities.append(result.resolverObject.key)
             else:
-                entityBuilder = EntityProxyContainer(results[0].resolverObject)
-                for result in results[1:]:
-                    entityBuilder.addSource(EntityProxySource(result.resolverObject))
-                entity = entityBuilder.buildEntity()
+                # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
+                entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
+                if entityId:
+                    fastResolvedIds.append(entityId)
 
-            entityResults.append(entity)
+        allIds = idsFromClusteredEntities + fastResolvedIds
+        if len(idsFromClusteredEntities) > 2:
+            logs.warning('Search results directly clustered multiple StampedSource results: [%s]' %
+                         ', '.join(str(entityId) for entityId in idsFromClusteredEntities))
+        elif len(allIds) > 2:
+            logs.warning('Search results indirectly clustered multiple entity IDs together: [%s]' %
+                         ', '.join(str(entityId) for entityId in allIds))
+        if not allIds:
+            return None
+        return allIds[0]
 
-        return zip(entityResults, clusters)
+
+    def __proxyToEntity(self, cluster):
+        # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
+        entityBuilder = EntityProxyContainer(cluster.results[0].resolverObject)
+        for result in cluster.results[1:]:
+            # TODO PRELAUNCH: Only use the best result from each source.
+            entityBuilder.addSource(EntityProxySource(result.resolverObject))
+        return entityBuilder.buildEntity()
+
+
+    @utils.lazyProperty
+    def __stampedSource(self):
+        return StampedSource()
+
+
+    def __buildEntity(self, entityId):
+        # TODO PRELAUNCH: Should be able to avoid separate lookup here.
+        proxy = self.__stampedSource.entityProxyFromKey(entityId)
+        entity = EntityProxyContainer(proxy).buildEntity()
+        entity.entity_id = entityId
+        return entity
+
+
+    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
+        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
+        entityResults = []
+
+        entityIdsToNewClusterIdxs = {}
+        entitiesAndClusters = []
+        for cluster in clusters:
+            entityId = self.__getEntityIdForCluster(cluster)
+            if not entityId:
+                entitiesAndClusters.append((self.__proxyToEntity(cluster), cluster))
+            # TODO PRELAUNCH: Make sure that the type we get from fast_resolve == the type we get from
+            # StampedSourceObject.key, or else using these as keys in a map together won't work.
+            elif entityId not in entityIdsToNewClusterIdxs:
+                entityIdsToNewClusterIdxs[entityId] = len(entitiesAndClusters)
+                entitiesAndClusters.append((self.__buildEntity(entityId), cluster))
+            else:
+                originalIndex = entityIdsToNewClusterIdxs[entityId]
+                (_, originalCluster) = entitiesAndClusters[originalIndex]
+                # We're not actually augmenting the result at all here; the result is the unadultered entity. We won't
+                # show an entity augmented with other third-party IDs we've attached in search results because it will
+                # create inconsistency for the entity show page and we don't know if they will definitely be attached.
+                # The point of the grok is entirely to boost the rank of the cluster (and thus of the entity.)
+                # TODO PRELAUNCH: Consider overriding this for sparse or user-created entities.
+                # TODO: Debug check to see if the two are definitely not a match according to our clustering logic.
+                originalCluster.grok(cluster)
+
+        return entitiesAndClusters
 
 
     def searchEntities(self, *args, **kwargs):
@@ -229,13 +285,24 @@ def main():
     parser = OptionParser(usage=usage, version=version)
     parser.add_option('--latlng', action='store', dest='latlng', default=None)
     parser.add_option('--address', action='store', dest='address', default=None)
+    parser.add_option('-t', '--log_timing', action='store_true', dest='log_timing', default=False)
+    parser.add_option('-r', '--log_source_results', action='store_true', dest='log_source_results', default=False)
+    parser.add_option('-c', '--log_clusters', action='store_true', dest='log_clusters', default=False)
     (options, args) = parser.parse_args()
-    
+
+    global shouldLogSourceResults
+    shouldLogSourceResults = options.log_source_results
+    global shouldLogTiming
+    shouldLogTiming = options.log_timing
+    global shouldLogClusters
+    shouldLogClusters = options.log_clusters
+
+
     queryParams = {}
     if options.latlng:
-        queryParams['queryLatLng'] = options.latlng.split(',')
+        queryParams['coords'] = options.latlng.split(',')
     elif options.address:
-        queryParams['queryLatLng'] = Geocoder().addressToLatLng(options.address)
+        queryParams['coords'] = Geocoder().addressToLatLng(options.address)
 
     if len(args) < 2 or args[0] not in Entity.categories:
         categories = '[ %s ]' % (', '.join(Entity.categories))

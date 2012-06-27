@@ -1064,6 +1064,8 @@ class AmazonSource(GenericSource):
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
+        if not resultList:
+            return
         # TODO: This math needs some work.
         defaultFactor = 0.2
         def calculateFactor(salesRank):
@@ -1145,13 +1147,14 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByScore([albums, tracks])
 
-    def __scoreBookResults(self, unscoredResultsLists):
-        assert(len(unscoredResultsLists) <= 1)
+    def __scoreBookResults(self, unscoredResultsLists, queryText):
+        assert len(unscoredResultsLists) <= 1 
         if len(unscoredResultsLists) == 0:
             return []
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
         scoredResults = scoreResultsWithBasicDropoffScoring(unscoredResultsLists['Books'], dropoffFactor=0.9)
+        augmentScoreForTextRelevance(scoredResults, queryText, lambda r: r.resolverObject.name, 2)
         self.__adjustScoresBySalesRank(scoredResults)
         for scoredResult in scoredResults:
             if not scoredResult.resolverObject.authors:
@@ -1217,7 +1220,7 @@ class AmazonSource(GenericSource):
             except KeyError:
                 pass
 
-    def searchLite(self, queryCategory, queryText, timeout=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         if queryCategory == 'music':
             # We're not passing a constructor, so this will return the raw results. This is because we're not sure if
             # they're songs or albums yet, so there's no straightforward constructor we can pass.
@@ -1235,7 +1238,7 @@ class AmazonSource(GenericSource):
                     AmazonSource.SearchIndexData('Books', 'Medium,Reviews', createBook),
                 )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
-            return self.__scoreBookResults(resultSets)
+            return self.__scoreBookResults(resultSets, queryText)
         #elif queryCategory == 'film':
         #    searchIndexes = (
         #        AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),

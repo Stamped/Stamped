@@ -78,7 +78,7 @@
                                                 {% endfor %}
                                                 
                                                 {% if stamp.previews.likes|length > 3 %}
-                                                    <a class="user-preview expand expand-likes" href="/popups/likes.html?stamp_id={{stamp.stamp_id}}">
+                                                    <a class="user-preview expand-popup expand-likes" href="/popups/likes.html?stamp_id={{stamp.stamp_id}}">
                                                         <div class="context-popup">Expand {{stamp.num_likes}} likes...</div>
                                                         <div class='user-preview-icon'></div>
                                                     </a>
@@ -96,7 +96,7 @@
                                                 {% endfor %}
                                                 
                                                 {% if stamp.previews.todos|length > 3 %}
-                                                    <a class="user-preview expand expand-todos" href="/popups/todos.html?stamp_id={{stamp.stamp_id}}">
+                                                    <a class="user-preview expand-popup expand-todos" href="/popups/todos.html?stamp_id={{stamp.stamp_id}}">
                                                         <div class="context-popup">Expand {{stamp.num_todos}} todos...</div>
                                                         <div class='user-preview-icon'></div>
                                                     </a>
@@ -181,8 +181,8 @@
     </div>
     
     <div class="section section-entity entity-id entity-id-{{stamp.entity.entity_id}}">
-        <div class="close-button">
-            <a href="#">Close</a>
+        <div class="clearfix">
+            {% handlebars_template "close-button" %}
         </div>
         
         {% handlebars_template "stamp-image-sdetail" stamp %}
@@ -206,7 +206,7 @@
                         {% else %}
                             <a class='action-link' href="">
                         {% endif %}
-                        
+                            
                             <div class="action action-{{action.type}} clearfix">
                                 <div class='entity-title' style="display: none;">
                                     {{stamp.entity.title}}

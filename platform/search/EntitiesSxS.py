@@ -59,23 +59,30 @@ def differenceScore(left, right):
 
 
 def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
-    indexTableRows = []
+    changedTableRows = []
+    allTableRows = []
     statsText = '%d same position, %d moved, %d added/droped'
     linkText = '<a href="%s">%s</a>'
     for key in sorted(oldResults.keys()):
         (same, moved, addDrop), filename = compareSingleSearch(
                 key, oldResults[key], newResults[key], outputDir, diffThreshold)
+        row = linkText % (filename, key), statsText % (same, moved, addDrop)
         if moved or addDrop:
-            indexTableRows.append((linkText % (filename, key), statsText % (same, moved, addDrop)))
-    random.shuffle(indexTableRows)
-    htmlRowTpl = '<tr><td>%s</td><td>%s</td></tr>'
-    tableContent = ''.join(htmlRowTpl % row for row in indexTableRows)
+            changedTableRows.append(row)
+        allTableRows.append(row)
+    random.shuffle(changedTableRows)
 
     summary = "%d out of %d queries had changes (%f%%). Here's a random list of them" % (
-            len(indexTableRows), len(oldResults), len(indexTableRows) / len(oldResults) * 100)
+            len(changedTableRows), len(oldResults), len(changedTableRows) / len(oldResults) * 100)
+    summary += ' <a href="index_all.html">show all</a>'
 
+    htmlRowTpl = '<tr><td>%s</td><td>%s</td></tr>'
     with open(path.join(outputDir, 'index.html'), 'w') as fout:
-        print >> fout, EntitiesSxSTemplates.SUMMARY_TPL % (summary, tableContent)
+        print >> fout, EntitiesSxSTemplates.SUMMARY_TPL % (
+                summary, ''.join(htmlRowTpl % row for row in changedTableRows))
+    with open(path.join(outputDir, 'index_all.html'), 'w') as fout:
+        print >> fout, EntitiesSxSTemplates.SUMMARY_TPL % (
+                'All queries', ''.join(htmlRowTpl % row for row in allTableRows))
 
 
 def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold):
@@ -108,20 +115,18 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             writeCompareEntity(entity, newEntity, outputDir, diffFileName)
 
             cellId = "diff" + str(i)
-            anchorTextTpl = """<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">
-                <a href="%s">%%s</a>
-            </td>""" % (cellId, cellId, cellId, diffFileName)
+            anchorTextTpl = '%s<a href="%s">%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName)
             linksLeft.append(anchorTextTpl % extractLinkText(entity))
             linksRightIndexed[destination] = anchorTextTpl % extractLinkText(newEntity)
         else:
-            linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i)))
+            linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), 'l%d' % i))
 
     linksRight = []
     for i, entity in enumerate(newResults):
         if i in linksRightIndexed:
             linksRight.append(linksRightIndexed[i])
         else:
-            linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i)))
+            linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), 'r%d' % i))
 
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
     for links in zip(linksLeft, linksRight):
@@ -130,7 +135,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
 
     with open(path.join(outputDir, filenameBase) + '.html', 'w') as fout:
         for line in fileContent:
-            print >> fout, line
+            print >> fout, line.encode('utf-8')
 
     # Now compute the stats:
     same = sum(1 for i, j in movements.iteritems() if i == j)
@@ -139,19 +144,23 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     return (same, moved, addDrop), filenameBase + '.html'
 
 
-def writeSingleEntity(entity, outputDir, filename):
+def writeSingleEntity(entity, outputDir, filename, cellId):
     with open(path.join(outputDir, filename), 'w') as fout:
         # TODO(geoff): This doesn't produce proper HTML
         print >> fout, '<pre>'
         pprint.pprint(entity, fout)
         print >> fout, '</pre>'
-    return '<td><a href="%s">%s</a></td>' % (filename, extractLinkText(entity))
+    return '%s<a href="%s">%s</a></td>' % (
+            makeHighlightingTableCell(cellId), filename, extractLinkText(entity))
 
+
+def makeHighlightingTableCell(name):
+    return '<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">' % ((name,) * 3)
 
 def writeCompareEntity(left, right, outputDir, filename):
     leftLines = pprint.pformat(left).split('\n')
     rightLines = pprint.pformat(right).split('\n')
-    differ = difflib.HtmlDiff()
+    differ = difflib.HtmlDiff(wrapcolumn=100)
     with open(path.join(outputDir, filename), 'w') as fout:
         print >> fout, differ.make_file(leftLines, rightLines)
 
