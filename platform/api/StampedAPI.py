@@ -1792,6 +1792,10 @@ class StampedAPI(AStampedAPI):
         Basic function to update all references to an entity_id that has been tombstoned.
         """
         oldEntity = self._entityDB.getEntity(oldEntityId)
+        if oldEntity.sources.tombstone_id is None:
+            logs.info("Short circuit: tombstone_id is 'None' for entity %s" % oldEntityId)
+            return
+        
         newEntity = self._entityDB.getEntity(oldEntity.sources.tombstone_id)
         newEntityId = newEntity.entity_id
         newEntityMini = newEntity.minimize()

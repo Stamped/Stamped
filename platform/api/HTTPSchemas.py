@@ -529,14 +529,6 @@ class HTTPAccountUpdateForm(Schema):
 
         return AccountUpdateForm().dataImport(data, overflow=True)
 
-#class HTTPAccountProfile(Schema):
-#    @classmethod
-#    def setSchema(cls):
-#        cls.addProperty('name',                             basestring)
-#        cls.addProperty('bio',                              basestring)
-#        cls.addProperty('website',                          basestring)
-#        cls.addProperty('location',                         basestring)
-
 class HTTPCustomizeStamp(Schema):
     @classmethod
     def setSchema(cls):
