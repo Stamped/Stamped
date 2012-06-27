@@ -21,6 +21,8 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'amrar',
                 'baking made easy',
                 'bossypants',
+                'd day cornelius ryan',
+                'd day stephen ambrose',
                 'embassytown china',
                 'freakonomics',
                 'freedom by jonathon franzen',
