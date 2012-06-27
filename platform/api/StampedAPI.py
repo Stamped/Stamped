@@ -4494,7 +4494,7 @@ class StampedAPI(AStampedAPI):
 
             modified = False
             visitedStubs = []
-            for i, stub in enumerate(stubList):
+            for stub in stubList:
                 try:
                     resolvedFull, stubModified = self._resolveStub(stub, False)
                 except KeyError as e:
@@ -4566,6 +4566,8 @@ class StampedAPI(AStampedAPI):
         else:
             raise KeyError('Unable to resolve stub: ' + str(stub))
 
+        if entity.kind != stub.kind:
+            raise KeyError('Confused and dazed. Stub and result are different kinds: ' + str(stub))
         return entity, stubModified
 
     def _iterateOutLinks(self, entity, func):
