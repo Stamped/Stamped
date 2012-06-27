@@ -6,8 +6,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs, gevent, utils
+import sys, datetime, logs, gevent, utils, math
 from api                        import Entity
+from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
@@ -253,6 +254,31 @@ class EntitySearch(object):
         return entity
 
 
+    def rescoreFinalResults(self, entityAndClusterList):
+        def isTempEntity(entity):
+            return entity.entity_id is None
+        realEntityIds = [ entity.entity_id for (entity, cluster) in entityAndClusterList if not isTempEntity(entity) ]
+        entityStats = MongoEntityStatsCollection().getStatsForEntities(realEntityIds)
+        statsByEntityId = dict([(stats.entity_id, stats) for stats in entityStats])
+
+        def scoreEntityAndCluster((entity, cluster)):
+            if isTempEntity(entity):
+                dataScore = cluster.dataQuality
+            else:
+                numStamps = 0
+                if entity.entity_id in statsByEntityId:
+                    numStamps = statsByEntityId[entity.entity_id].num_stamps
+                dataScore = 1.1 + math.log(numStamps+1, 50)
+
+            # TODO: Possibly distinguish even more about which of these have rich data. There are some types of data
+            # that don't affect dataQuality because they don't make us less certain about the state of a cluster, but
+            # they make user interactions with it more positive -- pictures, preview URLs, etc. We should factor
+            # these in here.
+            return dataScore * cluster.relevance
+
+        entityAndClusterList.sort(key=scoreEntityAndCluster, reverse=True)
+
+
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
         entityResults = []
@@ -288,6 +314,7 @@ class EntitySearch(object):
         # TODO: Reorder according to final scores that incorporate dataQuality and a richness score (presence of stamps,
         # presence of enriched entity, etc.)
 
+        self.rescoreFinalResults(entitiesAndClusters)
         return entitiesAndClusters
 
 
