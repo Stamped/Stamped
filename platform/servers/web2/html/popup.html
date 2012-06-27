@@ -1,16 +1,23 @@
 {% load stamped_tags %}
 
-<div class="popup popup-likes">
+{% block pre-popup %}
+<div class="popup {{popup_class}}">
     <div class="ribbon-top"></div>
-    <div class="close-button"></div>
+    {% endblock pre-popup %}
     
+    {% block popup-header %}
     <div class="popup-header clearfix">
-        <div class="pronounced-title">{{num_likes}} Likes</div>
+        <div class="pronounced-title">{{popup_title}}</div>
+        
         <div class="rhs-icon">
-            <div class="tongue"></div>
+            {% if popup_class == "popup-likes" %}
+                <div class="tongue"></div>
+            {% endif %}
         </div>
     </div>
+    {% endblock popup-header %}
     
+    {% block popup-body %}
     <div class="popup-body">
         <div class="popup-body-inner">
             {% for user in users %}
@@ -31,7 +38,10 @@
             {% endfor %}
         </div>
     </div>
+    {% endblock popup-body %}
     
+    {% block post-popup %}
     <div class="ribbon-bottom"></div>
 </div>
+{% endblock post-popup %}
 

@@ -124,19 +124,14 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     return transformOutput(result.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPActionComplete)
+@handleHTTPRequest(http_schema=HTTPActionComplete)
 @require_http_methods(["POST"])
-def completeAction(request, http_schema, **kwargs):
-    'rdio', 'spotify', 'amazon', 'itunes'
-    authUserId, authClientId = checkOAuth(request)
-    
-    #schema      = parseRequest(HTTPActionComplete(), request)
-    logs.info('http_schema: %s' % http_schema)
-    data = {}
+def completeAction(request, authUserId, http_schema, **kwargs):
     # Hack for Python 2.6 where unicode keys aren't valid...
+    data = {}
     for k, v in http_schema.dataExport().items():
         data[str(k)] = v
-    result      = stampedAPI.completeAction(authUserId, **data)
-
+    
+    result = stampedAPI.completeAction(authUserId, **data)
     return transformOutput(result)
 

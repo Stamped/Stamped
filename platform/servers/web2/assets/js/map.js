@@ -329,7 +329,8 @@
         var update_stamp_list_scrollbars = function($elem) {
             if (!!$elem) {
                 $elem.jScrollPane({
-                    contentWidth : "0", 
+                    contentWidth    : "0", 
+                    verticalPadding : 8
                 });
             }
         };
