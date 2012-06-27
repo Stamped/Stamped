@@ -995,6 +995,9 @@ class StampedAPI(AStampedAPI):
             return None
 
         netflix = globalNetflix()
+
+        logs.info('### addToNetflixInstant nf_user_id: %s  nf_token: %s  nf_secret: %s  netflixId: %s' %
+                (nf_user_id, nf_token, nf_secret, netflixId))
         return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
 
     @API_CALL
