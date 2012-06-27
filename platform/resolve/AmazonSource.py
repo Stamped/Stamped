@@ -11,6 +11,7 @@ __license__   = "TODO"
 __all__ = [ 'AmazonSource' ]
 
 import Globals
+import numpy
 from logs import report
 
 try:
@@ -1064,34 +1065,23 @@ class AmazonSource(GenericSource):
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
-        if not resultList:
+        if len(resultList) < 2:
             return
-        # TODO: This math needs some work.
-        defaultFactor = 0.2
-        def calculateFactor(salesRank):
-            return min(2.0, max(0.3, (5000 / salesRank) ** 0.1))
 
-        factors = []
-        for searchResult in resultList:
-            if not searchResult.resolverObject.salesRank:
-                factors.append(defaultFactor)
-            else:
-                factors.append(calculateFactor(searchResult.resolverObject.salesRank))
-        meanFactor = sum(factors) / float(len(resultList))
-        # We want to normalize by the mean because for some searches the results aren't super high salesRank and in
-        # those cases we don't want to ditch Amazon results compared to other sources.
-
-        for searchResult in resultList:
-            salesRank = searchResult.resolverObject.salesRank
-            if salesRank:
-                factor = calculateFactor(salesRank) / meanFactor
-                searchResult.addScoreComponentDebugInfo('Amazon salesRank factor', factor)
-                searchResult.score *= factor
-            else:
-                # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
-                factor = defaultFactor / meanFactor
-                searchResult.addScoreComponentDebugInfo('Amazon missing salesRank factor', factor)
-                searchResult.score *= factor
+        # The max rank across a sample was around 1300000 at the time of writing.
+        defaultSalesRank = 2000000
+        salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
+                for searchResult in resultList)
+        # Take the log here, since salesRank can be up to a very big number, and even some of the
+        # most popular items are ranked in the thousands.
+        logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
+        rankMean = numpy.mean(logSalesRanks)
+        rankStdDev = numpy.std(logSalesRanks)
+        
+        for logRank, searchResult in zip(logSalesRanks, resultList):
+            factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
+            searchResult.addScoreComponentDebugInfo('Amazon salesRank factor', factor)
+            searchResult.score *= factor
 
     def __scoreFilmResults(self, unscoredResultsLists):
         scoredTvShows = []
