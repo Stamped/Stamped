@@ -199,16 +199,15 @@ class EntitySearch(object):
 
     def __getEntityIdForCluster(self, cluster):
         idsFromClusteredEntities = []
+        fastResolvedIds = []
         for result in cluster.results:
             if result.resolverObject.source == 'stamped':
                 idsFromClusteredEntities.append(result.resolverObject.key)
-
-        fastResolvedIds = []
-        for result in cluster.results:
-            # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
-            entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
-            if entityId:
-                fastResolvedIds.append(entityId)
+            else:
+                # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
+                entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
+                if entityId:
+                    fastResolvedIds.append(entityId)
 
         allIds = idsFromClusteredEntities + fastResolvedIds
         if len(idsFromClusteredEntities) > 2:
