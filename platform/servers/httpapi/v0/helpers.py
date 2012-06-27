@@ -301,7 +301,7 @@ def handleHTTPCallbackRequest(
                 else:
                     raise StampedInputError("Access token not found")
 
-                params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=requires_auth)
+                params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=False)
 
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
