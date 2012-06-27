@@ -419,11 +419,11 @@ class GooglePlacesSource(GenericSource):
         localResults = scoreResultsWithBasicDropoffScoring(localResults, sourceScore=0.4, dropoffFactor=0.9)
         nationalResults = scoreResultsWithBasicDropoffScoring(nationalResults, sourceScore=0.6, dropoffFactor=0.9)
 
-        augmentPlaceScoresForRelevanceAndProximity(localResults, queryText, coords)
-        augmentPlaceScoresForRelevanceAndProximity(nationalResults, queryText, coords)
+        augmentPlaceRelevanceScoresForTitleMatchAndProximity(localResults, queryText, coords)
+        augmentPlaceRelevanceScoresForTitleMatchAndProximity(nationalResults, queryText, coords)
 
-        smoothScores(localResults)
-        smoothScores(nationalResults)
+        smoothRelevanceScores(localResults)
+        smoothRelevanceScores(nationalResults)
 
         return dedupeById(localResults + nationalResults)
 

@@ -306,11 +306,11 @@ class FactualSource(GenericSource):
         local_results = scoreResultsWithBasicDropoffScoring(local_results, sourceScore=0.4)
         national_results = scoreResultsWithBasicDropoffScoring(national_results, sourceScore=0.4)
 
-        augmentPlaceScoresForRelevanceAndProximity(local_results, queryText, coords)
-        augmentPlaceScoresForRelevanceAndProximity(national_results, queryText, coords)
+        augmentPlaceRelevanceScoresForTitleMatchAndProximity(local_results, queryText, coords)
+        augmentPlaceRelevanceScoresForTitleMatchAndProximity(national_results, queryText, coords)
 
-        smoothScores(local_results)
-        smoothScores(national_results)
+        smoothRelevanceScores(local_results)
+        smoothRelevanceScores(national_results)
 
         return dedupeById(local_results + national_results)
 
