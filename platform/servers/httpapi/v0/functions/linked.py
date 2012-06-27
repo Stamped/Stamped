@@ -97,8 +97,7 @@ def createNetflixLoginResponse(authUserId, netflixAddId=None):
 def netflixLogin(request, authUserId, **kwargs):
     return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
-    parse_request_kwargs={'allow_oauth_token': True})
+@handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()

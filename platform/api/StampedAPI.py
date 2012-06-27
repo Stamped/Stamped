@@ -427,7 +427,7 @@ class StampedAPI(AStampedAPI):
         # First, get user information from Twitter using the passed in token
         try:
             twitterUser = self._twitter.getUserInfo(new_tw_account.user_token, new_tw_account.user_secret)
-        except (StampedInputError, StampedUnavailableError):
+        except (StampedInputError, StampedUnavailableError) as e:
             logs.warning("Unable to get user info from Twitter %s" % e)
             raise StampedInputError('Unable to connect to Twitter')
         self._verifyTwitterAccount(twitterUser['id'])
@@ -606,10 +606,6 @@ class StampedAPI(AStampedAPI):
     def updateAccount(self, authUserId, updateAcctForm):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
-
-#        for k,v in fields.iteritems():
-#            if v == '':
-#                fields[k] = None
 
         if 'screen_name' in fields and account.screen_name != fields['screen_name']:
             old_screen_name = account.screen_name
@@ -2873,9 +2869,9 @@ class StampedAPI(AStampedAPI):
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
+            return "http://static.stamped.com/assets/movie7.html"
         if entityId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
+            return "http://static.stamped.com/assets/movie7.html"
         if userId is not None:
             return "http://static.stamped.com/assets/user.html"
 

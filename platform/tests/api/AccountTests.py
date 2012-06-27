@@ -39,7 +39,6 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         self.deleteAccount(self.account.user_id)
 
 
-    @fixtureTest()
     def test_change_name(self):
         TEST_NAME = "Pimpbot 5000"
         form = AccountUpdateForm()
@@ -70,6 +69,13 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         with expected_exception():
             self.createAccount("TestUser2", screen_name = TEST_SN)
 
+    def test_remove_screen_name(self):
+        form = AccountUpdateForm()
+        form.screen_name = None
+
+        with expected_exception():
+            self.api.updateAccount(self.account.user_id, form)
+
     def test_change_screen_name_blacklisted(self):
         TEST_SN = "cock"
         form = AccountUpdateForm()
@@ -85,6 +91,20 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         self.api.updateAccount(self.account.user_id, form)
         self.account = self.showAccount(self.account.user_id)
         self.assertEqual(self.account.phone, '2129876543')
+
+    def test_remove_phone(self):
+        form = AccountUpdateForm()
+        form.phone = '212-987-6543'
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.phone, '2129876543')
+
+        form.phone = None
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.phone, None)
 
     def test_change_bio(self):
         BIO = "I've got microchips from Yokohama and I'll be turning out yo mama!"
@@ -135,7 +155,7 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         with expected_exception():
             form.color_primary = COLOR_PRIMARY
 
-class StampedAPIAccountUpdateTest(AStampedAPITestCase):
+class StampedAPIAccountUpgradeTest(AStampedAPITestCase):
     def setUp(self):
         self.accountA = self.createTwitterAccount(TWITTER_USER_A0_TOKEN, TWITTER_USER_A0_SECRET, 'TestUserA')
         self.accountB = self.createTwitterAccount(TWITTER_USER_B0_TOKEN, TWITTER_USER_B0_SECRET, 'TestUserB',
