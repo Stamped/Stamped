@@ -75,6 +75,14 @@ footer,
 html,
 body {
   overflow-y: hidden;
+  /* TODO: the following only exists here as an attempt to remove the occasional 
+       white lines that appear inbetween google map tiles */
+
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 footer {
   display: none;
