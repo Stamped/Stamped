@@ -16,6 +16,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
     @fixtureTest()
     def test_run_book_queries(self):
         bookQueries = [
+                '1984',
                 '1Q84 book',
                 '1Q84',
                 'amrar',
