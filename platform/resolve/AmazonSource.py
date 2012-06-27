@@ -1065,6 +1065,16 @@ class AmazonSource(GenericSource):
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
+        """Adjusts the relevance scores of each result based on the sales rank from Amazon.
+
+        The gist of the algorithm is this:
+          - Take the log of all sales ranks. These range from 1 to ~1300000 at the time of writing,
+            so we end up with ranks in roughly [1, 6].
+          - Find mean and stddev of the log of ranks.
+          - The relevance adjustment for each result is then how many stddevs is the log of its
+            sales rank lower than the mean. Being three stddevs lower will give a boost factor of
+            2.0, whereas three stddevs higher will nerf the relevance to 0.
+        """
         if len(resultList) < 2:
             return
 
@@ -1072,8 +1082,6 @@ class AmazonSource(GenericSource):
         defaultSalesRank = 2000000
         salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
                 for searchResult in resultList)
-        # Take the log here, since salesRank can be up to a very big number, and even some of the
-        # most popular items are ranked in the thousands.
         logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
         rankMean = numpy.mean(logSalesRanks)
         rankStdDev = numpy.std(logSalesRanks)
