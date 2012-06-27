@@ -881,6 +881,8 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
                          args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
+        return linkedAccount
+
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
         # Before we do anything, verify that the account is valid
@@ -980,6 +982,8 @@ class StampedAPI(AStampedAPI):
         """
         account   = self._accountDB.getAccount(authUserId)
 
+        logs.info('### addToNetflixInstant account: %s' % account)
+
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
         nf_user_id  = None
         nf_token    = None
@@ -990,11 +994,16 @@ class StampedAPI(AStampedAPI):
             nf_token    = account.linked.netflix.token
             nf_secret   = account.linked.netflix.secret
 
+
+        logs.info('### addToNetflixInstant nf_user_id: %s  nf_token: %s  nf_secret: %s  netflixId: %s' %
+                  (nf_user_id, nf_token, nf_secret, netflixId))
+
         if (nf_user_id is None or nf_token is None or nf_secret is None):
             logs.info('Returning because of missing account credentials')
             return None
 
         netflix = globalNetflix()
+
         return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
 
     @API_CALL
