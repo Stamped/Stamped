@@ -206,7 +206,7 @@ class EntitySearch(object):
         fastResolvedIds = []
         for result in cluster.results:
             # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
-            entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
+            entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
             if entityId:
                 fastResolvedIds.append(entityId)
 
@@ -224,37 +224,41 @@ class EntitySearch(object):
 
     def __proxyToEntity(self, cluster):
         # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
-        entityBuilder = EntityProxyContainer(cluster[0].resolverObject)
-        for result in results[1:]:
+        entityBuilder = EntityProxyContainer(cluster.results[0].resolverObject)
+        for result in cluster.results[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.
             entityBuilder.addSource(EntityProxySource(result.resolverObject))
         return entityBuilder.buildEntity()
 
 
+    @utils.lazyProperty
+    def __stampedSource(self):
+        return StampedSource()
+
+
     def __buildEntity(self, entityId):
         # TODO PRELAUNCH: Should be able to avoid separate lookup here.
-        proxy = stampedSource.entityProxyFromKey(entityId)
+        proxy = self.__stampedSource.entityProxyFromKey(entityId)
         entity = EntityProxyContainer(proxy).buildEntity()
         entity.entity_id = entityId
         return entity
 
 
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
-        stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
         entityResults = []
 
-        entityIdsToNewClusterIdxs = 0
+        entityIdsToNewClusterIdxs = {}
         entitiesAndClusters = []
         for cluster in clusters:
             entityId = self.__getEntityIdForCluster(cluster)
             if not entityId:
-                entitiesAndClusters.append(self.__proxyToEntity(cluster), cluster)
+                entitiesAndClusters.append((self.__proxyToEntity(cluster), cluster))
             # TODO PRELAUNCH: Make sure that the type we get from fast_resolve == the type we get from
             # StampedSourceObject.key, or else using these as keys in a map together won't work.
             elif entityId not in entityIdsToNewClusterIdxs:
                 entityIdsToNewClusterIdxs[entityId] = len(entitiesAndClusters)
-                entitiesAndClusters.append(self.__buildEntity(entityId), cluster)
+                entitiesAndClusters.append((self.__buildEntity(entityId), cluster))
             else:
                 originalIndex = entityIdsToNewClusterIdxs[entityId]
                 (_, originalCluster) = entitiesAndClusters[originalIndex]
