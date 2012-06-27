@@ -135,6 +135,7 @@ def show(request, authUserId, **kwargs):
 
     return transformOutput(account.dataExport())
 
+
 @handleHTTPRequest(http_schema=HTTPAccountUpdateForm,
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm)
 @require_http_methods(["POST"])
@@ -172,6 +173,7 @@ def customizeStamp(request, authUserId, data, **kwargs):
     user    = HTTPUser().importUser(account)
     
     return transformOutput(user.dataExport())
+
 
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
