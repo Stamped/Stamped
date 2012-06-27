@@ -258,21 +258,21 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alert_settings                         = AccountAlertSettings()
-        alert_settings.ios_alert_credit         = True
-        alert_settings.ios_alert_like           = True
-        alert_settings.ios_alert_todo           = True
-        alert_settings.ios_alert_mention        = True
-        alert_settings.ios_alert_comment        = True
-        alert_settings.ios_alert_reply          = True
-        alert_settings.ios_alert_follow         = True
-        alert_settings.email_alert_credit       = True
-        alert_settings.email_alert_like         = False
-        alert_settings.email_alert_todo         = False
-        alert_settings.email_alert_mention      = True
-        alert_settings.email_alert_comment      = True
-        alert_settings.email_alert_reply        = True
-        alert_settings.email_alert_follow       = True
+        alert_settings                          = AccountAlertSettings()
+        alert_settings.alerts_credits_apns      = True
+        alert_settings.alerts_credits_email     = True
+        alert_settings.alerts_likes_apns        = True
+        alert_settings.alerts_likes_email       = False
+        alert_settings.alerts_todos_apns        = True
+        alert_settings.alerts_todos_email       = False
+        alert_settings.alerts_mentions_apns     = True
+        alert_settings.alerts_mentions_email    = True
+        alert_settings.alerts_comments_apns     = True
+        alert_settings.alerts_comments_email    = True
+        alert_settings.alerts_replies_apns      = True
+        alert_settings.alerts_replies_email     = True
+        alert_settings.alerts_followers_apns    = True
+        alert_settings.alerts_followers_email   = True
         account.alert_settings                  = alert_settings
 
         # Validate screen name
@@ -818,18 +818,22 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Invalid input")
 
     @API_CALL
-    def updateAlerts(self, authUserId, alerts):
+    def updateAlerts(self, authUserId, on, off):
         account = self._accountDB.getAccount(authUserId)
 
         accountAlerts = account.alert_settings
         if accountAlerts is None:
             accountAlerts = AccountAlertSettings()
 
-        for k, v in alerts.dataExport().iteritems():
-            if v:
-                setattr(accountAlerts, k, True)
-            else:
-                setattr(accountAlerts, k, False)
+        if on is not None:
+            for attr in on:
+                if hasattr(accountAlerts, attr):
+                    setattr(accountAlerts, attr, True)
+
+        if off is not None:
+            for attr in off:
+                if hasattr(accountAlerts, attr):
+                    setattr(accountAlerts, attr, False)
 
         account.alert_settings = accountAlerts
 
@@ -975,16 +979,21 @@ class StampedAPI(AStampedAPI):
                                           body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.linked_name)
             self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id)
 
+
+
     @API_CALL
-    def addToNetflixInstant(self, authUserId, netflixId):
-        """
-         Asynchronously add an entity to the user's netflix queue
-        """
+    def addToNetflixInstant(self, nf_user_id, nf_token, nf_secret, netflixId):
+        if (nf_user_id is None or nf_token is None or nf_secret is None):
+            logs.info('Returning because of missing account credentials')
+            return None
+
+        netflix = globalNetflix()
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
+
+    @API_CALL
+    def addToNetflixInstantWithUserId(self, authUserId, netflixId):
         account   = self._accountDB.getAccount(authUserId)
 
-        logs.info('### addToNetflixInstant account: %s' % account)
-
-        # TODO return HTTPAction to invoke sign in if credentials are unavailable
         nf_user_id  = None
         nf_token    = None
         nf_secret   = None
@@ -994,24 +1003,7 @@ class StampedAPI(AStampedAPI):
             nf_token    = account.linked.netflix.token
             nf_secret   = account.linked.netflix.secret
 
-
-        logs.info('### addToNetflixInstant nf_user_id: %s  nf_token: %s  nf_secret: %s  netflixId: %s' %
-                  (nf_user_id, nf_token, nf_secret, netflixId))
-
-        if (nf_user_id is None or nf_token is None or nf_secret is None):
-            logs.info('Returning because of missing account credentials')
-            return None
-
-        netflix = globalNetflix()
-
-        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
-
-    @API_CALL
-    def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
-
-        account   = self._accountDB.getAccount(authUserId)
-
-        return True
+        return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
 
     """

@@ -823,9 +823,12 @@ class StampedSource(GenericSource):
             # Use fairly conservative scoring now for StampedSource on the assumption that it will probably cluster
             # with other stuff.
             num_stamps = 0 if stats is None else stats.num_stamps
-            resultScore = 0.3 + 0.2 * (num_stamps ** 0.5)
-            results.append(SearchResult(resultScore, entityProxy))
-        sortByScore(results)
+            result = SearchResult(entityProxy)
+            result.relevance = 0.3 + 0.2 * (num_stamps ** 0.5)
+            result.addRelevanceComponentDebugInfo('Initial score based on Entity with %d stamps' % num_stamps,
+                                                  result.relevance)
+            results.append(result)
+        sortByRelevance(results)
         return results
 
 

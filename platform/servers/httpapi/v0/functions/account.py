@@ -227,22 +227,65 @@ def resetPassword(request, client_id, http_schema, **kwargs):
     return transformOutput(True)
 
 
+def _buildAlertsFromAccount(account):
+    alerts = getattr(account, 'alert_settings', None)
+    result = []
+
+    def buildToggle(settingType, settingGroup):
+        name = 'alerts_%s_%s' % (settingGroup, settingType)
+        toggle = HTTPSettingsToggle()
+        toggle.toggle_id = name
+        toggle.type = settingType
+        toggle.value = False
+        if alerts is not None and hasattr(alerts, name) and getattr(alerts, name) == True:
+            toggle.value = True
+        return toggle
+
+    def buildGroup(settingGroup, settingName, alertSuffix):
+        group = HTTPSettingsGroup()
+        group.group_id = 'alerts_%s' % settingGroup
+        group.name = settingName
+        group.toggles = [
+            buildToggle('apns', settingGroup),
+            buildToggle('email', settingGroup),
+        ]
+        return group
+
+    result.append(buildGroup('followers', 'New Followers', 'follow'))
+    result.append(buildGroup('credits', 'Credit', 'credit'))
+    result.append(buildGroup('mentions', 'Mentions', 'mention'))
+    result.append(buildGroup('comments', 'Comments', 'comment'))
+    result.append(buildGroup('replies', 'Replies', 'reply'))
+    result.append(buildGroup('likes', 'Likes', 'like'))
+    result.append(buildGroup('todos', 'To-Dos', 'todo'))
+
+    return map(lambda x: x.dataExport(), result)
+
+
 @handleHTTPRequest()
 @require_http_methods(["GET"])
 def showAlerts(request, authUserId, **kwargs):
     account  = stampedAPI.getAccount(authUserId)
-    settings = HTTPAccountAlerts().importAccount(account)
+    result = _buildAlertsFromAccount(account)
 
-    return transformOutput(settings.dataExport())
+    return transformOutput(result)
 
 
-@handleHTTPRequest(http_schema=HTTPAccountAlerts)
+@handleHTTPRequest(http_schema=HTTPSettingsToggleRequest)
 @require_http_methods(["POST"])
 def updateAlerts(request, authUserId, http_schema, **kwargs):
-    account  = stampedAPI.updateAlerts(authUserId, http_schema)
-    settings = HTTPAccountAlerts().importAccount(account)
+    on = None
+    if http_schema.on is not None:
+        on = set(http_schema.on.split(','))
 
-    return transformOutput(settings.dataExport())
+    off = None
+    if http_schema.off is not None:
+        off = set(http_schema.off.split(','))
+
+    account  = stampedAPI.updateAlerts(authUserId, on, off)
+    result = _buildAlertsFromAccount(account)
+
+    return transformOutput(result)
 
 
 @handleHTTPRequest(http_schema=HTTPAPNSToken)

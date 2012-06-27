@@ -533,18 +533,43 @@ class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
             "oauth_token": self.token['access_token']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(len(result) == 14)
+        self.assertTrue(len(result) == 7)
+        self.assertTrue(result[0]['group_id'] == 'alerts_followers')
 
     def test_update_settings(self):
         path = "account/alerts/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "email_alert_todo": True,
-            "email_alert_reply": False
+            "on": "alerts_todos_email",
+            "off": "alerts_replies_email"
         }
         result = self.handlePOST(path, data)
-        self.assertTrue(len(result) == 14)
-        self.assertTrue(result['email_alert_todo'])
+        self.assertTrue(len(result) == 7)
+        self.assertTrue(result[0]['group_id'] == 'alerts_followers')
+        # Check todos_email
+        for group in result:
+            if group['group_id'] == 'alerts_todos':
+                for toggle in group['toggles']:
+                    if toggle['toggle_id'] == 'alerts_todos_email':
+                        self.assertTrue(toggle['value'] == True)
+                        break
+                else:
+                    raise AssertionError("Email not found")
+                break
+        else:
+            raise AssertionError("Alert Todos not found")
+        # Check replies_email
+        for group in result:
+            if group['group_id'] == 'alerts_replies':
+                for toggle in group['toggles']:
+                    if toggle['toggle_id'] == 'alerts_replies_email':
+                        self.assertTrue(toggle['value'] == False)
+                        break
+                else:
+                    raise AssertionError("Email not found")
+                break
+        else:
+            raise AssertionError("Alert Replies not found")
 
     def test_set_token(self):
         path = "account/alerts/ios/update.json"
