@@ -21,6 +21,8 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'amrar',
                 'baking made easy',
                 'bossypants',
+                'd day cornelius ryan',
+                'd day stephen ambrose',
                 'embassytown china',
                 'freakonomics',
                 'freedom by jonathon franzen',
@@ -35,6 +37,17 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'the girl who played with fire',
                 'the help',
                 'the immortal life of henrietta lacks',
+                'hamlet',
+                # series names rather than book names
+                'narnia',
+                'lord of the rings',
+                'berenstain bears',
+                # title hint + name
+                'moon heinlein',
+                'america baudrillard',
+                'ouroboros e.r. eddison',
+                'snow malfi',
+                'c++ scott myers' # yeah i know it's misspelled, that's the point
                 ]
         self.__runQueries('book', bookQueries)
 
@@ -87,6 +100,18 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'tomorrow never dies',
                 'trailer park boys',
                 'up all night',
+
+                # Tests for title + corroborating detail
+                'true grit john wayne',
+                'true grit 2010',
+                'true grit jeff bridges',
+                'true grit coens brothers',
+                'superman reeves',
+                'superman brandon routh',
+                'superman kirk alyn',
+                'superman ii',
+                'superman iii',
+                'superman kevin spacey',
                 ]
         self.__runQueries('film', filmQueries)
 
@@ -192,6 +217,13 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'wolfgang amadeus phoenix',
                 'yelle',
                 'young blood lynx',
+
+                # tests for title of album or track + artist name
+                'waylon the door is always open',
+                'the door is always open jamey johnson',
+                'dreaming my dreams with you waylon',
+                'jamey johnson dreaming my dreams',
+                'alison krauss dreaming my dreams with you',
                 ]
         self.__runQueries('music', musicQueries)
 
@@ -235,6 +267,19 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ('venga empanadas', (37.806586,-122.406520)),
                 ('veritas media', (41.386533, 2.128773)),
                 ('zoka', (47.622030, -122.337103)),
+
+                # Disambiguating hints in query.
+                ('shake shack madison square park', (40.5, -74.6)),
+                ('shake shack madison ave', (40.5, -74.6)),
+                ('shake shack weston', (40.5, -74.6)),
+                ('shake shack madison ave', (41.4, -73.3)), # This one is real close to Weston but we should really
+                                                            # find the Madison Ave one because it's explicitly in the
+                                                            # query.
+                ('pepe\'s pizza yonkers', (41.4, -73.3)),
+                ('pepe\'s manchester', (41.4, -73.3)),
+                ('wendy\'s', (40.58, -74.64)),              # Should hit the one in Bridgewater, NJ because of the
+                                                            # lat/lng.
+                ('wendy\'s bridgewater 22', (41.4, -73.3))
             ]
         self.__runQueries('place', placeQueries)
 

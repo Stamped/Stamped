@@ -61,7 +61,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
-                'mentions'  : document.pop('mentions', None),
                 'timestamp' : { 'created' : created },
             }
             if 'image_dimensions' in document:

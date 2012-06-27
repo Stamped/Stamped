@@ -19,7 +19,9 @@ class SearchResult(object):
         self.resolverObject = resolverObject
 
     def addScoreComponentDebugInfo(self, componentName, componentValue):
-        self.__scoreDebugInfo.append((normalize(componentName), componentValue))
+        if isinstance(componentName, unicode):
+            componentName = componentName.encode('utf-8')
+        self.__scoreDebugInfo.append((componentName, componentValue))
 
     @property
     def scoreDebugInfo(self):

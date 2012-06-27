@@ -19,7 +19,7 @@ from api.ACommentDB import ACommentDB
 class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='comments', primary_key='comment_id', obj=Comment)
+        AMongoCollection.__init__(self, collection='comments', primary_key='comment_id', obj=Comment, overflow=True)
         ACommentDB.__init__(self)
 
         self._collection.ensure_index('user.user_id')

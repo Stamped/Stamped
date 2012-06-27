@@ -113,7 +113,7 @@ def handleHTTPRequest(requires_auth=True,
         @wraps(fn)
         def wrapper(request, *args, **kwargs):
             try:
-                origin = ""
+                origin = None
                 
                 try:
                     origin = request.META['HTTP_ORIGIN']

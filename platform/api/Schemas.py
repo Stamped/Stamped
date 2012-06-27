@@ -484,13 +484,6 @@ class Invite(Schema):
 # Comments #
 # ######## #
 
-class MentionSchema(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('screen_name',                      basestring, required=True)
-        cls.addProperty('user_id',                          basestring)
-        cls.addPropertyList('indices',                      int)
-
 class Comment(Schema):
     @classmethod
     def setSchema(cls):
@@ -499,7 +492,6 @@ class Comment(Schema):
         cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
-        cls.addNestedPropertyList('mentions',               MentionSchema)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
 
 
@@ -1336,7 +1328,6 @@ class StampContent(Schema):
         cls.addProperty('blurb',                            basestring)
         cls.addNestedPropertyList('images',                 ImageSchema)
         cls.addNestedProperty('timestamp',                  BasicTimestamp, required=True)
-        cls.addNestedPropertyList('mentions',               MentionSchema)
 
     def __init__(self):
         Schema.__init__(self)
