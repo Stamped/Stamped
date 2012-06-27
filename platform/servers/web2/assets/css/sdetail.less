@@ -684,8 +684,6 @@
 
 
 .entity-menu {
-    max-height: 480px;
-    overflow-y: scroll;
     text-align: center;
     
     .entity-title {
@@ -693,13 +691,25 @@
         
         font-size: 250%;
         font-weight: bold;
+        color: #262626;
+        
+        .box-shadow(0, 3px, 3px, 0, @shadow);
     }
     
     .menus {
+        max-height: 420px; // TODO: nuance
+        overflow-y: scroll;
+        
         .submenu {
             .submenu-title {
+                color: #595959;
+                
                 font-size: 200%;
                 font-weight: bold;
+                font-style: italic;
+                font-family: "Georgia", "arial", sans-serif;
+                
+                /* TODO: use font shorthand here! */
             }
             
             .submenu-desc {
@@ -713,6 +723,8 @@
             }
             
             .section {
+                color: #999;
+                
                 .section-title {
                     font-size: 150%;
                 }
@@ -727,9 +739,13 @@
                         .item-title {
                             font-weight: bold;
                         }
+                        
                         .item-prices {
+                            font-style: italic;
                             font-size: 80%;
+                            color: #bfbfbf;
                         }
+                        
                         /*.item-title, .item-desc, .item-spicy, .item-prices {
                             display: inline-block;
                         }*/
@@ -740,6 +756,8 @@
     }
     
     .attribution {
+        .box-shadow(0, -3px, 3px, 0, @shadow);
+        
         font-style: italic;
         font-size: 70%;
     }

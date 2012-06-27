@@ -262,11 +262,7 @@ def stamped_render(request, template, context, **kwargs):
     context = get_stamped_context(context, preload)
     
     #utils.log(pprint.pformat(context))
-    r = render_to_response(template, context, **kwargs)
-    f=open('t.html', 'w')
-    f.write(r.content)
-    f.close()
-    return r
+    return render_to_response(template, context, **kwargs)
 
 def get_stamped_context(context, preload=None):
     context = copy.copy(context)

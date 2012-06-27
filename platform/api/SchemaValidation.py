@@ -39,14 +39,14 @@ def validateHexColor(color):
         raise StampedInputError("Invalid color value.")
 
 def validateURL(url):
-    if url is None:
+    if url is None or url == "":
         return None
     val = URLValidator(verify_exists=False)
     try:
         val(url)
     except ValidationError, e:
         logs.warning("Invalid URL" % url)
-        raise StampedInputError("Invalid URL.")
+        raise StampedHTTPError(400, msg="Invalid URL")
     return url
 
 def validateObjectId(string):

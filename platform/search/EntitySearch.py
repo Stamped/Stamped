@@ -21,6 +21,7 @@ from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
+from DataQualityUtils           import *
 
 
 def total_seconds(timedelta):
@@ -145,15 +146,20 @@ class EntitySearch(object):
         # enough to give a solid idea.
         before = datetime.datetime.now()
         try:
-            resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
+            results = source.searchLite(queryCategory, queryText, **queryParams)
         except:
             logs.report()
-            resultsDict[source] = []
+            results = []
+
         after = datetime.datetime.now()
+        # First level of filtering on data quality score -- results that are really horrendous get dropped entirely
+        # pre-clustering.
+        filteredResults = [result for result in results if result.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_CLUSTER]
         timesDict[source] = after - before
-        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
-            source.sourceName, str(after - before), len(resultsDict.get(source, []))
+        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d, AFTER FILTERING: %d" % (
+            source.sourceName, str(after - before), len(results), len(filteredResults)
         ))
+        resultsDict[source] = filteredResults
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
@@ -222,9 +228,13 @@ class EntitySearch(object):
 
 
     def __proxyToEntity(self, cluster):
+        # Additional level of filtering -- some things get clustered (for the purpose of boosting certain cluster
+        # scores) but never included in the final result because we're not 100% that the data is good enough to show
+        # users.
+        filteredResults = [r for r in cluster.results if r.dataQuality > MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
         # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
-        entityBuilder = EntityProxyContainer(cluster.results[0].resolverObject)
-        for result in cluster.results[1:]:
+        entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
+        for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.
             entityBuilder.addSource(EntityProxySource(result.resolverObject))
         return entityBuilder.buildEntity()
@@ -252,7 +262,13 @@ class EntitySearch(object):
         for cluster in clusters:
             entityId = self.__getEntityIdForCluster(cluster)
             if not entityId:
-                entitiesAndClusters.append((self.__proxyToEntity(cluster), cluster))
+                # One more layer of filtering here -- clusters that don't overall hit our quality minimum get
+                # dropped. We never drop clusters that resolve to entities for this reason.
+                if cluster.dataQuality >= MIN_CLUSTER_DATA_QUALITY:
+                    entitiesAndClusters.append((self.__proxyToEntity(cluster), cluster))
+                else:
+                    logClusterData('DROPPING CLUSTER for shitty data quality:\n%s' % cluster)
+
             # TODO PRELAUNCH: Make sure that the type we get from fast_resolve == the type we get from
             # StampedSourceObject.key, or else using these as keys in a map together won't work.
             elif entityId not in entityIdsToNewClusterIdxs:
@@ -268,6 +284,9 @@ class EntitySearch(object):
                 # TODO PRELAUNCH: Consider overriding this for sparse or user-created entities.
                 # TODO: Debug check to see if the two are definitely not a match according to our clustering logic.
                 originalCluster.grok(cluster)
+
+        # TODO: Reorder according to final scores that incorporate dataQuality and a richness score (presence of stamps,
+        # presence of enriched entity, etc.)
 
         return entitiesAndClusters
 

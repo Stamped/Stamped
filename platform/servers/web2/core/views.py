@@ -17,6 +17,8 @@ import travis_test
 
 ENABLE_TRAVIS_TEST = (False and not IS_PROD)
 
+# TODO: stricter input schema validation
+
 def _is_static_profile_image(url):
     return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
 
@@ -78,6 +80,13 @@ def blog(request):
 
 @stamped_view(schema=HTTPWebTimeSlice)
 def profile(request, schema, **kwargs):
+    return handle_profile(request, schema, **kwargs)
+
+@stamped_view(schema=HTTPWebTimeMapSlice)
+def map(request, schema, **kwargs):
+    return handle_map(request, schema, **kwargs)
+
+def handle_profile(request, schema, **kwargs):
     url_format = "/{screen_name}"
     prev_url   = None
     next_url   = None
@@ -112,15 +121,8 @@ def profile(request, schema, **kwargs):
             user        = None
             user_id     = schema.user_id
         else:
-            user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+            user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
             user_id     = user['user_id']
-        
-        """
-        r = "4e57048accc2175fcd000001"
-        utils.log(user_id)
-        utils.log(r)
-        assert user_id == r
-        """
         
         # simple sanity check validation of user_id
         if utils.tryGetObjectId(user_id) is None:
@@ -195,6 +197,14 @@ def profile(request, schema, **kwargs):
     
     body_classes = _get_body_classes('profile', schema)
     
+    title   = "Stamped - %s" % user['screen_name']
+    sdetail = kwargs.get('sdetail', None)
+    stamp   = kwargs.get('stamp',   None)
+    entity  = kwargs.get('entity',  None)
+    
+    if sdetail is not None and entity is not None:
+        title = "%s - %s" % (title, stamp['entity']['title'])
+    
     return stamped_render(request, 'profile.html', {
         'user'                  : user, 
         'stamps'                : stamps, 
@@ -206,12 +216,13 @@ def profile(request, schema, **kwargs):
         'next_url'              : next_url, 
         
         'body_classes'          : body_classes, 
-    }, preload=[ 'user' ])
+        'sdetail'               : sdetail, 
+        'stamp'                 : stamp, 
+        'entity'                : entity, 
+        'title'                 : title, 
+    }, preload=[ 'user', 'sdetail' ])
 
-@stamped_view(schema=HTTPWebTimeMapSlice)
-def map(request, schema, **kwargs):
-    # TODO: enforce stricter validity checking on offset and limit
-    
+def handle_map(request, schema, **kwargs):
     schema.offset = schema.offset or 0
     schema.limit  = 1000 # TODO: customize this
     screen_name   = schema.screen_name
@@ -252,17 +263,22 @@ def map(request, schema, **kwargs):
     
     body_classes = _get_body_classes('map collapsed-header', schema)
     
+    title = "Stamped - %s map" % user['screen_name']
+    
     return stamped_render(request, 'map.html', {
         'user'          : user, 
         'stamps'        : stamps, 
         
         'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
+        'title'         : title, 
     }, preload=[ 'user', 'stamps', 'stamp_id' ])
 
 @stamped_view(schema=HTTPStampDetail)
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
+    ajax         = schema.ajax
+    del schema.ajax
     
     #import time
     #time.sleep(2)
@@ -270,48 +286,29 @@ def sdetail(request, schema, **kwargs):
     logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
-        user  = travis_test.user
-        #stamp = travis_test.stamps[(-schema.stamp_num) - 1]
-        
-        #stamp  = travis_test.sdetail_stamp
-        #entity = travis_test.sdetail_entity
+        user = travis_test.user
     else:
-        user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+        user = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
     
     stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")
     
-    entity = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
-    
-    """
-    from pprint import pprint
-    pprint(stamp)
-    
-    from pprint import pprint
-    pprint(entity)
-    """
-    
-    #stamp = Stamp().importData(stamp)
-    '''
-    encodedStampTitle = encodeStampTitle(stamp.entity.title)
-    
-    if encodedStampTitle != schema.stamp_title:
-        i = encodedStampTitle.find('.')
-        if i != -1:
-            encodedStampTitle = encodedStampTitle[:i]
-        
-        if encodedStampTitle != schema.stamp_title:
-            raise Exception("Invalid stamp title: '%s' (received) vs '%s' (stored)" % 
-                            (schema.stamp_title, encodedStampTitle))
-    '''
-    
-    return stamped_render(request, 'sdetail.html', {
+    entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
+    sdetail = stamped_render(request, 'sdetail.html', {
         'user'   : user, 
         'stamp'  : stamp, 
         'entity' : entity, 
     })
+    
+    if ajax:
+        return sdetail
+    else:
+        return handle_profile(request, HTTPWebTimeSlice().dataImport({
+            'screen_name'   : schema.screen_name, 
+            'user_id'       : user['user_id']
+        }), user=user, sdetail=sdetail.content, stamp=stamp, entity=entity)
 
 @stamped_view(schema=HTTPEntityId)
 def menu(request, schema, **kwargs):

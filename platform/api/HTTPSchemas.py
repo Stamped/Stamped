@@ -1080,15 +1080,16 @@ class HTTPEntity(Schema):
         cls.addProperty('category',                         basestring, required=True)
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('caption',                          basestring)
+        cls.addProperty('desc',                             basestring)
         cls.addNestedPropertyList('images',                 HTTPImage)
         cls.addProperty('last_modified',                    basestring)
         cls.addNestedProperty('previews',                   HTTPPreviews)
-
+        
         # Location
         cls.addProperty('address',                          basestring)
         cls.addProperty('neighborhood',                     basestring)
         cls.addProperty('coordinates',                      basestring)
-
+        
         # Components
         cls.addNestedProperty('playlist',                   HTTPEntityPlaylist)
         cls.addNestedPropertyList('actions',                HTTPEntityAction)
@@ -1197,6 +1198,7 @@ class HTTPEntity(Schema):
         self.subcategory        = entity.subcategory
 
         self.caption            = self.subtitle # Default
+        self.desc               = entity.desc
         self.last_modified      = entity.timestamp.created
 
         subcategory             = self._formatSubcategory(self.subcategory)
@@ -1582,7 +1584,7 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True, key='artist')
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
@@ -1599,7 +1601,8 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True, key='artist')
+                    ### TODO: Add album
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
@@ -2459,7 +2462,7 @@ class HTTPStamp(Schema):
         cls.addProperty('created',                          basestring)
         cls.addProperty('modified',                         basestring)
         cls.addProperty('stamped',                          basestring)
-
+        
         cls.addProperty('num_comments',                     int)
         cls.addProperty('num_likes',                        int)
         cls.addProperty('num_todos',                        int)
@@ -2578,11 +2581,17 @@ class HTTPStamp(Schema):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 
 class HTTPStampDetail(Schema):
+    
+    def __init__(self, *args, **kwargs):
+        Schema.__init__(self, *args, **kwargs)
+        self.ajax = False
+    
     @classmethod
     def setSchema(cls):
         cls.addProperty('screen_name',                      basestring)
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('stamp_title',                      basestring)
+        cls.addProperty('ajax',                             bool)
 
 class HTTPStampNew(Schema):
     @classmethod

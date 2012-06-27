@@ -1580,6 +1580,8 @@ a.pronounced-title {
   display: block;
   /* NOTE: with the rounded corners, this ends up being 36x36px */
 
+  /* TODO: possibly replace these rounded corners with static images? */
+
   width: 28px;
   height: 28px;
   border: 4px solid #bfbfbf;

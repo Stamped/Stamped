@@ -560,11 +560,6 @@ class StampedAPI(AStampedAPI):
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
 
-            # Decrement comment count on stamp
-            if comment.stamp_id not in stampIds:
-                logs.info('STAMP ID: %s' % comment.stamp_id)
-                self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
-
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
         likedStamps = self._stampDB.getStamps(likedStampIds)
@@ -574,9 +569,6 @@ class StampedAPI(AStampedAPI):
 
             # Decrement user stats by one
             self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=-1)
-
-            # Decrement stamp stats by one
-            self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
 
         # Remove like history
         self._stampDB.removeUserLikesHistory(account.user_id)
@@ -2874,9 +2866,6 @@ class StampedAPI(AStampedAPI):
         if len(repliedUserIds) > 0:
             self._addReplyActivity(authUserId, list(repliedUserIds), stamp.stamp_id, comment.comment_id)
 
-        # Increment comment count on stamp
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
-
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
@@ -2895,9 +2884,6 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity?
         self._activityDB.removeCommentActivity(authUserId, comment.comment_id)
-
-        # Increment comment count on stamp
-        self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
 
         # Add user object
         user = self._userDB.getUser(comment.user.user_id)
@@ -2966,24 +2952,10 @@ class StampedAPI(AStampedAPI):
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
 
-        # Verify user has the ability to 'like' the stamp
-        if stamp.user.user_id != authUserId:
-            friendship              = Friendship()
-            friendship.user_id      = stamp.user.user_id
-            friendship.friend_id    = authUserId
-
-            # Check if stamp is private; if so, must be a follower
-            if stamp.user.privacy == True:
-                if not self._friendshipDB.checkFriendship(friendship):
-                    raise StampedPermissionsError("Insufficient privileges to add comment")
-
-            # Check if block exists between user and stamp owner
-            if self._friendshipDB.blockExists(friendship) == True:
-                raise StampedIllegalActionError("Block exists")
-
         # Check to verify that user hasn't already liked stamp
         if self._stampDB.checkLike(authUserId, stampId):
-            raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            logs.info("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            return stamp
 
         # Check if user has liked the stamp previously; if so, don't give credit
         previouslyLiked = False
@@ -2997,21 +2969,26 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.likes')
 
-        # Increment user stats by one
-        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
-
-        # Increment stamp stats by one
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=1)
-
+        # Force attributes
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
-
         stamp.stats.num_likes += 1
-
         if stamp.attributes is None:
             stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True
+
+        # Add like async
+        tasks.invoke(tasks.APITasks.addLike, args=[authUserId, stampId, previouslyLiked])
+
+        return stamp
+
+    @API_CALL
+    def addLikeAsync(self, authUserId, stampId, previouslyLiked=False):
+        stamp = self._stampDB.getStamp(stampId)
+
+        # Increment user stats
+        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
 
         # Give credit if not previously liked
         if not previouslyLiked and stamp.user.user_id != authUserId:
@@ -3030,8 +3007,6 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
-        return stamp
-
     @API_CALL
     def removeLike(self, authUserId, stampId):
         # Remove like (if it exists)
@@ -3045,9 +3020,6 @@ class StampedAPI(AStampedAPI):
         # Decrement user stats by one
         self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
-
-        # Decrement stamp stats by one
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
 
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
@@ -4037,6 +4009,15 @@ class StampedAPI(AStampedAPI):
                                              benefit = benefit)
 
     def _addLikeActivity(self, userId, stampId, friendId, benefit):
+        """
+        Note: Ideally, if a user "re-likes" a stamp (e.g. they've liked it before and they
+        like it again), it should bump the activity item to the top of your feed. There are a 
+        whole bunch of pitfalls with this, though. Do you display that the user earned a stamp?
+        How is grouping handled, especially if it's grouped previously? What's the upside 
+        (especially if the second like is an accident)? 
+
+        Punting for now, but we can readdress after v2 launch.
+        """
         objects = ActivityObjectIds()
         objects.stamp_ids = [ stampId ]
         objects.user_ids = [ friendId ]
