@@ -11,7 +11,6 @@ __license__   = "TODO"
 __all__ = [ 'AmazonSource' ]
 
 import Globals
-import numpy
 from logs import report
 
 try:
@@ -1083,8 +1082,9 @@ class AmazonSource(GenericSource):
         salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
                 for searchResult in resultList)
         logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
-        rankMean = numpy.mean(logSalesRanks)
-        rankStdDev = numpy.std(logSalesRanks)
+        # TODO(geoff): Use numpy for these computations
+        rankMean = float(sum(logSalesRanks)) / len(logSalesRanks)
+        rankStdDev = math.sqrt(sum((r - rankMean) ** 2 for r in logSalesRanks) / len(logSalesRanks))
         
         for logRank, searchResult in zip(logSalesRanks, resultList):
             factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
