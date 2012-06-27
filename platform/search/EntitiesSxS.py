@@ -73,7 +73,7 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
     random.shuffle(changedTableRows)
 
     summary = "%d out of %d queries had changes (%f%%). Here's a random list of them" % (
-            len(changedTableRows), len(oldResults), len(changedTableRows) / len(oldResults) * 100)
+            len(changedTableRows), len(oldResults), float(len(changedTableRows)) / len(oldResults) * 100)
     summary += ' <a href="index_all.html">show all</a>'
 
     htmlRowTpl = '<tr><td>%s</td><td>%s</td></tr>'
