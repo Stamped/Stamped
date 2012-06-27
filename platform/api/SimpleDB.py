@@ -74,6 +74,9 @@ class SimpleDB(object):
 
             if 'node' in stat:
                 data['nde'] = stat['node']
+                
+            if 'client_id' in stat:
+                data['cid'] = stat['client_id']
 
             if len(data) > 0:
                 statId = str(ObjectId())
