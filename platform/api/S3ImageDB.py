@@ -114,7 +114,7 @@ class S3ImageDB(AImageDB):
             '92x92': (92, 92),  # 2x
             '46x46': (46, 46),  # 1x
             
-            # shown in inbox, activity (restamp), people (list)
+            # shown in inbox, activity (credit), people (list)
             '74x74': (74, 74),  # 2x
             '37x37': (37, 37),  # 1x
             

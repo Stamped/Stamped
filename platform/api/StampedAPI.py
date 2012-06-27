@@ -2406,7 +2406,7 @@ class StampedAPI(AStampedAPI):
 
         # Add activity for credited users
         if len(creditedUserIds) > 0:
-            self._addRestampActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
+            self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
 
         # Add activity for mentioned users
         mentionedUserIds = set()
@@ -2626,9 +2626,9 @@ class StampedAPI(AStampedAPI):
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
-        restamps                = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
-        stats.num_credits       = len(restamps)
-        stats.preview_credits   = map(lambda x: x.stamp_id, restamps[:MAX_PREVIEW])
+        creditStamps            = self._stampDB.getCreditedStamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
+        stats.num_credits       = len(creditStamps)
+        stats.preview_credits   = map(lambda x: x.stamp_id, creditStamps[:MAX_PREVIEW])
 
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
@@ -4029,11 +4029,11 @@ class StampedAPI(AStampedAPI):
                                             groupRange=timedelta(days=1),
                                             unique=True)
 
-    def _addRestampActivity(self, userId, recipientIds, stamp_id, benefit):
+    def _addCreditActivity(self, userId, recipientIds, stamp_id, benefit):
         objects = ActivityObjectIds()
         objects.user_ids = recipientIds
         objects.stamp_ids = [ stamp_id ]
-        self._addActivity('restamp', userId, objects,
+        self._addActivity('credit', userId, objects,
                                              benefit = benefit)
 
     def _addLikeActivity(self, userId, stampId, friendId, benefit):

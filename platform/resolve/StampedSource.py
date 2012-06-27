@@ -55,7 +55,7 @@ class _EntityProxyObject(object):
         return self.__entity
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         try:
             return self.entity.title
         except Exception:
@@ -91,6 +91,10 @@ class EntityProxyArtist(_EntityProxyObject, ResolverPerson):
         _EntityProxyObject.__init__(self, entity)
         ResolverPerson.__init__(self, types=entity.types)
 
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
+
     @lazyProperty
     def albums(self):
         try:
@@ -114,6 +118,10 @@ class EntityProxyAlbum(_EntityProxyObject, ResolverMediaCollection):
         _EntityProxyObject.__init__(self, entity)
         ResolverMediaCollection.__init__(self, types=entity.types)
 
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
+
     @lazyProperty
     def artists(self):
         try:
@@ -136,6 +144,10 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
     def __init__(self, entity):
         _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
+
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
 
     @property # @lazyProperty
     def artists(self):
@@ -198,6 +210,10 @@ class EntityProxyMovie(_EntityProxyObject, ResolverMediaItem):
         _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
 
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
+
     @lazyProperty 
     def cast(self):
         try:
@@ -242,7 +258,11 @@ class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
         _EntityProxyObject.__init__(self, entity)
         ResolverMediaCollection.__init__(self, types=entity.types)
 
-    @lazyProperty 
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
+
+    @lazyProperty
     def cast(self):
         try:
             return _fixCast(self.entity.cast)# [ { 'name' : item.title } for item in self.entity.cast ]
@@ -279,7 +299,11 @@ class EntityProxyBook(_EntityProxyObject, ResolverMediaItem):
         _EntityProxyObject.__init__(self, entity)
         ResolverMediaItem.__init__(self, types=entity.types)
 
-    @lazyProperty 
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
+
+    @lazyProperty
     def authors(self):
         try:
             return [ { 'name' : item.title } for item in self.entity.authors ]
@@ -320,6 +344,10 @@ class EntityProxyPlace(_EntityProxyObject, ResolverPlace):
         _EntityProxyObject.__init__(self, entity)
         ResolverPlace.__init__(self, types=entity.types)
 
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
+
     @lazyProperty
     def coordinates(self):
         try:
@@ -359,6 +387,10 @@ class EntityProxyApp(_EntityProxyObject, ResolverSoftware):
     def __init__(self, entity):
         _EntityProxyObject.__init__(self, entity)
         ResolverSoftware.__init__(self, types=entity.types)
+
+    def _cleanName(self, rawName):
+        # No processing happens after it's already become an entity.
+        return rawName
 
     @lazyProperty
     def release_date(self):
