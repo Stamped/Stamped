@@ -1093,11 +1093,11 @@ class AmazonSource(GenericSource):
                 searchResult.addRelevanceComponentDebugInfo('Amazon missing salesRank factor', factor)
                 searchResult.relevance *= factor
 
-    def __scoreFilmResults(self, unsearchResultsLists):
+    def __scoreFilmResults(self, resolverObjectsLists):
         scoredTvShows = []
         scoredMovies = []
-        for unsearchResultList in unsearchResultsLists:
-            scoredList = scoreResultsWithBasicDropoffScoring(unsearchResultList, sourceScore=1.0)
+        for resolverObjectList in resolverObjectsLists:
+            scoredList = scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0)
             tvShows = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonTvShow)]
             movies = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonMovie)]
             if len(tvShows) + len(movies) != len(scoredList):
@@ -1115,15 +1115,15 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByRelevance([tvShows, movies])
 
-    def __scoreMusicResults(self, unsearchResultsLists):
+    def __scoreMusicResults(self, resolverObjectsLists):
         # TODO: Clean up code duplication with __scoreFilmResults!
-        if not unsearchResultsLists:
+        if not resolverObjectsLists:
             return []
 
         scoredAlbums = []
         scoredTracks = []
-        for unsearchResultList in unsearchResultsLists:
-            scoredList = scoreResultsWithBasicDropoffScoring(unsearchResultList, sourceScore=0.6)
+        for resolverObjectList in resolverObjectsLists:
+            scoredList = scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=0.6)
             albums = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonAlbum)]
             tracks = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonTrack)]
             if len(albums) + len(tracks) != len(scoredList):
@@ -1147,13 +1147,13 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByRelevance([albums, tracks])
 
-    def __scoreBookResults(self, unsearchResultsLists, queryText):
-        assert len(unsearchResultsLists) <= 1 
-        if len(unsearchResultsLists) == 0:
+    def __scoreBookResults(self, resolverObjectsLists, queryText):
+        assert len(resolverObjectsLists) <= 1 
+        if len(resolverObjectsLists) == 0:
             return []
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
-        searchResults = scoreResultsWithBasicDropoffScoring(unsearchResultsLists['Books'], dropoffFactor=0.9)
+        searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
         augmentScoreForTextRelevance(searchResults, queryText, lambda r: r.resolverObject.name, 2)
         self.__adjustScoresBySalesRank(searchResults)
         for searchResult in searchResults:
