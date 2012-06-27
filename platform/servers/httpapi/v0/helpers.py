@@ -225,7 +225,7 @@ def handleHTTPRequest(requires_auth=True,
                         logs.debug("Origin not included")
                 
                 params = {}
-                params['authUserId'], params['authClientId'] = checkOAuth(request, required=requires_auth)
+                params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, required=requires_auth)
                 params['client_id'] = checkClient(request, required=requires_client)
                 
                 if parse_request:
@@ -289,6 +289,19 @@ def handleHTTPCallbackRequest(
                 logs.info("%s %s" % (request.method, request.path))
 
                 params = {}
+                oauth_token = None
+                if 'stamped_oauth_token' in request.GET:
+                    oauth_token = request.GET['stamped_oauth_token']
+                elif 'stamped_oauth_token' in request.POST:
+                    oauth_token = request.POST['stamped_oauth_token']
+                elif 'oauth_token' in request.GET:
+                    oauth_token = request.GET['oauth_token']
+                elif 'oauth_token' in request.POST:
+                    oauth_token = request.POST['oauth_token']
+                else:
+                    raise StampedInputError("Access token not found")
+
+                params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=requires_auth)
 
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
@@ -346,13 +359,13 @@ def checkClient(request, required=True):
 
 def optionalOAuth(request):
     try:
-        authUserId = checkOAuth(request)
+        authUserId = checkOAuthWithRequest(request)
     except Exception:
         authUserId = None
     
     return authUserId
 
-def checkOAuth(request, required=True):
+def checkOAuthWithRequest(request, required=True):
     ### Parse Request for Access Token
     try:
         if request.method == 'GET':
@@ -361,13 +374,16 @@ def checkOAuth(request, required=True):
             oauth_token = request.POST['oauth_token']
         else:
             raise Exception
-        
-        logs.token(oauth_token)
     except Exception:
         if not required:
-            return None, None 
+            return None, None
         raise StampedInputError("Access token not found")
-    
+
+    return checkOAuth(oauth_token, required)
+
+def checkOAuth(oauth_token, required=True):
+    logs.token(oauth_token)
+
     ### Validate OAuth Access Token
     try:
         authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)
