@@ -878,29 +878,38 @@ body.music, body.book, body.film, body.app {
     }
 }
 
-a.lightbox {
+.zoom {
     position: absolute;
     z-index: 101;
     
     top:   8px;
     right: 16px;
     
-    .zoom {
-        background: url(/assets/img/zoom-icon.png) no-repeat;
-        pointer-events: none;
-        cursor: pointer;
-        
-        display: block;
-        width:  25px;
-        height: 25px;
-    }
+    display: block;
+    width:  25px;
+    height: 25px;
     
     opacity: 0;
     .transition(opacity, 0.2s, ease-out);
+    
+    background: url(/assets/img/entityimagehover-sprite.png) no-repeat;
+    
+    &:hover {
+        background-position: 0 -27px;
+        cursor: pointer;
+    }
 }
 
-.stamp-user-image:hover, .stamp-entity-image:hover {
-    a.lightbox {
+.zoom-map {
+    background-position: -27px 0;
+    
+    &:hover {
+        background-position: -27px -27px;
+    }
+}
+
+.stamp-user-image:hover, .stamp-entity-image:hover, .static-map-small:hover {
+    .zoom {
         opacity: 1;
     }
 }

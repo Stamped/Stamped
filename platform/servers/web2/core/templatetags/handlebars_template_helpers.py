@@ -92,7 +92,7 @@ def entity_image(template_name, pad, scope, *args, **kwargs):
     
     onerror = "this.className='hidden'; if (typeof(window.g_update_stamps) !== 'undefined') { g_update_stamps(); }"
     pre     = '<div class="entity-image-wrapper"><img alt="%s" src="%s" onerror="%s" />' % (alt, url, onerror)
-    body    = '<a class="lightbox" href="%s"><div class="zoom"></div></a></div>' % large
+    body    = '<a class="lightbox zoom" href="%s"></a></div>' % large
     
     return pybars.strlist(pre + "\n" + body)
 

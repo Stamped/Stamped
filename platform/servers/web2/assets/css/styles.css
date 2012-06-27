@@ -1578,9 +1578,11 @@ a.pronounced-title {
 .close-button {
   position: relative;
   display: block;
+  /* NOTE: with the rounded corners, this ends up being 36x36px */
+
+  width: 28px;
+  height: 28px;
   border: 4px solid #bfbfbf;
-  width: 36px;
-  height: 36px;
   background: #fff;
   -webkit-border-radius: 36px;
   -moz-border-radius: 36px;
@@ -1592,8 +1594,8 @@ a.pronounced-title {
 .close-button .close-button-inner {
   background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
   position: absolute;
-  top: 11px;
-  left: 11px;
+  top: 7px;
+  left: 7px;
   width: 14px;
   height: 14px;
 }

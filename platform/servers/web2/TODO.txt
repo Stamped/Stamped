@@ -64,22 +64,21 @@ TODO:
             * DONE - fix sDetail bug where opening sDetail scrolls back to top of page
             * clicking on map in stamp gallery => selection in map view
             * BETA - FIX INFINITE SCROLL
-            * optimize infinite scroll
+            * BETA - optimize infinite scroll
             * adaptive layout improvements
             * NOREPRO - fix glitch w/ hover state on entity stamp images in gallery shifting text
         * headers:
             * change profile header image and share widget to remain constant
             * DONE - experiment w/ different transitions between subheader sections
-            * expanded friend view
-                * mock? possibly interesting popup gallery of user profile images?
+            * DONE - expanded friend view
         * sDetail:
-            * user feedback images inline and expanded view
-            * fixes to user-generated-image w/ zoom icon placement
-            * DONE  - nuance 3D transform applied to entity image
-            * DONE  - change crinkled map => larger, non-crinkled map
+            * DONE - user feedback images inline and expanded view
+            * DONE - fixes to user-generated-image w/ zoom icon placement
+            * DONE - nuance 3D transform applied to entity image
+            * DONE - change crinkled map => larger, non-crinkled map
     * map:
-        * add spiffy icon to return to profile
-        * remove ribbons from map list-view nav
+        * DONE - add spiffy icon to return to profile
+        * DONE - remove ribbons from map list-view nav
     
     * FIX CORS WebGL canvas issue
         * texImage2D
