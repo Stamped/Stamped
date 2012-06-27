@@ -115,6 +115,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
 
+    logs.info('### netflixLoginCallback result: %s' % result)
+
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
     linked.linked_user_id           = result['user_id']
