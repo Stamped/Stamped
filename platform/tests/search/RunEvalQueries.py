@@ -53,6 +53,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
 
     def test_run_film_queries(self):
         filmQueries = [
+                '1984',  # This one is a DISASTER.
                 '90210',
                 'LOST',
                 'Le ragazze di Piazza di Spagna',

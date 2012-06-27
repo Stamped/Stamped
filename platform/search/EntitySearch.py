@@ -197,42 +197,79 @@ class EntitySearch(object):
         return dedupedResults[:limit]
 
 
+    def __getEntityIdForCluster(self, cluster):
+        idsFromClusteredEntities = []
+        fastResolvedIds = []
+        for result in cluster.results:
+            if result.resolverObject.source == 'stamped':
+                idsFromClusteredEntities.append(result.resolverObject.key)
+            else:
+                # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
+                entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
+                if entityId:
+                    fastResolvedIds.append(entityId)
+
+        allIds = idsFromClusteredEntities + fastResolvedIds
+        if len(idsFromClusteredEntities) > 2:
+            logs.warning('Search results directly clustered multiple StampedSource results: [%s]' %
+                         ', '.join(str(entityId) for entityId in idsFromClusteredEntities))
+        elif len(allIds) > 2:
+            logs.warning('Search results indirectly clustered multiple entity IDs together: [%s]' %
+                         ', '.join(str(entityId) for entityId in allIds))
+        if not allIds:
+            return None
+        return allIds[0]
+
+
+    def __proxyToEntity(self, cluster):
+        # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
+        entityBuilder = EntityProxyContainer(cluster.results[0].resolverObject)
+        for result in cluster.results[1:]:
+            # TODO PRELAUNCH: Only use the best result from each source.
+            entityBuilder.addSource(EntityProxySource(result.resolverObject))
+        return entityBuilder.buildEntity()
+
+
+    @utils.lazyProperty
+    def __stampedSource(self):
+        return StampedSource()
+
+
+    def __buildEntity(self, entityId):
+        # TODO PRELAUNCH: Should be able to avoid separate lookup here.
+        proxy = self.__stampedSource.entityProxyFromKey(entityId)
+        entity = EntityProxyContainer(proxy).buildEntity()
+        entity.entity_id = entityId
+        return entity
+
+
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
-        stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
         entityResults = []
+
+        entityIdsToNewClusterIdxs = {}
+        entitiesAndClusters = []
         for cluster in clusters:
-            entityId = None
-            for result in cluster.results:
-                if result.resolverObject.source == 'stamped':
-                    entityId = result.resolverObject.key
-                    break
-
-            results = cluster.results[:]
-            results.sort(key = lambda result:result.score, reverse=True)
-            for result in results:
-                if entityId:
-                    break
-                proxy = result.resolverObject
-                # TODO: Batch the database requests into one big OR query. Have appropriate handling for when we get
-                # multiple Stamped IDs back.
-                entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
-                # TODO: Incorporate data fullness here!
-
-            if entityId:
-                proxy = stampedSource.entityProxyFromKey(entityId)
-                entity = EntityProxyContainer(proxy).buildEntity()
-                # TODO: Somehow mark the entity to be enriched with these other IDs I've attached
-                entity.entity_id = entityId
+            entityId = self.__getEntityIdForCluster(cluster)
+            if not entityId:
+                entitiesAndClusters.append((self.__proxyToEntity(cluster), cluster))
+            # TODO PRELAUNCH: Make sure that the type we get from fast_resolve == the type we get from
+            # StampedSourceObject.key, or else using these as keys in a map together won't work.
+            elif entityId not in entityIdsToNewClusterIdxs:
+                entityIdsToNewClusterIdxs[entityId] = len(entitiesAndClusters)
+                entitiesAndClusters.append((self.__buildEntity(entityId), cluster))
             else:
-                entityBuilder = EntityProxyContainer(results[0].resolverObject)
-                for result in results[1:]:
-                    entityBuilder.addSource(EntityProxySource(result.resolverObject))
-                entity = entityBuilder.buildEntity()
+                originalIndex = entityIdsToNewClusterIdxs[entityId]
+                (_, originalCluster) = entitiesAndClusters[originalIndex]
+                # We're not actually augmenting the result at all here; the result is the unadultered entity. We won't
+                # show an entity augmented with other third-party IDs we've attached in search results because it will
+                # create inconsistency for the entity show page and we don't know if they will definitely be attached.
+                # The point of the grok is entirely to boost the rank of the cluster (and thus of the entity.)
+                # TODO PRELAUNCH: Consider overriding this for sparse or user-created entities.
+                # TODO: Debug check to see if the two are definitely not a match according to our clustering logic.
+                originalCluster.grok(cluster)
 
-            entityResults.append(entity)
-
-        return zip(entityResults, clusters)
+        return entitiesAndClusters
 
 
     def searchEntities(self, *args, **kwargs):
