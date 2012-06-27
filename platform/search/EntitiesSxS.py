@@ -89,7 +89,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     diffScores = []
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
-            score = differenceScore(left[0], right[0])
+            score = differenceScore(left[0].dataExport(), right[0].dataExport())
             if score <= diffThreshold:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
@@ -148,7 +148,7 @@ def writeSingleEntity(entity, outputDir, filename, cellId):
     with open(path.join(outputDir, filename), 'w') as fout:
         # TODO(geoff): This doesn't produce proper HTML
         print >> fout, '<pre>'
-        pprint.pprint(entity, fout)
+        pprint.pprint(entity.dataExport(), fout)
         print >> fout, '</pre>'
     return '%s<a href="%s">%s</a></td>' % (
             makeHighlightingTableCell(cellId), filename, extractLinkText(entity))
@@ -158,16 +158,15 @@ def makeHighlightingTableCell(name):
     return '<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">' % ((name,) * 3)
 
 def writeCompareEntity(left, right, outputDir, filename):
-    leftLines = pprint.pformat(left).split('\n')
-    rightLines = pprint.pformat(right).split('\n')
+    leftLines = pprint.pformat(left.dataExport()).split('\n')
+    rightLines = pprint.pformat(right.dataExport()).split('\n')
     differ = difflib.HtmlDiff(wrapcolumn=100)
     with open(path.join(outputDir, filename), 'w') as fout:
         print >> fout, differ.make_file(leftLines, rightLines)
 
 
 def extractLinkText(entity):
-    # TODO(geoff): more details
-    return entity[0]['title']
+    return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, entity[0].subtitle)
 
 
 def ensureDirectory(pathName):
