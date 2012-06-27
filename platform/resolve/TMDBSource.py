@@ -17,6 +17,7 @@ try:
     import re, logs
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from libs.TMDB                  import globalTMDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
@@ -108,6 +109,9 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
         _TMDBObject.__init__(self, tmdb_id, data=data)
         ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanMovieTitle(rawName)
+
     @property
     def valid(self):
         try:
@@ -128,7 +132,7 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
             return []
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['title']
 
     @lazyProperty

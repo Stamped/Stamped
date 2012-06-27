@@ -12,13 +12,13 @@ from logs import report
 try:
     import utils
     import os, logs, re, time, urlparse, math, pylibmc
-    
+
     import Blacklist
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
     import Entity
-    
+
     from datetime                   import datetime, timedelta
     from auth                       import convertPasswordForStorage
     from utils                      import lazyProperty
@@ -27,7 +27,7 @@ try:
     from libs.ec2_utils             import is_prod_stack
     from pprint                     import pprint, pformat
     from operator                   import itemgetter, attrgetter
-    
+
     from AStampedAPI                import AStampedAPI
     from AAccountDB                 import AAccountDB
     from AEntityDB                  import AEntityDB
@@ -42,7 +42,7 @@ try:
     from api.Schemas                import *
     from ActivityCollectionCache    import ActivityCollectionCache
     from Memcache                   import globalMemcache
-    
+
     #resolve classes
     from resolve.EntitySource       import EntitySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
@@ -55,10 +55,10 @@ try:
     from TMDBSource                 import TMDBSource
     from TheTVDBSource              import TheTVDBSource
     from StampedSource              import StampedSource
-    
-    # TODO (travis): we should NOT be importing * here -- it's okay in limited 
+
+    # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
-    
+
     from Netflix                    import *
     from Facebook                   import *
     from Twitter                    import *
@@ -71,7 +71,7 @@ except Exception:
 CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per like
 
-# TODO (travis): refactor API function calling conventions to place optional last 
+# TODO (travis): refactor API function calling conventions to place optional last
 # instead of first.
 
 class StampedAPI(AStampedAPI):
@@ -258,21 +258,21 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alert_settings                         = AccountAlertSettings()
-        alert_settings.ios_alert_credit         = True
-        alert_settings.ios_alert_like           = True
-        alert_settings.ios_alert_todo           = True
-        alert_settings.ios_alert_mention        = True
-        alert_settings.ios_alert_comment        = True
-        alert_settings.ios_alert_reply          = True
-        alert_settings.ios_alert_follow         = True
-        alert_settings.email_alert_credit       = True
-        alert_settings.email_alert_like         = False
-        alert_settings.email_alert_todo         = False
-        alert_settings.email_alert_mention      = True
-        alert_settings.email_alert_comment      = True
-        alert_settings.email_alert_reply        = True
-        alert_settings.email_alert_follow       = True
+        alert_settings                          = AccountAlertSettings()
+        alert_settings.alerts_credits_apns      = True
+        alert_settings.alerts_credits_email     = True
+        alert_settings.alerts_likes_apns        = True
+        alert_settings.alerts_likes_email       = False
+        alert_settings.alerts_todos_apns        = True
+        alert_settings.alerts_todos_email       = False
+        alert_settings.alerts_mentions_apns     = True
+        alert_settings.alerts_mentions_email    = True
+        alert_settings.alerts_comments_apns     = True
+        alert_settings.alerts_comments_email    = True
+        alert_settings.alerts_replies_apns      = True
+        alert_settings.alerts_replies_email     = True
+        alert_settings.alerts_followers_apns    = True
+        alert_settings.alerts_followers_email   = True
         account.alert_settings                  = alert_settings
 
         # Validate screen name
@@ -427,7 +427,7 @@ class StampedAPI(AStampedAPI):
         # First, get user information from Twitter using the passed in token
         try:
             twitterUser = self._twitter.getUserInfo(new_tw_account.user_token, new_tw_account.user_secret)
-        except (StampedInputError, StampedUnavailableError):
+        except (StampedInputError, StampedUnavailableError) as e:
             logs.warning("Unable to get user info from Twitter %s" % e)
             raise StampedInputError('Unable to connect to Twitter')
         self._verifyTwitterAccount(twitterUser['id'])
@@ -560,11 +560,6 @@ class StampedAPI(AStampedAPI):
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
 
-            # Decrement comment count on stamp
-            if comment.stamp_id not in stampIds:
-                logs.info('STAMP ID: %s' % comment.stamp_id)
-                self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
-
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
         likedStamps = self._stampDB.getStamps(likedStampIds)
@@ -574,9 +569,6 @@ class StampedAPI(AStampedAPI):
 
             # Decrement user stats by one
             self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=-1)
-
-            # Decrement stamp stats by one
-            self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
 
         # Remove like history
         self._stampDB.removeUserLikesHistory(account.user_id)
@@ -606,10 +598,6 @@ class StampedAPI(AStampedAPI):
     def updateAccount(self, authUserId, updateAcctForm):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
-
-#        for k,v in fields.iteritems():
-#            if v == '':
-#                fields[k] = None
 
         if 'screen_name' in fields and account.screen_name != fields['screen_name']:
             old_screen_name = account.screen_name
@@ -822,18 +810,22 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Invalid input")
 
     @API_CALL
-    def updateAlerts(self, authUserId, alerts):
+    def updateAlerts(self, authUserId, on, off):
         account = self._accountDB.getAccount(authUserId)
 
         accountAlerts = account.alert_settings
         if accountAlerts is None:
             accountAlerts = AccountAlertSettings()
 
-        for k, v in alerts.dataExport().iteritems():
-            if v:
-                setattr(accountAlerts, k, True)
-            else:
-                setattr(accountAlerts, k, False)
+        if on is not None:
+            for attr in on:
+                if hasattr(accountAlerts, attr):
+                    setattr(accountAlerts, attr, True)
+
+        if off is not None:
+            for attr in off:
+                if hasattr(accountAlerts, attr):
+                    setattr(accountAlerts, attr, False)
 
         account.alert_settings = accountAlerts
 
@@ -884,6 +876,8 @@ class StampedAPI(AStampedAPI):
         elif linkedAccount.service_name == 'twitter':
             tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
                          args=[authUserId, linkedAccount.token, linkedAccount.secret])
+
+        return linkedAccount
 
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
@@ -977,14 +971,21 @@ class StampedAPI(AStampedAPI):
                                           body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.linked_name)
             self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id)
 
+
+
     @API_CALL
-    def addToNetflixInstant(self, authUserId, netflixId):
-        """
-         Asynchronously add an entity to the user's netflix queue
-        """
+    def addToNetflixInstant(self, nf_user_id, nf_token, nf_secret, netflixId):
+        if (nf_user_id is None or nf_token is None or nf_secret is None):
+            logs.info('Returning because of missing account credentials')
+            return None
+
+        netflix = globalNetflix()
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
+
+    @API_CALL
+    def addToNetflixInstantWithUserId(self, authUserId, netflixId):
         account   = self._accountDB.getAccount(authUserId)
 
-        # TODO return HTTPAction to invoke sign in if credentials are unavailable
         nf_user_id  = None
         nf_token    = None
         nf_secret   = None
@@ -994,19 +995,7 @@ class StampedAPI(AStampedAPI):
             nf_token    = account.linked.netflix.token
             nf_secret   = account.linked.netflix.secret
 
-        if (nf_user_id is None or nf_token is None or nf_secret is None):
-            logs.info('Returning because of missing account credentials')
-            return None
-
-        netflix = globalNetflix()
-        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
-
-    @API_CALL
-    def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
-
-        account   = self._accountDB.getAccount(authUserId)
-
-        return True
+        return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
 
     """
@@ -1024,35 +1013,35 @@ class StampedAPI(AStampedAPI):
     def getUserFromIdOrScreenName(self, userTiny):
         if not isinstance(userTiny, Schema):
             userTiny = UserTiny().dataImport(userTiny)
-        
+
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedInputError("Required field missing (user id or screen name)")
-        
+
         if userTiny.user_id is not None:
             return self._userDB.getUser(userTiny.user_id)
-        
+
         return self._userDB.getUserByScreenName(userTiny.screen_name)
 
     def _getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)
         stamps      = self._enrichStampObjects(stamps)
-        
+
         categories  = {}
         num_stamps  = len(stamps)
-        
+
         for stamp in stamps:
             category = stamp.entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
-        
+
         result = []
         for k, v in categories.items():
             distribution = CategoryDistribution()
             distribution.category = k
             distribution.count = v
             result.append(distribution)
-        
+
         return result
 
     def _enrichUserObjects(self, users, authUserId=None, **kwargs):
@@ -1070,10 +1059,10 @@ class StampedAPI(AStampedAPI):
                 if user.user_id in friends:
                     user.following = True
                 else:
-                    user.following = False 
+                    user.following = False
                 result.append(user)
-            users = result 
-        
+            users = result
+
         if singleUser:
             return users[0]
 
@@ -1804,7 +1793,7 @@ class StampedAPI(AStampedAPI):
         """
         oldEntity = self._entityDB.getEntity(oldEntityId)
         newEntity = self._entityDB.getEntity(oldEntity.sources.tombstone_id)
-        newEntityId = newEntity.entity_id 
+        newEntityId = newEntity.entity_id
         newEntityMini = newEntity.minimize()
 
         # Stamps
@@ -2409,7 +2398,7 @@ class StampedAPI(AStampedAPI):
 
         # Add activity for credited users
         if len(creditedUserIds) > 0:
-            self._addRestampActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
+            self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
 
         # Add activity for mentioned users
         mentionedUserIds = set()
@@ -2587,7 +2576,7 @@ class StampedAPI(AStampedAPI):
             statsList = self._stampStatsDB.getStatsForStamps(stampIds)
             statsDict = {}
             for stat in statsList:
-                statsDict[stat.stamp_id] = stat 
+                statsDict[stat.stamp_id] = stat
             for stampId in stampIds:
                 if stampId not in statsDict:
                     try:
@@ -2613,8 +2602,8 @@ class StampedAPI(AStampedAPI):
         """
         Note: To-Do preview objects are composed of two sources: users that have to-do'd the entity from
         the stamp directly ("direct" to-dos) and users that are following you but have also to-do'd the entity
-        ("indirect" to-dos). Direct to-dos are guaranteed and will always show up on the stamp. Indirect to-dos 
-        are recalculated frequently based on your follower list and can change over time. 
+        ("indirect" to-dos). Direct to-dos are guaranteed and will always show up on the stamp. Indirect to-dos
+        are recalculated frequently based on your follower list and can change over time.
         """
         todos                   = self._todoDB.getTodosFromStampId(stamp.stamp_id)
         followers               = self._friendshipDB.getFollowers(stamp.user.user_id)
@@ -2629,9 +2618,9 @@ class StampedAPI(AStampedAPI):
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
-        restamps                = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
-        stats.num_credits       = len(restamps)
-        stats.preview_credits   = map(lambda x: x.stamp_id, restamps[:MAX_PREVIEW])
+        creditStamps            = self._stampDB.getCreditedStamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
+        stats.num_credits       = len(creditStamps)
+        stats.preview_credits   = map(lambda x: x.stamp_id, creditStamps[:MAX_PREVIEW])
 
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
@@ -2654,9 +2643,9 @@ class StampedAPI(AStampedAPI):
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
         stats.score = int(score)
-        
+
         self._stampStatsDB.saveStampStats(stats)
-        
+
         return stats
 
     # TODO: Move this helper function to a more centralizated location?
@@ -2667,12 +2656,15 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            else:
-                return 'place'
+            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
+                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
+                return 'store'
+            return 'place'
 
         elif kind == 'person':
             if 'artist' in types:
                 return 'artist'
+            return 'person'
 
         elif kind == 'media_collection':
             if 'tv' in types:
@@ -2682,25 +2674,27 @@ class StampedAPI(AStampedAPI):
 
         elif kind == 'media_item':
             if 'track' in types:
-                return 'track'
+                return 'song'
             elif 'movie' in types:
                 return 'movie'
             elif 'book' in types:
                 return 'book'
+            elif 'song' in types:
+                return 'song'
 
         elif kind == 'software':
             if 'app' in types:
                 return 'app'
-
-        else:
-            return 'other'
+            elif 'video_game' in types:
+                return 'video_game'
+        return 'other'
 
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
+            return "http://static.stamped.com/assets/movie7.html"
         if entityId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
+            return "http://static.stamped.com/assets/movie7.html"
         if userId is not None:
             return "http://static.stamped.com/assets/user.html"
 
@@ -2872,9 +2866,6 @@ class StampedAPI(AStampedAPI):
         if len(repliedUserIds) > 0:
             self._addReplyActivity(authUserId, list(repliedUserIds), stamp.stamp_id, comment.comment_id)
 
-        # Increment comment count on stamp
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
-
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
@@ -2893,9 +2884,6 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity?
         self._activityDB.removeCommentActivity(authUserId, comment.comment_id)
-
-        # Increment comment count on stamp
-        self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
 
         # Add user object
         user = self._userDB.getUser(comment.user.user_id)
@@ -2964,24 +2952,10 @@ class StampedAPI(AStampedAPI):
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
 
-        # Verify user has the ability to 'like' the stamp
-        if stamp.user.user_id != authUserId:
-            friendship              = Friendship()
-            friendship.user_id      = stamp.user.user_id
-            friendship.friend_id    = authUserId
-
-            # Check if stamp is private; if so, must be a follower
-            if stamp.user.privacy == True:
-                if not self._friendshipDB.checkFriendship(friendship):
-                    raise StampedPermissionsError("Insufficient privileges to add comment")
-
-            # Check if block exists between user and stamp owner
-            if self._friendshipDB.blockExists(friendship) == True:
-                raise StampedIllegalActionError("Block exists")
-
         # Check to verify that user hasn't already liked stamp
         if self._stampDB.checkLike(authUserId, stampId):
-            raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            logs.info("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            return stamp
 
         # Check if user has liked the stamp previously; if so, don't give credit
         previouslyLiked = False
@@ -2995,21 +2969,26 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.likes')
 
-        # Increment user stats by one
-        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
-
-        # Increment stamp stats by one
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=1)
-
+        # Force attributes
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
-
         stamp.stats.num_likes += 1
-
         if stamp.attributes is None:
             stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True
+
+        # Add like async
+        tasks.invoke(tasks.APITasks.addLike, args=[authUserId, stampId, previouslyLiked])
+
+        return stamp
+
+    @API_CALL
+    def addLikeAsync(self, authUserId, stampId, previouslyLiked=False):
+        stamp = self._stampDB.getStamp(stampId)
+
+        # Increment user stats
+        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
 
         # Give credit if not previously liked
         if not previouslyLiked and stamp.user.user_id != authUserId:
@@ -3028,8 +3007,6 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
-        return stamp
-
     @API_CALL
     def removeLike(self, authUserId, stampId):
         # Remove like (if it exists)
@@ -3043,9 +3020,6 @@ class StampedAPI(AStampedAPI):
         # Decrement user stats by one
         self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
-
-        # Decrement stamp stats by one
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
 
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
@@ -3200,11 +3174,11 @@ class StampedAPI(AStampedAPI):
                 limit = 20
             start = datetime.utcnow() - timedelta(hours=3)
             if timeSlice.before is not None:
-                start = timeSlice.before 
+                start = timeSlice.before
             daysOffset = 0
             while len(stampIds) < limit and daysOffset < 7:
                 """
-                Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't 
+                Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
                 have enough stamps, it should check the previous day, with a max of one week.
                 """
                 before = start - timedelta(hours=(24*daysOffset))
@@ -3250,11 +3224,11 @@ class StampedAPI(AStampedAPI):
             raise Exception("No section or subsection specified for guide")
 
     def getPersonalGuide(self, guideRequest, authUserId):
-        assert(authUserId is not None) 
+        assert(authUserId is not None)
 
         # Todos (via TimeSlice)
         timeSlice = TimeSlice()
-        timeSlice.limit = guideRequest.limit 
+        timeSlice.limit = guideRequest.limit
         timeSlice.offset = guideRequest.offset
         timeSlice.viewport = guideRequest.viewport
         timeSlice.types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
@@ -3291,7 +3265,7 @@ class StampedAPI(AStampedAPI):
         return result
 
     def getUserGuide(self, guideRequest, authUserId):
-        assert(authUserId is not None) 
+        assert(authUserId is not None)
 
         try:
             guide = self._guideDB.getGuide(authUserId)
@@ -3319,10 +3293,10 @@ class StampedAPI(AStampedAPI):
         items = []
 
         if guideRequest.viewport is not None:
-            latA = guideRequest.viewport.lower_right.lat 
-            latB = guideRequest.viewport.upper_left.lat 
+            latA = guideRequest.viewport.lower_right.lat
+            latB = guideRequest.viewport.upper_left.lat
             lngA = guideRequest.viewport.upper_left.lng
-            lngB = guideRequest.viewport.lower_right.lng 
+            lngB = guideRequest.viewport.lower_right.lng
 
         i = 0
         for item in allItems:
@@ -3335,25 +3309,25 @@ class StampedAPI(AStampedAPI):
                 if item.coordinates is None:
                     continue
 
-                latCheck = False 
+                latCheck = False
                 lngCheck = False
 
                 if latA < latB:
                     if latA <= item.coordinates.lat and item.coordinates.lat <= latB:
-                        latCheck = True 
+                        latCheck = True
                 elif latA > latB:
                     if latA <= item.coordinates.lat or item.coordinates.lat <= latB:
                         latCheck = True
 
                 if lngA < lngB:
                     if lngA <= item.coordinates.lng and item.coordinates.lng <= lngB:
-                        lngCheck = True 
+                        lngCheck = True
                 elif lngA > lngB:
                     if lngA <= item.coordinates.lng or item.coordinates.lng <= lngB:
-                        lngCheck = True 
+                        lngCheck = True
 
                 if not latCheck or not lngCheck:
-                    continue 
+                    continue
 
             items.append(item)
             entityIds[item.entity_id] = None
@@ -3471,7 +3445,7 @@ class StampedAPI(AStampedAPI):
         for stat in entityStats:
             if stat.popular_users is not None:
                 for userId in stat.popular_users[:10]:
-                    userIds[userId] = None 
+                    userIds[userId] = None
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
@@ -3540,10 +3514,10 @@ class StampedAPI(AStampedAPI):
         userIds = {}
 
         for stamp in stamps:
-            userIds[stamp.user.user_id] = None 
+            userIds[stamp.user.user_id] = None
             if stamp.entity.entity_id in entityIds:
-                continue 
-            entityIds[stamp.entity.entity_id] = None 
+                continue
+            entityIds[stamp.entity.entity_id] = None
 
         # Entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3581,7 +3555,7 @@ class StampedAPI(AStampedAPI):
         seenEntities = set()
         for stamp in stamps:
             if stamp.entity.entity_id in seenEntities:
-                continue 
+                continue
             entity = entityIds[stamp.entity.entity_id]
             seenEntities.add(stamp.entity.entity_id)
 
@@ -3725,7 +3699,7 @@ class StampedAPI(AStampedAPI):
                     elif stamp.timestamp.created is not None:
                         created = max(created, time.mktime(stamp.timestamp.created.timetuple()))
                 score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, created=created)
-                coordinates = None 
+                coordinates = None
                 if hasattr(entity, 'coordinates'):
                     coordinates = entity.coordinates
                 r.append((entity.entity_id, score, entity.types, coordinates))
@@ -4027,14 +4001,23 @@ class StampedAPI(AStampedAPI):
                                             groupRange=timedelta(days=1),
                                             unique=True)
 
-    def _addRestampActivity(self, userId, recipientIds, stamp_id, benefit):
+    def _addCreditActivity(self, userId, recipientIds, stamp_id, benefit):
         objects = ActivityObjectIds()
         objects.user_ids = recipientIds
         objects.stamp_ids = [ stamp_id ]
-        self._addActivity('restamp', userId, objects,
+        self._addActivity('credit', userId, objects,
                                              benefit = benefit)
 
     def _addLikeActivity(self, userId, stampId, friendId, benefit):
+        """
+        Note: Ideally, if a user "re-likes" a stamp (e.g. they've liked it before and they
+        like it again), it should bump the activity item to the top of your feed. There are a 
+        whole bunch of pitfalls with this, though. Do you display that the user earned a stamp?
+        How is grouping handled, especially if it's grouped previously? What's the upside 
+        (especially if the second like is an accident)? 
+
+        Punting for now, but we can readdress after v2 launch.
+        """
         objects = ActivityObjectIds()
         objects.stamp_ids = [ stampId ]
         objects.user_ids = [ friendId ]
@@ -4357,35 +4340,55 @@ class StampedAPI(AStampedAPI):
         return entity_id
 
 
-    def mergeEntity(self, entity, link=True):
+    def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport(), link])
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
 
-    def mergeEntityAsync(self, entityDict, link=True):
-        self._mergeEntity(Entity.buildEntity(entityDict), link)
+    def mergeEntityAsync(self, entityDict):
+        self._mergeEntity(Entity.buildEntity(entityDict), set())
 
-    def mergeEntityId(self, entityId, link=True):
+    def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
-        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId, link])
+        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
 
-    def mergeEntityIdAsync(self, entityId, link=True):
-        self._mergeEntity(self._entityDB.getEntity(entityId), link)
+    def mergeEntityIdAsync(self, entityId):
+        self._mergeEntity(self._entityDB.getEntity(entityId), set())
 
-    def _mergeEntity(self, entity, link=True):
+    def _mergeEntity(self, entity, resolved, depth=3):
+        """Enriches the entity and possibly follow any links it may have.
+
+        The resolved parameter is used to keep track of the entities we've
+        already resolved so far. It is used internally by this function during
+        recursive calls, and should be passed in an empty set at the top
+        invocation.
+
+        The depth is a way to limit the scope of the search. We will only look
+        at items within "depth" distance from the given entity.
+        """
+
+        entitySummary = (entity.title, entity.kind)
+        if entitySummary in resolved and entity.entity_id:
+            # TODO(geoff): maybe we can just check for entity_id here.
+            return entity
+
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
-        if link:
-            modified = self._resolveEntityLinks(entity) | modified
+        modified = self._resolveRelatedEntities(entity) or modified
 
         if modified:
             if entity.entity_id is None:
-                self._entityDB.addEntity(entity)
+                entity = self._entityDB.addEntity(entity)
             else:
-                self._entityDB.updateEntity(entity)
+                entity = self._entityDB.updateEntity(entity)
 
+        resolved.add(entitySummary)
+
+        if depth and self._followOutLinks(entity, resolved, depth-1):
+            entity = self._entityDB.updateEntity(entity)
+
+        return entity
 
     def _resolveEntity(self, entity):
-
         def _getSuccessor(tombstoneId):
             logs.info("Get successor: %s" % tombstoneId)
             successor_id = tombstoneId
@@ -4436,217 +4439,130 @@ class StampedAPI(AStampedAPI):
             report()
             raise
 
+    def _resolveRelatedEntities(self, entity):
+        def _resolveStubList(entity, attr):
+            stubList = getattr(entity, attr)
+            if not stubList:
+                return False
 
-    def _resolveEntityLinks(self, entity):
+            resolvedList = []
+            stubsModified = False
 
-        def _resolveStub(stub, sources):
-            """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
+            for stub in stubList:
+                stubId = stub.entity_id
+                try:
+                    resolved, modified = self._resolveStub(stub, True)
+                    if resolved is None:
+                        continue
+                    resolvedList.append(resolved.minimize())
+                    if stubId != resolved.entity_id:
+                        stubsModified = True
+                except KeyError as e:
+                    # It's okay to fail resolution here, since we're only
+                    # resolving against our own db
+                    resolvedList.append(stub)
 
-            Tries to fast resolve Stamped DB using existing third-party source IDs.
-            Failing that (for one source at a time, not for all sources) tries to use standard resolution against
-                StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
-                falling back?)
-            Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
-                if there were any.
-            If none of this works, throws a KeyError.
-            """
+            setattr(entity, attr, resolvedList)
+            return stubsModified
 
-            source          = None
-            source_id       = None
-            entity_id       = None
-            proxy           = None
+        return self._iterateOutLinks(entity, _resolveStubList)
 
-            stubModified    = False
+    def _followOutLinks(self, entity, resolved, depth):
+        def followStubList(entity, attr):
+            stubList = getattr(entity, attr)
+            if not stubList:
+                return False
 
-            if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
-                entity_id = stub.entity_id
-            else:
-                for sourceName in sources:
-                    try:
-                        if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
-                            source = sources[sourceName]()
-                            source_id = getattr(stub.sources, '%s_id' % sourceName)
-                            # Attempt to resolve against the Stamped DB (quick)
-                            entity_id = stampedSource.resolve_fast(source, source_id)
-                            if entity_id is None:
-                                # Attempt to resolve against the Stamped DB (full)
-                                proxy = source.entityProxyFromKey(source_id, entity=stub)
-                                results = stampedSource.resolve(proxy)
-                                if len(results) > 0 and results[0][0]['resolved']:
-                                    entity_id = results[0][1].key
-                            break
-                    except Exception as e:
-                        logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
-                        pass
-            if entity_id is not None:
-                entity = self._entityDB.getEntity(entity_id)
-            elif source_id is not None and proxy is not None:
-                entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-                entity = entityProxy.buildEntity()
-                stubModified = True
-            else:
-                logs.warning('Unable to resolve stub: %s' % stub)
-                raise KeyError('Unable to resolve stub')
-
-            return entity, stubModified
-
-
-        ### TRACKS
-        def _resolveTrack(stub):
-            try:
-                track, trackModified = _resolveStub(stub, musicSources)
-            except KeyError as e:
-                logs.warning('Track resolution failed: %s' % e)
-                return stub
-
-            # Merge track if it wasn't resolved
-            if track.entity_id is None:
-                self.mergeEntity(track, link=False)
-
-            return track
-
-        def _resolveTracks(entity):
-            trackList = []
-            tracksModified = False
-
-            if entity.tracks is None:
-                return tracksModified
-
-            for stub in entity.tracks:
-                trackId = stub.entity_id
-                track = _resolveTrack(stub)
-                if track is None:
+            modified = False
+            visitedStubs = []
+            for i, stub in enumerate(stubList):
+                try:
+                    resolvedFull, stubModified = self._resolveStub(stub, False)
+                except KeyError as e:
+                    logs.warning('stub resolution failed: %s, %s' % (stub, e))
                     continue
-                # check if _resolveTrack returned a full entity or failed and returned the EntityMini stub we passed it
-                if isinstance(track, BasicEntity):
-                    track = track.minimize()
-                else:
-                    logs.info('failed to resolve stub: %s' % stub)
 
-                trackList.append(track)
+                merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
+                visitedStubs.append(merged)
+                modified = modified or (merged != stub)
+            setattr(entity, attr, visitedStubs)
+            return modified
+        return self._iterateOutLinks(entity, followStubList)
 
-                # Compare entity id before and after
-                if trackId != track.entity_id:
-                    tracksModified = True
+    def _resolveStub(self, stub, quickResolveOnly):
+        """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
 
-            entity.tracks = trackList
-            return tracksModified
+        Tries to fast resolve Stamped DB using existing third-party source IDs.
+        Failing that (for one source at a time, not for all sources) tries to use standard resolution against
+            StampedSource. (TODO: probably worth trying fast_resolve against all sources first, before trying
+            falling back?)
+        Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
+            if there were any.
+        If none of this works, throws a KeyError.
+        """
 
-
-        ### ALBUMS
-        def _resolveAlbum(stub):
-            try:
-                album, albumModified = _resolveStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Album resolution failed')
-                return stub
-
-            # Merge album if it wasn't resolved
-            if album.entity_id is None:
-                self.mergeEntity(album)
-
-            return album
-
-        def _resolveAlbums(entity):
-            albumList = []
-            albumsModified = False
-
-            if entity.albums is None:
-                return albumsModified
-
-            for stub in entity.albums:
-                albumId = stub.entity_id
-                album = _resolveAlbum(stub)
-                if album is None:
-                    continue
-                # check if _resolveAlbum returned a full entity or failed and returned the EntityMini stub we passed it
-                if isinstance(album, BasicEntity):
-                    album = album.minimize()
-                else:
-                    logs.info('failed to resolve stub: %s' % stub)
-
-                albumList.append(album)
-
-                # Compare entity id before and after
-                if albumId != album.entity_id:
-                    albumsModified = True
-
-            entity.albums = albumList
-            return albumsModified
-
-
-        ### ARTISTS
-        def _resolveArtist(stub):
-            try:
-                artist, artistModified = _resolveStub(stub, musicSources)
-            except KeyError:
-                logs.warning('Artist resolution failed')
-                return stub
-
-            # Merge artist if it wasn't resolved
-            # if artist.entity_id is None:
-            #     self.mergeEntity(artist)
-
-            return artist
-
-        def _resolveArtists(entity):
-            artistList = []
-            artistsModified = False
-
-            if entity.artists is None:
-                return artistsModified
-
-            for stub in entity.artists:
-                artistId = stub.entity_id
-                artist = _resolveArtist(stub)
-                # check if _resolveArtist returned a full entity or failed and returned the EntityMini stub we passed it
-                if isinstance(artist, BasicEntity):
-                    artist = artist.minimize()
-                else:
-                    logs.info('failed to resolve stub: %s' % stub)
-
-                artistList.append(artist)
-
-                # Compare entity id before and after
-                if artistId != artist.entity_id:
-                    artistsModified = True
-
-            entity.artists = artistList
-            return artistsModified
-
-        stampedSource   = StampedSource(stamped_api = self)
-        musicSources    = {
+        musicSources = {
             'itunes':       iTunesSource,
             'rdio':         RdioSource,
             'spotify':      SpotifySource,
             'amazon':       AmazonSource,
         }
 
+        source          = None
+        source_id       = None
+        entity_id       = None
+        proxy           = None
+        # TODO(geoff): Find all the callers of this function and see how the
+        # returend "stubModified" is used.
+        stubModified    = False
+
+        stampedSource   = StampedSource(stamped_api=self)
+
+        if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
+            entity_id = stub.entity_id
+        else:
+            for sourceName in musicSources:
+                try:
+                    if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
+                        source = musicSources[sourceName]()
+                        source_id = getattr(stub.sources, '%s_id' % sourceName)
+                        # Attempt to resolve against the Stamped DB (quick)
+                        entity_id = stampedSource.resolve_fast(source, source_id)
+                        if entity_id is None and not quickResolveOnly:
+                            # Attempt to resolve against the Stamped DB (full)
+                            proxy = source.entityProxyFromKey(source_id, entity=stub)
+                            results = stampedSource.resolve(proxy)
+                            if len(results) > 0 and results[0][0]['resolved']:
+                                entity_id = results[0][1].key
+                        break
+                except Exception as e:
+                    logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
+                    continue
+        if entity_id is not None:
+            entity = self._entityDB.getEntity(entity_id)
+        elif source_id is not None and proxy is not None:
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            stubModified = True
+        else:
+            raise KeyError('Unable to resolve stub: ' + str(stub))
+
+        return entity, stubModified
+
+    def _iterateOutLinks(self, entity, func):
         modified = False
-
         if entity.isType('album'):
-            modified = _resolveArtists(entity) | modified
-            modified = _resolveTracks(entity) | modified
-
-        if entity.isType('artist'):
-            modified = _resolveAlbums(entity) | modified
-            modified = _resolveTracks(entity) | modified
-
-        if entity.isType('artist') or entity.isType('track'):
-            # Enrich albums instead
-            if entity.albums is not None:
-                for albumItem in entity.albums:
-                    try:
-                        albumItem, albumModified = _resolveStub(albumItem, musicSources)
-                        if albumItem.entity_id is not None:
-                            if albumItem.isType('album'):
-                                self.mergeEntityId(albumItem.entity_id)
-                        else:
-                            self.mergeEntity(albumItem)
-                    except Exception as e:
-                        logs.warning('Failed to enrich album: %s' % e)
+            modified = func(entity, 'artists') or modified
+            modified = func(entity, 'tracks') or modified
+        elif entity.isType('artist'):
+            modified = func(entity, 'albums') or modified
+            modified = func(entity, 'tracks') or modified
+        elif entity.isType('track'):
+            modified = func(entity, 'artists') or modified
+            modified = func(entity, 'albums') or modified
 
         return modified
+
 
     """
     ######

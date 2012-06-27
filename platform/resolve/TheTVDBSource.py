@@ -17,6 +17,7 @@ try:
     import logs, utils
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
@@ -69,7 +70,7 @@ class _TheTVDBObject(object):
         return self.__data
     
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data.title
     
     @property 
@@ -87,7 +88,10 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
     def __init__(self, data=None, thetvdb_id=None, thetvdb=None):
         _TheTVDBObject.__init__(self, data=data, thetvdb_id=thetvdb_id, thetvdb=thetvdb)
         ResolverMediaCollection.__init__(self, types=['tv'])
-    
+
+    def _cleanName(self, rawName):
+        return cleanTvTitle(rawName)
+
     @lazyProperty
     def key(self):
         return self.data.sources.thetvdb_id

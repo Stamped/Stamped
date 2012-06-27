@@ -117,6 +117,10 @@ def addComment(*args, **kwargs):
     invoke(addComment.request, *args, **kwargs)
 
 @task(ignore_result=True)
+def addLike(*args, **kwargs):
+    invoke(addLike.request, *args, **kwargs)
+
+@task(ignore_result=True)
 def getComments(*args, **kwargs):
     invoke(getComments.request, *args, **kwargs)
 

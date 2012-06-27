@@ -17,6 +17,7 @@ try:
     import logs
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from libs.Rdio                  import Rdio, globalRdio
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
@@ -70,7 +71,7 @@ class _RdioObject(object):
         return self.__data
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['name']
 
     @lazyProperty
@@ -106,6 +107,9 @@ class RdioArtist(_RdioObject, ResolverPerson):
     def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
         ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='albumCount')
+
+    def _cleanName(self, rawName):
+        return cleanArtistTitle(rawName)
 
     @lazyProperty
     def albums(self):
@@ -147,6 +151,9 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
 
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
+
     @lazyProperty
     def artists(self):
         result = {}
@@ -183,6 +190,9 @@ class RdioTrack(_RdioObject, ResolverMediaItem):
     def __init__(self, data=None, rdio_id=None, rdio=None, maxLookupCalls=None):
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
         _RdioObject.__init__(self, data=data, rdio_id=rdio_id, rdio=rdio, extras='label, isCompilation')
+
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
 
     @lazyProperty
     def artists(self):

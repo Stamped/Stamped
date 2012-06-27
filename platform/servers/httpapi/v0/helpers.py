@@ -58,6 +58,85 @@ logs.info("INIT: %s sec" % duration)
 if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
+def handleStampedExceptions(e):
+    if isinstance(e, StampedHTTPError):
+        if e.kind is None:
+            e.kind = 'stamped_error'
+
+        logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(e.code)
+
+        error = {'error': e.kind}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+
+        return transformOutput(error, status=e.code)
+
+    if isinstance(e, StampedAuthError):
+        logs.warning("401 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(401)
+
+        error = {'error': e.msg}
+        return transformOutput(error, status=401)
+
+    if isinstance(e, StampedInputError):
+        logs.warning("400 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(400)
+
+        error = {'error': 'invalid_request'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=400)
+
+    if isinstance(e, StampedIllegalActionError):
+        logs.warning("403 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(403)
+
+        error = {'error': 'illegal_action'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=403)
+
+    if isinstance(e, StampedPermissionsError):
+        logs.warning("403 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(403)
+
+        error = {'error': 'insufficient_privileges'}
+        return transformOutput(error, status=403)
+
+    if isinstance(e, StampedDuplicationError):
+        logs.warning("409 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(409)
+
+        error = {'error': 'already_exists'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=409)
+
+    if isinstance(e, StampedUnavailableError):
+        logs.warning("404 Error: %s" % (e.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(404)
+
+        error = {'error': 'not_found'}
+        if e.msg is not None:
+            error['message'] = unicode(e.msg)
+        return transformOutput(error, status=404)
+
+    logs.warning("500 Error: %s" % e)
+    logs.warning(utils.getFormattedException())
+    logs.error(500)
+
+    error = {'error': 'internal server error'}
+    return transformOutput(error, status=500)
+
+
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False,
                       http_schema=None,
@@ -104,7 +183,7 @@ def handleHTTPRequest(requires_auth=True,
                              to require a valid client_id and client_secret, it must 
                              set requires_client to True.
     """
-    
+
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -146,7 +225,7 @@ def handleHTTPRequest(requires_auth=True,
                         logs.debug("Origin not included")
                 
                 params = {}
-                params['authUserId'], params['authClientId'] = checkOAuth(request, required=requires_auth)
+                params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, required=requires_auth)
                 params['client_id'] = checkClient(request, required=requires_client)
                 
                 if parse_request:
@@ -175,91 +254,82 @@ def handleHTTPRequest(requires_auth=True,
                     _add_cors_headers(ret)
                 
                 return ret
-            
-            except StampedHTTPError as e:
-                if e.kind is None:
-                    e.kind = 'stamped_error'
 
-                logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(e.code)
-
-                error = {'error': e.kind}
-                if e.msg is not None:
-                    error['message'] = unicode(e.msg)
-
-                return transformOutput(error, status=e.code)
-            
-            except StampedAuthError as e:
-                logs.warning("401 Error: %s" % (e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(401)
-
-                error = {'error': e.msg}
-                return transformOutput(error, status=401)
-            
-            except StampedInputError as e:
-                logs.warning("400 Error: %s" % (e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(400)
-                
-                error = {'error': 'invalid_request'}
-                if e.msg is not None:
-                    error['message'] = unicode(e.msg)
-                return transformOutput(error, status=400)
-            
-            except StampedIllegalActionError as e:
-                logs.warning("403 Error: %s" % (e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(403)
-
-                error = {'error': 'illegal_action'}
-                if e.msg is not None:
-                    error['message'] = unicode(e.msg)
-                return transformOutput(error, status=403)
-            
-            except StampedPermissionsError as e:
-                logs.warning("403 Error: %s" % (e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(403)
-
-                error = {'error': 'insufficient_privileges'}
-                return transformOutput(error, status=403)
-            
-            except StampedDuplicationError as e:
-                logs.warning("409 Error: %s" % (e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(409)
-
-                error = {'error': 'already_exists'}
-                if e.msg is not None:
-                    error['message'] = unicode(e.msg)
-                return transformOutput(error, status=409)
-            
-            except StampedUnavailableError as e:
-                logs.warning("404 Error: %s" % (e.msg))
-                logs.warning(utils.getFormattedException())
-                logs.error(404)
-
-                error = {'error': 'not_found'}
-                if e.msg is not None:
-                    error['message'] = unicode(e.msg)
-                return transformOutput(error, status=404)
-            
             except Exception as e:
-                logs.warning("500 Error: %s" % e)
-                logs.warning(utils.getFormattedException())
-                logs.error(500)
-
-                error = {'error': 'internal server error'}
-                return transformOutput(error, status=500)
-            
+                return handleStampedExceptions(e)
             finally:
                 try:
                     logs.save()
                 except Exception:
                     print 'Unable to save logs'
         
+        return wrapper
+    return decorator
+
+
+
+def handleHTTPCallbackRequest(
+        http_schema=None,
+        conversion=None,
+        parse_request_kwargs=None,
+        parse_request=True):
+
+    def decorator(fn):
+        # NOTE (travis): if you hit this assertion, you're likely using the
+        # handleHTTPRequest incorrectly.
+        assert callable(fn)
+
+        @wraps(fn)
+        def wrapper(request, *args, **kwargs):
+            try:
+                logs.begin(saveLog=stampedAPI._logsDB.saveLog,
+                    saveStat=stampedAPI._statsDB.addStat,
+                    requestData=request,
+                    nodeName=stampedAPI.node_name)
+                logs.info("%s %s" % (request.method, request.path))
+
+                params = {}
+                oauth_token = None
+                if 'stamped_oauth_token' in request.GET:
+                    oauth_token = request.GET['stamped_oauth_token']
+                elif 'stamped_oauth_token' in request.POST:
+                    oauth_token = request.POST['stamped_oauth_token']
+                elif 'oauth_token' in request.GET:
+                    oauth_token = request.GET['oauth_token']
+                elif 'oauth_token' in request.POST:
+                    oauth_token = request.POST['oauth_token']
+                else:
+                    raise StampedInputError("Access token not found")
+
+                params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=False)
+
+                if parse_request:
+                    parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
+
+                    if http_schema is not None:
+                        params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
+                    else:
+                        params['http_schema']   = parseRequest(None, request, **parse_kwargs)
+
+                    if conversion is not None:
+                        params['schema']        = conversion(params['http_schema'])
+                    elif http_schema is not None:
+                        params['data']          = params['http_schema'].dataExport()
+
+                kwargs.update(params)
+                ret = fn(request, *args, **kwargs)
+                logs.info("End request: Success")
+
+                return ret
+
+            except Exception as e:
+                handleStampedExceptions(e)
+            finally:
+                try:
+                    logs.save()
+                except Exception:
+                    print 'Unable to save logs'
+
         return wrapper
     return decorator
 
@@ -289,13 +359,13 @@ def checkClient(request, required=True):
 
 def optionalOAuth(request):
     try:
-        authUserId = checkOAuth(request)
+        authUserId = checkOAuthWithRequest(request)
     except Exception:
         authUserId = None
     
     return authUserId
 
-def checkOAuth(request, required=True):
+def checkOAuthWithRequest(request, required=True):
     ### Parse Request for Access Token
     try:
         if request.method == 'GET':
@@ -304,13 +374,16 @@ def checkOAuth(request, required=True):
             oauth_token = request.POST['oauth_token']
         else:
             raise Exception
-        
-        logs.token(oauth_token)
     except Exception:
         if not required:
-            return None, None 
+            return None, None
         raise StampedInputError("Access token not found")
-    
+
+    return checkOAuth(oauth_token, required)
+
+def checkOAuth(oauth_token, required=True):
+    logs.token(oauth_token)
+
     ### Validate OAuth Access Token
     try:
         authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)

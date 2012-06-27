@@ -97,8 +97,19 @@ class ResolverObject(object):
         self.__maxLookupCalls = oldMax
         return '\n'.join(lines)
 
-    @abstractproperty
+    @abstractmethod
+    def _cleanName(self, rawName):
+        raise NotImplementedError()
+
+    # ResolverObject.name is intended to be the cleaned name of the entity that this resolver object represents.
+    @lazyProperty
     def name(self):
+        return self._cleanName(self.raw_name)
+
+    # ResolverObject.raw_name is the unprocessed name given to us by the source. It may describe one incarnation or
+    # productization of the entity.
+    @abstractproperty
+    def raw_name(self):
         pass
 
     @abstractproperty

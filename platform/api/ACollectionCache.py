@@ -75,7 +75,6 @@ class ACollectionCache(object):
             logs.error('Error storing activity items to memcached.  Is memcached running?')
 
         logs.debug('Time for updateCache: %s' % (time.time() - t1))
-        t1 = time.time()
 
         return data
 

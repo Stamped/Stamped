@@ -23,6 +23,7 @@ try:
     from gevent.pool                import Pool
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from search.ScoringUtils        import *
 except:
     report()
@@ -99,7 +100,7 @@ class _SpotifyObject(object):
         return "spotify"
 
     @property
-    def name(self):
+    def raw_name(self):
         return self.data['name']
 
     def __repr__(self):
@@ -118,6 +119,9 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
         _SpotifyObject.__init__(self, spotify_id, data=data)
         ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
         self._properties.extend(['popularity'])
+
+    def _cleanName(self, rawName):
+        return cleanArtistTitle(rawName)
 
     def lookup_data(self):
         return self.spotify.lookup(self.key, "albumdetail")['artist']
@@ -182,6 +186,9 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
         self._properties.extend(['popularity'])
 
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
+
     def lookup_data(self):
         return self.spotify.lookup(self.key, 'trackdetail')['album']
 
@@ -223,6 +230,9 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
         _SpotifyObject.__init__(self, spotify_id, data=data)
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
         self._properties.extend(['popularity'])
+
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
 
     def lookup_data(self):
         return self.spotify.lookup(self.key)['track']
@@ -401,22 +411,22 @@ class SpotifySource(GenericSource):
             idsToAlbums[album.key] = albumSearchResult
             if album.artists and album.artists[0]['key'] in idsToArtists:
                 artistSearchResult = idsToArtists[album.artists[0]['key']]
-                scoreBoost = albumSearchResult.score / 3
-                artistSearchResult.addScoreComponentDebugInfo('Boost from album %s' % album.name, scoreBoost)
-                artistSearchResult.score += scoreBoost
+                scoreBoost = albumSearchResult.relevance / 3
+                artistSearchResult.addRelevanceComponentDebugInfo('Boost from album %s' % album.name, scoreBoost)
+                artistSearchResult.relevance += scoreBoost
 
         for trackSearchResult in trackSearchResults:
             track = trackSearchResult.resolverObject
             if track.artists and track.artists[0]['key'] in idsToArtists:
                 artistSearchResult = idsToArtists[track.artists[0]['key']]
-                scoreBoost = trackSearchResult.score / 5
-                artistSearchResult.addScoreComponentDebugInfo('Boost from track %s' % track.name, scoreBoost)
-                artistSearchResult.score += scoreBoost
+                scoreBoost = trackSearchResult.relevance / 5
+                artistSearchResult.addRelevanceComponentDebugInfo('Boost from track %s' % track.name, scoreBoost)
+                artistSearchResult.relevance += scoreBoost
             if track.albums and track.albums[0]['key'] in idsToAlbums:
                 albumSearchResult = idsToAlbums[track.albums[0]['key']]
-                scoreBoost = trackSearchResult.score / 5
-                albumSearchResult.addScoreComponentDebugInfo('Boost from track %s' % track.name, scoreBoost)
-                albumSearchResult.score += scoreBoost
+                scoreBoost = trackSearchResult.relevance / 5
+                albumSearchResult.addRelevanceComponentDebugInfo('Boost from track %s' % track.name, scoreBoost)
+                albumSearchResult.relevance += scoreBoost
 
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
@@ -438,9 +448,9 @@ class SpotifySource(GenericSource):
         albums  = scoreResultsWithBasicDropoffScoring(albums, sourceScore=0.7)
         artists = scoreResultsWithBasicDropoffScoring(artists, sourceScore=0.6)
         self.__augmentArtistsAndAlbumsWithTracks(artists, albums, tracks)
-        smoothScores(tracks), smoothScores(albums), smoothScores(artists)
+        smoothRelevanceScores(tracks), smoothRelevanceScores(albums), smoothRelevanceScores(artists)
         # TODO: Incorporate popularities into ranking? Only worthwhile if we think they're under-weighting them.
-        return interleaveResultsByScore((tracks, albums, artists))
+        return interleaveResultsByRelevance((tracks, albums, artists))
 
 if __name__ == '__main__':
     demo(SpotifySource(), 'Katy Perry')

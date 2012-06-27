@@ -16,6 +16,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
     @fixtureTest()
     def test_run_book_queries(self):
         bookQueries = [
+                '1984',
                 '1Q84 book',
                 '1Q84',
                 'amrar',
@@ -53,6 +54,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
 
     def test_run_film_queries(self):
         filmQueries = [
+                '1984',  # This one is a DISASTER.
                 '90210',
                 'LOST',
                 'Le ragazze di Piazza di Spagna',
@@ -86,6 +88,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'raiders of the lost ark',
                 'saturday night live',
                 'south park',
+                'superman',
                 'spongebob squarepants',
                 'spongebob',
                 'teenage mutant ninja turtles II',
@@ -309,7 +312,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 location = None
                 readableQuery = query
             results = searcher.searchEntitiesAndClusters(category, query, coords=location)
-            return readableQuery, [(entity.dataExport(), cluster) for entity, cluster in results]
+            return readableQuery, list(results)
 
         results = dict(runSearch(query) for query in queries)
 

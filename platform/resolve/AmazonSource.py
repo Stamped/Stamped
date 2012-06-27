@@ -16,6 +16,7 @@ from logs import report
 try:
     import logs, re
     from GenericSource              import GenericSource, multipleSource
+    from TitleUtils                 import *
     from Resolver                   import *
     from ResolverObject             import *
     from datetime                   import datetime
@@ -58,7 +59,7 @@ class _AmazonObject(object):
         self.__data = xp(raw, 'ItemLookupResponse','Items','Item')
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return xp(self.attributes, 'Title')['v']
 
     @lazyProperty
@@ -95,6 +96,9 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
 
     @lazyProperty
     def artists(self):
@@ -146,6 +150,9 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks')
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
 
     @lazyProperty
     def artists(self):
@@ -219,6 +226,9 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='AlternateVersions,Large')
         ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+
+    def _cleanName(self, rawName):
+        return cleanBookTitle(rawName)
 
     @lazyProperty
     def authors(self):
@@ -334,29 +344,8 @@ class AmazonMovie(_AmazonObject, ResolverMediaItem):
         ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
 
-    TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'\sHD'),
-        re.compile(r'\sBlu-?ray', re.IGNORECASE),
-        ]
-
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:
-                logs.warning("Avoiding transformation to AmazonMovie title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon movie title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
+    def _cleanName(self, rawName):
+        return cleanMovieTitle(rawName)
 
     @lazyProperty
     def cast(self):
@@ -457,33 +446,8 @@ class AmazonTvShow(_AmazonObject, ResolverMediaCollection):
         ResolverMediaCollection.__init__(self, types=['tv'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
 
-    TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?complete.*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(volumes?|vol\.)\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'^(the )?best (\w+ )?of ', re.IGNORECASE),
-    ]
-
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:
-                logs.warning("Avoiding transformation to AmazonTvShow title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon TV title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
+    def _cleanName(self, rawName):
+        return cleanTvTitle(rawName)
 
     @lazyProperty
     def cast(self):
@@ -1036,68 +1000,68 @@ class AmazonSource(GenericSource):
         """
 
 
-    def __interleaveAndCombineDupesBasedOnAsin(self, scoredResultLists):
+    def __interleaveAndCombineDupesBasedOnAsin(self, searchResultLists):
         """
         Takes in multiple lists of results of the same type and de-dupes based solely on ASIN. Note that the results of
         this function will not be sorted.
         """
         asinsToResults = {}
-        for scoredResultList in scoredResultLists:
-            for scoredResult in scoredResultList:
-                if scoredResult.resolverObject.key not in asinsToResults:
-                    asinsToResults[scoredResult.resolverObject.key] = [scoredResult]
+        for searchResultList in searchResultLists:
+            for searchResult in searchResultList:
+                if searchResult.resolverObject.key not in asinsToResults:
+                    asinsToResults[searchResult.resolverObject.key] = [searchResult]
                 else:
-                    asinsToResults[scoredResult.resolverObject.key].append(scoredResult)
+                    asinsToResults[searchResult.resolverObject.key].append(searchResult)
 
         dedupedResults = []
         for asin, results in asinsToResults.items():
             if len(results) == 1:
                 dedupedResults.append(results[0])
                 continue
-            scores = [ result.score for result in results ]
+            scores = [ result.relevance for result in results ]
             scores.sort(reverse=True)
             # Flat sum would be too unbalancing.
             totalScore = scores[0] + (0.5 * sum(scores[1:]))
-            results[0].score = totalScore
+            results[0].relevance = totalScore
             dedupedResults.append(results[0])
 
         return dedupedResults
 
     def __adjustScoresBySalesRank(self, resultList):
-        # TODO: This math needs some work.
-        defaultFactor = 0.2
-        def calculateFactor(salesRank):
-            return min(2.0, max(0.3, (5000 / salesRank) ** 0.1))
+        """Adjusts the relevance scores of each result based on the sales rank from Amazon.
 
-        factors = []
-        for searchResult in resultList:
-            if not searchResult.resolverObject.salesRank:
-                factors.append(defaultFactor)
-            else:
-                factors.append(calculateFactor(searchResult.resolverObject.salesRank))
-        meanFactor = sum(factors) / float(len(resultList))
-        # We want to normalize by the mean because for some searches the results aren't super high salesRank and in
-        # those cases we don't want to ditch Amazon results compared to other sources.
+        The gist of the algorithm is this:
+          - Take the log of all sales ranks. These range from 1 to ~1300000 at the time of writing,
+            so we end up with ranks in roughly [1, 6].
+          - Find mean and stddev of the log of ranks.
+          - The relevance adjustment for each result is then how many stddevs is the log of its
+            sales rank lower than the mean. Being three stddevs lower will give a boost factor of
+            2.0, whereas three stddevs higher will nerf the relevance to 0.
+        """
+        if len(resultList) < 2:
+            return
 
-        for searchResult in resultList:
-            salesRank = searchResult.resolverObject.salesRank
-            if salesRank:
-                factor = calculateFactor(salesRank) / meanFactor
-                searchResult.addScoreComponentDebugInfo('Amazon salesRank factor', factor)
-                searchResult.score *= factor
-            else:
-                # Not a lot of trust in things without sales rank. (TODO: Is this justified?)
-                factor = defaultFactor / meanFactor
-                searchResult.addScoreComponentDebugInfo('Amazon missing salesRank factor', factor)
-                searchResult.score *= factor
+        # The max rank across a sample was around 1300000 at the time of writing.
+        defaultSalesRank = 2000000
+        salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
+                for searchResult in resultList)
+        logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
+        # TODO(geoff): Use numpy for these computations
+        rankMean = float(sum(logSalesRanks)) / len(logSalesRanks)
+        rankStdDev = math.sqrt(sum((r - rankMean) ** 2 for r in logSalesRanks) / len(logSalesRanks))
+        
+        for logRank, searchResult in zip(logSalesRanks, resultList):
+            factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
+            searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
+            searchResult.relevance *= factor
 
-    def __scoreFilmResults(self, unscoredResultsLists):
+    def __scoreFilmResults(self, resolverObjectsLists):
         scoredTvShows = []
         scoredMovies = []
-        for unscoredResultList in unscoredResultsLists:
-            scoredList = scoreResultsWithBasicDropoffScoring(unscoredResultList, sourceScore=1.0)
-            tvShows = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonTvShow)]
-            movies = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonMovie)]
+        for resolverObjectList in resolverObjectsLists:
+            scoredList = scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=1.0)
+            tvShows = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonTvShow)]
+            movies = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonMovie)]
             if len(tvShows) + len(movies) != len(scoredList):
                 raise Exception('%d of %d elements in Amazon result list unrecognized!' % (
                     len(scoredList), len(scoredList) - len(tvShows) - len(movies)
@@ -1111,19 +1075,19 @@ class AmazonSource(GenericSource):
         self.__adjustScoresBySalesRank(tvShows)
         self.__adjustScoresBySalesRank(movies)
 
-        return interleaveResultsByScore([tvShows, movies])
+        return interleaveResultsByRelevance([tvShows, movies])
 
-    def __scoreMusicResults(self, unscoredResultsLists):
+    def __scoreMusicResults(self, resolverObjectsLists):
         # TODO: Clean up code duplication with __scoreFilmResults!
-        if not unscoredResultsLists:
+        if not resolverObjectsLists:
             return []
 
         scoredAlbums = []
         scoredTracks = []
-        for unscoredResultList in unscoredResultsLists:
-            scoredList = scoreResultsWithBasicDropoffScoring(unscoredResultList, sourceScore=0.6)
-            albums = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonAlbum)]
-            tracks = [scoredResult for scoredResult in scoredList if isinstance(scoredResult.resolverObject, AmazonTrack)]
+        for resolverObjectList in resolverObjectsLists:
+            scoredList = scoreResultsWithBasicDropoffScoring(resolverObjectList, sourceScore=0.6)
+            albums = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonAlbum)]
+            tracks = [searchResult for searchResult in scoredList if isinstance(searchResult.resolverObject, AmazonTrack)]
             if len(albums) + len(tracks) != len(scoredList):
                 raise Exception('%d of %d elements in Amazon result list unrecognized!' % (
                     len(scoredList), len(scoredList) - len(albums) - len(tracks)
@@ -1143,36 +1107,37 @@ class AmazonSource(GenericSource):
 
         self.__augmentAlbumResultsWithSongs(albums, tracks)
 
-        return interleaveResultsByScore([albums, tracks])
+        return interleaveResultsByRelevance([albums, tracks])
 
-    def __scoreBookResults(self, unscoredResultsLists):
-        assert(len(unscoredResultsLists) <= 1)
-        if len(unscoredResultsLists) == 0:
+    def __scoreBookResults(self, resolverObjectsLists, queryText):
+        assert len(resolverObjectsLists) <= 1 
+        if len(resolverObjectsLists) == 0:
             return []
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
-        scoredResults = scoreResultsWithBasicDropoffScoring(unscoredResultsLists['Books'], dropoffFactor=0.9)
-        self.__adjustScoresBySalesRank(scoredResults)
-        for scoredResult in scoredResults:
-            if not scoredResult.resolverObject.authors:
+        searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
+        augmentScoreForTextRelevance(searchResults, queryText, lambda r: r.resolverObject.name, 2)
+        self.__adjustScoresBySalesRank(searchResults)
+        for searchResult in searchResults:
+            if not searchResult.resolverObject.authors:
                 # TODO: Penalize other missing factors as well.
                 penaltyFactor = 0.2
-                scoredResult.score *= penaltyFactor
-                scoredResult.addScoreComponentDebugInfo('penalty factor for missing author', penaltyFactor)
-            if not scoredResult.resolverObject.isbn:
+                searchResult.relevance *= penaltyFactor
+                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing author', penaltyFactor)
+            if not searchResult.resolverObject.isbn:
                 penaltyFactor = 0.7
-                scoredResult.score *= penaltyFactor
-                scoredResult.addScoreComponentDebugInfo('penalty factor for missing isbn', penaltyFactor)
-            if not scoredResult.resolverObject.publishers:
+                searchResult.relevance *= penaltyFactor
+                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing isbn', penaltyFactor)
+            if not searchResult.resolverObject.publishers:
                 penaltyFactor = 0.4
-                scoredResult.score *= penaltyFactor
-                scoredResult.addScoreComponentDebugInfo('penalty factor for missing publishers', penaltyFactor)
-            if not scoredResult.resolverObject.release_date:
+                searchResult.relevance *= penaltyFactor
+                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing publishers', penaltyFactor)
+            if not searchResult.resolverObject.release_date:
                 penaltyFactor = 0.8
-                scoredResult.score *= penaltyFactor
-                scoredResult.addScoreComponentDebugInfo('penalty factor for missing release date', penaltyFactor)
+                searchResult.relevance *= penaltyFactor
+                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing release date', penaltyFactor)
 
-        return scoredResults
+        return searchResults
 
     def __augmentAlbumResultsWithSongs(self, albums, tracks):
         """
@@ -1209,10 +1174,10 @@ class AmazonSource(GenericSource):
                 largeImageUrl = xp(track.resolverObject.data, 'ImageSets', 'ImageSet', 'LargeImage', 'URL')['v']
                 if largeImageUrl not in picUrlsToAlbums:
                     continue
-                scoreBoost = track.score / 5
+                scoreBoost = track.relevance / 5
                 album = picUrlsToAlbums[largeImageUrl]
-                album.addScoreComponentDebugInfo('boost from song %s' % track.resolverObject.name, scoreBoost)
-                album.score += scoreBoost
+                album.addRelevanceComponentDebugInfo('boost from song %s' % track.resolverObject.name, scoreBoost)
+                album.relevance += scoreBoost
 
             except KeyError:
                 pass
@@ -1235,7 +1200,7 @@ class AmazonSource(GenericSource):
                     AmazonSource.SearchIndexData('Books', 'Medium,Reviews', createBook),
                 )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
-            return self.__scoreBookResults(resultSets)
+            return self.__scoreBookResults(resultSets, queryText)
         #elif queryCategory == 'film':
         #    searchIndexes = (
         #        AmazonSource.SearchIndexData('Video', 'Medium,Reviews', self.__constructVideoObjectFromResult),

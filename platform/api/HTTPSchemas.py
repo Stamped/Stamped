@@ -640,52 +640,31 @@ class HTTPAccountChangePassword(Schema):
         cls.addProperty('old_password',                     basestring, required=True)
         cls.addProperty('new_password',                     basestring, required=True)
 
-class HTTPAccountAlerts(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('ios_alert_credit',                 bool)
-        cls.addProperty('ios_alert_like',                   bool)
-        cls.addProperty('ios_alert_todo',                   bool)
-        cls.addProperty('ios_alert_mention',                bool)
-        cls.addProperty('ios_alert_comment',                bool)
-        cls.addProperty('ios_alert_reply',                  bool)
-        cls.addProperty('ios_alert_follow',                 bool)
-        cls.addProperty('email_alert_credit',               bool)
-        cls.addProperty('email_alert_like',                 bool)
-        cls.addProperty('email_alert_todo',                 bool)
-        cls.addProperty('email_alert_mention',              bool)
-        cls.addProperty('email_alert_comment',              bool)
-        cls.addProperty('email_alert_reply',                bool)
-        cls.addProperty('email_alert_follow',               bool)
-
-    def __init__(self):
-        Schema.__init__(self)
-        self.ios_alert_credit           = False
-        self.ios_alert_like             = False
-        self.ios_alert_todo             = False
-        self.ios_alert_mention          = False
-        self.ios_alert_comment          = False
-        self.ios_alert_reply            = False
-        self.ios_alert_follow           = False
-        self.email_alert_credit         = False
-        self.email_alert_like           = False
-        self.email_alert_todo           = False
-        self.email_alert_mention        = False
-        self.email_alert_comment        = False
-        self.email_alert_reply          = False
-        self.email_alert_follow         = False
-
-    def importAccount(self, account):
-        alerts = getattr(account, 'alert_settings', None)
-        if alerts is not None:
-            self.dataImport(alerts.dataExport(), overflow=True)
-
-        return self
-
 class HTTPAPNSToken(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('token',                            basestring, required=True)
+
+class HTTPSettingsToggle(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('toggle_id',                        basestring, required=True)
+        cls.addProperty('type',                             basestring, required=True)
+        cls.addProperty('value',                            bool, required=True)
+
+class HTTPSettingsGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('group_id',                         basestring, required=True)
+        cls.addProperty('name',                             basestring, required=True) # Used for display
+        cls.addProperty('desc',                             basestring) # Used for display
+        cls.addNestedPropertyList('toggles',                HTTPSettingsToggle)
+
+class HTTPSettingsToggleRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('on',                               basestring)
+        cls.addProperty('off',                              basestring)
 
 
 # ##### #
@@ -1101,6 +1080,7 @@ class HTTPEntity(Schema):
         cls.addProperty('category',                         basestring, required=True)
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('caption',                          basestring)
+        cls.addProperty('desc',                             basestring)
         cls.addNestedPropertyList('images',                 HTTPImage)
         cls.addProperty('last_modified',                    basestring)
         cls.addNestedProperty('previews',                   HTTPPreviews)
@@ -1218,6 +1198,7 @@ class HTTPEntity(Schema):
         self.subcategory        = entity.subcategory
 
         self.caption            = self.subtitle # Default
+        self.desc               = entity.desc
         self.last_modified      = entity.timestamp.created
 
         subcategory             = self._formatSubcategory(self.subcategory)
@@ -3042,7 +3023,7 @@ class HTTPActivity(Schema):
 
                 self.action = _buildUserAction(self.objects.users[0])
 
-        elif self.verb == 'restamp' or self.verb == 'credit':
+        elif self.verb == 'credit':
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
@@ -3056,9 +3037,6 @@ class HTTPActivity(Schema):
                 self.image = _getIconURL('news_credit_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
-
-            ### TEMP: Switch verb to be "credit" until we can make underlying changes
-            self.verb = 'credit'
 
         elif self.verb == 'like':
             _addStampObjects()

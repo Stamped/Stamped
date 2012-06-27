@@ -34,9 +34,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         
         if 'screen_name' in document:
             document['screen_name_lower'] = str(document['screen_name']).lower()
-        if 'name' in document:
+        if 'name' in document and document['name'] is not None:
             document['name_lower'] = unicode(document['name']).lower()
-        if 'phone' in document:
+        if 'phone' in document and document['phone'] is not None:
             document['phone'] = str(document['phone'])
 
         return document
@@ -104,15 +104,41 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         if 'alerts' in document:
             if 'alert_settings' not in document:
-                document['alert_settings'] = {}
+                document['alert_settings'] = document['alerts']
             if 'ios_alert_fav' in document['alerts']:
                 document['alert_settings']['ios_alert_todo'] = document['alerts']['ios_alert_fav']
                 del(document['alerts']['ios_alert_fav'])
             if 'email_alert_fav' in document['alerts']:
                 document['alert_settings']['email_alert_todo'] = document['alerts']['email_alert_fav']
                 del(document['alerts']['email_alert_fav'])
-            document['alert_settings'] = document['alerts']
             del(document['alerts'])
+
+        # Map the old-style alert settings to new-style
+        ### TODO: Change how this works once we've deprecated the script above (with 'alerts')
+        if 'alert_settings' in document:
+            alertMapping = {
+                'ios_alert_credit'      : 'alerts_credits_apns',
+                'email_alert_credit'    : 'alerts_credits_email',
+                'ios_alert_like'        : 'alerts_likes_apns',
+                'email_alert_like'      : 'alerts_likes_email',
+                'ios_alert_todo'        : 'alerts_todos_apns',
+                'email_alert_todo'      : 'alerts_todos_email',
+                'ios_alert_mention'     : 'alerts_mentions_apns',
+                'email_alert_mention'   : 'alerts_mentions_email',
+                'ios_alert_comment'     : 'alerts_comments_apns',
+                'email_alert_comment'   : 'alerts_comments_email',
+                'ios_alert_reply'       : 'alerts_replies_apns',
+                'email_alert_reply'     : 'alerts_replies_email',
+                'ios_alert_follow'      : 'alerts_followers_apns',
+                'email_alert_follow'    : 'alerts_followers_email',
+            }
+            alertSettings = {}
+            for k, v in document['alert_settings'].iteritems():
+                if k in alertMapping.values():
+                    alertSettings[k] = v 
+                elif k in alertMapping:
+                    alertSettings[alertMapping[k]] = v
+            document['alert_settings'] = alertSettings 
 
         if 'stats' in document and 'num_faves' in document['stats']:
             document['stats']['num_todos'] = document['stats']['num_faves']

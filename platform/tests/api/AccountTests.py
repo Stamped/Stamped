@@ -39,7 +39,6 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         self.deleteAccount(self.account.user_id)
 
 
-    @fixtureTest()
     def test_change_name(self):
         TEST_NAME = "Pimpbot 5000"
         form = AccountUpdateForm()
@@ -70,6 +69,13 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         with expected_exception():
             self.createAccount("TestUser2", screen_name = TEST_SN)
 
+    def test_remove_screen_name(self):
+        form = AccountUpdateForm()
+        form.screen_name = None
+
+        with expected_exception():
+            self.api.updateAccount(self.account.user_id, form)
+
     def test_change_screen_name_blacklisted(self):
         TEST_SN = "cock"
         form = AccountUpdateForm()
@@ -85,6 +91,20 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         self.api.updateAccount(self.account.user_id, form)
         self.account = self.showAccount(self.account.user_id)
         self.assertEqual(self.account.phone, '2129876543')
+
+    def test_remove_phone(self):
+        form = AccountUpdateForm()
+        form.phone = '212-987-6543'
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.phone, '2129876543')
+
+        form.phone = None
+
+        self.api.updateAccount(self.account.user_id, form)
+        self.account = self.showAccount(self.account.user_id)
+        self.assertEqual(self.account.phone, None)
 
     def test_change_bio(self):
         BIO = "I've got microchips from Yokohama and I'll be turning out yo mama!"
@@ -135,7 +155,7 @@ class StampedAPIAccountUpdateTest(AStampedAPITestCase):
         with expected_exception():
             form.color_primary = COLOR_PRIMARY
 
-class StampedAPIAccountUpdateTest(AStampedAPITestCase):
+class StampedAPIAccountUpgradeTest(AStampedAPITestCase):
     def setUp(self):
         self.accountA = self.createTwitterAccount(TWITTER_USER_A0_TOKEN, TWITTER_USER_A0_SECRET, 'TestUserA')
         self.accountB = self.createTwitterAccount(TWITTER_USER_B0_TOKEN, TWITTER_USER_B0_SECRET, 'TestUserB',
@@ -513,18 +533,43 @@ class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
             "oauth_token": self.token['access_token']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(len(result) == 14)
+        self.assertTrue(len(result) == 7)
+        self.assertTrue(result[0]['group_id'] == 'alerts_followers')
 
     def test_update_settings(self):
         path = "account/alerts/update.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "email_alert_todo": True,
-            "email_alert_reply": False
+            "on": "alerts_todos_email",
+            "off": "alerts_replies_email"
         }
         result = self.handlePOST(path, data)
-        self.assertTrue(len(result) == 14)
-        self.assertTrue(result['email_alert_todo'])
+        self.assertTrue(len(result) == 7)
+        self.assertTrue(result[0]['group_id'] == 'alerts_followers')
+        # Check todos_email
+        for group in result:
+            if group['group_id'] == 'alerts_todos':
+                for toggle in group['toggles']:
+                    if toggle['toggle_id'] == 'alerts_todos_email':
+                        self.assertTrue(toggle['value'] == True)
+                        break
+                else:
+                    raise AssertionError("Email not found")
+                break
+        else:
+            raise AssertionError("Alert Todos not found")
+        # Check replies_email
+        for group in result:
+            if group['group_id'] == 'alerts_replies':
+                for toggle in group['toggles']:
+                    if toggle['toggle_id'] == 'alerts_replies_email':
+                        self.assertTrue(toggle['value'] == False)
+                        break
+                else:
+                    raise AssertionError("Email not found")
+                break
+        else:
+            raise AssertionError("Alert Replies not found")
 
     def test_set_token(self):
         path = "account/alerts/ios/update.json"
