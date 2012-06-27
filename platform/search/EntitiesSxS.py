@@ -148,7 +148,7 @@ def writeSingleEntity(entity, outputDir, filename, cellId):
     with open(path.join(outputDir, filename), 'w') as fout:
         # TODO(geoff): This doesn't produce proper HTML
         print >> fout, '<pre>'
-        pprint.pprint(entity[1], fout)
+        pprint.pprint(entity[1:], fout)
         print >> fout, '</pre>'
     return '%s<a href="%s">%s</a></td>' % (
             makeHighlightingTableCell(cellId), filename, extractLinkText(entity))
@@ -158,8 +158,8 @@ def makeHighlightingTableCell(name):
     return '<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">' % ((name,) * 3)
 
 def writeCompareEntity(left, right, outputDir, filename):
-    leftLines = pprint.pformat(left[1]).split('\n')
-    rightLines = pprint.pformat(right[1]).split('\n')
+    leftLines = pprint.pformat(left[1:]).split('\n')
+    rightLines = pprint.pformat(right[1:]).split('\n')
     differ = difflib.HtmlDiff(wrapcolumn=100)
     with open(path.join(outputDir, filename), 'w') as fout:
         print >> fout, differ.make_file(leftLines, rightLines)

@@ -806,9 +806,9 @@ class AmazonSource(GenericSource):
     def __searchIndexLite(self, searchIndexData, queryText, results):
         searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
             ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25)
-        #print "\n\n\n\nAMAZON\n\n\n\n\n"
-        #pprint(searchResults)
-        #print "\n\n\n\nENDMAZON\n\n\n\n\n"
+        print "\n\n\n\nAMAZON\n\n\n\n\n"
+        pprint(searchResults)
+        print "\n\n\n\nENDMAZON\n\n\n\n\n"
         items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
 
         if 'Item' in items:
