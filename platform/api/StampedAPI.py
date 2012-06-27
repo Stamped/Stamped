@@ -982,6 +982,8 @@ class StampedAPI(AStampedAPI):
         """
         account   = self._accountDB.getAccount(authUserId)
 
+        logs.info('### addToNetflixInstant account: %s' % account)
+
         # TODO return HTTPAction to invoke sign in if credentials are unavailable
         nf_user_id  = None
         nf_token    = None
