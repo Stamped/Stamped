@@ -126,6 +126,7 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
     if http_schema.netflix_add_id is not None:
         try:
+            logs.info('### linked.linked_user_id: %s  linked.token: %s  linked.secret: %s  netflix_id: %s' % (linked.linked_user_id, linked.token, linked.secret))
             result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_id)
         except Exception as e:
             return HttpResponseRedirect("stamped://netflix/add/fail")
