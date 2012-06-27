@@ -115,8 +115,6 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
 
-    logs.info('### netflixLoginCallback result: %s' % result)
-
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
     linked.linked_user_id           = result['user_id']
@@ -124,11 +122,9 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
 
-    logs.info('### http_schema.netflix_add_id: %s' % http_schema.netflix_add_id)
-
     if http_schema.netflix_add_id is not None:
         try:
-            result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_id)
+            result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_add_id)
         except Exception as e:
             logs.warning('Error adding to netflix: %s' % e)
             return HttpResponseRedirect("stamped://netflix/add/fail")
