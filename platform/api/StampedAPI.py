@@ -2663,12 +2663,15 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            else:
-                return 'place'
+            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
+                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
+                return 'store'
+            return 'place'
 
         elif kind == 'person':
             if 'artist' in types:
                 return 'artist'
+            return 'person'
 
         elif kind == 'media_collection':
             if 'tv' in types:
@@ -2678,18 +2681,20 @@ class StampedAPI(AStampedAPI):
 
         elif kind == 'media_item':
             if 'track' in types:
-                return 'track'
+                return 'song'
             elif 'movie' in types:
                 return 'movie'
             elif 'book' in types:
                 return 'book'
+            elif 'song' in types:
+                return 'song'
 
         elif kind == 'software':
             if 'app' in types:
                 return 'app'
-
-        else:
-            return 'other'
+            elif 'video_game' in types:
+                return 'video_game'
+        return 'other'
 
     def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
         #TODO: fill this with something other than the dummy url
