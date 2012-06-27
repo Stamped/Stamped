@@ -1089,7 +1089,7 @@ class AmazonSource(GenericSource):
         for logRank, searchResult in zip(logSalesRanks, resultList):
             factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
             searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
-            searchResult.score *= factor
+            searchResult.relevance *= factor
 
     def __scoreFilmResults(self, resolverObjectsLists):
         scoredTvShows = []
