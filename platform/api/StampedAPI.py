@@ -2750,7 +2750,7 @@ class StampedAPI(AStampedAPI):
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stamp = stamp)
-            kwargs['message'] = stamp.content.blurb
+            kwargs['message'] = stamp.contents.blurb
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
             stamp = self.getStamp(likeStampid)
