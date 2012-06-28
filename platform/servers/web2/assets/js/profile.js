@@ -358,9 +358,19 @@ var g_update_stamps = null;
         var last_layout = null;
         
         // relayout the stamp gallery using isotope
-        var update_gallery_layout = function(is_visible, callback) {
+        var update_gallery_layout = function(is_visible, callback, recur) {
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
+            recur      = (typeof(recur)      === 'undefined' ? false : recur);
+            
             gallery_is_visible |= is_visible;
+            
+            var handle_recur = function() {
+                if (recur) {
+                    setTimeout(function() {
+                        update_gallery_layout(is_visible);
+                    }, 400);
+                }
+            };
             
             var set_gallery_visible = function() {
                 var style = {
@@ -382,12 +392,15 @@ var g_update_stamps = null;
                 if (_.isFunction(callback)) {
                     callback();
                 }
+                
+                handle_recur();
             });
             
             if (gallery_is_visible && !!last_layout) {
                 set_gallery_visible();
             }
             
+            handle_recur();
             return;
         };
         
@@ -972,11 +985,10 @@ var g_update_stamps = null;
         var options     = parsed_url.options;
         var base_uri    = parsed_url.base_uri;
         
-        console.debug(parsed_url);
         if (STAMPED_PRELOAD.sdetail) {
-            options     = { }
-            base_uri    = "/" + screen_name
-            base_url    = base_uri
+            options     = { };
+            base_uri    = "/" + screen_name;
+            base_url    = base_uri;
         }
         
         // Returns a new dictionary of parameters, comprised of (opts | params) 
@@ -1696,7 +1708,10 @@ var g_update_stamps = null;
                         
                         if (!href) {
                             update_gallery_layout(true);
-                            setTimeout(update_gallery_layout, 150);
+                            
+                            setTimeout(function() {
+                                update_gallery_layout(true, null, true);
+                            }, 150);
                         }
                     });
                 };
