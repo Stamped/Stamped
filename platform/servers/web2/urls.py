@@ -65,7 +65,7 @@ urlpatterns = patterns('',
     url(r'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
                                                 'core.views.sdetail'), 
     # e.g., stamped.com/travis/1
-    url(r'^(?P<screen_name>[\w-]{1,20})/(?P<stamp_num>\d+)', 
+    url(r'^(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
                                                 'core.views.sdetail'), 
 )
 
