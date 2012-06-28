@@ -43,7 +43,7 @@ def generateStampUrl(stamp):
     
     # NOTE (travis): as of June 2012, we've migrated from more verbose web sdetail 
     # URLs to a slightly shorter version
-    return 'http://www.stamped.com/%s/s/%s' % \ (stamp.user.screen_name, stamp.stats.stamp_num)
+    return 'http://www.stamped.com/%s/s/%s' % (stamp.user.screen_name, stamp.stats.stamp_num)
 
 def _coordinatesDictToFlat(coordinates):
     try:
