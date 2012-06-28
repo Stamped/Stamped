@@ -175,8 +175,8 @@ MOVIE_TITLE_REMOVAL_REGEXPS = (
 def cleanMovieTitle(movieTitle):
     return applyRemovalRegexps(MOVIE_TITLE_REMOVAL_REGEXPS, movieTitle)
 
-def getMovieReleaseYearFromTitle(movieResolverObject):
-    match = MOVIE_TITLE_YEAR_EXTRACTION_REGEXP.search(movieResolverObject.raw_name)
+def getMovieReleaseYearFromTitle(rawTitle):
+    match = MOVIE_TITLE_YEAR_EXTRACTION_REGEXP.search(rawTitle)
     if match:
         return int(match.group(1))
 

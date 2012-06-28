@@ -1687,7 +1687,6 @@ var g_update_stamps = null;
                 close_sdetail_func = null;
                 
                 $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                init_header_subsections();
                 
                 var close_sdetail_inner_func = function() {
                     resume_infinite_scroll();
@@ -1705,6 +1704,7 @@ var g_update_stamps = null;
                     
                     if (!href) {
                         update_gallery_layout(true);
+                        init_header_subsections();
                     }
                     
                     resize_sdetail_wrapper($target, 'closing', function() {

@@ -111,7 +111,7 @@
                         {% with credits=stamp.previews.credits %}
                             {% if credits and credits|length > 0 %}
                                 <p class="credits">
-                                    <img class="stamp_0" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" />
+                                    <img class="stamp_0" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" />
                                     
                                     Credit to 
                                     {% handlebars_template "screen-name" credits.0.user %}

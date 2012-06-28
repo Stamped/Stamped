@@ -390,7 +390,7 @@ class GooglePlacesSource(GenericSource):
         
         return self.generatorSource(gen())
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
         if (queryCategory != 'place'):
             raise NotImplementedError()
 
@@ -415,6 +415,16 @@ class GooglePlacesSource(GenericSource):
             pool.join(timeout=timeout)
         else:
             searchNationally()
+
+        if logRawResults:
+            logComponents = ['\n\n\nGOOGLEPLACES RAW RESULTS\nGOOGLEPLACES RAW RESULTS\nGOOGLEPLACES RAW RESULTS\n\n\n']
+            logComponents.append('NATIONAL RESULTS\n\n')
+            logComponents.extend(['\n\n%s\n\n' % pformat(result) for result in nationalResults])
+            if coords:
+                logComponents.append('LOCAL RESULTS\n\n')
+                logComponents.extend(['\n\n%s\n\n' % pformat(result) for result in localResults])
+            logComponents.append('\n\n\nEND GOOGLEPLACES RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
 
         # Convert JSON objects to GooglePlacesPages.
         localResults = [GooglePlacesPlace(result) for result in localResults]
