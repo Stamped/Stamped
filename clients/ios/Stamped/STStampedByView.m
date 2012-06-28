@@ -100,7 +100,7 @@
                     if (i == limit - 1) {
                         shouldShowArrow = NO;
                     }
-                    UIView* userImage = [Util profileImageViewForUser:stampPreview.user withSize:STProfileImageSize37];
+                    UIView* userImage = [Util profileImageViewForUser:stampPreview.user withSize:37];
                     [Util reframeView:userImage withDeltas:CGRectMake(i * imageSpacing, 0, 0, 0)];
                     [images addSubview:userImage];
                     UIView* buttonView = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stampPreview];

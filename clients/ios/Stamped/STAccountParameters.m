@@ -18,8 +18,8 @@
 @synthesize bio = _bio;
 @synthesize website = _website;
 @synthesize location = _location;
-@synthesize colorPrimary = _colorPrimary;
-@synthesize colorSecondary = _colorSecondary;
+@synthesize primaryColor = _primaryColor;
+@synthesize secondaryColor = _secondaryColor;
 
 - (void)dealloc {
     [_screenName release];
@@ -30,8 +30,8 @@
     [_bio release];
     [_website release];
     [_location release];
-    [_colorPrimary release];
-    [_colorSecondary release];
+    [_primaryColor release];
+    [_secondaryColor release];
     [super dealloc];
 }
 
@@ -46,8 +46,8 @@
                              @"bio", @"bio",
                              @"website", @"website",
                              @"location", @"location",
-                             @"color_primary", @"colorPrimary",
-                             @"color_secondary", @"colorSecondary",
+                             @"color_primary", @"primaryColor",
+                             @"color_secondary", @"secondaryColor",
                              nil];
     for (NSString* key in mapping.allKeys) {
         id object = [self valueForKey:key];
@@ -73,9 +73,7 @@
 }
 
 - (NSString*)description {
-    
-    return [NSString stringWithFormat:@"%@ name: %@ screenname: %@ email: %@ phone: %@ bio: %@ imageurl : %@ colors: %@ %@", [super description], _name, _screenName, _email, _phone, _bio, _tempImageURL, _colorPrimary, _colorSecondary];
-    
+    return [NSString stringWithFormat:@"%@ name: %@ screenname: %@ email: %@ phone: %@ bio: %@ imageurl : %@ colors: %@ %@", [super description], _name, _screenName, _email, _phone, _bio, _tempImageURL, _primaryColor, _secondaryColor];
 }
 
 @end

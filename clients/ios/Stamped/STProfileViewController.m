@@ -136,7 +136,7 @@ static const NSInteger _headerHeight = 95;
   self.header = [[[UIView alloc] initWithFrame:CGRectMake(0, self.headerOffset, self.scrollView.frame.size.width, _headerHeight)] autorelease];
   CGFloat padding = 10;
   CGFloat imageOffset = padding;
-  UIView* userImage = [Util profileImageViewForUser:self.userDetail withSize:STProfileImageSize72];
+  UIView* userImage = [Util profileImageViewForUser:self.userDetail withSize:72];
   [Util reframeView:userImage withDeltas:CGRectMake(imageOffset, imageOffset, 0, 0)];
   [self.header addSubview:userImage];
   UIView* imageButtom = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageTapped:) andMessage:nil];

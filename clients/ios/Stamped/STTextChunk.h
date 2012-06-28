@@ -12,5 +12,6 @@
 @interface STTextChunk : STChunk
 
 - (id)initWithPrev:(STChunk*)chunk text:(NSString*)text font:(UIFont*)font color:(UIColor*)color;
+- (id)initWithPrev:(STChunk*)chunk text:(NSString*)text font:(UIFont*)font color:(UIColor*)color kerning:(CGFloat)kerning;
 
 @end

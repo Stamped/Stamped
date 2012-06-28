@@ -214,6 +214,7 @@
 }
 
 - (STTextChunk *)bodyChunk {
+    /*
     if (!_bodyChunk) {
         STChunk* bodyStart = [[[STChunk alloc] initWithLineHeight:16
                                                             start:0 
@@ -222,6 +223,8 @@
                                                         lineCount:1 lineLimit:NSIntegerMax] autorelease];
     }
     return _bodyChunk;
+     */
+    return nil;
 }
 
 - (NSInteger)bodyReferenceOffset {

@@ -50,6 +50,10 @@
     return self;
 }
 
++ (STChunk*)chunkWithLineHeight:(CGFloat)lineHeight andWidth:(CGFloat)width {
+    return [[[STChunk alloc] initWithLineHeight:lineHeight start:0 end:0 width:width lineCount:1 lineLimit:NSIntegerMax] autorelease];
+}
+
 + (STChunk*)newlineChunkWithPrev:(STChunk*)chunk {
     STChunk* newlineChunk = [[[STChunk alloc] initWithLineHeight:chunk.lineHeight
                                                            start:chunk.end

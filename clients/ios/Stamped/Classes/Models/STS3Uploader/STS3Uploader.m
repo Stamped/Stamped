@@ -32,7 +32,10 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
 }
 
 - (void)startWithProgress:(STS3UploaderProgress)progress completion:(STS3UploaderCompletion)completion {
-    if (_uploading || !filePath) return;
+    if (_uploading || !filePath) {
+        NSLog(@"_uploading:%d filePath:%@",_uploading, filePath);
+        return;
+    }
     _uploading = YES;
     
     NSString *key = [NSString stringWithFormat:@"%@-%.0f.jpg", [[self.filePath dataUsingEncoding:NSUTF8StringEncoding] MD5], [[NSDate date] timeIntervalSince1970]];
@@ -64,6 +67,7 @@ static NSString* const kS3Bucket = @"stamped.com.static.temp";
         }
         [_request release], _request=nil;
     }];
+    NSLog(@"Request:%@", request);
     [ASIS3Request setShouldUpdateNetworkActivityIndicator:NO];
     [request startAsynchronous];
     _request = [request retain];

@@ -106,7 +106,7 @@
   UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, height)] autorelease];
   
   //Profile image packed left x + padding, centered y
-  UIView* profileImage = [Util profileImageViewForUser:self.stamp.user withSize:STProfileImageSize37];
+    UIView* profileImage = [Util profileImageViewForUser:self.stamp.user withSize:37];
   profileImage.frame = [Util centeredAndBounded:profileImage.frame.size inFrame:CGRectMake(paddingX, 0, height, height)];
   [view addSubview:profileImage];
   
@@ -394,7 +394,7 @@
   CGFloat yOffset = CGRectGetMaxY(ordinalText.frame)+10;
   for (NSInteger i = stampPreviews.count - 1; i >= 0; i--) {
     id<STStamp> stamp = [stampPreviews objectAtIndex:i];
-    UIView* imageView = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize37];
+    UIView* imageView = [Util profileImageViewForUser:stamp.user withSize:37];
     [Util reframeView:imageView withDeltas:CGRectMake(xOffset, yOffset, 0, 0)];
     [friendsView addSubview:imageView];
     UIView* imageButton = [Util tapViewWithFrame:imageView.frame target:self selector:@selector(friendImageClicked:) andMessage:stamp];

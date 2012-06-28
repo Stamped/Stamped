@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STEditProfileViewController : UITableViewController {
-    NSArray *_dataSource;
-}
+@interface STEditProfileViewController : UITableViewController
 
 @end

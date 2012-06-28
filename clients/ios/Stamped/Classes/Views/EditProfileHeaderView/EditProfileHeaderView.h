@@ -14,9 +14,8 @@
 @interface EditProfileHeaderView : UIView {
     UIButton *_stampColorButton;
 }
-@property(nonatomic,retain,readonly) STAvatarView *imageView;
-@property(nonatomic,retain,readonly) UserStampView *stampView;
-@property(nonatomic,assign) id <EditProfileHeaderViewDelegate> delegate;
+@property (nonatomic,assign) id <EditProfileHeaderViewDelegate> delegate;
+@property (nonatomic, readwrite, retain) UIImage* image;
 
 - (void)setStampColors:(NSArray*)colors;
 - (NSArray*)colors;
