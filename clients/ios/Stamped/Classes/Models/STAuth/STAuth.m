@@ -219,8 +219,7 @@ static id __instance;
         if (result) {
             id<STUserDetail> userDetail = result;
             if (userDetail) {
-                [STRestKitLoader sharedInstance].currentUser = userDetail;
-                [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:userDetail];
+                [[STRestKitLoader sharedInstance] updateCurrentUser:userDetail];
             }
             
         }

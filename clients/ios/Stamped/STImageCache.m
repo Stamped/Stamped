@@ -84,7 +84,7 @@ static STImageCache* _sharedInstance;
                         andCallback:(void(^)(UIImage* image, NSError* error, STCancellation* cancellation))block {
     NSAssert(URL != nil, @"Requested nil URL");
     STCancellation* cancellation = [STCancellation cancellation];
-    [self.cache objectForKey:URL forceUpdate:YES cacheAfterCancel:YES withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
+    [self.cache objectForKey:URL forceUpdate:NO cacheAfterCancel:YES withCallback:^(id<NSCoding> model, NSError *error, STCancellation *cancellation) {
         if (!cancellation.cancelled) {
             block((UIImage*)model, error, cancellation);
         }

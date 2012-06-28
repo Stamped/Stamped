@@ -56,8 +56,9 @@
 
 - (void)refreshToken;
 - (void)logout;
+- (void)updateCurrentUser:(id<STUserDetail>)currentUser;
 
-@property (nonatomic, readwrite, retain) id<STUserDetail> currentUser;
+@property (nonatomic, readonly, retain) id<STUserDetail> currentUser;
 
 + (STRestKitLoader*)sharedInstance;
 

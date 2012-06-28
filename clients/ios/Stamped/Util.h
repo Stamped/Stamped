@@ -18,6 +18,7 @@
 #import "STActionContext.h"
 #import "STCancellation.h"
 #import <QuartzCore/QuartzCore.h>
+#import "STMenuController.h"
 
 @class User;
 @class Entity;
@@ -169,7 +170,7 @@ typedef enum STGradientStyle {
 
 + (CAGradientLayer*)addGradientToLayer:(CALayer*)view withColors:(NSArray*)colors vertical:(BOOL)vertical;
 
-+ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size;
++ (UIImageView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size;
 
 /*
 + (UIView*)profileImageViewForUser:(id<STUser>)user 
@@ -247,5 +248,17 @@ typedef enum STGradientStyle {
 + (CGRect)scaledRectWithRect:(CGRect)original andScale:(CGFloat)scale;
 
 + (id<STImage>)bestImageFromImages:(NSArray<STImage>*)images forSize:(CGSize)size;
+
++ (STMenuController*)sharedMenuController;
+
++ (UINavigationController*)currentNavigationController;
+
++ (void)pushController:(UIViewController*)controller modal:(BOOL)modal animated:(BOOL)animated;
+
++ (void)popControllerAnimated:(BOOL)animated;
+
++ (BOOL)compareAndPopController:(UIViewController*)controller animated:(BOOL)animated;
+
++ (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block;
 
 @end

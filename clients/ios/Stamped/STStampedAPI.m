@@ -35,6 +35,8 @@
 #import "STSimpleEntityAutoCompleteResult.h"
 #import "STSimpleBooleanResponse.h"
 #import "STSimpleAccount.h"
+#import "STImageCache.h"
+#import "STSimpleAlertItem.h"
 
 
 NSString* const STStampedAPILoginNotification = @"STStampedAPILoginNotification";
@@ -76,6 +78,7 @@ NSString* const STStampedAPIRefreshedTokenNotification = @"STStampedAPIRefreshTo
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* entityDetailCache;
 @property (nonatomic, readonly, retain) STHybridCacheSource* stampedByCache;
+@property (nonatomic, readwrite, retain) STCancellation* userImageCancellation;
 @property (nonatomic, readonly, retain) NSCache* stampPreviewsCache;
 @property (nonatomic, readonly, retain) NSCache* userCache;
 @property (nonatomic, readonly, retain) NSCache* entityCache;
@@ -96,6 +99,8 @@ NSString* const STStampedAPIRefreshedTokenNotification = @"STStampedAPIRefreshTo
 @synthesize userCache = _userCache;
 @synthesize entityCache = _entityCache;
 @synthesize currentUserLocation = _currentUserLocation;
+@synthesize currentUserImage = _currentUserImage;
+@synthesize userImageCancellation = _userImageCancellation;
 
 static STStampedAPI* _sharedInstance;
 
@@ -146,6 +151,8 @@ static STStampedAPI* _sharedInstance;
     [_entityCache release];
     [entityDetailCache_ release];
     [lastCount_ release];
+    [_userImageCancellation cancel];
+    [_userImageCancellation release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -1178,7 +1185,7 @@ static STStampedAPI* _sharedInstance;
 
 
 - (STCancellation*)accountWithCallback:(void (^)(id<STAccount> account, NSError* error, STCancellation* cancellation))block {
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/accounts/show.json"
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/show.json"
                                                         post:NO
                                                authenticated:YES
                                                       params:[NSDictionary dictionary]
@@ -1188,13 +1195,84 @@ static STStampedAPI* _sharedInstance;
                                                  }];
 }
 
+- (STCancellation*)updateAccountWithAccountParameters:(STAccountParameters*)accountParameters 
+                                          andCallback:(void (^)(id<STUserDetail> user, NSError* error, STCancellation* cancellation))block {
+    
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/update.json"
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:accountParameters.asDictionaryParams
+                                                     mapping:[STSimpleUserDetail mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     if (result) {
+                                                         [[STRestKitLoader sharedInstance] updateCurrentUser:result];
+                                                     }
+                                                     block(result, error, cancellation);
+                                                 }];
+}
+
+- (UIImage *)currentUserImage {
+    if (!_currentUserImage) {
+        NSString* url = self.currentUser.imageURL;
+        _currentUserImage = [[[STImageCache sharedInstance] cachedImageForImageURL:self.currentUser.imageURL] retain];
+        if (!_currentUserImage && !self.userImageCancellation) {
+            self.userImageCancellation = [[STImageCache sharedInstance] imageForImageURL:url
+                                                                             andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                                                                                 if (!_currentUserImage && image) {
+                                                                                     self.userImageCancellation = nil;
+                                                                                     _currentUserImage = [image retain];
+                                                                                 }
+                                                                             }];
+        }
+    }
+    return [[_currentUserImage retain] autorelease];
+}
+
+- (void)setCurrentUserImage:(UIImage *)currentUserImage {
+    [_currentUserImage autorelease];
+    _currentUserImage = [currentUserImage retain];
+    [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
+}
+
+- (UIImage*)currentUserImageForSize:(STProfileImageSize)profileImageSize {
+    return self.currentUserImage;
+}
+
+- (STCancellation*)alertsWithCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/account/alerts/show.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:[NSDictionary dictionary]
+                                                  mapping:[STSimpleAlertItem mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation); 
+                                              }];
+}
+
+- (STCancellation*)alertsWithOnIDs:(NSArray*)onIDs
+                            offIDs:(NSArray*)offIDS 
+                       andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block {
+    NSString* onString = [onIDs componentsJoinedByString:@","];
+    NSString* offString = [offIDS componentsJoinedByString:@","];
+    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                            onString, @"on",
+                            offString, @"off",
+                            nil];
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/account/alerts/update.json"
+                                                     post:YES
+                                            authenticated:YES
+                                                   params:params 
+                                                  mapping:[STSimpleAlertItem mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation); 
+                                              }];
+}
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];
     [self.stampCache fastMemoryPurge];
     [self.stampedByCache fastMemoryPurge];
     [self.userCache removeAllObjects];
-    //[self.menuCache purge];
 }
 
 @end

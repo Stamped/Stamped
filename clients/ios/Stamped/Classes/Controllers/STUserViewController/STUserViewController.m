@@ -43,6 +43,7 @@
 @property (nonatomic, retain, readonly) UITableView *infoTableView;
 @property (nonatomic, readwrite, retain) STCancellation* stampCacheCreationCancellation;
 @property (nonatomic, readwrite, assign) BOOL loadingStamps;
+@property (nonatomic, readwrite, retain) STUserHeaderView* headerView;
 
 
 @end
@@ -57,6 +58,7 @@
 @synthesize infoTableView = _infoTableView;
 @synthesize stampCacheCreationCancellation = _stampCacheCreationCancellation;
 @synthesize loadingStamps = _loadingStamps;
+@synthesize headerView = _headerView;
 
 - (void)commonInit {
     
@@ -66,7 +68,17 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:STStampedAPIUserUpdatedNotification object:nil];
     
+}
+
+- (void)userUpdated:(id)notImportant {
+    if (IS_CURRENT_USER(self.user.userID)) {
+        self.user = [STStampedAPI sharedInstance].currentUser;
+        NSLog(@"Updated profile");
+        [self reloadDataSource];
+        [self.headerView setupWithUser:self.user];
+    }
 }
 
 - (void)handleStampCache:(STCache*)cache error:(NSError*)error cancellation:(STCancellation*)cancellation {
@@ -103,6 +115,7 @@
 }
 
 - (void)dealloc {
+    [_headerView release];
     [_stampCacheCreationCancellation cancel];
     [_stampCacheCreationCancellation release];
     [STEvents removeObserver:self];
@@ -136,6 +149,7 @@
         if (self.user) {
             [view setupWithUser:self.user];
         }
+        self.headerView = view;
     }
     
     if (LOGGED_IN && IS_CURRENT_USER(self.userIdentifier)) {
@@ -223,8 +237,7 @@
 - (void)editProfile:(id)sender {
     
     STEditProfileViewController *controller = [[[STEditProfileViewController alloc] init] autorelease];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
-    
+    [Util pushController:controller modal:YES animated:YES];
 }
 
 - (void)toggleFollowing:(FriendStatusButton*)sender {

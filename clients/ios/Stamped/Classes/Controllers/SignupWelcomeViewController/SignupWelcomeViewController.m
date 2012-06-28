@@ -27,6 +27,7 @@
 @property(nonatomic,readonly) SignupWelcomeType signupType;
 @property(nonatomic,retain) STS3Uploader *avatarUploader;
 @property(nonatomic,retain) NSString *avatarTempPath;
+@property (nonatomic, readwrite, retain) UIImage* avatarImage;
 @end
 
 @implementation SignupWelcomeViewController
@@ -34,6 +35,7 @@
 @synthesize userInfo;
 @synthesize avatarUploader;
 @synthesize avatarTempPath;
+@synthesize avatarImage = _avatarImage;
 
 - (id)initWithType:(SignupWelcomeType)type {
     if ((self = [super initWithStyle:UITableViewStyleGrouped])) {
@@ -51,6 +53,7 @@
     [self.avatarUploader cancel];
     self.avatarUploader = nil;
     [STEvents removeObserver:self];
+    [_avatarImage release];
     [super dealloc];
 }
 
@@ -215,7 +218,9 @@
 #pragma mark - Notifications
 
 - (void)signupFinished:(NSNotification*)notification {
-    
+    if (self.avatarImage) {
+        [STStampedAPI sharedInstance].currentUserImage = self.avatarImage;
+    }
     FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
@@ -254,8 +259,8 @@
         
         STAccountParameters *parameters = [[STAccountParameters alloc] init];
         parameters.screenName = cell.textField.text;
-        parameters.colorPrimary = primaryColor;
-        parameters.colorSecondary = secondaryColor;
+        parameters.primaryColor = primaryColor;
+        parameters.secondaryColor = secondaryColor;
 
         NSDictionary *userDic = [[STTwitter sharedInstance] twitterUser];
         
@@ -290,8 +295,8 @@
         
         STAccountParameters *parameters = [[STAccountParameters alloc] init];
         parameters.screenName = cell.textField.text;
-        parameters.colorPrimary = primaryColor;
-        parameters.colorSecondary = secondaryColor;
+        parameters.primaryColor = primaryColor;
+        parameters.secondaryColor = secondaryColor;
 
         NSDictionary *dictionary = [[STFacebook sharedInstance] userData];
         
@@ -542,6 +547,9 @@
             SignupCameraTableCell *cell = (SignupCameraTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
             if (cell) {
                 [cell setProgress:0.0f];
+            }
+            if (finished) {
+                self.avatarImage = image;
             }
             
             self.avatarTempPath = path;

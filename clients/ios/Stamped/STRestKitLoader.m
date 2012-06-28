@@ -104,6 +104,7 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 
 @property (nonatomic, readwrite, retain) STSimpleOAuthToken* authToken;
 
+@property (nonatomic, readwrite, retain) id<STUserDetail> currentUser;
 @property (nonatomic, readonly, retain) RKObjectManager* objectManager;
 
 @property (nonatomic, readonly, retain) RKRequestQueue* authRequestQueue;
@@ -722,6 +723,11 @@ static STRestKitLoader* _sharedInstance;
 - (void)appDidBecomeActive:(NSNotification*)notification {
     if (_authRequestQueue.count == 0)
         [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)updateCurrentUser:(id<STUserDetail>)currentUser {
+    self.currentUser = currentUser;
+    [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:currentUser];
 }
 
 

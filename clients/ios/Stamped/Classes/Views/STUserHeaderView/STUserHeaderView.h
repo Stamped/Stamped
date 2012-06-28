@@ -24,7 +24,6 @@ typedef enum {
 @class UserStampView, STAvatarView, UserHeaderTabView, STUserStatsView;
 @interface STUserHeaderView : UIView {
     UserHeaderTabView *_tabView;
-    STAvatarView *_avatarView;
     UserStampView *_stampView;
     UILabel *_titleLabel;
     UILabel *_detailTitleLabel;

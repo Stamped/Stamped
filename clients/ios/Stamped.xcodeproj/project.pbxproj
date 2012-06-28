@@ -1440,6 +1440,30 @@
 		632E0EA1157EC69900D018AA /* TEMP_sDetail_dots@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632E0EA0157EC69800D018AA /* TEMP_sDetail_dots@2x.png */; };
 		632E0EA2157EC69900D018AA /* TEMP_sDetail_dots@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632E0EA0157EC69800D018AA /* TEMP_sDetail_dots@2x.png */; };
 		632E0EA4157EC69900D018AA /* TEMP_sDetail_dots@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632E0EA0157EC69800D018AA /* TEMP_sDetail_dots@2x.png */; };
+		632ECB0D159B8B180047399F /* STUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB0C159B8B170047399F /* STUserImageView.m */; };
+		632ECB0E159B8B180047399F /* STUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB0C159B8B170047399F /* STUserImageView.m */; };
+		632ECB0F159B8B180047399F /* STUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB0C159B8B170047399F /* STUserImageView.m */; };
+		632ECB14159B9A580047399F /* STSimpleAlertItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB13159B9A570047399F /* STSimpleAlertItem.m */; };
+		632ECB15159B9A580047399F /* STSimpleAlertItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB13159B9A570047399F /* STSimpleAlertItem.m */; };
+		632ECB16159B9A580047399F /* STSimpleAlertItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB13159B9A570047399F /* STSimpleAlertItem.m */; };
+		632ECB19159B9AFC0047399F /* STSimpleAlertToggle.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB18159B9AFC0047399F /* STSimpleAlertToggle.m */; };
+		632ECB1A159B9AFC0047399F /* STSimpleAlertToggle.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB18159B9AFC0047399F /* STSimpleAlertToggle.m */; };
+		632ECB1B159B9AFC0047399F /* STSimpleAlertToggle.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB18159B9AFC0047399F /* STSimpleAlertToggle.m */; };
+		632ECB25159BF2850047399F /* STNotificationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB24159BF2850047399F /* STNotificationsViewController.m */; };
+		632ECB26159BF2850047399F /* STNotificationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB24159BF2850047399F /* STNotificationsViewController.m */; };
+		632ECB27159BF2850047399F /* STNotificationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 632ECB24159BF2850047399F /* STNotificationsViewController.m */; };
+		632ECB2D159BFC9B0047399F /* notifications-checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB29159BFC9B0047399F /* notifications-checkbox.png */; };
+		632ECB2E159BFC9B0047399F /* notifications-checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB29159BFC9B0047399F /* notifications-checkbox.png */; };
+		632ECB2F159BFC9B0047399F /* notifications-checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB29159BFC9B0047399F /* notifications-checkbox.png */; };
+		632ECB30159BFC9B0047399F /* notifications-checkmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2A159BFC9B0047399F /* notifications-checkmark.png */; };
+		632ECB31159BFC9B0047399F /* notifications-checkmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2A159BFC9B0047399F /* notifications-checkmark.png */; };
+		632ECB32159BFC9B0047399F /* notifications-checkmark.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2A159BFC9B0047399F /* notifications-checkmark.png */; };
+		632ECB33159BFC9B0047399F /* notifications-email-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2B159BFC9B0047399F /* notifications-email-icon.png */; };
+		632ECB34159BFC9B0047399F /* notifications-email-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2B159BFC9B0047399F /* notifications-email-icon.png */; };
+		632ECB35159BFC9B0047399F /* notifications-email-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2B159BFC9B0047399F /* notifications-email-icon.png */; };
+		632ECB36159BFC9B0047399F /* notifications-push-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2C159BFC9B0047399F /* notifications-push-icon.png */; };
+		632ECB37159BFC9B0047399F /* notifications-push-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2C159BFC9B0047399F /* notifications-push-icon.png */; };
+		632ECB38159BFC9B0047399F /* notifications-push-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 632ECB2C159BFC9B0047399F /* notifications-push-icon.png */; };
 		63313519156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
 		6331351A156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
 		6331351C156C067D00BF9B8D /* TEMP_todo_finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 63313516156C067D00BF9B8D /* TEMP_todo_finished.png */; };
@@ -3215,6 +3239,20 @@
 		6323F11A152635FE00BE408C /* STScrollViewContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollViewContainer.m; sourceTree = "<group>"; };
 		632E0E9B157EBE7F00D018AA /* TEMP_eDetailBox_arrow_right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_eDetailBox_arrow_right@2x.png"; sourceTree = "<group>"; };
 		632E0EA0157EC69800D018AA /* TEMP_sDetail_dots@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_sDetail_dots@2x.png"; sourceTree = "<group>"; };
+		632ECB0B159B8B170047399F /* STUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserImageView.h; sourceTree = "<group>"; };
+		632ECB0C159B8B170047399F /* STUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserImageView.m; sourceTree = "<group>"; };
+		632ECB10159B99990047399F /* STAlertItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAlertItem.h; sourceTree = "<group>"; };
+		632ECB11159B99F80047399F /* STAlertToggle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAlertToggle.h; sourceTree = "<group>"; };
+		632ECB12159B9A570047399F /* STSimpleAlertItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleAlertItem.h; sourceTree = "<group>"; };
+		632ECB13159B9A570047399F /* STSimpleAlertItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleAlertItem.m; sourceTree = "<group>"; };
+		632ECB17159B9AFC0047399F /* STSimpleAlertToggle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleAlertToggle.h; sourceTree = "<group>"; };
+		632ECB18159B9AFC0047399F /* STSimpleAlertToggle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleAlertToggle.m; sourceTree = "<group>"; };
+		632ECB23159BF2850047399F /* STNotificationsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNotificationsViewController.h; sourceTree = "<group>"; };
+		632ECB24159BF2850047399F /* STNotificationsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNotificationsViewController.m; sourceTree = "<group>"; };
+		632ECB29159BFC9B0047399F /* notifications-checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notifications-checkbox.png"; sourceTree = "<group>"; };
+		632ECB2A159BFC9B0047399F /* notifications-checkmark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notifications-checkmark.png"; sourceTree = "<group>"; };
+		632ECB2B159BFC9B0047399F /* notifications-email-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notifications-email-icon.png"; sourceTree = "<group>"; };
+		632ECB2C159BFC9B0047399F /* notifications-push-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notifications-push-icon.png"; sourceTree = "<group>"; };
 		63313516156C067D00BF9B8D /* TEMP_todo_finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TEMP_todo_finished.png; sourceTree = "<group>"; };
 		63313517156C067D00BF9B8D /* TEMP_todo_done.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TEMP_todo_done.png; sourceTree = "<group>"; };
 		63313518156C067D00BF9B8D /* TEMP_todo_not_done.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TEMP_todo_not_done.png; sourceTree = "<group>"; };
@@ -4211,6 +4249,8 @@
 				0301378B15668DBE00B55B47 /* STSearchView */,
 				0301378E15668DBE00B55B47 /* STSliderScopeView */,
 				0301379115668DBE00B55B47 /* STTextPopoverView */,
+				632ECB0B159B8B170047399F /* STUserImageView.h */,
+				632ECB0C159B8B170047399F /* STUserImageView.m */,
 			);
 			name = Views;
 			path = Classes/Views;
@@ -5213,6 +5253,26 @@
 			name = Vendor;
 			sourceTree = "<group>";
 		};
+		632ECB22159BF2610047399F /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				632ECB23159BF2850047399F /* STNotificationsViewController.h */,
+				632ECB24159BF2850047399F /* STNotificationsViewController.m */,
+			);
+			name = Notifications;
+			sourceTree = "<group>";
+		};
+		632ECB28159BFC720047399F /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				632ECB29159BFC9B0047399F /* notifications-checkbox.png */,
+				632ECB2A159BFC9B0047399F /* notifications-checkmark.png */,
+				632ECB2B159BFC9B0047399F /* notifications-email-icon.png */,
+				632ECB2C159BFC9B0047399F /* notifications-push-icon.png */,
+			);
+			name = Notifications;
+			sourceTree = "<group>";
+		};
 		63323C611540C15B00C8F7D3 /* Todo */ = {
 			isa = PBXGroup;
 			children = (
@@ -5489,6 +5549,8 @@
 				63F890D91579481900ECD501 /* STOAuthToken.h */,
 				634608E9157D33BD00267914 /* STBooleanResponse.h */,
 				63F582A6159796A400450961 /* STAccount.h */,
+				632ECB10159B99990047399F /* STAlertItem.h */,
+				632ECB11159B99F80047399F /* STAlertToggle.h */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -5597,6 +5659,10 @@
 				634608EB157D33D400267914 /* STSimpleBooleanResponse.m */,
 				63F582A71597975700450961 /* STSimpleAccount.h */,
 				63F582A81597975700450961 /* STSimpleAccount.m */,
+				632ECB12159B9A570047399F /* STSimpleAlertItem.h */,
+				632ECB13159B9A570047399F /* STSimpleAlertItem.m */,
+				632ECB17159B9AFC0047399F /* STSimpleAlertToggle.h */,
+				632ECB18159B9AFC0047399F /* STSimpleAlertToggle.m */,
 			);
 			name = "Simple Models";
 			sourceTree = "<group>";
@@ -6445,6 +6511,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				632ECB28159BFC720047399F /* Notifications */,
 				63BBFA1D159A4888006B8099 /* musicplayer-pausebtn@2x.png */,
 				63BBFA1E159A4888006B8099 /* musicplayer-playbtn@2x.png */,
 				63BBFA1F159A4888006B8099 /* musicplayer-sm-pausebtn@2x.png */,
@@ -6746,6 +6813,7 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				632ECB22159BF2610047399F /* Notifications */,
 				634DAC90158100600004946C /* Layout */,
 				0301378015668DB300B55B47 /* Views */,
 				0301372015668BAF00B55B47 /* Models */,
@@ -7478,6 +7546,10 @@
 				63BBFA26159A4888006B8099 /* musicplayer-playbtn@2x.png in Resources */,
 				63BBFA29159A4888006B8099 /* musicplayer-sm-pausebtn@2x.png in Resources */,
 				63BBFA2C159A4888006B8099 /* musicplayer-sm-playbtn@2x.png in Resources */,
+				632ECB2F159BFC9B0047399F /* notifications-checkbox.png in Resources */,
+				632ECB32159BFC9B0047399F /* notifications-checkmark.png in Resources */,
+				632ECB35159BFC9B0047399F /* notifications-email-icon.png in Resources */,
+				632ECB38159BFC9B0047399F /* notifications-push-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8003,6 +8075,10 @@
 				63BBFA25159A4888006B8099 /* musicplayer-playbtn@2x.png in Resources */,
 				63BBFA28159A4888006B8099 /* musicplayer-sm-pausebtn@2x.png in Resources */,
 				63BBFA2B159A4888006B8099 /* musicplayer-sm-playbtn@2x.png in Resources */,
+				632ECB2E159BFC9B0047399F /* notifications-checkbox.png in Resources */,
+				632ECB31159BFC9B0047399F /* notifications-checkmark.png in Resources */,
+				632ECB34159BFC9B0047399F /* notifications-email-icon.png in Resources */,
+				632ECB37159BFC9B0047399F /* notifications-push-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8531,6 +8607,10 @@
 				63BBFA24159A4888006B8099 /* musicplayer-playbtn@2x.png in Resources */,
 				63BBFA27159A4888006B8099 /* musicplayer-sm-pausebtn@2x.png in Resources */,
 				63BBFA2A159A4888006B8099 /* musicplayer-sm-playbtn@2x.png in Resources */,
+				632ECB2D159BFC9B0047399F /* notifications-checkbox.png in Resources */,
+				632ECB30159BFC9B0047399F /* notifications-checkmark.png in Resources */,
+				632ECB33159BFC9B0047399F /* notifications-email-icon.png in Resources */,
+				632ECB36159BFC9B0047399F /* notifications-push-icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8868,6 +8948,10 @@
 				63F582AB1597975700450961 /* STSimpleAccount.m in Sources */,
 				63F582B01597DD7100450961 /* STPlayer.m in Sources */,
 				63BBFA0C1599F28D006B8099 /* STPlayerPopUp.m in Sources */,
+				632ECB0F159B8B180047399F /* STUserImageView.m in Sources */,
+				632ECB16159B9A580047399F /* STSimpleAlertItem.m in Sources */,
+				632ECB1B159B9AFC0047399F /* STSimpleAlertToggle.m in Sources */,
+				632ECB27159BF2850047399F /* STNotificationsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9202,6 +9286,10 @@
 				63F582AA1597975700450961 /* STSimpleAccount.m in Sources */,
 				63F582AF1597DD7100450961 /* STPlayer.m in Sources */,
 				63BBFA0B1599F28D006B8099 /* STPlayerPopUp.m in Sources */,
+				632ECB0E159B8B180047399F /* STUserImageView.m in Sources */,
+				632ECB15159B9A580047399F /* STSimpleAlertItem.m in Sources */,
+				632ECB1A159B9AFC0047399F /* STSimpleAlertToggle.m in Sources */,
+				632ECB26159BF2850047399F /* STNotificationsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9547,6 +9635,10 @@
 				63F582A91597975700450961 /* STSimpleAccount.m in Sources */,
 				63F582AE1597DD7100450961 /* STPlayer.m in Sources */,
 				63BBFA0A1599F28D006B8099 /* STPlayerPopUp.m in Sources */,
+				632ECB0D159B8B180047399F /* STUserImageView.m in Sources */,
+				632ECB14159B9A580047399F /* STSimpleAlertItem.m in Sources */,
+				632ECB19159B9AFC0047399F /* STSimpleAlertToggle.m in Sources */,
+				632ECB25159BF2850047399F /* STNotificationsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9648,8 +9740,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "F8A71CB3-2DEB-4578-869A-77DDB136CE64";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "F8A71CB3-2DEB-4578-869A-77DDB136CE64";
+				PROVISIONING_PROFILE = "DC809555-D23B-49FB-9241-404FD6B0E775";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC809555-D23B-49FB-9241-404FD6B0E775";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -9694,8 +9786,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "F8A71CB3-2DEB-4578-869A-77DDB136CE64";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "F8A71CB3-2DEB-4578-869A-77DDB136CE64";
+				PROVISIONING_PROFILE = "DC809555-D23B-49FB-9241-404FD6B0E775";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC809555-D23B-49FB-9241-404FD6B0E775";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -9741,8 +9833,8 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "F8A71CB3-2DEB-4578-869A-77DDB136CE64";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "F8A71CB3-2DEB-4578-869A-77DDB136CE64";
+				PROVISIONING_PROFILE = "DC809555-D23B-49FB-9241-404FD6B0E775";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC809555-D23B-49FB-9241-404FD6B0E775";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

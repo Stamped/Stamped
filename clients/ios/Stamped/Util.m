@@ -25,6 +25,7 @@
 #import "STMenuController.h"
 #import "STNavigationItem.h"
 #import "STBadgeBarButtonItem.h"
+#import "STRootViewController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -963,7 +964,7 @@ static Rdio* _rdio;
     return gradient;
 }
 
-+ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size {
++ (UIImageView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size {
     
     UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
     imageView.layer.borderWidth = 1.5;
@@ -974,28 +975,36 @@ static Rdio* _rdio;
     imageView.layer.shadowRadius = 1;
     imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
     
-    size = size * [UIScreen mainScreen].scale;
-    STProfileImageSize profileSize = STProfileImageSize24;
-    if (size > profileSize) {
-        profileSize = STProfileImageSize48;
+    if (user) {
+        size = size * [UIScreen mainScreen].scale;
+        STProfileImageSize profileSize = STProfileImageSize24;
         if (size > profileSize) {
-            profileSize = STProfileImageSize60;
+            profileSize = STProfileImageSize48;
             if (size > profileSize) {
-                profileSize = STProfileImageSize96;
+                profileSize = STProfileImageSize60;
                 if (size > profileSize) {
-                    profileSize = STProfileImageSize144;
+                    profileSize = STProfileImageSize96;
+                    if (size > profileSize) {
+                        profileSize = STProfileImageSize144;
+                    }
                 }
             }
         }
-    }
-    UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
-    if (cachedImage) {
-        imageView.image = cachedImage;
-    }
-    else {
-        [[STImageCache sharedInstance] userImageForUser:user size:profileSize andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-            imageView.image = image;
-        }];
+        UIImage* cachedImage = nil;
+        if (IS_CURRENT_USER(user.userID)) {
+            cachedImage = [[STStampedAPI sharedInstance] currentUserImageForSize:profileSize];
+        }
+        if (!cachedImage) {
+            [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
+        }
+        if (cachedImage) {
+            imageView.image = cachedImage;
+        }
+        else {
+            [[STImageCache sharedInstance] userImageForUser:user size:profileSize andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                imageView.image = image;
+            }];
+        }
     }
     return imageView;
     
@@ -1553,6 +1562,72 @@ static Rdio* _rdio;
         }
     }
     return best;
+}
+
++ (STMenuController*)sharedMenuController {
+    STAppDelegate* delegate = (id)[UIApplication sharedApplication].delegate;
+    return delegate.menuController;
+}
+
++ (UINavigationController*)currentNavigationController {
+    STMenuController* root = [self sharedMenuController];
+    UIViewController* presented = root.presentedViewController;
+    if (!presented) {
+        return (id) root.rootViewController;
+    }
+    return (id)presented;
+}
+
++ (void)pushController:(UIViewController*)controller modal:(BOOL)modal animated:(BOOL)animated {
+    if (modal) {
+        STMenuController* root = [self sharedMenuController];
+        STRootViewController* nav = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
+        [root presentModalViewController:nav animated:animated];
+    }
+    else {
+        UINavigationController* cur = [self currentNavigationController];
+        if (cur) {
+            [cur pushViewController:controller animated:animated];
+        }
+        else {
+            NSLog(@"\n\n\n\nNav problem\n\n\n\n%@\n", [self sharedMenuController].rootViewController);
+        }
+    }
+}
+
++ (void)popControllerAnimated:(BOOL)animated {
+    UINavigationController* cur = [self currentNavigationController];
+    if (cur) {
+        if (cur.viewControllers.count > 1) {
+            [cur popViewControllerAnimated:animated];
+        }
+        else if (cur.viewControllers.count == 1) {
+            STMenuController* root = [self sharedMenuController];
+            [root dismissModalViewControllerAnimated:animated];
+        }
+        else {
+            NSLog(@"\n\n\nEmpty nav controller\n\n\n");
+        }
+    }
+    else {
+        NSLog(@"\n\n\n\nDifferent Nav problem\n\n\n\n");
+    }
+}
+
++ (BOOL)compareAndPopController:(UIViewController*)controller animated:(BOOL)animated {
+    UINavigationController* cur = [self currentNavigationController];
+    UIViewController* current = cur.topViewController;
+    if (current == controller) {
+        [self popControllerAnimated:animated];
+        return YES;
+    }
+    else {
+        return NO;
+    }
+}
+
++ (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block {
+    [self warnWithMessage:error.localizedDescription andBlock:block];
 }
 
 @end

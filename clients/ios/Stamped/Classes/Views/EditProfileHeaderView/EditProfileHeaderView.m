@@ -48,8 +48,11 @@
         [self addSubview:_imageView];
         
         NSString* url = [Util profileImageURLForUser:[STStampedAPI sharedInstance].currentUser withSize:STProfileImageSize144];
-        UIImage* cachedImage = [[STImageCache sharedInstance] cachedImageForImageURL:url];
-        NSLog(@"url:%@", url);
+        UIImage* cachedImage = [STStampedAPI sharedInstance].currentUserImage;
+        if (!cachedImage) {
+            cachedImage = [[STImageCache sharedInstance] cachedImageForImageURL:url];
+        }
+        //NSLog(@"url:%@", url);
         if (cachedImage) {
             _imageView.image = cachedImage;
         }

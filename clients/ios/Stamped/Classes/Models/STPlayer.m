@@ -231,7 +231,6 @@ static id _sharedInstance;
  */
 -(void)rdioPlayerChangedFromState:(RDPlayerState)oldState toState:(RDPlayerState)newState {
     NSAssert1([NSThread isMainThread], @"not main thread %@", [NSThread currentThread]);
-    NSLog(@"Rdio changed:%d,%d", oldState, newState);
     if (!self.paused) {
         if (oldState == RDPlayerStatePlaying && newState == RDPlayerStateStopped) {
             NSInteger next = self.currentItemIndex + 1;
