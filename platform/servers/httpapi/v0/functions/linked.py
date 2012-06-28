@@ -27,11 +27,11 @@ def show(request, authUserId, **kwargs):
 
     return transformOutput(result.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPLinkedAccount)
+@handleHTTPRequest(http_schema=HTTPLinkedAccount,
+                   conversion=HTTPLinkedAccount.exportLinkedAccount)
 @require_http_methods(["POST"])
-def add(request, authUserId, http_schema, **kwargs):
-    linkedAccount = http_schema.exportLinkedAccount()
-    result = stampedAPI.addLinkedAccount(authUserId, linkedAccount)
+def add(request, authUserId, http_schema, schema, **kwargs):
+    result = stampedAPI.addLinkedAccount(authUserId, schema)
 
     return transformOutput(True)
 
