@@ -318,7 +318,7 @@ var g_update_stamps = null;
         
         var update_gallery = function(callback) {
             if ($gallery !== null) {
-                $gallery = $(".stamp-gallery .stamps");
+                $gallery = $(".stamp-gallery").find(".stamps");
                 
                 $gallery.isotope('reLayout', callback);
             }
@@ -373,7 +373,7 @@ var g_update_stamps = null;
             
             update_gallery(function() {
                 update_navbar_layout(false);
-                last_layout = new Date().getTime();
+                last_layout = new Date();
                 
                 if (gallery_is_visible) {
                     set_gallery_visible();
@@ -645,107 +645,12 @@ var g_update_stamps = null;
                     var href  = $link.attr('href');
                     
                     href = href.replace('http://www.stamped.com', '');
-                    href = href + "?ajax=true";
                     //href = href + "&" + new Date().getTime();
                     
-                    $(sdetail_wrapper_sel).remove();
-                    var $target = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
-                    
-                    console.debug("AJAX: " + href);
-                    
-                    // TODO: disable infinite scroll and gallery animations during sdetail popup
-                    pause_infinite_scroll();
-                    enable_gallery_animations(false);
-                    
-                    $(sdetail_wrapper_sel).hide().remove();
-                    $target.insertAfter($('#main-page-content-body').get(0));
-                    $target = $(sdetail_wrapper_sel);
-                    
-                    update_dynamic_header();
-                    
-                    var scroll_top = $window.scrollTop();
-                    
-                    resize_sdetail_wrapper($target, 'opening', function() {
-                        $target.removeClass('animating');
-                    });
-                    
-                    close_sdetail_func = function() {
-                        close_sdetail_func = null;
-                        $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                        
-                        var close_sdetail_inner_func = function() {
-                            resume_infinite_scroll();
-                            update_dynamic_header();
-                            update_navbar_layout();
-                            g_init_social_sharing();
-                            
-                            // reset window's vertical scroll position to where it was 
-                            // before the sDetail popup
-                            // TODO: this is broken on Firefox
-                            $window.scrollTop(scroll_top);
-                            
-                            // reenable gallery animations
-                            enable_gallery_animations(true);
-                            
-                            resize_sdetail_wrapper($target, 'closing', function() {
-                                $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
-                            });
-                        };
-                        
-                        /*if (!!$gallery) {
-                            update_gallery_layout(true, function() {
-                                //$window.scrollTop(scroll_top);
-                                //init_infinite_scroll();
-                                
-                                close_sdetail_inner_func();
-                            });
-                        } else {
-                        }*/
-                        
-                        if (!!$gallery) {
-                            update_gallery_layout(true);
-                        }
-                        
-                        close_sdetail_inner_func();
-                    };
-                    
-                    // initialize sDetail popup after AJAX load
-                    $target.load(href, {}, function(response, status, xhr) {
-                        if (status == "error") {
-                            console.debug("AJAX ERROR (sdetail): " + url);
-                            console.debug(response);
-                            console.debug(xhr);
-                            
-                            alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
-                            
-                            return;
-                        }
-                        
-                        $target.removeClass('sdetail-loading');
-                        init_sdetail($target);
-                    });
-                    
+                    open_sdetail(href);
                     return false;
                 });
             }
-            
-            /*$('.stamp-gallery-item').click(function(event) {
-                //event.preventDefault();
-                
-                return;
-                var $this = $(this);
-                $this.find('.pronounced-title a').each(function(i, elem) {
-                    var $elem = $(elem);
-                    var href  = $elem.attr('href');
-                    href      = href.replace('http://www.stamped.com', '');
-                    
-                    console.debug(href);
-                    window.location = href;
-                    //$.colorbox({
-                    //    'href' : href
-                    //});
-                });
-            });*/
             
             $scope.find("a.lightbox").fancybox(get_fancybox_options({
                 closeClick : true
@@ -770,9 +675,9 @@ var g_update_stamps = null;
                 var offset = cur_header_height + 15;
                 var hidden = window.innerHeight + "px";
                 
-                if (!!$body && $body.hasClass('map')) {
+                /*if (!!$body && $body.hasClass('map')) {
                     offset += 0;
-                }
+                }*/
                 
                 offset += "px";
                 
@@ -829,6 +734,8 @@ var g_update_stamps = null;
                             }
                         });
                 } else if (!$sdetail_wrapper.hasClass('animating')) {
+                    $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
+                    
                     $sdetail_wrapper.css({
                         'top' : offset, 
                     });
@@ -1064,6 +971,13 @@ var g_update_stamps = null;
         var base_url    = parsed_url.base_url;
         var options     = parsed_url.options;
         var base_uri    = parsed_url.base_uri;
+        
+        console.debug(parsed_url);
+        if (STAMPED_PRELOAD.sdetail) {
+            options     = { }
+            base_uri    = "/" + screen_name
+            base_url    = base_uri
+        }
         
         // Returns a new dictionary of parameters, comprised of (opts | params) 
         // with values in params taking precedence over the default values in 
@@ -1721,6 +1635,100 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
+        var open_sdetail = function(href, html) {
+            var scroll_top = 0;
+            var $target;
+            
+            $(sdetail_wrapper_sel).remove();
+            
+            // disable infinite scroll and gallery animations during sdetail popup
+            pause_infinite_scroll();
+            enable_gallery_animations(false);
+            
+            if (!!href) {
+                $target     = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
+                scroll_top  = $window.scrollTop();
+                
+                console.debug("AJAX: " + href);
+            } else {
+                $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
+            }
+            
+            $(sdetail_wrapper_sel).hide().remove();
+            $target.insertAfter($('#main-page-content-body').get(0));
+            $target = $(sdetail_wrapper_sel);
+            
+            update_dynamic_header();
+            
+            if (!!href) {
+                resize_sdetail_wrapper($target, 'opening', function() {
+                    $target.removeClass('animating');
+                });
+            } else {
+                resize_sdetail_wrapper($target, '');
+            }
+            
+            close_sdetail_func = function() {
+                close_sdetail_func = null;
+                
+                $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
+                
+                var close_sdetail_inner_func = function() {
+                    resume_infinite_scroll();
+                    update_dynamic_header();
+                    update_navbar_layout();
+                    g_init_social_sharing();
+                    
+                    // reset window's vertical scroll position to where it was 
+                    // before the sDetail popup
+                    // TODO: this is broken on Firefox
+                    $window.scrollTop(scroll_top);
+                    
+                    // reenable gallery animations
+                    enable_gallery_animations(true);
+                    
+                    if (!href) {
+                        update_gallery_layout(true);
+                    }
+                    
+                    resize_sdetail_wrapper($target, 'closing', function() {
+                        $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
+                        
+                        if (!href) {
+                            update_gallery_layout(true);
+                            setTimeout(update_gallery_layout, 150);
+                        }
+                    });
+                };
+                
+                if (!!$gallery) {
+                    update_gallery_layout(true);
+                }
+                
+                close_sdetail_inner_func();
+            };
+            
+            if (!!href) {
+                // initialize sDetail popup after AJAX load
+                $target.load(href, { 'ajax' : true }, function(response, status, xhr) {
+                    if (status == "error") {
+                        console.debug("AJAX ERROR (sdetail): " + url);
+                        console.debug(response);
+                        console.debug(xhr);
+                        
+                        alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
+                        
+                        return;
+                    }
+                    
+                    $target.removeClass('sdetail-loading');
+                    init_sdetail($target);
+                });
+            } else {
+                init_sdetail($target);
+            }
+        };
+        
         var init_sdetail = function($sdetail) {
             if (!$sdetail) {
                 $sdetail        = $('.sdetail_body');
@@ -2033,6 +2041,10 @@ var g_update_stamps = null;
         // base page initialization
         // ---------------------------------------------------------------------
         
+        
+        if (STAMPED_PRELOAD.sdetail) {
+            open_sdetail(null, STAMPED_PRELOAD.sdetail);
+        }
         
         g_init_social_sharing();
         update_dynamic_header();

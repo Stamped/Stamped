@@ -294,6 +294,18 @@ def custom_css(parser, token):
     
     return CustomCSSNode(template_name, library)
 
+@register.filter
+def split(s, delimiter):
+    return s.split(delimiter)
+
+@register.filter
+def split0(s, delimiter):
+    return s.split(delimiter)[0]
+
+@register.filter
+def split1(s, delimiter):
+    return s.split(delimiter)[1]
+
 class AStampedNode(template.Node):
     
     def _simplify_context(self, context):

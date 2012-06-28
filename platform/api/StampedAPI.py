@@ -1803,6 +1803,10 @@ class StampedAPI(AStampedAPI):
         Basic function to update all references to an entity_id that has been tombstoned.
         """
         oldEntity = self._entityDB.getEntity(oldEntityId)
+        if oldEntity.sources.tombstone_id is None:
+            logs.info("Short circuit: tombstone_id is 'None' for entity %s" % oldEntityId)
+            return
+        
         newEntity = self._entityDB.getEntity(oldEntity.sources.tombstone_id)
         newEntityId = newEntity.entity_id
         newEntityMini = newEntity.minimize()
@@ -4489,7 +4493,7 @@ class StampedAPI(AStampedAPI):
 
             modified = False
             visitedStubs = []
-            for i, stub in enumerate(stubList):
+            for stub in stubList:
                 try:
                     resolvedFull, stubModified = self._resolveStub(stub, False)
                 except KeyError as e:
@@ -4561,6 +4565,8 @@ class StampedAPI(AStampedAPI):
         else:
             raise KeyError('Unable to resolve stub: ' + str(stub))
 
+        if entity.kind != stub.kind:
+            raise KeyError('Confused and dazed. Stub and result are different kinds: ' + str(stub))
         return entity, stubModified
 
     def _iterateOutLinks(self, entity, func):

@@ -617,8 +617,6 @@ footer,
                                 SDETAIL MENU
    ************************************************************************** */
 .entity-menu {
-  max-height: 480px;
-  overflow-y: scroll;
   text-align: center;
 }
 .entity-menu .entity-title {
@@ -627,10 +625,25 @@ footer,
   font-weight: normal;
   font-size: 250%;
   font-weight: bold;
+  color: #262626;
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+}
+.entity-menu .menus {
+  max-height: 420px;
+  overflow-y: scroll;
 }
 .entity-menu .menus .submenu .submenu-title {
+  color: #595959;
   font-size: 200%;
   font-weight: bold;
+  font-style: italic;
+  font-family: "Georgia", "arial", sans-serif;
+  /* TODO: use font shorthand here! */
+
 }
 .entity-menu .menus .submenu .submenu-desc {
   font-style: italic;
@@ -639,6 +652,9 @@ footer,
 .entity-menu .menus .submenu .submenu-footnote {
   font-style: italic;
   font-size: 80%;
+}
+.entity-menu .menus .submenu .section {
+  color: #999;
 }
 .entity-menu .menus .submenu .section .section-title {
   font-size: 150%;
@@ -657,9 +673,16 @@ footer,
   font-weight: bold;
 }
 .entity-menu .menus .submenu .section .items .item .item-prices {
+  font-style: italic;
   font-size: 80%;
+  color: #bfbfbf;
 }
 .entity-menu .attribution {
+  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
+  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
+  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
+  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
   font-style: italic;
   font-size: 70%;
 }

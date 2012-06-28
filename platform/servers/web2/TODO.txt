@@ -62,7 +62,7 @@ TODO:
             * DONE - disable navigation to empty category-sections
         * gallery:
             * DONE - fix sDetail bug where opening sDetail scrolls back to top of page
-            * clicking on map in stamp gallery => selection in map view
+            * DONE - clicking on map in stamp gallery => selection in map view
             * BETA - FIX INFINITE SCROLL
             * BETA - optimize infinite scroll
             * adaptive layout improvements

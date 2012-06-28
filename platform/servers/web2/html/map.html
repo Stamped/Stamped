@@ -2,11 +2,11 @@
 {% load stamped_tags %}
 {% load ssi from future %}
 
-{% block head %}
+{% block styles %}
     {{ block.super }}
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
-{% endblock head %}
+{% endblock styles %}
 
 {% block profile-header %}
 {% endblock profile-header %}
