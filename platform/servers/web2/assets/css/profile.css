@@ -1646,11 +1646,6 @@ body.sdetail_popup {
 }
 body.sdetail_popup #main-page-content-body {
   display: none;
-  /*#stamp-category-nav-bar {
-            visibility: hidden !important;
-            opacity: 0;
-        }*/
-
 }
 body.sdetail_popup #main-page-content-body #main-content {
   display: none;
