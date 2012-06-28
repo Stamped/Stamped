@@ -89,8 +89,8 @@ def stringRelevance(queryText, resultText):
 
     nonContinuityPenalty = 1.2
     matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
-    totalMatch = sum(matchSize ** nonContinuityPenalty
-            for _, _, matchSize in matchingBlocks if matchSize > 1)
+    matchingBlocks = filter(lambda block: block[2] > 1)
+    totalMatch = sum(matchSize ** nonContinuityPenalty for _, _, matchSize in matchingBlocks)
     return totalMatch / (len(queryText) ** nonContinuityPenalty), [(i, n) for i, _, n in matchingBlocks]
 
 

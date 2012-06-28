@@ -255,8 +255,6 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
                                exceptionQueryRegexps=makeTokenRegexp('best')),
     TitleDataQualityRegexpTest(r'\bbox(ed)? set\b', "'box set' in title", 0.3,
                                exceptionQueryRegexps=(makeTokenRegexp('box'), makeTokenRegexp('boxed'), makeTokenRegexp('set'))),
-    TitleDataQualityRegexpTest(r'\bedition', "'edition' in title", 0.3,
-                               exceptionQueryRegexps=makeTokenRegexp('edition')),
     TitleDataQualityRegexpTest(r'\bbook\s+\d', "'book #' in title", 0.3,
                                exceptionQueryRegexps=makeTokenRegexp('book')),
     TitleDataQualityRegexpTest(r'\bvolume\s+\d', "'volume #' in title", 0.3,
