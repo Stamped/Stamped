@@ -195,12 +195,15 @@ def handle_profile(request, schema, **kwargs):
     #utils.log("PREV: %s" % prev_url)
     #utils.log("NEXT: %s" % next_url)
     
-    body_classes = _get_body_classes('profile', schema)
-    
     title   = "Stamped - %s" % user['screen_name']
     sdetail = kwargs.get('sdetail', None)
     stamp   = kwargs.get('stamp',   None)
     entity  = kwargs.get('entity',  None)
+    url     = request.build_absolute_uri(request.get_full_path())
+    
+    body_classes = _get_body_classes('profile', schema)
+    if sdetail is not None:
+        body_classes += "sdetail_popup";
     
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
@@ -220,6 +223,7 @@ def handle_profile(request, schema, **kwargs):
         'stamp'                 : stamp, 
         'entity'                : entity, 
         'title'                 : title, 
+        'URL'                   : url, 
     }, preload=[ 'user', 'sdetail' ])
 
 def handle_map(request, schema, **kwargs):
@@ -264,6 +268,7 @@ def handle_map(request, schema, **kwargs):
     body_classes = _get_body_classes('map collapsed-header', schema)
     
     title = "Stamped - %s map" % user['screen_name']
+    url   = request.build_absolute_uri(request.get_full_path())
     
     return stamped_render(request, 'map.html', {
         'user'          : user, 
@@ -272,6 +277,7 @@ def handle_map(request, schema, **kwargs):
         'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
         'title'         : title, 
+        'URL'           : url, 
     }, preload=[ 'user', 'stamps', 'stamp_id' ])
 
 @stamped_view(schema=HTTPStampDetail)
