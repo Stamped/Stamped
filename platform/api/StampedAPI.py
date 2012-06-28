@@ -2758,7 +2758,7 @@ class StampedAPI(AStampedAPI):
 
         kwargs = {}
         if imageUrl is not None:
-            kwargs['image'] = imageUrl
+            kwargs['imageUrl'] = imageUrl
         if stampId is not None and share_settings.share_stamps == True:
             action = 'stamp'
             stamp = self.getStamp(stampId)
