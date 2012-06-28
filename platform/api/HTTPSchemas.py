@@ -603,6 +603,7 @@ class HTTPLinkedAccounts(Schema):
         cls.addNestedProperty('twitter',                    HTTPLinkedAccount)
         cls.addNestedProperty('facebook',                   HTTPLinkedAccount)
         cls.addNestedProperty('netflix',                    HTTPLinkedAccount)
+        cls.addNestedProperty('rdio',                       HTTPLinkedAccount)
 
     def importLinkedAccounts(self, linked):
         if linked.twitter is not None:
@@ -611,6 +612,8 @@ class HTTPLinkedAccounts(Schema):
             self.facebook = HTTPLinkedAccount().importLinkedAccount(linked.facebook)
         if linked.netflix is not None:
             self.netflix = HTTPLinkedAccount().importLinkedAccount(linked.netflix)
+        if linked.rdio is not None:
+            self.rdio = HTTPLinkedAccount().importLinkedAccount(linked.rdio)
         return self
 
     def exportLinkedAccounts(self):
@@ -622,7 +625,8 @@ class HTTPLinkedAccounts(Schema):
             schema.facebook = LinkedAccount().dataImport(self.facebook.dataExport(), overflow=True)
         if self.twitter is not None:
             schema.netflix = LinkedAccount().dataImport(self.netflix.dataExport(), overflow=True)
-
+        if self.rdio is not None:
+            schema.rdio = LinkedAccount().dataImport(self.rdio.dataExport(), overflow=True)
         return schema 
 
 class HTTPAvailableLinkedAccounts(Schema):
