@@ -1,5 +1,13 @@
 
-var init_social_sharing = function() {
+var init_social_sharing = function($scope, params) {
+    if (!!$scope && !!params) {
+        var $tweet_buttons = $scope.find('.twitter-share-button');
+        var text = "Check out this stamp of " + params.title;
+        
+        $tweet_buttons.attr("data-text", text);
+        $tweet_buttons.attr("data-url",  params.url);
+    }
+    
     // Twitter
     if (typeof(twttr) !== 'undefined' && !!twttr.widgets) {
         twttr.widgets.load();

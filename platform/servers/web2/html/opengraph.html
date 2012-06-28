@@ -78,13 +78,13 @@
                 <meta property="stampedapp:{{item.name|lower}}"  content="{{item.value}}"/>
             {% endif %}
         {% endfor %}
-    {% else %}{% if entity.category == "other" %}
+    {% else %}
         {% if entity.subcategory == "app" %}
             <meta property="og:type"        content="stampedapp:app"/>
         {% else %}
             <meta property="og:type"        content="stampedapp:other"/>
         {% endif %}
-    {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+    {% endif %}{% endif %}{% endif %}{% endif %}
 {% else %}
     <meta property="og:type"                content="stampedapp:user"/>
     <meta property="og:title"               content="{{user.screen_name}}"/>

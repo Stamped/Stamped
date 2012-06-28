@@ -39,10 +39,11 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
 def generateStampUrl(stamp):
-    url_title = encodeStampTitle(stamp.entity.title)
-
-    return 'http://www.stamped.com/%s/stamps/%s/%s' % \
-           (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
+    #url_title = encodeStampTitle(stamp.entity.title)
+    
+    # NOTE (travis): as of June 2012, we've migrated from more verbose web sdetail 
+    # URLs to a slightly shorter version
+    return 'http://www.stamped.com/%s/s/%s' % (stamp.user.screen_name, stamp.stats.stamp_num)
 
 def _coordinatesDictToFlat(coordinates):
     try:
