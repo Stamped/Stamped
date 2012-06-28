@@ -6,8 +6,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs, gevent, utils
+import sys, datetime, logs, gevent, utils, math
 from api                        import Entity
+from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
@@ -21,6 +22,7 @@ from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
 from SearchResultDeduper        import SearchResultDeduper
+from DataQualityUtils           import *
 
 
 def total_seconds(timedelta):
@@ -145,15 +147,20 @@ class EntitySearch(object):
         # enough to give a solid idea.
         before = datetime.datetime.now()
         try:
-            resultsDict[source] = source.searchLite(queryCategory, queryText, **queryParams)
+            results = source.searchLite(queryCategory, queryText, **queryParams)
         except:
             logs.report()
-            resultsDict[source] = []
+            results = []
+
         after = datetime.datetime.now()
+        # First level of filtering on data quality score -- results that are really horrendous get dropped entirely
+        # pre-clustering.
+        filteredResults = [result for result in results if result.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_CLUSTER]
         timesDict[source] = after - before
-        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d" % (
-            source.sourceName, str(after - before), len(resultsDict.get(source, []))
+        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d, AFTER FILTERING: %d" % (
+            source.sourceName, str(after - before), len(results), len(filteredResults)
         ))
+        resultsDict[source] = filteredResults
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
@@ -197,42 +204,118 @@ class EntitySearch(object):
         return dedupedResults[:limit]
 
 
+    def __getEntityIdForCluster(self, cluster):
+        idsFromClusteredEntities = []
+        fastResolvedIds = []
+        for result in cluster.results:
+            if result.resolverObject.source == 'stamped':
+                idsFromClusteredEntities.append(result.resolverObject.key)
+            else:
+                # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
+                entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
+                if entityId:
+                    fastResolvedIds.append(entityId)
+
+        allIds = idsFromClusteredEntities + fastResolvedIds
+        if len(idsFromClusteredEntities) > 2:
+            logs.warning('Search results directly clustered multiple StampedSource results: [%s]' %
+                         ', '.join(str(entityId) for entityId in idsFromClusteredEntities))
+        elif len(allIds) > 2:
+            logs.warning('Search results indirectly clustered multiple entity IDs together: [%s]' %
+                         ', '.join(str(entityId) for entityId in allIds))
+        if not allIds:
+            return None
+        return allIds[0]
+
+
+    def __proxyToEntity(self, cluster):
+        # Additional level of filtering -- some things get clustered (for the purpose of boosting certain cluster
+        # scores) but never included in the final result because we're not 100% that the data is good enough to show
+        # users.
+        filteredResults = [r for r in cluster.results if r.dataQuality > MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
+        # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
+        entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
+        for result in filteredResults[1:]:
+            # TODO PRELAUNCH: Only use the best result from each source.
+            entityBuilder.addSource(EntityProxySource(result.resolverObject))
+        return entityBuilder.buildEntity()
+
+
+    @utils.lazyProperty
+    def __stampedSource(self):
+        return StampedSource()
+
+
+    def __buildEntity(self, entityId):
+        # TODO PRELAUNCH: Should be able to avoid separate lookup here.
+        proxy = self.__stampedSource.entityProxyFromKey(entityId)
+        entity = EntityProxyContainer(proxy).buildEntity()
+        entity.entity_id = entityId
+        return entity
+
+
+    def rescoreFinalResults(self, entityAndClusterList):
+        def isTempEntity(entity):
+            return entity.entity_id is None
+        realEntityIds = [ entity.entity_id for (entity, cluster) in entityAndClusterList if not isTempEntity(entity) ]
+        entityStats = MongoEntityStatsCollection().getStatsForEntities(realEntityIds)
+        statsByEntityId = dict([(stats.entity_id, stats) for stats in entityStats])
+
+        def scoreEntityAndCluster((entity, cluster)):
+            if isTempEntity(entity):
+                dataScore = cluster.dataQuality
+            else:
+                numStamps = 0
+                if entity.entity_id in statsByEntityId:
+                    numStamps = statsByEntityId[entity.entity_id].num_stamps
+                dataScore = 1.1 + math.log(numStamps+1, 50)
+
+            # TODO: Possibly distinguish even more about which of these have rich data. There are some types of data
+            # that don't affect dataQuality because they don't make us less certain about the state of a cluster, but
+            # they make user interactions with it more positive -- pictures, preview URLs, etc. We should factor
+            # these in here.
+            return dataScore * cluster.relevance
+
+        entityAndClusterList.sort(key=scoreEntityAndCluster, reverse=True)
+
+
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
-        stampedSource = StampedSource()
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
         entityResults = []
+
+        entityIdsToNewClusterIdxs = {}
+        entitiesAndClusters = []
         for cluster in clusters:
-            entityId = None
-            for result in cluster.results:
-                if result.resolverObject.source == 'stamped':
-                    entityId = result.resolverObject.key
-                    break
+            entityId = self.__getEntityIdForCluster(cluster)
+            if not entityId:
+                # One more layer of filtering here -- clusters that don't overall hit our quality minimum get
+                # dropped. We never drop clusters that resolve to entities for this reason.
+                if cluster.dataQuality >= MIN_CLUSTER_DATA_QUALITY:
+                    entitiesAndClusters.append((self.__proxyToEntity(cluster), cluster))
+                else:
+                    logClusterData('DROPPING CLUSTER for shitty data quality:\n%s' % cluster)
 
-            results = cluster.results[:]
-            results.sort(key = lambda result:result.score, reverse=True)
-            for result in results:
-                if entityId:
-                    break
-                proxy = result.resolverObject
-                # TODO: Batch the database requests into one big OR query. Have appropriate handling for when we get
-                # multiple Stamped IDs back.
-                entityId = stampedSource.resolve_fast(proxy.source, proxy.key)
-                # TODO: Incorporate data fullness here!
-
-            if entityId:
-                proxy = stampedSource.entityProxyFromKey(entityId)
-                entity = EntityProxyContainer(proxy).buildEntity()
-                # TODO: Somehow mark the entity to be enriched with these other IDs I've attached
-                entity.entity_id = entityId
+            # TODO PRELAUNCH: Make sure that the type we get from fast_resolve == the type we get from
+            # StampedSourceObject.key, or else using these as keys in a map together won't work.
+            elif entityId not in entityIdsToNewClusterIdxs:
+                entityIdsToNewClusterIdxs[entityId] = len(entitiesAndClusters)
+                entitiesAndClusters.append((self.__buildEntity(entityId), cluster))
             else:
-                entityBuilder = EntityProxyContainer(results[0].resolverObject)
-                for result in results[1:]:
-                    entityBuilder.addSource(EntityProxySource(result.resolverObject))
-                entity = entityBuilder.buildEntity()
+                originalIndex = entityIdsToNewClusterIdxs[entityId]
+                (_, originalCluster) = entitiesAndClusters[originalIndex]
+                # We're not actually augmenting the result at all here; the result is the unadultered entity. We won't
+                # show an entity augmented with other third-party IDs we've attached in search results because it will
+                # create inconsistency for the entity show page and we don't know if they will definitely be attached.
+                # The point of the grok is entirely to boost the rank of the cluster (and thus of the entity.)
+                # TODO PRELAUNCH: Consider overriding this for sparse or user-created entities.
+                # TODO: Debug check to see if the two are definitely not a match according to our clustering logic.
+                originalCluster.grok(cluster)
 
-            entityResults.append(entity)
+        # TODO: Reorder according to final scores that incorporate dataQuality and a richness score (presence of stamps,
+        # presence of enriched entity, etc.)
 
-        return zip(entityResults, clusters)
+        self.rescoreFinalResults(entitiesAndClusters)
+        return entitiesAndClusters
 
 
     def searchEntities(self, *args, **kwargs):

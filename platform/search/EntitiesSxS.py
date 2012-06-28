@@ -10,6 +10,7 @@ import Globals
 from os import path
 
 import difflib
+import itertools
 import optparse
 import os
 import pickle
@@ -29,7 +30,7 @@ def loadSearchResultsFromFile(filename):
     with open(filename) as f:
         fullResults = pickle.load(f)
     for query, resultList in fullResults.iteritems():
-        stripedList = [(stripEntity(entity), cluster) for entity, cluster in resultList]
+        stripedList = [(entity, stripEntity(entity.dataExport()), cluster) for entity, cluster in resultList]
         returnDict[query] = stripedList
     return returnDict
 
@@ -45,7 +46,7 @@ def stripEntity(entityDict):
     if 'sources' in entityDict:
         entityDict['sources'] = stripTimestamps(entityDict['sources'])
     return entityDict
-    
+
 
 def differenceScore(left, right):
     commonKeys = left.viewkeys() & right.viewkeys()
@@ -61,19 +62,19 @@ def differenceScore(left, right):
 def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
     changedTableRows = []
     allTableRows = []
-    statsText = '%d same position, %d moved, %d added/droped'
+    statsText = '%d same position, %d moved, %d added, %d droped'
     linkText = '<a href="%s">%s</a>'
     for key in sorted(oldResults.keys()):
-        (same, moved, addDrop), filename = compareSingleSearch(
+        (same, moved, added, dropped), filename = compareSingleSearch(
                 key, oldResults[key], newResults[key], outputDir, diffThreshold)
-        row = linkText % (filename, key), statsText % (same, moved, addDrop)
-        if moved or addDrop:
+        row = linkText % (filename, key), statsText % (same, moved, added, dropped)
+        if moved or added or dropped:
             changedTableRows.append(row)
         allTableRows.append(row)
     random.shuffle(changedTableRows)
 
     summary = "%d out of %d queries had changes (%f%%). Here's a random list of them" % (
-            len(changedTableRows), len(oldResults), len(changedTableRows) / len(oldResults) * 100)
+            len(changedTableRows), len(oldResults), float(len(changedTableRows)) / len(oldResults) * 100)
     summary += ' <a href="index_all.html">show all</a>'
 
     htmlRowTpl = '<tr><td>%s</td><td>%s</td></tr>'
@@ -89,7 +90,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     diffScores = []
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
-            score = differenceScore(left[0], right[0])
+            score = differenceScore(left[1], right[1])
             if score <= diffThreshold:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
@@ -129,7 +130,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), 'r%d' % i))
 
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
-    for links in zip(linksLeft, linksRight):
+    for links in itertools.izip_longest(linksLeft, linksRight, fillvalue='<td></td>'):
         fileContent.append('<tr>%s%s</tr>' % links)
     fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER)
 
@@ -140,15 +141,16 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     # Now compute the stats:
     same = sum(1 for i, j in movements.iteritems() if i == j)
     moved = len(movements) - same
-    addDrop = len(oldResults) - len(movements)
-    return (same, moved, addDrop), filenameBase + '.html'
+    added = len(newResults) - len(movements)
+    dropped = len(oldResults) - len(movements)
+    return (same, moved, added, dropped), filenameBase + '.html'
 
 
 def writeSingleEntity(entity, outputDir, filename, cellId):
     with open(path.join(outputDir, filename), 'w') as fout:
         # TODO(geoff): This doesn't produce proper HTML
         print >> fout, '<pre>'
-        pprint.pprint(entity, fout)
+        pprint.pprint(entity[1:], fout)
         print >> fout, '</pre>'
     return '%s<a href="%s">%s</a></td>' % (
             makeHighlightingTableCell(cellId), filename, extractLinkText(entity))
@@ -158,16 +160,15 @@ def makeHighlightingTableCell(name):
     return '<td onmouseover=highlightCell("%s") onmouseout=unhighlightCell("%s") name="%s">' % ((name,) * 3)
 
 def writeCompareEntity(left, right, outputDir, filename):
-    leftLines = pprint.pformat(left).split('\n')
-    rightLines = pprint.pformat(right).split('\n')
+    leftLines = pprint.pformat(left[1:]).split('\n')
+    rightLines = pprint.pformat(right[1:]).split('\n')
     differ = difflib.HtmlDiff(wrapcolumn=100)
     with open(path.join(outputDir, filename), 'w') as fout:
         print >> fout, differ.make_file(leftLines, rightLines)
 
 
 def extractLinkText(entity):
-    # TODO(geoff): more details
-    return entity[0]['title']
+    return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, entity[0].subtitle)
 
 
 def ensureDirectory(pathName):

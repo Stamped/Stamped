@@ -178,13 +178,17 @@ class Facebook(object):
             path,
         )
 
-    def postToOpenGraph(self, access_token, object_type, object_url):
+    def postToOpenGraph(self, action, access_token, object_type, object_url, message=None, imageUrl=None):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
 
 
-        path = "me/stampedapp:stamp"
+        path = "me/stampedapp:%s" % action
         args = {}
         args[object_type] = object_url
+        if message is not None:
+            args['message'] = message
+        if imageUrl is not None:
+            args['image'] = imageUrl
         return self._post(
             access_token,
             path,
@@ -223,7 +227,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
-    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph(access_token,
+    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('stamp', access_token,
                                                    'movie', 'http://www.imdb.com/title/tt1190536/'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())

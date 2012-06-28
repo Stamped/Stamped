@@ -11,7 +11,7 @@ import sha
 
 
 conn = boto.connect_sdb("AKIAJPJJ2QXCMPIITWDQ","XwBv06/ezFEjsJvalbLNgE9IrHJ46DlGtWc5/F+X")
-domain = conn.get_domain('stats-dev')
+#domain = conn.get_domain('stats_dev')
 
 api = MongoStampedAPI()
 sample = MongoStatsCollection()._collection.find()
@@ -72,25 +72,24 @@ def putSDB(item,suffix):
         domains[suffix].batch_put_attributes(queues[suffix], replace = False)
         queues[suffix] = {}
 
-def SDBToSDB(origin,destination,domains):
+def SDBToSDB(origins,destination,domains,origNum):
     place = 0
     count = 0
     failures = 0
     badRequests = []
     pings_ignored = 0
     
-    pool = Pool(30)
+    suffix = '0'+hex(origNum)[2]
     
-    for i in origin:
-        if place > 100000:
+    for i in origins[suffix]:
+        if place > 0:
             try:
                 if i['uri'] == "/v0/ping.json" or i['uri'] == '/v0/temp/ping.json':
                     pings_ignored += 1
                     if pings_ignored % 500 == 0:
                         print 'ignored: ' + str(pings_ignored)
                 else: 
-                    suffix = '0'+sha.new(i.name).hexdigest()[0]
-                    pool.spawn(putSDB,i,suffix)
+                    putSDB(i,suffix)
                     count += 1
                     if count % 1000 == 0:
                         print str(count) + ', ' + str(len(badRequests))
@@ -98,7 +97,6 @@ def SDBToSDB(origin,destination,domains):
                 badRequests.append(i)
         place += 1
         
-    pool.join()
     
     print "Now attempting bad requests"
     
@@ -118,16 +116,26 @@ def SDBToSDB(origin,destination,domains):
     
     pool.join()
     
-origin = conn.get_domain('stats-prod')
+    
+origins = {}
 domains = {}
 queues = {}
+
+for i in range (0,16):
+    origins['0'+hex(i)[2]] = conn.get_domain('stats-prod_0'+hex(i)[2])
 
 for i in range (0,16):
     queues['0'+hex(i)[2]] = {}
 
 for i in range (0,16):
-    domains['0'+hex(i)[2]] = conn.get_domain('stats-prod_0'+hex(i)[2])
+    domains['0'+hex(i)[2]] = conn.get_domain('stats_prod_0'+hex(i)[2])
+
+pool = Pool(16)
+
+for suffix in range (0,16):
+
+    pool.spawn(SDBToSDB,origins,'stats_prod',domains,i) 
     
-SDBToSDB(origin,'stats-prod',domains) 
+pool.join()
 
 

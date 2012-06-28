@@ -17,12 +17,13 @@ try:
     import re, logs
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from libs.TMDB                  import globalTMDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
     from abc                        import ABCMeta, abstractproperty
     from urllib2                    import HTTPError
-    from datetime                   import datetime
+    from datetime                   import datetime, timedelta
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
     from search.ScoringUtils        import *
@@ -108,6 +109,9 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
         _TMDBObject.__init__(self, tmdb_id, data=data)
         ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanMovieTitle(rawName)
+
     @property
     def valid(self):
         try:
@@ -128,7 +132,7 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
             return []
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['title']
 
     @lazyProperty
@@ -279,10 +283,25 @@ class TMDBSource(GenericSource):
                 pass
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
 
+    def __pareOutResultsFarInFuture(self, resolverObjects):
+        """
+        TMDB has a bad habit of giving results that are still far out, sometimes results that are too far out to be sure
+        that a movie will ever be made. We make the editorial decision not to show any movie more than 90 days out.
+        In 99.9% of cases this should be beneficial. Every once in a blue moon someone might want to stamp a movie they
+        just saw a first trailer for and are really excited about, but I think that's not strictly an appropriate use
+        of a stamp anyway; how can you recommend what you haven't seen, because it isn't even finished yet?
+        """
+        cutoff = datetime.now() + timedelta(90)
+        def isFarInFuture(resolverObject):
+            return resolverObject.release_date and resolverObject.release_date > cutoff
+
+        return [resolverObject for resolverObject in resolverObjects if not isFarInFuture(resolverObject)]
+
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
         raw_results = self.__tmdb.movie_search(queryText)['results']
         # 20 results is good enough for us. No second requests.
         resolver_objects = [ TMDBMovie(result['id'], data=result, maxLookupCalls=0) for result in raw_results ]
+        resolver_objects = self.__pareOutResultsFarInFuture(resolver_objects)
         scored_results = scoreResultsWithBasicDropoffScoring(resolver_objects, sourceScore=1.0)
         # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
         # TMDB is clever enough to handle that for us.

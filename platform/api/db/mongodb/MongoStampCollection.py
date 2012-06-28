@@ -79,6 +79,14 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = created
 
+        elif 'contents' in document:
+            contents = []
+            for content in document['contents']:
+                if 'mentions' in content:
+                    del(content['mentions'])
+                contents.append(content)
+            document['contents'] = contents
+
         if 'credit' in document:
             document['credits'] = document['credit']
             del(document['credit'])
@@ -356,7 +364,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     def countCredits(self, userId):
         return self.credit_received_collection.numCredit(userId)
 
-    def getRestamps(self, userId, entityId, limit=0):
+    def getCreditedStamps(self, userId, entityId, limit=0):
         try:
             query = {
                 'entity.entity_id'      : entityId,

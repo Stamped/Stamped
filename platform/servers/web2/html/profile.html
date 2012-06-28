@@ -10,19 +10,22 @@
 -->
 {% load ssi from future %}
 
-{% block head %}
+{% block styles %}
     {{ block.super }}
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/libs/colorbox.css">-->
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.fancybox.css?v=2.0.6">
     <link rel="stylesheet" href="{{ STATIC_URL }}/css/libs/jquery.jscrollpane.css">
     
     <style>
         {% custom_css "profile" %}
     </style>
-{% endblock head %}
+{% endblock styles %}
+
+{% block opengraph %}
+    {% include "opengraph.html" %}
+{% endblock opengraph %}
 
 {% block main %}
     {{ block.super }}

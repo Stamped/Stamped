@@ -21,6 +21,7 @@ try:
     from GooglePlaces               import GooglePlaces
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from datetime                   import datetime
@@ -98,6 +99,9 @@ class GooglePlacesPlace(ResolverPlace):
         ResolverPlace.__init__(self)
         self.__data = data
 
+    def _cleanName(self, rawName):
+        return cleanPlaceTitle(rawName)
+
     @lazyProperty
     def key(self):
         try:
@@ -110,7 +114,7 @@ class GooglePlacesPlace(ResolverPlace):
         return self.__data
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['name']
 
     @lazyProperty
@@ -230,6 +234,9 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
         ResolverPlace.__init__(self)
         self.__data = data
 
+    def _cleanName(self, rawName):
+        return cleanPlaceTitle(rawName)
+
     @property
     def source(self):
         return 'googleplaces'
@@ -247,7 +254,7 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
             return []
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         if self.__terms:
             return self.__terms[0]
         return self.__data['description']
@@ -419,11 +426,11 @@ class GooglePlacesSource(GenericSource):
         localResults = scoreResultsWithBasicDropoffScoring(localResults, sourceScore=0.4, dropoffFactor=0.9)
         nationalResults = scoreResultsWithBasicDropoffScoring(nationalResults, sourceScore=0.6, dropoffFactor=0.9)
 
-        augmentPlaceScoresForRelevanceAndProximity(localResults, queryText, coords)
-        augmentPlaceScoresForRelevanceAndProximity(nationalResults, queryText, coords)
+        augmentPlaceRelevanceScoresForTitleMatchAndProximity(localResults, queryText, coords)
+        augmentPlaceRelevanceScoresForTitleMatchAndProximity(nationalResults, queryText, coords)
 
-        smoothScores(localResults)
-        smoothScores(nationalResults)
+        smoothRelevanceScores(localResults)
+        smoothRelevanceScores(nationalResults)
 
         return dedupeById(localResults + nationalResults)
 

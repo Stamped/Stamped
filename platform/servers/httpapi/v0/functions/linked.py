@@ -27,15 +27,15 @@ def show(request, authUserId, **kwargs):
 
     return transformOutput(result.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPLinkedAccount)
+@handleHTTPRequest(http_schema=HTTPLinkedAccount,
+                   conversion=HTTPLinkedAccount.exportLinkedAccount)
 @require_http_methods(["POST"])
-def add(request, authUserId, http_schema, **kwargs):
-    linkedAccount = http_schema.exportLinkedAccount()
-    result = stampedAPI.addLinkedAccount(authUserId, linkedAccount)
+def add(request, authUserId, http_schema, schema, **kwargs):
+    result = stampedAPI.addLinkedAccount(authUserId, schema)
 
     return transformOutput(True)
 
-@handleHTTPRequest(http_schema=HTTPRemoveLinkedAccountForm)
+@handleHTTPRequest(http_schema=HTTPServiceNameForm)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, http_schema.service_name)
@@ -49,12 +49,60 @@ def update(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(True)
 
-@handleHTTPRequest(http_schema=HTTPUpdateLinkedAccountShareSettingsForm,
-                   conversion=HTTPUpdateLinkedAccountShareSettingsForm.exportLinkedAccountShareSettings)
+def _buildShareSettingsFromLinkedAccount(linked):
+    shares = getattr(linked, 'share_settings', None)
+    result = []
+
+    def buildToggle(settingType):
+        name = 'share_%s' % settingType
+        toggle = HTTPSettingsToggle()
+        toggle.toggle_id = name
+        toggle.type = settingType
+        toggle.value = False
+        if shares is not None and hasattr(shares, name) and getattr(shares, name) == True:
+            toggle.value = True
+        return toggle
+
+    def buildGroup(settingGroup, settingName):
+        group = HTTPSettingsGroup()
+        group.group_id = 'share_%s' % settingGroup
+        group.name = settingName
+        group.toggles = [
+            buildToggle(settingGroup)
+        ]
+        return group
+
+    result.append(buildGroup('stamps', 'Share Stamps'))
+    result.append(buildGroup('likes', 'Share Likes'))
+    result.append(buildGroup('todos', 'Share Todos'))
+    result.append(buildGroup('follows', 'Share Follows'))
+
+    return map(lambda x: x.dataExport(), result)
+
+@handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest)
 @require_http_methods(["POST"])
-def updateShareSettings(request, authUserId, http_schema, schema, **kwargs):
-    result = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, schema)
-    return transformOutput(True)
+def updateShareSettings(request, authUserId, http_schema, **kwargs):
+    on = None
+    if http_schema.on is not None:
+        on = set(http_schema.on.split(','))
+
+    off = None
+    if http_schema.off is not None:
+        off = set(http_schema.off.split(','))
+
+    logs.info('### on: %s' % on)
+    linkedAccount  = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, on, off)
+    result = _buildShareSettingsFromLinkedAccount(linkedAccount)
+
+    return transformOutput(result)
+
+@handleHTTPRequest(http_schema=HTTPServiceNameForm)
+@require_http_methods(["GET"])
+def showShareSettings(request, authUserId, http_schema, **kwargs):
+    linked  = stampedAPI.getLinkedAccount(authUserId, http_schema.service_name)
+    result = _buildShareSettingsFromLinkedAccount(linked)
+
+    return transformOutput(result)
 
 
 @handleHTTPRequest()
@@ -79,9 +127,17 @@ def removeTwitter(request, authUserId, **kwargs):
 
     return transformOutput(True)
 
-def createNetflixLoginResponse(authUserId, netflixAddId=None):
+def createNetflixLoginResponse(request, netflixAddId=None):
+    if 'oauth_token' in request.GET:
+        oauth_token = request.GET['oauth_token']
+    elif 'oauth_token' in request.POST:
+        oauth_token = request.POST['oauth_token']
+    else:
+        raise StampedInputError("Access token not found")
+
+
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(authUserId, netflixAddId)
+    secret, url = netflix.getLoginUrl(oauth_token, netflixAddId)
 
     response                = HTTPEndpointResponse()
     source                  = HTTPActionSource()
@@ -95,32 +151,33 @@ def createNetflixLoginResponse(authUserId, netflixAddId=None):
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["GET"])
 def netflixLogin(request, authUserId, **kwargs):
-    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+    return createNetflixLoginResponse(request, http_schema.netflix_id)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPNetflixAuthResponse,
-    parse_request_kwargs={'allow_oauth_token': True})
+@handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
-    authUserId = http_schema.stamped_oauth_token
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
         result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
+
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
-    linked.user_id                  = result['user_id']
+    linked.linked_user_id           = result['user_id']
     linked.token                    = result['oauth_token']
     linked.secret                   = result['oauth_token_secret']
     stampedAPI.addLinkedAccount(authUserId, linked)
 
     if http_schema.netflix_add_id is not None:
         try:
-            result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
+            result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_add_id)
         except Exception as e:
+            logs.warning('Error adding to netflix: %s' % e)
             return HttpResponseRedirect("stamped://netflix/add/fail")
         if result == None:
+            logs.warning('Error adding to netflix.  Returned no result.')
             return HttpResponseRedirect("stamped://netflix/add/fail")
         return HttpResponseRedirect("stamped://netflix/add/success")
     return HttpResponseRedirect("stamped://netflix/link/success")
@@ -129,11 +186,11 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:
-        result = stampedAPI.addToNetflixInstant(authUserId, http_schema.netflix_id)
+        result = stampedAPI.addToNetflixInstantWithUserId(authUserId, http_schema.netflix_id)
     except StampedThirdPartyInvalidCredentialsError:
-        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+        return createNetflixLoginResponse(request, http_schema.netflix_id)
     if result == None:
-        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+        return createNetflixLoginResponse(request, http_schema.netflix_id)
 
     response = HTTPEndpointResponse()
 

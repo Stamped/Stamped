@@ -587,8 +587,8 @@ class StampedAPILikesFail(StampedAPIStampLikesHttpTest):
         self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
         self.assertEqual(result['num_likes'], 1)
         
-        with expected_exception():
-            result = self.handlePOST(path, data)
+        # Second result should be a no-op
+        result = self.handlePOST(path, data)
         
         path = "stamps/likes/remove.json"
         data = { 
@@ -608,9 +608,6 @@ class StampedAPILikesFail(StampedAPIStampLikesHttpTest):
             }
             result = self.handlePOST(path, data)
             self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
-
-            if 'like_threshold_hit' in result:
-                self.assertEqual(result['like_threshold_hit'], False)
 
             path = "stamps/likes/remove.json"
             data = { 

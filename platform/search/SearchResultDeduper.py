@@ -90,7 +90,7 @@ class SearchResultDeduper(object):
         artistClusters = self.__formClusters(artists, ArtistSearchResultCluster)
         albumClusters = self.__formClusters(albums, AlbumSearchResultCluster)
         songClusters = self.__formClusters(songs, TrackSearchResultCluster)
-        return interleaveResultsByScore([artistClusters, albumClusters, songClusters])
+        return interleaveResultsByRelevance([artistClusters, albumClusters, songClusters])
 
     def __dedupeVideoResults(self, resultLists):
         # First, split by type.
@@ -106,7 +106,7 @@ class SearchResultDeduper(object):
 
         tvClusters = self.__formClusters(tv, TvSearchResultCluster)
         movieClusters = self.__formClusters(movies, MovieSearchResultCluster)
-        return interleaveResultsByScore([tvClusters, movieClusters])
+        return interleaveResultsByRelevance([tvClusters, movieClusters])
 
     def __dedupePlaceResults(self, resultLists):
         places = []
@@ -117,7 +117,7 @@ class SearchResultDeduper(object):
         placeClusters = self.__formClusters(places, PlaceSearchResultCluster)
         # TODO: I need a pruning phase here. Where I have a good cluster in a city that has street-specific data, and
         # another cluster in the same city that doesn't, just get rid of the second one.
-        sortByScore(placeClusters)
+        sortByRelevance(placeClusters)
         return placeClusters
 
     def __dedupeAppResults(self, resultLists):
@@ -125,7 +125,7 @@ class SearchResultDeduper(object):
         for resultList in resultLists:
             apps.extend(resultList)
         clusters = self.__formClusters(apps, AppSearchResultCluster)
-        sortByScore(clusters)
+        sortByRelevance(clusters)
         print "RESULTS WAS OF LENGTH", len(apps)
         print "CLUSTERED TO", len(clusters)
         return clusters
@@ -135,5 +135,5 @@ class SearchResultDeduper(object):
         for resultList in resultLists:
             books.extend(resultList)
         clusters = self.__formClusters(books, BookSearchResultCluster)
-        sortByScore(clusters)
+        sortByRelevance(clusters)
         return clusters

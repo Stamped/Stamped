@@ -22,6 +22,7 @@ try:
     from pprint                     import pformat
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
     from libs.LibUtils              import parseDateString
     from StampedSource              import StampedSource
     from Entity                     import mapCategoryToTypes
@@ -158,8 +159,11 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverPerson.__init__(self, types=['artist'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanArtistTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['artistName']
 
     @lazyProperty
@@ -234,8 +238,11 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaCollection.__init__(self, types=['album'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanAlbumTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         suffix = ''
         try:
             if self.data['contentAdvisoryRating'] == 'Clean':
@@ -314,8 +321,11 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaItem.__init__(self, types=['track'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanTrackTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         suffix = ''
         try:
             if self.data['contentAdvisoryRating'] == 'Clean':
@@ -402,8 +412,11 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaItem.__init__(self, types=['movie'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanMovieTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['trackName']
 
     @lazyProperty
@@ -479,9 +492,12 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
     def __init__(self, itunes_id=None, data=None, itunes=None, maxLookupCalls=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaCollection.__init__(self, types=['tv'], maxLookupCalls=maxLookupCalls)
-    
+
+    def _cleanName(self, rawName):
+        return cleanTvTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['artistName']
 
     @lazyProperty
@@ -530,13 +546,15 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
             return ''
 
 class iTunesBook(_iTunesObject, ResolverMediaItem):
-
     def __init__(self, itunes_id=None, data=None, itunes=None, maxLookupCalls=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanBookTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['trackName']
 
     @lazyProperty
@@ -581,13 +599,15 @@ class iTunesBook(_iTunesObject, ResolverMediaItem):
         return None
 
 class iTunesApp(_iTunesObject, ResolverSoftware):
-
     def __init__(self, itunes_id=None, data=None, itunes=None, maxLookupCalls=None):
         _iTunesObject.__init__(self, itunes_id=itunes_id, data=data, itunes=itunes)
         ResolverSoftware.__init__(self, types=['app'], maxLookupCalls=maxLookupCalls)
 
+    def _cleanName(self, rawName):
+        return cleanAppTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.data['trackName']
 
     @lazyProperty
@@ -905,7 +925,7 @@ class iTunesSource(GenericSource):
             pool.spawn(self.__searchEntityTypeLite, iTunesType, queryText, rawResults)
         pool.join(timeout=timeout)
 
-        scoredResultsByType = {}
+        searchResultsByType = {}
         # Convert from JSON objects to entity proxies. Pass through actual parsing errors, but report & drop the result
         # if we just see a type we aren't expecting. (Music search will sometimes return podcasts, for instance.)
         for (iTunesType, rawTypeResults) in rawResults.items():
@@ -918,21 +938,21 @@ class iTunesSource(GenericSource):
                     pass
 
             if len(processedResults) > 0:
-                scoredResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults)
+                searchResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults)
 
-        if len(scoredResultsByType) == 0:
+        if len(searchResultsByType) == 0:
             # TODO: Throw exception to avoid cache?
             return []
-        if len(scoredResultsByType) == 1:
-            return scoredResultsByType.values()[0]
+        if len(searchResultsByType) == 1:
+            return searchResultsByType.values()[0]
         if queryCategory == 'music':
             # We have to separately request songs, albums, and artists because iTunes does a terrible job blending
             # results between the three. So we need to blend, but it's hard to know how to. We do a little work on the
             # string matching side, but
-            self.__augmentAlbumAndArtistResultsWithSongs(scoredResultsByType.get('album', []),
-                scoredResultsByType.get('musicArtist', []),
-                scoredResultsByType.get('song', []))
-        return interleaveResultsByScore(scoredResultsByType.values())
+            self.__augmentAlbumAndArtistResultsWithSongs(searchResultsByType.get('album', []),
+                searchResultsByType.get('musicArtist', []),
+                searchResultsByType.get('song', []))
+        return interleaveResultsByRelevance(searchResultsByType.values())
 
     def __scoreResults(self, iTunesType, resolverObjects):
         # We weight down album and artist and rely on the augmentation to bring them back up. This is because otherwise
@@ -952,18 +972,18 @@ class iTunesSource(GenericSource):
         }
 
         if iTunesType in iTunesTypesToWeights:
-            scoredResults = scoreResultsWithBasicDropoffScoring(resolverObjects,
+            searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects,
                 sourceScore=iTunesTypesToWeights[iTunesType])
         else:
-            scoredResults = scoreResultsWithBasicDropoffScoring(resolverObjects)
+            searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects)
 
         # Artists without amg IDs get scored down.
         if iTunesType == 'musicArtist':
-            for artistResult in scoredResults:
+            for artistResult in searchResults:
                 if not artistResult.resolverObject.amgId:
-                    artistResult.score = artistResult.score * 0.6
+                    artistResult.relevance = artistResult.relevance * 0.6
 
-        return scoredResults
+        return searchResults
         # TODO: POTENTIALLY USE RELEASE DATE.
 
     def __augmentAlbumAndArtistResultsWithSongs(self, albumSearchResults, artistSearchResults, songSearchResults):
@@ -997,18 +1017,18 @@ class iTunesSource(GenericSource):
             if albumId and albumId in collectionIdsToAlbums:
                 albumSearchResult = collectionIdsToAlbums.get(albumId, None)
                 # TODO: Revisit this.
-                scoreBoost = songSearchResult.score / 5
-                albumSearchResult.addScoreComponentDebugInfo(
+                scoreBoost = songSearchResult.relevance / 5
+                albumSearchResult.addRelevanceComponentDebugInfo(
                     'boost from song %s' % songSearchResult.resolverObject.name, scoreBoost)
-                albumSearchResult.score += scoreBoost
+                albumSearchResult.relevance += scoreBoost
 
             if artistId and artistId in artistIdsToArtists:
                 artistSearchResult = artistIdsToArtists.get(artistId, None)
                 # TODO: Revisit this.
-                scoreBoost = songSearchResult.score / 3
-                artistSearchResult.addScoreComponentDebugInfo(
+                scoreBoost = songSearchResult.relevance / 3
+                artistSearchResult.addRelevanceComponentDebugInfo(
                     'boost from song %s' % songSearchResult.resolverObject.name, scoreBoost)
-                artistSearchResult.score += scoreBoost
+                artistSearchResult.relevance += scoreBoost
                     
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:

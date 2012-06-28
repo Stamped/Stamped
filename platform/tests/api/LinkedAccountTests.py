@@ -148,74 +148,78 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         data = {
             "oauth_token"   : self.token['access_token'],
             'service_name'   : 'facebook',
-            'share_stamps'   : True,
+            'on'   : 'share_stamps,share_follows,share_todos,share_likes',
             }
         self.handlePOST(path, data)
 
         # verify that share settings were updated
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(linkedAccounts['facebook']['share_settings']['share_stamps'], True)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_follows'], True)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_todos'], True)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_likes'], True)
 
-        account = self.showAccount(self.token)
-        import pprint
-        pprint.pprint(linkedAccounts)
-
-        print('###')
-        pprint.pprint(account)
-
-#        self.entity = self.createEntity(self.token)
-#        self.stamp = self.createStamp(self.token, self.entity['entity_id'], blurb='ASDF')
-#
-#        import time
-#        time.sleep(10)
-
-#
-#        self.async(lambda: self.showActivity(self.fUserAToken), [
-#            lambda x: self.assertEqual(len(x), 1),
-#            lambda x: self.assertEqual(x[0]['verb'], 'friend_facebook'),
-#            lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.fUserB['user_id']),
-#            ])
-
-    def test_update_facebook_share_settings(self):
-        # verify that the linked account was properly added
-        linkedAccounts = self.showLinkedAccounts(self.token)
-        self.assertEqual(len(linkedAccounts), 1)
-        self.assertEqual(linkedAccounts['facebook']['service_name'], 'facebook')
-
-        # update share settings: enable share stamps on facebook
-        path = "account/linked/update_share_settings.json"
         data = {
             "oauth_token"   : self.token['access_token'],
             'service_name'   : 'facebook',
-            'share_stamps'      : True,
+            'off'   : 'share_stamps,share_follows',
             }
         self.handlePOST(path, data)
 
-        # verify that share settings were updated
         linkedAccounts = self.showLinkedAccounts(self.token)
-        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_stamps'], True)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_stamps'], False)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_follows'], False)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_todos'], True)
+        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_likes'], True)
 
-        account = self.showAccount(self.token)
+        path = "account/linked/show_share_settings.json"
+        data = {
+            "oauth_token"   : self.token['access_token'],
+            "service_name"  : 'facebook',
+            }
+        result = self.handleGET(path, data)
+
         import pprint
-        pprint.pprint(linkedAccounts)
-
-        print('###')
-        pprint.pprint(account)
-
-        #entity = self.createEntity(self.token)
-        #stamp = self.createStamp(self.token, entity['entity_id'], blurb='ASDF')
-        #self.createTodo(self.token, entity['entity_id'])
-        #self.createLike(self.token, stamp['stamp_id'])
-
-        import time
-        time.sleep(5)
-
-        result = self._getOpenGraphActivity(self.fb_user_token_a)
         pprint.pprint(result)
 
-
-
-
+#    def test_update_facebook_share_settings(self):
+#        # verify that the linked account was properly added
+#        linkedAccounts = self.showLinkedAccounts(self.token)
+#        self.assertEqual(len(linkedAccounts), 1)
+#        self.assertEqual(linkedAccounts['facebook']['service_name'], 'facebook')
+#
+#        # update share settings: enable share stamps on facebook
+#        path = "account/linked/update_share_settings.json"
+#        data = {
+#            "oauth_token"       : self.token['access_token'],
+#            'service_name'      : 'facebook',
+#            'on'                : 'share_stamps',
+#            }
+#        self.handlePOST(path, data)
+#
+#        # verify that share settings were updated
+#        linkedAccounts = self.showLinkedAccounts(self.token)
+#        self.assertEqual(linkedAccounts['facebook']['share_settings']['share_stamps'], True)
+#
+#        account = self.showAccount(self.token)
+#        import pprint
+#        pprint.pprint(linkedAccounts)
+#
+#        print('###')
+#        pprint.pprint(account)
+#
+#        #entity = self.createEntity(self.token)
+#        #stamp = self.createStamp(self.token, entity['entity_id'], blurb='ASDF')
+#        #self.createTodo(self.token, entity['entity_id'])
+#        #self.createLike(self.token, stamp['stamp_id'])
+#
+#        import time
+#        time.sleep(5)
+#
+#        result = self._getOpenGraphActivity(self.fb_user_token_a)
+#        pprint.pprint(result)
+#
+#
 #        self.async(lambda: self.stamp = self.createStamp(self.token, self.entity['entity_id'], blurb='ASDF'), [
 #            lambda x: self.assertEqual(len(x), 1),
 #            lambda x: self.assertEqual(x[0]['verb'], 'friend_facebook'),

@@ -279,20 +279,20 @@ class DevicesSchema(Schema):
 class AccountAlertSettings(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('ios_alert_credit',                 bool)
-        cls.addProperty('ios_alert_like',                   bool)
-        cls.addProperty('ios_alert_todo',                   bool)
-        cls.addProperty('ios_alert_mention',                bool)
-        cls.addProperty('ios_alert_comment',                bool)
-        cls.addProperty('ios_alert_reply',                  bool)
-        cls.addProperty('ios_alert_follow',                 bool)
-        cls.addProperty('email_alert_credit',               bool)
-        cls.addProperty('email_alert_like',                 bool)
-        cls.addProperty('email_alert_todo',                 bool)
-        cls.addProperty('email_alert_mention',              bool)
-        cls.addProperty('email_alert_comment',              bool)
-        cls.addProperty('email_alert_reply',                bool)
-        cls.addProperty('email_alert_follow',               bool)
+        cls.addProperty('alerts_credits_apns',              bool)
+        cls.addProperty('alerts_credits_email',             bool)
+        cls.addProperty('alerts_likes_apns',                bool)
+        cls.addProperty('alerts_likes_email',               bool)
+        cls.addProperty('alerts_todos_apns',                bool)
+        cls.addProperty('alerts_todos_email',               bool)
+        cls.addProperty('alerts_mentions_apns',             bool)
+        cls.addProperty('alerts_mentions_email',            bool)
+        cls.addProperty('alerts_comments_apns',             bool)
+        cls.addProperty('alerts_comments_email',            bool)
+        cls.addProperty('alerts_replies_apns',              bool)
+        cls.addProperty('alerts_replies_email',             bool)
+        cls.addProperty('alerts_followers_apns',            bool)
+        cls.addProperty('alerts_followers_email',           bool)
 
 class LinkedAccountShareSettings(Schema):
     @classmethod
@@ -306,9 +306,9 @@ class LinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
-        cls.addProperty('linked_user_id',                          basestring)
-        cls.addProperty('linked_screen_name',                      basestring)
-        cls.addProperty('linked_name',                             basestring)
+        cls.addProperty('linked_user_id',                   basestring)
+        cls.addProperty('linked_screen_name',               basestring)
+        cls.addProperty('linked_name',                      basestring)
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)

@@ -16,6 +16,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
     @fixtureTest()
     def test_run_book_queries(self):
         bookQueries = [
+                '1984',
                 '1Q84 book',
                 '1Q84',
                 'amrar',
@@ -51,17 +52,28 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('book', bookQueries)
 
+    @fixtureTest()
     def test_run_film_queries(self):
         filmQueries = [
+                '1984',  # This one is a DISASTER.
                 '90210',
                 'LOST',
                 'Le ragazze di Piazza di Spagna',
+                'a-team',
+                'ateam',
+                'a team',
                 'american idol',
+                'animaniacs',
                 'arrested development',
+                'athf',
+                'aqua teen hunger force',
+                'avengers',
                 'big bang theory',
                 'breaking bad',
+                'casablanca',
                 'coupling',
                 'dark angel',
+                'deadwood',
                 'dexter',
                 'die hard',
                 'drive (2011)',
@@ -73,24 +85,40 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'futurama movie',
                 'futurama',
                 'game of thrones',
+                'girl with the dragon tattoo',
                 'godfather',
+                'harry potter',
                 'hotel babylon',
                 'how i met your mother',
                 'hunger games',
                 'inception',
+                'incredibles',
                 'it\'s always sunny in philadelphia',
                 'jeeves and wooster',
+                'lord of the rings',
                 'misfits',
                 'mission impossible ghost protocol',
                 'new girl',
                 'raiders of the lost ark',
+                'requiem',
+                'requiem for a dream',
+                'rome',
                 'saturday night live',
                 'south park',
+                'superman',
                 'spongebob squarepants',
                 'spongebob',
+                'star wars',
+                'star wars tng',
+                'star wars deep space nine',
+                'star trek',
+                'star trek wrath of khan',
+                'taken',
                 'teenage mutant ninja turtles II',
                 'teenage mutant ninja turtles III',
                 'teenage mutant ninja turtles',
+                'the a-team',
+                'the avengers',
                 'the fifth element',
                 'the godfather',
                 'the hunger games',
@@ -99,6 +127,8 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'the walking dead',
                 'tomorrow never dies',
                 'trailer park boys',
+                'true grit',
+                'two towers',
                 'up all night',
 
                 # Tests for title + corroborating detail
@@ -115,6 +145,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('film', filmQueries)
 
+    @fixtureTest()
     def test_run_music_queries(self):
         musicQueries = [
                 '1980 rehab graffiti the world',
@@ -227,6 +258,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 ]
         self.__runQueries('music', musicQueries)
 
+    @fixtureTest()
     def test_run_place_queries(self):
         placeQueries = [
                 ('A16', (37.806528, -122.406511)),
@@ -283,6 +315,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
             ]
         self.__runQueries('place', placeQueries)
 
+    @fixtureTest()
     def test_run_app_queries(self):
         appQueries = [
                 'Stamped',
@@ -309,7 +342,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 location = None
                 readableQuery = query
             results = searcher.searchEntitiesAndClusters(category, query, coords=location)
-            return readableQuery, [(entity.dataExport(), cluster) for entity, cluster in results]
+            return readableQuery, list(results)
 
         results = dict(runSearch(query) for query in queries)
 

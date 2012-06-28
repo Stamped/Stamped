@@ -38,6 +38,12 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 # URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
 url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
+def generateStampUrl(stamp):
+    url_title = encodeStampTitle(stamp.entity.title)
+
+    return 'http://www.stamped.com/%s/stamps/%s/%s' % \
+           (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
+
 def _coordinatesDictToFlat(coordinates):
     try:
         if isinstance(coordinates, Schema):
@@ -529,14 +535,6 @@ class HTTPAccountUpdateForm(Schema):
 
         return AccountUpdateForm().dataImport(data, overflow=True)
 
-#class HTTPAccountProfile(Schema):
-#    @classmethod
-#    def setSchema(cls):
-#        cls.addProperty('name',                             basestring)
-#        cls.addProperty('bio',                              basestring)
-#        cls.addProperty('website',                          basestring)
-#        cls.addProperty('location',                         basestring)
-
 class HTTPCustomizeStamp(Schema):
     @classmethod
     def setSchema(cls):
@@ -553,7 +551,7 @@ class HTTPAccountCheck(Schema):
     def setSchema(cls):
         cls.addProperty('login',                            basestring, required=True)
 
-class HTTPRemoveLinkedAccountForm(Schema):
+class HTTPServiceNameForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
@@ -640,52 +638,38 @@ class HTTPAccountChangePassword(Schema):
         cls.addProperty('old_password',                     basestring, required=True)
         cls.addProperty('new_password',                     basestring, required=True)
 
-class HTTPAccountAlerts(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('ios_alert_credit',                 bool)
-        cls.addProperty('ios_alert_like',                   bool)
-        cls.addProperty('ios_alert_todo',                   bool)
-        cls.addProperty('ios_alert_mention',                bool)
-        cls.addProperty('ios_alert_comment',                bool)
-        cls.addProperty('ios_alert_reply',                  bool)
-        cls.addProperty('ios_alert_follow',                 bool)
-        cls.addProperty('email_alert_credit',               bool)
-        cls.addProperty('email_alert_like',                 bool)
-        cls.addProperty('email_alert_todo',                 bool)
-        cls.addProperty('email_alert_mention',              bool)
-        cls.addProperty('email_alert_comment',              bool)
-        cls.addProperty('email_alert_reply',                bool)
-        cls.addProperty('email_alert_follow',               bool)
-
-    def __init__(self):
-        Schema.__init__(self)
-        self.ios_alert_credit           = False
-        self.ios_alert_like             = False
-        self.ios_alert_todo             = False
-        self.ios_alert_mention          = False
-        self.ios_alert_comment          = False
-        self.ios_alert_reply            = False
-        self.ios_alert_follow           = False
-        self.email_alert_credit         = False
-        self.email_alert_like           = False
-        self.email_alert_todo           = False
-        self.email_alert_mention        = False
-        self.email_alert_comment        = False
-        self.email_alert_reply          = False
-        self.email_alert_follow         = False
-
-    def importAccount(self, account):
-        alerts = getattr(account, 'alert_settings', None)
-        if alerts is not None:
-            self.dataImport(alerts.dataExport(), overflow=True)
-
-        return self
-
 class HTTPAPNSToken(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('token',                            basestring, required=True)
+
+class HTTPSettingsToggle(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('toggle_id',                        basestring, required=True)
+        cls.addProperty('type',                             basestring, required=True)
+        cls.addProperty('value',                            bool, required=True)
+
+class HTTPSettingsGroup(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('group_id',                         basestring, required=True)
+        cls.addProperty('name',                             basestring, required=True) # Used for display
+        cls.addProperty('desc',                             basestring) # Used for display
+        cls.addNestedPropertyList('toggles',                HTTPSettingsToggle)
+
+class HTTPSettingsToggleRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('on',                               basestring)
+        cls.addProperty('off',                              basestring)
+
+class HTTPShareSettingsToggleRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',                     basestring)
+        cls.addProperty('on',                               basestring)
+        cls.addProperty('off',                              basestring)
 
 
 # ##### #
@@ -1101,15 +1085,16 @@ class HTTPEntity(Schema):
         cls.addProperty('category',                         basestring, required=True)
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('caption',                          basestring)
+        cls.addProperty('desc',                             basestring)
         cls.addNestedPropertyList('images',                 HTTPImage)
         cls.addProperty('last_modified',                    basestring)
         cls.addNestedProperty('previews',                   HTTPPreviews)
-
+        
         # Location
         cls.addProperty('address',                          basestring)
         cls.addProperty('neighborhood',                     basestring)
         cls.addProperty('coordinates',                      basestring)
-
+        
         # Components
         cls.addNestedProperty('playlist',                   HTTPEntityPlaylist)
         cls.addNestedPropertyList('actions',                HTTPEntityAction)
@@ -1218,6 +1203,7 @@ class HTTPEntity(Schema):
         self.subcategory        = entity.subcategory
 
         self.caption            = self.subtitle # Default
+        self.desc               = entity.desc
         self.last_modified      = entity.timestamp.created
 
         subcategory             = self._formatSubcategory(self.subcategory)
@@ -1603,7 +1589,7 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True, key='artist')
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Album Details', entity.desc, key='desc', optional=True)
@@ -1620,7 +1606,8 @@ class HTTPEntity(Schema):
                         action.type         = 'stamped_view_entity'
                         action.name         = 'View Artist'
                         action.sources      = [source]
-                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True)
+                        self._addMetadata('Artist', entity.artists[0].title, action=action, optional=True, key='artist')
+                    ### TODO: Add album
                 self._addMetadata('Genre', self._formatMetadataList(entity.genres))
                 self._addMetadata('Release Date', self._formatReleaseDate(entity.release_date))
                 self._addMetadata('Song Details', entity.desc, key='desc', optional=True)
@@ -2480,7 +2467,7 @@ class HTTPStamp(Schema):
         cls.addProperty('created',                          basestring)
         cls.addProperty('modified',                         basestring)
         cls.addProperty('stamped',                          basestring)
-
+        
         cls.addProperty('num_comments',                     int)
         cls.addProperty('num_likes',                        int)
         cls.addProperty('num_todos',                        int)
@@ -2549,9 +2536,7 @@ class HTTPStamp(Schema):
         self.num_todos      = getattr(stamp.stats, 'num_todos', 0)
         self.num_credits    = getattr(stamp.stats, 'num_credit', 0)
 
-        url_title = encodeStampTitle(stamp.entity.title)
-        self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
-                   (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
+        self.url = generateStampUrl(stamp)
 
         if stamp.attributes is not None:
             self.is_liked   = getattr(stamp.attributes, 'is_liked', False)
@@ -2599,11 +2584,17 @@ class HTTPStamp(Schema):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 
 class HTTPStampDetail(Schema):
+    
+    def __init__(self, *args, **kwargs):
+        Schema.__init__(self, *args, **kwargs)
+        self.ajax = False
+    
     @classmethod
     def setSchema(cls):
         cls.addProperty('screen_name',                      basestring)
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('stamp_title',                      basestring)
+        cls.addProperty('ajax',                             bool)
 
 class HTTPStampNew(Schema):
     @classmethod
@@ -3050,9 +3041,6 @@ class HTTPActivity(Schema):
                 self.image = _getIconURL('news_credit_group')
 
             self.action = _buildStampAction(self.objects.stamps[0])
-
-            ### TEMP: Switch verb to be "credit" until we can make underlying changes
-            self.verb = 'credit'
 
         elif self.verb == 'like':
             _addStampObjects()

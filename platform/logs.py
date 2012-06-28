@@ -65,6 +65,9 @@ def _log(level, msg, *args, **kwargs):
         localData.log['log'].append(item)
         localData.log[level] = True
 
+    if isinstance(msg, unicode):
+        msg = msg.encode('utf-8')
+
     # else:
     msg = "{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, msg)
     if level == 'warning':
@@ -146,12 +149,6 @@ def token(token):
         localData.log['token'] = token
     except:
         localData.log['token'] = 'FAIL'
-
-def client(client_id):
-    try:
-        localData.log['client_id'] = client_id
-    except:
-        localData.log['client_id'] = 'FAIL'
 
 def user(user_id):
     try:

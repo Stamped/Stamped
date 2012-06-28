@@ -42,6 +42,7 @@ try:
     from api.Schemas                import *
     from ActivityCollectionCache    import ActivityCollectionCache
     from Memcache                   import globalMemcache
+    from HTTPSchemas                import generateStampUrl
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
@@ -258,21 +259,21 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = '0057D1'
 
         # Set default alerts
-        alert_settings                         = AccountAlertSettings()
-        alert_settings.ios_alert_credit         = True
-        alert_settings.ios_alert_like           = True
-        alert_settings.ios_alert_todo           = True
-        alert_settings.ios_alert_mention        = True
-        alert_settings.ios_alert_comment        = True
-        alert_settings.ios_alert_reply          = True
-        alert_settings.ios_alert_follow         = True
-        alert_settings.email_alert_credit       = True
-        alert_settings.email_alert_like         = False
-        alert_settings.email_alert_todo         = False
-        alert_settings.email_alert_mention      = True
-        alert_settings.email_alert_comment      = True
-        alert_settings.email_alert_reply        = True
-        alert_settings.email_alert_follow       = True
+        alert_settings                          = AccountAlertSettings()
+        alert_settings.alerts_credits_apns      = True
+        alert_settings.alerts_credits_email     = True
+        alert_settings.alerts_likes_apns        = True
+        alert_settings.alerts_likes_email       = False
+        alert_settings.alerts_todos_apns        = True
+        alert_settings.alerts_todos_email       = False
+        alert_settings.alerts_mentions_apns     = True
+        alert_settings.alerts_mentions_email    = True
+        alert_settings.alerts_comments_apns     = True
+        alert_settings.alerts_comments_email    = True
+        alert_settings.alerts_replies_apns      = True
+        alert_settings.alerts_replies_email     = True
+        alert_settings.alerts_followers_apns    = True
+        alert_settings.alerts_followers_email   = True
         account.alert_settings                  = alert_settings
 
         # Validate screen name
@@ -427,7 +428,7 @@ class StampedAPI(AStampedAPI):
         # First, get user information from Twitter using the passed in token
         try:
             twitterUser = self._twitter.getUserInfo(new_tw_account.user_token, new_tw_account.user_secret)
-        except (StampedInputError, StampedUnavailableError):
+        except (StampedInputError, StampedUnavailableError) as e:
             logs.warning("Unable to get user info from Twitter %s" % e)
             raise StampedInputError('Unable to connect to Twitter')
         self._verifyTwitterAccount(twitterUser['id'])
@@ -560,11 +561,6 @@ class StampedAPI(AStampedAPI):
             # Remove comment
             self._commentDB.removeComment(comment.comment_id)
 
-            # Decrement comment count on stamp
-            if comment.stamp_id not in stampIds:
-                logs.info('STAMP ID: %s' % comment.stamp_id)
-                self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
-
         # Remove likes
         likedStampIds = self._stampDB.getUserLikes(account.user_id)
         likedStamps = self._stampDB.getStamps(likedStampIds)
@@ -574,9 +570,6 @@ class StampedAPI(AStampedAPI):
 
             # Decrement user stats by one
             self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=-1)
-
-            # Decrement stamp stats by one
-            self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
 
         # Remove like history
         self._stampDB.removeUserLikesHistory(account.user_id)
@@ -606,10 +599,6 @@ class StampedAPI(AStampedAPI):
     def updateAccount(self, authUserId, updateAcctForm):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
-
-#        for k,v in fields.iteritems():
-#            if v == '':
-#                fields[k] = None
 
         if 'screen_name' in fields and account.screen_name != fields['screen_name']:
             old_screen_name = account.screen_name
@@ -717,6 +706,10 @@ class StampedAPI(AStampedAPI):
         return self._accountDB.getAccount(authUserId)
 
     @API_CALL
+    def getLinkedAccount(self, authUserId, service_name):
+        return getattr(self.getAccount(authUserId).linked, service_name)
+
+    @API_CALL
     def getLinkedAccounts(self, authUserId):
         return self.getAccount(authUserId).linked
 
@@ -822,18 +815,22 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Invalid input")
 
     @API_CALL
-    def updateAlerts(self, authUserId, alerts):
+    def updateAlerts(self, authUserId, on, off):
         account = self._accountDB.getAccount(authUserId)
 
         accountAlerts = account.alert_settings
         if accountAlerts is None:
             accountAlerts = AccountAlertSettings()
 
-        for k, v in alerts.dataExport().iteritems():
-            if v:
-                setattr(accountAlerts, k, True)
-            else:
-                setattr(accountAlerts, k, False)
+        if on is not None:
+            for attr in on:
+                if hasattr(accountAlerts, attr):
+                    setattr(accountAlerts, attr, True)
+
+        if off is not None:
+            for attr in off:
+                if hasattr(accountAlerts, attr):
+                    setattr(accountAlerts, attr, False)
 
         account.alert_settings = accountAlerts
 
@@ -885,6 +882,8 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.alertFollowersFromTwitter,
                          args=[authUserId, linkedAccount.token, linkedAccount.secret])
 
+        return linkedAccount
+
     @API_CALL
     def updateLinkedAccount(self, authUserId, linkedAccount):
         # Before we do anything, verify that the account is valid
@@ -893,22 +892,29 @@ class StampedAPI(AStampedAPI):
         return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
-    def updateLinkedAccountShareSettings(self, authUserId, service_name, linkedAccountShareSettings):
-        if service_name not in ['facebook', 'twitter', 'netflix']:
-            logs.warning('Attempted to update share settings of invalid linked account: %s' % service_name)
-            raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
-
-        account = self.getAccount(authUserId)
-        if getattr(account.linked, service_name, None) == None:
-            logs.warning('Could not find linked account to update: %s' % service_name)
-            raise StampedIllegalActionError("There was an error updating share settings")
-
+    def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
+        account = self._accountDB.getAccount(authUserId)
         linkedAccount = getattr(account.linked, service_name)
-        logs.info('### share_settings: %s' % linkedAccountShareSettings)
-        linkedAccount.share_settings = linkedAccountShareSettings
+
+
+        shareSettings = linkedAccount.share_settings
+        if shareSettings is None:
+            shareSettings = LinkedAccountShareSettings()
+
+        if on is not None:
+            for attr in on:
+                if hasattr(shareSettings, attr):
+                    setattr(shareSettings, attr, True)
+
+        if off is not None:
+            for attr in off:
+                if hasattr(shareSettings, attr):
+                    setattr(shareSettings, attr, False)
+
+        linkedAccount.share_settings = shareSettings
 
         self._accountDB.updateLinkedAccount(authUserId, linkedAccount)
-        return True
+        return linkedAccount
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
@@ -977,14 +983,21 @@ class StampedAPI(AStampedAPI):
                                           body = 'Your Facebook friend %s joined Stamped.' % account.linked.facebook.linked_name)
             self._accountDB.addLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id)
 
+
+
     @API_CALL
-    def addToNetflixInstant(self, authUserId, netflixId):
-        """
-         Asynchronously add an entity to the user's netflix queue
-        """
+    def addToNetflixInstant(self, nf_user_id, nf_token, nf_secret, netflixId):
+        if (nf_user_id is None or nf_token is None or nf_secret is None):
+            logs.info('Returning because of missing account credentials')
+            return None
+
+        netflix = globalNetflix()
+        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
+
+    @API_CALL
+    def addToNetflixInstantWithUserId(self, authUserId, netflixId):
         account   = self._accountDB.getAccount(authUserId)
 
-        # TODO return HTTPAction to invoke sign in if credentials are unavailable
         nf_user_id  = None
         nf_token    = None
         nf_secret   = None
@@ -994,19 +1007,7 @@ class StampedAPI(AStampedAPI):
             nf_token    = account.linked.netflix.token
             nf_secret   = account.linked.netflix.secret
 
-        if (nf_user_id is None or nf_token is None or nf_secret is None):
-            logs.info('Returning because of missing account credentials')
-            return None
-
-        netflix = globalNetflix()
-        return netflix.addToQueue(nf_user_id, nf_token, nf_secret, netflixId)
-
-    @API_CALL
-    def removeFromNetflixInstant(self, authUserId, netflixId=None, netflixKey=None, netflixSecret=None):
-
-        account   = self._accountDB.getAccount(authUserId)
-
-        return True
+        return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
 
     """
@@ -1803,6 +1804,10 @@ class StampedAPI(AStampedAPI):
         Basic function to update all references to an entity_id that has been tombstoned.
         """
         oldEntity = self._entityDB.getEntity(oldEntityId)
+        if oldEntity.sources.tombstone_id is None:
+            logs.info("Short circuit: tombstone_id is 'None' for entity %s" % oldEntityId)
+            return
+        
         newEntity = self._entityDB.getEntity(oldEntity.sources.tombstone_id)
         newEntityId = newEntity.entity_id
         newEntityMini = newEntity.minimize()
@@ -2409,7 +2414,7 @@ class StampedAPI(AStampedAPI):
 
         # Add activity for credited users
         if len(creditedUserIds) > 0:
-            self._addRestampActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
+            self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
 
         # Add activity for mentioned users
         mentionedUserIds = set()
@@ -2629,9 +2634,9 @@ class StampedAPI(AStampedAPI):
         stats.num_todos         = len(todos)
         stats.preview_todos     = todos[:MAX_PREVIEW]
 
-        restamps                = self._stampDB.getRestamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
-        stats.num_credits       = len(restamps)
-        stats.preview_credits   = map(lambda x: x.stamp_id, restamps[:MAX_PREVIEW])
+        creditStamps            = self._stampDB.getCreditedStamps(stamp.user.user_id, stamp.entity.entity_id, limit=100)
+        stats.num_credits       = len(creditStamps)
+        stats.preview_credits   = map(lambda x: x.stamp_id, creditStamps[:MAX_PREVIEW])
 
         comments                = self._commentDB.getCommentsForStamp(stampId, limit=100)
         stats.num_comments      = len(comments)
@@ -2667,12 +2672,15 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            else:
-                return 'place'
+            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
+                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
+                return 'store'
+            return 'place'
 
         elif kind == 'person':
             if 'artist' in types:
                 return 'artist'
+            return 'person'
 
         elif kind == 'media_collection':
             if 'tv' in types:
@@ -2682,33 +2690,36 @@ class StampedAPI(AStampedAPI):
 
         elif kind == 'media_item':
             if 'track' in types:
-                return 'track'
+                return 'song'
             elif 'movie' in types:
                 return 'movie'
             elif 'book' in types:
                 return 'book'
+            elif 'song' in types:
+                return 'song'
 
         elif kind == 'software':
             if 'app' in types:
                 return 'app'
+            elif 'video_game' in types:
+                return 'video_game'
+        return 'other'
 
-        else:
-            return 'other'
-
-    def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
+    def _getOpenGraphUrl(self, stamp=None, user=None):
         #TODO: fill this with something other than the dummy url
-        if stampId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
-        if entityId is not None:
-            return "http://static.stamped.com/assets/movies7.html"
-        if userId is not None:
-            return "http://static.stamped.com/assets/user.html"
+        if stamp is not None:
+            url = generateStampUrl(stamp)
+            #HACK for testing purposes
+            return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
+        if user is not None:
+            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
-    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
+    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
         if account.screen_name_lower not in ['ml', 'kevin']:
+            logs.info('Skipping Open Graph post because user not on whitelist')
             return
 
         logs.info('######')
@@ -2728,37 +2739,39 @@ class StampedAPI(AStampedAPI):
 
         logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
 
+        kwargs = {}
         if stampId is not None and share_settings.share_stamps == True:
             action = 'stamp'
             stamp = self.getStamp(stampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = stampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
+            kwargs['message'] = stamp.content.blurb
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
             stamp = self.getStamp(likeStampid)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = likeStampId)
-        elif todoEntityId is not None and share_settings.share_todos == True:
+            url = self._getOpenGraphUrl(stamp = stamp)
+        elif todoStampId is not None and share_settings.share_todos == True:
             action = 'todo'
-            entity = self.getEntity({'entity_id': todoEntityId})
-            kind = entity.kind
-            types = entity.types
+            stamp = self.getStamp(todoStampId)
+            kind = stamp.entity.kind
+            types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(entityId = entity.entity_id)
+            url = self._getOpenGraphUrl(stamp = stamp)
         elif followUserId is not None and share_settings.share_follows == True:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
             ogType = 'user'
-            url = self._getOpenGraphUrl(userId = user.user_id)
+            url = self._getOpenGraphUrl(user = user)
 
         if action is None or ogType is None or url is None:
             return
 
-        self._facebook.postToOpenGraph(token, ogType, url)
+        self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 
 
@@ -2872,9 +2885,6 @@ class StampedAPI(AStampedAPI):
         if len(repliedUserIds) > 0:
             self._addReplyActivity(authUserId, list(repliedUserIds), stamp.stamp_id, comment.comment_id)
 
-        # Increment comment count on stamp
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_comments', increment=1)
-
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
@@ -2893,9 +2903,6 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity?
         self._activityDB.removeCommentActivity(authUserId, comment.comment_id)
-
-        # Increment comment count on stamp
-        self._stampDB.updateStampStats(comment.stamp_id, 'num_comments', increment=-1)
 
         # Add user object
         user = self._userDB.getUser(comment.user.user_id)
@@ -2964,24 +2971,10 @@ class StampedAPI(AStampedAPI):
         stamp = self._stampDB.getStamp(stampId)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId)
 
-        # Verify user has the ability to 'like' the stamp
-        if stamp.user.user_id != authUserId:
-            friendship              = Friendship()
-            friendship.user_id      = stamp.user.user_id
-            friendship.friend_id    = authUserId
-
-            # Check if stamp is private; if so, must be a follower
-            if stamp.user.privacy == True:
-                if not self._friendshipDB.checkFriendship(friendship):
-                    raise StampedPermissionsError("Insufficient privileges to add comment")
-
-            # Check if block exists between user and stamp owner
-            if self._friendshipDB.blockExists(friendship) == True:
-                raise StampedIllegalActionError("Block exists")
-
         # Check to verify that user hasn't already liked stamp
         if self._stampDB.checkLike(authUserId, stampId):
-            raise StampedIllegalActionError("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            logs.info("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+            return stamp
 
         # Check if user has liked the stamp previously; if so, don't give credit
         previouslyLiked = False
@@ -2995,21 +2988,26 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.likes')
 
-        # Increment user stats by one
-        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
-
-        # Increment stamp stats by one
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=1)
-
+        # Force attributes
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
-
         stamp.stats.num_likes += 1
-
         if stamp.attributes is None:
             stamp.attributes = StampAttributesSchema()
         stamp.attributes.is_liked = True
+
+        # Add like async
+        tasks.invoke(tasks.APITasks.addLike, args=[authUserId, stampId, previouslyLiked])
+
+        return stamp
+
+    @API_CALL
+    def addLikeAsync(self, authUserId, stampId, previouslyLiked=False):
+        stamp = self._stampDB.getStamp(stampId)
+
+        # Increment user stats
+        self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
 
         # Give credit if not previously liked
         if not previouslyLiked and stamp.user.user_id != authUserId:
@@ -3028,8 +3026,6 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
-        return stamp
-
     @API_CALL
     def removeLike(self, authUserId, stampId):
         # Remove like (if it exists)
@@ -3043,9 +3039,6 @@ class StampedAPI(AStampedAPI):
         # Decrement user stats by one
         self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=-1)
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
-
-        # Decrement stamp stats by one
-        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=-1)
 
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
@@ -3895,7 +3888,9 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoEntityId':entity.entity_id})
+        # for now, we only post to OpenGraph if the Todo was off of a stamp
+        if stampId is not None:
+            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoStampId':stampId})
 
         return todo
 
@@ -4027,14 +4022,23 @@ class StampedAPI(AStampedAPI):
                                             groupRange=timedelta(days=1),
                                             unique=True)
 
-    def _addRestampActivity(self, userId, recipientIds, stamp_id, benefit):
+    def _addCreditActivity(self, userId, recipientIds, stamp_id, benefit):
         objects = ActivityObjectIds()
         objects.user_ids = recipientIds
         objects.stamp_ids = [ stamp_id ]
-        self._addActivity('restamp', userId, objects,
+        self._addActivity('credit', userId, objects,
                                              benefit = benefit)
 
     def _addLikeActivity(self, userId, stampId, friendId, benefit):
+        """
+        Note: Ideally, if a user "re-likes" a stamp (e.g. they've liked it before and they
+        like it again), it should bump the activity item to the top of your feed. There are a 
+        whole bunch of pitfalls with this, though. Do you display that the user earned a stamp?
+        How is grouping handled, especially if it's grouped previously? What's the upside 
+        (especially if the second like is an accident)? 
+
+        Punting for now, but we can readdress after v2 launch.
+        """
         objects = ActivityObjectIds()
         objects.stamp_ids = [ stampId ]
         objects.user_ids = [ friendId ]
@@ -4492,7 +4496,7 @@ class StampedAPI(AStampedAPI):
 
             modified = False
             visitedStubs = []
-            for i, stub in enumerate(stubList):
+            for stub in stubList:
                 try:
                     resolvedFull, stubModified = self._resolveStub(stub, False)
                 except KeyError as e:
@@ -4564,6 +4568,8 @@ class StampedAPI(AStampedAPI):
         else:
             raise KeyError('Unable to resolve stub: ' + str(stub))
 
+        if entity.kind != stub.kind:
+            raise KeyError('Confused and dazed. Stub and result are different kinds: ' + str(stub))
         return entity, stubModified
 
     def _iterateOutLinks(self, entity, func):

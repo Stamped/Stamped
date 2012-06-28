@@ -49,7 +49,7 @@ class ActivityCollectionCache(ACollectionCache):
                 # Exclude the item if it is in the user's 0personal feed, unless it is a 'follow' item.  In that case,
                 #  remove the user as an object and ensure there are still other users targeted by the item
                 isInPersonalFeed = item.activity_id in overlappingActivityIds
-                if isInPersonalFeed and item.verb in ['comment', 'like',  'todo', 'restamp' ]:
+                if isInPersonalFeed and item.verb in ['comment', 'like',  'todo', 'credit' ]:
                     continue
                 elif isInPersonalFeed and item.verb in ['follow']:
                     assert(item.objects is not None and authUserId in item.objects.user_ids)
