@@ -21,10 +21,10 @@ def applyRemovalRegexps(regexps, title):
     while modified:
         modified = False
         for removalRegexp in regexps:
-            if removalRegexp.find(text):
-                text = removalRegexp.sub('', text)
+            if removalRegexp.search(title):
+                title = removalRegexp.sub('', title)
                 modified = True
-    return text
+    return title
 
 
 class TitleDataQualityTest(object):
@@ -123,8 +123,23 @@ def cleanArtistTitle(artistTitle):
 ################################################   BOOKS    ################################################
 ############################################################################################################
 
+def makeDelimitedSectionRe(pattern):
+    """Returns a regex that matches an entire delimited section (by () or []) if the
+    section contains the given pattern.
+    """
+    return re.compile("[(\[](.+ )?%s( .+)?[)\]]" % pattern, re.IGNORECASE)
+
+BOOK_TITLE_REMOVAL_REGEXPS = (
+    makeDelimitedSectionRe('edition'),
+    makeDelimitedSectionRe('series'),
+    makeDelimitedSectionRe('vintage'),
+    makeDelimitedSectionRe('classic'),
+    makeDelimitedSectionRe('book'),
+    makeDelimitedSectionRe('volume'),
+)
+
 def cleanBookTitle(bookTitle):
-    return bookTitle
+    return applyRemovalRegexps(BOOK_TITLE_REMOVAL_REGEXPS, bookTitle)
 
 ############################################################################################################
 ################################################    APPS    ################################################
