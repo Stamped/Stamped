@@ -130,6 +130,7 @@ class StampedAPIProxy(object):
 stampedAPIProxy = StampedAPIProxy()
 
 def stamped_view(schema=None, 
+                 ignore_extra_params=False, 
                  parse_request_kwargs=None, 
                  parse_django_kwargs=True):
     def decorator(fn):
@@ -156,7 +157,7 @@ def stamped_view(schema=None,
                         django_kwargs = kwargs or {}
                         subkwargs = {}
                     
-                    result = parse_request(request, schema(), django_kwargs, **parse_kwargs)
+                    result = parse_request(request, schema(), django_kwargs, overflow=ignore_extra_params, **parse_kwargs)
                     subkwargs['schema'] = result
                 
                 response = fn(request, *args, **subkwargs)
@@ -285,7 +286,7 @@ def get_stamped_context(context, preload=None):
     
     return context
 
-def parse_request(request, schema, django_kwargs, **kwargs):
+def parse_request(request, schema, django_kwargs, overflow, **kwargs):
     data = { }
     
     try:
@@ -327,7 +328,7 @@ def parse_request(request, schema, django_kwargs, **kwargs):
                 raise
             return
         
-        schema.dataImport(data)
+        schema.dataImport(data, overflow=overflow)
         return schema
     except Exception as e:
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
