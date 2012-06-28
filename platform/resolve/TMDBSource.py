@@ -297,8 +297,15 @@ class TMDBSource(GenericSource):
 
         return [resolverObject for resolverObject in resolverObjects if not isFarInFuture(resolverObject)]
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         raw_results = self.__tmdb.movie_search(queryText)['results']
+        if logRawResults:
+            logComponents = ['\n\n\nTMDB RAW RESULTS\nTMDB RAW RESULTS\nTMDB RAW RESULTS\n\n\n']
+            for result in raw_results:
+                logComponents.extend(['\n\n', pformat(result), '\n\n'])
+            logComponents.append('\n\n\nEND TMDB RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
+
         # 20 results is good enough for us. No second requests.
         resolver_objects = [ TMDBMovie(result['id'], data=result, maxLookupCalls=0) for result in raw_results ]
         resolver_objects = self.__pareOutResultsFarInFuture(resolver_objects)
