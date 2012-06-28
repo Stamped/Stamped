@@ -232,7 +232,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
     if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('stamp', access_token,
-                                                   'movie', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/travis/stamps/68/Megamind'))
+                                                   'place', 'http://static.stamped.com/assets/place.html'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
@@ -240,7 +240,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToOpenGraph'
+    methods = 'postToNewsFeed'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
