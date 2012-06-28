@@ -11,13 +11,22 @@
 #import "UserStampView.h"
 #import "STSimpleUserDetail.h"
 #import "STUserStatsView.h"
+#import "STUserImageView.h"
+#import "STStampedActions.h"
 
 @interface UserHeaderTabView : UIView
 @property(nonatomic,assign) id delegate;
 - (void)setSelectedTab:(STUserHeaderTab)tab;
 @end
 
+@interface STUserHeaderView ()
+
+@property (nonatomic, readonly, retain) STUserImageView* userImageView;
+
+@end
+
 @implementation STUserHeaderView
+@synthesize userImageView = _userImageView;
 @synthesize selectedTab=_selectedTab;
 @synthesize showingStats=_showingStats;
 @synthesize delegate;
@@ -26,19 +35,22 @@
     if ((self = [super initWithFrame:frame])) {
         
         self.clipsToBounds = YES;
+        _userImageView = [[STUserImageView alloc] initWithSize:76];
+        [Util reframeView:_userImageView withDeltas:CGRectMake(10, 10, 0, 0)];
+        [self addSubview:_userImageView];
         
-        STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 76.0f, 76.0f)];
-        view.delegate = (id<STAvatarViewDelegate>)self;
-        view.backgroundColor = [UIColor whiteColor];
-        [self addSubview:view];
-        [view release];
-        _avatarView = view;
-        [view setDefault];
-                
-        view.imageView.frame = CGRectInset(view.imageView.frame, 1, 1);
-        view.backgroundView.layer.shadowRadius = 1.0f;
-        view.backgroundView.layer.shadowOpacity = 0.2f;
-        
+//        STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 76.0f, 76.0f)];
+//        view.delegate = (id<STAvatarViewDelegate>)self;
+//        view.backgroundColor = [UIColor whiteColor];
+//        [self addSubview:view];
+//        [view release];
+//        _avatarView = view;
+//        [view setDefault];
+//                
+//        view.imageView.frame = CGRectInset(view.imageView.frame, 1, 1);
+//        view.backgroundView.layer.shadowRadius = 1.0f;
+//        view.backgroundView.layer.shadowOpacity = 0.2f;
+//        
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(108.0f, 30.0f, 0.0f, 0.0f)];
         label.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
         label.font = [UIFont boldSystemFontOfSize:16];
@@ -63,7 +75,7 @@
         [label release];
         _detailTitleLabel = label;
         
-        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_avatarView.frame) - 34, CGRectGetMinY(_avatarView.frame) - 34.0f, 60.0f, 60.0f)];
+        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(_userImageView.frame) - 34, CGRectGetMinY(_userImageView.frame) - 34.0f, 60.0f, 60.0f)];
         stampView.size = STStampImageSize60;
         [self addSubview:stampView];
         [stampView release];
@@ -77,12 +89,13 @@
         [self addSubview:waveView];
         [waveView release];
         _tabView = waveView;
-                
+        
     }
     return self;
 }
 
 - (void)dealloc {
+    [_userImageView release];
     [super dealloc];
 }
 
@@ -114,14 +127,7 @@
 #pragma mark - Setters
 
 - (void)setupWithUser:(STSimpleUserDetail*)user {
-    
-    if ([user isKindOfClass:NSClassFromString(@"STSimpleSource")]) {
-        _titleLabel.text = user.name;
-        [_titleLabel sizeToFit];
-        return;
-    }
-        
-    [_avatarView setImageURL:[NSURL URLWithString:[user imageURL]]];
+    [_userImageView setupWithUser:user viewAction:NO];
     _titleLabel.text = user.name;
     if ([user respondsToSelector:@selector(location)] && [user location]) {
         _detailTitleLabel.text = [user location];
@@ -133,6 +139,10 @@
     if (_statsView) {
         [_statsView setupWithUser:user];
     }
+    [_userImageView clearAction];
+    STActionContext* context = [STActionContext context];
+    id<STAction> action = [STStampedActions actionViewUserImage:user withOutputContext:context];
+    [_userImageView setAction:action withContext:context];
     [self setNeedsLayout];
     
 }

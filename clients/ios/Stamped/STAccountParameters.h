@@ -18,8 +18,8 @@
 @property (nonatomic, readwrite, copy) NSString* bio;
 @property (nonatomic, readwrite, copy) NSString* website;
 @property (nonatomic, readwrite, copy) NSString* location;
-@property (nonatomic, readwrite, copy) NSString* colorPrimary;
-@property (nonatomic, readwrite, copy) NSString* colorSecondary;
+@property (nonatomic, readwrite, copy) NSString* primaryColor;
+@property (nonatomic, readwrite, copy) NSString* secondaryColor;
 
 - (NSMutableDictionary*)asDictionaryParams;
 - (NSString*)errorStringRequiresEmail:(BOOL)requiresEmail;

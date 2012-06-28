@@ -102,13 +102,14 @@ static const NSInteger _cellsPerRow = 7;
         NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
         BOOL continuedFlag = (limit < total);
         
+        STProfileImageSize size = STProfileImageSize48;
         for (id<STStampPreview> credit in previews.credits) {
             if (index >= limit) break;
             
             STActionContext *context = [STActionContext context];
             id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:size]];
             [view setupWithUser:credit.user];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
             index++;
@@ -122,7 +123,7 @@ static const NSInteger _cellsPerRow = 7;
             context.user = user;
             id<STAction> action = [STStampedActions actionViewStamp:preview.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
             [view setupWithUser:user];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
             index++;
@@ -137,7 +138,7 @@ static const NSInteger _cellsPerRow = 7;
             context.user = like;
             id<STAction> action = [STStampedActions actionViewUser:like.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:size]];
             view.iconImageView.image = likeIcon;
             [view setupWithUser:nil];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
@@ -153,7 +154,7 @@ static const NSInteger _cellsPerRow = 7;
             context.user = todo;
             id<STAction> action = [STStampedActions actionViewUser:todo.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
+            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:size]];
             view.iconImageView.image = todoIcon;
             [view setupWithUser:nil];
             [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
@@ -266,9 +267,10 @@ static const NSInteger _cellsPerRow = 7;
             //continuedFlag = YES;
         }
         
+        STProfileImageSize size = STProfileImageSize48;
         for (id<STStampPreview> credit in previews.credits) {
             if (images.count < limit) {
-                [images addObject:[Util profileImageURLForUser:credit.user withSize:STProfileImageSize31]];
+                [images addObject:[Util profileImageURLForUser:credit.user withSize:size]];
             }
             else {
                 break;
@@ -277,7 +279,7 @@ static const NSInteger _cellsPerRow = 7;
         for (id<STStampPreview> preview in previews.stamps) {
             id<STUser> user = preview.user;
             if (images.count < limit) {
-                [images addObject:[Util profileImageURLForUser:user withSize:STProfileImageSize31]];
+                [images addObject:[Util profileImageURLForUser:user withSize:size]];
             }
             else {
                 break;
@@ -285,7 +287,7 @@ static const NSInteger _cellsPerRow = 7;
         }
         for (id<STUser> like in previews.likes) {
             if (images.count < limit) {
-                [images addObject:[Util profileImageURLForUser:like withSize:STProfileImageSize31]];
+                [images addObject:[Util profileImageURLForUser:like withSize:size]];
             }
             else {
                 break;
@@ -293,7 +295,7 @@ static const NSInteger _cellsPerRow = 7;
         }
         for (id<STUser> todo in previews.todos) {
             if (images.count < limit) {
-                [images addObject:[Util profileImageURLForUser:todo withSize:STProfileImageSize31]];
+                [images addObject:[Util profileImageURLForUser:todo withSize:size]];
             }
             else {
                 break;

@@ -14,10 +14,11 @@
 @protocol STPlaylistItem <NSObject>
 
 @property (nonatomic, readonly, retain) NSString* name;
+@property (nonatomic, readonly, retain) NSString* subtitle;
 @property (nonatomic, readonly, assign) NSInteger length;
 @property (nonatomic, readonly, retain) NSString* icon;
 @property (nonatomic, readonly, retain) NSString* entityID;
-@property (nonatomic, readonly, retain) id<STImage> image;
+@property (nonatomic, readonly, retain) NSArray<STImage>* images;
 @property (nonatomic, readonly, retain) id<STAction> action;
 
 @end

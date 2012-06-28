@@ -63,7 +63,20 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-    [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request with %d:\n%@\n%@ ", objectLoader.response.statusCode, objectLoader.URL, objectLoader.params]];
+    id<RKParser> parser = [[RKParserRegistry sharedRegistry] parserForMIMEType:objectLoader.response.MIMEType];
+    NSString* errorMessage = nil;
+    if (parser) {
+        NSString* body = objectLoader.response.bodyAsString;
+        if (body) {
+            NSDictionary* errorDict = [parser objectFromString:objectLoader.response.bodyAsString error:nil];
+            errorMessage = [errorDict objectForKey:@"message"];
+        }
+    }
+    if (!errorMessage) {
+        errorMessage = error.localizedDescription;
+    }
+    error = [NSError errorWithDomain:error.domain code:error.code userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
+    [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request with %d:\n%@\n%@", objectLoader.response.statusCode, objectLoader.URL, objectLoader.params]];
     if ([self.cancellation finish]) {
         [Util executeOnMainThread:^{
             self.callback(nil, error, self.cancellation);
@@ -91,6 +104,7 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 
 @property (nonatomic, readwrite, retain) STSimpleOAuthToken* authToken;
 
+@property (nonatomic, readwrite, retain) id<STUserDetail> currentUser;
 @property (nonatomic, readonly, retain) RKObjectManager* objectManager;
 
 @property (nonatomic, readonly, retain) RKRequestQueue* authRequestQueue;
@@ -709,6 +723,11 @@ static STRestKitLoader* _sharedInstance;
 - (void)appDidBecomeActive:(NSNotification*)notification {
     if (_authRequestQueue.count == 0)
         [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)updateCurrentUser:(id<STUserDetail>)currentUser {
+    self.currentUser = currentUser;
+    [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:currentUser];
 }
 
 

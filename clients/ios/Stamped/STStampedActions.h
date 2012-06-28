@@ -25,6 +25,7 @@
 + (id<STAction>)actionUntodoStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionDeleteStamp:(NSString*)stampID withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionViewImage:(NSString*)imageURL withOutputContext:(STActionContext*)context;
++ (id<STAction>)actionViewUserImage:(id<STUser>)user withOutputContext:(STActionContext*)context;
 + (id<STAction>)actionViewCreateStampWithEntity:(id<STEntity>)entity creditedUsers:(NSArray<STUser>*)users withOutputContext:(STActionContext*)context;
 
 @end

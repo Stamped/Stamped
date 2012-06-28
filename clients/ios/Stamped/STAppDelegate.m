@@ -43,6 +43,7 @@
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
 #import "STUserViewController.h"
+#import "STPlayer.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -405,6 +406,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [STActionManager setupConfigurations];
     
     [STCalloutView setupConfigurations];
+    
+    [STPlayer setupConfigurations];
 }
 
 @end

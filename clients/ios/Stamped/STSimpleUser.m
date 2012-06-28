@@ -101,7 +101,8 @@
             _loading = NO;
         }];
         
-    } else {
+    } 
+    else {
         
         [[STStampedAPI sharedInstance] addFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
             self.following = [NSNumber numberWithBool:![self.following boolValue]];

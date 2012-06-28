@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "STActionDelegate.h"
+#import <Rdio/Rdio.h>
 
 @interface STRdio : NSObject <STActionDelegate>
 
@@ -17,6 +18,7 @@
 - (void)startPlayback:(NSString*)rdioID;
 - (void)stopPlayback;
 
+@property (nonatomic, readonly, retain) Rdio* rdio;
 @property (nonatomic, readonly, assign) BOOL loggedIn;
 @property (nonatomic, readonly, copy) NSString* accessToken;
 

@@ -55,6 +55,7 @@ TODO:
             * http://css-tricks.com/efficiently-rendering-css/
             * https://developers.google.com/speed/docs/best-practices/rendering
             * optimize LESS compiled CSS to remove unnecessary / inefficient descendant selectors
+        * remove unused PRELOAD templates from per-page <script> include
     
     * profile:
         * category nav:
@@ -250,7 +251,7 @@ ChangeList 6/22/2012:
             * Infinite-scroll now works across different category selections and should be more responsive
             * Re-added item animations
                 * NOTE: these manifest via infinite-scroll, category changes, sort changes, and resizing the browser
-            * TV Stamps from thetvdb.com finally have images!
+            * TV Stamps from thetvdb finally have images!
         * Header:
             * Subsection polish
             * Hidden subsections aren't visible on page load anymore

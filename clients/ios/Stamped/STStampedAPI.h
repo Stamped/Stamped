@@ -40,6 +40,7 @@
 #import "STRestKitLoader.h"
 #import "STAccount.h"
 #import <CoreLocation/CoreLocation.h>
+#import "STAlertItem.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -255,15 +256,27 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)accountWithCallback:(void (^)(id<STAccount> account, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)updateAccountWithAccountParameters:(STAccountParameters*)accountParameters 
+                                          andCallback:(void (^)(id<STUserDetail> user, NSError* error, STCancellation* cancellation))block;
 
 - (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context;
+
+- (STCancellation*)alertsWithCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)alertsWithOnIDs:(NSArray*)onIDs
+                            offIDs:(NSArray*)offIDS 
+                       andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block;
 
 - (NSString*)stringForScope:(STStampedAPIScope)scope;
 
 - (void)fastPurge;
 
 + (STStampedAPI*)sharedInstance;
+
+- (UIImage*)currentUserImageForSize:(STProfileImageSize)profileImageSize;
+
+@property (nonatomic, readwrite, retain) UIImage* currentUserImage;
 
 @end

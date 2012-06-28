@@ -76,7 +76,7 @@ static const CGFloat _bodyWidth = 214;
 - (id)initWithComment:(id<STComment>)comment {
     self = [super initWithFrame:CGRectMake(0, 0, 290, 48)];
     if (self) {
-        UIView* userImage = [Util profileImageViewForUser:comment.user withSize:STProfileImageSize31];
+        UIView* userImage = [Util profileImageViewForUser:comment.user withSize:31];
         [Util setTopRightForView:userImage toPoint:CGPointMake(_imageMaxX, 6)];
         [self addSubview:userImage];
         UIView* userButton = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:comment.user];
@@ -136,7 +136,7 @@ static const CGFloat _bodyWidth = 214;
 - (id)initWithStamp:(id<STStamp>)stamp andDelegate:(id<STViewDelegate>)delegate {
     self = [super initWithDelegate:delegate andFrame:CGRectMake(0, 0, 290, 0)];
     if (self) {
-        UIView* userImage = [Util profileImageViewForUser:stamp.user withSize:STProfileImageSize46];
+        UIView* userImage = [Util profileImageViewForUser:stamp.user withSize:46];
         [Util setTopRightForView:userImage toPoint:CGPointMake(_imageMaxX, 6)];
         [self addSubview:userImage];
         UIView* userButton = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stamp.user];

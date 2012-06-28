@@ -280,7 +280,7 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 }
 
 - (void)addHiddenBlurbViews {
-    self.blurbProfileImage = [Util profileImageViewForUser:[STStampedAPI sharedInstance].currentUser withSize:STProfileImageSize46];
+    self.blurbProfileImage = [Util profileImageViewForUser:[STStampedAPI sharedInstance].currentUser withSize:46];
     self.profileImageOriginHidden = CGPointMake(-10 - self.blurbProfileImage.frame.size.width, 15);
     self.profileImageOriginShown = CGPointMake(20, 15);
     [Util reframeView:self.blurbProfileImage withDeltas:CGRectMake(self.profileImageOriginHidden.x, self.profileImageOriginHidden.y, 0, 0)];
