@@ -14,7 +14,7 @@ import Globals
 from logs import report
 
 try:
-    import logs, urllib2
+    import logs, urllib2, datetime
     from libs.iTunes                import globaliTunes
     from GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty, basicNestedObjectToString
@@ -444,9 +444,12 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
 
     @lazyProperty
     def release_date(self):
-        try:
-            return parseDateString(self.data['releaseDate'])
-        except KeyError:
+        # iTunes movie release dates are LIES. If there's something in a title in parens, we can trust it. Otherwise,
+        # throw it out.
+        year = getMovieReleaseYearFromTitle(self.raw_name)
+        if year is not None:
+            return datetime.datetime(year, 1, 1)
+        else:
             return None
 
     @lazyProperty
