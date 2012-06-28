@@ -2435,7 +2435,7 @@ class StampedAPI(AStampedAPI):
 
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph,
-                kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'image':imageUrl})
+                kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
 
 
     @API_CALL
