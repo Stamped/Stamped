@@ -2705,15 +2705,14 @@ class StampedAPI(AStampedAPI):
                 return 'video_game'
         return 'other'
 
-    def _getOpenGraphUrl(self, stampId=None, userId=None):
+    def _getOpenGraphUrl(self, stamp=None, user=None):
         #TODO: fill this with something other than the dummy url
-        if stampId is not None:
-            stamp = self.getStamp(stampId)
+        if stamp is not None:
             url = generateStampUrl(stamp)
             #HACK for testing purposes
             return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
-        if userId is not None:
-            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % stamp.user.screen_name
+        if user is not None:
+            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
         account = self.getAccount(authUserId)
@@ -2745,26 +2744,26 @@ class StampedAPI(AStampedAPI):
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = stampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
             stamp = self.getStamp(likeStampid)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = likeStampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
         elif todoStampId is not None and share_settings.share_todos == True:
             action = 'todo'
             stamp = self.getStamp(todoStampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = todoStampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
         elif followUserId is not None and share_settings.share_follows == True:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
             ogType = 'user'
-            url = self._getOpenGraphUrl(userId = user.user_id)
+            url = self._getOpenGraphUrl(user = user)
 
         if action is None or ogType is None or url is None:
             return
