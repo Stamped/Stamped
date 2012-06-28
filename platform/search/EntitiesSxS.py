@@ -42,7 +42,10 @@ def stripEntity(entityDict):
 
     def stripTimestamps(d):
         return {k : v for k, v in d.iteritems() if 'timestamp' not in k}
+    def stripSourceFields(d):
+        return {k : v for k, v in d.iteritems() if '_source' not in k}
     entityDict = stripTimestamps(entityDict)
+    entityDict = stripSourceFields(entityDict)
     if 'sources' in entityDict:
         entityDict['sources'] = stripTimestamps(entityDict['sources'])
     return entityDict
