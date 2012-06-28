@@ -1117,33 +1117,48 @@ class AmazonSource(GenericSource):
         return interleaveResultsByRelevance([albums, tracks])
 
     def __scoreBookResults(self, resolverObjectsLists, queryText):
+        def adjustByQueryRelevance(result):
+            def adjustRelevance(matchFactor, maxBoost, factorName):
+                factor = maxBoost ** matchFactor
+                result.relevance *= factor
+                result.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
+            matchingBlocks = []
+
+            factor, blocks = stringRelevance(queryText, result.resolverObject.name)
+            matchingBlocks.extend(blocks)
+            adjustRelevance(factor, 2, 'title')
+
+            factor, blocks = stringRelevance(queryText,
+                    ' '.join(author['name'] for author in result.resolverObject.authors))
+            matchingBlocks.extend(blocks)
+            adjustRelevance(factor, 1.5, 'author')
+
+            queryFulfilled = float(combineMatchingSections(matchingBlocks)) / len(queryText)
+            result.relevance *= queryFulfilled
+            result.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
+
         assert len(resolverObjectsLists) <= 1 
         if len(resolverObjectsLists) == 0:
             return []
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
-        augmentScoreForTextRelevance(searchResults, queryText, lambda r: r.resolverObject.name, 2)
         self.__adjustScoresBySalesRank(searchResults)
         for searchResult in searchResults:
+            adjustByQueryRelevance(searchResult)
+            applyBookTitleDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
-                # TODO: Penalize other missing factors as well.
                 penaltyFactor = 0.2
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing author', penaltyFactor)
-            if not searchResult.resolverObject.isbn:
-                penaltyFactor = 0.7
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing isbn', penaltyFactor)
-            if not searchResult.resolverObject.publishers:
-                penaltyFactor = 0.4
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing publishers', penaltyFactor)
-            if not searchResult.resolverObject.release_date:
-                penaltyFactor = 0.8
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing release date', penaltyFactor)
+                searchResult.dataQuality *= penaltyFactor
+                searchResult.addDataQualityComponentDebugInfo('penalty factor for missing author', penaltyFactor)
 
+            miscComponentsToCheck = ['isbn', 'publishers', 'release_date', 'length', 'sku_number', 'images']
+            componentsMissing = [c for c in miscComponentsToCheck if not getattr(searchResult.resolverObject, c)]
+            if componentsMissing:
+                penalty = 0.8 ** len(componentsMissing)
+                searchResult.dataQuality *= penalty
+                searchResult.addDataQualityComponentDebugInfo(
+                        'penalty factor for missing components: %s' % str(componentsMissing), penalty)
         return searchResults
 
     def __augmentAlbumResultsWithSongs(self, albums, tracks):

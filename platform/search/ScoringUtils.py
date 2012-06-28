@@ -75,21 +75,36 @@ def sortByRelevance(results):
 
 
 def stringRelevance(queryText, resultText):
-    """Returns a number between 0 and 1, measuring how "relevant" the resultText is for queryText.
+    """Computes how well the given result text satisfies the query text.
 
     Note that this differs from similarity, in that it is not symmetric. It only matters now much of
     the query text is "fulfilled" by the result text. The result text could have a lot more
     irrelevant terms without affecting the result.
+
+    Returns a pair (relevance, matchingBlocks), where relevance is a score in [0, 1], and
+    matchingBlocks is a list of (i, n) blocks indicating that queryText[i:i+n] was matched.
     """
     queryText = simplify(queryText)
     resultText = simplify(resultText)
 
-    # sqrt(2), pulled out of an ass.
-    nonContinuityPenalty = 1.414
+    nonContinuityPenalty = 1.2
     matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
     totalMatch = sum(matchSize ** nonContinuityPenalty
             for _, _, matchSize in matchingBlocks if matchSize > 1)
-    return totalMatch / (len(queryText) ** nonContinuityPenalty)
+    return totalMatch / (len(queryText) ** nonContinuityPenalty), [(i, n) for i, _, n in matchingBlocks]
+
+
+def combineMatchingSections(matchingSections):
+    """Given a list of (i, n) blocks, as returned from stringRelevance, compute the total length."""
+    matchingSections.sort(key=lambda x: x[0])
+    collapsedBlocks = [matchingSections[0]]
+    for i, n in matchingSections[1:]:
+        j, m = collapsedBlocks[-1]
+        if i <= j + m:
+            collapsedBlocks[-1] = (j, max(i - j + n, m))
+        else:
+            collapsedBlocks.append((i, n))
+    return sum(n for i, n in collapsedBlocks)
 
 
 def interleaveResultsByRelevance(resultLists):
@@ -126,14 +141,6 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     d = radius * c
 
     return d
-
-
-def augmentScoreForTextRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
-    for result in results:
-        resultText = resultTextExtractor(result)
-        titleBoost = maxRelevanceBoost ** stringRelevance(queryText, resultText)
-        result.relevance *= titleBoost
-        result.addRelevanceComponentDebugInfo('title similarity factor', titleBoost)
 
 
 def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, queryLatLng):
