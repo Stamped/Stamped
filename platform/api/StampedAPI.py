@@ -42,6 +42,7 @@ try:
     from api.Schemas                import *
     from ActivityCollectionCache    import ActivityCollectionCache
     from Memcache                   import globalMemcache
+    from HTTPSchemas                import generateStampUrl
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
@@ -2704,21 +2705,21 @@ class StampedAPI(AStampedAPI):
                 return 'video_game'
         return 'other'
 
-    def _getOpenGraphUrl(self, ogType, stampId=None, userId=None):
-        #if ogType == 'restaurant':
-
-
+    def _getOpenGraphUrl(self, stamp=None, user=None):
         #TODO: fill this with something other than the dummy url
-        if stampId is not None:
-            return "http://static.stamped.com/assets/movie7.html"
-        if userId is not None:
-            return "http://static.stamped.com/assets/user.html"
+        if stamp is not None:
+            url = generateStampUrl(stamp)
+            #HACK for testing purposes
+            return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
+        if user is not None:
+            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
         if account.screen_name_lower not in ['ml', 'kevin']:
+            logs.info('Skipping Open Graph post because user not on whitelist')
             return
 
         logs.info('######')
@@ -2738,37 +2739,39 @@ class StampedAPI(AStampedAPI):
 
         logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
 
+        kwargs = {}
         if stampId is not None and share_settings.share_stamps == True:
             action = 'stamp'
             stamp = self.getStamp(stampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = stampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
+            kwargs['message'] = stamp.content.blurb
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
             stamp = self.getStamp(likeStampid)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = likeStampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
         elif todoStampId is not None and share_settings.share_todos == True:
             action = 'todo'
             stamp = self.getStamp(todoStampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stampId = todoStampId)
+            url = self._getOpenGraphUrl(stamp = stamp)
         elif followUserId is not None and share_settings.share_follows == True:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
             ogType = 'user'
-            url = self._getOpenGraphUrl(userId = user.user_id)
+            url = self._getOpenGraphUrl(user = user)
 
         if action is None or ogType is None or url is None:
             return
 
-        self._facebook.postToOpenGraph(token, ogType, url)
+        self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 
 

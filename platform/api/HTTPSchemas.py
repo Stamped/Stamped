@@ -38,6 +38,12 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 # URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
 url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
+def generateStampUrl(stamp):
+    url_title = encodeStampTitle(stamp.entity.title)
+
+    return 'http://www.stamped.com/%s/stamps/%s/%s' % \
+           (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
+
 def _coordinatesDictToFlat(coordinates):
     try:
         if isinstance(coordinates, Schema):
@@ -2530,9 +2536,7 @@ class HTTPStamp(Schema):
         self.num_todos      = getattr(stamp.stats, 'num_todos', 0)
         self.num_credits    = getattr(stamp.stats, 'num_credit', 0)
 
-        url_title = encodeStampTitle(stamp.entity.title)
-        self.url = 'http://www.stamped.com/%s/stamps/%s/%s' %\
-                   (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
+        self.url = generateStampUrl(stamp)
 
         if stamp.attributes is not None:
             self.is_liked   = getattr(stamp.attributes, 'is_liked', False)
