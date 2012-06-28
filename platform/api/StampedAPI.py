@@ -2774,7 +2774,7 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
-        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' (action, token, ogType, url))
+        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
         self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 
