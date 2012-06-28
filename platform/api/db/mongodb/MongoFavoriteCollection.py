@@ -18,7 +18,7 @@ from Schemas                        import *
 class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
     
     def __init__(self):
-        AMongoCollectionView.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
+        AMongoCollectionView.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite, overflow=True)
         AFavoriteDB.__init__(self)
 
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), \
@@ -26,6 +26,25 @@ class MongoFavoriteCollection(AMongoCollectionView, AFavoriteDB):
 
         self._collection.ensure_index([('user_id', pymongo.ASCENDING), \
                                         ('timestamp.created', pymongo.DESCENDING)])
+
+
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        entity = document.pop('entity', None)
+        if entity is not None and 'entity_id' in entity:
+            document['entity'] = {'entity_id': entity['entity_id']}
+
+        # Note: Not downgrading stamp from whom you added to-do from for now. Too much of a headache.
+
+        favorite = self._obj(document, overflow=self._overflow)
+
+        return favorite
     
     ### PUBLIC
     

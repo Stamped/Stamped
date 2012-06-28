@@ -19,13 +19,87 @@ from AAccountDB                 import AAccountDB
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account)
+        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account, overflow=True)
         AAccountDB.__init__(self)
         
         ### TEMP: For now, verify that no duplicates can occur via index
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
+
+    def _downgradeAccountFromTwoPointOh(self, data):
+        # Linked Accounts
+        linked = data.pop('linked', None)
+        if linked is not None:
+            linkedAccounts = {}
+
+            facebook = linked.pop('facebook', None)
+            if facebook is not None:
+                linkedAccounts['facebook'] = {}
+                if 'linked_user_id' in facebook:
+                    linkedAccounts['facebook']['facebook_id'] = facebook['linked_user_id']
+                if 'linked_name' in facebook:
+                    linkedAccounts['facebook']['facebook_name'] = facebook['linked_name']
+                if 'linked_screen_name' in facebook:
+                    linkedAccounts['facebook']['facebook_screen_name'] = facebook['linked_screen_name']
+                linkedAccounts['facebook']['facebook_alerts_sent'] = True
+
+            twitter = linked.pop('twitter', None)
+            if twitter is not None:
+                linkedAccounts['twitter'] = {}
+                if 'linked_user_id' in twitter:
+                    linkedAccounts['twitter']['twitter_id'] = twitter['linked_user_id']
+                if 'linked_screen_name' in twitter:
+                    linkedAccounts['twitter']['twitter_screen_name'] = twitter['linked_screen_name']
+                linkedAccounts['twitter']['twitter_alerts_sent'] = True
+
+            data['linked_accounts'] = linkedAccounts
+
+        if 'auth_service' in data:
+            del(data['auth_service'])
+
+        # Alerts
+        alerts = data.pop('alert_settings', None)
+        if alerts is not None:
+            alertMapping = {
+                'alerts_credits_apns'       : 'ios_alert_credit',
+                'alerts_credits_email'      : 'email_alert_credit',
+                'alerts_likes_apns'         : 'ios_alert_like',
+                'alerts_likes_email'        : 'email_alert_like',
+                'alerts_todos_apns'         : 'ios_alert_fav',
+                'alerts_todos_email'        : 'email_alert_fav',
+                'alerts_mentions_apns'      : 'ios_alert_mention',
+                'alerts_mentions_email'     : 'email_alert_mention',
+                'alerts_comments_apns'      : 'ios_alert_comment',
+                'alerts_comments_email'     : 'email_alert_comment',
+                'alerts_replies_apns'       : 'ios_alert_reply',
+                'alerts_replies_email'      : 'email_alert_reply',
+                'alerts_followers_apns'     : 'ios_alert_follow',
+                'alerts_followers_email'    : 'email_alert_follow',
+            }
+
+            alertSettings = {}
+            for k, v in alerts.iteritems():
+                if k in alertMapping.values():
+                    alertSettings[k] = v 
+                elif k in alertMapping:
+                    alertSettings[alertMapping[k]] = v
+            data['alerts'] = alertSettings 
+
+        # Stats
+        stats = data.pop('stats')
+        if 'distribution' in stats:
+            del(stats['distribution'])
+        if 'num_todos' in stats:
+            stats['num_faves'] = stats['num_todos']
+            del(stats['num_todos'])
+        data['stats'] = stats
+
+        return data
+    
+    def _convertFromMongo(self, document):
+        document = self._downgradeAccountFromTwoPointOh(document)
+        return AMongoCollection._convertFromMongo(self, document)
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)

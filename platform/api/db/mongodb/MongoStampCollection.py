@@ -27,7 +27,7 @@ from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def __init__(self):
-        AMongoCollectionView.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp)
+        AMongoCollectionView.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp, overflow=True)
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
@@ -35,6 +35,40 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                                         ('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('stats.stamp_num', pymongo.ASCENDING)])
+
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+        
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        # Convert multi-blurb documents into single-blurb schema
+        contents = document.pop('contents', None)
+        if 'contents' is not None and len(contents) > 0:
+            for content in contents:
+                if 'blurb' in content:
+                    document['blurb'] = content['blurb']
+                    break
+
+            # Note: Because the image URL is created higher up, we can't seamlessly convert images into the 
+            # old scheam. For now I'm just going to "drop" them so that v1 users can't see images posted by
+            # v2 users.
+
+        if 'credits' in document:
+            # Note: Old credits require the screen name, which we're not storing the new version, so 
+            # I'm going to "drop" them as well. Looks like v1 sDetail isn't going to be pretty...
+            del(document['credits'])
+
+        entity = document.pop('entity')
+        document['entity'] = {'entity_id' : entity['entity_id']}
+
+        ### TODO: Add stamp stats from MongoStampStatsCollection
+        
+        stamp = self._obj(document, overflow=self._overflow)
+
+        return stamp 
     
     ### PUBLIC
     

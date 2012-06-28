@@ -1168,7 +1168,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityRequest, authUserId=None):
         entity = self._getEntityFromRequest(entityRequest)
         ### TODO: Check if user has access to this entity?
-        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+        # tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         return entity
     
     @API_CALL
@@ -2725,7 +2725,7 @@ class StampedAPI(AStampedAPI):
             try:
                 entity = self._entityDB.getEntity(entity_id)
                 if entity is not None:
-                    self._enrichEntity(entity)
+                    # self._enrichEntity(entity)
                     menu = self.__menuDB.getMenu(entityId)
             except Exception:
                 pass
@@ -2920,7 +2920,7 @@ class StampedAPI(AStampedAPI):
         assert entity.entity_id is not None
         logs.debug("converted search_id=%s to entity_id=%s" % (search_id, entity.entity_id))
         
-        tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
+        # tasks.invoke(tasks.APITasks._enrichEntity, args=[entity.entity_id])
         
         return entity.entity_id
     
