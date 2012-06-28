@@ -235,10 +235,13 @@ class TheTVDBSource(GenericSource):
             raise NotImplementedError()
         # Ugh. Why are we using entities?
         entities = self.__thetvdb.search(queryText, transform=True, detailed=False)
-        results = [TheTVDBShow(data=entity) for entity in entities]
+        resolverObjects = [TheTVDBShow(data=entity) for entity in entities]
         # TheTVDB has a higher source score than TMDB because it is strict with its retrieval. If you don't match
         # closely, it won't return anything.
-        return scoreResultsWithBasicDropoffScoring(results, sourceScore=1.1)
+        searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects, sourceScore=1.1)
+        for searchResult in searchResults:
+            applyTvTitleDataQualityTests(searchResult, queryText)
+        return searchResults
 
 if __name__ == '__main__':
     demo(TheTVDBSource(), 'Archer')
