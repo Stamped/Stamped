@@ -48,11 +48,12 @@ class TitleDataQualityRegexpTest(object):
         self.exceptionQueryRegexp = exceptionQueryRegexp
         self.message = message
         self.penalty = penalty
+        self.rawName = rawName
 
     def applyTest(self, searchResult, searchQuery):
-        title = searchResult.resolverObject.raw_name if rawName else searchResult.resolverObject.name
+        title = searchResult.resolverObject.raw_name if self.rawName else searchResult.resolverObject.name
         anyMatches = False
-        if self.titleRegexp.find(title) and not self.exceptionQueryRegexp.find(searchQuery):
+        if self.titleRegexp.search(title) and not self.exceptionQueryRegexp.search(searchQuery):
             searchResult.dataQuality *= 1 - self.penalty
             searchResult.addDataQualityComponentDebugInfo(message, self.penalty)
             anyMatches = True
@@ -61,17 +62,25 @@ class TitleDataQualityRegexpTest(object):
 
 def applyTitleTests(titleTests, searchResult, searchQuery):
     for titleTest in titleTests:
-        titleTest.apply(searchResult, searchQuery)
+        titleTest.applyTest(searchResult, searchQuery)
 
 
-def tokenRegexp(token):
+def makeTokenRegexp(token):
     """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
     return re.compile("[^ ,-:\[(]%s[$ ,-:\])]", re.IGNORECASE)
 
+def makeDelimitedSectionRe(pattern):
+    """Returns a regex that matches an entire delimited section (by () or []) if the
+    section contains the given pattern.
+    """
+    return re.compile("[(\[](.+ )?%s( .+)?[)\]]" % pattern, re.IGNORECASE)
 
-NON_CHAR_LETTER = re.compile('[ .,:;"\'&-]')
+
+POSSESSIVE_RE = re.compile('\'s[$\s]', re.IGNORECASE)
+NON_CHAR_LETTER_RE = re.compile('[ .,:;"\'&-]')
 def tokenizeString(string):
-    withoutPunctuation = NON_CHAR_LETTER.sub(' ', string)
+    withoutPossessives = POSSESSIVE_RE.sub(' ', string)
+    withoutPunctuation = NON_CHAR_LETTER_RE.sub(' ', withoutPossessives)
     return withoutPunctuation.lower().split()
 
 
@@ -83,10 +92,10 @@ class Token(object):
 
     def isIn(self, tokenList):
         if ' ' not in self.text:
-            return self.token in tokenList
+            return self.text in tokenList
         else:
             # This is actually multiple words. So we'll hack a little.
-            return self.token in ' '.join(tokenList)
+            return self.text in ' '.join(tokenList)
 
 
 def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
@@ -125,23 +134,37 @@ TV_TITLE_REMOVAL_REGEXPS = (
 )
 
 def cleanTvTitle(tvTitle):
-    # return applyRemovalRegexps(TV_TITLE_REMOVAL_REGEXPS, tvTitle)
-    return tvTitle
+    return applyRemovalRegexps(TV_TITLE_REMOVAL_REGEXPS, tvTitle)
 
 TV_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
+    # I didn't quite feel confident enough to strip this one out.
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' prefix in title", 0.35,
-        exceptionQueryRegexp=tokenRegexp('complete')),
-    TitleDataQualityRegexpTest('')
+        exceptionQueryRegexp=makeTokenRegexp('complete')),
+)
+
+TV_TITLE_BAD_TOKENS = (
+    Token('season'), Token('seasons'),
+    Token('episode'), Token('episodes'),
+    Token('collector'), Token('collection'),
+    Token('series'),
+    Token('best of'),
+    Token('volume'), Token('volumes')
 )
 
 def applyTvTitleDataQualityTests(searchResult, searchQuery):
+    if applyTitleTests(TV_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS, searchResult, searchQuery):
+        # We've already found a severe problem and demoted heavily. Skip the token tests, which are weaker and may
+        # be duplicative.
+        return
+    applyTokenTests(TV_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
 
 
-MOVIE_TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\(\d{4})\s*$")
+MOVIE_TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\s*$")
 
 # These are things we're so confident don't belong in movie titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
 MOVIE_TITLE_REMOVAL_REGEXPS = (
+    MOVIE_TITLE_YEAR_EXTRACTION_REGEXP,
     re.compile("[ ,:\[(-]+Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
@@ -150,26 +173,30 @@ MOVIE_TITLE_REMOVAL_REGEXPS = (
 )
 
 def cleanMovieTitle(movieTitle):
-    #return applyRemovalRegexps(MOVIE_TITLE_REMOVAL_REGEXPS, movieTitle)
-    return movieTitle
+    return applyRemovalRegexps(MOVIE_TITLE_REMOVAL_REGEXPS, movieTitle)
+
+def getMovieReleaseYearFromTitle(movieResolverObject):
+    match = MOVIE_TITLE_YEAR_EXTRACTION_REGEXP.search(movieResolverObject.raw_name)
+    if match:
+        return int(match.group(1))
 
 # These aren't things we expect, or things we remove. These are things that probably indicate that there's
 # something wrong with a movie. Most likely, it's actually a TV show or a box set.
 MOVIE_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' in title", 0.35,
-                               exceptionQueryRegexp=tokenRegexp('complete')),
+                               exceptionQueryRegexp=makeTokenRegexp('complete')),
     TitleDataQualityRegexpTest(TV_SEASON1_REGEX_CONFIDENT, "season specification in title", 0.5,
-                               exceptionQueryRegexp=tokenRegexp('season')),
+                               exceptionQueryRegexp=makeTokenRegexp('season')),
     TitleDataQualityRegexpTest(TV_SEASON2_REGEX_CONFIDENT, "season specification in title", 0.5,
-                               exceptionQueryRegexp=tokenRegexp('season')),
+                               exceptionQueryRegexp=makeTokenRegexp('season')),
     TitleDataQualityRegexpTest(TV_BOXED_SET_REGEX_CONFIDENT, "box set in title", 0.5),
     TitleDataQualityRegexpTest(TV_VOLUMES_REGEX_CONFIDENT, "volume specification in title", 0.5,
-                               exceptionQueryRegexp=tokenRegexp('volume')),
+                               exceptionQueryRegexp=makeTokenRegexp('volume')),
     TitleDataQualityRegexpTest(TV_BEST_OF_REGEX_CONFIDENT, "'best of' in title", 0.5,
-                               exceptionQueryRegexp=tokenRegexp('best'))
+                               exceptionQueryRegexp=makeTokenRegexp('best'))
 )
 
-MOVIE_TITLE_BAD_TOKENS_AND_PENALTIES = (
+MOVIE_TITLE_BAD_TOKENS = (
     Token('season'), Token('seasons'),
     Token('volume'), Token('volumes'),
     Token('box set', penalty=0.35), Token('boxed set', penalty=0.35),
@@ -183,7 +210,7 @@ def applyMovieTitleDataQualityTests(searchResult, searchQuery):
         # We've already found a severe problem and demoted heavily. Skip the token tests, which are weaker and may
         # be duplicative.
         return
-    applyTokenTests(MOVIE_TITLE_BAD_TOKENS_AND_PENALTIES, searchResult, searchQuery, defaultPenalty=0.2)
+    applyTokenTests(MOVIE_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
 
 
 ############################################################################################################
@@ -202,12 +229,6 @@ def cleanArtistTitle(artistTitle):
 ############################################################################################################
 ################################################   BOOKS    ################################################
 ############################################################################################################
-
-def makeDelimitedSectionRe(pattern):
-    """Returns a regex that matches an entire delimited section (by () or []) if the
-    section contains the given pattern.
-    """
-    return re.compile("[(\[](.+ )?%s( .+)?[)\]]" % pattern, re.IGNORECASE)
 
 BOOK_TITLE_REMOVAL_REGEXPS = (
     makeDelimitedSectionRe('edition'),
