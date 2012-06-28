@@ -618,23 +618,36 @@ footer,
    ************************************************************************** */
 .entity-menu {
   text-align: center;
+  background: #fff;
 }
 .entity-menu .entity-title {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: normal;
-  font-size: 250%;
+  font-size: 4em;
   font-weight: bold;
   color: #262626;
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.75);
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
 }
 .entity-menu .menus {
   max-height: 420px;
   overflow-y: scroll;
+}
+.entity-menu .menus p {
+  margin: 0;
+  line-height: 125%;
+}
+.entity-menu .menus .jspVerticalBar {
+  margin: 0 6px;
+  padding-top: 8px;
+}
+.entity-menu .menus .submenu {
+  margin: 1em 0;
+  padding: 0 12px;
 }
 .entity-menu .menus .submenu .submenu-title {
   color: #595959;
@@ -654,16 +667,19 @@ footer,
   font-size: 80%;
 }
 .entity-menu .menus .submenu .section {
+  margin-bottom: 2em;
   color: #999;
 }
 .entity-menu .menus .submenu .section .section-title {
   font-size: 150%;
+  margin-bottom: .5em;
 }
 .entity-menu .menus .submenu .section .section-desc {
   font-style: italic;
   font-size: 90%;
 }
 .entity-menu .menus .submenu .section .items .item {
+  margin-bottom: 1em;
   /*.item-title, .item-desc, .item-spicy, .item-prices {
                             display: inline-block;
                         }*/
@@ -678,11 +694,12 @@ footer,
   color: #bfbfbf;
 }
 .entity-menu .attribution {
-  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
-  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
-  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
-  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
-  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.75);
+  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  padding: 12px 24px 0;
   font-style: italic;
   font-size: 70%;
 }

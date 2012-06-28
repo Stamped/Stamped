@@ -249,25 +249,28 @@ var g_update_stamps = null;
             return false;
         });
         
-        var $header_subsections = $('.header-subsection');
-        var header_subsection_height = 0;
-        var $header_subsection_0 = null;
-        
-        $header_subsections.each(function(i, elem) {
-            var $elem = $(elem);
-            if ($elem.hasClass('header-subsection-0')) {
-                $header_subsection_0 = $elem;
-            }
+        var init_header_subsections = function() {
+            var header_subsection_height = 0;
+            var $header_subsections  = $('.header-subsection');
+            var $header_subsection_0 = null;
             
-            header_subsection_height = Math.max($elem.height(), header_subsection_height);
-        });
-        
-        if (!!$header_subsection_0) {
-            $header_subsection_0.css({
-                'height'     : header_subsection_height, 
-                'min-height' : header_subsection_height
+            $header_subsections.each(function(i, elem) {
+                var $elem = $(elem);
+                
+                if ($elem.hasClass('header-subsection-0')) {
+                    $header_subsection_0 = $elem;
+                }
+                
+                header_subsection_height = Math.max($elem.height(), header_subsection_height);
             });
-        }
+            
+            if (!!$header_subsection_0 && header_subsection_height > 0) {
+                $header_subsection_0.css({
+                    'height'     : header_subsection_height, 
+                    'min-height' : header_subsection_height
+                });
+            }
+        };
         
         // TODO: may not be recursive
         //$(document).emoji();
@@ -1684,6 +1687,7 @@ var g_update_stamps = null;
                 close_sdetail_func = null;
                 
                 $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
+                init_header_subsections();
                 
                 var close_sdetail_inner_func = function() {
                     resume_infinite_scroll();
@@ -1879,14 +1883,15 @@ var g_update_stamps = null;
                             //link_type = 'iframe';
                             //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
                             
-                            var popup_options = get_fancybox_options({
+                            var popup_options = get_fancybox_popup_options({
                                 href            : link_href, 
                                 type            : link_type, 
-                                title           : entity_title, 
                                 maxWidth        : 480, //Math.min((2 * window.innerWidth) / 3, 480), 
                                 
                                 afterShow       : function() {
-                                    $('.entity-menu').jScrollPane();
+                                    $('.menus').jScrollPane({
+                                        verticalPadding : 8
+                                    });
                                 }
                             });
                             
@@ -2063,6 +2068,7 @@ var g_update_stamps = null;
         
         g_init_social_sharing();
         update_dynamic_header();
+        init_header_subsections();
         update_stamps();
         init_gallery();
         update_navbar_layout();

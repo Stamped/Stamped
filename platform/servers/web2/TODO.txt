@@ -56,6 +56,7 @@ TODO:
             * https://developers.google.com/speed/docs/best-practices/rendering
             * optimize LESS compiled CSS to remove unnecessary / inefficient descendant selectors
         * remove unused PRELOAD templates from per-page <script> include
+            * USED: stamp-map-item and social-feedback
     
     * profile:
         * category nav:

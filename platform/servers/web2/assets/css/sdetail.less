@@ -14,8 +14,8 @@
    ************************************************************************** */
 
 
-@shadow: rgba(50, 50, 50, 0.75);
-@shadow-light: fade(@shadow, 15%);
+@shadow-sdetail: rgba(50, 50, 50, 0.75);
+@shadow-light: fade(@shadow-sdetail, 15%);
 
 @text0: #666;
 @text1: #999;
@@ -366,7 +366,7 @@
         
         .stamp-card {
             @round: 4px;
-            .box-shadow(0, 0, 16px, 0, @shadow);
+            .box-shadow(0, 0, 16px, 0, @shadow-sdetail);
             .rounded(@round);
             
             @space: 48px;
@@ -685,11 +685,12 @@
 
 .entity-menu {
     text-align: center;
+    background: #fff;
     
     .entity-title {
         .stamped-font();
         
-        font-size: 250%;
+        font-size: 4em;
         font-weight: bold;
         color: #262626;
         
@@ -700,7 +701,20 @@
         max-height: 420px; // TODO: nuance
         overflow-y: scroll;
         
+        p {
+            margin: 0;
+            line-height: 125%;
+        }
+        
+        .jspVerticalBar {
+            margin: 0 6px;
+            padding-top: 8px;
+        }
+        
         .submenu {
+            margin: 1em 0;
+            padding: 0 12px;
+            
             .submenu-title {
                 color: #595959;
                 
@@ -723,10 +737,12 @@
             }
             
             .section {
+                margin-bottom: 2em;
                 color: #999;
                 
                 .section-title {
                     font-size: 150%;
+                    margin-bottom: .5em;
                 }
                 
                 .section-desc {
@@ -736,6 +752,8 @@
                 
                 .items {
                     .item {
+                        margin-bottom: 1em;
+                        
                         .item-title {
                             font-weight: bold;
                         }
@@ -757,6 +775,7 @@
     
     .attribution {
         .box-shadow(0, -3px, 3px, 0, @shadow);
+        padding: 12px 24px 0;
         
         font-style: italic;
         font-size: 70%;

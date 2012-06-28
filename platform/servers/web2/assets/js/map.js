@@ -313,6 +313,7 @@
             
             if (!stamp_map_popups.hasOwnProperty(stamp_id)) {
                 console.debug("ERROR: couldn't find stamp-list-view-item for stamp_id " + stamp_id);
+                // TODO: better error reporting!
                 
                 return;
             } else {

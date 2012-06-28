@@ -1,6 +1,8 @@
 {% load stamped_tags %}
 
 <div class='entity-menu'>
+    <div class="ribbon-bottom"></div>
+    
     <div class='entity-title'>
         {% if menu.attribution_image_link %}
             <a href='{{menu.attribution_image_link}}' target='_blank' title='View Menu for {{entity.title}}'>
@@ -94,5 +96,7 @@
             {% endif %}
         </div>
     {% endif %}
+    
+    <div class="ribbon-top"></div>
 </div>
 

@@ -918,7 +918,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
-        if service_name not in ['facebook', 'twitter', 'netflix']:
+        if service_name not in ['facebook', 'twitter', 'netflix', 'rdio']:
             logs.warning('Attempted to remove invalid linked account: %s' % service_name)
             raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
 
@@ -2350,7 +2350,7 @@ class StampedAPI(AStampedAPI):
 
             # Asynchronously add references to the stamp in follower's inboxes and
             # add activity for credit and mentions
-            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
+            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
 
         else:
             # Update stamp stats
@@ -2359,7 +2359,7 @@ class StampedAPI(AStampedAPI):
         return stamp
 
     @API_CALL
-    def addStampAsync(self, authUserId, stampId):
+    def addStampAsync(self, authUserId, stampId, imageUrl):
         stamp   = self._stampDB.getStamp(stampId)
         entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
@@ -2434,7 +2434,8 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id})
+        tasks.invoke(tasks.APITasks.postToOpenGraph,
+                kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
 
 
     @API_CALL
@@ -2714,7 +2715,7 @@ class StampedAPI(AStampedAPI):
         if user is not None:
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
-    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
+    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
@@ -2740,6 +2741,8 @@ class StampedAPI(AStampedAPI):
         logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
 
         kwargs = {}
+        if imageUrl is not None:
+            kwargs['image'] = imageUrl
         if stampId is not None and share_settings.share_stamps == True:
             action = 'stamp'
             stamp = self.getStamp(stampId)
@@ -2771,6 +2774,7 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
+        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' (action, token, ogType, url))
         self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 

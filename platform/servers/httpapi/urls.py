@@ -36,7 +36,7 @@ lookup.json         Return a list of objects based on a comma-separated list of 
 collection.json     Return a list of objects based on a specified scope. Takes a scope param defining the collection
                     (e.g. "inbox") as well as additional filtering. Implies that a subset of data will be returned.
 
-search.json         Return a list of objects based on a sepcified scope and a text query. Typically builds upon the 
+search.json         Return a list of objects based on a specified scope and a text query. Typically builds upon the
                     collection endpoint to overlay search on top of other filtering.
 """
 
