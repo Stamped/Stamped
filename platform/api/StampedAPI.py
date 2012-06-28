@@ -918,7 +918,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
-        if service_name not in ['facebook', 'twitter', 'netflix']:
+        if service_name not in ['facebook', 'twitter', 'netflix', 'rdio']:
             logs.warning('Attempted to remove invalid linked account: %s' % service_name)
             raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
 
@@ -2771,6 +2771,7 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
+        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' (action, token, ogType, url))
         self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 

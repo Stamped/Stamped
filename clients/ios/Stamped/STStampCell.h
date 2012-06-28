@@ -17,7 +17,6 @@
     STBlockUIView *_commentView;
     STPreviewsView *_statsView;
     CAShapeLayer *_statsDots;
-    STAvatarView *_userImageView;
     UIImageView *_footerImageView;
     UILabel *_dateLabel;    
     UIImage *_categoryImage;

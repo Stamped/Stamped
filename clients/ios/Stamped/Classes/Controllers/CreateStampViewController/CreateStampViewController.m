@@ -170,7 +170,7 @@
                 }
             }
             button.titleLabel.alpha = 1.0f;
-            
+            [Util warnWithMessage:@"There was a problem creating your stamp" andBlock:nil];
         }
         
         self.view.userInteractionEnabled = YES;
@@ -293,7 +293,6 @@
     [controller release];
     
 }
-
 
 #pragma mark - Setters
 

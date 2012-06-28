@@ -117,7 +117,8 @@
     }
     
     if (controller) {
-        [self.navigationController pushViewController:controller animated:YES];
+        [Util pushController:controller modal:NO animated:YES];
+        //[self.navigationController pushViewController:controller animated:YES];
     } else {
         [Util warnWithMessage:[NSString stringWithFormat:@"controller for %@ not implemented yet...", category] andBlock:nil];
     }

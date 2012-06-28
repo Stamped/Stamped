@@ -13,6 +13,7 @@
 #import "STMenuController.h"
 #import "STAppDelegate.h"
 #import "STDefaultTableCell.h"
+#import "STNotificationsViewController.h"
 
 @interface STSettingsViewController ()
 
@@ -240,10 +241,14 @@
         
         // you
         if (indexPath.row == 0) {
-            STEditProfileViewController *controller = [[STEditProfileViewController alloc] init];
-            [self.navigationController pushViewController:controller animated:YES];
-            [controller release];
-        } else {
+            STEditProfileViewController *controller = [[[STEditProfileViewController alloc] init] autorelease];
+            [Util pushController:controller modal:YES animated:YES];
+        }
+        else if (indexPath.row == 2) {
+            STNotificationsViewController* controller = [[[STNotificationsViewController alloc] init] autorelease];
+            [Util pushController:controller modal:YES animated:YES];
+        }
+        else {
             [tableView deselectRowAtIndexPath:indexPath animated:YES];
         }
         

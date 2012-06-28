@@ -20,6 +20,7 @@
 - (void)drawRect:(CGRect)rect;
 - (void)offset:(CGPoint)offset;
 
++ (STChunk*)chunkWithLineHeight:(CGFloat)lineHeight andWidth:(CGFloat)width;
 + (STChunk*)newlineChunkWithPrev:(STChunk*)chunk;
 
 @property (nonatomic, readonly, assign) CGFloat lineHeight;

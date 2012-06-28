@@ -22,14 +22,18 @@
 @synthesize string = _string;
 @synthesize font = _font;
 
-- (id)initWithPrev:(STChunk *)chunk text:(NSString *)text font:(UIFont *)font color:(UIColor*)color {
+- (id)initWithPrev:(STChunk *)chunk text:(NSString *)text font:(UIFont *)font color:(UIColor *)color {
+    return [self initWithPrev:chunk text:text font:font color:color kerning:0.0];
+}
+
+- (id)initWithPrev:(STChunk*)chunk text:(NSString*)text font:(UIFont*)font color:(UIColor*)color kerning:(CGFloat)kerning {
     if (!chunk) {
         chunk = [[[STChunk alloc] initWithLineHeight:font.ascender + font.leading start:0 end:0 width:CGFLOAT_MAX lineCount:1 lineLimit:1] autorelease];
     }
     CGFloat end;
     NSInteger lineCount;
     NSInteger lineLimit = chunk.lineLimit - (chunk.lineCount - 1);
-    NSAttributedString* string = [Util attributedStringForString:text font:font color:color lineHeight:chunk.lineHeight indent:chunk.end];
+    NSAttributedString* string = [Util attributedStringForString:text font:font color:color lineHeight:chunk.lineHeight indent:chunk.end kerning:kerning];
     CGSize size = [Util sizeForString:string thatFits:CGSizeMake(chunk.frame.size.width, chunk.lineHeight * lineLimit)];
     lineCount = roundf(size.height / chunk.lineHeight);
     //size.width = chunk.frame.size.width;

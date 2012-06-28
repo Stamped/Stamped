@@ -25,6 +25,8 @@
 #import "STUser.h"
 #import "STUserViewController.h"
 #import "STAvatarView.h"
+#import "STPlayer.h"
+#import "STPlayerPopUp.h"
 
 #define kAvatarViewTag 101
 
@@ -37,11 +39,21 @@ static NSString* const _debugNameKey = @"Root.debugName";
 static NSString* const _todoNameKey = @"Root.todoName";
 static NSString* const _settingsNameKey = @"Root.settingsName";
 
+@interface STLeftMenuViewController ()
+
+@property (nonatomic, readonly, retain) UIView* titleView;
+@property (nonatomic, readonly, retain) UIView* playerView;
+@property (nonatomic, readonly, retain) UILabel* playerTitleView;
+
+@end
 
 @implementation STLeftMenuViewController
 
 @synthesize tableView=_tableView;
 @synthesize anchorTableView=_anchorTableView;
+@synthesize titleView = _titleView;
+@synthesize playerView = _playerView;
+@synthesize playerTitleView = _playerTitleView;
 
 - (id)init {
     if ((self = [super init])) {
@@ -59,6 +71,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [_controllerStore release], _controllerStore=nil;
     [_anchorDataSource release], _anchorDataSource=nil;
     [_anchorControllerStore release], _anchorControllerStore=nil;
+    [_titleView release];
     [super dealloc];
 }
 
@@ -82,12 +95,26 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         tableView.backgroundView = imageView;
         [imageView release];
         
-        imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"left_logo.png"]];
-        UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 50.0f)];
+        imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"left_logo.png"]] autorelease];
+        UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 50.0f)] autorelease];
         [view addSubview:imageView];
         self.tableView.tableHeaderView = view;
-        [view release];
-        [imageView release];
+        _titleView = imageView;
+        
+        _playerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
+        _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 50)];
+        _playerTitleView.backgroundColor = [UIColor clearColor];
+        _playerTitleView.textColor = [UIColor whiteColor];
+        _playerTitleView.font = [UIFont stampedBoldFontWithSize:16];
+        _playerTitleView.lineBreakMode = UILineBreakModeTailTruncation;
+        
+        UIButton* playerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [playerButton setImage:[UIImage imageNamed:@"menu_icon-viewplaylist"] forState:UIControlStateNormal];
+         [playerButton addTarget:self action:@selector(showPlaylist:) forControlEvents:UIControlEventTouchUpInside];
+        playerButton.frame = CGRectMake(10, 10, 30, 30);
+        [_playerView addSubview:playerButton];
+        [_playerView addSubview:_playerTitleView];
+        [view addSubview:_playerView];
         
         CGRect frame = imageView.frame;
         frame.origin.x = 14.0f;
@@ -156,6 +183,9 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILoginNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemChanged:) name:STPlayerItemChangedNotification object:nil];
+    [self playerStateChanged:nil];
 }
 
 - (void)viewDidUnload {
@@ -163,6 +193,31 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     self.anchorTableView = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidUnload];
+}
+
+- (void)showPlaylist:(id)notImportant {
+    [STPlayerPopUp present];
+}
+
+- (void)playerStateChanged:(id)notImportant {
+    STPlayer* player = [STPlayer sharedInstance];
+    if (player.paused) {
+        _titleView.hidden = NO;
+        _playerView.hidden = YES;
+    }
+    else {
+        _playerView.hidden = NO;
+        _titleView.hidden = YES;
+        [self playerItemChanged:nil];
+    }
+}
+
+- (void)playerItemChanged:(id)notImportant {
+    STPlayer* player = [STPlayer sharedInstance];
+    if (player.itemCount) {
+        id<STPlaylistItem> item = [player itemAtIndex:player.currentItemIndex];
+        _playerTitleView.text = item.name;
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -351,7 +406,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         [menuController setRootController:navController animated:YES];
         [Util addHomeButtonToController:controller withBadge:![controller isKindOfClass:[STUniversalNewsController class]]];
         
-    } else {
+    } 
+    else {
         
         STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
         controller.navigationItem.rightBarButtonItem = item;

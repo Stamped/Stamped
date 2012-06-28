@@ -231,7 +231,8 @@
     
     STTextCalloutView *callout = [[STTextCalloutView alloc] init];
     [view addSubview:callout];
-    [callout setTitle:[NSString stringWithFormat:@"%i stamp%@ in %@", cell.stampCount, (cell.stampCount==1) ? @"" : @"s", cell.category] boldText:cell.category];
+    NSString* baseTitle = [[Util titleForCategory:cell.category] lowercaseString];
+    [callout setTitle:[NSString stringWithFormat:@"%i stamp%@ in %@", cell.stampCount, (cell.stampCount==1) ? @"" : @"s", baseTitle] boldText:cell.category];
     CGPoint point = CGPointMake(cell.bounds.size.width/2, (cell.bounds.size.height - cell.barHeight)-14.0f);
     [callout showFromPosition:[view convertPoint:point fromView:cell] animated:YES];
     [callout release];

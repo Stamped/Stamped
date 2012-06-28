@@ -9,10 +9,20 @@
 #import "EditProfileHeaderView.h"
 #import "STAvatarView.h"
 #import "UserStampView.h"
+#import "STImageCache.h"
+
+@interface EditProfileHeaderView ()
+
+@property (nonatomic,retain,readonly) UIImageView *imageView;
+@property (nonatomic,retain,readonly) UserStampView *stampView;
+@property (nonatomic, readwrite, assign) BOOL imageSet;
+
+@end
 
 @implementation EditProfileHeaderView
 @synthesize imageView=_imageView;
 @synthesize stampView=_stampView;
+@synthesize imageSet = _imageSet;
 @synthesize delegate;
 
 - (id)initWithFrame:(CGRect)frame {
@@ -33,18 +43,32 @@
         label.frame = frame;
         [self addSubview:label];
         [label release];
-    
-        STAvatarView *imageView = [[STAvatarView alloc] initWithFrame:CGRectMake(11.0f, 40.0f, 106.0f, 106.0f)];
-        imageView.userInteractionEnabled = NO;
-        imageView.imageView.frame = CGRectInset(imageView.bounds, 4.0f, 4.0f);
-        [self addSubview:imageView];
-        _imageView = [imageView retain];
-        [imageView release];
-        [_imageView setDefault];
         
-        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectMake(imageView.bounds.size.width-24, -26.0f, 46.0f, 46.0f)];
+        _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(11.0f, 40.0f, 106.0f, 106.0f)];
+        [self addSubview:_imageView];
+        
+        NSString* url = [Util profileImageURLForUser:[STStampedAPI sharedInstance].currentUser withSize:STProfileImageSize144];
+        UIImage* cachedImage = [STStampedAPI sharedInstance].currentUserImage;
+        if (!cachedImage) {
+            cachedImage = [[STImageCache sharedInstance] cachedImageForImageURL:url];
+        }
+        //NSLog(@"url:%@", url);
+        if (cachedImage) {
+            _imageView.image = cachedImage;
+        }
+        else {
+            [[STImageCache sharedInstance] imageForImageURL:url
+                                                andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                                                    if (!self.imageSet) {
+                                                        _imageView.image = image; 
+                                                    }
+                                                }];
+        }
+        
+        
+        UserStampView *stampView = [[UserStampView alloc] initWithFrame:CGRectMake(_imageView.bounds.size.width-24, -26.0f, 46.0f, 46.0f)];
         stampView.size = STStampImageSize46;
-        [imageView addSubview:stampView];
+        [_imageView addSubview:stampView];
         [stampView setupWithUser:[[STStampedAPI sharedInstance] currentUser]];
         _stampView = stampView;
         [stampView release];
@@ -75,7 +99,7 @@
         
         image = [Util stampImageForUser:[[STStampedAPI sharedInstance] currentUser] withSize:STStampImageSize18];
         [button setImage:image forState:UIControlStateNormal];
-
+        
         
     }
     return self;
@@ -131,6 +155,12 @@
     
 }
 
+- (void)setImage:(UIImage *)image {
+    if (image) {
+        self.imageSet = YES;
+        self.imageView.image = image;
+    }
+}
 
 #pragma mark - Getters
 
@@ -138,6 +168,13 @@
     
     return [self.stampView colors];
     
+}
+
+- (UIImage *)image {
+    if (self.imageSet) {
+        return self.imageView.image;
+    }
+    return nil;
 }
 
 

@@ -185,6 +185,14 @@ static STStampedActions* _sharedInstance;
           [[Util sharedNavigationController] pushViewController:controller animated:YES];
       }
     }
+    else if ([action isEqualToString:@"stamped_view_user_image"] && context.user) {
+        handled = YES;
+        if (flag) {
+            
+            STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:context.user.imageURL]];
+            [[Util sharedNavigationController] pushViewController:controller animated:YES];
+        }
+    }
     else if ([action isEqualToString:@"stamped_confirm"] && source.sourceData != nil) {
         handled = YES;
         if (flag) {
@@ -206,10 +214,8 @@ static STStampedActions* _sharedInstance;
         handled = YES;
         if (flag) {
             CreateStampViewController* controller = [[[CreateStampViewController alloc] initWithEntity:context.entity] autorelease];
-            STRootViewController *navController = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
             controller.creditUsers = context.creditedUsers;
-            id menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-            [menuController presentModalViewController:navController animated:YES];
+            [[Util sharedNavigationController] pushViewController:controller animated:YES];
         }
     }
     else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
@@ -297,6 +303,12 @@ static STStampedActions* _sharedInstance;
 + (id<STAction>)actionViewImage:(NSString*)imageURL withOutputContext:(STActionContext*)context {
   return [STSimpleAction actionWithType:@"stamped_view_image" 
                               andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:imageURL]];
+}
+
++ (id<STAction>)actionViewUserImage:(id<STUser>)user withOutputContext:(STActionContext*)context {
+    context.user = user;
+    return [STSimpleAction actionWithType:@"stamped_view_user_image" 
+                                andSource:[STSimpleSource sourceWithSource:@"stamped" andSourceID:user.userID]];
 }
 
 + (id<STAction>)actionViewCreateStampWithEntity:(id<STEntity>)entity creditedUsers:(NSArray<STUser>*)users withOutputContext:(STActionContext*)context {

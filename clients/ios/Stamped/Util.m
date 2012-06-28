@@ -25,6 +25,7 @@
 #import "STMenuController.h"
 #import "STNavigationItem.h"
 #import "STBadgeBarButtonItem.h"
+#import "STRootViewController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -630,7 +631,7 @@ static Rdio* _rdio;
 }
 
 + (UINavigationController*)sharedNavigationController {
-  
+    
     STAppDelegate *delegate = (STAppDelegate*) [UIApplication sharedApplication].delegate;
     STMenuController *menuController = delegate.menuController;
     if (menuController.modalViewController) {
@@ -638,11 +639,11 @@ static Rdio* _rdio;
         if ([menuController.modalViewController isKindOfClass:[UINavigationController class]]) {
             return (UINavigationController*)menuController.modalViewController;
         }
-
+        
     }
-
+    
     return (UINavigationController*)delegate.menuController.rootViewController;
-
+    
 }
 
 + (void)globalLoadingLock {
@@ -858,12 +859,11 @@ static Rdio* _rdio;
 }
 
 + (NSString*)profileImageURLForUser:(id<STUser>)user withSize:(STProfileImageSize)size {
-    CGFloat imageSize = size * [UIScreen mainScreen].scale;
     if (user.imageURL) {
         NSString* original = [NSString stringWithFormat:@"/users/%@.jpg", user.screenName.lowercaseString];
         NSString* replacement =
-        [NSString stringWithFormat:@"/users/%@-%.0fx%.0f.jpg",
-         user.screenName.lowercaseString, imageSize, imageSize];
+        [NSString stringWithFormat:@"/users/%@-%dx%d.jpg",
+         user.screenName.lowercaseString, size, size];
         NSString* URL = [user.imageURL stringByReplacingOccurrencesOfString:original withString:replacement];
         return URL;
     }
@@ -964,7 +964,7 @@ static Rdio* _rdio;
     return gradient;
 }
 
-+ (UIView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size {
++ (UIImageView*)profileImageViewForUser:(id<STUser>)user withSize:(NSInteger)size {
     
     UIImageView* imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, size, size)] autorelease];
     imageView.layer.borderWidth = 1.5;
@@ -975,27 +975,36 @@ static Rdio* _rdio;
     imageView.layer.shadowRadius = 1;
     imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
     
-    STProfileImageSize profileSize = STProfileImageSize31;
-    if (size > profileSize) {
-        profileSize = STProfileImageSize37;
+    if (user) {
+        size = size * [UIScreen mainScreen].scale;
+        STProfileImageSize profileSize = STProfileImageSize24;
         if (size > profileSize) {
-            profileSize = STProfileImageSize46;
+            profileSize = STProfileImageSize48;
             if (size > profileSize) {
-                profileSize = STProfileImageSize55;
+                profileSize = STProfileImageSize60;
                 if (size > profileSize) {
-                    profileSize = STProfileImageSize72;
+                    profileSize = STProfileImageSize96;
+                    if (size > profileSize) {
+                        profileSize = STProfileImageSize144;
+                    }
                 }
             }
         }
-    }
-    UIImage* cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
-    if (cachedImage) {
-        imageView.image = cachedImage;
-    }
-    else {
-        [[STImageCache sharedInstance] userImageForUser:user size:profileSize andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-            imageView.image = image;
-        }];
+        UIImage* cachedImage = nil;
+        if (IS_CURRENT_USER(user.userID)) {
+            cachedImage = [[STStampedAPI sharedInstance] currentUserImageForSize:profileSize];
+        }
+        if (!cachedImage) {
+            [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
+        }
+        if (cachedImage) {
+            imageView.image = cachedImage;
+        }
+        else {
+            [[STImageCache sharedInstance] userImageForUser:user size:profileSize andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                imageView.image = image;
+            }];
+        }
     }
     return imageView;
     
@@ -1390,7 +1399,8 @@ static Rdio* _rdio;
                                              font:(UIFont *)aFont 
                                             color:(UIColor *)aColor 
                                        lineHeight:(CGFloat)lineHeight 
-                                           indent:(CGFloat)indent {    
+                                           indent:(CGFloat)indent 
+                                  extraAttributes:(NSDictionary*)attributes {    
     if (!aString)
         return nil;
     
@@ -1414,15 +1424,42 @@ static Rdio* _rdio;
         
     })());
     
-    NSAttributedString *returnedString = [[[NSAttributedString alloc] initWithString:aString attributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                                         fontAttr, kCTFontAttributeName,
-                                                                                                         foregroundColorAttr, kCTForegroundColorAttributeName,
-                                                                                                         paragraphStyleAttr, kCTParagraphStyleAttributeName,
-                                                                                                         nil]] autorelease];
-    
+    NSMutableDictionary* attrs = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                  fontAttr, kCTFontAttributeName,
+                                  foregroundColorAttr, kCTForegroundColorAttributeName,
+                                  paragraphStyleAttr, kCTParagraphStyleAttributeName,
+                                  nil];
+    [attrs addEntriesFromDictionary:attributes];
+    NSAttributedString *returnedString = [[[NSAttributedString alloc] initWithString:aString attributes:attrs] autorelease];
     return returnedString;
     
 }
+
+
++ (NSAttributedString *)attributedStringForString:(NSString *)aString 
+                                             font:(UIFont *)aFont 
+                                            color:(UIColor *)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent {
+    return [self attributedStringForString:aString font:aFont color:aColor lineHeight:lineHeight indent:indent extraAttributes:[NSDictionary dictionary]];
+}
+
+
++ (NSAttributedString *)attributedStringForString:(NSString *)aString 
+                                             font:(UIFont *)aFont 
+                                            color:(UIColor *)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent 
+                                          kerning:(CGFloat)kerning {
+    return [self attributedStringForString:aString
+                                      font:aFont 
+                                     color:aColor 
+                                lineHeight:lineHeight
+                                    indent:indent
+                           extraAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:kerning] forKey:(id)kCTKernAttributeName]];
+}
+//
+//[NSNumber numberWithFloat:5.0],kCTKernAttributeName,
 
 + (void)drawAttributedString:(NSAttributedString*)string atPoint:(CGPoint)origin withWidth:(CGFloat)width andMaxHeight:(CGFloat)height {
     CGContextRef context = UIGraphicsGetCurrentContext();
@@ -1439,7 +1476,7 @@ static Rdio* _rdio;
     CGMutablePathRef path = CGPathCreateMutable();
     CGPathAddRect(path, NULL, CGRectMake(0, 0, size.width, size.height) );
     
-    // create the framesetter and render text
+    // create the framesetter and render text;
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string); 
     CTFrameRef frame = CTFramesetterCreateFrame(framesetter,
                                                 CFRangeMake(0, [string length]), path, NULL);
@@ -1504,6 +1541,93 @@ static Rdio* _rdio;
     else {
         return noun;
     }
+}
+
++ (id<STImage>)bestImageFromImages:(NSArray<STImage>*)images forSize:(CGSize)size {
+    if (images.count == 0) return nil;
+    CGSize bestSize = CGSizeZero;
+    id<STImage> best = nil;
+    for (id<STImage> image in images) {
+        if (!best) {
+            best = image;
+        }
+        else {
+            if (image.height && image.width && image.url) {
+                CGSize curSize = CGSizeMake(image.width.floatValue, image.height.floatValue);
+                if (!best || (curSize.width > size.width && curSize.width < bestSize.width) ) {
+                    bestSize = curSize;
+                    best = image;   
+                }
+            }
+        }
+    }
+    return best;
+}
+
++ (STMenuController*)sharedMenuController {
+    STAppDelegate* delegate = (id)[UIApplication sharedApplication].delegate;
+    return delegate.menuController;
+}
+
++ (UINavigationController*)currentNavigationController {
+    STMenuController* root = [self sharedMenuController];
+    UIViewController* presented = root.presentedViewController;
+    if (!presented) {
+        return (id) root.rootViewController;
+    }
+    return (id)presented;
+}
+
++ (void)pushController:(UIViewController*)controller modal:(BOOL)modal animated:(BOOL)animated {
+    if (modal) {
+        STMenuController* root = [self sharedMenuController];
+        STRootViewController* nav = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
+        [root presentModalViewController:nav animated:animated];
+    }
+    else {
+        UINavigationController* cur = [self currentNavigationController];
+        if (cur) {
+            [cur pushViewController:controller animated:animated];
+        }
+        else {
+            NSLog(@"\n\n\n\nNav problem\n\n\n\n%@\n", [self sharedMenuController].rootViewController);
+        }
+    }
+}
+
++ (void)popControllerAnimated:(BOOL)animated {
+    UINavigationController* cur = [self currentNavigationController];
+    if (cur) {
+        if (cur.viewControllers.count > 1) {
+            [cur popViewControllerAnimated:animated];
+        }
+        else if (cur.viewControllers.count == 1) {
+            STMenuController* root = [self sharedMenuController];
+            [root dismissModalViewControllerAnimated:animated];
+        }
+        else {
+            NSLog(@"\n\n\nEmpty nav controller\n\n\n");
+        }
+    }
+    else {
+        NSLog(@"\n\n\n\nDifferent Nav problem\n\n\n\n");
+    }
+}
+
++ (BOOL)compareAndPopController:(UIViewController*)controller animated:(BOOL)animated {
+    UINavigationController* cur = [self currentNavigationController];
+    UIViewController* current = cur.topViewController;
+    if (current == controller) {
+        [self popControllerAnimated:animated];
+        return YES;
+    }
+    else {
+        return NO;
+    }
+}
+
++ (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block {
+    [self warnWithMessage:error.localizedDescription andBlock:block];
 }
 
 @end

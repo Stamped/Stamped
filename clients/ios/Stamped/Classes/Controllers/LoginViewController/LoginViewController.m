@@ -188,7 +188,7 @@
 
         if (error) {
 
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Couldn't Log In" message:@"The username and password do not match." delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Reset password" otherButtonTitles:@"      OK      ", nil];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Couldn't Log In" message:error.localizedDescription delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Reset password" otherButtonTitles:@"      OK      ", nil];
             [alertView show];
             [alertView release];
             
@@ -459,8 +459,6 @@
 
 #pragma mark - Getters
 
-#warning Shouldn't mangle passwords
-
 - (NSString*)username {
     
     if (_username.text) {
@@ -473,7 +471,7 @@
 - (NSString*)password {
     
     if (_password.text) {
-        return [_password.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        return _password.text;
     }
     
     return @"";

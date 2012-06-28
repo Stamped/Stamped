@@ -114,20 +114,20 @@ static CGFloat _rowHeight = 44;
   id<STPlaylistItem> item = [self.playlistItems objectAtIndex:indexPath.row];
   UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"track"] autorelease];
   
-    //UISwipeGestureRecognizer* recognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(test:)] autorelease];
-    //recognizer.direction = UISwipeGestureRecognizerDirectionRight;
-    //cell.showsReorderControl = YES;
-    //[cell addGestureRecognizer:recognizer];
+    UISwipeGestureRecognizer* recognizer = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(test:)] autorelease];
+    recognizer.direction = UISwipeGestureRecognizerDirectionRight;
+    cell.showsReorderControl = YES;
+    [cell addGestureRecognizer:recognizer];
     cell.textLabel.text = item.name ? item.name : @"?";
     return cell;
 }
 
 - (BOOL)tableView:(UITableView *)tableview canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-	return NO;	
+	return YES;	
 }
 
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-	
+	NSLog(@"From %d to %d", fromIndexPath.row, toIndexPath.row);
 }
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   
