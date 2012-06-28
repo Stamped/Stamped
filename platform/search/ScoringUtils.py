@@ -95,7 +95,13 @@ def stringRelevance(queryText, resultText):
 
 
 def combineMatchingSections(matchingSections):
-    """Given a list of (i, n) blocks, as returned from stringRelevance, compute the total length."""
+    """Given a list of (i, n) pairs, where each (i, n) pair denotes a block starting at ith
+    position, with length n, combine overlapping blocks, and return the total length of the combined
+    blocks.
+    
+    For example, if the input is [(0, 3), (2, 4), (20, 2)], the first two blocks overlap, and will
+    be combined to (0, 6). The final result would be 6 + 2 = 8.
+    """
     matchingSections.sort()
     collapsedBlocks = [matchingSections[0]]
     for i, n in matchingSections[1:]:
