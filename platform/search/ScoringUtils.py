@@ -96,7 +96,7 @@ def stringRelevance(queryText, resultText):
 
 def combineMatchingSections(matchingSections):
     """Given a list of (i, n) blocks, as returned from stringRelevance, compute the total length."""
-    matchingSections.sort(key=lambda x: x[0])
+    matchingSections.sort()
     collapsedBlocks = [matchingSections[0]]
     for i, n in matchingSections[1:]:
         j, m = collapsedBlocks[-1]
@@ -167,4 +167,25 @@ def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, que
             distance_boost = 1 + math.log(100 / distance, 1000)
             result.relevance *= distance_boost
             result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
+
+
+def adjustBookRelevanceByQueryMatch(searchResult, queryText):
+    def adjustRelevance(matchFactor, maxBoost, factorName):
+        factor = maxBoost ** matchFactor
+        searchResult.relevance *= factor
+        searchResult.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
+    matchingBlocks = []
+
+    factor, blocks = stringRelevance(queryText, searchResult.resolverObject.name)
+    matchingBlocks.extend(blocks)
+    adjustRelevance(factor, 2, 'title')
+
+    factor, blocks = stringRelevance(queryText,
+            ' '.join(author['name'] for author in searchResult.resolverObject.authors))
+    matchingBlocks.extend(blocks)
+    adjustRelevance(factor, 1.5, 'author')
+
+    queryFulfilled = float(combineMatchingSections(matchingBlocks)) / len(queryText)
+    searchResult.relevance *= queryFulfilled
+    searchResult.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
 

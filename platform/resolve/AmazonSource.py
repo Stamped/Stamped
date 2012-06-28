@@ -1117,26 +1117,6 @@ class AmazonSource(GenericSource):
         return interleaveResultsByRelevance([albums, tracks])
 
     def __scoreBookResults(self, resolverObjectsLists, queryText):
-        def adjustByQueryRelevance(result):
-            def adjustRelevance(matchFactor, maxBoost, factorName):
-                factor = maxBoost ** matchFactor
-                result.relevance *= factor
-                result.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
-            matchingBlocks = []
-
-            factor, blocks = stringRelevance(queryText, result.resolverObject.name)
-            matchingBlocks.extend(blocks)
-            adjustRelevance(factor, 2, 'title')
-
-            factor, blocks = stringRelevance(queryText,
-                    ' '.join(author['name'] for author in result.resolverObject.authors))
-            matchingBlocks.extend(blocks)
-            adjustRelevance(factor, 1.5, 'author')
-
-            queryFulfilled = float(combineMatchingSections(matchingBlocks)) / len(queryText)
-            result.relevance *= queryFulfilled
-            result.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
-
         assert len(resolverObjectsLists) <= 1 
         if len(resolverObjectsLists) == 0:
             return []
@@ -1145,7 +1125,7 @@ class AmazonSource(GenericSource):
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
         self.__adjustScoresBySalesRank(searchResults)
         for searchResult in searchResults:
-            adjustByQueryRelevance(searchResult)
+            adjustBookRelevanceByQueryMatch(searchResult, queryText)
             applyBookTitleDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
                 penaltyFactor = 0.2
