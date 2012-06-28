@@ -19,7 +19,7 @@ try:
     from GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty, basicNestedObjectToString
     from gevent.pool                import Pool
-    from pprint                     import pformat
+    from pprint                     import pprint, pformat
     from Resolver                   import *
     from ResolverObject             import *
     from TitleUtils                 import *
@@ -909,7 +909,7 @@ class iTunesSource(GenericSource):
         except Exception:
             logs.report()
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         if queryCategory not in ('music', 'film', 'app', 'book'):
             raise NotImplementedError()
 
@@ -925,6 +925,9 @@ class iTunesSource(GenericSource):
             pool.spawn(self.__searchEntityTypeLite, iTunesType, queryText, rawResults)
         pool.join(timeout=timeout)
 
+        if logRawResults:
+            logComponents = ["\n\n\nITUNES RAW RESULTS\nITUNES RAW RESULTS\nITUNES RAW RESULTS\n\n\n"]
+
         searchResultsByType = {}
         # Convert from JSON objects to entity proxies. Pass through actual parsing errors, but report & drop the result
         # if we just see a type we aren't expecting. (Music search will sometimes return podcasts, for instance.)
@@ -932,6 +935,8 @@ class iTunesSource(GenericSource):
             processedResults = []
             for rawResult in rawTypeResults:
                 try:
+                    if logRawResults:
+                        logComponents.extend(['\n\n', pformat(rawResult), '\n\n'])
                     processedResults.append(self.__createEntityProxy(rawResult, maxLookupCalls=0))
                 except UnknownITunesTypeError:
                     logs.report()
@@ -939,6 +944,10 @@ class iTunesSource(GenericSource):
 
             if len(processedResults) > 0:
                 searchResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults, queryText)
+
+        if logRawResults:
+            logComponents.append("\n\n\nEND RAW ITUNES RESULTS\n\n\n")
+            logs.debug(''.join(logComponents))
 
         if len(searchResultsByType) == 0:
             # TODO: Throw exception to avoid cache?

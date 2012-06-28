@@ -781,7 +781,7 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query)
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         simplifiedText = queryText.lower()
         if queryCategory == 'film':
             query = {
@@ -847,6 +847,11 @@ class StampedSource(GenericSource):
         entityIds = [ match['_id'] for match in matches ]
         # TODO: Should just retrieve all of this from the initial query!
         entityProxies = [ self.entityProxyFromKey(entityId) for entityId in entityIds ]
+        if logRawResults:
+            logComponents = ['\n\n\nSTAMPED RAW RESULTS\nSTAMPED RAW RESULTS\nSTAMPED RAW RESULTS\n\n\n']
+            logComponents.extend(['\n\n%s\n\n' % str(proxy) for proxy in entityProxies])
+            logComponents.append('\n\n\nEND STAMPED RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
         entityStats = MongoEntityStatsCollection().getStatsForEntities(entityIds)
         statsByEntityId = dict([(stats.entity_id, stats) for stats in entityStats])
         results = []

@@ -820,7 +820,7 @@ class AmazonSource(GenericSource):
                     indexResults.append(parsedItem)
             results[searchIndexData.searchIndexName] = indexResults
 
-    def __searchIndexesLite(self, searchIndexes, queryText, timeout=None):
+    def __searchIndexesLite(self, searchIndexes, queryText, timeout=None, logRawResults=False):
         """
         Issues searches for the given SearchIndexes and creates ResolverObjects from the results.
         """
@@ -829,6 +829,13 @@ class AmazonSource(GenericSource):
         for searchIndexData in searchIndexes:
             pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex)
         pool.join(timeout)
+        if logRawResults:
+            logComponents = ['\n\n\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\n\n\n']
+            for (searchIndexName, results) in resultsBySearchIndex.items():
+                logComponents.append('\n\nAMAZON RESULTS FOR SEARCHINDEX %s\n\n' % searchIndexName)
+                logComponents.extend(['\n\n%s\n\n' % pformat(result.data) for result in results])
+            logComponents.append('\n\n\nEND AMAZON RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
 
         return resultsBySearchIndex
 
@@ -1182,7 +1189,7 @@ class AmazonSource(GenericSource):
             except KeyError:
                 pass
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         if queryCategory == 'music':
             # We're not passing a constructor, so this will return the raw results. This is because we're not sure if
             # they're songs or albums yet, so there's no straightforward constructor we can pass.
@@ -1190,7 +1197,7 @@ class AmazonSource(GenericSource):
                 AmazonSource.SearchIndexData('Music', 'Medium,Tracks,Reviews', self.__constructMusicObjectFromResult),
                 AmazonSource.SearchIndexData('DigitalMusic', 'Medium,Reviews', self.__constructMusicObjectFromResult)
             )
-            resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
+            resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout, logRawResults=logRawResults)
             return self.__scoreMusicResults(resultSets.values())
         elif queryCategory == 'book':
             def createBook(rawResult, maxLookupCalls):
@@ -1199,7 +1206,7 @@ class AmazonSource(GenericSource):
             searchIndexes = (
                     AmazonSource.SearchIndexData('Books', 'Medium,Reviews', createBook),
                 )
-            resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout)
+            resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout, logRawResults=logRawResults)
             return self.__scoreBookResults(resultSets, queryText)
         #elif queryCategory == 'film':
         #    searchIndexes = (
