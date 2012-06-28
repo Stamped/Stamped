@@ -42,6 +42,7 @@ try:
     from api.Schemas                import *
     from ActivityCollectionCache    import ActivityCollectionCache
     from Memcache                   import globalMemcache
+    from HTTPSchemas                import generateStampUrl
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
@@ -2704,15 +2705,15 @@ class StampedAPI(AStampedAPI):
                 return 'video_game'
         return 'other'
 
-    def _getOpenGraphUrl(self, ogType, stampId=None, userId=None):
-        #if ogType == 'restaurant':
-
-
+    def _getOpenGraphUrl(self, stampId=None, userId=None):
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movie7.html"
+            stamp = self.getStamp(stampId)
+            url = generateStampUrl(stamp)
+            #HACK for testing purposes
+            return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
         if userId is not None:
-            return "http://static.stamped.com/assets/user.html"
+            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % stamp.user.screen_name
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
         account = self.getAccount(authUserId)
