@@ -22,7 +22,6 @@ from MongoStampLikesCollection          import MongoStampLikesCollection
 from MongoStampViewsCollection          import MongoStampViewsCollection
 from MongoUserStampsCollection          import MongoUserStampsCollection
 from MongoInboxStampsCollection         import MongoInboxStampsCollection
-from MongoDeletedStampCollection        import MongoDeletedStampCollection
 from MongoCreditGiversCollection        import MongoCreditGiversCollection
 from MongoCreditReceivedCollection      import MongoCreditReceivedCollection
 

@@ -2719,7 +2719,7 @@ class StampedAPI(AStampedAPI):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin']:
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby']:
             logs.info('Skipping Open Graph post because user not on whitelist')
             return
 
@@ -2750,7 +2750,7 @@ class StampedAPI(AStampedAPI):
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stamp = stamp)
-            kwargs['message'] = stamp.content.blurb
+            kwargs['message'] = stamp.contents[-1].blurb
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
             stamp = self.getStamp(likeStampid)
@@ -2774,7 +2774,7 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
-        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' (action, token, ogType, url))
+        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
         self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 

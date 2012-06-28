@@ -203,7 +203,7 @@ def handle_profile(request, schema, **kwargs):
     
     body_classes = _get_body_classes('profile', schema)
     if sdetail is not None:
-        body_classes += "sdetail_popup";
+        body_classes += " sdetail_popup";
     
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
