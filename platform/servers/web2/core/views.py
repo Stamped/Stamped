@@ -280,7 +280,7 @@ def handle_map(request, schema, **kwargs):
         'URL'           : url, 
     }, preload=[ 'user', 'stamps', 'stamp_id' ])
 
-@stamped_view(schema=HTTPStampDetail)
+@stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax

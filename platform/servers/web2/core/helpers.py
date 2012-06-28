@@ -328,6 +328,7 @@ def parse_request(request, schema, django_kwargs, overflow, **kwargs):
                 raise
             return
         
+        utils.log("OVERFLOW: %s" % overflow);
         schema.dataImport(data, overflow=overflow)
         return schema
     except Exception as e:
