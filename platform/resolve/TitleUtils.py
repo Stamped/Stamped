@@ -41,20 +41,20 @@ class TitleDataQualityRegexpTest(object):
     If rawName==True, we apply the regular expression to the raw_name ResolverObject field instead of the processed
     name property.
     """
-    def __init__(self, penalizedTitleRegexp, message, penalty, exceptionQueryRegexp=None, rawName=False):
+    def __init__(self, penalizedTitleRegexp, message, penalty, exceptionQueryRegexps=None, rawName=False):
         self.titleRegexp = penalizedTitleRegexp
         if isinstance(self.titleRegexp, basestring):
             self.titleRegexp = re.compile(self.titleRegexp, re.IGNORECASE)
-        self.exceptionQueryRegexp = exceptionQueryRegexp
+        self.exceptionQueryRegexps = exceptionQueryRegexps
         self.message = message
         self.penalty = penalty
         self.rawName = rawName
 
     def __matchesException(self, query):
         try:
-            return self.exceptionQueryRegexp.search(query)
+            return self.exceptionQueryRegexps.search(query)
         except:
-            return any(regexp.search(query) for regexp in self.exceptionQueryRegexp)
+            return any(regexp.search(query) for regexp in self.exceptionQueryRegexps)
 
     def applyTest(self, searchResult, searchQuery):
         title = searchResult.resolverObject.raw_name if self.rawName else searchResult.resolverObject.name
@@ -128,7 +128,7 @@ def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
 TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('[^:,\[\(-]\s*The Complete ', re.IGNORECASE)
 TV_SEASON1_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*Seasons? ', re.IGNORECASE)
 TV_SEASON2_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
-TV_BOXED_SET_REGEX_CONFIDENT = re.compile('[:,\[\(-]Box(ed)? Set[:,\]\) $-]', re.IGNORECASE)
+TV_BOXED_SET_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*Box(ed)? Set[:,\]\) $-]', re.IGNORECASE)
 TV_VOLUMES_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}[\]) ]+$', re.IGNORECASE)
 TV_BEST_OF_REGEX_CONFIDENT = re.compile('[^:,\[\(-]\s*The Best of ', re.IGNORECASE)
 
@@ -146,7 +146,7 @@ def cleanTvTitle(tvTitle):
 TV_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
     # I didn't quite feel confident enough to strip this one out.
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' prefix in title", 0.35,
-        exceptionQueryRegexp=makeTokenRegexp('complete')),
+        exceptionQueryRegexps=makeTokenRegexp('complete')),
 )
 
 TV_TITLE_BAD_TOKENS = (
@@ -191,16 +191,16 @@ def getMovieReleaseYearFromTitle(movieResolverObject):
 # something wrong with a movie. Most likely, it's actually a TV show or a box set.
 MOVIE_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' in title", 0.35,
-                               exceptionQueryRegexp=makeTokenRegexp('complete')),
+                               exceptionQueryRegexps=makeTokenRegexp('complete')),
     TitleDataQualityRegexpTest(TV_SEASON1_REGEX_CONFIDENT, "season specification in title", 0.5,
-                               exceptionQueryRegexp=makeTokenRegexp('season')),
+                               exceptionQueryRegexps=makeTokenRegexp('season')),
     TitleDataQualityRegexpTest(TV_SEASON2_REGEX_CONFIDENT, "season specification in title", 0.5,
-                               exceptionQueryRegexp=makeTokenRegexp('season')),
+                               exceptionQueryRegexps=makeTokenRegexp('season')),
     TitleDataQualityRegexpTest(TV_BOXED_SET_REGEX_CONFIDENT, "box set in title", 0.5),
     TitleDataQualityRegexpTest(TV_VOLUMES_REGEX_CONFIDENT, "volume specification in title", 0.5,
-                               exceptionQueryRegexp=makeTokenRegexp('volume')),
+                               exceptionQueryRegexps=makeTokenRegexp('volume')),
     TitleDataQualityRegexpTest(TV_BEST_OF_REGEX_CONFIDENT, "'best of' in title", 0.5,
-                               exceptionQueryRegexp=makeTokenRegexp('best'))
+                               exceptionQueryRegexps=makeTokenRegexp('best'))
 )
 
 MOVIE_TITLE_BAD_TOKENS = (
@@ -251,16 +251,16 @@ def cleanBookTitle(bookTitle):
     return applyRemovalRegexps(BOOK_TITLE_REMOVAL_REGEXPS, bookTitle)
 
 BOOK_TITLE_SUSPICIOUS_TESTS = (
-    TitleDataQualityRegexpTest('\bbest of\b', "'best of' in title", 0.3,
-                               exceptionQueryRegexp=makeTokenRegexp('best')),
-    TitleDataQualityRegexpTest('\bbox(ed)? set\b', "'box set' in title", 0.3,
-                               exceptionQueryRegexp=(makeTokenRegexp('box'), makeTokenRegexp('boxed'), makeTokenRegexp('set'))),
-    TitleDataQualityRegexpTest('\bedition', "'edition' in title", 0.3,
-                               exceptionQueryRegexp=makeTokenRegexp('edition')),
-    TitleDataQualityRegexpTest('\bbook\s+\d', "'book #' in title", 0.3,
-                               exceptionQueryRegexp=makeTokenRegexp('book')),
-    TitleDataQualityRegexpTest('\bvolume\s+\d', "'volume #' in title", 0.3,
-                               exceptionQueryRegexp=makeTokenRegexp('volume')),
+    TitleDataQualityRegexpTest(r'\bbest of\b', "'best of' in title", 0.3,
+                               exceptionQueryRegexps=makeTokenRegexp('best')),
+    TitleDataQualityRegexpTest(r'\bbox(ed)? set\b', "'box set' in title", 0.3,
+                               exceptionQueryRegexps=(makeTokenRegexp('box'), makeTokenRegexp('boxed'), makeTokenRegexp('set'))),
+    TitleDataQualityRegexpTest(r'\bedition', "'edition' in title", 0.3,
+                               exceptionQueryRegexps=makeTokenRegexp('edition')),
+    TitleDataQualityRegexpTest(r'\bbook\s+\d', "'book #' in title", 0.3,
+                               exceptionQueryRegexps=makeTokenRegexp('book')),
+    TitleDataQualityRegexpTest(r'\bvolume\s+\d', "'volume #' in title", 0.3,
+                               exceptionQueryRegexps=makeTokenRegexp('volume')),
 )
 
 def applyBookTitleDataQualityTests(searchResult, searchQuery):
