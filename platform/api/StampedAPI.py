@@ -705,6 +705,10 @@ class StampedAPI(AStampedAPI):
         return self._accountDB.getAccount(authUserId)
 
     @API_CALL
+    def getLinkedAccount(self, authUserId, service_name):
+        return getattr(self.getAccount(authUserId).linked, service_name)
+
+    @API_CALL
     def getLinkedAccounts(self, authUserId):
         return self.getAccount(authUserId).linked
 
@@ -887,22 +891,29 @@ class StampedAPI(AStampedAPI):
         return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
-    def updateLinkedAccountShareSettings(self, authUserId, service_name, linkedAccountShareSettings):
-        if service_name not in ['facebook', 'twitter', 'netflix']:
-            logs.warning('Attempted to update share settings of invalid linked account: %s' % service_name)
-            raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
-
-        account = self.getAccount(authUserId)
-        if getattr(account.linked, service_name, None) == None:
-            logs.warning('Could not find linked account to update: %s' % service_name)
-            raise StampedIllegalActionError("There was an error updating share settings")
-
+    def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
+        account = self._accountDB.getAccount(authUserId)
         linkedAccount = getattr(account.linked, service_name)
-        logs.info('### share_settings: %s' % linkedAccountShareSettings)
-        linkedAccount.share_settings = linkedAccountShareSettings
+
+
+        shareSettings = linkedAccount.share_settings
+        if shareSettings is None:
+            shareSettings = LinkedAccountShareSettings()
+
+        if on is not None:
+            for attr in on:
+                if hasattr(shareSettings, attr):
+                    setattr(shareSettings, attr, True)
+
+        if off is not None:
+            for attr in off:
+                if hasattr(shareSettings, attr):
+                    setattr(shareSettings, attr, False)
+
+        linkedAccount.share_settings = shareSettings
 
         self._accountDB.updateLinkedAccount(authUserId, linkedAccount)
-        return True
+        return linkedAccount
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
@@ -2689,16 +2700,17 @@ class StampedAPI(AStampedAPI):
                 return 'video_game'
         return 'other'
 
-    def _getOpenGraphUrl(self, stampId=None, entityId=None, userId=None):
+    def _getOpenGraphUrl(self, ogType, stampId=None, userId=None):
+        #if ogType == 'restaurant':
+
+
         #TODO: fill this with something other than the dummy url
         if stampId is not None:
-            return "http://static.stamped.com/assets/movie7.html"
-        if entityId is not None:
             return "http://static.stamped.com/assets/movie7.html"
         if userId is not None:
             return "http://static.stamped.com/assets/user.html"
 
-    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoEntityId=None, followUserId=None):
+    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
@@ -2736,13 +2748,13 @@ class StampedAPI(AStampedAPI):
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stampId = likeStampId)
-        elif todoEntityId is not None and share_settings.share_todos == True:
+        elif todoStampId is not None and share_settings.share_todos == True:
             action = 'todo'
-            entity = self.getEntity({'entity_id': todoEntityId})
-            kind = entity.kind
-            types = entity.types
+            stamp = self.getStamp(todoStampId)
+            kind = stamp.entity.kind
+            types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(entityId = entity.entity_id)
+            url = self._getOpenGraphUrl(stampId = todoStampId)
         elif followUserId is not None and share_settings.share_follows == True:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
@@ -3869,7 +3881,9 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoEntityId':entity.entity_id})
+        # for now, we only post to OpenGraph if the Todo was off of a stamp
+        if stampId is not None:
+            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoStampId':stampId})
 
         return todo
 

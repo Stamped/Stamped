@@ -35,7 +35,7 @@ def add(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(True)
 
-@handleHTTPRequest(http_schema=HTTPRemoveLinkedAccountForm)
+@handleHTTPRequest(http_schema=HTTPServiceNameForm)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, http_schema.service_name)
@@ -49,12 +49,60 @@ def update(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(True)
 
-@handleHTTPRequest(http_schema=HTTPUpdateLinkedAccountShareSettingsForm,
-                   conversion=HTTPUpdateLinkedAccountShareSettingsForm.exportLinkedAccountShareSettings)
+def _buildShareSettingsFromLinkedAccount(linked):
+    shares = getattr(linked, 'share_settings', None)
+    result = []
+
+    def buildToggle(settingType):
+        name = 'share_%s' % settingType
+        toggle = HTTPSettingsToggle()
+        toggle.toggle_id = name
+        toggle.type = settingType
+        toggle.value = False
+        if shares is not None and hasattr(shares, name) and getattr(shares, name) == True:
+            toggle.value = True
+        return toggle
+
+    def buildGroup(settingGroup, settingName):
+        group = HTTPSettingsGroup()
+        group.group_id = 'share_%s' % settingGroup
+        group.name = settingName
+        group.toggles = [
+            buildToggle(settingGroup)
+        ]
+        return group
+
+    result.append(buildGroup('stamps', 'Share Stamps'))
+    result.append(buildGroup('likes', 'Share Likes'))
+    result.append(buildGroup('todos', 'Share Todos'))
+    result.append(buildGroup('follows', 'Share Follows'))
+
+    return map(lambda x: x.dataExport(), result)
+
+@handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest)
 @require_http_methods(["POST"])
-def updateShareSettings(request, authUserId, http_schema, schema, **kwargs):
-    result = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, schema)
-    return transformOutput(True)
+def updateShareSettings(request, authUserId, http_schema, **kwargs):
+    on = None
+    if http_schema.on is not None:
+        on = set(http_schema.on.split(','))
+
+    off = None
+    if http_schema.off is not None:
+        off = set(http_schema.off.split(','))
+
+    logs.info('### on: %s' % on)
+    linkedAccount  = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, on, off)
+    result = _buildShareSettingsFromLinkedAccount(linkedAccount)
+
+    return transformOutput(result)
+
+@handleHTTPRequest(http_schema=HTTPServiceNameForm)
+@require_http_methods(["GET"])
+def showShareSettings(request, authUserId, http_schema, **kwargs):
+    linked  = stampedAPI.getLinkedAccount(authUserId, http_schema.service_name)
+    result = _buildShareSettingsFromLinkedAccount(linked)
+
+    return transformOutput(result)
 
 
 @handleHTTPRequest()

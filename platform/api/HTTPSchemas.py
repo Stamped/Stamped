@@ -553,7 +553,7 @@ class HTTPAccountCheck(Schema):
     def setSchema(cls):
         cls.addProperty('login',                            basestring, required=True)
 
-class HTTPRemoveLinkedAccountForm(Schema):
+class HTTPServiceNameForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('service_name',                     basestring, required=True)
@@ -663,6 +663,13 @@ class HTTPSettingsGroup(Schema):
 class HTTPSettingsToggleRequest(Schema):
     @classmethod
     def setSchema(cls):
+        cls.addProperty('on',                               basestring)
+        cls.addProperty('off',                              basestring)
+
+class HTTPShareSettingsToggleRequest(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('service_name',                     basestring)
         cls.addProperty('on',                               basestring)
         cls.addProperty('off',                              basestring)
 
@@ -3017,7 +3024,7 @@ class HTTPActivity(Schema):
 
                 self.action = _buildUserAction(self.objects.users[0])
 
-        elif self.verb == 'credit':
+        elif self.verb == 'restamp' or self.verb == 'credit':
             _addStampObjects()
 
             subjects, subjectReferences = _formatUserObjects(self.subjects)
