@@ -140,6 +140,10 @@ class StampedDuplicateScreenNameError(StampedDuplicationError):
         StampedDuplicationError.__init__(self, msg)
 
 
+class StampedLinkedAccountError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedDuplicationError.__init__(self, msg)
+
 # Third Party Stamped Exceptions
 
 class StampedThirdPartyError(StampedInputError):

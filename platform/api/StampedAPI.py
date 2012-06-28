@@ -2476,6 +2476,22 @@ class StampedAPI(AStampedAPI):
 
 
     @API_CALL
+    def shareStamp(self, authUserId, stampId, service_name, imageUrl):
+        stamp = self.getStamp(stampId)
+        account = self.getAccount(authUserId)
+
+        if service_name == 'facebook':
+            if account.linked is None or account.linked.facebook is None is None \
+               or account.linked.facebook.token is None or account.linked.facebook.linked_user_id:
+                logs.warning('Cannot share stamp on facebook, missing necessary linked account information.')
+                raise StampedLinkedAccountError("")
+            self._facebook.postToNewsFeed(account.linked.facebook.linked_user_id,
+                                          account.linked.facebook.token,
+                                          stamp.contents[-1].blurb,
+                                          imageUrl)
+        return stamp
+
+    @API_CALL
     def updateStamp(self, authUserId, stampId, data):
         raise NotImplementedError
 
@@ -2753,7 +2769,7 @@ class StampedAPI(AStampedAPI):
             kwargs['message'] = stamp.contents[-1].blurb
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
-            stamp = self.getStamp(likeStampid)
+            stamp = self.getStamp(likeStampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)

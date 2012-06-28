@@ -2609,6 +2609,13 @@ class HTTPStampNew(Schema):
         cls.addProperty('credits',                          basestring) # comma-separated screen names
         cls.addProperty('temp_image_url',                   basestring)
 
+class HTTPStampShare(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('service_name',                     basestring)
+        cls.addProperty('temp_image_url',                   basestring)
+
 class HTTPStampEdit(Schema):
     @classmethod
     def setSchema(cls):
