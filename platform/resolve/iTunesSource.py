@@ -938,7 +938,7 @@ class iTunesSource(GenericSource):
                     pass
 
             if len(processedResults) > 0:
-                searchResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults)
+                searchResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults, queryText)
 
         if len(searchResultsByType) == 0:
             # TODO: Throw exception to avoid cache?
@@ -954,7 +954,7 @@ class iTunesSource(GenericSource):
                 searchResultsByType.get('song', []))
         return interleaveResultsByRelevance(searchResultsByType.values())
 
-    def __scoreResults(self, iTunesType, resolverObjects):
+    def __scoreResults(self, iTunesType, resolverObjects, queryText):
         # We weight down album and artist and rely on the augmentation to bring them back up. This is because otherwise
         # we will always interleave artists with songs -- you'll never get a query where artists don't feature
         # prominently -- and that doesn't make sense.
@@ -971,11 +971,21 @@ class iTunesSource(GenericSource):
             'ebook': 0.1,
         }
 
+        # TODO: Refactoring is needed here.
+        iTunesTypesToTitleTests = {
+            'movie' : applyMovieTitleDataQualityTests,
+            'tvShow' : applyTvTitleDataQualityTests
+        }
+
         if iTunesType in iTunesTypesToWeights:
             searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects,
                 sourceScore=iTunesTypesToWeights[iTunesType])
         else:
             searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects)
+
+        if iTunesType in iTunesTypesToTitleTests:
+            for searchResult in searchResults:
+                iTunesTypesToTitleTests[iTunesType](searchResult, queryText)
 
         # Artists without amg IDs get scored down.
         if iTunesType == 'musicArtist':

@@ -72,10 +72,10 @@ def _buildShareSettingsFromLinkedAccount(linked):
         ]
         return group
 
-    result.append(buildGroup('stamps', 'Share Stamps'))
-    result.append(buildGroup('likes', 'Share Likes'))
-    result.append(buildGroup('todos', 'Share Todos'))
-    result.append(buildGroup('follows', 'Share Follows'))
+    result.append(buildGroup('stamps', 'Publish My Stamps'))
+    result.append(buildGroup('likes', 'Publish Stamps That I Like'))
+    result.append(buildGroup('todos', "Publish My Todo's"))
+    result.append(buildGroup('follows', "Publish When I Follow Someone"))
 
     return map(lambda x: x.dataExport(), result)
 

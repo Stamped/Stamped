@@ -162,6 +162,7 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         self.assertEqual(linkedAccounts['facebook']['service_name'], 'facebook')
 
         # update share settings: enable share stamps on facebook
+
         path = "account/linked/update_share_settings.json"
         data = {
             "oauth_token"   : self.token['access_token'],

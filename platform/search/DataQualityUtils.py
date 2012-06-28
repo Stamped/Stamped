@@ -71,7 +71,7 @@ MIN_CLUSTER_DATA_QUALITY = 0.7
             # "The Complete Guide to _____" so this safeguard is built in for that purpose.
             if len(alteredTitle) >= 3:
                 currTitle = alteredTitle
-            else:
+            else:g
                 logs.warning("Avoiding transformation to AmazonTvShow title '%s' because result would be too short" %
                              rawTitle)
         if currTitle != rawTitle:

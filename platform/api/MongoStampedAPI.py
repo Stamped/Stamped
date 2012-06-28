@@ -42,7 +42,6 @@ from db.mongodb.MongoGuideCollection            import MongoGuideCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
-from db.mongodb.MongoDeletedEntityCollection    import MongoDeletedEntityCollection
 from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
 from db.mongodb.MongoFactualCollection          import MongoFactualCollection
 from db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
@@ -153,10 +152,6 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _emailAlertDB(self):
         return MongoAuthEmailAlertsCollection()
-    
-    @lazyProperty
-    def _deletedEntityDB(self):
-        return MongoDeletedEntityCollection()
     
     @lazyProperty
     def _entityStatsDB(self):
