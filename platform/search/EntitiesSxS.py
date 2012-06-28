@@ -10,6 +10,7 @@ import Globals
 from os import path
 
 import difflib
+import itertools
 import optparse
 import os
 import pickle
@@ -61,13 +62,13 @@ def differenceScore(left, right):
 def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
     changedTableRows = []
     allTableRows = []
-    statsText = '%d same position, %d moved, %d added/droped'
+    statsText = '%d same position, %d moved, %d added, %d droped'
     linkText = '<a href="%s">%s</a>'
     for key in sorted(oldResults.keys()):
-        (same, moved, addDrop), filename = compareSingleSearch(
+        (same, moved, added, dropped), filename = compareSingleSearch(
                 key, oldResults[key], newResults[key], outputDir, diffThreshold)
-        row = linkText % (filename, key), statsText % (same, moved, addDrop)
-        if moved or addDrop:
+        row = linkText % (filename, key), statsText % (same, moved, added, dropped)
+        if moved or added or dropped:
             changedTableRows.append(row)
         allTableRows.append(row)
     random.shuffle(changedTableRows)
@@ -129,7 +130,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), 'r%d' % i))
 
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
-    for links in zip(linksLeft, linksRight):
+    for links in itertools.izip_longest(linksLeft, linksRight, fillvalue='<td></td>'):
         fileContent.append('<tr>%s%s</tr>' % links)
     fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER)
 
@@ -140,8 +141,9 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     # Now compute the stats:
     same = sum(1 for i, j in movements.iteritems() if i == j)
     moved = len(movements) - same
-    addDrop = len(oldResults) - len(movements)
-    return (same, moved, addDrop), filenameBase + '.html'
+    added = len(newResults) - len(movements)
+    dropped = len(oldResults) - len(movements)
+    return (same, moved, added, dropped), filenameBase + '.html'
 
 
 def writeSingleEntity(entity, outputDir, filename, cellId):
