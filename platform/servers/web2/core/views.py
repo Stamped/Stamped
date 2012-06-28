@@ -78,11 +78,11 @@ def index(request):
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 
-@stamped_view(schema=HTTPWebTimeSlice)
+@stamped_view(schema=HTTPWebTimeSlice, ignore_extra_params=True)
 def profile(request, schema, **kwargs):
     return handle_profile(request, schema, **kwargs)
 
-@stamped_view(schema=HTTPWebTimeMapSlice)
+@stamped_view(schema=HTTPWebTimeMapSlice, ignore_extra_params=True)
 def map(request, schema, **kwargs):
     return handle_map(request, schema, **kwargs)
 
@@ -280,7 +280,7 @@ def handle_map(request, schema, **kwargs):
         'URL'           : url, 
     }, preload=[ 'user', 'stamps', 'stamp_id' ])
 
-@stamped_view(schema=HTTPStampDetail)
+@stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
