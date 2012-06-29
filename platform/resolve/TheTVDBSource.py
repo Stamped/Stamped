@@ -248,6 +248,7 @@ class TheTVDBSource(GenericSource):
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects, sourceScore=1.1)
         for searchResult in searchResults:
             applyTvTitleDataQualityTests(searchResult, queryText)
+            adjustTvRelevanceByQueryMatch(searchResult, queryText)
         return searchResults
 
 if __name__ == '__main__':

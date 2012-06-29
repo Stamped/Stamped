@@ -642,10 +642,12 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Could not update account website")
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
-        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
-            account.color_primary = fields['color_primary']
-        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
-            account.color_secondary = fields['color_secondary']
+        if 'color_primary' in fields and 'color_secondary' in fields:
+            if account.color_primary != fields['color_primary'] or account.color_secondary != fields['color_secondary']:
+                account.color_secondary = fields['color_secondary']
+                account.color_primary = fields['color_primary']
+                # Asynchronously generate stamp file
+                tasks.invoke(tasks.APITasks.customizeStamp, args=[account.color_primary, account.color_secondary])
         if 'temp_image_url' in fields:
             image_cache_timestamp = datetime.utcnow()
             account.timestamp.image_cache = image_cache_timestamp
@@ -2483,8 +2485,7 @@ class StampedAPI(AStampedAPI):
         if service_name == 'facebook':
             if account.linked is None or account.linked.facebook is None is None \
                or account.linked.facebook.token is None or account.linked.facebook.linked_user_id:
-                logs.warning('Cannot share stamp on facebook, missing necessary linked account information.')
-                raise StampedLinkedAccountError("")
+                raise StampedLinkedAccountError('Cannot share stamp on facebook, missing necessary linked account information.')
             self._facebook.postToNewsFeed(account.linked.facebook.linked_user_id,
                                           account.linked.facebook.token,
                                           stamp.contents[-1].blurb,
@@ -2689,9 +2690,9 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
-                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
-                return 'store'
+#            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
+#                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
+#                return 'store'
             return 'place'
 
         elif kind == 'person':
@@ -2739,10 +2740,6 @@ class StampedAPI(AStampedAPI):
             logs.info('Skipping Open Graph post because user not on whitelist')
             return
 
-        logs.info('######')
-        import pprint
-        logs.info(pprint.pformat(account))
-
         if account.linked is None or account.linked.facebook is None or account.linked.facebook.share_settings is None\
            or account.linked.facebook.token is None:
             return
@@ -2753,8 +2750,6 @@ class StampedAPI(AStampedAPI):
         action = None
         ogType = None
         url = None
-
-        logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
 
         kwargs = {}
         if imageUrl is not None:

@@ -312,6 +312,7 @@ class TMDBSource(GenericSource):
         search_results = scoreResultsWithBasicDropoffScoring(resolver_objects, sourceScore=1.0)
         for search_result in search_results:
             applyMovieTitleDataQualityTests(search_result, queryText)
+            adjustMovieRelevanceByQueryMatch(search_result, queryText)
         # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
         # TMDB is clever enough to handle that for us.
         return search_results

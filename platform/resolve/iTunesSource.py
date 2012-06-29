@@ -916,6 +916,13 @@ class iTunesSource(GenericSource):
         if queryCategory not in ('music', 'film', 'app', 'book'):
             raise NotImplementedError()
 
+        supportedProxyTypes = {
+            'music': (iTunesArtist, iTunesAlbum, iTunesTrack),
+            'film': (iTunesMovie, iTunesTVShow),
+            'app': (iTunesTrack,),
+            'book': (iTunesBook,),
+        }[queryCategory]
+
         types = mapCategoryToTypes(queryCategory)
         iTunesTypes = []
         typesMap = dict(self.__types_to_itunes_strings)
@@ -940,6 +947,11 @@ class iTunesSource(GenericSource):
                 try:
                     if logRawResults:
                         logComponents.extend(['\n\n', pformat(rawResult), '\n\n'])
+                    proxy = self.__createEntityProxy(rawResult, maxLookupCalls=0)
+                    if not any(isinstance(proxy, proxyType) for proxyType in supportedProxyTypes):
+                        logs.warning('Dropping iTunes proxy of unsupported type %s for queryCategory %s:\n\n%s\n\n' %
+                                     (proxy.__class__.__name__, queryCategory, str(proxy)))
+                        continue
                     processedResults.append(self.__createEntityProxy(rawResult, maxLookupCalls=0))
                 except UnknownITunesTypeError:
                     logs.report()
@@ -976,17 +988,19 @@ class iTunesSource(GenericSource):
         iTunesTypesToWeights = {
             'album' : 0.5,
             'musicArtist' : 0.8,
-            'movie' : 0.5,
-            'tvShow' : 0.5,
             # Having iTunes book results is good for enrichment, and in case Amazon doesn't return results or something,
-            # but we really don't want it having much of an impact on ranking.
-            'ebook': 0.1,
+            # but we really don't want it having much of an impact on ranking, since iTunes only has
+            # ebooks, so any book without ebook version will be at a huge disadvantage
+            'ebook': 0.3,
         }
 
         # TODO: Refactoring is needed here.
-        iTunesTypesToTitleTests = {
-            'movie' : applyMovieTitleDataQualityTests,
-            'tvShow' : applyTvTitleDataQualityTests
+        iTunesTypesToScoreAdjustments = {
+            'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch),
+            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
+            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
+            'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
+            'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch)
         }
 
         if iTunesType in iTunesTypesToWeights:
@@ -995,9 +1009,9 @@ class iTunesSource(GenericSource):
         else:
             searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects)
 
-        if iTunesType in iTunesTypesToTitleTests:
+        for adjustmentFn in iTunesTypesToScoreAdjustments.get(iTunesType, ()):
             for searchResult in searchResults:
-                iTunesTypesToTitleTests[iTunesType](searchResult, queryText)
+                adjustmentFn(searchResult, queryText)
 
         # Artists without amg IDs get scored down.
         if iTunesType == 'musicArtist':

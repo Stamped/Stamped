@@ -233,9 +233,10 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
     @lazyProperty
     def authors(self):
         try:
-            return [{
-                'name': xp(self.attributes, 'Author')['v']
-            }]
+            author = xp(self.attributes, 'Author')['v']
+            if '-N/A-' in author:
+                return []
+            return [{ 'name': author }]
         except Exception:
             return []
 
@@ -1084,7 +1085,7 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByRelevance([tvShows, movies])
 
-    def __scoreMusicResults(self, resolverObjectsLists):
+    def __scoreMusicResults(self, resolverObjectsLists, queryText):
         # TODO: Clean up code duplication with __scoreFilmResults!
         if not resolverObjectsLists:
             return []
@@ -1109,6 +1110,13 @@ class AmazonSource(GenericSource):
         albums = self.__interleaveAndCombineDupesBasedOnAsin(scoredAlbums)
         tracks = self.__interleaveAndCombineDupesBasedOnAsin(scoredTracks)
 
+        for albumResult in albums:
+            applyAlbumTitleDataQualityTests(albumResult, queryText)
+            adjustAlbumRelevanceByQueryMatch(albumResult, queryText)
+        for trackResult in tracks:
+            applyTrackTitleDataQualityTests(trackResult, queryText)
+            adjustTrackRelevanceByQueryMatch(trackResult, queryText)
+
         self.__adjustScoresBySalesRank(albums)
         self.__adjustScoresBySalesRank(tracks)
 
@@ -1123,27 +1131,22 @@ class AmazonSource(GenericSource):
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
-        augmentScoreForTextRelevance(searchResults, queryText, lambda r: r.resolverObject.name, 2)
         self.__adjustScoresBySalesRank(searchResults)
         for searchResult in searchResults:
+            adjustBookRelevanceByQueryMatch(searchResult, queryText)
+            applyBookTitleDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
-                # TODO: Penalize other missing factors as well.
                 penaltyFactor = 0.2
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing author', penaltyFactor)
-            if not searchResult.resolverObject.isbn:
-                penaltyFactor = 0.7
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing isbn', penaltyFactor)
-            if not searchResult.resolverObject.publishers:
-                penaltyFactor = 0.4
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing publishers', penaltyFactor)
-            if not searchResult.resolverObject.release_date:
-                penaltyFactor = 0.8
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing release date', penaltyFactor)
+                searchResult.dataQuality *= penaltyFactor
+                searchResult.addDataQualityComponentDebugInfo('penalty factor for missing author', penaltyFactor)
 
+            miscComponentsToCheck = ['isbn', 'publishers', 'release_date', 'length', 'sku_number', 'images']
+            componentsMissing = [c for c in miscComponentsToCheck if not getattr(searchResult.resolverObject, c)]
+            if componentsMissing:
+                penalty = 0.8 ** len(componentsMissing)
+                searchResult.dataQuality *= penalty
+                searchResult.addDataQualityComponentDebugInfo(
+                        'penalty factor for missing components: %s' % str(componentsMissing), penalty)
         return searchResults
 
     def __augmentAlbumResultsWithSongs(self, albums, tracks):
@@ -1198,7 +1201,7 @@ class AmazonSource(GenericSource):
                 AmazonSource.SearchIndexData('DigitalMusic', 'Medium,Reviews', self.__constructMusicObjectFromResult)
             )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout, logRawResults=logRawResults)
-            return self.__scoreMusicResults(resultSets.values())
+            return self.__scoreMusicResults(resultSets.values(), queryText)
         elif queryCategory == 'book':
             def createBook(rawResult, maxLookupCalls):
                 asin = xp(rawResult, 'ASIN')['v']

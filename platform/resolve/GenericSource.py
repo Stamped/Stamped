@@ -226,7 +226,7 @@ class GenericSource(BasicSource):
         
         ### Place
         if entity.kind == 'place' and proxy.kind == 'place':
-            setAttribute('formatted_address', 'formatted_address')
+            setAttribute('address_string', 'formatted_address')
 
             if proxy.coordinates is not None:
                 coordinates = Coordinates()

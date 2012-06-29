@@ -21,6 +21,7 @@ from resolve.FactualSource      import FactualSource
 from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
+from api.Schemas                import PlaceEntity
 from SearchResultDeduper        import SearchResultDeduper
 from DataQualityUtils           import *
 
@@ -238,7 +239,9 @@ class EntitySearch(object):
         # scores) but never included in the final result because we're not 100% that the data is good enough to show
         # users.
         filteredResults = [r for r in cluster.results if r.dataQuality > MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
-        # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
+        # So this is ugly, but it's pretty common for two listings to have the same or virtually the same data quality
+        # and using relevance as a tie-breaker is really helpful.
+        filteredResults.sort(key=lambda r: r.dataQuality + (r.relevance / 10.0), reverse=True)
         entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
         for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.
@@ -285,7 +288,7 @@ class EntitySearch(object):
 
 
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
-        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
+        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
         entityResults = []
 
         entityIdsToNewClusterIdxs = {}
@@ -370,7 +373,13 @@ def main():
     searcher = EntitySearch()
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
-        print "\n\n", result
+        print "\n\n"
+        print "TITLE:", result.title
+        subtitle = result.subtitle
+        if isinstance(result, PlaceEntity) and result.formatAddress():
+            subtitle = result.formatAddress()
+        print "SUBTITLE", subtitle
+        print result
 
 
 if __name__ == '__main__':

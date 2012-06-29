@@ -14,7 +14,7 @@ from AKeyBasedAPI   import AKeyBasedAPI
 from AEntitySource  import AExternalServiceEntitySource
 from api.Schemas    import PlaceEntity, Coordinates
 from LRUCache       import lru_cache
-from Memcache       import memcached_function
+from CachedFunction import *
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -196,8 +196,15 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
                 entity.address_components = result['address_components']
         
         return entity
-    
+
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @cachedFn()
     def getSearchResultsByLatLng(self, latLng, params=None):
+        print 'TEST LATLNG IS', latLng
+        print 'PARAMS IS', params
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -228,7 +235,12 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
                     return None
             
             return response['results']
-    
+
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached remotely via memcached with a TTL of 7 days
+    @lru_cache(maxsize=64)
+    @cachedFn()
     def getAutocompleteResults(self, latLng, query, params=None):
         (offset, count) = self._initAPIKeyIndices()
         
@@ -258,11 +270,6 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['predictions']
     
-    # note: these decorators add tiered caching to this function, such that
-    # results will be cached locally with a very small LRU cache of 64 items 
-    # and also cached remotely via memcached with a TTL of 7 days
-    @lru_cache(maxsize=64)
-    @memcached_function(time=7*24*60*60)
     def getEntityAutocompleteResults(self, query, latLng=None, params=None):
         results = self.getAutocompleteResults(latLng, query, params)
         output  = []

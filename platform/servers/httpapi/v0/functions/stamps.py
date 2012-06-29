@@ -45,7 +45,11 @@ def create(request, authUserId, data, **kwargs):
 @handleHTTPRequest(http_schema=HTTPStampShare)
 @require_http_methods(["POST"])
 def share(request, authUserId, http_schema, data, **kwargs):
-    stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
+    try:
+        stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
+    except StampedLinkedAccountError:
+        raise StampedHTTPError(401, msg="Missing credentials for linked account")
+
 
     return transformOutput(stamp.dataExport())
 
