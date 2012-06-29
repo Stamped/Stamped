@@ -12,7 +12,7 @@ import re
 from utils import indentText
 from libs.LRUCache import lru_cache
 from resolve.Resolver import *
-from resolve.TitleUtils import cleanBookTitle
+from resolve.TitleUtils import cleanBookTitle, tokenizeString
 from search.SearchResult import SearchResult
 from search import ScoringUtils
 
@@ -528,18 +528,31 @@ class BookSearchResultCluster(SearchResultCluster):
         return similarity
 
     @classmethod
+    def _compare_authors(cls, author1, author2):
+        author1_name_simple = cached_simplify(author1)
+        author2_name_simple = cached_simplify(author2)
+        author1_tokens = set(tokenizeString(author1_name_simple))
+        author2_tokens = set(tokenizeString(author2_name_simple))
+        if author1_tokens == author2_tokens:
+            return 1.0
+        # This makes "Todd Gardner" and "Todd Manci Gardner" match.
+        if author1_tokens > author2_tokens or author2_tokens > author1_tokens:
+            return 0.9
+        return cached_string_comparison(author1_name_simple, author2_name_simple)
+
+    @classmethod
     def _compare_proxies(cls, book1, book2):
         """
         """
         title_similarity = cls._compare_titles(book1.name, book2.name)
+        if book1.isbn and book1.isbn == book2.isbn and title_similarity > 0.5:
+            return CompareResult.match(title_similarity + 1)
         if title_similarity < 0.75:
             return CompareResult.unknown()
 
         try:
-            author1_name_simple = cached_simplify(book1.authors[0]['name'])
-            author2_name_simple = cached_simplify(book2.authors[0]['name'])
             # TODO: Look for multiple authors, try to match intelligently.
-            author_similarity = cached_string_comparison(author1_name_simple, author2_name_simple)
+            author_similarity = cls._compare_authors(book1.authors[0]['name'], book2.authors[0]['name'])
             if title_similarity + author_similarity > 1.7:
                 return CompareResult.match(title_similarity + author_similarity)
         except Exception:

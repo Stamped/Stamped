@@ -234,9 +234,7 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
     def authors(self):
         try:
             author = xp(self.attributes, 'Author')['v']
-            # TODO(geoff): This is a bit hacky, but sometimes Amazon proudly returns these strings.
-            # Maybe find a better way to deal with this?
-            if author == '-N/A-':
+            if '-N/A-' in author:
                 return []
             return [{ 'name': author }]
         except Exception:
