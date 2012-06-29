@@ -53,6 +53,7 @@ class SearchResultDeduper(object):
             elif len(match_scores_and_clusters) > 1:
                 match_scores_and_clusters.sort(reverse=True)
                 cluster = match_scores_and_clusters[0][1]
+                unmerged_matches = 0
                 for (match_score, secondary_match_cluster) in match_scores_and_clusters[1:]:
                     if (cluster, secondary_match_cluster) in known_non_matches:
                         continue
@@ -60,9 +61,17 @@ class SearchResultDeduper(object):
                     if comparison.is_definitely_not_match():
                         known_non_matches.add((cluster, secondary_match_cluster))
                         known_non_matches.add((secondary_match_cluster, cluster))
+                        # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK SXS AND ENABLE ME
+                        # unmerged_matches += 1
                     else:
                         cluster.grok(secondary_match_cluster)
                         del(clusters[clusters.index(secondary_match_cluster)])
+                if unmerged_matches > 0:
+                    # If we weren't sure what cluster to put this result in, but we weren't able to merge them, then
+                    # we obviously can't be sure this is in the right cluster, so we penalize the shit out of it.
+                    penalty = 0.25 * (unmerged_matches ** 0.5)  # As Geoff would put it: "Pulled out of an ass."
+                    result.addDataQualityComponentDebugInfo("penalty for %d unmerged matches" % unmerged_matches, penalty)
+                    result.dataQuality *= 1 - penalty
             for non_match_cluster in cluster_non_matches:
                 known_non_matches.add((cluster, non_match_cluster))
                 known_non_matches.add((non_match_cluster, cluster))
@@ -126,8 +135,6 @@ class SearchResultDeduper(object):
             apps.extend(resultList)
         clusters = self.__formClusters(apps, AppSearchResultCluster)
         sortByRelevance(clusters)
-        print "RESULTS WAS OF LENGTH", len(apps)
-        print "CLUSTERED TO", len(clusters)
         return clusters
 
     def __dedupeBookResults(self, resultLists):
