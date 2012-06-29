@@ -19,6 +19,7 @@ enum EventType {
     EventTypeFacebookAuthFinished,
     EventTypeFacebookAuthFailed,
     EventTypeFacebookCameBack,
+    EventTypeFacebookLoggedOut,
     
     // signup
     EventTypeSignupFinished,

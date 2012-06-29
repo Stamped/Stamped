@@ -18,8 +18,11 @@
 - (void)startPlayback:(NSString*)rdioID;
 - (void)stopPlayback;
 
+- (void)logout;
+
 @property (nonatomic, readonly, retain) Rdio* rdio;
 @property (nonatomic, readonly, assign) BOOL loggedIn;
+@property (nonatomic, readonly, assign) BOOL connected;
 @property (nonatomic, readonly, copy) NSString* accessToken;
 
 @end

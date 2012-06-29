@@ -86,6 +86,19 @@ static STRdio* _sharedInstance;
     return _sharedInstance;
 }
 
+- (void)logout {
+    [self.rdio logout];
+    self.loggedIn = NO;
+    self.accessToken = nil;
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:_rdioTokenKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (BOOL)connected {
+    NSString* token = [[NSUserDefaults standardUserDefaults] stringForKey:_rdioTokenKey];
+    return token != nil;
+}
+
 - (void)ensureLoginWithCompletionBlock:(void(^)(void))block {
     self.callback = block;
     UIWindow* window = [[UIApplication sharedApplication] keyWindow];
@@ -205,31 +218,31 @@ static STRdio* _sharedInstance;
 - (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
     BOOL handled = NO;
     if ([source.source isEqualToString:@"rdio"]) {
-        if ([action isEqualToString:@"listen"] && source.sourceID != nil) {
-            handled = TRUE;
-            if (flag) {
-                //NSLog(@"playing song:%@",context.entityDetail);
-                [self ensureLoginWithCompletionBlock:^{
-                    if (self.loggedIn) {
-                        BOOL revert = [STConfiguration flag:STPlayerRevertKey];
-                        if (revert) {
-                            //[STPlayer sharedInstance] addPlaylistItem:<#(id<STPlaylistItem>)#> atIndex:<#(NSInteger)#>
-                            [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
-                                         dismissible:NO 
-                                      withBackground:[UIColor colorWithWhite:0 alpha:.3]];
-                            
-                        }
-                        else {
-                            NSArray<STPlaylistItem>* items = [self itemsForSource:source forAction:action withContext:context];
-                            [STPlayerPopUp presentWithItems:items clear:![STConfiguration flag:STPlayerCummulativeKey]];
-                            
-                        }
-                    }
-                }];
-                //[self startPlayback:source.sourceID];
-            }
-        }
-        else if ([action isEqualToString:@"playlist"] && source.sourceID != nil) {
+//        if ([action isEqualToString:@"listen"] && source.sourceID != nil ) {
+//            handled = TRUE;
+//            if (flag) {
+//                //NSLog(@"playing song:%@",context.entityDetail);
+//                [self ensureLoginWithCompletionBlock:^{
+//                    if (self.loggedIn) {
+//                        BOOL revert = [STConfiguration flag:STPlayerRevertKey];
+//                        if (revert) {
+//                            //[STPlayer sharedInstance] addPlaylistItem:<#(id<STPlaylistItem>)#> atIndex:<#(NSInteger)#>
+//                            [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
+//                                         dismissible:NO 
+//                                      withBackground:[UIColor colorWithWhite:0 alpha:.3]];
+//                            
+//                        }
+//                        else {
+//                            NSArray<STPlaylistItem>* items = [self itemsForSource:source forAction:action withContext:context];
+//                            [STPlayerPopUp presentWithItems:items clear:![STConfiguration flag:STPlayerCummulativeKey]];
+//                            
+//                        }
+//                    }
+//                }];
+//                //[self startPlayback:source.sourceID];
+//            }
+//        }
+        if ([action isEqualToString:@"playlist"] && source.sourceID != nil) {
             handled = TRUE;
             if (flag) {
                 [self addToPlaylist:source.sourceID];
@@ -243,6 +256,7 @@ static STRdio* _sharedInstance;
     self.loggedIn = YES;
     self.accessToken = accessToken;
     [[NSUserDefaults standardUserDefaults] setValue:accessToken forKey:_rdioTokenKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     //NSLog(@"Storing:%@",accessToken);
     if (self.callback) {
         self.callback();

@@ -85,6 +85,43 @@ def makeDelimitedSectionRe(pattern):
     return re.compile("[(\[](.+ )?%s( .+)?[)\]]" % pattern, re.IGNORECASE)
 
 
+ROMAN_NUMERAL_RE = re.compile(
+    '(?P<numeral>m{0,4}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3}))\s*(:|$)', re.IGNORECASE)
+REPLACEMENTS = {
+    'm' : 1000,
+    'cm' : 900,
+    'd' : 500,
+    'cd' : 400,
+    'c' : 100,
+    'xc' : 90,
+    'l' : 50,
+    'xl' : 40,
+    'x' : 10,
+    'ix' : 9,
+    'v' : 5,
+    'iv' : 4,
+    'i' : 1,
+}
+def convertRomanNumerals(title):
+    def romanToInt(numeral):
+        numeral = numeral.lower()
+        total = 0
+        while numeral:
+            step = 2 if numeral[:2] in REPLACEMENTS else 1
+            total += REPLACEMENTS[numeral[:step]]
+            numeral = numeral[step:]
+        return str(total)
+
+    match = ROMAN_NUMERAL_RE.search(title)
+    numeral = match.group('numeral')
+    if numeral:
+        matchStart, matchEnd = match.span()
+        modifiedTail = convertRomanNumerals(title[matchEnd:])
+        numeralInt = romanToInt(numeral)
+        title = title[:matchStart] + title[matchStart:matchEnd].replace(numeral, numeralInt, 1) + modifiedTail
+    return title
+
+
 POSSESSIVE_RE = re.compile('\'s[$\s]', re.IGNORECASE)
 NON_CHAR_LETTER_RE = re.compile('[ /.,:;"\'&-]')
 def tokenizeString(string):
