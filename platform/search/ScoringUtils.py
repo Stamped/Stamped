@@ -183,9 +183,10 @@ RelevanceFactor = namedtuple('RelevanceFactor', 'fieldName fieldExtractor maxBoo
 
 def _adjustRelevanceByQueryMatch(searchResult, queryText, factors):
     def adjustRelevance(matchFactor, maxBoost, factorName):
-        factor = maxBoost ** matchFactor
-        searchResult.relevance *= factor
-        searchResult.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
+        if matchFactor:
+            factor = maxBoost ** matchFactor
+            searchResult.relevance *= factor
+            searchResult.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
 
     matchingBlocks = []
     for fieldName, fieldExtractor, maxBoost in factors:
@@ -194,8 +195,10 @@ def _adjustRelevanceByQueryMatch(searchResult, queryText, factors):
         adjustRelevance(factor, maxBoost, fieldName)
 
     queryFulfilled = combineMatchingSections(matchingBlocks) / len(queryText)
-    searchResult.relevance *= queryFulfilled
-    searchResult.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
+    relevanceMultiplier = math.sqrt(0.75 + 0.5 * queryFulfilled)
+    searchResult.relevance *= relevanceMultiplier
+    searchResult.addRelevanceComponentDebugInfo('boost for fulfilling %f%% of query text' % queryFulfilled,
+                                                relevanceMultiplier)
 
 
 BOOKS_RELEVANCE_FACTORS = (
@@ -207,20 +210,20 @@ def adjustBookRelevanceByQueryMatch(searchResult, queryText):
     _adjustRelevanceByQueryMatch(searchResult, queryText, BOOKS_RELEVANCE_FACTORS)
 
 MOVIE_RELEVANCE_FACTORS = (
-    RelevanceFactor('title', lambda result: result.resolverObject.name, 2),
-    RelevanceFactor('author', lambda result: ' '.join(actor['name'] for actor in result.resolverObject.cast), 1.5),
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 1.4),
+    RelevanceFactor('author', lambda result: ' '.join(actor['name'] for actor in result.resolverObject.cast), 1.2),
     RelevanceFactor('year',
-        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.5),
-    RelevanceFactor('description', lambda result: result.resolverObject.description, 0.5)
+        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.2),
+    RelevanceFactor('description', lambda result: result.resolverObject.description, 1.2)
 )
 def adjustMovieRelevanceByQueryMatch(searchResult, queryText):
     _adjustRelevanceByQueryMatch(searchResult, queryText, MOVIE_RELEVANCE_FACTORS)
 
 TV_RELEVANCE_FACTORS = (
-    RelevanceFactor('title', lambda result: result.resolverObject.name, 2),
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 1.4),
     RelevanceFactor('year',
-        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.5),
-    RelevanceFactor('description', lambda result: result.resolverObject.description, 0.5)
+        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.2),
+    RelevanceFactor('description', lambda result: result.resolverObject.description, 1.2)
 )
 def adjustTvRelevanceByQueryMatch(searchResult, queryText):
     _adjustRelevanceByQueryMatch(searchResult, queryText, TV_RELEVANCE_FACTORS)
