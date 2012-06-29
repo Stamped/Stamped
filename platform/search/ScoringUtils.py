@@ -205,3 +205,22 @@ BOOKS_RELEVANCE_FACTORS = (
 )
 def adjustBookRelevanceByQueryMatch(searchResult, queryText):
     _adjustRelevanceByQueryMatch(searchResult, queryText, BOOKS_RELEVANCE_FACTORS)
+
+MOVIE_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2),
+    RelevanceFactor('author', lambda result: ' '.join(actor['name'] for actor in result.resolverObject.cast), 1.5),
+    RelevanceFactor('year',
+        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.5),
+    RelevanceFactor('description', lambda result: result.resolverObject.description, 0.5)
+)
+def adjustMovieRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, MOVIE_RELEVANCE_FACTORS)
+
+TV_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2),
+    RelevanceFactor('year',
+        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.5),
+    RelevanceFactor('description', lambda result: result.resolverObject.description, 0.5)
+)
+def adjustTvRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, TV_RELEVANCE_FACTORS)
