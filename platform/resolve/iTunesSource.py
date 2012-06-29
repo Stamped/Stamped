@@ -996,7 +996,10 @@ class iTunesSource(GenericSource):
         # TODO: Refactoring is needed here.
         iTunesTypesToScoreAdjustments = {
             'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch),
-            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch)
+            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
+            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
+            'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
+            'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch)
         }
 
         if iTunesType in iTunesTypesToWeights:

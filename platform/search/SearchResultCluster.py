@@ -30,6 +30,7 @@ def cached_artist_simplify(artist_name):
 
 @lru_cache()
 def cached_album_simplify(album_name):
+    album_name = re.compile('[ (\[:,-]+EP[)\]:, -]*$').sub(' ', album_name)
     return albumSimplify(album_name)
 
 @lru_cache()
@@ -240,23 +241,29 @@ class AlbumSearchResultCluster(SearchResultCluster):
         """
         Album comparison is easy -- just album name and artist name.
         """
-        album1_name_simple = cached_album_simplify(album1.name)
-        album2_name_simple = cached_album_simplify(album2.name)
-        album_name_sim = cached_string_comparison(album1_name_simple, album2_name_simple)
-        if album_name_sim <= 0.9:
+        raw_name_similarity = cached_string_comparison(album1.name, album2.name)
+        simple_name_similarity = cached_string_comparison(cached_album_simplify(album1.name),
+            cached_album_simplify(album2.name))
+        album_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
+        if album_name_sim <= 0.8:
             return CompareResult.unknown()
-        # TODO: Handle case with multiple artists? Does this come up?
+                # TODO: Handle case with multiple artists? Does this come up?
 
         try:
-            artist1_name_simple = cached_artist_simplify(album1.artists[0]['name'])
-            artist2_name_simple = cached_artist_simplify(album2.artists[0]['name'])
+            artist1_name = album1.artists[0]['name']
+            artist2_name = album2.artists[0]['name']
+            raw_artist_similarity = cached_string_comparison(artist1_name, artist2_name)
+            simple_artist_similarity = cached_string_comparison(cached_artist_simplify(artist1_name),
+                                                                cached_artist_simplify(artist2_name))
+            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
+            if artist1_name in artist2_name or artist2_name in artist1_name:
+                artist_name_sim = max(artist_name_sim, 0.9)
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
             # 'Various Artists' or whatever.
             return CompareResult.unknown()
 
-        artist_name_sim = cached_string_comparison(artist1_name_simple, artist2_name_simple)
-        if artist_name_sim <= 0.9:
+        if artist_name_sim <= 0.8:
             return CompareResult.unknown()
         score = album_name_sim * album_name_sim * artist_name_sim
         return CompareResult.match(score)
@@ -268,23 +275,29 @@ class TrackSearchResultCluster(SearchResultCluster):
         """
         Track comparison is easy -- just track name and artist name.
         """
-        track1_name_simple = cached_track_simplify(track1.name)
-        track2_name_simple = cached_track_simplify(track2.name)
-        track_name_sim = cached_string_comparison(track1_name_simple, track2_name_simple)
-        if track_name_sim <= 0.9:
+        raw_name_similarity = cached_string_comparison(track1.name, track2.name)
+        simple_name_similarity = cached_string_comparison(cached_track_simplify(track1.name),
+                                                          cached_track_simplify(track2.name))
+        track_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
+        if track_name_sim <= 0.8:
             return CompareResult.unknown()
         # TODO: Handle case with multiple artists? Does this come up?
 
         try:
-            artist1_name_simple = cached_artist_simplify(track1.artists[0]['name'])
-            artist2_name_simple = cached_artist_simplify(track2.artists[0]['name'])
+            artist1_name = track1.artists[0]['name']
+            artist2_name = track2.artists[0]['name']
+            raw_artist_similarity = cached_string_comparison(artist1_name, artist2_name)
+            simple_artist_similarity = cached_string_comparison(cached_artist_simplify(artist1_name),
+                                                                cached_artist_simplify(artist2_name))
+            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
+            if artist1_name in artist2_name or artist2_name in artist1_name:
+                artist_name_sim = max(artist_name_sim, 0.9)
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
             # 'Various Artists' or whatever.
             return CompareResult.unknown()
 
-        artist_name_sim = cached_string_comparison(artist1_name_simple, artist2_name_simple)
-        if artist_name_sim <= 0.9:
+        if artist_name_sim <= 0.8:
             return CompareResult.unknown()
         score = track_name_sim * artist_name_sim
         return CompareResult.match(score)

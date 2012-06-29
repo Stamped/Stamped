@@ -105,10 +105,11 @@ class Token(object):
             return self.text in ' '.join(tokenList)
 
 
-def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
+def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1, useRawName=False):
     queryTokens = tokenizeString(searchQuery)
     # TODO: Should I use raw_name?
-    titleTokens = tokenizeString(searchResult.resolverObject.name)
+    title = searchResult.resolverObject.raw_name if useRawName else searchResult.resolverObject.name
+    titleTokens = tokenizeString(title)
     anyMatches = False
     for token in tokens:
         if token.isIn(titleTokens) and not token.isIn(queryTokens):
@@ -178,6 +179,7 @@ MOVIE_TITLE_REMOVAL_REGEXPS = (
     re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+HD[ ,:\])-]*$"),
     re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Edition|Restoration|Version)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
     re.compile("\s*[\[\(].*subtitle.*[\)\]]\s*$", re.IGNORECASE),
     re.compile("\s*\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
 )
@@ -227,14 +229,48 @@ def applyMovieTitleDataQualityTests(searchResult, searchQuery):
 ################################################   MUSIC    ################################################
 ############################################################################################################
 
+# These are things we're so confident don't belong in track/album titles that we're willing to strip them out wantonly.
+# These aren't things that reflect badly on a movie for being in its title.
+ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
+    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Mix|Remix|Edit|Version)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|instrumental)[ ,:\])-]*$", re.IGNORECASE),
+)
+
 def cleanTrackTitle(trackTitle):
-    return trackTitle
+    return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, trackTitle)
 
+TRACK_TITLE_BAD_TOKENS = (
+    Token('mix'), Token('remix'), Token('cut'), Token('edit'), Token('instrumental'),
+    Token('cover'), Token('version'), Token('tribute'),
+    Token('karaoke', penalty=0.4)
+)
+def applyTrackTitleDataQualityTests(searchResult, searchQuery):
+    # Even though we cut this mix/edit/etc. bullshit out of the title we want to demote results that had these terms
+    # in their raw names in order to favor the non-mixed/edited/whatever versions.
+    applyTokenTests(TRACK_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.25, useRawName=True)
+
+# Album titles don't really have problems.
 def cleanAlbumTitle(albumTitle):
-    return albumTitle
+    return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, albumTitle)
 
+ALBUM_TITLE_BAD_TOKENS = (
+    Token('ep', penalty=0.25),
+    Token('karaoke', penalty=0.4),
+)
+def applyAlbumTitleDataQualityTests(searchResult, searchQuery):
+    applyTokenTests(ALBUM_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2, useRawName=True)
+
+ARTIST_TITLE_BAD_TOKENS = (
+    Token('karaoke', penalty=0.4),
+    Token('featuring')
+)
+# Artist titles don't really have problems, either.
 def cleanArtistTitle(artistTitle):
     return artistTitle
+
+def applyArtistTitleDataQualityTests(searchResult, searchQuery):
+    applyTokenTests(ARTIST_TITLE_BAD_TOKENS, searchResult, searchQuery)
 
 ############################################################################################################
 ################################################   BOOKS    ################################################

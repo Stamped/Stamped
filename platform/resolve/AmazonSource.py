@@ -1087,7 +1087,7 @@ class AmazonSource(GenericSource):
 
         return interleaveResultsByRelevance([tvShows, movies])
 
-    def __scoreMusicResults(self, resolverObjectsLists):
+    def __scoreMusicResults(self, resolverObjectsLists, queryText):
         # TODO: Clean up code duplication with __scoreFilmResults!
         if not resolverObjectsLists:
             return []
@@ -1111,6 +1111,13 @@ class AmazonSource(GenericSource):
         # object.
         albums = self.__interleaveAndCombineDupesBasedOnAsin(scoredAlbums)
         tracks = self.__interleaveAndCombineDupesBasedOnAsin(scoredTracks)
+
+        for albumResult in albums:
+            applyAlbumTitleDataQualityTests(albumResult, queryText)
+            adjustAlbumRelevanceByQueryMatch(albumResult, queryText)
+        for trackResult in tracks:
+            applyTrackTitleDataQualityTests(trackResult, queryText)
+            adjustTrackRelevanceByQueryMatch(trackResult, queryText)
 
         self.__adjustScoresBySalesRank(albums)
         self.__adjustScoresBySalesRank(tracks)
@@ -1196,7 +1203,7 @@ class AmazonSource(GenericSource):
                 AmazonSource.SearchIndexData('DigitalMusic', 'Medium,Reviews', self.__constructMusicObjectFromResult)
             )
             resultSets = self.__searchIndexesLite(searchIndexes, queryText, timeout=timeout, logRawResults=logRawResults)
-            return self.__scoreMusicResults(resultSets.values())
+            return self.__scoreMusicResults(resultSets.values(), queryText)
         elif queryCategory == 'book':
             def createBook(rawResult, maxLookupCalls):
                 asin = xp(rawResult, 'ASIN')['v']

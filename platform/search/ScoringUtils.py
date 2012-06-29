@@ -181,7 +181,7 @@ def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, que
 
 RelevanceFactor = namedtuple('RelevanceFactor', 'fieldName fieldExtractor maxBoost')
 
-def _adjustRelevanceByQueryMatch(searchResult, queryText, factors):
+def _adjustRelevanceByQueryMatch(searchResult, queryText, factors, fulfillmentFactor=0.5, fulfillmentExponent=0.5):
     def adjustRelevance(matchFactor, maxBoost, factorName):
         if matchFactor:
             factor = maxBoost ** matchFactor
@@ -195,7 +195,9 @@ def _adjustRelevanceByQueryMatch(searchResult, queryText, factors):
         adjustRelevance(factor, maxBoost, fieldName)
 
     queryFulfilled = combineMatchingSections(matchingBlocks) / len(queryText)
-    relevanceMultiplier = math.sqrt(0.75 + 0.5 * queryFulfilled)
+    # If half-fulfilled, that equals out to 1.
+    relevanceMultiplier = queryFulfilled * fulfillmentFactor + 1 - (fulfillmentFactor / 2.0)
+    relevanceMultiplier = relevanceMultiplier ** fulfillmentExponent
     searchResult.relevance *= relevanceMultiplier
     searchResult.addRelevanceComponentDebugInfo('boost for fulfilling %f%% of query text' % queryFulfilled,
                                                 relevanceMultiplier)
@@ -227,3 +229,27 @@ TV_RELEVANCE_FACTORS = (
 )
 def adjustTvRelevanceByQueryMatch(searchResult, queryText):
     _adjustRelevanceByQueryMatch(searchResult, queryText, TV_RELEVANCE_FACTORS)
+
+
+
+ARTIST_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2.0),
+)
+def adjustArtistRelevanceByQueryMatch(searchResult, queryText):
+    # If the whole query is consumed by the artist title alone, that's a big deal.
+    _adjustRelevanceByQueryMatch(searchResult, queryText, ARTIST_RELEVANCE_FACTORS, fulfillmentFactor=1, fulfillmentExponent=1)
+
+ALBUM_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2.0),
+    RelevanceFactor('artist', lambda result: ' '.join(artist['name'] for artist in result.resolverObject.artists), 1.0)
+)
+def adjustAlbumRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, ALBUM_RELEVANCE_FACTORS)
+
+TRACK_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2.0),
+    RelevanceFactor('artist', lambda result: ' '.join(artist['name'] for artist in result.resolverObject.artists), 1.0),
+    RelevanceFactor('album', lambda result: ' '.join(album['name'] for album in result.resolverObject.albums), 1.0)
+)
+def adjustTrackRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, TRACK_RELEVANCE_FACTORS)
