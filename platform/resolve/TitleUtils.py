@@ -84,7 +84,7 @@ def makeDelimitedSectionRe(pattern):
 
 
 POSSESSIVE_RE = re.compile('\'s[$\s]', re.IGNORECASE)
-NON_CHAR_LETTER_RE = re.compile('[ .,:;"\'&-]')
+NON_CHAR_LETTER_RE = re.compile('[ /.,:;"\'&-]')
 def tokenizeString(string):
     withoutPossessives = POSSESSIVE_RE.sub(' ', string)
     withoutPunctuation = NON_CHAR_LETTER_RE.sub(' ', withoutPossessives)
@@ -285,6 +285,7 @@ BOOK_TITLE_REMOVAL_REGEXPS = (
     makeDelimitedSectionRe('book'),
     makeDelimitedSectionRe('volume'),
     makeDelimitedSectionRe('paperback'),
+    makeDelimitedSectionRe('hardcover'),
 )
 
 def cleanBookTitle(bookTitle):
