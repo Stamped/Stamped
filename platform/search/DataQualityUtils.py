@@ -12,10 +12,10 @@ import math
 import re
 
 # Results with lower data quality than this are summarily dropped pre-clustering.
-MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.3  # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK UP THIS
+MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.3
 # Results with lower data quality than this are allowed to cluster for the purposes of boosting the cluster's final
 # score, but are never included in the final result.
-MIN_RESULT_DATA_QUALITY_TO_INCLUDE = 0.6  # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK UP THIS
+MIN_RESULT_DATA_QUALITY_TO_INCLUDE = 0.6
 # Clusters with data quality lower than this are not returned to the user.
 MIN_CLUSTER_DATA_QUALITY = 0.7
 
