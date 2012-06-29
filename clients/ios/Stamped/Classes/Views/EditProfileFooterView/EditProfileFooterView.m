@@ -7,6 +7,8 @@
 //
 
 #import "EditProfileFooterView.h"
+#import "UIFont+Stamped.h"
+#import "Util.h"
 
 @implementation EditProfileFooterView
 @synthesize delegate;
@@ -29,8 +31,9 @@
         UIImage *image = [UIImage imageNamed:@"delete_btn_bg.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:14];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
+        button.titleLabel.font = [UIFont stampedBoldFontWithSize:12];
+        [Util reframeView:button.titleLabel withDeltas:CGRectMake(.5, -2.5, 0, 0)];
+        //button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
         button.frame = CGRectMake(10.0f, 10.0f, self.bounds.size.width-20.0f, image.size.height);
         [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.2f] forState:UIControlStateNormal];
         [button setTitle:NSLocalizedString(@"Delete Account", @"Delete Account") forState:UIControlStateNormal];

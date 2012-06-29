@@ -10,10 +10,13 @@
 #import "STRdio.h"
 #import "Util.h"
 #import "STConfiguration.h"
+#import <AVFoundation/AVFoundation.h>
+#import "STActionUtil.h"
 
 typedef enum {
-    STPlayerServiceNone,
-    STPlayerServiceRdio,
+    STPlayerServiceNone = 0,
+    STPlayerServicePreview = 1,
+    STPlayerServiceRdio = 2,
 } STPlayerService;
 
 NSString* const STPlayerItemChangedNotification = @"STPlayerItemChangedNotification";
@@ -33,6 +36,7 @@ NSString* const STPlayerFullFooterKey = @"Player.fullFooter";
 @property (nonatomic, readwrite, assign) NSInteger currentItemIndex;
 
 @property (nonatomic, readonly, retain) Rdio* rdio;
+@property (nonatomic, readonly, retain) AVPlayer* previewPlayer;
 
 @end
 
@@ -41,6 +45,7 @@ NSString* const STPlayerFullFooterKey = @"Player.fullFooter";
 @synthesize paused = _paused;
 @synthesize currentItemLength = _currentItemLength;
 @synthesize currentItemIndex = _currentItemIndex;
+@synthesize previewPlayer = _previewPlayer;
 
 @synthesize items = _items;
 @synthesize rdio = _rdio;
@@ -62,8 +67,22 @@ static id _sharedInstance;
         _rdio = [[STRdio sharedRdio].rdio retain];
         _paused = YES;
         self.rdio.player.delegate = self;
+        _previewPlayer = [[AVPlayer alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(previewEnded:) 
+                                                     name:AVPlayerItemDidPlayToEndTimeNotification
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_rdio release];
+    [_items release];
+    [_previewPlayer release];
+    [super dealloc];
 }
 
 
@@ -124,29 +143,36 @@ static id _sharedInstance;
 }
 
 - (STPlayerService)serviceForItem:(id<STPlaylistItem>)item {
-    STPlayerService best = STPlayerServiceNone;
-    if (item.action.sources.count) {
-        for (id<STSource> source in item.action.sources) {
-            if ([[source source] isEqualToString:@"rdio"]) {
-                best = STPlayerServiceRdio;
-            }
-        }
+    BOOL rdioConnected = [STRdio sharedRdio].connected;
+    NSString* rdioID = [STActionUtil sourceIDForItem:item withSource:@"rdio"];
+    NSString* preview = [STActionUtil previewURLForItem:item];
+    if ((rdioID && rdioConnected)) {
+        return STPlayerServiceRdio;
     }
-    return best;
+    else if (preview) {
+        return STPlayerServicePreview;
+    }
+    else {
+        return STPlayerServiceNone;
+    }
 }
 
 - (void)_stopItem {
     if (self.items.count) {
         id<STPlaylistItem> item = [self.items objectAtIndex:self.currentItemIndex];
-        if (STPlayerServiceRdio == [self serviceForItem:item]) {
-            [self.rdio.player stop];
-        }
+        STPlayerService service = [self serviceForItem:item];
+        [self.previewPlayer pause]; //helps with Rdio login
+        [self.rdio.player stop];
+        //  else if (STPlayerServicePreview == service) {
+//            [self.previewPlayer pause];
+//        }
     }
 }
 
 - (void)_playItemAtIndex:(NSInteger)index {
     id<STPlaylistItem> item = [self.items objectAtIndex:index];
-    if (STPlayerServiceRdio == [self serviceForItem:item]) {
+    STPlayerService service = [self serviceForItem:item];
+    if (STPlayerServiceRdio == service) {
         NSString* rdioID = nil;
         for (id<STSource> source in item.action.sources) {
             if ([[source source] isEqualToString:@"rdio"]) {
@@ -154,9 +180,14 @@ static id _sharedInstance;
             }
         }
         if (rdioID) {
-            NSLog(@"rdio play:%@", rdioID);
+            //NSLog(@"rdio play:%@", rdioID);
             [self.rdio.player playSource:rdioID];
         }
+    }
+    else if (STPlayerServicePreview == service) {
+        NSURL* url = [NSURL URLWithString:[STActionUtil previewURLForItem:item]];
+        [self.previewPlayer replaceCurrentItemWithPlayerItem:[AVPlayerItem playerItemWithURL:url]];
+        [self.previewPlayer play];
     }
 }
 
@@ -217,6 +248,14 @@ static id _sharedInstance;
                     }
                 }
             }
+            else if (STPlayerServicePreview == service) {
+                if (paused) {
+                    [self.previewPlayer pause];
+                }
+                else {
+                    [self.previewPlayer play];
+                }
+            }
         }
         [self fireStateChanged];
     }
@@ -238,8 +277,21 @@ static id _sharedInstance;
                 [self seekToItemAtIndex:next];
             }
             else {
-                [self seekToItemAtIndex:0];
+                self.paused = YES;
             }
+        }
+    }
+}
+
+- (void)previewEnded:(NSNotification*)notifications {
+    if (!self.paused) {
+       // NSLog(@"itunes song");
+        NSInteger next = self.currentItemIndex + 1;
+        if (next < self.itemCount) {
+            [self seekToItemAtIndex:next];
+        }
+        else {
+            self.paused = YES;
         }
     }
 }

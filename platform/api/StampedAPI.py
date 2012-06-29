@@ -642,10 +642,12 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Could not update account website")
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
-        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
-            account.color_primary = fields['color_primary']
-        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
-            account.color_secondary = fields['color_secondary']
+        if 'color_primary' in fields and 'color_secondary' in fields:
+            if account.color_primary != fields['color_primary'] or account.color_secondary != fields['color_secondary']:
+                account.color_secondary = fields['color_secondary']
+                account.color_primary = fields['color_primary']
+                # Asynchronously generate stamp file
+                tasks.invoke(tasks.APITasks.customizeStamp, args=[account.color_primary, account.color_secondary])
         if 'temp_image_url' in fields:
             image_cache_timestamp = datetime.utcnow()
             account.timestamp.image_cache = image_cache_timestamp
@@ -918,7 +920,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
-        if service_name not in ['facebook', 'twitter', 'netflix']:
+        if service_name not in ['facebook', 'twitter', 'netflix', 'rdio']:
             logs.warning('Attempted to remove invalid linked account: %s' % service_name)
             raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
 
@@ -2350,7 +2352,7 @@ class StampedAPI(AStampedAPI):
 
             # Asynchronously add references to the stamp in follower's inboxes and
             # add activity for credit and mentions
-            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id])
+            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
 
         else:
             # Update stamp stats
@@ -2359,7 +2361,7 @@ class StampedAPI(AStampedAPI):
         return stamp
 
     @API_CALL
-    def addStampAsync(self, authUserId, stampId):
+    def addStampAsync(self, authUserId, stampId, imageUrl):
         stamp   = self._stampDB.getStamp(stampId)
         entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
@@ -2434,7 +2436,8 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id})
+        tasks.invoke(tasks.APITasks.postToOpenGraph,
+                kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
 
 
     @API_CALL
@@ -2473,6 +2476,21 @@ class StampedAPI(AStampedAPI):
         stamp.contents = contents
         self._stampDB.updateStamp(stamp)
 
+
+    @API_CALL
+    def shareStamp(self, authUserId, stampId, service_name, imageUrl):
+        stamp = self.getStamp(stampId)
+        account = self.getAccount(authUserId)
+
+        if service_name == 'facebook':
+            if account.linked is None or account.linked.facebook is None is None \
+               or account.linked.facebook.token is None or account.linked.facebook.linked_user_id:
+                raise StampedLinkedAccountError('Cannot share stamp on facebook, missing necessary linked account information.')
+            self._facebook.postToNewsFeed(account.linked.facebook.linked_user_id,
+                                          account.linked.facebook.token,
+                                          stamp.contents[-1].blurb,
+                                          imageUrl)
+        return stamp
 
     @API_CALL
     def updateStamp(self, authUserId, stampId, data):
@@ -2672,9 +2690,9 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
-                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
-                return 'store'
+#            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
+#                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
+#                return 'store'
             return 'place'
 
         elif kind == 'person':
@@ -2714,17 +2732,13 @@ class StampedAPI(AStampedAPI):
         if user is not None:
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
-    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None):
+    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin']:
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby']:
             logs.info('Skipping Open Graph post because user not on whitelist')
             return
-
-        logs.info('######')
-        import pprint
-        logs.info(pprint.pformat(account))
 
         if account.linked is None or account.linked.facebook is None or account.linked.facebook.share_settings is None\
            or account.linked.facebook.token is None:
@@ -2737,9 +2751,9 @@ class StampedAPI(AStampedAPI):
         ogType = None
         url = None
 
-        logs.info('### stampId = %s   share_settings.share_stamps: %s' % (stampId, share_settings.share_stamps))
-
         kwargs = {}
+        if imageUrl is not None:
+            kwargs['imageUrl'] = imageUrl
         if stampId is not None and share_settings.share_stamps == True:
             action = 'stamp'
             stamp = self.getStamp(stampId)
@@ -2747,10 +2761,10 @@ class StampedAPI(AStampedAPI):
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stamp = stamp)
-            kwargs['message'] = stamp.content.blurb
+            kwargs['message'] = stamp.contents[-1].blurb
         elif likeStampId is not None and share_settings.share_likes == True:
             action = 'like'
-            stamp = self.getStamp(likeStampid)
+            stamp = self.getStamp(likeStampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
@@ -2771,6 +2785,7 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
+        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
         self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
 

@@ -8,7 +8,7 @@
                     <div class="ribbon-bottom"></div>
                 </div>
                 
-                <div class="stamp-contents">
+                <div class="stamp-contents" data-url="{{stamp.url}}">
                     <div class="stamp-contents-upper{% if stamp.previews.comments|length > 0 %} shadowed{% endif %}">
                         <div class="stamp-inner-content clearfix">
                             <div class="stamp-card-header clearfix">
@@ -66,42 +66,19 @@
                             <div class='social-feedback-expanded'>
                                 {% handlebars_template "social-feedback" stamp %}
                                 
-                                {% if stamp.previews %}
-                                    <div class='user-previews'>
-                                        {% if stamp.previews.likes and stamp.preview.likes|length > 0 %}
-                                            <div class='likes clearfix'>
-                                                {% for user_mini in stamp.previews.likes|slice:":3" %}
-                                                    <div class='user-preview'>
-                                                        {% handlebars_template "profile-image-tiny" user_mini %}
-                                                        <div class='user-preview-icon'></div>
-                                                    </div>
-                                                {% endfor %}
-                                                
-                                                {% if stamp.previews.likes|length > 3 %}
-                                                    <a class="user-preview expand-popup expand-likes" href="/popups/likes?stamp_id={{stamp.stamp_id}}">
-                                                        <div class="context-popup">Expand {{stamp.num_likes}} likes...</div>
-                                                        <div class='user-preview-icon'></div>
-                                                    </a>
-                                                {% endif %}
+                                {% if stamp.previews and feedback_users and feedback_users|length > 0 %}
+                                    <div class='user-previews clearfix'>
+                                        {% for user_mini in feedback_users|slice:":10" %}
+                                            <div class='user-preview {{user_mini.preview_type}}'>
+                                                {% handlebars_template "profile-image-tiny" user_mini %}
+                                                <div class='user-preview-icon'></div>
                                             </div>
-                                        {% endif %}
+                                        {% endfor %}
                                         
-                                        {% if stamp.previews.todos and stamp.preview.todos|length > 0 %}
-                                            <div class='todos clearfix'>
-                                                {% for user_mini in stamp.previews.todos|slice:":3" %}
-                                                    <div class='user-preview'>
-                                                        {% handlebars_template "profile-image-tiny" user_mini %}
-                                                        <div class='user-preview-icon'></div>
-                                                    </div>
-                                                {% endfor %}
-                                                
-                                                {% if stamp.previews.todos|length > 3 %}
-                                                    <a class="user-preview expand-popup expand-todos" href="/popups/todos?stamp_id={{stamp.stamp_id}}">
-                                                        <div class="context-popup">Expand {{stamp.num_todos}} todos...</div>
-                                                        <div class='user-preview-icon'></div>
-                                                    </a>
-                                                {% endif %}
-                                            </div>
+                                        {% if feedback_users|length > 10 %}
+                                            <a class="user-preview expand-popup" href="/popups/sdetail-social?stamp_id={{stamp.stamp_id}}">
+                                                <div class="context-popup">Expand list...</div>
+                                            </a>
                                         {% endif %}
                                     </div>
                                 {% endif %}
@@ -111,7 +88,7 @@
                         {% with credits=stamp.previews.credits %}
                             {% if credits and credits|length > 0 %}
                                 <p class="credits">
-                                    <img class="stamp_0" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" />
+                                    <img class="stamp_0" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" />
                                     
                                     Credit to 
                                     {% handlebars_template "screen-name" credits.0.user %}

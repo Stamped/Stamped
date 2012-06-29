@@ -21,6 +21,7 @@ from resolve.FactualSource      import FactualSource
 from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
+from api.Schemas                import PlaceEntity
 from SearchResultDeduper        import SearchResultDeduper
 from DataQualityUtils           import *
 
@@ -33,6 +34,8 @@ def total_seconds(timedelta):
 shouldLogSourceResults = False
 shouldLogTiming = False
 shouldLogClusters = False
+shouldLogRawSourceResults = False
+shouldDisableTimeout = False
 
 def logClusterData(msg):
     if shouldLogClusters:
@@ -146,6 +149,8 @@ class EntitySearch(object):
         # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
         # enough to give a solid idea.
         before = datetime.datetime.now()
+        if shouldLogRawSourceResults:
+            queryParams['logRawResults'] = True
         try:
             results = source.searchLite(queryCategory, queryText, **queryParams)
         except:
@@ -177,7 +182,8 @@ class EntitySearch(object):
             # more gracefully.
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
-        pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
+        if not shouldDisableTimeout:
+            pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
         logTimingData("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
@@ -208,6 +214,8 @@ class EntitySearch(object):
         idsFromClusteredEntities = []
         fastResolvedIds = []
         for result in cluster.results:
+            if result.dataQuality < MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
+                continue
             if result.resolverObject.source == 'stamped':
                 idsFromClusteredEntities.append(result.resolverObject.key)
             else:
@@ -232,8 +240,10 @@ class EntitySearch(object):
         # Additional level of filtering -- some things get clustered (for the purpose of boosting certain cluster
         # scores) but never included in the final result because we're not 100% that the data is good enough to show
         # users.
-        filteredResults = [r for r in cluster.results if r.dataQuality > MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
-        # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
+        filteredResults = [r for r in cluster.results if r.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
+        # So this is ugly, but it's pretty common for two listings to have the same or virtually the same data quality
+        # and using relevance as a tie-breaker is really helpful.
+        filteredResults.sort(key=lambda r: r.dataQuality + (r.relevance / 10.0), reverse=True)
         entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
         for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.
@@ -280,7 +290,7 @@ class EntitySearch(object):
 
 
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
-        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
+        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
         entityResults = []
 
         entityIdsToNewClusterIdxs = {}
@@ -332,16 +342,24 @@ def main():
     parser.add_option('--latlng', action='store', dest='latlng', default=None)
     parser.add_option('--address', action='store', dest='address', default=None)
     parser.add_option('-t', '--log_timing', action='store_true', dest='log_timing', default=False)
-    parser.add_option('-r', '--log_source_results', action='store_true', dest='log_source_results', default=False)
+    parser.add_option('-r', '--log_raw_source_results', action='store_true', dest='log_raw_source_results', default=False)
+    parser.add_option('-s', '--log_source_results', action='store_true', dest='log_source_results', default=False)
     parser.add_option('-c', '--log_clusters', action='store_true', dest='log_clusters', default=False)
+    parser.add_option('-v', '--log_all', action='store_true', dest='log_all', default=False)
+    parser.add_option('--notimeout', action='store_true', dest='no_timeout', default=False)
     (options, args) = parser.parse_args()
 
+    global shouldLogRawSourceResults
+    shouldLogRawSourceResults = options.log_all or options.log_raw_source_results
     global shouldLogSourceResults
-    shouldLogSourceResults = options.log_source_results
+    shouldLogSourceResults = options.log_all or options.log_source_results
     global shouldLogTiming
-    shouldLogTiming = options.log_timing
+    shouldLogTiming = options.log_all or options.log_timing
     global shouldLogClusters
-    shouldLogClusters = options.log_clusters
+    shouldLogClusters = options.log_all or options.log_clusters
+    global shouldDisableTimeout
+    # With verbose logging we disable the timeout because it takes so long it causes us to miss sources.
+    shouldDisableTimeout = options.log_all or options.no_timeout
 
 
     queryParams = {}
@@ -357,7 +375,13 @@ def main():
     searcher = EntitySearch()
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
-        print "\n\n", result
+        print "\n\n"
+        print "TITLE:", result.title
+        subtitle = result.subtitle
+        if isinstance(result, PlaceEntity) and result.formatAddress():
+            subtitle = result.formatAddress()
+        print "SUBTITLE", subtitle
+        print result
 
 
 if __name__ == '__main__':

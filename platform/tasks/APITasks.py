@@ -68,87 +68,97 @@ def invoke(request, *args, **kwargs):
         except:
             pass
 
-@task(ignore_result=True)
+default_params = {
+    'ignore_result'         : True,
+}
+
+retry_params = {
+    'ignore_result'         : True,
+    'default_retry_delay'   : 10, 
+    'max_retries'           : 3,
+}
+
+@task(queue='api', **default_params)
 def addStamp(*args, **kwargs):
     invoke(addStamp.request, *args, **kwargs)
 
-@task(ignore_result=True, default_retry_delay=10, max_retries=3)
+@task(queue='api', **retry_params)
 def addResizedStampImages(*args, **kwargs):
     invoke(addResizedStampImages.request, *args, **kwargs)
 
-@task(ignore_result=True, default_retry_delay=10, max_retries=3)
+@task(queue='api', **retry_params)
 def customizeStamp(*args, **kwargs):
     invoke(customizeStamp.request, *args, **kwargs)
 
-@task(ignore_result=True, default_retry_delay=10, max_retries=3)
+@task(queue='api', **retry_params)
 def updateProfileImage(*args, **kwargs):
     invoke(updateProfileImage.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def addAccount(*args, **kwargs):
     invoke(addAccount.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def changeProfileImageName(*args, **kwargs):
     invoke(changeProfileImageName.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def alertFollowersFromTwitter(*args, **kwargs):
     invoke(alertFollowersFromTwitter.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def alertFollowersFromFacebook(*args, **kwargs):
     invoke(alertFollowersFromFacebook.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def addFriendship(*args, **kwargs):
     invoke(addFriendship.request, *args, **kwargs)
 
-@task(ignore_result=True, default_retry_delay=10, max_retries=3)
+@task(queue='api', **retry_params)
 def removeFriendship(*args, **kwargs):
     invoke(removeFriendship.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def inviteFriend(*args, **kwargs):
     invoke(inviteFriend.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def addComment(*args, **kwargs):
     invoke(addComment.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def addLike(*args, **kwargs):
     invoke(addLike.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def getComments(*args, **kwargs):
     invoke(getComments.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='enrich', **default_params)
 def mergeEntity(*args, **kwargs):
     invoke(mergeEntity.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='enrich', **default_params)
 def mergeEntityId(*args, **kwargs):
     invoke(mergeEntityId.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def updateEntityStats(*args, **kwargs):
     invoke(updateEntityStats.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def updateStampStats(*args, **kwargs):
     invoke(updateStampStats.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def postToOpenGraph(*args, **kwargs):
     invoke(postToOpenGraph.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def buildGuide(*args, **kwargs):
     invoke(buildGuide.request, *args, **kwargs)
 
-@task(ignore_result=True)
+@task(queue='api', **default_params)
 def updateTombstonedEntityReferences(*args, **kwargs):
     invoke(updateTombstonedEntityReferences.request, *args, **kwargs)
 

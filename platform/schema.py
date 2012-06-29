@@ -249,7 +249,7 @@ class Schema(object):
         overflow = False
         if 'overflow' in kwargs and kwargs['overflow'] == True:
             overflow = True
-            
+        
         if isinstance(properties, Schema):
             raise Exception("Invalid data type: cannot import schema object")
         try:

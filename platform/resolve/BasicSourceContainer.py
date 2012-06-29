@@ -62,7 +62,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             max_iterations = self.__default_max_iterations
         modified_total = False
         failedSources = set()
-        logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
+        #logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
         # We will loop through all sources multiple times, because as data is enriched, previous unresolvable sources
         # may become resolvable and can enrich in turn.  If no fields are modified by any source in a given iteration,
         # then there's no reason to loop again
@@ -90,7 +90,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                             # timestamps is used for specifying stale data, failed lookups, and UNOBSERVABLE changes (same value)
                             timestamps = {} # { GROUP : TIMESTAMP ... } optional
                             localDecorations = {} # opaque decorations, for group object based extensions (i.e. Menus)
-                            logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                            #logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
                             try:
                                 enriched = source.enrichEntity(copy, self, localDecorations, timestamps)
                                 if enriched:
@@ -109,8 +109,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                                 groupObj.setSource(entity, source.sourceName)
                                                 modified = True
                                                 enrichedOutput.add(groupObj.groupName)
-                                    if len(enrichedOutput) > 0:
-                                        logs.debug("Output from enrich: %s" % enrichedOutput)
+                                    #if len(enrichedOutput) > 0:
+                                    #    logs.debug("Output from enrich: %s" % enrichedOutput)
                                 self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                             except Exception as e:
                                 exc_type, exc_value, exc_traceback = sys.exc_info()

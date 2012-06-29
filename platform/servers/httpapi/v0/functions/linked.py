@@ -72,16 +72,16 @@ def _buildShareSettingsFromLinkedAccount(linked):
         ]
         return group
 
-    result.append(buildGroup('stamps', 'Share Stamps'))
-    result.append(buildGroup('likes', 'Share Likes'))
-    result.append(buildGroup('todos', 'Share Todos'))
-    result.append(buildGroup('follows', 'Share Follows'))
+    result.append(buildGroup('stamps', 'Publish My Stamps'))
+    result.append(buildGroup('likes', 'Publish Stamps That I Like'))
+    result.append(buildGroup('todos', "Publish My Todo's"))
+    result.append(buildGroup('follows', "Publish When I Follow Someone"))
 
     return map(lambda x: x.dataExport(), result)
 
 @handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest)
 @require_http_methods(["POST"])
-def updateShareSettings(request, authUserId, http_schema, **kwargs):
+def updateSettings(request, authUserId, http_schema, **kwargs):
     on = None
     if http_schema.on is not None:
         on = set(http_schema.on.split(','))
@@ -98,7 +98,7 @@ def updateShareSettings(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPServiceNameForm)
 @require_http_methods(["GET"])
-def showShareSettings(request, authUserId, http_schema, **kwargs):
+def showSettings(request, authUserId, http_schema, **kwargs):
     linked  = stampedAPI.getLinkedAccount(authUserId, http_schema.service_name)
     result = _buildShareSettingsFromLinkedAccount(linked)
 

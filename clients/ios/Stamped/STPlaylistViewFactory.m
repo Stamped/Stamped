@@ -14,6 +14,7 @@
 #import "STStampedActions.h"
 #import "STActionManager.h"
 #import <QuartzCore/QuartzCore.h>
+#import "STActionUtil.h"
 
 @interface STPlaylistItemView : UIView
 
@@ -62,19 +63,15 @@
         indexView.frame = [Util centeredAndBounded:indexView.frame.size 
                                            inFrame:CGRectMake(self.frame.size.height-10, 5, indexView.frame.size.width, 40)];
         [self addSubview:indexView];
-        if (playlistItem.action) {
-            STActionContext* context = [STActionContext contextInView:self];
-            context.entityDetail = entityDetail;
-            if ([[STActionManager sharedActionManager] canHandleAction:playlistItem.action withContext:context]) {
-                UIImageView* playIcon = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"act_play_primary"]] autorelease];
-                playIcon.frame = [Util centeredAndBounded:playIcon.frame.size inFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
-                [self addSubview:playIcon];
-                UIView* playButton = [Util tapViewWithFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height) 
-                                                     target:self 
-                                                   selector:@selector(play:) 
-                                                 andMessage:nil];
-                [self addSubview:playButton];
-            }
+        if ([STActionUtil playable:playlistItem]) {
+            UIImageView* playIcon = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"act_play_primary"]] autorelease];
+            playIcon.frame = [Util centeredAndBounded:playIcon.frame.size inFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height)];
+            [self addSubview:playIcon];
+            UIView* playButton = [Util tapViewWithFrame:CGRectMake(0, 0, self.frame.size.height, self.frame.size.height) 
+                                                 target:self 
+                                               selector:@selector(play:) 
+                                             andMessage:nil];
+            [self addSubview:playButton];
         }
         if (playlistItem.length != 0) {
             UIView* lengthView = [Util viewWithText:[Util trackLengthString:playlistItem.length]
@@ -106,6 +103,7 @@
 - (void)play:(id)message {
     STActionContext* context = [STActionContext contextInView:self];
     context.entityDetail = self.entityDetail;
+    context.playlistItem = self.playlistItem;
     [[STActionManager sharedActionManager] didChooseAction:self.playlistItem.action withContext:context];
 }
 

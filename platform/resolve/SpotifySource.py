@@ -429,7 +429,7 @@ class SpotifySource(GenericSource):
                 albumSearchResult.relevance += scoreBoost
 
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
         tracks, albums, artists = [], [], []
         def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
             rawResults = self.__spotify.search(typeString, q=queryText)[resultsKey]
@@ -443,10 +443,34 @@ class SpotifySource(GenericSource):
         for typeSearch in typeSearches:
             pool.spawn(conductTypeSearch, typeSearch)
         pool.join(timeout=timeout)
+        
+        if logRawResults:
+            logComponents = ['\n\n\nSPOTIFY RAW RESULTS\nSPOTIFY RAW RESULTS\nSPOTIFY RAW RESULTS\n\n\n']
+            logComponents.append('\n\nTRACKS TRACKS TRACKS TRACKS TRACKS TRACKS\n\n')
+            logComponents.extend(['\n\n%s\n\n' % pformat(proxy.data) for proxy in tracks])
+            logComponents.append('\n\nALBUMS ALBUMS ALBUMS ALBUMS ALBUMS ALBUMS\n\n')
+            logComponents.extend(['\n\n%s\n\n' % pformat(proxy.data) for proxy in albums])
+            logComponents.append('\n\nARTISTS ARTISTS ARTISTS ARTISTS ARTISTS ARTISTS\n\n')
+            logComponents.extend(['\n\n%s\n\n' % pformat(proxy.data) for proxy in artists])
+            logComponents.append('\n\n\nEND SPOTIFY RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
+
         # We start out penalizing albums and artists severely, with the idea that if they show up
         tracks  = scoreResultsWithBasicDropoffScoring(tracks, sourceScore=1.0)
+        for track in tracks:
+            applyTrackTitleDataQualityTests(track, queryText)
+            adjustTrackRelevanceByQueryMatch(track, queryText)
+
         albums  = scoreResultsWithBasicDropoffScoring(albums, sourceScore=0.7)
+        for album in albums:
+            applyAlbumTitleDataQualityTests(album, queryText)
+            adjustAlbumRelevanceByQueryMatch(album, queryText)
+
         artists = scoreResultsWithBasicDropoffScoring(artists, sourceScore=0.6)
+        for artist in artists:
+            applyArtistTitleDataQualityTests(artist, queryText)
+            adjustArtistRelevanceByQueryMatch(artist, queryText)
+
         self.__augmentArtistsAndAlbumsWithTracks(artists, albums, tracks)
         smoothRelevanceScores(tracks), smoothRelevanceScores(albums), smoothRelevanceScores(artists)
         # TODO: Incorporate popularities into ranking? Only worthwhile if we think they're under-weighting them.

@@ -28,6 +28,7 @@ try:
     from gevent.pool                import Pool
     from api.Schemas                import TimesSchema, HoursSchema
     from search.ScoringUtils        import *
+    from search.DataQualityUtils    import *
 except:
     report()
     raise
@@ -279,7 +280,7 @@ class FactualSource(GenericSource):
         return generatorSource(gen(), constructor=FactualSearchAll)
 
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
         if queryCategory != 'place':
             raise NotImplementedError()
 
@@ -301,6 +302,16 @@ class FactualSource(GenericSource):
         else:
             getNationalResults()
 
+        if logRawResults:
+            logComponents = ['\n\n\nFACTUAL RAW RESULTS\nFACTUAL RAW RESULTS\nFACTUAL RAW RESULTS\n\n\n']
+            logComponents.append('NATIONAL RESULTS\n\n')
+            logComponents.extend(['\n\n%s\n\n' % pformat(result) for result in national_results])
+            if coords:
+                logComponents.append('LOCAL RESULTS\n\n')
+                logComponents.extend(['\n\n%s\n\n' % pformat(result) for result in local_results])
+            logComponents.append('\n\n\nEND FACTUAL RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
+            
         local_results = [FactualPlace(data=result) for result in local_results]
         national_results = [FactualPlace(data=result) for result in national_results]
 
@@ -316,7 +327,10 @@ class FactualSource(GenericSource):
         smoothRelevanceScores(local_results)
         smoothRelevanceScores(national_results)
 
-        return dedupeById(local_results + national_results)
+        jointResults = dedupeById(local_results + national_results)
+        for searchResult in jointResults:
+            augmentPlaceDataQualityOnBasicAttributePresence(searchResult)
+        return jointResults
 
 
     def enrichEntity(self, entity, controller, decorations, timestamps):

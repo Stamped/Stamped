@@ -230,11 +230,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     [STStampedAPI sharedInstance].currentUserLocation = nil;
-    /* NSLog(@"Going to background");
-     [[STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends] saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-     NSLog(@"Saved"); 
-     }];
-     */
 }
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {

@@ -104,6 +104,7 @@ datestring_re0 = re.compile(r'^(\d\d\d\d) (\d\d) (\d\d)$')
 datestring_re1 = re.compile(r'^(\w+) (\d+), (\d\d\d\d)$')
 datestring_re2 = re.compile(r'^(\d\d\d\d)-(\d\d)-(\d\d)$')
 datestring_re3 = re.compile(r'^(\d\d\d\d)-(\d\d)-(\d\d)\w+\d\d:\d\d:\d\d\w+$')
+datestring_yearonly_re = re.compile(r'\d{4}')
 
 def parseDateString(date):
     if date is not None:
@@ -142,6 +143,11 @@ def parseDateString(date):
                 return datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
             except (ValueError, TypeError):
                 pass
+
+        match = datestring_yearonly_re.match(date)
+
+        if match and match is not None:
+            return datetime(int(match.group(0)), 1, 1)
     
     return None
 

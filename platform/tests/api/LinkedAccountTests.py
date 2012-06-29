@@ -79,8 +79,8 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
         # add the linked account
         data = {
             'service_name'   : 'twitter',
-            'user_id'        : TWITTER_USER_A0_ID,
-            'screen_name'    : 'test_user_a',
+            'linked_user_id'        : TWITTER_USER_A0_ID,
+            'linked_screen_name'    : 'test_user_a',
             'token'          : TWITTER_USER_A0_TOKEN,  #'test_twitter_token',
             'secret'         : TWITTER_USER_A0_SECRET, #'test_twitter_secret',
         }
@@ -100,9 +100,9 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
         # add the linked account
         data = {
             'service_name'   : 'facebook',
-            'user_id'        : self.fb_user_id_a,
-            'screen_name'    : 'fbusera',
-            'name'           : 'Test User',
+            'linked_user_id'        : self.fb_user_id_a,
+            'linked_screen_name'    : 'fbusera',
+            'linked_name'           : 'Test User',
             'token'          : self.fb_user_token_a,
             }
         self.addLinkedAccount(self.token, **data)
@@ -114,6 +114,24 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
 
         # remove the linked account and verify that it has been removed
         self.removeLinkedAccount(self.token, 'facebook')
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 0)
+
+    def test_add_rdio_account(self):
+        # add the linked account
+        data = {
+            'service_name'   : 'rdio',
+            'token'          : 'TOKEN_DUMMY',
+            }
+        self.addLinkedAccount(self.token, **data)
+
+        # verify that the linked account was properly added
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 1)
+        self.assertEqual(linkedAccounts['rdio']['service_name'], 'rdio')
+
+        # remove the linked account and verify that it has been removed
+        self.removeLinkedAccount(self.token, 'rdio')
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 0)
 
@@ -144,7 +162,8 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         self.assertEqual(linkedAccounts['facebook']['service_name'], 'facebook')
 
         # update share settings: enable share stamps on facebook
-        path = "account/linked/update_share_settings.json"
+
+        path = "account/linked/facebook/settings/update.json"
         data = {
             "oauth_token"   : self.token['access_token'],
             'service_name'   : 'facebook',
@@ -172,7 +191,7 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         self.assertEqual(linkedAccounts['facebook']['share_settings']['share_todos'], True)
         self.assertEqual(linkedAccounts['facebook']['share_settings']['share_likes'], True)
 
-        path = "account/linked/show_share_settings.json"
+        path = "account/linked/facebook/settings/show.json"
         data = {
             "oauth_token"   : self.token['access_token'],
             "service_name"  : 'facebook',
@@ -305,14 +324,14 @@ class StampedAPIHttpLinkedAccountUpgrade(AStampedAPIHttpTestCase):
         testAccount = self.showAccount(self.token)
         linkedAccounts = self.showLinkedAccounts(self.token)
 
-        self.assertEqual(linkedAccounts['twitter'], { 'service_name': 'twitter', 'screen_name' : 'testusera0', 'user_id': '12345678'})
-        self.assertEqual(linkedAccounts['facebook'], { 'service_name': 'facebook', 'user_id' : '1234567', 'name': 'Test User'})
+        self.assertEqual(linkedAccounts['twitter'], { 'service_name': 'twitter', 'linked_screen_name' : 'testusera0', 'linked_user_id': '12345678'})
+        self.assertEqual(linkedAccounts['facebook'], { 'service_name': 'facebook', 'linked_user_id' : '1234567', 'linked_name': 'Test User'})
         self.assertEqual(linkedAccounts['netflix'],
                 {
                 'service_name' : 'netflix',
                 'token' : 'abcdefghijkl_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0',
                 'secret' : 'abcdefghijkl',
-                'user_id': 'abcdefghijsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-',
+                'linked_user_id': 'abcdefghijsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-',
                 }
         )
 

@@ -302,6 +302,11 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'token'                 : True,
             'secret'                : True,
         }
+
+        valid_rdio = {
+            'service_name'          : True,
+            'token'                 : True,
+        }
         
         fields = {}
         valid = True
@@ -312,6 +317,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             valid_fields = valid_facebook
         elif linkedAccount.service_name == 'netflix':
             valid_fields = valid_netflix
+        elif linkedAccount.service_name == 'rdio':
+            valid_fields = valid_rdio
         else:
             raise StampedInputError("Attempting to add unknown linked account type: '%s'" % linkedAccount.service_name)
 
@@ -341,8 +348,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     def updateLinkedAccount(self, userId, linkedAccount):
         fields = {}
-        validFields = ['twitter', 'facebook', 'netflix' ]
-        if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix'] :
+        validFields = ['twitter', 'facebook', 'netflix', 'rdio' ]
+        if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
         logs.info('### linkedAccount: %s' % linkedAccount)
@@ -354,8 +361,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     def removeLinkedAccount(self, userId, linkedAccount):
         fields = {}
-        validFields = ['twitter', 'facebook', 'netflix' ]
-        if linkedAccount not in ['twitter', 'facebook', 'netflix'] :
+        validFields = ['twitter', 'facebook', 'netflix', 'rdio' ]
+        if linkedAccount not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
         # update old format accounts

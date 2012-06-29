@@ -78,11 +78,11 @@ def index(request):
 def blog(request):
     return HttpResponseRedirect('http://blog.stamped.com/')
 
-@stamped_view(schema=HTTPWebTimeSlice)
+@stamped_view(schema=HTTPWebTimeSlice, ignore_extra_params=True)
 def profile(request, schema, **kwargs):
     return handle_profile(request, schema, **kwargs)
 
-@stamped_view(schema=HTTPWebTimeMapSlice)
+@stamped_view(schema=HTTPWebTimeMapSlice, ignore_extra_params=True)
 def map(request, schema, **kwargs):
     return handle_map(request, schema, **kwargs)
 
@@ -195,12 +195,15 @@ def handle_profile(request, schema, **kwargs):
     #utils.log("PREV: %s" % prev_url)
     #utils.log("NEXT: %s" % next_url)
     
-    body_classes = _get_body_classes('profile', schema)
-    
     title   = "Stamped - %s" % user['screen_name']
     sdetail = kwargs.get('sdetail', None)
     stamp   = kwargs.get('stamp',   None)
     entity  = kwargs.get('entity',  None)
+    url     = request.build_absolute_uri(request.get_full_path())
+    
+    body_classes = _get_body_classes('profile', schema)
+    if sdetail is not None:
+        body_classes += " sdetail_popup";
     
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
@@ -220,6 +223,7 @@ def handle_profile(request, schema, **kwargs):
         'stamp'                 : stamp, 
         'entity'                : entity, 
         'title'                 : title, 
+        'URL'                   : url, 
     }, preload=[ 'user', 'sdetail' ])
 
 def handle_map(request, schema, **kwargs):
@@ -264,6 +268,7 @@ def handle_map(request, schema, **kwargs):
     body_classes = _get_body_classes('map collapsed-header', schema)
     
     title = "Stamped - %s map" % user['screen_name']
+    url   = request.build_absolute_uri(request.get_full_path())
     
     return stamped_render(request, 'map.html', {
         'user'          : user, 
@@ -272,9 +277,10 @@ def handle_map(request, schema, **kwargs):
         'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
         'title'         : title, 
+        'URL'           : url, 
     }, preload=[ 'user', 'stamps', 'stamp_id' ])
 
-@stamped_view(schema=HTTPStampDetail)
+@stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
@@ -295,11 +301,32 @@ def sdetail(request, schema, **kwargs):
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")
     
+    previews = stamp['previews']
+    users    = []
+    
+    if 'likes' in previews and len(previews['likes']) > 0:
+        likes = previews['likes']
+        
+        for user in likes:
+            user['preview_type'] = 'like'
+        
+        users.extend(likes)
+    
+    if 'todos' in previews and len(previews['todos']) > 0:
+        todos = previews['todos']
+        
+        for user in todos:
+            user['preview_type'] = 'todo'
+        
+        users.extend(todos)
+    
+    users   = _shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     sdetail = stamped_render(request, 'sdetail.html', {
-        'user'   : user, 
-        'stamp'  : stamp, 
-        'entity' : entity, 
+        'user'               : user, 
+        'feedback_users'     : users, 
+        'stamp'              : stamp, 
+        'entity'             : entity, 
     })
     
     if ajax:
@@ -327,24 +354,39 @@ def test_view(request, **kwargs):
     return stamped_render(request, 'test.html', { })
 
 @stamped_view(schema=HTTPStampId)
-def popup_likes(request, schema, **kwargs):
-    users = stampedAPIProxy.getLikes(schema.dataExport())
+def popup_sdetail_social(request, schema, **kwargs):
+    params = schema.dataExport()
+    likes  = stampedAPIProxy.getLikes(params)
+    todos  = stampedAPIProxy.getTodos(params)
+    users  = []
+    
+    for user in likes:
+        user['preview_type'] = 'like'
+    
+    for user in todos:
+        user['preview_type'] = 'todo'
+    
+    users.extend(likes)
+    users.extend(todos)
+    
+    users = _shuffle_split_users(users)
     num_users = len(users)
     
-    return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Likes" % num_users, 
-        'popup_class' : 'popup-likes', 
-        'users'       : users, 
-    })
-
-@stamped_view(schema=HTTPStampId)
-def popup_todos(request, schema, **kwargs):
-    users = stampedAPIProxy.getTodos(schema.dataExport())
-    num_users = len(users)
+    title = ""
+    popup = "popup-sdetail-social"
+    
+    if len(likes) > 0:
+        if len(todos) > 0:
+            title = "%d Likes and %d Todos" % (len(likes), len(todos))
+        else:
+            title = "%d Likes" % len(likes)
+    elif len(todos) > 0:
+        title = "%d Todos" % len(todos)
+        popup = "%s popup-todos" % popup
     
     return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Todos" % num_users, 
-        'popup_class' : 'popup-todos', 
+        'popup_title' : title, 
+        'popup_class' : popup, 
         'users'       : users, 
     })
 
