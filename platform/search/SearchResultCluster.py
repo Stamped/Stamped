@@ -257,7 +257,7 @@ class AlbumSearchResultCluster(SearchResultCluster):
             simple_artist_similarity = cached_string_comparison(cached_artist_simplify(artist1_name),
                                                                 cached_artist_simplify(artist2_name))
             artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
-            if artist1_name in artist2_name or artist2_name in artist1_name:
+            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
                 artist_name_sim = max(artist_name_sim, 0.9)
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
@@ -291,7 +291,7 @@ class TrackSearchResultCluster(SearchResultCluster):
             simple_artist_similarity = cached_string_comparison(cached_artist_simplify(artist1_name),
                                                                 cached_artist_simplify(artist2_name))
             artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
-            if artist1_name in artist2_name or artist2_name in artist1_name:
+            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
                 artist_name_sim = max(artist_name_sim, 0.9)
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
@@ -312,6 +312,7 @@ class PlaceSearchResultCluster(SearchResultCluster):
         mappings = { 'rd': 'road',
                      'st': 'street',
                      'ste': 'suite',
+                     'ave': 'avenue',
                      'apt': 'apartment',
                      'hwy': 'highway',
                      'rte': 'route',
@@ -331,41 +332,73 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
     @classmethod
     def _compare_proxies(cls, place1, place2):
-        place1_name = cached_simplify(place1.name)
-        place2_name = cached_simplify(place2.name)
-        name_similarity = cached_string_comparison(place1_name, place2_name)
+        #print "COMPARING PLACES:", place1.name, "--", tryToGetStreetAddressFromPlace(place1), "--", place1.key, \
+        #      "       AND    ", place2.name, "--", tryToGetStreetAddressFromPlace(place2), "--", place2.key
 
-        #print 'COMPARING', place1.name, tryToGetStreetAddressFromPlace(place1), "    TO   ", place2.name, tryToGetStreetAddressFromPlace(place2)
+        raw_name_similarity = cached_string_comparison(place1.name, place2.name)
+        simple_name_similarity = cached_string_comparison(cached_simplify(place1.name),
+                                                          cached_simplify(place2.name))
+        name_similarity = max(raw_name_similarity, simple_name_similarity - 0.15)
+        if place1.name.startswith(place2.name) or place2.name.startswith(place1.name):
+            name_similarity = max(name_similarity, 0.9)
+
+        #print "NAME SIM IS", name_similarity
 
         if name_similarity < 0.5:
-            return CompareResult.unknown()
-        similarity_score = name_similarity - 0.5
-        if place1.name == place2.name:
-            # Boost for being identical pre-simplification.
-            similarity_score += 0.1
+            return CompareResult.definitely_not_match()
 
         compared_locations = False
+        location_similarity = 0.0
 
         if place1.coordinates and place2.coordinates:
             distance_in_km = ScoringUtils.geoDistance(place1.coordinates, place2.coordinates)
             if distance_in_km > 10:
-                # print "CRAPPING OUT"
+                #print "CRAPPING OUT"
                 return CompareResult.unknown()
 
             # Min of 0.01m away.
             distance_in_km = max(distance_in_km, 0.01)
 
-            # .08 if 1km apart, .35 if 0.1km, 0.622 if 0.01km.
-            similarity_score += math.log(1.0 / distance_in_km, 5000)
+            # 0 if 1km apart, .27 if 0.1km, 0.54 if 0.01km.
+            location_similarity = math.log(1.0 / distance_in_km, 5000)
+            #print "COORD-BASED LOCATION SIM IS", location_similarity
             compared_locations = True
 
-        if similarity_score > 0.9:
+        state1 = tryToGetStateFromPlace(place1)
+        state2 = tryToGetStateFromPlace(place2)
+        if state1 and state2 and state1 != state2:
+            compared_locations = True
+            #print "DROPPING 0.3 for STATE"
+            location_similarity -= 0.4
+
+        zip1 = tryToGetPostalCodeFromPlace(place1)
+        zip2 = tryToGetPostalCodeFromPlace(place2)
+        if zip1 and zip2:
+            compared_locations = True
+            if int(zip1 / 1000) != int(zip2 / 1000):
+                location_similarity -= 0.4
+                #print "DROPPING 0.4 for ZIP"
+            elif zip1 == zip2:
+                location_similarity += 0.1
+
+        if compared_locations and name_similarity + location_similarity > 0.9:
+            #print "HOT DAMN! QUITTIN EARLY."
             # If we think these two businesses are extremely likely to be the same based on name and latlng, exit early.
             # The reason for this is that sometimes a business will have two addresses if it's on a corner or has two
             # entrances. We'll tank it in the address comparison. Exiting early makes sure that, when the latlngs and
             # names are close enough, we don't second-guess it because of an address issue.
-            # print "Matching after lat-lng with sim score", similarity_score
-            return CompareResult.match(similarity_score)
+            # #print "Matching after lat-lng with sim score", similarity_score
+            return CompareResult.match(name_similarity + location_similarity)
+
+        # TODO: Should really just get parsed-out map in one call since it's repeating same regexp matches over and
+        # over again.
+        locality1 = tryToGetLocalityFromPlace(place1)
+        locality2 = tryToGetLocalityFromPlace(place2)
+        if locality1 and locality2:
+            compared_locations = True
+            if cached_string_comparison(cached_simplify(locality1), cached_simplify(locality2)) != 1:
+                #print "DROPPING 0.3 for LOCALITY"
+                location_similarity -= 0.3
 
         # This would probably be good enough, except that Google Places national/autocomplete results don't have
         # latitude and longitude; they only have address strings. And other things don't have full address string; they
@@ -388,23 +421,26 @@ class PlaceSearchResultCluster(SearchResultCluster):
                 # Street # differences up until 5 are actually positive signals. But street # differences past that
                 # point are strongly negative; a difference of 100 is a penalty of 0.65.
                 if int(street_number1) == int(street_number2):
-                    similarity_score += 0.5
+                    location_similarity += 0.4
                 else:
-                    # print "Deducting for street #s:", math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
-                    similarity_score -= math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
-                    # print "Score is now", similarity_score
+                    # #print "Deducting for street #s:", math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
+                    location_similarity -= math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
+                    # #print "Score is now", similarity_score
                 # We then go on to do the full address string similarity, which is a bit duplicative. TODO: There might
                 # be an issue here, because we're double-counting street # similarities, where things on two different
                 # streets with the same street # and short string names get counted as the same. It seems like a rare
                 # case, though.
 
-            # print "COMPARING", street_address1, "TO", street_address2
+            #print "COMPARING", street_address1, "TO", street_address2
             street_address_similarity = cached_string_comparison(street_address1, street_address2)
+            if ((street_address1 in street_address2 and set(street_address1.split()) < set(street_address2.split())) or
+                (street_address2 in street_address1 and set(street_address2.split()) < set(street_address1.split()))):
+                street_address_similarity = max(street_address_similarity, 0.9)
             # If street addresses are significantly different, we totally tank the comparison. If they're identical,
-            # it's a boost of 0.6.
-            #print "BOOSTING BY ", ((street_address_similarity - 0.7) * 2), "FOR STREET ADDRESS"
-            similarity_score += (street_address_similarity - 0.7) * 2
-            #print "SCORE IS NOW", similarity_score
+            # it's a boost of 0.4.
+            #print "STREET ADDRESS SIM IS", street_address_similarity
+            location_similarity += (street_address_similarity - 0.8) * 2
+            #print "SCORE IS NOW", name_similarity + location_similarity
             compared_locations = True
 
         if not compared_locations and place1.address_string and place2.address_string:
@@ -417,16 +453,18 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
             # Completely tanks similarity for different address strings, max boost of 0.6 for identical. TODO: I might
             # want to be even stricter here.
-            similarity_score += (address_string_similarity - 0.7) * 2
+            location_similarity += (address_string_similarity - 0.7) * 2
 
         # TODO: The big case we're not catching yet is duplicates where one source knows the city and street and the
         # other just knows the city. This isn't always feasible because half of Google results lack structured address
         # data but might be worth doing for the other half.
 
-        if similarity_score > 0.75:
+        similarity_score = location_similarity + name_similarity
+        #print "FINAL TOTAL SIM IS", similarity_score
+        if similarity_score > 0.9:
             #print "MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED WITH SCORE", similarity_score
             return CompareResult.match(similarity_score)
-        elif similarity_score < 0.25:
+        elif similarity_score < 0.3:
             return CompareResult.definitely_not_match()
         else:
             return CompareResult.unknown()
