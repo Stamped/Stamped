@@ -41,8 +41,16 @@ url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}
 def generateStampUrl(stamp):
     #url_title = encodeStampTitle(stamp.entity.title)
     
-    # NOTE (travis): as of June 2012, we've migrated from more verbose web sdetail 
-    # URLs to a slightly shorter version
+    # NOTE (travis): as of June 2012, we've shortened our sdetail URLs.
+    # Also note that the v1 URL format will continue to be supported by the web client.
+    # Going forward (after v2 launch), we'd like to support both verbose and shortened 
+    # versions, with the shortened version being an actual hash instead of the short-ish 
+    # version we're using today.
+    
+    # v1: http://www.stamped.com/{{screen_name}}/stamps/{{stamp_num}}/{{entity_title}}
+    # v2: http://www.stamped.com/{{screen_name}}/s/{{stamp_num}}
+    
+    # TODO: remove the implicit http:// prefix here?
     return 'http://www.stamped.com/%s/s/%s' % (stamp.user.screen_name, stamp.stats.stamp_num)
 
 def _coordinatesDictToFlat(coordinates):

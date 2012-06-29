@@ -68,6 +68,10 @@ TODO:
             * BETA - FIX INFINITE SCROLL
             * BETA - optimize infinite scroll
             * adaptive layout improvements
+                * fixes to .fixedwidth
+                * allow mode with n columns and enable gallery view for n>=3 or n==1
+                * fix stamp logo layer to be fixed to never be offscreen and clamped to be visible
+                * also clamp stamp-category-nav-bar
             * NOREPRO - fix glitch w/ hover state on entity stamp images in gallery shifting text
         * headers:
             * change profile header image and share widget to remain constant
