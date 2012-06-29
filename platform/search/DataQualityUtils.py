@@ -23,24 +23,24 @@ MIN_CLUSTER_DATA_QUALITY = 0.7
 ############################################################################################################
 
 def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
-    # TODO PRELAUNCH IMMEDIATELY FUCK FUCK TEST THIS AND COMMIT
-    if True:
-        return
-
     if movieSearchResult.release_date is None:
         # This is a non-trivial penalty because this is a key differentiator of movies with the same title. Case
         # would work, but it's very rarely present on both parties of a comparison. Having a good release date is
         # key.
-        penalty = 0.2
+        penalty = 0.25
         movieSearchResult.dataQuality *= 1 - penalty
         movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
+    if movieSearchResult.director:
+        boost = 0.1
+        movieSearchResult.dataQuality *= 1 + boost
+        movieSearchResult.addDataQualityComponentDebugInfo("boost for director", boost)
+
     if movieSearchResult.cast:
-        boost = 0.1 * math.log(1 + len(movieSearchResult.cast))
+        boost = 0.05 * math.log(1 + len(movieSearchResult.cast))
         movieSearchResult.dataQuality *= 1 + boost
         movieSearchResult.addDataQualityComponentDebugInfo("boost for cast of size %d" % len(movieSearchResult.cast), boost)
 
-    # TODO: MPAA rating?
 
 def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
     pass

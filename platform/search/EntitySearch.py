@@ -238,7 +238,9 @@ class EntitySearch(object):
         # scores) but never included in the final result because we're not 100% that the data is good enough to show
         # users.
         filteredResults = [r for r in cluster.results if r.dataQuality > MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
-        filteredResults.sort(key=lambda r: r.dataQuality, reverse=True)
+        # So this is ugly, but it's pretty common for two listings to have the same or virtually the same data quality
+        # and using relevance as a tie-breaker is really helpful.
+        filteredResults.sort(key=lambda r: r.dataQuality + (r.relevance / 10.0), reverse=True)
         entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
         for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.
