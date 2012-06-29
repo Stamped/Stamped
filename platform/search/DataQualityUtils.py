@@ -75,6 +75,47 @@ def augmentAppDataQualityOnBasicAttributePresence(appSearchResult):
 ################################################   PLACES   ################################################
 ############################################################################################################
 
+US_POSTAL_CODE_RE = re.compile("(\d{5})(-\d{4})?$")
+US_STATE_RE = re.compile('[A-Z]{2}')
+# Group 1 is city, group 2 is state, group 3 is postal code.
+US_ADDRESS_STRING_W_POSTAL_CODE_RE = re.compile("[^,]\s*([A-Za-z. -]+)[ ,]+([A-Z]{2})[ ,]+(\d{5})(-\d{4})?([ ,]+(US))?\s*$")
+# Group 1 is city, group 2 is state.
+US_ADDRESS_STRING_WO_POSTAL_CODE_RE = re.compile("[^,]\s*([A-Za-z. -]+)[ ,]+([A-Z]{2})([ ,]+(US))?\s*$")
+
+def tryToGetPostalCodeFromPlace(placeResolverObject):
+    if placeResolverObject.address and 'postcode' in placeResolverObject.address:
+        reMatch = US_POSTAL_CODE_RE.match(placeResolverObject.address['postcode'])
+        if reMatch:
+            return int(reMatch.group(1))
+    if placeResolverObject.address_string:
+        reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return int(reMatch.group(3))
+
+def tryToGetStateFromPlace(placeResolverObject):
+    if placeResolverObject.address and 'region' in placeResolverObject.address:
+        reMatch = US_STATE_RE.match(placeResolverObject.address['region'])
+        if reMatch:
+            return placeResolverObject.address['region']
+    if placeResolverObject.address_string:
+        reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(2)
+        reMatch = US_ADDRESS_STRING_WO_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(2)
+
+def tryToGetLocalityFromPlace(placeResolverObject):
+    if placeResolverObject.address and 'locality' in placeResolverObject.address:
+        return placeResolverObject.address['locality']
+    if placeResolverObject.address_string:
+        reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(1)
+        reMatch = US_ADDRESS_STRING_WO_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(1)
+
 STREET_NUMBER_RE = re.compile('(^|\s)\d+($|[\s.#,])')
 NONCRITICAL_ADDRESS_CHARS = re.compile('[^a-zA-Z0-9 ]')
 

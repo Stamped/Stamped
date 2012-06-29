@@ -51,6 +51,8 @@ class TitleDataQualityRegexpTest(object):
         self.rawName = rawName
 
     def __matchesException(self, query):
+        if not self.exceptionQueryRegexps:
+            return False
         try:
             return self.exceptionQueryRegexps.search(query)
         except:
@@ -277,22 +279,25 @@ def applyArtistTitleDataQualityTests(searchResult, searchQuery):
 ############################################################################################################
 
 BOOK_TITLE_REMOVAL_REGEXPS = (
-    makeDelimitedSectionRe('edition'),
-    makeDelimitedSectionRe('version'),
-    makeDelimitedSectionRe('series'),
-    makeDelimitedSectionRe('vintage'),
-    makeDelimitedSectionRe('classic'),
-    makeDelimitedSectionRe('book'),
-    makeDelimitedSectionRe('volume'),
-    makeDelimitedSectionRe('paperback'),
+    makeDelimitedSectionRe('bargain'),
+    makeDelimitedSectionRe('books?'),
+    makeDelimitedSectionRe('classics?'),
+    makeDelimitedSectionRe('editions?'),
     makeDelimitedSectionRe('hardcover'),
+    makeDelimitedSectionRe('paperback'),
+    makeDelimitedSectionRe('series'),
+    makeDelimitedSectionRe('signet'),
+    makeDelimitedSectionRe('translations?'),
+    makeDelimitedSectionRe('version'),
+    makeDelimitedSectionRe('vintage'),
+    makeDelimitedSectionRe('volume'),
 )
 
 def cleanBookTitle(bookTitle):
     return applyRemovalRegexps(BOOK_TITLE_REMOVAL_REGEXPS, bookTitle)
 
 
-def _makeSingleTokenSuspiciousTest(token, weight=0.25):
+def _makeSingleTokenSuspiciousTest(token, weight):
     return TitleDataQualityRegexpTest('\\b%s\\b' % token, '"%s" in title' % token, weight,
             exceptionQueryRegexps=makeTokenRegexp(token))
 
@@ -303,13 +308,25 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
         exceptionQueryRegexps=makeTokenRegexp('book')),
     TitleDataQualityRegexpTest(r'\bvolume\s+\d', '"volume #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('volume')),
-    _makeSingleTokenSuspiciousTest('box'),
-    _makeSingleTokenSuspiciousTest('boxed'),
-    _makeSingleTokenSuspiciousTest('set'),
-    _makeSingleTokenSuspiciousTest('bundle'),
-    _makeSingleTokenSuspiciousTest('trilogy'),
-    _makeSingleTokenSuspiciousTest('collection'),
-    _makeSingleTokenSuspiciousTest('series'),
+    TitleDataQualityRegexpTest('\(', 'parenthesis in title', 0.1),
+    TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
+
+    _makeSingleTokenSuspiciousTest('box', 0.25),
+    _makeSingleTokenSuspiciousTest('boxed', 0.25),
+    _makeSingleTokenSuspiciousTest('edition', 0.25),
+    _makeSingleTokenSuspiciousTest('set', 0.25),
+    _makeSingleTokenSuspiciousTest('bundle', 0.25),
+    _makeSingleTokenSuspiciousTest('collection', 0.25),
+    _makeSingleTokenSuspiciousTest('series', 0.25),
+
+    _makeSingleTokenSuspiciousTest('trilogy', 0.1),
+    _makeSingleTokenSuspiciousTest('complete', 0.1),
+
+    # TODO(geoff): this is a hacky way to demote the study guides. There are just so many of them...
+    TitleDataQualityRegexpTest('(Cliff.*Notes?)', '"cliff notes" in title', 0.4,
+        exceptionQueryRegexps=(makeTokenRegexp('cliff'), makeTokenRegexp('note'))),
+    TitleDataQualityRegexpTest('(literature made easy)', '"literature made easy" in title', 0.4,
+        exceptionQueryRegexps=(makeTokenRegexp('literature'), makeTokenRegexp('made'), makeTokenRegexp('easy'))),
 )
 
 def applyBookTitleDataQualityTests(searchResult, searchQuery):
