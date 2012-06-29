@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+
+    {% block head %}
+	    <head>
+	        
+	        <meta charset="utf-8">
+	        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	        
+	        <title>Stamped Analytics</title>
+	        
+	        <meta name="description"        content="A page for monitoring key analytics for the Stamped mobile app">
+	        
+	        <meta name="author"             content="Stamped, Inc.">
+	        <meta name="copyright"          content="Stamped, Inc.">
+	        
+	        <meta http-equiv="refresh" content="10" >
+	        
+	        <!-- icons -->
+	        <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
+	        <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
+	        
+	        
+	    </head>
+	{% endblock head %}
+
+	{% block header %}
+		<body>
+			<h1> Stamped Analytics Dashboard </h1>
+			
+			<h2> All stats through {{hour}}:{{minute}} UTC</h4>
+			
+			<div>
+				<ul style='display:inline'>
+					<li><a href='/dashboard'>Daily Overview </a></li>
+					<li><a href='/enrichment'>Enrichment Stats </a></li>
+					<li><a href='/latency'>API Latency</a></li>
+					<li><a href='/segmentation'>User Segmentation</a></li>
+					<li><a href='/trending'>Trending</a></li>
+					<li><a href='/custom'>Custom</a></li>
+				</ul>
+			</div>	
+	{% endblock header %}
+	
+	{% block content %}
+	<div>
+		<div>
+			<h2>New Stamps</h2>
+			<table>
+				<tr>
+					<td> Today: {{todayStamps}}</td>
+				</tr><tr>
+					<td> Yesterday: {{yestStamps}}</td>
+					<td> {%if deltaStampsDay == '0.00'%} -- {% elif todayStamps > yestStamps %} +{{deltaStampsDay}}% {% else %} {{deltaStampsDay}}% {%endif%} </td>
+				</tr><tr>
+					<td> Weekly Avg: {{weekStamps}}</td>
+					<td> {%if deltaStampsWeek == '0.00'%} -- {% elif todayStamps > weekStamps %} +{{deltaStampsWeek}}% {% else %} {{deltaStampsWeek}}% {%endif%} </td>
+				</tr>
+			</table>
+		</div>
+		<div>
+			<h2>Accounts Created</h2>
+			<table>
+				<tr>
+					<td> Today: {{todayAccts}}</td>
+				</tr><tr>
+					<td> Yesterday: {{yestAccts}}</td>
+					<td> {%if deltaAcctsDay == '0.00'%} -- {% elif todayAccts > yestAccts %} +{{deltaAcctsDay}}% {% else %} {{deltaAcctsDay}}% {%endif%} </td>
+				</tr><tr>
+					<td> Weekly Avg: {{weekAccts}}</td>
+					<td> {%if deltaAcctsWeek == '0.00'%} -- {% elif todayAccts > weekAccts %} +{{deltaAcctsWeek}}% {% else %} {{deltaAcctsWeek}}% {%endif%} </td>
+				</tr>
+			</table>
+		</div>
+		<div>
+			<h2>Active Users</h2>
+			<table>
+				<tr>
+					<td> Today: {{todayUsrs}}</td>
+				</tr><tr>
+					<td> Yesterday: {{yestUsrs}}</td>
+					<td> {%if deltaUsrsDay == '0.00'%} -- {% elif todayUsrs > yestUsrs %} +{{deltaUsrsDay}}% {% else %} {{deltaUsrsDay}}% {%endif%} </td>
+				</tr><tr>
+					<td> Weekly Avg: {{weekUsrs}}</td>
+					<td> {%if deltaUsrsWeek == '0.00'%} -- {% elif todayUsrs > weekUsrs %} +{{deltaUsrsWeek}}% {% else %} {{deltaUsrsWeek}}% {%endif%} </td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	{% endblock content %}
+</html>
