@@ -89,7 +89,7 @@ def stringRelevance(queryText, resultText):
 
     nonContinuityPenalty = 1.2
     matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
-    matchingBlocks = filter(lambda block: block[2] > 1)
+    matchingBlocks = filter(lambda block: block[2] > 1 for block in matchingBlocks)
     totalMatch = sum(matchSize ** nonContinuityPenalty for _, _, matchSize in matchingBlocks)
     return totalMatch / (len(queryText) ** nonContinuityPenalty), [(i, n) for i, _, n in matchingBlocks]
 
@@ -191,7 +191,7 @@ def adjustBookRelevanceByQueryMatch(searchResult, queryText):
     matchingBlocks.extend(blocks)
     adjustRelevance(factor, 1.5, 'author')
 
-    queryFulfilled = float(combineMatchingSections(matchingBlocks)) / len(queryText)
+    queryFulfilled = combineMatchingSections(matchingBlocks) / len(queryText)
     searchResult.relevance *= queryFulfilled
     searchResult.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
 
