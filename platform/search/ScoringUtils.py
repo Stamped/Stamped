@@ -191,7 +191,7 @@ def adjustBookRelevanceByQueryMatch(searchResult, queryText):
     matchingBlocks.extend(blocks)
     adjustRelevance(factor, 1.5, 'author')
 
-    queryFulfilled = float(combineMatchingSections(matchingBlocks)) / len(queryText)
+    queryFulfilled = combineMatchingSections(matchingBlocks) / len(queryText)
     searchResult.relevance *= queryFulfilled
     searchResult.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
 
