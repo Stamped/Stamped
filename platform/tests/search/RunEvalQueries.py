@@ -348,13 +348,13 @@ class RunEvalQueries(AStampedFixtureTestCase):
 
         outputMessage = """
         /---------------------------------------------
-        |    Search results written to:
+        |    Search results for category %s written to:
         |      %s
         \\---------------------------------------------
         """
         with tempfile.NamedTemporaryFile(delete=False) as fout:
             pickle.dump(results, fout)
-            print outputMessage % fout.name
+            print outputMessage % (category, fout.name)
 
 
 if __name__ == '__main__':

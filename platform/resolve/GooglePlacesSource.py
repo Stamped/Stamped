@@ -394,10 +394,6 @@ class GooglePlacesSource(GenericSource):
         if (queryCategory != 'place'):
             raise NotImplementedError()
 
-        print "queryText is", queryText
-        print "queryCategory is", queryCategory
-        print "coords is", coords
-
         localResults = []
         nationalResults = []
         def searchLocally():
