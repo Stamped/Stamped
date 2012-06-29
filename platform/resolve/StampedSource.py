@@ -849,7 +849,7 @@ class StampedSource(GenericSource):
         entityProxies = [ self.entityProxyFromKey(entityId) for entityId in entityIds ]
         if logRawResults:
             logComponents = ['\n\n\nSTAMPED RAW RESULTS\nSTAMPED RAW RESULTS\nSTAMPED RAW RESULTS\n\n\n']
-            logComponents.extend(['\n\n%s\n\n' % str(proxy) for proxy in entityProxies])
+            logComponents.extend(['\n\n%s\n\n' % str(proxy.entity) for proxy in entityProxies])
             logComponents.append('\n\n\nEND STAMPED RAW RESULTS\n\n\n')
             logs.debug(''.join(logComponents))
         entityStats = MongoEntityStatsCollection().getStatsForEntities(entityIds)
