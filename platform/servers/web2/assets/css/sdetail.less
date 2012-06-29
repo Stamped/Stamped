@@ -456,7 +456,7 @@
                                 
                                 .user-preview {
                                     position: relative;
-                                    margin: 0 4px 4px 0;
+                                    margin: 0 8px 8px 0;
                                     float: left;
                                     
                                     .profile-image-tiny {
@@ -464,19 +464,6 @@
                                         z-index: 25;
                                         float: none;
                                     }
-                                }
-                                
-                                .user-preview-icon {
-                                    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
-                                    position: absolute;
-                                    z-index: 26;
-                                    
-                                    right:  -6px;
-                                    bottom: -6px;
-                                    
-                                    width:  17px;
-                                    height: 17px;
-                                    pointer-events: none;
                                 }
                                 
                                 .expand-popup {
@@ -488,31 +475,11 @@
                                     background: url(/assets/img/user-gallery-expand.png) no-repeat;
                                     .profile-image-border(2px);
                                     
-                                    .user-preview-icon {
-                                        right:  -8px;
-                                        bottom: -8px;
-                                    }
-                                    
                                     &:hover, &:active {
                                         .context-popup {
                                             display: block;
                                         }
                                     }
-                                }
-                                
-                                .likes, .todos {
-                                    display: inline-block;
-                                }
-                                .likes {
-                                    margin-right: 1em;
-                                }
-                                
-                                .likes .user-preview-icon {
-                                    background-position: 0 0;
-                                }
-                                
-                                .todos .user-preview-icon {
-                                    background-position: -19px 0;
                                 }
                             }
                         }

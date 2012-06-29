@@ -313,13 +313,13 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
 
     _makeSingleTokenSuspiciousTest('box', 0.25),
     _makeSingleTokenSuspiciousTest('boxed', 0.25),
+    _makeSingleTokenSuspiciousTest('edition', 0.25),
     _makeSingleTokenSuspiciousTest('set', 0.25),
     _makeSingleTokenSuspiciousTest('bundle', 0.25),
     _makeSingleTokenSuspiciousTest('collection', 0.25),
     _makeSingleTokenSuspiciousTest('series', 0.25),
 
     _makeSingleTokenSuspiciousTest('trilogy', 0.1),
-    _makeSingleTokenSuspiciousTest('edition', 0.1),
     _makeSingleTokenSuspiciousTest('complete', 0.1),
 
     # TODO(geoff): this is a hacky way to demote the study guides. There are just so many of them...
