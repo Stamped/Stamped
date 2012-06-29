@@ -4502,6 +4502,11 @@ class StampedAPI(AStampedAPI):
         return self._iterateOutLinks(entity, _resolveStubList)
 
     def _followOutLinks(self, entity, resolved, depth, geventPool=gevent.pool.Pool(32)):
+        """Follow the outlinks on the entity and merge all the entities to which it refers.
+
+        Note that the geventPool is being used as a singleton here. Unless a separate pool is
+        explicitly passed in, all invocations of this method will share a single pool.
+        """
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
