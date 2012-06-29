@@ -67,12 +67,30 @@ __stack = {
         }, 
     }, 
     
-    # worker nodes handle stateless, asynchronous tasks
+    # generic worker nodes handle stateless, asynchronous tasks
     'work' : {
+        'count' : 0, 
+        
+        'template' : {
+            'roles' : [ 'work', 'mem' ], 
+        }, 
+    }, 
+    
+    # api-specific worker nodes handle api-specific async tasks
+    'work-api' : {
         'count' : 1, 
         
         'template' : {
-            'roles' : [ 'work', 'mem', 'search' ], 
+            'roles' : [ 'work-api', 'work', 'mem' ], 
+        }, 
+    }, 
+    
+    # enrich-specific worker nodes handle enrich-specific async tasks
+    'work-enrich' : {
+        'count' : 1, 
+        
+        'template' : {
+            'roles' : [ 'work-enrich', 'work', 'mem' ], 
         }, 
     }, 
     
