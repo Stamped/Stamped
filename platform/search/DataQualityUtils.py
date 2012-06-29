@@ -8,12 +8,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import math
 
 # Results with lower data quality than this are summarily dropped pre-clustering.
-MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.1
+MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.1  # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK UP THIS
 # Results with lower data quality than this are allowed to cluster for the purposes of boosting the cluster's final
 # score, but are never included in the final result.
-MIN_RESULT_DATA_QUALITY_TO_INCLUDE = 0.3
+MIN_RESULT_DATA_QUALITY_TO_INCLUDE = 0.3  # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK UP THIS
 # Clusters with data quality lower than this are not returned to the user.
 MIN_CLUSTER_DATA_QUALITY = 0.7
 
@@ -21,68 +22,28 @@ MIN_CLUSTER_DATA_QUALITY = 0.7
 ################################################    FILM    ################################################
 ############################################################################################################
 
-"""
+def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
+    # TODO PRELAUNCH IMMEDIATELY FUCK FUCK TEST THIS AND COMMIT
+    if True:
+        return
 
-    TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'\sHD'),
-        re.compile(r'\sBlu-?ray', re.IGNORECASE),
-        ]
+    if movieSearchResult.release_date is None:
+        # This is a non-trivial penalty because this is a key differentiator of movies with the same title. Case
+        # would work, but it's very rarely present on both parties of a comparison. Having a good release date is
+        # key.
+        penalty = 0.2
+        movieSearchResult.dataQuality *= 1 - penalty
+        movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:
-                logs.warning("Avoiding transformation to AmazonMovie title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon movie title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
+    if movieSearchResult.cast:
+        boost = 0.1 * math.log(1 + len(movieSearchResult.cast))
+        movieSearchResult.dataQuality *= 1 + boost
+        movieSearchResult.addDataQualityComponentDebugInfo("boost for cast of size %d" % len(movieSearchResult.cast), boost)
 
+    # TODO: MPAA rating?
 
-
-
-            TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?complete.*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(volumes?|vol\.)\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'^(the )?best (\w+ )?of ', re.IGNORECASE),
-    ]
-
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:g
-                logs.warning("Avoiding transformation to AmazonTvShow title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon TV title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
-
-"""
-
-def augmentFilmDataQualityOnBasicAttributePresence(filmSearchResult):
+def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
     pass
-
 
 ############################################################################################################
 ################################################   MUSIC    ################################################
