@@ -125,12 +125,12 @@ def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
 
 # These are things we're so confident don't belong in TV titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
-TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('[^:,\[\(-]\s*The Complete ', re.IGNORECASE)
-TV_SEASON1_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*Seasons? ', re.IGNORECASE)
-TV_SEASON2_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
-TV_BOXED_SET_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*Box(ed)? Set[:,\]\) $-]', re.IGNORECASE)
-TV_VOLUMES_REGEX_CONFIDENT = re.compile('[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}[\]) ]+$', re.IGNORECASE)
-TV_BEST_OF_REGEX_CONFIDENT = re.compile('[^:,\[\(-]\s*The Best of ', re.IGNORECASE)
+TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('\s*[^:,\[\(-]\s*The Complete ', re.IGNORECASE)
+TV_SEASON1_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Seasons? ', re.IGNORECASE)
+TV_SEASON2_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
+TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set[:,\]\) $-]', re.IGNORECASE)
+TV_VOLUMES_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}[\]) ]+$', re.IGNORECASE)
+TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*[^:,\[\(-]\s*The Best of ', re.IGNORECASE)
 
 TV_TITLE_REMOVAL_REGEXPS = (
     TV_SEASON1_REGEX_CONFIDENT,
@@ -166,7 +166,7 @@ def applyTvTitleDataQualityTests(searchResult, searchQuery):
     applyTokenTests(TV_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
 
 
-MOVIE_TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\s*$")
+MOVIE_TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
 
 # These are things we're so confident don't belong in movie titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
@@ -176,7 +176,7 @@ MOVIE_TITLE_REMOVAL_REGEXPS = (
     re.compile("[ ,:\[(-]+Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+HD[ ,:\])-]*$"),
-    re.compile("[ ,:\[(-]+[a-zA-Z0-9']{3,15}\s+Edition[ ,:\])-]*$", re.IGNORECASE)
+    re.compile("\s*[,:\[(-]+[a-zA-Z0-9']{3,15}\s+Edition[ ,:\])-]*$", re.IGNORECASE)
 )
 
 def cleanMovieTitle(movieTitle):
