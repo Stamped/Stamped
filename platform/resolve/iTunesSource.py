@@ -989,8 +989,9 @@ class iTunesSource(GenericSource):
             'album' : 0.5,
             'musicArtist' : 0.8,
             # Having iTunes book results is good for enrichment, and in case Amazon doesn't return results or something,
-            # but we really don't want it having much of an impact on ranking.
-            'ebook': 0.1,
+            # but we really don't want it having much of an impact on ranking, since iTunes only has
+            # ebooks, so any book without ebook version will be at a huge disadvantage
+            'ebook': 0.3,
         }
 
         # TODO: Refactoring is needed here.
