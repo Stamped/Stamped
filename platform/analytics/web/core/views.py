@@ -34,7 +34,6 @@ entity_collection = api._entityDB._collection
 
 conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 
-@login_required
 def index(request):
     
     
@@ -69,7 +68,6 @@ def index(request):
     })
     return HttpResponse(t.render(c))
 
-@login_required
 def enrichment(request):
     
     media_items,songs,movies,books,media_colls,shows,albums,places,percentSingle,artists,app = getEnrichmentStats()
@@ -93,7 +91,6 @@ def enrichment(request):
     })
     return HttpResponse(t.render(c))
 
-@login_required
 def latency(request):
     
     query = logsQuery()
@@ -125,7 +122,6 @@ def latency(request):
     })
     return HttpResponse(t.render(c))
 
-@login_required
 def segmentation(request):
     scorer = weeklyScore()
     
@@ -160,7 +156,6 @@ def segmentation(request):
     })
     return HttpResponse(t.render(c))
 
-@login_required
 def trending(request):
     
     if today().month > 1:
@@ -193,7 +188,6 @@ def trending(request):
     })
     return HttpResponse(t.render(c))
 
-@login_required
 def custom(request):
 
     class inputForm(forms.Form):
