@@ -342,15 +342,42 @@ class RunEvalQueries(AStampedFixtureTestCase):
         ('shake shack madison square park', (40.5, -74.6)),
         ('shake shack madison ave', (40.5, -74.6)),
         ('shake shack weston', (40.5, -74.6)),
-        ('shake shack madison ave', (41.4, -73.3)), # This one is real close to Weston but we should really
-        # find the Madison Ave one because it's explicitly in the
-        # query.
+        ('shake shack madison ave', (41.4, -73.3)), # This one is real close to Westport but we should really
+                                                    # find the Madison Ave one because it's explicitly in the
+                                                    # query.
         ('pepe\'s pizza yonkers', (41.4, -73.3)),
         ('pepe\'s manchester', (41.4, -73.3)),
         ('wendy\'s', (40.58, -74.64)),              # Should hit the one in Bridgewater, NJ because of the
-        # lat/lng.
-        ('wendy\'s bridgewater 22', (41.4, -73.3))
+                                                    # lat/lng.
+        ('wendy\'s bridgewater 22', (41.4, -73.3)),
+
+        ('ben bensons', (45, -93)),                 # Should both hit Ben Benson's steakhouse in midtown.
+        ('ben bensons steakhouse', (36, -78)),
+
+        ('palazzio', (45, -93)),                    # Should both hit Palazzio in Santa Barbara.
+        ('palazzio santa barbara', (36, -78)),
+
+        ('the nines', (40.7, -74)),                 # The Nines in Ithaca should be one of first results.
+        ('the nines ithaca', (40.7, -74)),          # The Nines in Ithaca should be the first result.
+        ('the nines cornell', (36, -78)),           # The Nines in Ithaca should be the first result.
+
+        ('roasting company', (41.3, -72.9)),
+        ('savin rock roasting', (36, -78)),
+        ('roasting company ct', (40.7, -74)),
+
+        ('toy store mamaroneck', (40.7, -74)),
+        ('toy box', (40.95, -73.733)),
+        ('toybox', (40.95, -73.733)),
+
+        ('general cafe', (35.91, -79.05)),
+        ('general store cafe', (35.8, -79.2)),
+        ('general cafe pittsboro', (40.95, -73.733)),
+
+        ('trader joes', (41, -73.73)),
+        ('whole foods orange', (41, -73.73)),
+        ('wegmans', (40.58, -74.64))
     ]
+
     @fixtureTest()
     def test_run_place_queries(self):
         self.__runQueries([('place', self.PLACE_QUERIES)])
