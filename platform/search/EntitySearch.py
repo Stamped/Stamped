@@ -285,7 +285,7 @@ class EntitySearch(object):
 
 
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
-        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=None)
+        clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
         entityResults = []
 
         entityIdsToNewClusterIdxs = {}
