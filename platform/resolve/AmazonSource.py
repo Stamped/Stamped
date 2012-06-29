@@ -233,9 +233,12 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
     @lazyProperty
     def authors(self):
         try:
-            return [{
-                'name': xp(self.attributes, 'Author')['v']
-            }]
+            author = xp(self.attributes, 'Author')['v']
+            # TODO(geoff): This is a bit hacky, but sometimes Amazon proudly returns these strings.
+            # Maybe find a better way to deal with this?
+            if author == '-N/A-':
+                return []
+            return [{ 'name': author }]
         except Exception:
             return []
 
