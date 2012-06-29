@@ -4,6 +4,7 @@ var init_social_sharing = function($scope, params) {
         var $tweet_buttons = $scope.find('.twitter-share-button');
         var text = "Check out this stamp of " + params.title;
         
+        // TODO: prefer .data or .attr?
         $tweet_buttons.attr("data-text", text);
         $tweet_buttons.attr("data-url",  params.url);
     }
