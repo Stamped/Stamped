@@ -132,7 +132,10 @@ TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set[:,\]\) $-
 TV_VOLUMES_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}[\]) ]+$', re.IGNORECASE)
 TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*[^:,\[\(-]\s*The Best of ', re.IGNORECASE)
 
+TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
+
 TV_TITLE_REMOVAL_REGEXPS = (
+    TITLE_YEAR_EXTRACTION_REGEXP,
     TV_SEASON1_REGEX_CONFIDENT,
     TV_SEASON2_REGEX_CONFIDENT,
     TV_BOXED_SET_REGEX_CONFIDENT,
@@ -166,24 +169,23 @@ def applyTvTitleDataQualityTests(searchResult, searchQuery):
     applyTokenTests(TV_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
 
 
-MOVIE_TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
-
 # These are things we're so confident don't belong in movie titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
 MOVIE_TITLE_REMOVAL_REGEXPS = (
-    MOVIE_TITLE_YEAR_EXTRACTION_REGEXP,
+    TITLE_YEAR_EXTRACTION_REGEXP,
     re.compile("[ ,:\[(-]+Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+HD[ ,:\])-]*$"),
-    re.compile("\s*[,:\[(-]+[a-zA-Z0-9']{3,15}\s+Edition[ ,:\])-]*$", re.IGNORECASE)
+    re.compile("\s*[,:\[(-]+([a-zA-Z0-9']{3,20}\s+){1,2}Edition[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
 )
 
 def cleanMovieTitle(movieTitle):
     return applyRemovalRegexps(MOVIE_TITLE_REMOVAL_REGEXPS, movieTitle)
 
 def getMovieReleaseYearFromTitle(rawTitle):
-    match = MOVIE_TITLE_YEAR_EXTRACTION_REGEXP.search(rawTitle)
+    match = TITLE_YEAR_EXTRACTION_REGEXP.search(rawTitle)
     if match:
         return int(match.group(1))
 
