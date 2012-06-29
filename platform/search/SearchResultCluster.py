@@ -564,39 +564,48 @@ class MovieSearchResultCluster(SearchResultCluster):
     def _compare_proxies(cls, movie1, movie2):
         # Our task here is a bit harder than normal. There are often remakes, so name is not decisive. There are often
         # digital re-masterings and re-releases, so dates are not decisive. Cast data is spotty.
-        #
-        # TODO: Try to use MPAA rating, especially if we can get it from TMDB.
+        # We get reliable release dates from TMDB and TheTVDB, but not from iTunes, so those are generally unhelpful.
 
-        movie1_name_simple = cached_movie_simplify(movie1.name)
-        movie2_name_simple = cached_movie_simplify(movie2.name)
-        name_similarity = cached_string_comparison(movie1_name_simple, movie2_name_simple)
 
-        # TODO: We almost certainly want to weaken this once we have batch processes to really see the effects of
-        # changes in the other pieces of the comparison.
-        if movie1_name_simple != movie2_name_simple:
-            return CompareResult.unknown()
-
-        score = name_similarity - 0.9
-
-        movie1_length, movie2_length = None, None
-        if movie1.length and movie2.length:
-            if movie1.length == movie2.length:
-                score += 0.3
-            elif abs(movie1.length - movie2.length) <= 60:
-                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
-                # then converted back.
-                score += 0.1
+        raw_name_similarity = cached_string_comparison(movie1.name, movie2.name)
+        simple_name_similarity = cached_string_comparison(cached_movie_simplify(movie1.name),
+                                                          cached_movie_simplify(movie2.name))
+        sim_score = max(raw_name_similarity, simple_name_similarity - 0.9)
 
         if movie1.release_date and movie2.release_date:
             time_difference = abs(movie1.release_date - movie2.release_date)
-            if time_difference < datetime.timedelta(7):
-                score += 0.4
-            elif time_difference < datetime.timedelta(30):
-                score += 0.3
+            if time_difference > datetime.timedelta(750):
+                sim_score -= 0.2
             elif time_difference < datetime.timedelta(365):
-                # Within 1 year + exact title match = cluster.
-                score += 0.2
+                sim_score += 0.05
+            elif time_difference < datetime.timedelta(30):
+                sim_score += 0.1
 
+        if movie1.length and movie2.length:
+            if movie1.length == movie2.length:
+                sim_score += 0.1
+            if abs(movie1.length - movie2.length) < 60:
+                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
+                # then converted back.
+                sim_score += 0.05
+
+        try:
+            movie1_director = cached_simplify(movie1.directors[0]['name'])
+            movie2_director = cached_simplify(movie2.directors[0]['name'])
+            if movie1_director == movie2_director:
+                sim_score += 0.2
+            else:
+                sim_score -= 0.2
+        except IndexError:
+            pass
+
+        if simple_name_similarity > 0.9 and sim_score > 0.95:
+            return CompareResult.match(sim_score)
+        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+            return CompareResult.definitely_not_match()
+        return CompareResult.unknown()
+
+        """
         cast1_names = set([cached_simplify(actor['name']) for actor in movie1.cast])
         cast2_names = set([cached_simplify(actor['name']) for actor in movie2.cast])
         if cast1_names and cast2_names:
@@ -634,3 +643,4 @@ class MovieSearchResultCluster(SearchResultCluster):
             return CompareResult.match(score)
         else:
             return CompareResult.unknown()
+        """
