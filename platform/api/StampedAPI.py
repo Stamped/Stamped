@@ -19,7 +19,6 @@ try:
     import tasks.APITasks
     import Entity
 
-    from datetime                   import datetime, timedelta
     from auth                       import convertPasswordForStorage
     from utils                      import lazyProperty
     from functools                  import wraps
@@ -65,6 +64,8 @@ try:
     from Twitter                    import *
     from GooglePlaces               import *
     from Rdio                       import *
+    
+    from datetime                   import datetime, timedelta
 except Exception:
     report()
     raise
