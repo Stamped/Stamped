@@ -12,6 +12,7 @@ from collections import namedtuple
 from SearchResult import SearchResult
 from resolve.Resolver import simplify
 from difflib import SequenceMatcher
+from DataQualityUtils import *
 
 import math
 
@@ -153,32 +154,6 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     return d
 
 
-def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, queryLatLng):
-    """
-    What I'm really looking for here are hints as to how I should blend between search and autocomplete results.
-    TODO: We should do text matching that extends past the title and into the address as well -- queries like
-    'Shake Shack Westport' are really good ways to make your intent explicit to Google, but we don't do a good
-    job of handling them.
-    """
-    for result in results:
-        # TODO: I think the string matching here underweights substring matches, and especially prefix matches.
-        titleSimilarity = SequenceMatcher(',]:-.'.__contains__, queryText, result.resolverObject.name).ratio()
-        if titleSimilarity > 0.6:
-            factor = 1 + (titleSimilarity - 0.6)
-            # Maxes out at 1.5 if it's identical.
-            if titleSimilarity == 1:
-                factor += 0.1
-            result.relevance *= factor
-            result.addRelevanceComponentDebugInfo('title similarity factor', factor)
-
-        if queryLatLng and result.resolverObject.coordinates:
-            distance = geoDistance(queryLatLng, result.resolverObject.coordinates)
-            # Works out to about x2 for being right fucking next to something and x1.2 for being 25km away.
-            distance_boost = 1 + math.log(100 / distance, 1000)
-            result.relevance *= distance_boost
-            result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
-
-
 RelevanceFactor = namedtuple('RelevanceFactor', 'fieldName fieldExtractor maxBoost')
 
 def _adjustRelevanceByQueryMatch(searchResult, queryText, factors, fulfillmentFactor=0.5, fulfillmentExponent=0.5):
@@ -253,3 +228,27 @@ TRACK_RELEVANCE_FACTORS = (
 )
 def adjustTrackRelevanceByQueryMatch(searchResult, queryText):
     _adjustRelevanceByQueryMatch(searchResult, queryText, TRACK_RELEVANCE_FACTORS)
+
+
+PLACE_RELEVANCE_FACTORS = (
+    RelevanceFactor('name', lambda result: result.resolverObject.name, 2.0),
+    RelevanceFactor('locality', lambda result: tryToGetLocalityFromPlace(result.resolverObject), 1.2),
+    RelevanceFactor('street address', lambda result: tryToGetStreetAddressFromPlace(result.resolverObject), 1.2)
+)
+
+def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, queryLatLng):
+    """
+    What I'm really looking for here are hints as to how I should blend between search and autocomplete results.
+    TODO: We should do text matching that extends past the title and into the address as well -- queries like
+    'Shake Shack Westport' are really good ways to make your intent explicit to Google, but we don't do a good
+    job of handling them.
+    """
+    for result in results:
+        _adjustRelevanceByQueryMatch(result, queryText, PLACE_RELEVANCE_FACTORS)
+
+        if queryLatLng and result.resolverObject.coordinates:
+            distance = geoDistance(queryLatLng, result.resolverObject.coordinates)
+            # Works out to about x2 for being right fucking next to something and x1.2 for being 25km away.
+            distance_boost = 1 + math.log(100 / distance, 1000)
+            result.relevance *= distance_boost
+            result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
