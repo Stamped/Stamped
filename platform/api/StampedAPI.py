@@ -642,10 +642,12 @@ class StampedAPI(AStampedAPI):
                 raise StampedInputError("Could not update account website")
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
-        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
-            account.color_primary = fields['color_primary']
-        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
-            account.color_secondary = fields['color_secondary']
+        if 'color_primary' in fields and 'color_secondary' in fields:
+            if account.color_primary != fields['color_primary'] or account.color_secondary != fields['color_secondary']:
+                account.color_secondary = fields['color_secondary']
+                account.color_primary = fields['color_primary']
+                # Asynchronously generate stamp file
+                tasks.invoke(tasks.APITasks.customizeStamp, args=[account.color_primary, account.color_secondary])
         if 'temp_image_url' in fields:
             image_cache_timestamp = datetime.utcnow()
             account.timestamp.image_cache = image_cache_timestamp
