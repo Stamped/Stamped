@@ -29,6 +29,7 @@ try:
     from LibUtils                   import states
     from pprint                     import pformat
     from search.ScoringUtils        import *
+    from search.DataQualityUtils    import *
     from difflib                    import SequenceMatcher
 except:
     report()
@@ -390,13 +391,9 @@ class GooglePlacesSource(GenericSource):
         
         return self.generatorSource(gen())
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
         if (queryCategory != 'place'):
             raise NotImplementedError()
-
-        print "queryText is", queryText
-        print "queryCategory is", queryCategory
-        print "coords is", coords
 
         localResults = []
         nationalResults = []
@@ -416,6 +413,16 @@ class GooglePlacesSource(GenericSource):
         else:
             searchNationally()
 
+        if logRawResults:
+            logComponents = ['\n\n\nGOOGLEPLACES RAW RESULTS\nGOOGLEPLACES RAW RESULTS\nGOOGLEPLACES RAW RESULTS\n\n\n']
+            logComponents.append('NATIONAL RESULTS\n\n')
+            logComponents.extend(['\n\n%s\n\n' % pformat(result) for result in nationalResults])
+            if coords:
+                logComponents.append('LOCAL RESULTS\n\n')
+                logComponents.extend(['\n\n%s\n\n' % pformat(result) for result in localResults])
+            logComponents.append('\n\n\nEND GOOGLEPLACES RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
+
         # Convert JSON objects to GooglePlacesPages.
         localResults = [GooglePlacesPlace(result) for result in localResults]
         nationalResults = [GooglePlacesAutocompletePlace(result) for result in nationalResults]
@@ -432,7 +439,10 @@ class GooglePlacesSource(GenericSource):
         smoothRelevanceScores(localResults)
         smoothRelevanceScores(nationalResults)
 
-        return dedupeById(localResults + nationalResults)
+        jointResults = dedupeById(localResults + nationalResults)
+        for searchResult in jointResults:
+            augmentPlaceDataQualityOnBasicAttributePresence(searchResult)
+        return jointResults
 
 
     def entityProxyFromKey(self, key, **kwargs):

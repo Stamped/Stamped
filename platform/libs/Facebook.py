@@ -10,6 +10,7 @@ APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
 ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
 
 class Facebook(object):
@@ -189,11 +190,14 @@ class Facebook(object):
             args['message'] = message
         if imageUrl is not None:
             args['image'] = imageUrl
-        return self._post(
-            access_token,
-            path,
-            **args
-        )
+        try:
+            return self._post(
+                access_token,
+                path,
+                **args
+            )
+        except Exception as e:
+            print('EXCEPTION: %s' % e)
 
 
     def postToNewsFeed(self, user_id, access_token, message, picture=None):
@@ -227,8 +231,8 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
-    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('stamp', access_token,
-                                                   'movie', 'http://www.imdb.com/title/tt1190536/'))
+    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('todo', access_token,
+                                                   'app', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/ml/stamps/29/Angry-Birds-Space'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
@@ -236,7 +240,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'clearTestUsers'
+    methods = 'postToOpenGraph'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

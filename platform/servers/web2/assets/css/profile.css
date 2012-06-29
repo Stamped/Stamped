@@ -1646,11 +1646,6 @@ body.sdetail_popup {
 }
 body.sdetail_popup #main-page-content-body {
   display: none;
-  /*#stamp-category-nav-bar {
-            visibility: hidden !important;
-            opacity: 0;
-        }*/
-
 }
 body.sdetail_popup #main-page-content-body #main-content {
   display: none;
@@ -1909,13 +1904,14 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
   white-space: nowrap;
   padding: 12px 24px;
 }
-.popup .popup-body .popup-body-inner .user .profile-image-small,
+.popup .popup-body .popup-body-inner .user .profile-image-wrapper,
 .popup .popup-body .popup-body-inner .user .stamp,
 .popup .popup-body .popup-body-inner .user .name {
   float: left;
 }
-.popup .popup-body .popup-body-inner .user .profile-image-small {
+.popup .popup-body .popup-body-inner .user .profile-image-wrapper {
   margin-right: 16px;
+  position: relative;
 }
 .popup .popup-body .popup-body-inner .user .stamp {
   margin-right: 6px;
@@ -1947,12 +1943,41 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
 .popup .popup-body .popup-body-inner .user:hover .name a {
   color: #595959;
 }
+.popup-sdetail-social .pronounced-title {
+  font-size: 2em;
+}
+.popup-sdetail-social .popup-header .rhs-icon {
+  margin-top: 4px;
+}
+.popup-todos .pronounced-title {
+  font-size: 3em;
+}
 .popup-todos .popup-header .rhs-icon {
   background-position: -76px 0 !important;
+  margin-top: 16px;
+}
+.popup-todos .popup-header .rhs-icon .tongue {
+  display: none;
 }
 .popup-followers .popup-header .rhs-icon {
   background-position: -114px 0 !important;
 }
 .popup-following .popup-header .rhs-icon {
   background-position: -152px 0 !important;
+}
+.user-preview-icon {
+  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  position: absolute;
+  z-index: 26;
+  right: -6px;
+  bottom: -6px;
+  width: 17px;
+  height: 17px;
+  pointer-events: none;
+}
+.like .user-preview-icon {
+  background-position: 0 0;
+}
+.todo .user-preview-icon {
+  background-position: -19px 0;
 }

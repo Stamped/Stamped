@@ -23,7 +23,7 @@ import EntitiesSxSTemplates
 # the pickled objects
 import datetime
 import search.SearchResultCluster
-
+from api.Schemas import PlaceEntity
 
 def loadSearchResultsFromFile(filename):
     returnDict = {}
@@ -42,7 +42,10 @@ def stripEntity(entityDict):
 
     def stripTimestamps(d):
         return {k : v for k, v in d.iteritems() if 'timestamp' not in k}
+    def stripSourceFields(d):
+        return {k : v for k, v in d.iteritems() if '_source' not in k}
     entityDict = stripTimestamps(entityDict)
+    entityDict = stripSourceFields(entityDict)
     if 'sources' in entityDict:
         entityDict['sources'] = stripTimestamps(entityDict['sources'])
     return entityDict
@@ -168,7 +171,10 @@ def writeCompareEntity(left, right, outputDir, filename):
 
 
 def extractLinkText(entity):
-    return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, entity[0].subtitle)
+    subtitle = entity[0].subtitle
+    if isinstance(entity[0], PlaceEntity) and entity[0].formatAddress():
+        subtitle = entity[0].formatAddress()
+    return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, subtitle)
 
 
 def ensureDirectory(pathName):

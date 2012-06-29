@@ -268,6 +268,7 @@ a.follow-button:active {
 }
 .profile-image-large:hover .context-popup {
   display: block;
+  cursor: pointer;
 }
 .profile-image-large-ish {
   position: relative;
@@ -291,6 +292,7 @@ a.follow-button:active {
 }
 .profile-image-large-ish:hover .context-popup {
   display: block;
+  cursor: pointer;
 }
 .profile-image-medium-ish {
   position: relative;
@@ -314,6 +316,7 @@ a.follow-button:active {
 }
 .profile-image-medium-ish:hover .context-popup {
   display: block;
+  cursor: pointer;
 }
 .profile-image-medium {
   position: relative;
@@ -337,6 +340,7 @@ a.follow-button:active {
 }
 .profile-image-medium:hover .context-popup {
   display: block;
+  cursor: pointer;
 }
 .profile-image-small {
   position: relative;
@@ -360,6 +364,7 @@ a.follow-button:active {
 }
 .profile-image-small:hover .context-popup {
   display: block;
+  cursor: pointer;
 }
 .profile-image-tiny {
   position: relative;
@@ -383,6 +388,7 @@ a.follow-button:active {
 }
 .profile-image-tiny:hover .context-popup {
   display: block;
+  cursor: pointer;
 }
 /* **************************************************************************
                                 USER GALLERY

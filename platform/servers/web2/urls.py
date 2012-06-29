@@ -27,12 +27,8 @@ urlpatterns = patterns('',
     url(r'^entities/menu\.html?$',              'core.views.menu'), 
     
     # e.g., stamped.com/popups/likes, stamped.com/popups/likes.html
-    url(r'^popups/likes$',                      'core.views.popup_likes'), 
-    url(r'^popups/likes\.html?$',               'core.views.popup_likes'), 
-    
-    # e.g., stamped.com/popups/todos, stamped.com/popups/todos.html
-    url(r'^popups/todos$',                      'core.views.popup_todos'), 
-    url(r'^popups/todos\.html?$',               'core.views.popup_todos'), 
+    url(r'^popups/sdetail-social$',             'core.views.popup_sdetail_social'), 
+    url(r'^popups/sdetail-social\.html?$',      'core.views.popup_sdetail_social'), 
     
     # e.g., stamped.com/popups/followers, stamped.com/popups/followers.html
     url(r'^popups/followers$',                  'core.views.popup_followers'), 
@@ -65,7 +61,7 @@ urlpatterns = patterns('',
     url(r'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
                                                 'core.views.sdetail'), 
     # e.g., stamped.com/travis/1
-    url(r'^(?P<screen_name>[\w-]{1,20})/(?P<stamp_num>\d+)', 
+    url(r'^(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
                                                 'core.views.sdetail'), 
 )
 

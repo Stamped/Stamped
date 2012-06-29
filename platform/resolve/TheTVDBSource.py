@@ -21,7 +21,7 @@ try:
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
     from GenericSource              import GenericSource
     from utils                      import lazyProperty
-    from pprint                     import pformat
+    from pprint                     import pformat, pprint
     from search.ScoringUtils        import *
 except:
     report()
@@ -229,16 +229,27 @@ class TheTVDBSource(GenericSource):
         
         return gen()
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         # TODO: USE TIMEOUT.
         if queryCategory != 'film':
             raise NotImplementedError()
         # Ugh. Why are we using entities?
-        entities = self.__thetvdb.search(queryText, transform=True, detailed=False)
-        results = [TheTVDBShow(data=entity) for entity in entities]
-        # TheTVDB has a higher source score than TMDB because it is strict with its retrieval. If you don't match
+        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False)
+        if logRawResults:
+            logComponents = ['\n\n\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\n\n\n']
+            for rawResult in rawResults:
+                logComponents.extend(['\n\n', pformat(rawResult), '\n\n'])
+            logComponents.append('\n\n\nEND TheTVDB RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
+
+        resolverObjects = [TheTVDBShow(data=rawResult) for rawResult in rawResults]
+        # TheTVDB has a higher source score than TheTVDB because it is strict with its retrieval. If you don't match
         # closely, it won't return anything.
-        return scoreResultsWithBasicDropoffScoring(results, sourceScore=1.1)
+        searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects, sourceScore=1.1)
+        for searchResult in searchResults:
+            applyTvTitleDataQualityTests(searchResult, queryText)
+            adjustTvRelevanceByQueryMatch(searchResult, queryText)
+        return searchResults
 
 if __name__ == '__main__':
     demo(TheTVDBSource(), 'Archer')

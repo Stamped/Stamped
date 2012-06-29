@@ -60,3 +60,25 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "notifications@stamped.com"
 EMAIL_HOST_PASSWORD = "mariotennis"
 
+CELERY_QUEUES = {
+    "default": {
+        "exchange": "default",
+        "binding_key": "default"
+    },
+    "api": {
+        "exchange": "stamped",
+        "exchange_type": "topic",
+        "binding_key": "api.#",
+    },
+    "enrich": {
+        "exchange": "stamped",
+        "exchange_type": "topic",
+        "binding_key": "enrich.#",
+    }
+}
+CELERY_DEFAULT_QUEUE = "default"
+CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_ROUTING_KEY = "default"
+
+
+

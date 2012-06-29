@@ -249,25 +249,28 @@ var g_update_stamps = null;
             return false;
         });
         
-        var $header_subsections = $('.header-subsection');
-        var header_subsection_height = 0;
-        var $header_subsection_0 = null;
-        
-        $header_subsections.each(function(i, elem) {
-            var $elem = $(elem);
-            if ($elem.hasClass('header-subsection-0')) {
-                $header_subsection_0 = $elem;
-            }
+        var init_header_subsections = function() {
+            var header_subsection_height = 0;
+            var $header_subsections  = $('.header-subsection');
+            var $header_subsection_0 = null;
             
-            header_subsection_height = Math.max($elem.height(), header_subsection_height);
-        });
-        
-        if (!!$header_subsection_0) {
-            $header_subsection_0.css({
-                'height'     : header_subsection_height, 
-                'min-height' : header_subsection_height
+            $header_subsections.each(function(i, elem) {
+                var $elem = $(elem);
+                
+                if ($elem.hasClass('header-subsection-0')) {
+                    $header_subsection_0 = $elem;
+                }
+                
+                header_subsection_height = Math.max($elem.height(), header_subsection_height);
             });
-        }
+            
+            if (!!$header_subsection_0 && header_subsection_height > 0) {
+                $header_subsection_0.css({
+                    'height'     : header_subsection_height, 
+                    'min-height' : header_subsection_height
+                });
+            }
+        };
         
         // TODO: may not be recursive
         //$(document).emoji();
@@ -382,7 +385,10 @@ var g_update_stamps = null;
             };
             
             update_gallery(function() {
-                update_navbar_layout(false);
+                if (!!update_navbar_layout) {
+                    update_navbar_layout(false);
+                }
+                
                 last_layout = new Date();
                 
                 if (gallery_is_visible) {
@@ -1701,6 +1707,7 @@ var g_update_stamps = null;
                     
                     if (!href) {
                         update_gallery_layout(true);
+                        init_header_subsections();
                     }
                     
                     resize_sdetail_wrapper($target, 'closing', function() {
@@ -1879,14 +1886,15 @@ var g_update_stamps = null;
                             //link_type = 'iframe';
                             //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
                             
-                            var popup_options = get_fancybox_options({
+                            var popup_options = get_fancybox_popup_options({
                                 href            : link_href, 
                                 type            : link_type, 
-                                title           : entity_title, 
                                 maxWidth        : 480, //Math.min((2 * window.innerWidth) / 3, 480), 
                                 
                                 afterShow       : function() {
-                                    $('.entity-menu').jScrollPane();
+                                    $('.menus').jScrollPane({
+                                        verticalPadding : 8
+                                    });
                                 }
                             });
                             
@@ -2020,7 +2028,25 @@ var g_update_stamps = null;
             });
             
             update_stamps($sdetail);
-            init_social_sharing();
+            
+            // TODO: prefer .attr("data-url") vs .data("url")?
+            var title  = $sdetail.find('.pronounced-title a').text();
+            var url    = $sdetail.find('.stamp-contents').attr("data-url");
+            var prefix = "http://www.";
+            
+            // remove http://www. prefix from url to shorten it for sharing purposes
+            if (url.indexOf(prefix) === 0) {
+                var url2 = url.substring(prefix.length);
+                
+                if (url2.length > 0) {
+                    url = url2;
+                }
+            }
+            
+            init_social_sharing($sdetail, {
+                title : title, 
+                url   : url
+            });
         };
         
         
@@ -2063,6 +2089,7 @@ var g_update_stamps = null;
         
         g_init_social_sharing();
         update_dynamic_header();
+        init_header_subsections();
         update_stamps();
         init_gallery();
         update_navbar_layout();

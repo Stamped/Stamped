@@ -297,15 +297,25 @@ class TMDBSource(GenericSource):
 
         return [resolverObject for resolverObject in resolverObjects if not isFarInFuture(resolverObject)]
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         raw_results = self.__tmdb.movie_search(queryText)['results']
+        if logRawResults:
+            logComponents = ['\n\n\nTMDB RAW RESULTS\nTMDB RAW RESULTS\nTMDB RAW RESULTS\n\n\n']
+            for result in raw_results:
+                logComponents.extend(['\n\n', pformat(result), '\n\n'])
+            logComponents.append('\n\n\nEND TMDB RAW RESULTS\n\n\n')
+            logs.debug(''.join(logComponents))
+
         # 20 results is good enough for us. No second requests.
         resolver_objects = [ TMDBMovie(result['id'], data=result, maxLookupCalls=0) for result in raw_results ]
         resolver_objects = self.__pareOutResultsFarInFuture(resolver_objects)
-        scored_results = scoreResultsWithBasicDropoffScoring(resolver_objects, sourceScore=1.0)
+        search_results = scoreResultsWithBasicDropoffScoring(resolver_objects, sourceScore=1.0)
+        for search_result in search_results:
+            applyMovieTitleDataQualityTests(search_result, queryText)
+            adjustMovieRelevanceByQueryMatch(search_result, queryText)
         # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
         # TMDB is clever enough to handle that for us.
-        return scored_results
+        return search_results
 
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:

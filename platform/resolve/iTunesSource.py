@@ -14,12 +14,12 @@ import Globals
 from logs import report
 
 try:
-    import logs, urllib2
+    import logs, urllib2, datetime
     from libs.iTunes                import globaliTunes
     from GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty, basicNestedObjectToString
     from gevent.pool                import Pool
-    from pprint                     import pformat
+    from pprint                     import pprint, pformat
     from Resolver                   import *
     from ResolverObject             import *
     from TitleUtils                 import *
@@ -444,9 +444,12 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
 
     @lazyProperty
     def release_date(self):
-        try:
-            return parseDateString(self.data['releaseDate'])
-        except KeyError:
+        # iTunes movie release dates are LIES. If there's something in a title in parens, we can trust it. Otherwise,
+        # throw it out.
+        year = getMovieReleaseYearFromTitle(self.raw_name)
+        if year is not None:
+            return datetime.datetime(year, 1, 1)
+        else:
             return None
 
     @lazyProperty
@@ -909,9 +912,16 @@ class iTunesSource(GenericSource):
         except Exception:
             logs.report()
 
-    def searchLite(self, queryCategory, queryText, timeout=None, coords=None):
+    def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         if queryCategory not in ('music', 'film', 'app', 'book'):
             raise NotImplementedError()
+
+        supportedProxyTypes = {
+            'music': (iTunesArtist, iTunesAlbum, iTunesTrack),
+            'film': (iTunesMovie, iTunesTVShow),
+            'app': (iTunesTrack,),
+            'book': (iTunesBook,),
+        }[queryCategory]
 
         types = mapCategoryToTypes(queryCategory)
         iTunesTypes = []
@@ -925,6 +935,9 @@ class iTunesSource(GenericSource):
             pool.spawn(self.__searchEntityTypeLite, iTunesType, queryText, rawResults)
         pool.join(timeout=timeout)
 
+        if logRawResults:
+            logComponents = ["\n\n\nITUNES RAW RESULTS\nITUNES RAW RESULTS\nITUNES RAW RESULTS\n\n\n"]
+
         searchResultsByType = {}
         # Convert from JSON objects to entity proxies. Pass through actual parsing errors, but report & drop the result
         # if we just see a type we aren't expecting. (Music search will sometimes return podcasts, for instance.)
@@ -932,13 +945,24 @@ class iTunesSource(GenericSource):
             processedResults = []
             for rawResult in rawTypeResults:
                 try:
+                    if logRawResults:
+                        logComponents.extend(['\n\n', pformat(rawResult), '\n\n'])
+                    proxy = self.__createEntityProxy(rawResult, maxLookupCalls=0)
+                    if not any(isinstance(proxy, proxyType) for proxyType in supportedProxyTypes):
+                        logs.warning('Dropping iTunes proxy of unsupported type %s for queryCategory %s:\n\n%s\n\n' %
+                                     (proxy.__class__.__name__, queryCategory, str(proxy)))
+                        continue
                     processedResults.append(self.__createEntityProxy(rawResult, maxLookupCalls=0))
                 except UnknownITunesTypeError:
                     logs.report()
                     pass
 
             if len(processedResults) > 0:
-                searchResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults)
+                searchResultsByType[iTunesType] = self.__scoreResults(iTunesType, processedResults, queryText)
+
+        if logRawResults:
+            logComponents.append("\n\n\nEND RAW ITUNES RESULTS\n\n\n")
+            logs.debug(''.join(logComponents))
 
         if len(searchResultsByType) == 0:
             # TODO: Throw exception to avoid cache?
@@ -954,7 +978,7 @@ class iTunesSource(GenericSource):
                 searchResultsByType.get('song', []))
         return interleaveResultsByRelevance(searchResultsByType.values())
 
-    def __scoreResults(self, iTunesType, resolverObjects):
+    def __scoreResults(self, iTunesType, resolverObjects, queryText):
         # We weight down album and artist and rely on the augmentation to bring them back up. This is because otherwise
         # we will always interleave artists with songs -- you'll never get a query where artists don't feature
         # prominently -- and that doesn't make sense.
@@ -964,11 +988,19 @@ class iTunesSource(GenericSource):
         iTunesTypesToWeights = {
             'album' : 0.5,
             'musicArtist' : 0.8,
-            'movie' : 0.5,
-            'tvShow' : 0.5,
             # Having iTunes book results is good for enrichment, and in case Amazon doesn't return results or something,
-            # but we really don't want it having much of an impact on ranking.
-            'ebook': 0.1,
+            # but we really don't want it having much of an impact on ranking, since iTunes only has
+            # ebooks, so any book without ebook version will be at a huge disadvantage
+            'ebook': 0.5,
+        }
+
+        # TODO: Refactoring is needed here.
+        iTunesTypesToScoreAdjustments = {
+            'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch),
+            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
+            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
+            'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
+            'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch)
         }
 
         if iTunesType in iTunesTypesToWeights:
@@ -976,6 +1008,10 @@ class iTunesSource(GenericSource):
                 sourceScore=iTunesTypesToWeights[iTunesType])
         else:
             searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects)
+
+        for adjustmentFn in iTunesTypesToScoreAdjustments.get(iTunesType, ()):
+            for searchResult in searchResults:
+                adjustmentFn(searchResult, queryText)
 
         # Artists without amg IDs get scored down.
         if iTunesType == 'musicArtist':

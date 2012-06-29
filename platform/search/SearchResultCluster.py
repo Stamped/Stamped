@@ -12,8 +12,10 @@ import re
 from utils import indentText
 from libs.LRUCache import lru_cache
 from resolve.Resolver import *
+from resolve.TitleUtils import cleanBookTitle, tokenizeString
 from search.SearchResult import SearchResult
 from search import ScoringUtils
+from DataQualityUtils import *
 
 @lru_cache()
 def cached_simplify(string):
@@ -29,6 +31,7 @@ def cached_artist_simplify(artist_name):
 
 @lru_cache()
 def cached_album_simplify(album_name):
+    album_name = re.compile('[ (\[:,-]+EP[)\]:, -]*$').sub(' ', album_name)
     return albumSimplify(album_name)
 
 @lru_cache()
@@ -239,23 +242,29 @@ class AlbumSearchResultCluster(SearchResultCluster):
         """
         Album comparison is easy -- just album name and artist name.
         """
-        album1_name_simple = cached_album_simplify(album1.name)
-        album2_name_simple = cached_album_simplify(album2.name)
-        album_name_sim = cached_string_comparison(album1_name_simple, album2_name_simple)
-        if album_name_sim <= 0.9:
+        raw_name_similarity = cached_string_comparison(album1.name, album2.name)
+        simple_name_similarity = cached_string_comparison(cached_album_simplify(album1.name),
+            cached_album_simplify(album2.name))
+        album_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
+        if album_name_sim <= 0.8:
             return CompareResult.unknown()
-        # TODO: Handle case with multiple artists? Does this come up?
+                # TODO: Handle case with multiple artists? Does this come up?
 
         try:
-            artist1_name_simple = cached_artist_simplify(album1.artists[0]['name'])
-            artist2_name_simple = cached_artist_simplify(album2.artists[0]['name'])
+            artist1_name = album1.artists[0]['name']
+            artist2_name = album2.artists[0]['name']
+            raw_artist_similarity = cached_string_comparison(artist1_name, artist2_name)
+            simple_artist_similarity = cached_string_comparison(cached_artist_simplify(artist1_name),
+                                                                cached_artist_simplify(artist2_name))
+            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
+            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
+                artist_name_sim = max(artist_name_sim, 0.9)
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
             # 'Various Artists' or whatever.
             return CompareResult.unknown()
 
-        artist_name_sim = cached_string_comparison(artist1_name_simple, artist2_name_simple)
-        if artist_name_sim <= 0.9:
+        if artist_name_sim <= 0.8:
             return CompareResult.unknown()
         score = album_name_sim * album_name_sim * artist_name_sim
         return CompareResult.match(score)
@@ -267,23 +276,29 @@ class TrackSearchResultCluster(SearchResultCluster):
         """
         Track comparison is easy -- just track name and artist name.
         """
-        track1_name_simple = cached_track_simplify(track1.name)
-        track2_name_simple = cached_track_simplify(track2.name)
-        track_name_sim = cached_string_comparison(track1_name_simple, track2_name_simple)
-        if track_name_sim <= 0.9:
+        raw_name_similarity = cached_string_comparison(track1.name, track2.name)
+        simple_name_similarity = cached_string_comparison(cached_track_simplify(track1.name),
+                                                          cached_track_simplify(track2.name))
+        track_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
+        if track_name_sim <= 0.8:
             return CompareResult.unknown()
         # TODO: Handle case with multiple artists? Does this come up?
 
         try:
-            artist1_name_simple = cached_artist_simplify(track1.artists[0]['name'])
-            artist2_name_simple = cached_artist_simplify(track2.artists[0]['name'])
+            artist1_name = track1.artists[0]['name']
+            artist2_name = track2.artists[0]['name']
+            raw_artist_similarity = cached_string_comparison(artist1_name, artist2_name)
+            simple_artist_similarity = cached_string_comparison(cached_artist_simplify(artist1_name),
+                                                                cached_artist_simplify(artist2_name))
+            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
+            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
+                artist_name_sim = max(artist_name_sim, 0.9)
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
             # 'Various Artists' or whatever.
             return CompareResult.unknown()
 
-        artist_name_sim = cached_string_comparison(artist1_name_simple, artist2_name_simple)
-        if artist_name_sim <= 0.9:
+        if artist_name_sim <= 0.8:
             return CompareResult.unknown()
         score = track_name_sim * artist_name_sim
         return CompareResult.match(score)
@@ -291,68 +306,13 @@ class TrackSearchResultCluster(SearchResultCluster):
 
 class PlaceSearchResultCluster(SearchResultCluster):
     @classmethod
-    def get_data_richness_score(cls, place):
-        """
-        Returns a score indicating how much information the ResolverPlace argument place contains that we can use for
-        clustering purposes.
-        """
-        score = 0
-        if place.coordinates:
-            # 5 points for lat/lng
-            score += 5
-        if place.address or place.address_string:
-            # 5 points for presence of any address info at all.
-            score += 2
-        if cls._try_to_get_street_address(place):
-            # 2 points if we have a street name.
-            score += 2
-            (number, name) = cls._split_street_address(cls._try_to_get_street_address(place))
-            if number:
-                # 2 points if we have a street number.
-                score += 2
-        return score
-
-    STREET_NUMBER_RE = re.compile('(^|\s)\d+($|[\s.,])')
-    NONCRITICAL_CHARS = re.compile('[^a-zA-Z0-9 ]')
-    @classmethod
-    def _try_to_get_street_address(cls, place):
-        """
-        Given a place, attempts to return the street address only (# and street name) as a string.
-        """
-        # First try to retrieve it from structured data.
-        address = place.address
-        # TODO: Is this the right name?
-        if address and 'street' in address:
-            return address['street']
-
-        # Next, look in the address string. Peel off the first segment of it and try to determine if it's a street
-        # address. A little hacky.
-        address_string = place.address_string
-        if not address_string:
-            return None
-
-        first_term = address_string.split(',')[0]
-
-        # If there's a number in it, it's not a city. It's likely a street address. In the off-chance it's something
-        # like a P.O. box we're not really in trouble -- this is used for comparisons, and the real danger is returning
-        # something that too many things will have in common, like a city name.
-        if cls.STREET_NUMBER_RE.search(first_term):
-            return first_term
-        first_term_simplified = first_term.lower().strip()
-        first_term_simplified = cls.NONCRITICAL_CHARS.sub(' ', first_term_simplified)
-        first_term_words = first_term_simplified.split()
-        street_address_terms = ('street', 'st', 'road', 'rd', 'avenue', 'ave', 'highway', 'hwy', 'apt', 'suite', 'ste')
-        if any(term in first_term_words for term in street_address_terms):
-            return first_term
-        return None
-
-    @classmethod
     def _simplify_address(cls, address_string):
         # TODO: Share somewhere common with resolve/etc.!
         address_string = cached_simplify(address_string)
         mappings = { 'rd': 'road',
                      'st': 'street',
                      'ste': 'suite',
+                     'ave': 'avenue',
                      'apt': 'apartment',
                      'hwy': 'highway',
                      'rte': 'route',
@@ -371,66 +331,88 @@ class PlaceSearchResultCluster(SearchResultCluster):
         return ' '.join(address_words)
 
     @classmethod
-    def _split_street_address(cls, street_address):
-        """
-        Splits a street address into number/name components and returns them in a tuple.
-        """
-        words = street_address.split()
-        if len(words) <= 1 or not words[0].isdigit():
-            return (None, street_address)
-        return (words[0], ' '.join(words[1:]))
-
-    @classmethod
     def _compare_proxies(cls, place1, place2):
-        place1_name = cached_simplify(place1.name)
-        place2_name = cached_simplify(place2.name)
-        name_similarity = cached_string_comparison(place1_name, place2_name)
+        #print "COMPARING PLACES:", place1.name, "--", tryToGetStreetAddressFromPlace(place1), "--", place1.key, \
+        #      "       AND    ", place2.name, "--", tryToGetStreetAddressFromPlace(place2), "--", place2.key
 
-        #print 'COMPARING', place1.name, cls._try_to_get_street_address(place1), "    TO   ", place2.name, cls._try_to_get_street_address(place2)
+        raw_name_similarity = cached_string_comparison(place1.name, place2.name)
+        simple_name_similarity = cached_string_comparison(cached_simplify(place1.name),
+                                                          cached_simplify(place2.name))
+        name_similarity = max(raw_name_similarity, simple_name_similarity - 0.15)
+        if place1.name.startswith(place2.name) or place2.name.startswith(place1.name):
+            name_similarity = max(name_similarity, 0.9)
+
+        #print "NAME SIM IS", name_similarity
 
         if name_similarity < 0.5:
-            return CompareResult.unknown()
-        similarity_score = name_similarity - 0.5
-        if place1.name == place2.name:
-            # Boost for being identical pre-simplification.
-            similarity_score += 0.1
+            return CompareResult.definitely_not_match()
 
         compared_locations = False
+        location_similarity = 0.0
 
         if place1.coordinates and place2.coordinates:
             distance_in_km = ScoringUtils.geoDistance(place1.coordinates, place2.coordinates)
             if distance_in_km > 10:
-                # print "CRAPPING OUT"
+                #print "CRAPPING OUT"
                 return CompareResult.unknown()
 
             # Min of 0.01m away.
             distance_in_km = max(distance_in_km, 0.01)
 
-            # .08 if 1km apart, .35 if 0.1km, 0.622 if 0.01km.
-            similarity_score += math.log(1.0 / distance_in_km, 5000)
+            # 0 if 1km apart, .27 if 0.1km, 0.54 if 0.01km.
+            location_similarity = math.log(1.0 / distance_in_km, 5000)
+            #print "COORD-BASED LOCATION SIM IS", location_similarity
             compared_locations = True
 
-        if similarity_score > 0.9:
+        state1 = tryToGetStateFromPlace(place1)
+        state2 = tryToGetStateFromPlace(place2)
+        if state1 and state2 and state1 != state2:
+            compared_locations = True
+            #print "DROPPING 0.3 for STATE"
+            location_similarity -= 0.4
+
+        zip1 = tryToGetPostalCodeFromPlace(place1)
+        zip2 = tryToGetPostalCodeFromPlace(place2)
+        if zip1 and zip2:
+            compared_locations = True
+            if int(zip1 / 1000) != int(zip2 / 1000):
+                location_similarity -= 0.4
+                #print "DROPPING 0.4 for ZIP"
+            elif zip1 == zip2:
+                location_similarity += 0.1
+
+        if compared_locations and name_similarity + location_similarity > 0.9:
+            #print "HOT DAMN! QUITTIN EARLY."
             # If we think these two businesses are extremely likely to be the same based on name and latlng, exit early.
             # The reason for this is that sometimes a business will have two addresses if it's on a corner or has two
             # entrances. We'll tank it in the address comparison. Exiting early makes sure that, when the latlngs and
             # names are close enough, we don't second-guess it because of an address issue.
-            # print "Matching after lat-lng with sim score", similarity_score
-            return CompareResult.match(similarity_score)
+            # #print "Matching after lat-lng with sim score", similarity_score
+            return CompareResult.match(name_similarity + location_similarity)
+
+        # TODO: Should really just get parsed-out map in one call since it's repeating same regexp matches over and
+        # over again.
+        locality1 = tryToGetLocalityFromPlace(place1)
+        locality2 = tryToGetLocalityFromPlace(place2)
+        if locality1 and locality2:
+            compared_locations = True
+            if cached_string_comparison(cached_simplify(locality1), cached_simplify(locality2)) != 1:
+                #print "DROPPING 0.3 for LOCALITY"
+                location_similarity -= 0.3
 
         # This would probably be good enough, except that Google Places national/autocomplete results don't have
         # latitude and longitude; they only have address strings. And other things don't have full address string; they
         # just have addresses. Ugh.
 
-        street_address1 = cls._try_to_get_street_address(place1)
-        street_address2 = cls._try_to_get_street_address(place2)
+        street_address1 = tryToGetStreetAddressFromPlace(place1)
+        street_address2 = tryToGetStreetAddressFromPlace(place2)
         if street_address1 and street_address2:
             # TODO: Is cached_simplify really what we want here for the street addresses?
             street_address1 = cls._simplify_address(street_address1)
             street_address2 = cls._simplify_address(street_address2)
 
-            (street_number1, street_name1) = cls._split_street_address(street_address1)
-            (street_number2, street_name2) = cls._split_street_address(street_address2)
+            (street_number1, street_name1) = tryToSplitStreetAddress(street_address1)
+            (street_number2, street_name2) = tryToSplitStreetAddress(street_address2)
             if street_number2 and not street_number1:
                 street_address2 = street_name2
             elif street_number1 and not street_number2:
@@ -439,23 +421,26 @@ class PlaceSearchResultCluster(SearchResultCluster):
                 # Street # differences up until 5 are actually positive signals. But street # differences past that
                 # point are strongly negative; a difference of 100 is a penalty of 0.65.
                 if int(street_number1) == int(street_number2):
-                    similarity_score += 0.5
+                    location_similarity += 0.4
                 else:
-                    # print "Deducting for street #s:", math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
-                    similarity_score -= math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
-                    # print "Score is now", similarity_score
+                    # #print "Deducting for street #s:", math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
+                    location_similarity -= math.log(abs(int(street_number1) - int(street_number2)) / 5.0, 100)
+                    # #print "Score is now", similarity_score
                 # We then go on to do the full address string similarity, which is a bit duplicative. TODO: There might
                 # be an issue here, because we're double-counting street # similarities, where things on two different
                 # streets with the same street # and short string names get counted as the same. It seems like a rare
                 # case, though.
 
-            # print "COMPARING", street_address1, "TO", street_address2
+            #print "COMPARING", street_address1, "TO", street_address2
             street_address_similarity = cached_string_comparison(street_address1, street_address2)
+            if ((street_address1 in street_address2 and set(street_address1.split()) < set(street_address2.split())) or
+                (street_address2 in street_address1 and set(street_address2.split()) < set(street_address1.split()))):
+                street_address_similarity = max(street_address_similarity, 0.9)
             # If street addresses are significantly different, we totally tank the comparison. If they're identical,
-            # it's a boost of 0.6.
-            #print "BOOSTING BY ", ((street_address_similarity - 0.7) * 2), "FOR STREET ADDRESS"
-            similarity_score += (street_address_similarity - 0.7) * 2
-            #print "SCORE IS NOW", similarity_score
+            # it's a boost of 0.4.
+            #print "STREET ADDRESS SIM IS", street_address_similarity
+            location_similarity += (street_address_similarity - 0.8) * 2
+            #print "SCORE IS NOW", name_similarity + location_similarity
             compared_locations = True
 
         if not compared_locations and place1.address_string and place2.address_string:
@@ -468,16 +453,18 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
             # Completely tanks similarity for different address strings, max boost of 0.6 for identical. TODO: I might
             # want to be even stricter here.
-            similarity_score += (address_string_similarity - 0.7) * 2
+            location_similarity += (address_string_similarity - 0.7) * 2
 
         # TODO: The big case we're not catching yet is duplicates where one source knows the city and street and the
         # other just knows the city. This isn't always feasible because half of Google results lack structured address
         # data but might be worth doing for the other half.
 
-        if similarity_score > 0.75:
+        similarity_score = location_similarity + name_similarity
+        #print "FINAL TOTAL SIM IS", similarity_score
+        if similarity_score > 0.9:
             #print "MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED WITH SCORE", similarity_score
             return CompareResult.match(similarity_score)
-        elif similarity_score < 0.25:
+        elif similarity_score < 0.3:
             return CompareResult.definitely_not_match()
         else:
             return CompareResult.unknown()
@@ -485,15 +472,23 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
 class BookSearchResultCluster(SearchResultCluster):
     SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
+    COMMA_SUBTITLE_RE = re.compile('(\w)\s*,\s*\w+.*$')
     @classmethod
     def _strip_subtitle(cls, title):
         without_subtitle = cls.SUBTITLE_RE.sub('\\1', title)
-        if len(without_subtitle) > 5:
+        if without_subtitle != title and len(without_subtitle) > 3:
             return without_subtitle
+
+        # Sometimes a comma is used for subtitles, but we want to be a lot more conservative with
+        # them. So we will only split it if there is only one comma.
+        if title.count(',') == 1 and title.find(',') >= 3:
+            return cls.COMMA_SUBTITLE_RE.sub('\\1', title)
         return title
 
     @classmethod
     def _compare_titles(cls, title1, title2):
+        title1 = cleanBookTitle(title1)
+        title2 = cleanBookTitle(title2)
         book1_name_simple = cached_simplify(title1)
         book2_name_simple = cached_simplify(title2)
         if book1_name_simple == book2_name_simple:
@@ -512,18 +507,31 @@ class BookSearchResultCluster(SearchResultCluster):
         return similarity
 
     @classmethod
+    def _compare_authors(cls, author1, author2):
+        author1_name_simple = cached_simplify(author1)
+        author2_name_simple = cached_simplify(author2)
+        author1_tokens = set(tokenizeString(author1_name_simple))
+        author2_tokens = set(tokenizeString(author2_name_simple))
+        if author1_tokens == author2_tokens:
+            return 1.0
+        # This makes "Todd Gardner" and "Todd Manci Gardner" match.
+        if author1_tokens > author2_tokens or author2_tokens > author1_tokens:
+            return 0.9
+        return cached_string_comparison(author1_name_simple, author2_name_simple)
+
+    @classmethod
     def _compare_proxies(cls, book1, book2):
         """
         """
         title_similarity = cls._compare_titles(book1.name, book2.name)
+        if book1.isbn and book1.isbn == book2.isbn and title_similarity > 0.5:
+            return CompareResult.match(title_similarity + 1)
         if title_similarity < 0.75:
             return CompareResult.unknown()
 
         try:
-            author1_name_simple = cached_simplify(book1.authors[0]['name'])
-            author2_name_simple = cached_simplify(book2.authors[0]['name'])
             # TODO: Look for multiple authors, try to match intelligently.
-            author_similarity = cached_string_comparison(author1_name_simple, author2_name_simple)
+            author_similarity = cls._compare_authors(book1.authors[0]['name'], book2.authors[0]['name'])
             if title_similarity + author_similarity > 1.7:
                 return CompareResult.match(title_similarity + author_similarity)
         except Exception:
@@ -546,13 +554,28 @@ class TvSearchResultCluster(SearchResultCluster):
         """
         The tricky thing about comparing TV shows is that they're often elements for different seasons of the show,
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
-        the meat of the comparison, and if title isn't decisive we hope for some clue like publisher, etc.
+        the meat of the comparison.
         """
-        # TODO: THIS NEEDS WORK. Related to the ongoing AmazonSource work.
-        show1_name_simple = cached_movie_simplify(tv_show1.name)
-        show2_name_simple = cached_movie_simplify(tv_show2.name)
-        if cached_string_comparison(show1_name_simple, show2_name_simple) > 0.95:
-            return CompareResult.match(1)
+        raw_name_similarity = cached_string_comparison(tv_show1.name, tv_show2.name)
+        simple_name_similarity = cached_string_comparison(cached_movie_simplify(tv_show1.name),
+                                                          cached_movie_simplify(tv_show2.name))
+        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+
+        if tv_show1.release_date and tv_show2.release_date:
+            time_difference = abs(tv_show1.release_date - tv_show2.release_date)
+            if time_difference > datetime.timedelta(365 * 10):
+                sim_score -= 0.2
+            elif time_difference < datetime.timedelta(365 * 5):
+                sim_score += 0.075
+            elif time_difference < datetime.timedelta(365 * 2):
+                sim_score += 0.1
+            elif time_difference < datetime.timedelta(365 * 1):
+                sim_score += 0.15
+
+        if simple_name_similarity > 0.85 and sim_score >= 0.9:
+            return CompareResult.match(sim_score)
+        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+            return CompareResult.definitely_not_match()
         return CompareResult.unknown()
 
 
@@ -561,39 +584,48 @@ class MovieSearchResultCluster(SearchResultCluster):
     def _compare_proxies(cls, movie1, movie2):
         # Our task here is a bit harder than normal. There are often remakes, so name is not decisive. There are often
         # digital re-masterings and re-releases, so dates are not decisive. Cast data is spotty.
-        #
-        # TODO: Try to use MPAA rating, especially if we can get it from TMDB.
+        # We get reliable release dates from TMDB and TheTVDB, but not from iTunes, so those are generally unhelpful.
 
-        movie1_name_simple = cached_movie_simplify(movie1.name)
-        movie2_name_simple = cached_movie_simplify(movie2.name)
-        name_similarity = cached_string_comparison(movie1_name_simple, movie2_name_simple)
 
-        # TODO: We almost certainly want to weaken this once we have batch processes to really see the effects of
-        # changes in the other pieces of the comparison.
-        if movie1_name_simple != movie2_name_simple:
-            return CompareResult.unknown()
-
-        score = name_similarity - 0.9
-
-        movie1_length, movie2_length = None, None
-        if movie1.length and movie2.length:
-            if movie1.length == movie2.length:
-                score += 0.3
-            elif abs(movie1.length - movie2.length) <= 60:
-                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
-                # then converted back.
-                score += 0.1
+        raw_name_similarity = cached_string_comparison(movie1.name, movie2.name)
+        simple_name_similarity = cached_string_comparison(cached_movie_simplify(movie1.name),
+                                                          cached_movie_simplify(movie2.name))
+        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
 
         if movie1.release_date and movie2.release_date:
             time_difference = abs(movie1.release_date - movie2.release_date)
-            if time_difference < datetime.timedelta(7):
-                score += 0.4
-            elif time_difference < datetime.timedelta(30):
-                score += 0.3
+            if time_difference > datetime.timedelta(750):
+                sim_score -= 0.2
             elif time_difference < datetime.timedelta(365):
-                # Within 1 year + exact title match = cluster.
-                score += 0.2
+                sim_score += 0.05
+            elif time_difference < datetime.timedelta(30):
+                sim_score += 0.1
 
+        if movie1.length and movie2.length:
+            if movie1.length == movie2.length:
+                sim_score += 0.1
+            if abs(movie1.length - movie2.length) < 60:
+                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
+                # then converted back.
+                sim_score += 0.05
+
+        try:
+            movie1_director = cached_simplify(movie1.directors[0]['name'])
+            movie2_director = cached_simplify(movie2.directors[0]['name'])
+            if movie1_director == movie2_director:
+                sim_score += 0.2
+            else:
+                sim_score -= 0.2
+        except IndexError:
+            pass
+
+        if simple_name_similarity > 0.9 and sim_score > 0.95:
+            return CompareResult.match(sim_score)
+        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+            return CompareResult.definitely_not_match()
+        return CompareResult.unknown()
+
+        """
         cast1_names = set([cached_simplify(actor['name']) for actor in movie1.cast])
         cast2_names = set([cached_simplify(actor['name']) for actor in movie2.cast])
         if cast1_names and cast2_names:
@@ -631,3 +663,4 @@ class MovieSearchResultCluster(SearchResultCluster):
             return CompareResult.match(score)
         else:
             return CompareResult.unknown()
+        """

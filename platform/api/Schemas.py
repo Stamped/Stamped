@@ -320,6 +320,7 @@ class LinkedAccounts(Schema):
         cls.addNestedProperty('twitter',                    LinkedAccount)
         cls.addNestedProperty('facebook',                   LinkedAccount)
         cls.addNestedProperty('netflix',                    LinkedAccount)
+        cls.addNestedProperty('rdio',                       LinkedAccount)
 
 class Account(Schema):
     @classmethod

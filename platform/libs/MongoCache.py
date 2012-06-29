@@ -83,7 +83,7 @@ def serializeArgument(arg):
     elif isinstance(arg, dict):
         # Technically this means you can have collisions -- for instance, the call foo({1: 2, 4: 3})
         # would collide with the call foo([(1, 2), (4, 3)]) -- but whatever.
-        return ((serializeArgument(key), serializeArgument(value)) for key, value in arg.items())
+        return tuple((serializeArgument(key), serializeArgument(value)) for key, value in arg.items())
     # We don't expect to get here; assertCallIsSerializable should have found the problem first.
     raise SerializationError('Unexpectedly failed to serialize arg: (%s)' % str(arg))
 
@@ -155,6 +155,7 @@ def hashFunctionCall(fnName, args, kwargs):
     else:
         keys, values = zip(*kwargs.items())
         kwargs = tuple(zip(map(serializeArgument, keys), map(serializeArgument, values)))
+
     return hash((fnName, args, kwargs))
 
 

@@ -36,7 +36,7 @@ lookup.json         Return a list of objects based on a comma-separated list of 
 collection.json     Return a list of objects based on a specified scope. Takes a scope param defining the collection
                     (e.g. "inbox") as well as additional filtering. Implies that a subset of data will be returned.
 
-search.json         Return a list of objects based on a sepcified scope and a text query. Typically builds upon the 
+search.json         Return a list of objects based on a specified scope and a text query. Typically builds upon the
                     collection endpoint to overlay search on top of other filtering.
 """
 
@@ -68,10 +68,10 @@ urlpatterns = patterns('',
     (r'v0/account/linked/show.json',                        'v0.functions.linked.show'),
     (r'v0/account/linked/add.json',                         'v0.functions.linked.add'),
     (r'v0/account/linked/remove.json',                      'v0.functions.linked.remove'),
-    (r'v0/account/linked/update_share_settings.json',       'v0.functions.linked.updateShareSettings'),
-    (r'v0/account/linked/show_share_settings.json',         'v0.functions.linked.showShareSettings'),
     (r'v0/account/linked/twitter/add.json',                 'v0.functions.linked.add'),
     (r'v0/account/linked/facebook/add.json',                'v0.functions.linked.add'),
+    (r'v0/account/linked/facebook/settings/update.json',    'v0.functions.linked.updateSettings', {'service_name' : 'facebook'}),
+    (r'v0/account/linked/facebook/settings/show.json',      'v0.functions.linked.showSettings', {'service_name' : 'facebook'}),
     (r'v0/account/linked/netflix/add.json',                 'v0.functions.linked.add'),
 
     # TODO: REMOVE FROM PROD
@@ -130,6 +130,7 @@ urlpatterns = patterns('',
 
     ### STAMPS
     (r'v0/stamps/create.json',                              'v0.functions.stamps.create'),
+    (r'v0/stamps/share/facebook.json',                      'v0.functions.stamps.share', { 'service_name' : 'facebook' }),
     (r'v0/stamps/update.json',                              'v0.functions.stamps.update'),
     (r'v0/stamps/show.json',                                'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json',                              'v0.functions.stamps.remove'),

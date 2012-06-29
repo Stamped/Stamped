@@ -2,6 +2,7 @@
 
 <meta property="fb:app_id"                  content="297022226980395"/>
 <meta property="og:site_name"               content="Stamped"/>
+<meta property="og:url"                     content="{{URL}}"/>
 
 {% if sdetail %}
     <meta property="og:title"               content="{{entity.title}}"/>
@@ -22,7 +23,7 @@
                 {% if img2 %}
                     <meta property="og:image"   content="{{img2}}"/>
                 {% else %}
-                    <meta property="og:image"   content="{{ STATIC_URL }}img/stamped-logo.png"/>
+                    <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped-logo.png"/>
                 {% endif %}
             {% endwith %}
         {% endif %}
@@ -77,17 +78,22 @@
                 <meta property="stampedapp:{{item.name|lower}}"  content="{{item.value}}"/>
             {% endif %}
         {% endfor %}
-    {% else %}{% if entity.category == "other" %}
+    {% else %}
         {% if entity.subcategory == "app" %}
             <meta property="og:type"        content="stampedapp:app"/>
         {% else %}
             <meta property="og:type"        content="stampedapp:other"/>
         {% endif %}
-    {% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+    {% endif %}{% endif %}{% endif %}{% endif %}
 {% else %}
-    <meta property="og:type"                content="stampedap:user"/>
-    <meta property="og:image"               content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
-    <meta property="og:title"               content="Stamped - {{user.screen_name}}"/>
+    <meta property="og:type"                content="stampedapp:user"/>
+    <meta property="og:title"               content="{{user.screen_name}}"/>
+    
+    {% if user.image_url == "http://static.stamped.com/users/default.jpg" %}
+        <meta property="og:image"           content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
+    {% else %}
+        <meta property="og:image"           content="{{user.image_url}}"/>
+    {% endif %}
     
     <meta property="stampedapp:user_id"     content="{{user.user_id}}"/>
     <meta property="stampedapp:screen_name" content="{{user.screen_name}}"/>

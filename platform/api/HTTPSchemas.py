@@ -39,10 +39,19 @@ mention_re      = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z
 url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
 def generateStampUrl(stamp):
-    url_title = encodeStampTitle(stamp.entity.title)
-
-    return 'http://www.stamped.com/%s/stamps/%s/%s' % \
-           (stamp.user.screen_name, stamp.stats.stamp_num, url_title)
+    #url_title = encodeStampTitle(stamp.entity.title)
+    
+    # NOTE (travis): as of June 2012, we've shortened our sdetail URLs.
+    # Also note that the v1 URL format will continue to be supported by the web client.
+    # Going forward (after v2 launch), we'd like to support both verbose and shortened 
+    # versions, with the shortened version being an actual hash instead of the short-ish 
+    # version we're using today.
+    
+    # v1: http://www.stamped.com/{{screen_name}}/stamps/{{stamp_num}}/{{entity_title}}
+    # v2: http://www.stamped.com/{{screen_name}}/s/{{stamp_num}}
+    
+    # TODO: remove the implicit http:// prefix here?
+    return 'http://www.stamped.com/%s/s/%s' % (stamp.user.screen_name, stamp.stats.stamp_num)
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -603,6 +612,7 @@ class HTTPLinkedAccounts(Schema):
         cls.addNestedProperty('twitter',                    HTTPLinkedAccount)
         cls.addNestedProperty('facebook',                   HTTPLinkedAccount)
         cls.addNestedProperty('netflix',                    HTTPLinkedAccount)
+        cls.addNestedProperty('rdio',                       HTTPLinkedAccount)
 
     def importLinkedAccounts(self, linked):
         if linked.twitter is not None:
@@ -611,6 +621,8 @@ class HTTPLinkedAccounts(Schema):
             self.facebook = HTTPLinkedAccount().importLinkedAccount(linked.facebook)
         if linked.netflix is not None:
             self.netflix = HTTPLinkedAccount().importLinkedAccount(linked.netflix)
+        if linked.rdio is not None:
+            self.rdio = HTTPLinkedAccount().importLinkedAccount(linked.rdio)
         return self
 
     def exportLinkedAccounts(self):
@@ -622,7 +634,8 @@ class HTTPLinkedAccounts(Schema):
             schema.facebook = LinkedAccount().dataImport(self.facebook.dataExport(), overflow=True)
         if self.twitter is not None:
             schema.netflix = LinkedAccount().dataImport(self.netflix.dataExport(), overflow=True)
-
+        if self.rdio is not None:
+            schema.rdio = LinkedAccount().dataImport(self.rdio.dataExport(), overflow=True)
         return schema 
 
 class HTTPAvailableLinkedAccounts(Schema):
@@ -2603,6 +2616,13 @@ class HTTPStampNew(Schema):
         cls.addProperty('search_id',                        basestring)
         cls.addProperty('blurb',                            basestring)
         cls.addProperty('credits',                          basestring) # comma-separated screen names
+        cls.addProperty('temp_image_url',                   basestring)
+
+class HTTPStampShare(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('service_name',                     basestring)
         cls.addProperty('temp_image_url',                   basestring)
 
 class HTTPStampEdit(Schema):
