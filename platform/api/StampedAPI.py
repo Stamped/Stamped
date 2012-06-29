@@ -4507,13 +4507,13 @@ class StampedAPI(AStampedAPI):
             if not stubList:
                 return False
 
-            resolveTasks = [geventPool.spawn(self._resolve, stub, False) for stub in stubList]
+            resolveTasks = [geventPool.spawn(self._resolveStub, stub, False) for stub in stubList]
             modified = False
             visitedStubs = []
             for stub, task in zip(stubList, resolveTasks):
                 resolvedFull = task.get()
                 if resolvedFull is None:
-                    logs.warning('stub resolution failed: %s, %s' % (stub, e))
+                    logs.warning('stub resolution failed: %s' % stub)
                     continue
 
                 merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
