@@ -166,6 +166,7 @@
         if (action) {
             STActionContext* context = [STActionContext context];
             context.entity = self.entityDetail;
+            context.entityDetail = self.entityDetail;
             if ([[STActionManager sharedActionManager] canHandleAction:action withContext:context]) {
                 UIView* buttonViews[2];
                 CGRect buttonFrame = CGRectMake(0, 0, 60, 60);

@@ -203,8 +203,6 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     @lru_cache(maxsize=64)
     @cachedFn()
     def getSearchResultsByLatLng(self, latLng, params=None):
-        print 'TEST LATLNG IS', latLng
-        print 'PARAMS IS', params
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
