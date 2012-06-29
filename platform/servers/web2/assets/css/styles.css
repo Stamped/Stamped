@@ -298,12 +298,12 @@ a.follow-button:active {
   position: relative;
   float: left;
   display: block;
-  width: 78px;
-  height: 78px;
+  width: 66px;
+  height: 66px;
 }
 .profile-image-medium-ish img {
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   border: 3px solid #ffffff;
   -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
