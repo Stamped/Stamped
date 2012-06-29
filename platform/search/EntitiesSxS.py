@@ -171,7 +171,9 @@ def writeCompareEntity(left, right, outputDir, filename):
 
 
 def extractLinkText(entity):
-    subtitle = entity[0].formatAddress() if isinstance(entity[0], PlaceEntity) else entity[0].subtitle
+    subtitle = entity[0].subtitle
+    if isinstance(entity[0], PlaceEntity) and entity[0].formatAddress():
+        subtitle = entity[0].formatAddress()
     return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, subtitle)
 
 

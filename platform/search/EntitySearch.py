@@ -375,7 +375,9 @@ def main():
     for result in results:
         print "\n\n"
         print "TITLE:", result.title
-        subtitle = result.formatAddress() if isinstance(result, PlaceEntity) else result.subtitle
+        subtitle = result.subtitle
+        if isinstance(result, PlaceEntity) and result.formatAddress():
+            subtitle = result.formatAddress()
         print "SUBTITLE", subtitle
         print result
 

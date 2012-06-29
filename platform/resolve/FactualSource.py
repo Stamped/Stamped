@@ -28,6 +28,7 @@ try:
     from gevent.pool                import Pool
     from api.Schemas                import TimesSchema, HoursSchema
     from search.ScoringUtils        import *
+    from search.DataQualityUtils    import *
 except:
     report()
     raise
@@ -326,7 +327,10 @@ class FactualSource(GenericSource):
         smoothRelevanceScores(local_results)
         smoothRelevanceScores(national_results)
 
-        return dedupeById(local_results + national_results)
+        jointResults = dedupeById(local_results + national_results)
+        for searchResult in jointResults:
+            augmentPlaceDataQualityOnBasicAttributePresence(searchResult)
+        return jointResults
 
 
     def enrichEntity(self, entity, controller, decorations, timestamps):
