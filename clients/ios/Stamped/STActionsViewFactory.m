@@ -184,7 +184,6 @@
             context.entityDetail = detail;
             if ([STConfiguration flag:STActionManagerShowAllActionsKey] || 
                 [[STActionManager sharedActionManager] canHandleAction:actualAction withContext:context]) {
-                
                 CGRect frame = CGRectMake(cell_padding_w, 0, cell_width, cell_height);
                 ActionItemView* actionView = [[ActionItemView alloc] initWithAction:action andFrame:frame delegate:view]; 
                 actionView.entityDetail = detail;

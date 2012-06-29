@@ -14,6 +14,7 @@
 #import "STAppDelegate.h"
 #import "STDefaultTableCell.h"
 #import "STNotificationsViewController.h"
+#import "STLinkedAccountsViewController.h"
 
 @interface STSettingsViewController ()
 
@@ -243,6 +244,10 @@
         if (indexPath.row == 0) {
             STEditProfileViewController *controller = [[[STEditProfileViewController alloc] init] autorelease];
             [Util pushController:controller modal:YES animated:YES];
+        }
+        else if (indexPath.row == 1) {
+            STLinkedAccountsViewController* controller = [[[STLinkedAccountsViewController alloc] init] autorelease];
+            [Util pushController:controller modal:NO animated:YES];
         }
         else if (indexPath.row == 2) {
             STNotificationsViewController* controller = [[[STNotificationsViewController alloc] init] autorelease];

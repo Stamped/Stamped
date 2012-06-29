@@ -18,6 +18,7 @@
 @synthesize user = _user;
 @synthesize completionBlock = _completionBlock;
 @synthesize creditedUsers = _creditedUsers;
+@synthesize playlistItem = _playlistItem;
 
 - (void)dealloc
 {
@@ -25,6 +26,7 @@
     [_stamp release];
     [_user release];
     [_completionBlock release];
+    [_playlistItem release];
     [_creditedUsers release];
     [super dealloc];
 }

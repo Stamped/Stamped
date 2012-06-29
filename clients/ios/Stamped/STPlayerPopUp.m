@@ -14,6 +14,7 @@
 #import "Util.h"
 #import "STImageCache.h"
 #import "STRippleBar.h"
+#import "STRdio.h"
 
 @interface STPlayerPopUpCell : UITableViewCell
 
@@ -59,7 +60,7 @@
         self.backgroundColor = [UIColor whiteColor];
         
         
-        _fullFooter = NO;
+        _fullFooter = NO;//![STRdio sharedRdio].loggedIn;
         
         CGFloat headerHeight = 66;
         CGFloat footerHeight;
@@ -80,7 +81,7 @@
         _headerView.layer.shadowOpacity = .2;
         
         
-        CGFloat contentWidth = 130;
+        CGFloat contentWidth = 110;
         UIFont* titleFont = [UIFont stampedTitleLightFontWithSize:24];
         _titleView = [[UILabel alloc] initWithFrame:CGRectMake(xOffset, 36 - titleFont.leading + 8.5, contentWidth, titleFont.lineHeight)];
         _titleView.font = titleFont;
@@ -141,15 +142,17 @@
         [_footerView addSubview:footerBar];
         
         if (_fullFooter) {
-            _editButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-            [_editButton addTarget:self action:@selector(toggleEdit:) forControlEvents:UIControlEventTouchUpInside];
-            [_editButton setImage:[UIImage imageNamed:@"menu_icon-settings"] forState:UIControlStateNormal];
-            _editButton.frame = CGRectMake(10, 10, 30, 30);
-            [_footerView addSubview:_editButton];
+            
             _footerView.backgroundColor = [UIColor whiteColor];
             _footerView.layer.shadowOffset = CGSizeMake(0, -2);
             _footerView.layer.shadowOpacity = .2;
             _footerView.layer.shadowColor = [UIColor blackColor].CGColor;
+            
+            //            _editButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+            //            [_editButton addTarget:self action:@selector(toggleEdit:) forControlEvents:UIControlEventTouchUpInside];
+            //            [_editButton setImage:[UIImage imageNamed:@"menu_icon-settings"] forState:UIControlStateNormal];
+            //            _editButton.frame = CGRectMake(10, 10, 30, 30);
+            //            [_footerView addSubview:_editButton];
         }
         else {
             _footerView.backgroundColor = [UIColor clearColor];
@@ -228,7 +231,7 @@
     [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithWhite:0 alpha:.5]];
 }
 
-+ (void)presentWithItems:(NSArray<STPlaylistItem>*)playlist clear:(BOOL)clear {
++ (void)presentWithItems:(NSArray<STPlaylistItem>*)playlist clear:(BOOL)clear startIndex:(NSInteger)index {
     STPlayer* player = [STPlayer sharedInstance];
     if (clear) {
         [player clear];
@@ -239,7 +242,7 @@
         [player addPlaylistItem:item atIndex:i];
     }
     if (player.itemCount > 0) {
-        [player seekToItemAtIndex:0];
+        [player seekToItemAtIndex:index];
         player.paused = NO;
     }
     [self present];
@@ -248,34 +251,38 @@
 
 - (void)update {
     [self.tableView reloadData];
-    id<STPlaylistItem> item = [self.player itemAtIndex:self.player.currentItemIndex];   
-    _titleView.text = item.name;
-    _subtitleView.text = item.subtitle;
-    id<STImage> bestImage = [Util bestImageFromImages:item.images forSize:_imageView.frame.size];
-    if (bestImage) {
-        void (^block)(UIImage* image) = ^(UIImage* image) {
-            self.imageView.image = image;
-        };
-        NSString* url = bestImage.url;
-        UIImage* cachedImage = [[STImageCache sharedInstance] cachedImageForImageURL:url];
-        if (cachedImage) {
-            block(cachedImage);
-        }
-        else {
-            [[STImageCache sharedInstance] imageForImageURL:url andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-                block(image); 
+    if (self.player.itemCount) {
+        id<STPlaylistItem> item = [self.player itemAtIndex:self.player.currentItemIndex];   
+        if (item) {
+            _titleView.text = item.name;
+            _subtitleView.text = item.subtitle;
+            id<STImage> bestImage = [Util bestImageFromImages:item.images forSize:_imageView.frame.size];
+            if (bestImage) {
+                void (^block)(UIImage* image) = ^(UIImage* image) {
+                    self.imageView.image = image;
+                };
+                NSString* url = bestImage.url;
+                UIImage* cachedImage = [[STImageCache sharedInstance] cachedImageForImageURL:url];
+                if (cachedImage) {
+                    block(cachedImage);
+                }
+                else {
+                    [[STImageCache sharedInstance] imageForImageURL:url andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                        block(image); 
+                    }];
+                }
+            }
+            else {
+                self.imageView.image = [UIImage imageNamed:@"TEMP_noImage"];
+            }
+            _pauseButton.selected = !self.player.paused;
+            [Util executeOnMainThread:^{
+                self.selectMask = YES;
+                [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.player.currentItemIndex inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
+                self.selectMask = NO;
             }];
         }
     }
-    else {
-        self.imageView.image = [UIImage imageNamed:@"TEMP_noImage"];
-    }
-    _pauseButton.selected = !self.player.paused;
-    [Util executeOnMainThread:^{
-        self.selectMask = YES;
-        [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.player.currentItemIndex inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
-        self.selectMask = NO;
-    }];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -287,7 +294,7 @@
 }
 
 - (BOOL)tableView:(UITableView *)tableview canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-	return YES;	
+    return YES;	
 }
 
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
