@@ -1123,27 +1123,22 @@ class AmazonSource(GenericSource):
         # I use dramatically less dropoff and a huge penalty for missing authors because I'm occasionally getting these
         # complete shit results that I want to drop off the bottom.
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
-        augmentScoreForTextRelevance(searchResults, queryText, lambda r: r.resolverObject.name, 2)
         self.__adjustScoresBySalesRank(searchResults)
         for searchResult in searchResults:
+            adjustBookRelevanceByQueryMatch(searchResult, queryText)
+            applyBookTitleDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
-                # TODO: Penalize other missing factors as well.
                 penaltyFactor = 0.2
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing author', penaltyFactor)
-            if not searchResult.resolverObject.isbn:
-                penaltyFactor = 0.7
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing isbn', penaltyFactor)
-            if not searchResult.resolverObject.publishers:
-                penaltyFactor = 0.4
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing publishers', penaltyFactor)
-            if not searchResult.resolverObject.release_date:
-                penaltyFactor = 0.8
-                searchResult.relevance *= penaltyFactor
-                searchResult.addRelevanceComponentDebugInfo('penalty factor for missing release date', penaltyFactor)
+                searchResult.dataQuality *= penaltyFactor
+                searchResult.addDataQualityComponentDebugInfo('penalty factor for missing author', penaltyFactor)
 
+            miscComponentsToCheck = ['isbn', 'publishers', 'release_date', 'length', 'sku_number', 'images']
+            componentsMissing = [c for c in miscComponentsToCheck if not getattr(searchResult.resolverObject, c)]
+            if componentsMissing:
+                penalty = 0.8 ** len(componentsMissing)
+                searchResult.dataQuality *= penalty
+                searchResult.addDataQualityComponentDebugInfo(
+                        'penalty factor for missing components: %s' % str(componentsMissing), penalty)
         return searchResults
 
     def __augmentAlbumResultsWithSongs(self, albums, tracks):
