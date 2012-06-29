@@ -238,7 +238,7 @@ class EntitySearch(object):
         # scores) but never included in the final result because we're not 100% that the data is good enough to show
         # users.
         filteredResults = [r for r in cluster.results if r.dataQuality > MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
-        # TODO PRELAUNCH: Resort cluster by data scoring, not relevancy/prominence.
+        filteredResults.sort(key=lambda r: r.dataQuality, reverse=True)
         entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
         for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.

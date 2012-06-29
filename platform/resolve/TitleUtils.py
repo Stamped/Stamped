@@ -245,24 +245,31 @@ BOOK_TITLE_REMOVAL_REGEXPS = (
     makeDelimitedSectionRe('classic'),
     makeDelimitedSectionRe('book'),
     makeDelimitedSectionRe('volume'),
+    makeDelimitedSectionRe('paperback'),
 )
 
 def cleanBookTitle(bookTitle):
     return applyRemovalRegexps(BOOK_TITLE_REMOVAL_REGEXPS, bookTitle)
 
+
+def _makeSingleTokenSuspiciousTest(token, weight=0.25):
+    return TitleDataQualityRegexpTest('\\b%s\\b' % token, '"%s" in title' % token, weight,
+            exceptionQueryRegexps=makeTokenRegexp(token))
+
 BOOK_TITLE_SUSPICIOUS_TESTS = (
     TitleDataQualityRegexpTest(r'\bbest of\b', '"best of" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('best')),
-    TitleDataQualityRegexpTest(r'\bbox(ed)? set\b', '"box set" in title', 0.4,
-        exceptionQueryRegexps=(makeTokenRegexp('box'), makeTokenRegexp('boxed'), makeTokenRegexp('set'))),
-    TitleDataQualityRegexpTest(r'\bbundle\b', '"bundle" in title', 0.25,
-        exceptionQueryRegexps=makeTokenRegexp('bundle')),
-    TitleDataQualityRegexpTest(r'\btrilogy\b', '"trilogy" in title', 0.25,
-        exceptionQueryRegexps=makeTokenRegexp('trilogy')),
     TitleDataQualityRegexpTest(r'\bbook\s+\d', '"book #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('book')),
     TitleDataQualityRegexpTest(r'\bvolume\s+\d', '"volume #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('volume')),
+    _makeSingleTokenSuspiciousTest('box'),
+    _makeSingleTokenSuspiciousTest('boxed'),
+    _makeSingleTokenSuspiciousTest('set'),
+    _makeSingleTokenSuspiciousTest('bundle'),
+    _makeSingleTokenSuspiciousTest('trilogy'),
+    _makeSingleTokenSuspiciousTest('collection'),
+    _makeSingleTokenSuspiciousTest('series'),
 )
 
 def applyBookTitleDataQualityTests(searchResult, searchQuery):
