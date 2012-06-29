@@ -29,6 +29,8 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'freedom by jonathon franzen',
                 'freedom jonathon franzen',
                 'freedom',
+                'jesus i never knew',
+                'little bee',
                 'lord of the flies',
                 'of mice and men',
                 'steve jobs biography',
@@ -38,17 +40,20 @@ class RunEvalQueries(AStampedFixtureTestCase):
                 'the girl who played with fire',
                 'the help',
                 'the immortal life of henrietta lacks',
+                'twilight',
                 'hamlet',
                 # series names rather than book names
-                'narnia',
-                'lord of the rings',
                 'berenstain bears',
+                'harry potter',
+                'lord of the rings',
+                'narnia',
                 # title hint + name
-                'moon heinlein',
                 'america baudrillard',
+                'bad luck trouble lee',
+                'c++ scott myers' # yeah i know it's misspelled, that's the point
+                'moon heinlein',
                 'ouroboros e.r. eddison',
                 'snow malfi',
-                'c++ scott myers' # yeah i know it's misspelled, that's the point
                 ]
         self.__runQueries('book', bookQueries)
 
