@@ -61,8 +61,7 @@ class SearchResultDeduper(object):
                     if comparison.is_definitely_not_match():
                         known_non_matches.add((cluster, secondary_match_cluster))
                         known_non_matches.add((secondary_match_cluster, cluster))
-                        # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK SXS AND ENABLE ME
-                        # unmerged_matches += 1
+                        unmerged_matches += 1
                     else:
                         cluster.grok(secondary_match_cluster)
                         del(clusters[clusters.index(secondary_match_cluster)])
