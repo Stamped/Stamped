@@ -102,6 +102,8 @@ def combineMatchingSections(matchingSections):
     For example, if the input is [(0, 3), (2, 4), (20, 2)], the first two blocks overlap, and will
     be combined to (0, 6). The final result would be 6 + 2 = 8.
     """
+    if not matchingSections:
+        return 0
     matchingSections.sort()
     collapsedBlocks = [matchingSections[0]]
     for i, n in matchingSections[1:]:
