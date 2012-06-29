@@ -50,11 +50,12 @@ TODO:
         * gzip components
         * configure ETags and cache expiration headers
         * ensure favicon.ico is optimized and cacheable
-        * address 301 redirect inefficiency for static assets
+        * address 301 / 304 redirect inefficiency for static assets
         * CSS:
             * http://css-tricks.com/efficiently-rendering-css/
             * https://developers.google.com/speed/docs/best-practices/rendering
             * optimize LESS compiled CSS to remove unnecessary / inefficient descendant selectors
+            * use more efficient id selectors where possible
         * remove unused PRELOAD templates from per-page <script> include
             * USED: stamp-map-item and social-feedback
     
@@ -68,6 +69,10 @@ TODO:
             * BETA - FIX INFINITE SCROLL
             * BETA - optimize infinite scroll
             * adaptive layout improvements
+                * fixes to .fixedwidth
+                * allow mode with n columns and enable gallery view for n>=3 or n==1
+                * fix stamp logo layer to be fixed to never be offscreen and clamped to be visible
+                * also clamp position of stamp-category-nav-bar
             * NOREPRO - fix glitch w/ hover state on entity stamp images in gallery shifting text
         * headers:
             * change profile header image and share widget to remain constant
