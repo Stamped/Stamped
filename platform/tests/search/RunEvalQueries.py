@@ -395,15 +395,15 @@ class RunEvalQueries(AStampedFixtureTestCase):
         ]
     @fixtureTest()
     def test_run_app_queries(self):
-        self.__runQueries([('app', APP_QUERIES)])
+        self.__runQueries([('app', self.APP_QUERIES)])
 
     @fixtureTest()
     def test_run_all_queries(self):
-        self.__runQueries([('music', MUSIC_QUERIES),
-                           ('film', FILM_QUERIES),
-                           ('book', BOOK_QUERIES),
-                           ('app', APP_QUERIES),
-                           ('place', PLACE_QUERIES)])
+        self.__runQueries([('music', self.MUSIC_QUERIES),
+                           ('film', self.FILM_QUERIES),
+                           ('book', self.BOOK_QUERIES),
+                           ('app', self.APP_QUERIES),
+                           ('place', self.PLACE_QUERIES)])
 
     def __runQueries(self, categoriesAndQuerySets):
         searcher = EntitySearch()
