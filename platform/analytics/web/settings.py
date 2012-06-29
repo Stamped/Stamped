@@ -16,10 +16,12 @@ ADMINS = (
 
 MANAGERS  = ADMINS
 
+db_path = os.path.join(os.path.abspath(os.path.dirname(os.path.abspath(__file__))), 'test')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/Users/jstaehle/Desktop/stamped/platform/analytics/web/sqlite_test',                      # Or path to database file if using sqlite3.
+        'NAME': db_path,                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
