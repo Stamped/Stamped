@@ -444,23 +444,13 @@ footer,
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .user-preview {
   position: relative;
-  margin: 0 4px 4px 0;
+  margin: 0 8px 8px 0;
   float: left;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .user-preview .profile-image-tiny {
   position: relative;
   z-index: 25;
   float: none;
-}
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .user-preview-icon {
-  background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
-  position: absolute;
-  z-index: 26;
-  right: -6px;
-  bottom: -6px;
-  width: 17px;
-  height: 17px;
-  pointer-events: none;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand-popup {
   display: block;
@@ -477,26 +467,9 @@ footer,
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand-popup:active {
   border-color: #666;
 }
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand-popup .user-preview-icon {
-  right: -8px;
-  bottom: -8px;
-}
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand-popup:hover .context-popup,
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand-popup:active .context-popup {
   display: block;
-}
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .likes,
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .todos {
-  display: inline-block;
-}
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .likes {
-  margin-right: 1em;
-}
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .likes .user-preview-icon {
-  background-position: 0 0;
-}
-.sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .todos .user-preview-icon {
-  background-position: -19px 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits {
   border-top: 1px solid #bbb;
