@@ -434,11 +434,17 @@ class PlaceSearchResultCluster(SearchResultCluster):
 
 class BookSearchResultCluster(SearchResultCluster):
     SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
+    COMMA_SUBTITLE_RE = re.compile('(\w)\s*,\s*\w+.*$')
     @classmethod
     def _strip_subtitle(cls, title):
         without_subtitle = cls.SUBTITLE_RE.sub('\\1', title)
-        if len(without_subtitle) > 5:
+        if without_subtitle != title and len(without_subtitle) > 3:
             return without_subtitle
+
+        # Sometimes a comma is used for subtitles, but we want to be a lot more conservative with
+        # them. So we will only split it if there is only one comma.
+        if title.count(',') == 1 and title.find(',') >= 3:
+            return cls.COMMA_SUBTITLE_RE.sub('\\1', title)
         return title
 
     @classmethod
