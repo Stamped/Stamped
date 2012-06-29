@@ -988,8 +988,6 @@ class iTunesSource(GenericSource):
         iTunesTypesToWeights = {
             'album' : 0.5,
             'musicArtist' : 0.8,
-            'movie' : 0.5,
-            'tvShow' : 0.5,
             # Having iTunes book results is good for enrichment, and in case Amazon doesn't return results or something,
             # but we really don't want it having much of an impact on ranking.
             'ebook': 0.1,
