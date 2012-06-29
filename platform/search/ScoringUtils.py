@@ -8,6 +8,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+from collections import namedtuple
 from SearchResult import SearchResult
 from resolve.Resolver import simplify
 from difflib import SequenceMatcher
@@ -177,23 +178,29 @@ def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, que
             result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
 
 
-def adjustBookRelevanceByQueryMatch(searchResult, queryText):
+RelevanceFactor = namedtuple('RelevanceFactor', 'fieldName fieldExtractor maxBoost')
+
+def _adjustRelevanceByQueryMatch(searchResult, queryText, factors):
     def adjustRelevance(matchFactor, maxBoost, factorName):
         factor = maxBoost ** matchFactor
         searchResult.relevance *= factor
         searchResult.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
+
     matchingBlocks = []
-
-    factor, blocks = stringRelevance(queryText, searchResult.resolverObject.name)
-    matchingBlocks.extend(blocks)
-    adjustRelevance(factor, 2, 'title')
-
-    factor, blocks = stringRelevance(queryText,
-            ' '.join(author['name'] for author in searchResult.resolverObject.authors))
-    matchingBlocks.extend(blocks)
-    adjustRelevance(factor, 1.5, 'author')
+    for fieldName, fieldExtractor, maxBoost in factors:
+        factor, blocks = stringRelevance(queryText, fieldExtractor(searchResult))
+        matchingBlocks.extend(blocks)
+        adjustRelevance(factor, maxBoost, fieldName)
 
     queryFulfilled = combineMatchingSections(matchingBlocks) / len(queryText)
     searchResult.relevance *= queryFulfilled
     searchResult.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
 
+
+BOOKS_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2),
+    RelevanceFactor('author',
+        lambda result: ' '.join(author['name'] for author in result.resolverObject.authors), 1.5),
+)
+def adjustBookRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, BOOKS_RELEVANCE_FACTORS)
