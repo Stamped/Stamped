@@ -43,7 +43,6 @@ from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenColle
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
-from db.mongodb.MongoFactualCollection          import MongoFactualCollection
 from db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 
 class MongoStampedAPI(StampedAPI):
@@ -168,10 +167,6 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _clientLogsDB(self):
         return MongoClientLogsCollection()
-
-    @lazyProperty
-    def _factualDB(self):
-        return MongoFactualCollection()
     
     @lazyProperty
     def _suggestedEntities(self):

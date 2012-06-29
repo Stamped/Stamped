@@ -81,7 +81,7 @@ def _buildShareSettingsFromLinkedAccount(linked):
 
 @handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest)
 @require_http_methods(["POST"])
-def updateShareSettings(request, authUserId, http_schema, **kwargs):
+def updateSettings(request, authUserId, http_schema, **kwargs):
     on = None
     if http_schema.on is not None:
         on = set(http_schema.on.split(','))
@@ -98,7 +98,7 @@ def updateShareSettings(request, authUserId, http_schema, **kwargs):
 
 @handleHTTPRequest(http_schema=HTTPServiceNameForm)
 @require_http_methods(["GET"])
-def showShareSettings(request, authUserId, http_schema, **kwargs):
+def showSettings(request, authUserId, http_schema, **kwargs):
     linked  = stampedAPI.getLinkedAccount(authUserId, http_schema.service_name)
     result = _buildShareSettingsFromLinkedAccount(linked)
 

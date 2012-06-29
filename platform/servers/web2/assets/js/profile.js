@@ -2025,7 +2025,14 @@ var g_update_stamps = null;
             });
             
             update_stamps($sdetail);
-            init_social_sharing();
+            
+            var title = $sdetail.find('.pronounced-title a').text();
+            var url   = $sdetail.find('.stamp-contents').attr("data-url");
+            
+            init_social_sharing($sdetail, {
+                title : title, 
+                url   : url
+            });
         };
         
         

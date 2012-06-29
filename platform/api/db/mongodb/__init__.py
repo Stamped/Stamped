@@ -6,7 +6,6 @@ import MongoActivityCollection
 import MongoBlockCollection
 import MongoCollectionCollection
 import MongoCommentCollection
-import MongoDeletedEntityCollection
 import MongoCreditGiversCollection
 import MongoCreditReceivedCollection
 import MongoEntityCollection
