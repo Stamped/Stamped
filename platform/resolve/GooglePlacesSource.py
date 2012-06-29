@@ -29,6 +29,7 @@ try:
     from LibUtils                   import states
     from pprint                     import pformat
     from search.ScoringUtils        import *
+    from search.DataQualityUtils    import *
     from difflib                    import SequenceMatcher
 except:
     report()
@@ -438,7 +439,10 @@ class GooglePlacesSource(GenericSource):
         smoothRelevanceScores(localResults)
         smoothRelevanceScores(nationalResults)
 
-        return dedupeById(localResults + nationalResults)
+        jointResults = dedupeById(localResults + nationalResults)
+        for searchResult in jointResults:
+            augmentPlaceDataQualityOnBasicAttributePresence(searchResult)
+        return jointResults
 
 
     def entityProxyFromKey(self, key, **kwargs):

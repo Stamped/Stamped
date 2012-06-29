@@ -9,6 +9,7 @@ __license__   = "TODO"
 
 import Globals
 import math
+import re
 
 # Results with lower data quality than this are summarily dropped pre-clustering.
 MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.1  # TODO PRELAUNCH IMMEDIATELY FUCK FUCK FUCK UP THIS
@@ -74,5 +75,66 @@ def augmentAppDataQualityOnBasicAttributePresence(appSearchResult):
 ################################################   PLACES   ################################################
 ############################################################################################################
 
+STREET_NUMBER_RE = re.compile('(^|\s)\d+($|[\s.#,])')
+NONCRITICAL_ADDRESS_CHARS = re.compile('[^a-zA-Z0-9 ]')
+
+def tryToGetStreetAddressFromPlace(placeResolverObject):
+    """
+    Given a place, attempts to return the street address only (# and street name) as a string.
+    """
+    # First try to retrieve it from structured data.
+    address = placeResolverObject.address
+    # TODO: Is this the right name?
+    if address and 'street' in address:
+        return address['street']
+
+    # Next, look in the address string. Peel off the first segment of it and try to determine if it's a street
+    # address. A little hacky.
+    address_string = placeResolverObject.address_string
+    if not address_string:
+        return None
+
+    first_term = address_string.split(',')[0]
+
+    # If there's a number in it, it's not a city. It's likely a street address. In the off-chance it's something
+    # like a P.O. box we're not really in trouble -- this is used for comparisons, and the real danger is returning
+    # something that too many things will have in common, like a city name.
+    if STREET_NUMBER_RE.search(first_term):
+        return first_term
+    first_term_simplified = first_term.lower().strip()
+    first_term_simplified = NONCRITICAL_ADDRESS_CHARS.sub(' ', first_term_simplified)
+    first_term_words = first_term_simplified.split()
+    street_address_terms = ('street', 'st', 'road', 'rd', 'avenue', 'ave', 'highway', 'hwy', 'apt', 'suite', 'ste')
+    if any(term in first_term_words for term in street_address_terms):
+        return first_term
+    return None
+
+
+def tryToSplitStreetAddress(streetAddressString):
+    words = streetAddressString.split()
+    if len(words) <= 1 or not words[0].isdigit():
+        return (None, streetAddressString)
+    return (words[0], ' '.join(words[1:]))
+
+
 def augmentPlaceDataQualityOnBasicAttributePresence(placeSearchResult):
-    pass
+    resolverObject = placeSearchResult.resolverObject
+    if not resolverObject.coordinates:
+        penalty = 0.3
+        placeSearchResult.dataQuality *= 1 - penalty
+        placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing coordinates", penalty)
+    streetAddress = tryToGetStreetAddressFromPlace(resolverObject)
+    if not streetAddress and not resolverObject.address and not resolverObject.address_string:
+        penalty = 0.4
+        placeSearchResult.dataQuality *= 1 - penalty
+        placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing any address info", penalty)
+    elif not streetAddress:
+        penalty = 0.15
+        placeSearchResult.dataQuality *= 1 - penalty
+        placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing street address", penalty)
+    else:
+        (number, street) = tryToSplitStreetAddress(streetAddress)
+        if number:
+            boost = 0.2
+            placeSearchResult.dataQuality *= 1 + boost
+            placeSearchResult.addDataQualityComponentDebugInfo("boost for having street #", boost)

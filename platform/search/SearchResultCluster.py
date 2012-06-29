@@ -15,6 +15,7 @@ from resolve.Resolver import *
 from resolve.TitleUtils import cleanBookTitle, tokenizeString
 from search.SearchResult import SearchResult
 from search import ScoringUtils
+from DataQualityUtils import *
 
 @lru_cache()
 def cached_simplify(string):
@@ -305,62 +306,6 @@ class TrackSearchResultCluster(SearchResultCluster):
 
 class PlaceSearchResultCluster(SearchResultCluster):
     @classmethod
-    def get_data_richness_score(cls, place):
-        """
-        Returns a score indicating how much information the ResolverPlace argument place contains that we can use for
-        clustering purposes.
-        """
-        score = 0
-        if place.coordinates:
-            # 5 points for lat/lng
-            score += 5
-        if place.address or place.address_string:
-            # 5 points for presence of any address info at all.
-            score += 2
-        if cls._try_to_get_street_address(place):
-            # 2 points if we have a street name.
-            score += 2
-            (number, name) = cls._split_street_address(cls._try_to_get_street_address(place))
-            if number:
-                # 2 points if we have a street number.
-                score += 2
-        return score
-
-    STREET_NUMBER_RE = re.compile('(^|\s)\d+($|[\s.,])')
-    NONCRITICAL_CHARS = re.compile('[^a-zA-Z0-9 ]')
-    @classmethod
-    def _try_to_get_street_address(cls, place):
-        """
-        Given a place, attempts to return the street address only (# and street name) as a string.
-        """
-        # First try to retrieve it from structured data.
-        address = place.address
-        # TODO: Is this the right name?
-        if address and 'street' in address:
-            return address['street']
-
-        # Next, look in the address string. Peel off the first segment of it and try to determine if it's a street
-        # address. A little hacky.
-        address_string = place.address_string
-        if not address_string:
-            return None
-
-        first_term = address_string.split(',')[0]
-
-        # If there's a number in it, it's not a city. It's likely a street address. In the off-chance it's something
-        # like a P.O. box we're not really in trouble -- this is used for comparisons, and the real danger is returning
-        # something that too many things will have in common, like a city name.
-        if cls.STREET_NUMBER_RE.search(first_term):
-            return first_term
-        first_term_simplified = first_term.lower().strip()
-        first_term_simplified = cls.NONCRITICAL_CHARS.sub(' ', first_term_simplified)
-        first_term_words = first_term_simplified.split()
-        street_address_terms = ('street', 'st', 'road', 'rd', 'avenue', 'ave', 'highway', 'hwy', 'apt', 'suite', 'ste')
-        if any(term in first_term_words for term in street_address_terms):
-            return first_term
-        return None
-
-    @classmethod
     def _simplify_address(cls, address_string):
         # TODO: Share somewhere common with resolve/etc.!
         address_string = cached_simplify(address_string)
@@ -385,22 +330,12 @@ class PlaceSearchResultCluster(SearchResultCluster):
         return ' '.join(address_words)
 
     @classmethod
-    def _split_street_address(cls, street_address):
-        """
-        Splits a street address into number/name components and returns them in a tuple.
-        """
-        words = street_address.split()
-        if len(words) <= 1 or not words[0].isdigit():
-            return (None, street_address)
-        return (words[0], ' '.join(words[1:]))
-
-    @classmethod
     def _compare_proxies(cls, place1, place2):
         place1_name = cached_simplify(place1.name)
         place2_name = cached_simplify(place2.name)
         name_similarity = cached_string_comparison(place1_name, place2_name)
 
-        #print 'COMPARING', place1.name, cls._try_to_get_street_address(place1), "    TO   ", place2.name, cls._try_to_get_street_address(place2)
+        #print 'COMPARING', place1.name, tryToGetStreetAddressFromPlace(place1), "    TO   ", place2.name, tryToGetStreetAddressFromPlace(place2)
 
         if name_similarity < 0.5:
             return CompareResult.unknown()
@@ -436,15 +371,15 @@ class PlaceSearchResultCluster(SearchResultCluster):
         # latitude and longitude; they only have address strings. And other things don't have full address string; they
         # just have addresses. Ugh.
 
-        street_address1 = cls._try_to_get_street_address(place1)
-        street_address2 = cls._try_to_get_street_address(place2)
+        street_address1 = tryToGetStreetAddressFromPlace(place1)
+        street_address2 = tryToGetStreetAddressFromPlace(place2)
         if street_address1 and street_address2:
             # TODO: Is cached_simplify really what we want here for the street addresses?
             street_address1 = cls._simplify_address(street_address1)
             street_address2 = cls._simplify_address(street_address2)
 
-            (street_number1, street_name1) = cls._split_street_address(street_address1)
-            (street_number2, street_name2) = cls._split_street_address(street_address2)
+            (street_number1, street_name1) = tryToSplitStreetAddress(street_address1)
+            (street_number2, street_name2) = tryToSplitStreetAddress(street_address2)
             if street_number2 and not street_number1:
                 street_address2 = street_name2
             elif street_number1 and not street_number2:

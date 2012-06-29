@@ -121,7 +121,7 @@ class SearchResultDeduper(object):
         for resultList in resultLists:
             places.extend(resultList)
 
-        places.sort(key=lambda p:PlaceSearchResultCluster.get_data_richness_score(p.resolverObject), reverse=True)
+        places.sort(key=lambda place: place.dataQuality, reverse=True)
         placeClusters = self.__formClusters(places, PlaceSearchResultCluster)
         # TODO: I need a pruning phase here. Where I have a good cluster in a city that has street-specific data, and
         # another cluster in the same city that doesn't, just get rid of the second one.
