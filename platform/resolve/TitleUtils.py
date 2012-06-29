@@ -177,7 +177,8 @@ MOVIE_TITLE_REMOVAL_REGEXPS = (
     re.compile("[ ,:\[(-]+Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+HD[ ,:\])-]*$"),
-    re.compile("\s*[,:\[(-]+([a-zA-Z0-9']{3,20}\s+){1,2}Edition[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}Edition[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[\[\(].*subtitle.*[\)\]]\s*$", re.IGNORECASE),
     re.compile("\s*\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
 )
 

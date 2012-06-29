@@ -549,13 +549,28 @@ class TvSearchResultCluster(SearchResultCluster):
         """
         The tricky thing about comparing TV shows is that they're often elements for different seasons of the show,
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
-        the meat of the comparison, and if title isn't decisive we hope for some clue like publisher, etc.
+        the meat of the comparison.
         """
-        # TODO: THIS NEEDS WORK. Related to the ongoing AmazonSource work.
-        show1_name_simple = cached_movie_simplify(tv_show1.name)
-        show2_name_simple = cached_movie_simplify(tv_show2.name)
-        if cached_string_comparison(show1_name_simple, show2_name_simple) > 0.95:
-            return CompareResult.match(1)
+        raw_name_similarity = cached_string_comparison(tv_show1.name, tv_show2.name)
+        simple_name_similarity = cached_string_comparison(cached_movie_simplify(tv_show1.name),
+                                                          cached_movie_simplify(tv_show2.name))
+        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+
+        if tv_show1.release_date and tv_show2.release_date:
+            time_difference = abs(tv_show1.release_date - tv_show2.release_date)
+            if time_difference > datetime.timedelta(365 * 10):
+                sim_score -= 0.2
+            elif time_difference < datetime.timedelta(365 * 5):
+                sim_score += 0.075
+            elif time_difference < datetime.timedelta(365 * 2):
+                sim_score += 0.1
+            elif time_difference < datetime.timedelta(365 * 1):
+                sim_score += 0.15
+
+        if simple_name_similarity > 0.85 and sim_score >= 0.9:
+            return CompareResult.match(sim_score)
+        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+            return CompareResult.definitely_not_match()
         return CompareResult.unknown()
 
 
@@ -570,7 +585,7 @@ class MovieSearchResultCluster(SearchResultCluster):
         raw_name_similarity = cached_string_comparison(movie1.name, movie2.name)
         simple_name_similarity = cached_string_comparison(cached_movie_simplify(movie1.name),
                                                           cached_movie_simplify(movie2.name))
-        sim_score = max(raw_name_similarity, simple_name_similarity - 0.9)
+        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
 
         if movie1.release_date and movie2.release_date:
             time_difference = abs(movie1.release_date - movie2.release_date)
