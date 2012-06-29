@@ -12,6 +12,7 @@ import re
 from utils import indentText
 from libs.LRUCache import lru_cache
 from resolve.Resolver import *
+from resolve.TitleUtils import cleanBookTitle
 from search.SearchResult import SearchResult
 from search import ScoringUtils
 
@@ -494,6 +495,8 @@ class BookSearchResultCluster(SearchResultCluster):
 
     @classmethod
     def _compare_titles(cls, title1, title2):
+        title1 = cleanBookTitle(title1)
+        title2 = cleanBookTitle(title2)
         book1_name_simple = cached_simplify(title1)
         book2_name_simple = cached_simplify(title2)
         if book1_name_simple == book2_name_simple:

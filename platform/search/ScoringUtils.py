@@ -75,21 +75,42 @@ def sortByRelevance(results):
 
 
 def stringRelevance(queryText, resultText):
-    """Returns a number between 0 and 1, measuring how "relevant" the resultText is for queryText.
+    """Computes how well the given result text satisfies the query text.
 
     Note that this differs from similarity, in that it is not symmetric. It only matters now much of
     the query text is "fulfilled" by the result text. The result text could have a lot more
     irrelevant terms without affecting the result.
+
+    Returns a pair (relevance, matchingBlocks), where relevance is a score in [0, 1], and
+    matchingBlocks is a list of (i, n) blocks indicating that queryText[i:i+n] was matched.
     """
     queryText = simplify(queryText)
     resultText = simplify(resultText)
 
-    # sqrt(2), pulled out of an ass.
-    nonContinuityPenalty = 1.414
+    nonContinuityPenalty = 1.2
     matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
-    totalMatch = sum(matchSize ** nonContinuityPenalty
-            for _, _, matchSize in matchingBlocks if matchSize > 1)
-    return totalMatch / (len(queryText) ** nonContinuityPenalty)
+    matchingBlocks = filter(lambda block: block[2] > 1)
+    totalMatch = sum(matchSize ** nonContinuityPenalty for _, _, matchSize in matchingBlocks)
+    return totalMatch / (len(queryText) ** nonContinuityPenalty), [(i, n) for i, _, n in matchingBlocks]
+
+
+def combineMatchingSections(matchingSections):
+    """Given a list of (i, n) pairs, where each (i, n) pair denotes a block starting at ith
+    position, with length n, combine overlapping blocks, and return the total length of the combined
+    blocks.
+    
+    For example, if the input is [(0, 3), (2, 4), (20, 2)], the first two blocks overlap, and will
+    be combined to (0, 6). The final result would be 6 + 2 = 8.
+    """
+    matchingSections.sort()
+    collapsedBlocks = [matchingSections[0]]
+    for i, n in matchingSections[1:]:
+        j, m = collapsedBlocks[-1]
+        if i <= j + m:
+            collapsedBlocks[-1] = (j, max(i - j + n, m))
+        else:
+            collapsedBlocks.append((i, n))
+    return sum(n for i, n in collapsedBlocks)
 
 
 def interleaveResultsByRelevance(resultLists):
@@ -128,14 +149,6 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     return d
 
 
-def augmentScoreForTextRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
-    for result in results:
-        resultText = resultTextExtractor(result)
-        titleBoost = maxRelevanceBoost ** stringRelevance(queryText, resultText)
-        result.relevance *= titleBoost
-        result.addRelevanceComponentDebugInfo('title similarity factor', titleBoost)
-
-
 def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, queryLatLng):
     """
     What I'm really looking for here are hints as to how I should blend between search and autocomplete results.
@@ -160,4 +173,25 @@ def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, que
             distance_boost = 1 + math.log(100 / distance, 1000)
             result.relevance *= distance_boost
             result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
+
+
+def adjustBookRelevanceByQueryMatch(searchResult, queryText):
+    def adjustRelevance(matchFactor, maxBoost, factorName):
+        factor = maxBoost ** matchFactor
+        searchResult.relevance *= factor
+        searchResult.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
+    matchingBlocks = []
+
+    factor, blocks = stringRelevance(queryText, searchResult.resolverObject.name)
+    matchingBlocks.extend(blocks)
+    adjustRelevance(factor, 2, 'title')
+
+    factor, blocks = stringRelevance(queryText,
+            ' '.join(author['name'] for author in searchResult.resolverObject.authors))
+    matchingBlocks.extend(blocks)
+    adjustRelevance(factor, 1.5, 'author')
+
+    queryFulfilled = float(combineMatchingSections(matchingBlocks)) / len(queryText)
+    searchResult.relevance *= queryFulfilled
+    searchResult.addRelevanceComponentDebugInfo('portion of query text fulfilled', queryFulfilled)
 
