@@ -21,6 +21,7 @@ from resolve.FactualSource      import FactualSource
 from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
+from api.Schemas                import PlaceEntity
 from SearchResultDeduper        import SearchResultDeduper
 from DataQualityUtils           import *
 
@@ -372,7 +373,11 @@ def main():
     searcher = EntitySearch()
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
-        print "\n\n", result
+        print "\n\n"
+        print "TITLE:", result.title
+        subtitle = result.formatAddress() if isinstance(result, PlaceEntity) else result.subtitle
+        print "SUBTITLE", subtitle
+        print result
 
 
 if __name__ == '__main__':
