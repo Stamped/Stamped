@@ -541,7 +541,7 @@ footer,
   font-size: 3em;
   letter-spacing: .05em;
   margin: 0 0 -0.2em;
-  text-shadow: 2px 2px #d2d2d2;
+  text-shadow: 0 2px #d2d2d2;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp p {
   margin: 0 0 .5em;
@@ -1658,7 +1658,7 @@ body.sdetail_popup #main-page-content-body #main-content {
     -webkit-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
   }
   100% {
-    -webkit-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+    -webkit-transform: perspective(600px) rotatey(180deg) translate(0, 0);
   }
 }
 @-webkit-keyframes map-profile-inner-shadow-bounce {
@@ -1683,7 +1683,7 @@ body.sdetail_popup #main-page-content-body #main-content {
     -moz-transform: perspective(600px) rotatey(180deg) translate(0, -12px);
   }
   100% {
-    -moz-transform: perspective(600px) rotatey(360deg) translate(0, 0);
+    -moz-transform: perspective(600px) rotatey(180deg) translate(0, 0);
   }
 }
 @-moz-keyframes map-profile-inner-shadow-bounce {
@@ -1827,6 +1827,9 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
   max-width: 366px;
   background-color: #fff;
 }
+.popup .ribbon-wrapper {
+  background: #d9d9d9;
+}
 .popup .popup-header {
   position: relative;
   z-index: 5000;
@@ -1967,6 +1970,7 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
 }
 .user-preview-icon {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+  display: none;
   position: absolute;
   z-index: 26;
   right: -6px;
@@ -1977,7 +1981,9 @@ a.map-profile-link:hover .map-profile-icon-wrapper .map-profile-icon .inner-shad
 }
 .like .user-preview-icon {
   background-position: 0 0;
+  display: block;
 }
 .todo .user-preview-icon {
   background-position: -19px 0;
+  display: block;
 }

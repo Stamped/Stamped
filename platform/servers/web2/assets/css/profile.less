@@ -472,7 +472,7 @@
                         font-size: 3em;
                         letter-spacing: .05em;
                         margin: 0 0 -.2em;
-                        text-shadow: 2px 2px #d2d2d2;
+                        text-shadow: 0 2px #d2d2d2;
                     }
                     
                     p {
@@ -1605,7 +1605,7 @@ body.sdetail_popup {
 @-webkit-keyframes map-profile-inner-bounce {
     0%   { -webkit-transform: perspective(600px) translate(0, 0); }
     50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
-    100% { -webkit-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+    100% { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
 @-webkit-keyframes map-profile-inner-shadow-bounce {
@@ -1617,7 +1617,7 @@ body.sdetail_popup {
 @-moz-keyframes map-profile-inner-bounce {
     0%   { -moz-transform: perspective(600px) translate(0, 0); }
     50%  { -moz-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
-    100% { -moz-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+    100% { -moz-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
 @-moz-keyframes map-profile-inner-shadow-bounce {
@@ -1740,6 +1740,10 @@ a.map-profile-link {
     @padding:  24px;
     
     // TODO: add large 50px drop shadow
+    
+    .ribbon-wrapper {
+        background: #d9d9d9;
+    }
     
     background-color: #fff;
     
@@ -1873,6 +1877,7 @@ a.map-profile-link {
         margin-top: 4px;
     }
 }
+
 .popup-todos {
     .pronounced-title {
         font-size: 3em;
@@ -1898,8 +1903,9 @@ a.map-profile-link {
 
 .user-preview-icon {
     background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+    display:  none;
     position: absolute;
-    z-index: 26;
+    z-index:  26;
     
     right:  -6px;
     bottom: -6px;
@@ -1912,9 +1918,11 @@ a.map-profile-link {
 
 .like .user-preview-icon {
     background-position: 0 0;
+    display: block;
 }
 
 .todo .user-preview-icon {
     background-position: -19px 0;
+    display: block;
 }
 

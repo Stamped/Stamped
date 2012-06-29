@@ -1598,6 +1598,11 @@ a.pronounced-title {
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
+  -webkit-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
+  -moz-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
+  -ms-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
+  -o-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
+  box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
 }
 .close-button .close-button-inner {
   background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
