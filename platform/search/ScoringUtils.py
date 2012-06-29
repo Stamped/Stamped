@@ -104,6 +104,7 @@ def combineMatchingSections(matchingSections):
     """
     if not matchingSections:
         return 0
+
     matchingSections.sort()
     collapsedBlocks = [matchingSections[0]]
     for i, n in matchingSections[1:]:
