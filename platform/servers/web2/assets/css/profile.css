@@ -252,8 +252,8 @@ footer,
   padding: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs p.name {
-  font-weight: 700;
-  color: #000;
+  font-weight: 400;
+  color: #262626;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs p.title {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
@@ -262,7 +262,7 @@ footer,
   line-height: 100%;
   font-size: 7em;
   letter-spacing: .02em;
-  color: #000;
+  color: #262626;
   display: block;
   padding: 0;
 }
