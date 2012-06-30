@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc
+    import os, logs, re, time, urlparse, math, pylibmc, gevent.pool
 
     import Blacklist
     import libs.ec2_utils
@@ -4487,36 +4487,39 @@ class StampedAPI(AStampedAPI):
 
             for stub in stubList:
                 stubId = stub.entity_id
-                try:
-                    resolved, modified = self._resolveStub(stub, True)
-                    if resolved is None:
-                        continue
-                    resolvedList.append(resolved.minimize())
-                    if stubId != resolved.entity_id:
-                        stubsModified = True
-                except KeyError as e:
+                resolved = self._resolveStub(stub, True)
+                if resolved is None:
                     # It's okay to fail resolution here, since we're only
                     # resolving against our own db
                     resolvedList.append(stub)
+                    continue
+                resolvedList.append(resolved.minimize())
+                if stubId != resolved.entity_id:
+                    stubsModified = True
 
             setattr(entity, attr, resolvedList)
             return stubsModified
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
-    def _followOutLinks(self, entity, resolved, depth):
+    def _followOutLinks(self, entity, resolved, depth, geventPool=gevent.pool.Pool(32)):
+        """Follow the outlinks on the entity and merge all the entities to which it refers.
+
+        Note that the geventPool is being used as a singleton here. Unless a separate pool is
+        explicitly passed in, all invocations of this method will share a single pool.
+        """
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
 
+            resolveTasks = [geventPool.spawn(self._resolveStub, stub, False) for stub in stubList]
             modified = False
             visitedStubs = []
-            for stub in stubList:
-                try:
-                    resolvedFull, stubModified = self._resolveStub(stub, False)
-                except KeyError as e:
-                    logs.warning('stub resolution failed: %s, %s' % (stub, e))
+            for stub, task in zip(stubList, resolveTasks):
+                resolvedFull = task.get()
+                if resolvedFull is None:
+                    logs.warning('stub resolution failed: %s' % stub)
                     continue
 
                 merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
@@ -4535,7 +4538,7 @@ class StampedAPI(AStampedAPI):
             falling back?)
         Failing that, just returns an entity proxy using one of the third-party sources for which we found an ID,
             if there were any.
-        If none of this works, throws a KeyError.
+        If none of this works, returns None
         """
 
         musicSources = {
@@ -4549,9 +4552,6 @@ class StampedAPI(AStampedAPI):
         source_id       = None
         entity_id       = None
         proxy           = None
-        # TODO(geoff): Find all the callers of this function and see how the
-        # returend "stubModified" is used.
-        stubModified    = False
 
         stampedSource   = StampedSource(stamped_api=self)
 
@@ -4580,13 +4580,13 @@ class StampedAPI(AStampedAPI):
         elif source_id is not None and proxy is not None:
             entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()
-            stubModified = True
         else:
-            raise KeyError('Unable to resolve stub: ' + str(stub))
+            return None
 
         if entity.kind != stub.kind:
-            raise KeyError('Confused and dazed. Stub and result are different kinds: ' + str(stub))
-        return entity, stubModified
+            logs.info('Confused and dazed. Stub and result are different kinds: ' + str(stub))
+            return None
+        return entity
 
     def _iterateOutLinks(self, entity, func):
         modified = False

@@ -25,7 +25,7 @@
 @stamped-base-color: #3b84eb;
 @outer: #E5E5E5;
 @inner: #FEFEFE;
-@shadow: rgba(50, 50, 50, 0.35);
+@shadow: rgba(50, 50, 50, 0.25);
 
 
 /* **************************************************************************
@@ -80,13 +80,13 @@ footer, .fixedwidth {
 
 .stamped-font() {
     font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
-    font-style:  normal;
-    font-weight: normal;
+    font-style: normal;
+    font-weight: 200;
 }
 
 .profile-image-border(@size) {
     border: @size solid #fff;
-    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
+    .box-shadow(0px, @size, @size, 0, rgba(0, 0, 0, 0.15));
     
     &:active {
         border-color: #666;
