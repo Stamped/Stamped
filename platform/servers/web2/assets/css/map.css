@@ -128,6 +128,11 @@ footer {
 }
 .stamp-map .stamp-map-canvas .stamp-map-item-wrapper {
   position: relative;
+  /*width:  27px;
+            height: 12px;
+            z-index: 26;
+            background: url(/assets/img/mapstamp-arrow.png) no-repeat;*/
+
 }
 .stamp-map .stamp-map-canvas .stamp-map-item-wrapper .stamp-map-item-shadow {
   position: absolute;
@@ -140,18 +145,28 @@ footer {
 }
 .stamp-map .stamp-map-canvas .stamp-map-item-wrapper .stamp-map-item-arrow {
   position: absolute;
-  left: 32px;
-  bottom: -12px;
-  width: 27px;
-  height: 12px;
-  z-index: 26;
-  background: url(/assets/img/mapstamp-arrow.png) no-repeat;
+  left: 25px;
+  bottom: -18px;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid #fff;
+}
+.stamp-map .stamp-map-canvas .stamp-map-item-wrapper .stamp-map-item-arrow-inner {
+  position: absolute;
+  left: 25px;
+  bottom: -18px;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid transparent;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item {
   position: relative;
   z-index: 26;
   background: #fff;
-  padding: 12px;
   -webkit-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   -moz-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
   -ms-box-shadow: 0 0 4px 0 rgba(50, 50, 50, 0.35);
@@ -168,12 +183,16 @@ footer {
   cursor: pointer;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .stamp-map-item-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   background: transparent;
+  padding: 12px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.stamp-map .stamp-map-canvas .stamp-map-item .clearfix {
   pointer-events: none;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .stamp-map-item-close-button {
@@ -198,8 +217,8 @@ footer {
   display: block;
 }
 .stamp-map .stamp-map-canvas .stamp-map-item .entity-header {
-  float: left;
   position: relative;
+  float: left;
   top: 0;
   margin-left: 0;
   max-width: 212px;
