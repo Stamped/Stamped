@@ -230,7 +230,7 @@ a.follow-button {
 
 .profile-image-border(@size) {
     border: @size solid #fff;
-    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
+    .box-shadow(0, 1px, 3px, 0, rgba(0, 0, 0, 0.25));
 }
 
 .profile-image(@size: 128px, @border: 4px) {
@@ -753,10 +753,11 @@ footer .copyright a, footer .copyright a {
     text-transform: lowercase;
     font-family: "StampedScreenNameFont", helvetica, sans-serif;
     letter-spacing: .05em;
+    font-size: 85%;
 }
 
 .pronounced-title a, a.pronounced-title {
-    color: #000;
+    color: #262626;
 }
 
 .pronounced-title {
@@ -764,8 +765,8 @@ footer .copyright a, footer .copyright a {
     
     .stamped-font();
     
-    font-size: 3em;
+    font-size: 2.8em;
     letter-spacing: .05em;
-    color: #000;
+    color: #262626;
 }
 

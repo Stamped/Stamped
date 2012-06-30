@@ -56,6 +56,6 @@ footer,
 @font-face {
   font-family: StampedFallbackFont;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200;
   src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
 }

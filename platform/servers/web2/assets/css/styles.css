@@ -69,7 +69,7 @@ footer,
 @font-face {
   font-family: StampedFallbackFont;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200;
   src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
 }
 /* **************************************************************************
@@ -256,17 +256,17 @@ a.follow-button:active {
   width: 128px;
   height: 128px;
   border: 4px solid #ffffff;
-  -webkit-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   border: 4px solid #ffffff;
-  -webkit-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-large img:active {
   border-color: #666;
@@ -281,17 +281,17 @@ a.follow-button:active {
   width: 96px;
   height: 96px;
   border: 3px solid #ffffff;
-  -webkit-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   border: 3px solid #ffffff;
-  -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-large-ish img:active {
   border-color: #666;
@@ -306,17 +306,17 @@ a.follow-button:active {
   width: 72px;
   height: 72px;
   border: 3px solid #ffffff;
-  -webkit-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   border: 3px solid #ffffff;
-  -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-medium-ish img:active {
   border-color: #666;
@@ -331,17 +331,17 @@ a.follow-button:active {
   width: 54px;
   height: 54px;
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-medium img:active {
   border-color: #666;
@@ -356,17 +356,17 @@ a.follow-button:active {
   width: 44px;
   height: 44px;
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-small img:active {
   border-color: #666;
@@ -381,17 +381,17 @@ a.follow-button:active {
   width: 24px;
   height: 24px;
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-tiny img:active {
   border-color: #666;
@@ -1557,17 +1557,18 @@ footer .copyright a {
   text-transform: lowercase;
   font-family: "StampedScreenNameFont", helvetica, sans-serif;
   letter-spacing: .05em;
+  font-size: 85%;
 }
 .pronounced-title a,
 a.pronounced-title {
-  color: #000;
+  color: #262626;
 }
 .pronounced-title {
   position: relative;
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
   font-weight: 200;
-  font-size: 3em;
+  font-size: 2.8em;
   letter-spacing: .05em;
-  color: #000;
+  color: #262626;
 }

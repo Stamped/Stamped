@@ -14,7 +14,7 @@
    ************************************************************************** */
 
 
-@shadow-sdetail: rgba(50, 50, 50, 0.75);
+@shadow-sdetail: rgba(50, 50, 50, 0.25);
 @shadow-light: fade(@shadow-sdetail, 15%);
 
 @text0: #666;
@@ -51,7 +51,7 @@
     
     .section-entity {
         float: right;
-        width: 35%;
+        width: 28%;
         padding: .25em;
         
         .close-button {
@@ -361,12 +361,12 @@
         .timestamp, .timestamp_raw {
             text-align: right;
             font-size: 80%;
-            color: #999999;
+            color: #bfbfbf;
         }
         
         .stamp-card {
-            @round: 4px;
-            .box-shadow(0, 0, 16px, 0, @shadow-sdetail);
+            @round: 0px;
+            .box-shadow(0, 1px, 8px, 0, @shadow-sdetail);
             .rounded(@round);
             
             @space: 48px;
@@ -388,7 +388,8 @@
                         
                         .entity-header {
                             max-width: 280px;
-                            padding: 2px;
+                            padding: 15px;
+                            margin: 0px 0px 0px 0px;
                         }
                         
                         .profile-image-large-ish {
@@ -397,7 +398,7 @@
                         }
                         
                         .user-header {
-                            margin: .5em 0 .5em;
+                            margin:10px 0px 12px 0px;
                             clear: both;
                             
                             .name {
@@ -583,6 +584,7 @@
                                 
                                 p.normal_blurb {
                                     font-size: 80%;
+                                    color: #595959
                                 }
                             }
                         }
