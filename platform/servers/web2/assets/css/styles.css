@@ -194,11 +194,11 @@ a.follow-button:active {
 .post-header {
   position: relative;
   width: 100%;
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
   position: relative;
   display: block;
   height: 15px;
@@ -247,7 +247,6 @@ a.follow-button:active {
                                 PROFILE IMAGES
    ************************************************************************** */
 .profile-image-large {
-  position: relative;
   float: left;
   display: block;
   width: 136px;
@@ -256,6 +255,12 @@ a.follow-button:active {
 .profile-image-large img {
   width: 128px;
   height: 128px;
+  border: 4px solid #ffffff;
+  -webkit-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 4px 4px 0 rgba(0, 0, 0, 0.15);
   border: 4px solid #ffffff;
   -webkit-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.15);
@@ -266,12 +271,7 @@ a.follow-button:active {
 .profile-image-large img:active {
   border-color: #666;
 }
-.profile-image-large:hover .context-popup {
-  display: block;
-  cursor: pointer;
-}
 .profile-image-large-ish {
-  position: relative;
   float: left;
   display: block;
   width: 102px;
@@ -280,6 +280,12 @@ a.follow-button:active {
 .profile-image-large-ish img {
   width: 96px;
   height: 96px;
+  border: 3px solid #ffffff;
+  -webkit-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
   border: 3px solid #ffffff;
   -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
@@ -290,20 +296,21 @@ a.follow-button:active {
 .profile-image-large-ish img:active {
   border-color: #666;
 }
-.profile-image-large-ish:hover .context-popup {
-  display: block;
-  cursor: pointer;
-}
 .profile-image-medium-ish {
-  position: relative;
   float: left;
   display: block;
-  width: 66px;
-  height: 66px;
+  width: 78px;
+  height: 78px;
 }
 .profile-image-medium-ish img {
-  width: 60px;
-  height: 60px;
+  width: 72px;
+  height: 72px;
+  border: 3px solid #ffffff;
+  -webkit-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 3px 3px 0 rgba(0, 0, 0, 0.15);
   border: 3px solid #ffffff;
   -webkit-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 3px 3px 3px 0 rgba(0, 0, 0, 0.15);
@@ -314,12 +321,7 @@ a.follow-button:active {
 .profile-image-medium-ish img:active {
   border-color: #666;
 }
-.profile-image-medium-ish:hover .context-popup {
-  display: block;
-  cursor: pointer;
-}
 .profile-image-medium {
-  position: relative;
   float: left;
   display: block;
   width: 58px;
@@ -328,6 +330,12 @@ a.follow-button:active {
 .profile-image-medium img {
   width: 54px;
   height: 54px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
   border: 2px solid #ffffff;
   -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
@@ -338,12 +346,7 @@ a.follow-button:active {
 .profile-image-medium img:active {
   border-color: #666;
 }
-.profile-image-medium:hover .context-popup {
-  display: block;
-  cursor: pointer;
-}
 .profile-image-small {
-  position: relative;
   float: left;
   display: block;
   width: 48px;
@@ -352,6 +355,12 @@ a.follow-button:active {
 .profile-image-small img {
   width: 44px;
   height: 44px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
   border: 2px solid #ffffff;
   -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
@@ -362,12 +371,7 @@ a.follow-button:active {
 .profile-image-small img:active {
   border-color: #666;
 }
-.profile-image-small:hover .context-popup {
-  display: block;
-  cursor: pointer;
-}
 .profile-image-tiny {
-  position: relative;
   float: left;
   display: block;
   width: 28px;
@@ -376,6 +380,12 @@ a.follow-button:active {
 .profile-image-tiny img {
   width: 24px;
   height: 24px;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
   border: 2px solid #ffffff;
   -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
   -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
@@ -386,42 +396,42 @@ a.follow-button:active {
 .profile-image-tiny img:active {
   border-color: #666;
 }
-.profile-image-tiny:hover .context-popup {
-  display: block;
-  cursor: pointer;
-}
 /* **************************************************************************
                                 USER GALLERY
    ************************************************************************** */
 .user-gallery {
   display: block;
   position: relative;
+  /*:nth-child(3) {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        margin-top: -12px;
+        
+        .overlay {
+            display: block;
+            width:  24px;
+            height: 24px;
+            
+            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
+        }
+        
+        &:hover {
+            background: lighten(@stamped-base-color, 10%);
+        }
+    }*/
+
 }
 .user-gallery .user-gallery-item {
   display: inline-block;
 }
-.user-gallery .expand-friends {
-  width: 24px;
-  height: 24px;
-  position: absolute;
-  display: block;
-  right: 4px;
-  top: 50%;
-  margin-top: -14px;
-  background: url(/assets/img/user-gallery-expand.png) no-repeat;
-  border: 2px solid #ffffff;
-  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+.user-gallery .user-gallery-item .overlay {
+  display: none;
+  z-index: 23;
+  position: relative;
 }
-.user-gallery .expand-friends:active {
-  border-color: #666;
-}
-.user-gallery .expand-friends:hover .context-popup,
-.user-gallery .expand-friends:active .context-popup {
-  display: block;
+.user-gallery :nth-child(n+4) {
+  display: none;
 }
 /* **************************************************************************
                            CRINKLED STATIC GOOGLE MAP
@@ -1360,11 +1370,11 @@ a.follow-button:active {
   -moz-background-clip: padding;
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
-  -webkit-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.35);
+  -webkit-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.25);
+  -moz-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.25);
+  -ms-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.25);
+  -o-box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.25);
+  box-shadow: 0 0 18px 0 rgba(50, 50, 50, 0.25);
   /* NOTE: because social sharing requires JS, sharing widgets are hidden 
        by default in CSS and only displayed on page load via JS if JS is 
        supported.
@@ -1556,66 +1566,8 @@ a.pronounced-title {
   position: relative;
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
-  font-weight: normal;
+  font-weight: 200;
   font-size: 3em;
   letter-spacing: .05em;
   color: #000;
-}
-.context-popup {
-  position: absolute;
-  top: -32px;
-  left: -16px;
-  font-size: .9em;
-  font-weight: 700;
-  padding: 8px;
-  z-index: 10001;
-  line-height: 100%;
-  display: none;
-  background: rgba(10, 10, 10, 0.75);
-  color: #fff;
-  white-space: nowrap;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-}
-.close-button {
-  position: relative;
-  display: block;
-  /* NOTE: with the rounded corners, this ends up being 36x36px */
-
-  /* TODO: possibly replace these rounded corners with static images? */
-
-  width: 28px;
-  height: 28px;
-  border: 4px solid #bfbfbf;
-  background: #fff;
-  -webkit-border-radius: 36px;
-  -moz-border-radius: 36px;
-  border-radius: 36px;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  -webkit-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.35);
-}
-.close-button .close-button-inner {
-  background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
-  position: absolute;
-  top: 7px;
-  left: 7px;
-  width: 14px;
-  height: 14px;
-}
-.close-button:hover {
-  border-color: #666;
-  cursor: pointer;
-}
-.close-button:hover .close-button-inner {
-  background-position: -48px 0;
 }

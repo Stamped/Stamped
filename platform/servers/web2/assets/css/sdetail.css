@@ -458,11 +458,11 @@ footer,
   height: 24px;
   background: url(/assets/img/user-gallery-expand.png) no-repeat;
   border: 2px solid #ffffff;
-  -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -ms-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  -o-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -webkit-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .social-feedback-expanded .user-previews .expand-popup:active {
   border-color: #666;
@@ -596,15 +596,15 @@ footer,
 .entity-menu .entity-title {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
   font-style: normal;
-  font-weight: normal;
+  font-weight: 200;
   font-size: 4em;
   font-weight: bold;
   color: #262626;
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.35);
+  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
 }
 .entity-menu .menus {
   max-height: 420px;
@@ -667,11 +667,11 @@ footer,
   color: #bfbfbf;
 }
 .entity-menu .attribution {
-  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
-  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
-  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
-  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
-  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.35);
+  -webkit-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.25);
+  -moz-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.25);
+  -ms-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.25);
+  -o-box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.25);
+  box-shadow: 0 -3px 3px 0 rgba(50, 50, 50, 0.25);
   padding: 12px 24px 0;
   font-style: italic;
   font-size: 70%;

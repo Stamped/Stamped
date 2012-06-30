@@ -228,8 +228,12 @@ a.follow-button {
    ************************************************************************** */
 
 
+.profile-image-border(@size) {
+    border: @size solid #fff;
+    .box-shadow(@size, @size, @size, 0, rgba(0, 0, 0, 0.15));
+}
+
 .profile-image(@size: 128px, @border: 4px) {
-    position: relative;
     .floatleft;
     
     display: block;
@@ -242,11 +246,6 @@ a.follow-button {
         
         .profile-image-border(@border);
     }
-    
-    &:hover .context-popup {
-        display: block;
-        cursor:  pointer;
-    }
 }
 
 .profile-image-large {
@@ -258,7 +257,7 @@ a.follow-button {
 }
 
 .profile-image-medium-ish {
-    .profile-image(60px,  3px);
+    .profile-image(72px,  3px);
 }
 
 .profile-image-medium {
@@ -285,25 +284,35 @@ a.follow-button {
     
     .user-gallery-item {
         display: inline-block;
+        
+        .overlay {
+            display: none;
+            z-index: 23;
+            position: relative;
+        }
     }
     
-    .expand-friends {
-        width:  24px;
-        height: 24px;
+    /*:nth-child(3) {
         position: absolute;
-        display: block;
-        right: 4px;
-        top:   50%;
-        margin-top: -14px;
+        right: 0;
+        top: 50%;
+        margin-top: -12px;
         
-        background: url(/assets/img/user-gallery-expand.png) no-repeat;
-        .profile-image-border(2px);
-        
-        &:hover, &:active {
-            .context-popup {
-                display: block;
-            }
+        .overlay {
+            display: block;
+            width:  24px;
+            height: 24px;
+            
+            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
         }
+        
+        &:hover {
+            background: lighten(@stamped-base-color, 10%);
+        }
+    }*/
+    
+    :nth-child(n+4) {
+        display: none;
     }
 }
 
@@ -758,57 +767,5 @@ footer .copyright a, footer .copyright a {
     font-size: 3em;
     letter-spacing: .05em;
     color: #000;
-}
-
-.context-popup {
-    position: absolute;
-    top:  -32px;
-    left: -16px;
-    font-size: .9em;
-    font-weight: 700;
-    padding: 8px;
-    z-index: 10001;
-    
-    line-height: 100%;
-    display:  none;
-    background: rgba(10, 10, 10, 0.75);
-    color: #fff;
-    white-space: nowrap;
-    
-    .rounded(4px);
-}
-
-.close-button {
-    position: relative;
-    display:  block;
-    
-    /* NOTE: with the rounded corners, this ends up being 36x36px */
-    /* TODO: possibly replace these rounded corners with static images? */
-    width:  28px;
-    height: 28px;
-    
-    border: 4px solid #bfbfbf;
-    background: #fff;
-    .rounded(36px);
-    .box-shadow(0, 0, 6px, 0, @shadow);
-    
-    .close-button-inner {
-        background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
-        position: absolute;
-        top:  7px;
-        left: 7px;
-        
-        width:  14px;
-        height: 14px;
-    }
-    
-    &:hover {
-        border-color: #666;
-        cursor: pointer;
-        
-        .close-button-inner {
-            background-position: -48px 0;
-        }
-    }
 }
 
