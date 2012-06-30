@@ -327,17 +327,17 @@ class AWSInstance(AInstance):
             raise NotInitializedError()
     
     def _get_security_groups(self):
-        security_groups = [ ]
+        security_groups = set()
         
         for role in self.roles:
-            security_groups.append(role.lower())
+            security_groups.add(role.lower().split('-')[0])
         
         utils.log("IS_PROD: %s" % self.stack.is_prod)
         
         if not self.stack.is_prod:
-            security_groups.append('dev')
+            security_groups.add('dev')
         
-        return security_groups
+        return list(security_groups)
     
     def _get_user_data(self):
         config = dict(self.config)

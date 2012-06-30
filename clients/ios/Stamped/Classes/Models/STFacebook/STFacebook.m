@@ -126,6 +126,7 @@ static id __instance;
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults synchronize];
     
+    [STEvents postEvent:EventTypeFacebookLoggedOut];
 }
 
 - (void)fbSessionInvalidated {
@@ -147,7 +148,6 @@ static id __instance;
        // [Events postEvent:EventTypeFacebookFriendsFinished object:result];
         
     } else if ([[request url] hasSuffix:@"me"]) {
-        
         if ([result objectForKey:@"id"]) {
             [[NSUserDefaults standardUserDefaults] setObject:[result objectForKey:@"id"] forKey:kFacebookUserIdentifier];
             [[NSUserDefaults standardUserDefaults] synchronize];

@@ -27,12 +27,8 @@ urlpatterns = patterns('',
     url(r'^entities/menu\.html?$',              'core.views.menu'), 
     
     # e.g., stamped.com/popups/likes, stamped.com/popups/likes.html
-    url(r'^popups/likes$',                      'core.views.popup_likes'), 
-    url(r'^popups/likes\.html?$',               'core.views.popup_likes'), 
-    
-    # e.g., stamped.com/popups/todos, stamped.com/popups/todos.html
-    url(r'^popups/todos$',                      'core.views.popup_todos'), 
-    url(r'^popups/todos\.html?$',               'core.views.popup_todos'), 
+    url(r'^popups/sdetail-social$',             'core.views.popup_sdetail_social'), 
+    url(r'^popups/sdetail-social\.html?$',      'core.views.popup_sdetail_social'), 
     
     # e.g., stamped.com/popups/followers, stamped.com/popups/followers.html
     url(r'^popups/followers$',                  'core.views.popup_followers'), 

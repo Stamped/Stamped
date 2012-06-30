@@ -41,6 +41,7 @@
 #import "STAccount.h"
 #import <CoreLocation/CoreLocation.h>
 #import "STAlertItem.h"
+#import "STLinkedAccounts.h"
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -268,6 +269,12 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 - (STCancellation*)alertsWithOnIDs:(NSArray*)onIDs
                             offIDs:(NSArray*)offIDS 
                        andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)shareSettingsWithService:(NSString*)service
+                                andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block;
+
+
+- (STCancellation*)linkedAccountsWithCallback:(void (^)(id<STLinkedAccounts> linkedAccounts, NSError* error, STCancellation* cancellation))block;
 
 - (NSString*)stringForScope:(STStampedAPIScope)scope;
 

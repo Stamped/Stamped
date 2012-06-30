@@ -8,12 +8,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import math
+import re
 
 # Results with lower data quality than this are summarily dropped pre-clustering.
-MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.1
+MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.3
 # Results with lower data quality than this are allowed to cluster for the purposes of boosting the cluster's final
 # score, but are never included in the final result.
-MIN_RESULT_DATA_QUALITY_TO_INCLUDE = 0.3
+MIN_RESULT_DATA_QUALITY_TO_INCLUDE = 0.6
 # Clusters with data quality lower than this are not returned to the user.
 MIN_CLUSTER_DATA_QUALITY = 0.7
 
@@ -21,68 +23,28 @@ MIN_CLUSTER_DATA_QUALITY = 0.7
 ################################################    FILM    ################################################
 ############################################################################################################
 
-"""
+def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
+    if movieSearchResult.release_date is None:
+        # This is a non-trivial penalty because this is a key differentiator of movies with the same title. Case
+        # would work, but it's very rarely present on both parties of a comparison. Having a good release date is
+        # key.
+        penalty = 0.25
+        movieSearchResult.dataQuality *= 1 - penalty
+        movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
-    TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'\sHD'),
-        re.compile(r'\sBlu-?ray', re.IGNORECASE),
-        ]
+    if movieSearchResult.director:
+        boost = 0.1
+        movieSearchResult.dataQuality *= 1 + boost
+        movieSearchResult.addDataQualityComponentDebugInfo("boost for director", boost)
 
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:
-                logs.warning("Avoiding transformation to AmazonMovie title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon movie title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
+    if movieSearchResult.cast:
+        boost = 0.05 * math.log(1 + len(movieSearchResult.cast))
+        movieSearchResult.dataQuality *= 1 + boost
+        movieSearchResult.addDataQualityComponentDebugInfo("boost for cast of size %d" % len(movieSearchResult.cast), boost)
 
 
-
-
-            TITLE_REMOVAL_REGEXES = [
-        re.compile(r'\s\[.*\]\s*$', re.IGNORECASE),
-        re.compile(r'\s\(.*\)\s*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?complete.*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} seasons?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)seasons?\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(the )?[a-zA-Z0-9]{2,10} volumes?$', re.IGNORECASE),
-        re.compile(r'(\s*[:,;.-]+\s*|\s)(volumes?|vol\.)\s[a-zA-Z0-9].*$', re.IGNORECASE),
-        re.compile(r'^(the )?best (\w+ )?of ', re.IGNORECASE),
-    ]
-
-    @lazyProperty
-    def name(self):
-        rawTitle = xp(self.attributes, 'Title')['v']
-        currTitle = rawTitle
-        for titleRemovalRegex in self.TITLE_REMOVAL_REGEXES:
-            alteredTitle = titleRemovalRegex.sub('', currTitle)
-            # I'm concerned that a few of these titles could devour an entire title if something were named, like,
-            # "The Complete Guide to _____" so this safeguard is built in for that purpose.
-            if len(alteredTitle) >= 3:
-                currTitle = alteredTitle
-            else:g
-                logs.warning("Avoiding transformation to AmazonTvShow title '%s' because result would be too short" %
-                             rawTitle)
-        if currTitle != rawTitle:
-            logs.warning("Converted Amazon TV title: '%s' => '%s'" % (rawTitle, currTitle))
-        return currTitle
-
-"""
-
-def augmentFilmDataQualityOnBasicAttributePresence(filmSearchResult):
+def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
     pass
-
 
 ############################################################################################################
 ################################################   MUSIC    ################################################
@@ -113,5 +75,107 @@ def augmentAppDataQualityOnBasicAttributePresence(appSearchResult):
 ################################################   PLACES   ################################################
 ############################################################################################################
 
+US_POSTAL_CODE_RE = re.compile("(\d{5})(-\d{4})?$")
+US_STATE_RE = re.compile('[A-Z]{2}')
+# Group 1 is city, group 2 is state, group 3 is postal code.
+US_ADDRESS_STRING_W_POSTAL_CODE_RE = re.compile("[^,]\s*([A-Za-z. -]+)[ ,]+([A-Z]{2})[ ,]+(\d{5})(-\d{4})?([ ,]+(US))?\s*$")
+# Group 1 is city, group 2 is state.
+US_ADDRESS_STRING_WO_POSTAL_CODE_RE = re.compile("[^,]\s*([A-Za-z. -]+)[ ,]+([A-Z]{2})([ ,]+(US))?\s*$")
+
+def tryToGetPostalCodeFromPlace(placeResolverObject):
+    if placeResolverObject.address and 'postcode' in placeResolverObject.address:
+        reMatch = US_POSTAL_CODE_RE.match(placeResolverObject.address['postcode'])
+        if reMatch:
+            return int(reMatch.group(1))
+    if placeResolverObject.address_string:
+        reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return int(reMatch.group(3))
+
+def tryToGetStateFromPlace(placeResolverObject):
+    if placeResolverObject.address and 'region' in placeResolverObject.address:
+        reMatch = US_STATE_RE.match(placeResolverObject.address['region'])
+        if reMatch:
+            return placeResolverObject.address['region']
+    if placeResolverObject.address_string:
+        reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(2)
+        reMatch = US_ADDRESS_STRING_WO_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(2)
+
+def tryToGetLocalityFromPlace(placeResolverObject):
+    if placeResolverObject.address and 'locality' in placeResolverObject.address:
+        return placeResolverObject.address['locality']
+    if placeResolverObject.address_string:
+        reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(1)
+        reMatch = US_ADDRESS_STRING_WO_POSTAL_CODE_RE.search(placeResolverObject.address_string)
+        if reMatch:
+            return reMatch.group(1)
+
+STREET_NUMBER_RE = re.compile('(^|\s)\d+($|[\s.#,])')
+NONCRITICAL_ADDRESS_CHARS = re.compile('[^a-zA-Z0-9 ]')
+
+def tryToGetStreetAddressFromPlace(placeResolverObject):
+    """
+    Given a place, attempts to return the street address only (# and street name) as a string.
+    """
+    # First try to retrieve it from structured data.
+    address = placeResolverObject.address
+    # TODO: Is this the right name?
+    if address and 'street' in address:
+        return address['street']
+
+    # Next, look in the address string. Peel off the first segment of it and try to determine if it's a street
+    # address. A little hacky.
+    address_string = placeResolverObject.address_string
+    if not address_string:
+        return None
+
+    first_term = address_string.split(',')[0]
+
+    # If there's a number in it, it's not a city. It's likely a street address. In the off-chance it's something
+    # like a P.O. box we're not really in trouble -- this is used for comparisons, and the real danger is returning
+    # something that too many things will have in common, like a city name.
+    if STREET_NUMBER_RE.search(first_term):
+        return first_term
+    first_term_simplified = first_term.lower().strip()
+    first_term_simplified = NONCRITICAL_ADDRESS_CHARS.sub(' ', first_term_simplified)
+    first_term_words = first_term_simplified.split()
+    street_address_terms = ('street', 'st', 'road', 'rd', 'avenue', 'ave', 'highway', 'hwy', 'apt', 'suite', 'ste')
+    if any(term in first_term_words for term in street_address_terms):
+        return first_term
+    return None
+
+
+def tryToSplitStreetAddress(streetAddressString):
+    words = streetAddressString.split()
+    if len(words) <= 1 or not words[0].isdigit():
+        return (None, streetAddressString)
+    return (words[0], ' '.join(words[1:]))
+
+
 def augmentPlaceDataQualityOnBasicAttributePresence(placeSearchResult):
-    pass
+    resolverObject = placeSearchResult.resolverObject
+    if not resolverObject.coordinates:
+        penalty = 0.3
+        placeSearchResult.dataQuality *= 1 - penalty
+        placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing coordinates", penalty)
+    streetAddress = tryToGetStreetAddressFromPlace(resolverObject)
+    if not streetAddress and not resolverObject.address and not resolverObject.address_string:
+        penalty = 0.4
+        placeSearchResult.dataQuality *= 1 - penalty
+        placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing any address info", penalty)
+    elif not streetAddress:
+        penalty = 0.15
+        placeSearchResult.dataQuality *= 1 - penalty
+        placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing street address", penalty)
+    else:
+        (number, street) = tryToSplitStreetAddress(streetAddress)
+        if number:
+            boost = 0.2
+            placeSearchResult.dataQuality *= 1 + boost
+            placeSearchResult.addDataQualityComponentDebugInfo("boost for having street #", boost)

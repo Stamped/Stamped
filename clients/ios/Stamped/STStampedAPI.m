@@ -37,7 +37,7 @@
 #import "STSimpleAccount.h"
 #import "STImageCache.h"
 #import "STSimpleAlertItem.h"
-
+#import "STSimpleLinkedAccounts.h"
 
 NSString* const STStampedAPILoginNotification = @"STStampedAPILoginNotification";
 NSString* const STStampedAPILogoutNotification = @"STStampedAPILogoutNotification";
@@ -1267,6 +1267,51 @@ static STStampedAPI* _sharedInstance;
                                                   block((id)results, error, cancellation); 
                                               }];
 }
+
+- (STCancellation*)shareSettingsWithService:(NSString*)service
+                                andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/show_share_settings.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:[NSDictionary dictionaryWithObject:service forKey:@"service_name"]
+                                                  mapping:[STSimpleAlertItem mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+- (STCancellation*)updateShareSettingsWithService:(NSString*)service
+                                            onIDs:(NSArray*)onIDs
+                                           offIDs:(NSArray*)offIDS 
+                                      andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block {
+    NSString* onString = [onIDs componentsJoinedByString:@","];
+    NSString* offString = [offIDS componentsJoinedByString:@","];
+    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                            onString, @"on",
+                            offString, @"off",
+                            service, @"service_name",
+                            nil];
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/update_share_settings.json"
+                                                     post:YES
+                                            authenticated:YES
+                                                   params:params 
+                                                  mapping:[STSimpleAlertItem mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation); 
+                                              }];
+}
+
+- (STCancellation*)linkedAccountsWithCallback:(void (^)(id<STLinkedAccounts> linkedAccounts, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/show.json"
+                                                        post:NO
+                                               authenticated:YES
+                                                      params:[NSDictionary dictionary]
+                                                     mapping:[STSimpleLinkedAccounts mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation); 
+                                                 }];
+}
+
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];

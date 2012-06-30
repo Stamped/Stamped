@@ -405,7 +405,19 @@ class   RdioSource(GenericSource):
             logs.debug(''.join(logComponents))
 
         resolverObjects = [rdioJsonToResolverObject(result) for result in response['result']['results']]
-        return scoreResultsWithBasicDropoffScoring(resolverObjects, sourceScore=0.7)
+        searchResults = scoreResultsWithBasicDropoffScoring(resolverObjects, sourceScore=0.7)
+        for searchResult in searchResults:
+            if isinstance(searchResult.resolverObject, RdioTrack):
+                applyTrackTitleDataQualityTests(searchResult, queryText)
+                adjustTrackRelevanceByQueryMatch(searchResult, queryText)
+            elif isinstance(searchResult.resolverObject, RdioAlbum):
+                applyAlbumTitleDataQualityTests(searchResult, queryText)
+                adjustAlbumRelevanceByQueryMatch(searchResult, queryText)
+            elif isinstance(searchResult.resolverObject, RdioArtist):
+                applyArtistTitleDataQualityTests(searchResult, queryText)
+                adjustArtistRelevanceByQueryMatch(searchResult, queryText)
+        sortByRelevance(searchResults)
+        return searchResults
 
 if __name__ == '__main__':
     demo(RdioSource(), 'Katy Perry')

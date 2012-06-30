@@ -17,6 +17,8 @@
 #import "STStampedAPI.h"
 #import "STRestKitLoader.h"
 #import "STConfiguration.h"
+#import "STActionUtil.h"
+#import <MediaPlayer/MediaPlayer.h>
 
 NSString* STActionManagerShowAllActionsKey = @"Actions.showAllActions";
 
@@ -97,7 +99,7 @@ static STActionManager* _singleton;
             }
         }
         if (flag) {
-            if ([validSources count] > 1) {
+            if ([validSources count] > 1 && ![[action type] isEqualToString:@"listen"] ) {
                 STActionMenuFactory* factory = [[[STActionMenuFactory alloc] init] autorelease];
                 NSOperation* operation = [factory createViewWithAction:action sources:validSources andContext:context forBlock:^(STViewCreator init) {
                     if (init) {
@@ -108,7 +110,7 @@ static STActionManager* _singleton;
                 }];
                 [self.operationQueue addOperation:operation];
             }
-            else if ([validSources count] == 1) {
+            else if ([validSources count] >= 1) {
                 [self handleSource:[validSources objectAtIndex:0] withAction:action.type withContext:context shouldExecute:YES];
             }
         }
@@ -131,15 +133,33 @@ static STActionManager* _singleton;
     //NSLog(@"%@", source.completionData);
     
     //}
-    id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];
-    if (sourceObject != nil && 
-        [sourceObject respondsToSelector:@selector(canHandleSource:forAction:withContext:)] &&
-        [sourceObject canHandleSource:source forAction:action withContext:context] &&
-        [sourceObject respondsToSelector:@selector(didChooseSource:forAction:withContext:)]) {
-        handled = TRUE;
-        if (flag) {
-            [sourceObject didChooseSource:source forAction:action withContext:context];
-            [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
+    if (!handled) {
+        handled = [[STActionUtil sharedInstance] canHandleSource:source forAction:action withContext:context];
+        if (handled && flag) {
+            [[STActionUtil sharedInstance] didChooseSource:source forAction:action withContext:context];
+        }
+    }
+    if (!handled && [action isEqualToString:@"watch"] && NO) {
+        NSString* previewURL = [source.sourceData objectForKey:@"preview_url"];
+        if (previewURL) {
+            handled = YES;
+            if (flag) {
+                MPMoviePlayerViewController* controller = [[[MPMoviePlayerViewController alloc] initWithContentURL:[NSURL URLWithString:previewURL]] autorelease];
+                [[Util currentNavigationController] presentMoviePlayerViewControllerAnimated:controller];
+            }
+        }
+    }
+    if (!handled) {
+        id<STViewDelegate> sourceObject = [self.sources objectForKey:source.source];
+        if (sourceObject != nil && 
+            [sourceObject respondsToSelector:@selector(canHandleSource:forAction:withContext:)] &&
+            [sourceObject canHandleSource:source forAction:action withContext:context] &&
+            [sourceObject respondsToSelector:@selector(didChooseSource:forAction:withContext:)]) {
+            handled = TRUE;
+            if (flag) {
+                [sourceObject didChooseSource:source forAction:action withContext:context];
+                [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
+            }
         }
     }
     if (!handled && source.endpoint) {
@@ -148,20 +168,20 @@ static STActionManager* _singleton;
             [[STStampedAPI sharedInstance] didChooseSource:source forAction:action withContext:context];
         }
     }
-    if (!handled && source.link) {
+    if (!handled && (source.link && ![action isEqualToString:@"listen"])) {
         handled = TRUE;
         if (flag) {
             NSURL* url = [NSURL URLWithString:source.link];
             if ([url.scheme isEqualToString:@"tel"]) {
-            [Util confirmWithMessage:[NSString stringWithFormat:@"Are you sure?"]
-                              action:@"Call"
-                         destructive:NO
-                           withBlock:^(BOOL result) {
-                               if (result) {
-                                   [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
-                                   [[UIApplication sharedApplication] openURL:url];
-                               }
-                           }];
+                [Util confirmWithMessage:[NSString stringWithFormat:@"Are you sure?"]
+                                  action:@"Call"
+                             destructive:NO
+                               withBlock:^(BOOL result) {
+                                   if (result) {
+                                       [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
+                                       [[UIApplication sharedApplication] openURL:url];
+                                   }
+                               }];
             }
             else {
                 [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];

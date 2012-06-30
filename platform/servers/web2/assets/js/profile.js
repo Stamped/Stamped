@@ -385,7 +385,10 @@ var g_update_stamps = null;
             };
             
             update_gallery(function() {
-                update_navbar_layout(false);
+                if (!!update_navbar_layout) {
+                    update_navbar_layout(false);
+                }
+                
                 last_layout = new Date();
                 
                 if (gallery_is_visible) {
@@ -1309,13 +1312,13 @@ var g_update_stamps = null;
                 if (category !== g_category) {
                     var sel = '.header-category-' + orig_category;
                     var $elem = $(sel);
+                    g_category = category;
                     
                     if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                         var completion_func = function() {
                             $('.header-selected').removeClass('header-animating header-selected');
                             $elem.removeClass('header-animating').addClass('header-selected');
                             
-                            g_category = category;
                             set_body_class(orig_category);
                             g_init_social_sharing();
                         };
@@ -1349,6 +1352,10 @@ var g_update_stamps = null;
                 
                 var $target = $("<div></div>");
                 $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                    if (category !== g_category) {
+                        return;
+                    }
+                    
                     if (status == "error") {
                         console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
                         console.debug(response);
@@ -2026,8 +2033,19 @@ var g_update_stamps = null;
             
             update_stamps($sdetail);
             
-            var title = $sdetail.find('.pronounced-title a').text();
-            var url   = $sdetail.find('.stamp-contents').attr("data-url");
+            // TODO: prefer .attr("data-url") vs .data("url")?
+            var title  = $sdetail.find('.pronounced-title a').text();
+            var url    = $sdetail.find('.stamp-contents').attr("data-url");
+            var prefix = "http://www.";
+            
+            // remove http://www. prefix from url to shorten it for sharing purposes
+            if (url.indexOf(prefix) === 0) {
+                var url2 = url.substring(prefix.length);
+                
+                if (url2.length > 0) {
+                    url = url2;
+                }
+            }
             
             init_social_sharing($sdetail, {
                 title : title, 

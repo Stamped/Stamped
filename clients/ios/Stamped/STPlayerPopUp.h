@@ -12,6 +12,6 @@
 
 + (void)present;
 
-+ (void)presentWithItems:(NSArray<STPlaylistItem>*)playlist clear:(BOOL)clear;
++ (void)presentWithItems:(NSArray<STPlaylistItem>*)playlist clear:(BOOL)clear startIndex:(NSInteger)index;
 
 @end

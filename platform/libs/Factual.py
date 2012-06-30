@@ -549,12 +549,12 @@ class Factual(object):
         else:
             return None
 
-    # note: these decorators add tiered caching to this function, such that 
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @lru_cache(maxsize=64)
     @cachedFn()
-    def __factual(self, service, prefix='places', **args):
+    def __rawFactual(self, service, prefix='places', **args):
         """
         Helper method for making OAuth Factual API calls.
 
@@ -578,8 +578,14 @@ class Factual(object):
             req = urllib2.Request(url, None, request.to_header())
             logs.info(req.get_full_url())
             res = urllib2.urlopen(req)
-            response = res.read()
-        m = json.loads(response)
+        return res.read()
+
+    def __factual(self, service, prefix='places', **args):
+        """
+        Factual results are difficult to turn into mongo objects for the mongo cache because sometimes they contain
+        dicts that use "$distance" as a key which is a problem for mongo. So we cache the result before it's parsed.
+        """
+        m = json.loads(self.__rawFactual(service, prefix, **args))
         try:
             return m['response']['data']
         except:

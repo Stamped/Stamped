@@ -90,15 +90,34 @@ footer {
             
             .stamp-map-item-arrow {
                 position: absolute;
-                left:   32px;
-                bottom: -12px;
+                left:    25px;
+                bottom: -18px;
                 
-                width:  27px;
-                height: 12px;
-                z-index: 26;
+                width:  0; 
+                height: 0; 
                 
-                background: url(/assets/img/mapstamp-arrow.png) no-repeat;
+                border-left:  20px solid transparent;
+                border-right: 20px solid transparent;
+                border-top:   20px solid #fff;
             }
+            
+            .stamp-map-item-arrow-inner {
+                position: absolute;
+                left:    25px;
+                bottom: -18px;
+                
+                width:  0;
+                height: 0;
+                
+                border-left:  20px solid transparent;
+                border-right: 20px solid transparent;
+                border-top:   20px solid transparent;
+            }
+            
+            /*width:  27px;
+            height: 12px;
+            z-index: 26;
+            background: url(/assets/img/mapstamp-arrow.png) no-repeat;*/
         }
         
         .stamp-map-item {
@@ -108,7 +127,6 @@ footer {
             z-index: 26;
             
             background: #fff;
-            padding: @marker_space;
             
             .box-shadow(0, 0, 4px, 0, @shadow);
             .rounded(4px);
@@ -118,14 +136,13 @@ footer {
             }
             
             .stamp-map-item-overlay {
-                position: absolute;
-                top:  0;
-                left: 0;
-                
-                width:  100%;
-                height: 100%;
-                
                 background: transparent;
+                padding: @marker_space;
+                
+                .rounded(4px);
+            }
+            
+            .clearfix {
                 pointer-events: none;
             }
             
@@ -156,8 +173,8 @@ footer {
             }
             
             .entity-header {
-                float: left;
                 position: relative;
+                float: left;
                 top: 0;
                 
                 margin-left: 0;

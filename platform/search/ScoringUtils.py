@@ -8,9 +8,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+from collections import namedtuple
 from SearchResult import SearchResult
 from resolve.Resolver import simplify
 from difflib import SequenceMatcher
+from DataQualityUtils import *
 
 import math
 
@@ -75,21 +77,45 @@ def sortByRelevance(results):
 
 
 def stringRelevance(queryText, resultText):
-    """Returns a number between 0 and 1, measuring how "relevant" the resultText is for queryText.
+    """Computes how well the given result text satisfies the query text.
 
     Note that this differs from similarity, in that it is not symmetric. It only matters now much of
     the query text is "fulfilled" by the result text. The result text could have a lot more
     irrelevant terms without affecting the result.
+
+    Returns a pair (relevance, matchingBlocks), where relevance is a score in [0, 1], and
+    matchingBlocks is a list of (i, n) blocks indicating that queryText[i:i+n] was matched.
     """
     queryText = simplify(queryText)
     resultText = simplify(resultText)
 
-    # sqrt(2), pulled out of an ass.
-    nonContinuityPenalty = 1.414
+    nonContinuityPenalty = 1.2
     matchingBlocks = SequenceMatcher(a=queryText, b=resultText).get_matching_blocks()
-    totalMatch = sum(matchSize ** nonContinuityPenalty
-            for _, _, matchSize in matchingBlocks if matchSize > 1)
-    return totalMatch / (len(queryText) ** nonContinuityPenalty)
+    matchingBlocks = filter(lambda block: block[2] > 1, matchingBlocks)
+    totalMatch = sum(matchSize ** nonContinuityPenalty for _, _, matchSize in matchingBlocks)
+    return totalMatch / (len(queryText) ** nonContinuityPenalty), [(i, n) for i, _, n in matchingBlocks]
+
+
+def combineMatchingSections(matchingSections):
+    """Given a list of (i, n) pairs, where each (i, n) pair denotes a block starting at ith
+    position, with length n, combine overlapping blocks, and return the total length of the combined
+    blocks.
+    
+    For example, if the input is [(0, 3), (2, 4), (20, 2)], the first two blocks overlap, and will
+    be combined to (0, 6). The final result would be 6 + 2 = 8.
+    """
+    if not matchingSections:
+        return 0
+
+    matchingSections.sort()
+    collapsedBlocks = [matchingSections[0]]
+    for i, n in matchingSections[1:]:
+        j, m = collapsedBlocks[-1]
+        if i <= j + m:
+            collapsedBlocks[-1] = (j, max(i - j + n, m))
+        else:
+            collapsedBlocks.append((i, n))
+    return sum(n for i, n in collapsedBlocks)
 
 
 def interleaveResultsByRelevance(resultLists):
@@ -128,13 +154,87 @@ def geoDistance((lat1, lng1), (lat2, lng2)):
     return d
 
 
-def augmentScoreForTextRelevance(results, queryText, resultTextExtractor, maxRelevanceBoost):
-    for result in results:
-        resultText = resultTextExtractor(result)
-        titleBoost = maxRelevanceBoost ** stringRelevance(queryText, resultText)
-        result.relevance *= titleBoost
-        result.addRelevanceComponentDebugInfo('title similarity factor', titleBoost)
+RelevanceFactor = namedtuple('RelevanceFactor', 'fieldName fieldExtractor maxBoost')
 
+def _adjustRelevanceByQueryMatch(searchResult, queryText, factors, fulfillmentFactor=0.5, fulfillmentExponent=0.5):
+    def adjustRelevance(matchFactor, maxBoost, factorName):
+        if matchFactor:
+            factor = maxBoost ** matchFactor
+            searchResult.relevance *= factor
+            searchResult.addRelevanceComponentDebugInfo('boost for query match against %s' % factorName, factor)
+
+    matchingBlocks = []
+    for fieldName, fieldExtractor, maxBoost in factors:
+        factor, blocks = stringRelevance(queryText, fieldExtractor(searchResult))
+        matchingBlocks.extend(blocks)
+        adjustRelevance(factor, maxBoost, fieldName)
+
+    queryFulfilled = combineMatchingSections(matchingBlocks) / len(queryText)
+    # If half-fulfilled, that equals out to 1.
+    relevanceMultiplier = queryFulfilled * fulfillmentFactor + 1 - (fulfillmentFactor / 2.0)
+    relevanceMultiplier = relevanceMultiplier ** fulfillmentExponent
+    searchResult.relevance *= relevanceMultiplier
+    searchResult.addRelevanceComponentDebugInfo('boost for fulfilling %f%% of query text' % queryFulfilled,
+                                                relevanceMultiplier)
+
+
+BOOKS_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2),
+    RelevanceFactor('author',
+        lambda result: ' '.join(author['name'] for author in result.resolverObject.authors), 1.5),
+)
+def adjustBookRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, BOOKS_RELEVANCE_FACTORS)
+
+MOVIE_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 1.4),
+    RelevanceFactor('author', lambda result: ' '.join(actor['name'] for actor in result.resolverObject.cast), 1.2),
+    RelevanceFactor('year',
+        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.2),
+    RelevanceFactor('description', lambda result: result.resolverObject.description, 1.2)
+)
+def adjustMovieRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, MOVIE_RELEVANCE_FACTORS)
+
+TV_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 1.4),
+    RelevanceFactor('year',
+        lambda result: str(result.resolverObject.release_date.year) if result.resolverObject.release_date else '', 1.2),
+    RelevanceFactor('description', lambda result: result.resolverObject.description, 1.2)
+)
+def adjustTvRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, TV_RELEVANCE_FACTORS)
+
+
+
+ARTIST_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2.0),
+)
+def adjustArtistRelevanceByQueryMatch(searchResult, queryText):
+    # If the whole query is consumed by the artist title alone, that's a big deal.
+    _adjustRelevanceByQueryMatch(searchResult, queryText, ARTIST_RELEVANCE_FACTORS, fulfillmentFactor=1, fulfillmentExponent=1)
+
+ALBUM_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2.0),
+    RelevanceFactor('artist', lambda result: ' '.join(artist['name'] for artist in result.resolverObject.artists), 1.0)
+)
+def adjustAlbumRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, ALBUM_RELEVANCE_FACTORS)
+
+TRACK_RELEVANCE_FACTORS = (
+    RelevanceFactor('title', lambda result: result.resolverObject.name, 2.0),
+    RelevanceFactor('artist', lambda result: ' '.join(artist['name'] for artist in result.resolverObject.artists), 1.0),
+    RelevanceFactor('album', lambda result: ' '.join(album['name'] for album in result.resolverObject.albums), 1.0)
+)
+def adjustTrackRelevanceByQueryMatch(searchResult, queryText):
+    _adjustRelevanceByQueryMatch(searchResult, queryText, TRACK_RELEVANCE_FACTORS)
+
+
+PLACE_RELEVANCE_FACTORS = (
+    RelevanceFactor('name', lambda result: result.resolverObject.name, 2.0),
+    RelevanceFactor('locality', lambda result: tryToGetLocalityFromPlace(result.resolverObject), 1.2),
+    RelevanceFactor('street address', lambda result: tryToGetStreetAddressFromPlace(result.resolverObject), 1.2)
+)
 
 def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, queryLatLng):
     """
@@ -144,15 +244,7 @@ def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, que
     job of handling them.
     """
     for result in results:
-        # TODO: I think the string matching here underweights substring matches, and especially prefix matches.
-        titleSimilarity = SequenceMatcher(',]:-.'.__contains__, queryText, result.resolverObject.name).ratio()
-        if titleSimilarity > 0.6:
-            factor = 1 + (titleSimilarity - 0.6)
-            # Maxes out at 1.5 if it's identical.
-            if titleSimilarity == 1:
-                factor += 0.1
-            result.relevance *= factor
-            result.addRelevanceComponentDebugInfo('title similarity factor', factor)
+        _adjustRelevanceByQueryMatch(result, queryText, PLACE_RELEVANCE_FACTORS)
 
         if queryLatLng and result.resolverObject.coordinates:
             distance = geoDistance(queryLatLng, result.resolverObject.coordinates)
@@ -160,4 +252,3 @@ def augmentPlaceRelevanceScoresForTitleMatchAndProximity(results, queryText, que
             distance_boost = 1 + math.log(100 / distance, 1000)
             result.relevance *= distance_boost
             result.addRelevanceComponentDebugInfo('proximity score factor', distance_boost)
-

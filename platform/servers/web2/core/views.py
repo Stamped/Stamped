@@ -301,11 +301,32 @@ def sdetail(request, schema, **kwargs):
     if stamp is None:
         raise StampedUnavailableError("stamp does not exist")
     
+    previews = stamp['previews']
+    users    = []
+    
+    if 'likes' in previews and len(previews['likes']) > 0:
+        likes = previews['likes']
+        
+        for user in likes:
+            user['preview_type'] = 'like'
+        
+        users.extend(likes)
+    
+    if 'todos' in previews and len(previews['todos']) > 0:
+        todos = previews['todos']
+        
+        for user in todos:
+            user['preview_type'] = 'todo'
+        
+        users.extend(todos)
+    
+    users   = _shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     sdetail = stamped_render(request, 'sdetail.html', {
-        'user'   : user, 
-        'stamp'  : stamp, 
-        'entity' : entity, 
+        'user'               : user, 
+        'feedback_users'     : users, 
+        'stamp'              : stamp, 
+        'entity'             : entity, 
     })
     
     if ajax:
@@ -333,24 +354,41 @@ def test_view(request, **kwargs):
     return stamped_render(request, 'test.html', { })
 
 @stamped_view(schema=HTTPStampId)
-def popup_likes(request, schema, **kwargs):
-    users = stampedAPIProxy.getLikes(schema.dataExport())
+def popup_sdetail_social(request, schema, **kwargs):
+    params = schema.dataExport()
+    likes  = stampedAPIProxy.getLikes(params)
+    todos  = stampedAPIProxy.getTodos(params)
+    users  = []
+    
+    for user in likes:
+        user['preview_type'] = 'like'
+    
+    for user in todos:
+        user['preview_type'] = 'todo'
+    
+    users.extend(likes)
+    users.extend(todos)
+    
+    users = _shuffle_split_users(users)
     num_users = len(users)
     
-    return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Likes" % num_users, 
-        'popup_class' : 'popup-likes', 
-        'users'       : users, 
-    })
-
-@stamped_view(schema=HTTPStampId)
-def popup_todos(request, schema, **kwargs):
-    users = stampedAPIProxy.getTodos(schema.dataExport())
-    num_users = len(users)
+    title = ""
+    popup = "popup-sdetail-social"
+    like  = "Like%s" % ("s" if len(likes) != 1 else "")
+    todo  = "Todo%s" % ("s" if len(todos) != 1 else "")
+    
+    if len(likes) > 0:
+        if len(todos) > 0:
+            title = "%d %s and %d %s" % (len(likes), like, len(todos), todo)
+        else:
+            title = "%d %s" % (len(likes), like)
+    elif len(todos) > 0:
+        title = "%d %s" % (len(todos), todo)
+        popup = "%s popup-todos" % popup
     
     return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Todos" % num_users, 
-        'popup_class' : 'popup-todos', 
+        'popup_title' : title, 
+        'popup_class' : popup, 
         'users'       : users, 
     })
 
