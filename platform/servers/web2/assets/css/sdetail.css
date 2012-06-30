@@ -101,7 +101,7 @@ footer,
 }
 .sdetail_body .section-entity {
   float: right;
-  width: 28%;
+  width: 30%;
   padding: .25em;
 }
 .sdetail_body .section-entity .close-button {
@@ -384,12 +384,12 @@ footer,
   z-index: 501;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content {
-  margin: 40px 48px 0;
+  margin: 29px 45px 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .entity-header {
   max-width: 280px;
   padding: 15px;
-  margin: 0px 0px 0px 0px;
+  margin: 0px;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .profile-image-large-ish {
   margin: 0 0 12px 0;
@@ -409,7 +409,7 @@ footer,
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .stamp-preview {
   clear: both;
-  margin: 24px 0;
+  margin: 22.5px 0;
   max-width: 420px !important;
   max-height: 280px !important;
   width: auto !important;
@@ -427,11 +427,11 @@ footer,
   cursor: pointer;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .stamp-preview img {
-  -webkit-box-shadow: 0 4px 12px -4px rgba(30, 30, 30, 0.85);
-  -moz-box-shadow: 0 4px 12px -4px rgba(30, 30, 30, 0.85);
-  -ms-box-shadow: 0 4px 12px -4px rgba(30, 30, 30, 0.85);
-  -o-box-shadow: 0 4px 12px -4px rgba(30, 30, 30, 0.85);
-  box-shadow: 0 4px 12px -4px rgba(30, 30, 30, 0.85);
+  -webkit-box-shadow: 0 2px 6px -4px rgba(30, 30, 30, 0.85);
+  -moz-box-shadow: 0 2px 6px -4px rgba(30, 30, 30, 0.85);
+  -ms-box-shadow: 0 2px 6px -4px rgba(30, 30, 30, 0.85);
+  -o-box-shadow: 0 2px 6px -4px rgba(30, 30, 30, 0.85);
+  box-shadow: 0 2px 6px -4px rgba(30, 30, 30, 0.85);
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .stamp-inner-content .normal_blurb {
   display: block;
@@ -474,7 +474,7 @@ footer,
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits {
   border-top: 1px solid #bbb;
-  padding: 0.5em 48px;
+  padding: 0.5em 45px;
   margin: 0;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .stamp-contents-upper .credits .stamp_0 {
@@ -524,7 +524,7 @@ footer,
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comments-list li.comment {
   display: block;
   border-bottom: 1px solid #bbb;
-  padding: 1em 48px 0;
+  padding: 1em 45px 0;
   opacity: 1;
 }
 .sdetail_body .section-stamp .stamp-card .stamp-contents .comments ol.comments-list li.comment .profile-image-small {

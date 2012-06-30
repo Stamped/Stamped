@@ -861,7 +861,7 @@ body.app .stamp-gallery-view-map {
 .social-feedback .count {
   position: relative;
   top: -4px;
-  margin: 0px 15px 0px 0px;
+  margin: 0px 7px 0px 0px;
 }
 .social-feedback .social-feedback-like {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
