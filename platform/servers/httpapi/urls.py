@@ -75,16 +75,11 @@ urlpatterns = patterns('',
     (r'v0/account/linked/netflix/add.json',                 'v0.functions.linked.add'),
 
     # TODO: REMOVE FROM PROD
-    (r'v0/account/linked_accounts.json',                    'v0.functions.linked.linked_accounts'),
-    
-    (r'v0/account/linked/twitter/update.json',              'v0.functions.linked.linked_accounts'),
     (r'v0/account/linked/twitter/remove.json',              'v0.functions.linked.removeTwitter'),
     (r'v0/account/linked/facebook/login_callback.json',     'v0.functions.linked.facebookLoginCallback'),
-    (r'v0/account/linked/facebook/update.json',             'v0.functions.linked.linked_accounts'),
     (r'v0/account/linked/facebook/remove.json',             'v0.functions.linked.removeFacebook'),
     (r'v0/account/linked/netflix/login.json',               'v0.functions.linked.netflixLogin'),
     (r'v0/account/linked/netflix/login_callback.json',      'v0.functions.linked.netflixLoginCallback'),
-    (r'v0/account/linked/netflix/update.json',              'v0.functions.linked.linked_accounts'),
     (r'v0/account/linked/netflix/remove.json',              'v0.functions.linked.removeNetflix'),
     (r'v0/account/linked/netflix/add_instant.json',         'v0.functions.linked.addToNetflixInstant'),
     (r'v0/account/linked/instagram/login_callback.json',    'v0.functions.linked.instagramLogin'),
