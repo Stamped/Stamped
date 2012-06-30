@@ -139,7 +139,7 @@ def createNetflixLoginResponse(request, netflixAddId=None):
     netflix = globalNetflix()
     secret, url = netflix.getLoginUrl(oauth_token, netflixAddId)
 
-    response                = HTTPEndpointResponse()
+    response                = HTTPActionResponse()
     source                  = HTTPActionSource()
     source.source           = 'netflix'
     source.link             = url
@@ -192,7 +192,7 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     if result == None:
         return createNetflixLoginResponse(request, http_schema.netflix_id)
 
-    response = HTTPEndpointResponse()
+    response = HTTPActionResponse()
 
     source                              = HTTPActionSource()
     source.name                         = 'Added to Netflix Instant Queue'

@@ -9,6 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 from utils                  import lazyProperty
 from pymongo.errors          import *
+from errors                 import *
 from framework.FixtureTest  import *
 from AStampedAPITestCase    import *
 from AStampedAPIHttpTestCase import *
@@ -249,6 +250,7 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):
 """
 
 class StampedAPIAccountCustomizeStamp(StampedAPIAccountHttpTest):
+
     def test_customize_stamp(self):
         path = "account/customize_stamp.json"
         data = {

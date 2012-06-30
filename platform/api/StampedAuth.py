@@ -243,18 +243,12 @@ class StampedAuth(AStampedAuth):
 
     
     def verifyPassword(self, userId, password):
-        try:
-            user = self._accountDB.getAccount(userId)
+        user = self._accountDB.getAccount(userId)
+        if not auth.comparePasswordToStored(password, user.password):
+            raise StampedInvalidPasswordError("Invalid password")
 
-            if not auth.comparePasswordToStored(password, user.password):
-                raise
+        return True
 
-            return True
-        except Exception:
-            msg = "Invalid password"
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
-    
     def forgotPassword(self, email):
         email = str(email).lower().strip()
         if not utils.validate_email(email):

@@ -58,7 +58,31 @@ logs.info("INIT: %s sec" % duration)
 if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
-def handleStampedExceptions(e):
+def handleStampedExceptions(e, handlers=None):
+    if handlers is not None:
+        logs.info('### e.__class__: %s' % e.__class__)
+        if e.__class__.__name__ in handlers:
+            exception = handlers[e.__class__.__name__]
+            logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
+            logs.warning(utils.getFormattedException())
+            logs.error(exception.code)
+
+            kind = exception.kind
+            if kind is None:
+                kind = 'stamped_error'
+
+            message = exception.msg
+            if message is None and e.msg is not None:
+                message = e.msg
+
+            error = {}
+            error['error'] = kind
+            if message is not None:
+                error['message'] = unicode(message)
+
+            logs.info('### about to return error message')
+            return transformOutput(error, status=exception.code)
+
     if isinstance(e, StampedHTTPError):
         if e.kind is None:
             e.kind = 'stamped_error'
@@ -133,7 +157,7 @@ def handleStampedExceptions(e):
     logs.warning(utils.getFormattedException())
     logs.error(500)
 
-    error = {'error': 'internal server error'}
+    error = {'error': 'internal_server_error'}
     return transformOutput(error, status=500)
 
 
@@ -143,7 +167,8 @@ def handleHTTPRequest(requires_auth=True,
                       conversion=None,
                       upload=None, 
                       parse_request_kwargs=None, 
-                      parse_request=True):
+                      parse_request=True,
+                      exceptions=None):
     """
         handleHTTPRequest is Stamped API's main HTTP API function decorator, taking 
         care of oauth, client, and request validation, optionally parsing the input 
@@ -217,7 +242,7 @@ def handleHTTPRequest(requires_auth=True,
                            requestData=request,
                            nodeName=stampedAPI.node_name)
                 logs.info("%s %s" % (request.method, request.path))
-                
+
                 if valid_origin is None:
                     if origin is not None:
                         logs.warning("Invalid origin: %s" % origin)
@@ -256,7 +281,7 @@ def handleHTTPRequest(requires_auth=True,
                 return ret
 
             except Exception as e:
-                return handleStampedExceptions(e)
+                return handleStampedExceptions(e, exceptions)
             finally:
                 try:
                     logs.save()

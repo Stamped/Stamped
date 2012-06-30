@@ -7,6 +7,12 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+exceptions = {
+    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
+    'StampedPermissionError'            : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to view user'),
+}
+
+
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
@@ -24,7 +30,7 @@ def lookup(request, authUserId, http_schema, **kwargs):
     elif http_schema.screen_names is not None:
         users = stampedAPI.getUsers(None, http_schema.screen_names.split(','), authUserId)
     else:
-        raise Exception("Field missing")
+        raise StampedInputError("Field missing")
     
     output = []
     for user in users:
@@ -131,8 +137,13 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
+exceptions_findTwitter = {
+    'StampedThirdPartyInvalidCredentialsError' : StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Twitter credentials'),
+}
+
 @handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
-                   parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]})
+                   parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]},
+                   exceptions=exceptions.update(exceptions_findTwitter))
 @require_http_methods(["POST"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.findUsersByTwitter(authUserId, http_schema.user_token, http_schema.user_secret)
@@ -144,8 +155,14 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
+exceptions_findFacebook = {
+    'StampedThirdPartyInvalidCredentialsError' : StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Facebook credentials'),
+}
+
 @handleHTTPRequest(http_schema=HTTPFindFacebookUser, 
-                   parse_request_kwargs={'obfuscate':['user_token' ]})
+                   parse_request_kwargs={'obfuscate':['user_token' ]},
+                   exceptions=exceptions.update(exceptions_findTwitter))
+
 @require_http_methods(["POST"])
 def findFacebook(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.findUsersByFacebook(authUserId, http_schema.user_token)
