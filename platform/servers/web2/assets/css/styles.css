@@ -194,11 +194,11 @@ a.follow-button:active {
 .post-header {
   position: relative;
   width: 100%;
-  -webkit-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
-  -moz-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
-  -ms-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
-  -o-box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
-  box-shadow: 0 3px 3px 0 rgba(50, 50, 50, 0.25);
+  -webkit-box-shadow: 0 2px 3px 0 rgba(50, 50, 50, 0.15);
+  -moz-box-shadow: 0 2px 3px 0 rgba(50, 50, 50, 0.15);
+  -ms-box-shadow: 0 2px 3px 0 rgba(50, 50, 50, 0.15);
+  -o-box-shadow: 0 2px 3px 0 rgba(50, 50, 50, 0.15);
+  box-shadow: 0 2px 3px 0 rgba(50, 50, 50, 0.15);
   position: relative;
   display: block;
   height: 15px;
