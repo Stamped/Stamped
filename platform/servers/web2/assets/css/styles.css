@@ -251,6 +251,7 @@ a.follow-button:active {
                                 PROFILE IMAGES
    ************************************************************************** */
 .profile-image-large {
+  position: relative;
   float: left;
   display: block;
   width: 136px;
@@ -265,17 +266,16 @@ a.follow-button:active {
   -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
-  border: 4px solid #ffffff;
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-large img:active {
   border-color: #666;
 }
+.profile-image-large:hover .context-popup {
+  display: block;
+  cursor: pointer;
+}
 .profile-image-large-ish {
+  position: relative;
   float: left;
   display: block;
   width: 102px;
@@ -290,17 +290,16 @@ a.follow-button:active {
   -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
-  border: 3px solid #ffffff;
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-large-ish img:active {
   border-color: #666;
 }
+.profile-image-large-ish:hover .context-popup {
+  display: block;
+  cursor: pointer;
+}
 .profile-image-medium-ish {
+  position: relative;
   float: left;
   display: block;
   width: 78px;
@@ -315,17 +314,16 @@ a.follow-button:active {
   -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
-  border: 3px solid #ffffff;
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-medium-ish img:active {
   border-color: #666;
 }
+.profile-image-medium-ish:hover .context-popup {
+  display: block;
+  cursor: pointer;
+}
 .profile-image-medium {
+  position: relative;
   float: left;
   display: block;
   width: 58px;
@@ -340,17 +338,16 @@ a.follow-button:active {
   -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
-  border: 2px solid #ffffff;
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-medium img:active {
   border-color: #666;
 }
+.profile-image-medium:hover .context-popup {
+  display: block;
+  cursor: pointer;
+}
 .profile-image-small {
+  position: relative;
   float: left;
   display: block;
   width: 48px;
@@ -365,17 +362,16 @@ a.follow-button:active {
   -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
-  border: 2px solid #ffffff;
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-small img:active {
   border-color: #666;
 }
+.profile-image-small:hover .context-popup {
+  display: block;
+  cursor: pointer;
+}
 .profile-image-tiny {
+  position: relative;
   float: left;
   display: block;
   width: 26px;
@@ -390,15 +386,13 @@ a.follow-button:active {
   -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
   box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
-  border: 1px solid #ffffff;
-  -webkit-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -ms-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  -o-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25);
 }
 .profile-image-tiny img:active {
   border-color: #666;
+}
+.profile-image-tiny:hover .context-popup {
+  display: block;
+  cursor: pointer;
 }
 /* **************************************************************************
                                 USER GALLERY
@@ -406,36 +400,32 @@ a.follow-button:active {
 .user-gallery {
   display: block;
   position: relative;
-  /*:nth-child(3) {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        margin-top: -12px;
-        
-        .overlay {
-            display: block;
-            width:  24px;
-            height: 24px;
-            
-            background: url(/assets/img/user-gallery-expand.png) left top no-repeat;
-        }
-        
-        &:hover {
-            background: lighten(@stamped-base-color, 10%);
-        }
-    }*/
-
 }
 .user-gallery .user-gallery-item {
   display: inline-block;
 }
-.user-gallery .user-gallery-item .overlay {
-  display: none;
-  z-index: 23;
-  position: relative;
+.user-gallery .expand-friends {
+  position: absolute;
+  display: block;
+  width: 24px;
+  height: 24px;
+  right: 4px;
+  top: 50%;
+  margin-top: -14px;
+  background: url(/assets/img/user-gallery-expand.png) no-repeat;
+  border: 2px solid #ffffff;
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -ms-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  -o-box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
 }
-.user-gallery :nth-child(n+4) {
-  display: none;
+.user-gallery .expand-friends:active {
+  border-color: #666;
+}
+.user-gallery .expand-friends:hover .context-popup,
+.user-gallery .expand-friends:active .context-popup {
+  display: block;
 }
 /* **************************************************************************
                            CRINKLED STATIC GOOGLE MAP
@@ -1575,4 +1565,62 @@ a.pronounced-title {
   font-size: 2.8em;
   letter-spacing: .05em;
   color: #262626;
+}
+.context-popup {
+  position: absolute;
+  top: -32px;
+  left: -16px;
+  font-size: .9em;
+  font-weight: 700;
+  padding: 8px;
+  z-index: 10001;
+  line-height: 100%;
+  display: none;
+  background: rgba(10, 10, 10, 0.75);
+  color: #fff;
+  white-space: nowrap;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.close-button {
+  position: relative;
+  display: block;
+  /* NOTE: with the rounded corners, this ends up being 36x36px */
+
+  /* TODO: possibly replace these rounded corners with static images? */
+
+  width: 28px;
+  height: 28px;
+  border: 4px solid #bfbfbf;
+  background: #fff;
+  -webkit-border-radius: 36px;
+  -moz-border-radius: 36px;
+  border-radius: 36px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  -webkit-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.25);
+  -moz-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.25);
+  -ms-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.25);
+  -o-box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.25);
+  box-shadow: 0 0 6px 0 rgba(50, 50, 50, 0.25);
+}
+.close-button .close-button-inner {
+  background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 14px;
+  height: 14px;
+}
+.close-button:hover {
+  border-color: #666;
+  cursor: pointer;
+}
+.close-button:hover .close-button-inner {
+  background-position: -48px 0;
 }

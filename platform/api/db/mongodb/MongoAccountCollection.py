@@ -177,8 +177,11 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 raise StampedDuplicationError("Account information already exists: %s" % e)
     
     def getAccount(self, userId):
-        documentId = self._getObjectIdFromString(userId)
-        document = self._getMongoDocumentFromId(documentId)
+        try:
+            documentId = self._getObjectIdFromString(userId)
+            document = self._getMongoDocumentFromId(documentId)
+        except Exception:
+            raise StampedAccountNotFoundError("Account not found in database")
         return self._convertFromMongo(document)
     
     def getAccounts(self, userIds, limit=0):
@@ -213,14 +216,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         email = str(email).lower()
         document = self._collection.find_one({"email": email})
         if document is None:
-            raise StampedUnavailableError("Unable to find account (%s)" % email)
+            raise StampedAccountNotFoundError("Unable to find account (%s)" % email)
         return self._convertFromMongo(document)
     
     def getAccountByScreenName(self, screenName):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
         if document is None:
-            raise StampedUnavailableError("Unable to find account (%s)" % screenName)
+            raise StampedAccountNotFoundError("Unable to find account (%s)" % screenName)
         return self._convertFromMongo(document)
 
     def getAccountsByFacebookId(self, facebookId):

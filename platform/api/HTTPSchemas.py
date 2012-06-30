@@ -978,7 +978,7 @@ class HTTPPreviews(Schema):
 # Endpoint Response #
 # ################# #
 
-class HTTPEndpointResponse(Schema):
+class HTTPActionResponse(Schema):
     @classmethod
     def setSchema(cls):
         cls.addNestedProperty('action',                     HTTPAction)
@@ -2621,8 +2621,8 @@ class HTTPStampNew(Schema):
 class HTTPStampShare(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamp_id',                         basestring)
         cls.addProperty('service_name',                     basestring)
+        cls.addProperty('stamp_id',                         basestring)
         cls.addProperty('temp_image_url',                   basestring)
 
 class HTTPStampEdit(Schema):

@@ -49,8 +49,10 @@ def share(request, authUserId, http_schema, data, **kwargs):
         stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
     except StampedLinkedAccountError:
         raise StampedHTTPError(401, msg="Missing credentials for linked account")
+    except StampedThirdPartyError:
+        raise StampedHTTPError(400, msg="There was an error connecting to the third-party service")
 
-
+    stamp = HTTPStamp().importStamp(stamp)
     return transformOutput(stamp.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPStampId)

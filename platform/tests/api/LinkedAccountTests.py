@@ -42,7 +42,7 @@ class StampedAPILinkedAccountHttpTest(AStampedAPIHttpTestCase):
 
 
         # Next generate the test user for our app on Facebook
-        fb_test_user            = self.fb.createTestUser(name, self.fb_app_access_token, permissions='email,publish_actions')
+        fb_test_user            = self.fb.createTestUser(name, self.fb_app_access_token, permissions='email,publish_stream,publish_actions')
 
         fb_user_id              = fb_test_user['id']
         fb_user_token           = fb_test_user['access_token']
@@ -377,64 +377,81 @@ class StampedAPIFacebookTest(StampedAPILinkedAccountHttpTest):
 
 class StampedAPIFacebookCreate(StampedAPIFacebookTest):
 
-    def test_invalid_facebook_token_login(self):
-        # attempt login with invalid facebook token
-        with expected_exception():
-            self.loginWithFacebook("BLAAARRGH!!")
+#    def test_invalid_facebook_token_login(self):
+#        # attempt login with invalid facebook token
+#        with expected_exception():
+#            self.loginWithFacebook("BLAAARRGH!!")
+#
+#    def test_create_duplicate_facebook_auth_account(self):
+#        with expected_exception():
+#            self.createFacebookAccount(self.fb_user_token_a, name='fUser2')
+#
+#    def test_linked_account_with_used_facebook_id(self):
+#    #        self.addLinkedAccount(
+#    #            self.sUserToken,
+#    #                { 'facebook_id'         : self.fb_user_id,
+#    #                  'facebook_name'       : 'facebook_user',
+#    #                  'facebook_token'      : self.fb_user_token,
+#    #                  }
+#    #        )
+#        pass
+#
+#    def test_attempt_linked_account_change_for_facebook_auth_user(self):
+#        pass
 
-    def test_create_duplicate_facebook_auth_account(self):
-        with expected_exception():
-            self.createFacebookAccount(self.fb_user_token_a, name='fUser2')
-
-    def test_linked_account_with_used_facebook_id(self):
-    #        self.addLinkedAccount(
-    #            self.sUserToken,
-    #                { 'facebook_id'         : self.fb_user_id,
-    #                  'facebook_name'       : 'facebook_user',
-    #                  'facebook_token'      : self.fb_user_token,
-    #                  }
-    #        )
-        pass
-
-    def test_attempt_linked_account_change_for_facebook_auth_user(self):
-        pass
-
-
-
-    def test_valid_login(self):
-        # login with facebook user account
-        result = self.loginWithFacebook(self.fb_user_token_a)
-
-        # verify that the stamped user token and user_id are correct
-        self.assertEqual(result['user']['user_id'], self.fUserA['user_id'])
-
-    def test_find_by_facebook(self):
-        path = "users/find/facebook.json"
+    def test_fb_stamp_share(self):
+        self.entity = self.createEntity(self.fUserAToken)
+        self.stamp = self.createStamp(self.fUserAToken, self.entity['entity_id'])
+        path = 'v0/stamps/share/facebook.json'
         data = {
             "oauth_token"   : self.fUserAToken['access_token'],
-            "user_token"    : self.fb_user_token_a,
+            "service_name"  : "facebook",
+            "stamp_id"      : self.stamp['stamp_id'],
         }
+        self.handlePOST(path, data)
 
-        logs.info("self.fb_user_token_a %s" % self.fb_user_token_a)
+        # Get news feed from Facebook to verify the wall post went through
+        result = self.fb.getNewsFeed(self.fb_user_id_a, self.fb_user_token_a)
 
-        self.async(lambda: self.handlePOST(path, data), [
-            lambda x: self.assertEqual(len(x), 1),
-            lambda x: self.assertEqual(x[0]['user_id'], self.fUserB['user_id']),
-            ])
-
-    def test_friend_joined_activity_alert(self):
-        self.async(lambda: self.showActivity(self.fUserAToken), [
-            lambda x: self.assertEqual(len(x), 1),
-            lambda x: self.assertEqual(x[0]['verb'], 'friend_facebook'),
-            lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.fUserB['user_id']),
-            ])
-
-        # Make sure that another activity alert is not sent
-        self.deleteAccount(self.fUserBToken)
-        (self.fUserB, self.fUserBToken) = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
-        self.async(lambda: self.showActivity(self.fUserAToken), [
-            lambda x: self.assertEqual(len(x), 1),
-            ])
+        import pprint
+        print('#### NEWS FEED RESULTS:')
+        pprint.pprint(result)
+#
+#
+#    def test_valid_login(self):
+#        # login with facebook user account
+#        result = self.loginWithFacebook(self.fb_user_token_a)
+#
+#        # verify that the stamped user token and user_id are correct
+#        self.assertEqual(result['user']['user_id'], self.fUserA['user_id'])
+#
+#    def test_find_by_facebook(self):
+#        path = "users/find/facebook.json"
+#        data = {
+#            "oauth_token"   : self.fUserAToken['access_token'],
+#            "user_token"    : self.fb_user_token_a,
+#        }
+#
+#        logs.info("self.fb_user_token_a %s" % self.fb_user_token_a)
+#
+#        self.async(lambda: self.handlePOST(path, data), [
+#            lambda x: self.assertEqual(len(x), 1),
+#            lambda x: self.assertEqual(x[0]['user_id'], self.fUserB['user_id']),
+#            ])
+#
+#    def test_friend_joined_activity_alert(self):
+#        self.async(lambda: self.showActivity(self.fUserAToken), [
+#            lambda x: self.assertEqual(len(x), 1),
+#            lambda x: self.assertEqual(x[0]['verb'], 'friend_facebook'),
+#            lambda x: self.assertEqual(x[0]['subjects'][0]['user_id'], self.fUserB['user_id']),
+#            ])
+#
+#        # Make sure that another activity alert is not sent
+#        self.deleteAccount(self.fUserBToken)
+#        (self.fUserB, self.fUserBToken) = self.createFacebookAccount(self.fb_user_token_b, name='fUserB')
+#        self.async(lambda: self.showActivity(self.fUserAToken), [
+#            lambda x: self.assertEqual(len(x), 1),
+#            ])
 
 
 class StampedAPITwitterHttpTest(AStampedAPIHttpTestCase):

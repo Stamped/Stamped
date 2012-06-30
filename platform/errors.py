@@ -10,6 +10,16 @@ import logs
 class Fail(Exception):
     pass
 
+error_kinds = set([
+    'stamped_error',
+    'forbidden',
+    'invalid_credentials',
+    'illegal_action',
+    'already_exists',
+    'not_found',
+    'internal_server_error',
+])
+
 class StampedHTTPError(Exception):
     def __init__(self, code, kind=None, msg=None):
         Exception.__init__(self, msg)
@@ -111,6 +121,7 @@ class StampedLinkedAccountExistsError(StampedIllegalActionError):
     def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
+
 class StampedInvalidPasswordError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
@@ -123,11 +134,19 @@ class StampedInvalidEmailError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
+class StampedInvalidWebsiteError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
 class StampedInvalidClientError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
 class StampedInvalidCredentialsError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidStampColorsError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
@@ -139,10 +158,19 @@ class StampedDuplicateScreenNameError(StampedDuplicationError):
     def __init__(self, msg=None):
         StampedDuplicationError.__init__(self, msg)
 
+class StampedAccountNotFoundError(StampedUnavailableError):
+    def __init(self, msg=None):
+        StampedUnavailableError.__init__(self, msg)
+
+class StampedBlackListedScreenNameError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+
 
 class StampedLinkedAccountError(StampedPermissionsError):
     def __init__(self, msg=None):
-        StampedDuplicationError.__init__(self, msg)
+        StampedPermissionsError.__init__(self, msg)
 
 # Third Party Stamped Exceptions
 
