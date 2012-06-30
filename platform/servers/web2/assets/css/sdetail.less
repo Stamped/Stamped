@@ -366,7 +366,7 @@
         
         .stamp-card {
             @round: 0px;
-            .box-shadow(0, 1px, 8px, 0, @shadow-sdetail);
+            .box-shadow(0, 2px, 15px, 0, @shadow-sdetail);
             .rounded(@round);
             
             @space: 45px;
@@ -549,7 +549,7 @@
                         
                         li.comment {
                             display: block;
-                            border-bottom: 1px solid #bbb;
+                            border-bottom: 1px solid #f2f2f2;
                             padding: 1em @space 0;
                             opacity: 1;
                             
@@ -601,6 +601,7 @@
                         
                         .show {
                             display: block;
+                            font-size: 80%;
                         }
                         
                         .hide {
@@ -634,10 +635,14 @@
         //border: 2px solid blue;
         float: left;
         width: 50%;
-        margin: .5em .5em 1em;
+        margin: .5em .5em 4em;
+        padding-left: 37px;
         
         p.share {
             font-size: 80%;
+            font-weight: bold;
+            color: #595959;
+            letter-spacing: 0.01em;
         }
         
         .share-button {
@@ -661,20 +666,27 @@
     .entity-title {
         .stamped-font();
         
-        font-size: 4em;
-        font-weight: bold;
+        font-size: 2.8em;
         color: #262626;
+        margin-bottom: 7px;
+        letter-spacing: 0.02em;
+        padding: 0px 20px 5px 9px;
         
-        .box-shadow(0, 3px, 3px, 0, @shadow);
+        .box-shadow(0, 2px, 4px, 0, rgba(0,0,0,0.1));
     }
     
     .menus {
-        max-height: 420px; // TODO: nuance
+        max-height: 380px; // TODO: nuance
         overflow-y: scroll;
         
         p {
             margin: 0;
-            line-height: 125%;
+            padding:0px 60px 0px 60px;
+            line-height: 130%;
+            font-size: 67%;
+            letter-spacing: 0.05em;
+            color: #999999;
+            margin-bottom: 6px;
         }
         
         .jspVerticalBar {
@@ -687,19 +699,19 @@
             padding: 0 12px;
             
             .submenu-title {
-                color: #595959;
+                color: #999999;
                 
-                font-size: 200%;
-                font-weight: bold;
-                font-style: italic;
-                font-family: "Georgia", "arial", sans-serif;
+                font-size: 80%;
+                font-style: bold;
+                font-family: "helvetica", sans-serif;
+                margin-bottom: 12px;
                 
                 /* TODO: use font shorthand here! */
             }
             
             .submenu-desc {
                 font-style: italic;
-                font-size: 90%;
+                font-size: 80%;
             }
             
             .submenu-footnote {
@@ -712,13 +724,16 @@
                 color: #999;
                 
                 .section-title {
-                    font-size: 150%;
-                    margin-bottom: .5em;
+                	font-style: italic;
+                	font-family: "Georgia", "helvetica", sans-serif;
+                    font-size: 100%;
+                    color: #595959;
+                    margin-bottom: 19px;
                 }
                 
                 .section-desc {
                     font-style: italic;
-                    font-size: 90%;
+                    font-size: 60%;
                 }
                 
                 .items {
@@ -726,7 +741,9 @@
                         margin-bottom: 1em;
                         
                         .item-title {
-                            font-weight: bold;
+                            font-weight: 400;
+                            font-size: 80%;
+                            margin-bottom: 3px;
                         }
                         
                         .item-prices {
@@ -745,11 +762,12 @@
     }
     
     .attribution {
-        .box-shadow(0, -3px, 3px, 0, @shadow);
-        padding: 12px 24px 0;
+        .box-shadow(0, -2px, 3px, 0, rgba(0,0,0,0.1));
+        padding: 12px 50px 0px 50px;
         
-        font-style: italic;
-        font-size: 70%;
+        font-style: normal;
+        font-size: 67%;
+        color: #bfbfbf;
     }
 }
 

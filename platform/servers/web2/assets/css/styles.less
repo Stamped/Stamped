@@ -33,11 +33,15 @@ body, html {
 }
 
 body {
-    font-family: 'arial', sans-serif;
+    font-family: 'helvetica', sans-serif;
     font-size: 1em;
     
     background: #fff;
     color: #666;
+}
+
+a, a:link {
+	font-style: inherit;
 }
 
 a, a:focus {
@@ -53,7 +57,7 @@ a:visited {
 }
 
 a:hover {
-    text-decoration: underline;
+    color: black;
 }
 
 ol, ul {
@@ -269,7 +273,7 @@ a.follow-button {
 }
 
 .profile-image-tiny {
-    .profile-image(24px,  2px);
+    .profile-image(24px,  1px);
 }
 
 
@@ -547,7 +551,7 @@ a.follow-button {
 
 .share-widget {
     background-color: #fff;
-    padding: 0.25em 0.5em;
+    padding: 7px 17px 4px 17px;
     
     .rounded(1em);
     .box-shadow(0, 0, 18px, 0, @shadow);
@@ -572,7 +576,7 @@ a.follow-button {
         display: none;
         white-space: nowrap;
         
-        margin: 4px auto;
+        margin: 7px 0px 5px 0px;
         
         .share-button {
             display: inline-block;
