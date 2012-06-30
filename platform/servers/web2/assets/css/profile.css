@@ -66,7 +66,7 @@ footer,
 @font-face {
   font-family: StampedFallbackFont;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200;
   src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
 }
 /**** Isotope Filtering ****/
@@ -252,8 +252,8 @@ footer,
   padding: 0;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs p.name {
-  font-weight: 700;
-  color: #000;
+  font-weight: 400;
+  color: #262626;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-body .profile-header-body-fixedwidth .lhs p.title {
   font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
@@ -262,7 +262,7 @@ footer,
   line-height: 100%;
   font-size: 7em;
   letter-spacing: .02em;
-  color: #000;
+  color: #262626;
   display: block;
   padding: 0;
 }
@@ -545,6 +545,8 @@ footer,
   letter-spacing: .03em;
   margin: 0 0 -0.2em;
   text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+  top: 5px;
 }
 .profile-header-wrapper .profile-header .profile-content-page .profile-header-post .inset-stamp p {
   margin: 0 0 .5em;
@@ -859,6 +861,7 @@ body.app .stamp-gallery-view-map {
 .social-feedback .count {
   position: relative;
   top: -4px;
+  margin: 0px 7px 0px 0px;
 }
 .social-feedback .social-feedback-like {
   background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
@@ -1073,12 +1076,12 @@ body.app .stamp-gallery-view-map {
   text-align: left;
   quotes: "\201C" "\201D";
   font-family: 'helvetica', sans-serif;
-  font-weight: 300;
+  font-weight: 200;
   color: #999999;
   line-height: 140%;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   margin: 0px 0px 9px 0px;
-  top: -10px;
+  top: -8px;
   position: relative;
 }
 .blurb {
@@ -1095,7 +1098,7 @@ body.app .stamp-gallery-view-map {
   position: relative;
   display: block;
   margin: -0.3em 0 0;
-  top: -1px;
+  top: 0px;
   left: -3px;
 }
 .subtitle-line p {

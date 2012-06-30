@@ -72,7 +72,7 @@ footer, .fixedwidth {
 @font-face {
     font-family: StampedFallbackFont;
     font-style:  normal;
-    font-weight: 400;
+    font-weight: 200;
     
     src: local("☺"),
          url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
@@ -86,7 +86,7 @@ footer, .fixedwidth {
 
 .profile-image-border(@size) {
     border: @size solid #fff;
-    .box-shadow(0px, @size, @size, 0, rgba(0, 0, 0, 0.15));
+    .box-shadow(0px, 1px, 3px, 0, rgba(0, 0, 0, 0.15));
     
     &:active {
         border-color: #666;
