@@ -276,6 +276,9 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)linkedAccountsWithCallback:(void (^)(id<STLinkedAccounts> linkedAccounts, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)removeLinkedAccountWithService:(NSString*)service
+                                      andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
 - (NSString*)stringForScope:(STStampedAPIScope)scope;
 
 - (void)fastPurge;

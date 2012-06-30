@@ -59,7 +59,7 @@
     [mapping mapKeyPathsToAttributes:
      @"service_name", @"serviceName",
      @"linked_user_id", @"linkedUserID",
-     @"linked_name", @"linked_name",
+     @"linked_name", @"linkedName",
      @"token", @"token",
      @"secret", @"secret",
      @"token_expiration", @"tokenExpiration",

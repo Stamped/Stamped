@@ -15,11 +15,36 @@
 #import "STEvents.h"
 #import "STSimpleBooleanResponse.h"
 #import "STLinkedAccounts.h"
+#import "STSimpleEndpointResponse.h"
+#import "STActionManager.h"
+#import "STSimpleAlertItem.h"
+#import "CocoaLibSpotify.h"
+#import "STTwitter.h"
+#import "STStampedAPI.h"
+#import "Util.h"
 
 static const CGFloat _headerWidth = 200;
 static const CGFloat _textOffset = 26;
+static const CGFloat _cellHeight = 46;
 
-@interface STLinkedAccountsViewController () <FBRequestDelegate>
+
+@interface STOpenGraphCell : UITableViewCell
+
+- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
+
+- (void)setupWithAlertItem:(id<STAlertItem>)item;
+
+@property (nonatomic, readwrite, retain) UIView* title;
+@property (nonatomic, readonly, retain) UIButton* button;
+@property (nonatomic, readonly, retain) UIImageView* check;
+@property (nonatomic, readwrite, copy) NSString* toggleID;
+@property (nonatomic, readwrite, assign) BOOL locked;
+@property (nonatomic, readwrite, assign) STLinkedAccountsViewController* controller;
+
+@end
+
+
+@interface STLinkedAccountsViewController () <FBRequestDelegate, UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, readonly, retain) UIButton* connectToFacebook;
 @property (nonatomic, readonly, retain) UIButton* connectToTwitter;
@@ -28,8 +53,24 @@ static const CGFloat _textOffset = 26;
 @property (nonatomic, readonly, retain) UIButton* connectToNetflix;
 
 @property (nonatomic, readonly, retain) UIButton* disconnectFromFacebook;
+@property (nonatomic, readonly, retain) UIButton* disconnectFromTwitter;
 @property (nonatomic, readonly, retain) UIButton* disconnectFromRdio;
+@property (nonatomic, readonly, retain) UIButton* disconnectFromSpotify;
 @property (nonatomic, readonly, retain) UIButton* disconnectFromNetflix;
+
+@property (nonatomic, readonly, retain) STViewContainer* openGraphSettings;
+@property (nonatomic, readonly, retain) UITableView* openGraphTable;
+@property (nonatomic, readwrite, retain) NSArray<STAlertItem>* openGraphItems;
+@property (nonatomic, readonly, retain) NSMutableDictionary* openGraphValues;
+@property (nonatomic, readwrite, retain) STCancellation* openGraphCancellation;
+
+@property (nonatomic, readwrite, assign) BOOL twitterPending;
+
+@property (nonatomic, readwrite, retain) STCancellation* netflixCancellation;
+@property (nonatomic, readwrite, assign) BOOL netflixEndpointPending;
+
+@property (nonatomic, readwrite, retain) STCancellation* linkedAccountsCancellation;
+@property (nonatomic, readwrite, retain) FBRequest* meDetailsRequest;
 
 @property (nonatomic, readwrite, assign) BOOL locked;
 
@@ -44,8 +85,24 @@ static const CGFloat _textOffset = 26;
 @synthesize connectToNetflix = _connectToNetflix;
 
 @synthesize disconnectFromFacebook = _disconnectFromFacebook;
+@synthesize disconnectFromTwitter = _disconnectFromTwitter;
 @synthesize disconnectFromRdio = _disconnectFromRdio;
+@synthesize disconnectFromSpotify = _disconnectFromSpotify;
 @synthesize disconnectFromNetflix = _disconnectFromNetflix;
+
+@synthesize openGraphSettings = _openGraphSettings;
+@synthesize openGraphTable = _openGraphTable;
+@synthesize openGraphItems = _openGraphItems;
+@synthesize openGraphValues = _openGraphValues;
+@synthesize openGraphCancellation = _openGraphCancellation;
+
+@synthesize twitterPending = _twitterPending;
+
+@synthesize netflixCancellation = _netflixCancellation;
+@synthesize netflixEndpointPending = _netflixEndpointPending;
+
+@synthesize linkedAccountsCancellation = _linkedAccountsCancellation;
+@synthesize meDetailsRequest = _meDetailsRequest;
 
 @synthesize locked = _locked;
 
@@ -53,12 +110,15 @@ static const CGFloat _textOffset = 26;
 {
     self = [super init];
     if (self) {
+        _openGraphItems = (id)[[NSArray alloc] init];
+        _openGraphValues = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [STEvents removeObserver:self];
     [_connectToFacebook release];
     [_connectToTwitter release];
@@ -67,14 +127,35 @@ static const CGFloat _textOffset = 26;
     [_connectToNetflix release];
     
     [_disconnectFromFacebook release];
+    [_disconnectFromTwitter release];
     [_disconnectFromRdio release];
+    [_disconnectFromSpotify release];
     [_disconnectFromNetflix release];
+    
+    [_openGraphSettings release];
+    [_openGraphTable release];
+    [_openGraphItems release];
+    [_openGraphValues release];
+    [_openGraphCancellation release];
+    
+    [_netflixCancellation cancel];
+    [_netflixCancellation release];
+    
+    [_linkedAccountsCancellation cancel];
+    [_linkedAccountsCancellation release];
+    _meDetailsRequest.delegate = nil;
+    
+    [_meDetailsRequest release];
     [super dealloc];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+    [[STStampedAPI sharedInstance] linkedAccountsWithCallback:^(id<STLinkedAccounts> linkedAccounts, NSError *error, STCancellation *cancellation) {
+        [self setupWithLinkedAccounts:linkedAccounts error:error]; 
+    }];
 }
 
 - (void)setupWithLinkedAccounts:(id<STLinkedAccounts>)linkedAccounts error:(NSError*)error {
@@ -83,6 +164,9 @@ static const CGFloat _textOffset = 26;
         [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFailed];
         [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookCameBack];
         [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookLoggedOut];
+        
+        [STEvents addObserver:self selector:@selector(twitterAuthFinished:) event:EventTypeTwitterAuthFinished];
+        [STEvents addObserver:self selector:@selector(twitterAuthFailed:) event:EventTypeTwitterAuthFailed];
         
         UIImageView* header = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"linked_accounts_greenbar"]] autorelease];
         CGRect headerFrame = header.frame;
@@ -131,12 +215,50 @@ static const CGFloat _textOffset = 26;
                                                    color:[UIColor stampedDarkGrayColor]] retain];
         [self wrapAndAppendViews:_connectToFacebook other:_disconnectFromFacebook];
         
+        _openGraphSettings = [[STViewContainer alloc] initWithDelegate:self.scrollView andFrame:CGRectMake(0, -5, self.view.frame.size.width, 5)];
+        _openGraphTable = [[UITableView alloc] initWithFrame:CGRectMake(0, 5, self.view.frame.size.width, 0)];
+        _openGraphTable.backgroundColor = [UIColor clearColor];
+        _openGraphTable.delegate = self;
+        _openGraphTable.dataSource = self;
+        _openGraphTable.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [_openGraphSettings addSubview:_openGraphTable];
+        [_openGraphTable reloadData];
+        [self.scrollView appendChildView:_openGraphSettings];
+        
+        if (linkedAccounts.facebook) {
+            _connectToFacebook.hidden = YES;
+            [self loadOpenGraphSettings];
+        }
+        else {
+            _disconnectFromFacebook.hidden = YES;
+        }
+        
         _connectToTwitter = [[self buttonWithTitle:@"Twitter"
                                           subtitle:@"Connect to Twitter"
-                                            action:@selector(connectTemp:)
+                                            action:@selector(connectToTwitter:)
                                              image:@"welcome_twitter_btn" 
                                              color:[UIColor whiteColor]] retain];
-        [self.scrollView appendChildView:_connectToTwitter];
+        _disconnectFromTwitter = [[self buttonWithTitle:@"Twitter"
+                                               subtitle:@"Disconnect from Twitter"
+                                                 action:@selector(disconnectFromTwitter:)
+                                                  image:@"welcome_twitter-dis_btn" 
+                                                  color:[UIColor stampedGrayColor]] retain];
+        [self wrapAndAppendViews:_connectToTwitter other:_disconnectFromTwitter];
+        
+        if (linkedAccounts.twitter) {
+            _connectToTwitter.hidden = YES;
+        }
+        else {
+            _disconnectFromTwitter.hidden = YES;
+        }
+        
+        UIView* socialFooter1 = [self footerWithText:@"Find friends on Stamped and share your\nactivity to Facebook and Twitter."];
+        [self.scrollView appendChildView:socialFooter1];
+        
+        UIView* socialFooter2 = [self footerWithText:@"We will never post anything without your permission"];
+        
+        [Util reframeView:socialFooter2 withDeltas:CGRectMake(0, 4, 0, 12)];
+        [self.scrollView appendChildView:socialFooter2];
         
         [self addDividerBar];
         
@@ -168,7 +290,18 @@ static const CGFloat _textOffset = 26;
                                             action:@selector(connectTemp:)
                                              image:@"welcome_spotify_btn" 
                                              color:[UIColor whiteColor]] retain];
-        [self.scrollView appendChildView:_connectToSpotify];
+        _disconnectFromSpotify = [[self buttonWithTitle:@"Spotify"
+                                               subtitle:@"Disconnect from Spotify"
+                                                 action:@selector(connectTemp:)
+                                                  image:@"welcome_spotify-dis_btn" 
+                                                  color:[UIColor stampedGrayColor]] retain];
+        [self wrapAndAppendViews:_connectToSpotify other:_disconnectFromSpotify];
+        
+        _disconnectFromSpotify.hidden = YES;
+        
+        UIView* musicFooter = [self footerWithText:@"Access your listening history, listen to full songs in Stamped, and add songs to your playlist."];
+        [Util reframeView:musicFooter withDeltas:CGRectMake(0, 0, 0, 12)];
+        [self.scrollView appendChildView:musicFooter];
         
         [self addDividerBar];
         
@@ -177,22 +310,26 @@ static const CGFloat _textOffset = 26;
         
         _connectToNetflix = [[self buttonWithTitle:@"Netflix"
                                           subtitle:@"Connect to Netflix"
-                                            action:@selector(connectTemp:)
+                                            action:@selector(connectToNetflix:)
                                              image:@"welcome_netflix_btn" 
                                              color:[UIColor whiteColor]] retain];
         _disconnectFromNetflix = [[self buttonWithTitle:@"Netflix"
                                                subtitle:@"Disconnect from Netflix"
-                                                 action:@selector(connectTemp:)
+                                                 action:@selector(disconnectFromNetflix:)
                                                   image:@"welcome_netflix-dis_btn" 
-                                                  color:[UIColor whiteColor]] retain];
+                                                  color:[UIColor stampedGrayColor]] retain];
         [self wrapAndAppendViews:_connectToNetflix other:_disconnectFromNetflix];
         
-        [self addDividerBar];
         
-        CGSize contentSize = self.scrollView.contentSize;
-        contentSize.height += 30;
-        self.scrollView.contentSize = contentSize;
-        [self facebookAuthChanged:nil];
+        if (linkedAccounts.netflix) {
+            _connectToNetflix.hidden = YES;
+        }
+        else {
+            _disconnectFromNetflix.hidden = YES;
+        }
+        
+        UIView* filmFooter = [self footerWithText:@"Access your recommendations and add stamps to your Netflix queue."];
+        [Util reframeView:filmFooter withDeltas:CGRectMake(0, 0, 0, 24)];
     }
     else {
         [Util warnWithAPIError:error andBlock:^{
@@ -201,29 +338,153 @@ static const CGFloat _textOffset = 26;
     }
 }
 
+- (void)applicationDidBecomeActive:(NSNotification*)notification {
+    if (self.netflixEndpointPending) {
+        self.netflixEndpointPending = NO;
+        [self checkNetflix];
+    }
+}
+
+- (void)checkNetflix {
+    self.netflixCancellation = [[STStampedAPI sharedInstance] linkedAccountsWithCallback:^(id<STLinkedAccounts> linkedAccounts, NSError *error, STCancellation *cancellation) {
+        self.netflixCancellation = nil;
+        if (linkedAccounts.netflix) {
+            self.connectToNetflix.hidden = YES;
+            self.disconnectFromNetflix.hidden = NO;
+        }
+        else {
+            self.connectToNetflix.hidden = NO;
+            self.disconnectFromNetflix.hidden = YES;
+        }
+    }];
+}
+
+- (void)connectToNetflix:(id)notImportant {
+    if (!self.netflixCancellation) {
+        self.netflixCancellation = [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/netflix/login.json"
+                                                                                post:NO
+                                                                       authenticated:YES
+                                                                              params:[NSDictionary dictionary]
+                                                                             mapping:[STSimpleEndpointResponse mapping]
+                                                                         andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                                             self.netflixCancellation = nil;
+                                                                             if (result) {
+                                                                                 id<STEndpointResponse> response = result;
+                                                                                 if (response.action) {
+                                                                                     [[STActionManager sharedActionManager] didChooseAction:response.action withContext:[STActionContext context]];
+                                                                                 }
+                                                                                 else {
+                                                                                     [self checkNetflix];
+                                                                                 }
+                                                                             }
+                                                                             else {
+                                                                                 [Util warnWithAPIError:error andBlock:nil];
+                                                                             }
+                                                                         }];
+    }
+}
+
+- (void)disconnectFromNetflix:(id)notImportant {
+    if (!self.netflixCancellation) {
+        self.netflixCancellation = [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/netflix/remove.json"
+                                                                                post:YES
+                                                                       authenticated:YES
+                                                                              params:[NSDictionary dictionary]
+                                                                             mapping:[STSimpleBooleanResponse mapping]
+                                                                         andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                                             self.netflixCancellation = nil;
+                                                                             if (result) {
+                                                                                 self.connectToNetflix.hidden = NO;
+                                                                                 self.disconnectFromNetflix.hidden = YES;
+                                                                             }
+                                                                             else {
+                                                                                 [Util warnWithAPIError:error andBlock:nil];
+                                                                             }
+                                                                         }];
+    }
+}
+
+
 - (void)wrapAndAppendViews:(UIView*)view other:(UIView*)other {
     UIView* container = [[[UIView alloc] initWithFrame:CGRectMake(0,
                                                                   0,
                                                                   self.view.frame.size.width,
-                                                                  view.frame.size.height)] autorelease];
+                                                                  CGRectGetMaxY(view.frame))] autorelease];
     [container addSubview:view];
     [container addSubview:other];
     [self.scrollView appendChildView:container];
+}
+
+- (void)reloadStampedData {
+    [self loadOpenGraphSettings];
+    [self checkNetflix];
+}
+
+- (void)twitterAuthFinished:(id)notImportant {
+    self.twitterPending = NO;
+    self.connectToTwitter.hidden = YES;
+    self.disconnectFromTwitter.hidden = NO;
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    STTwitter* twitter = [STTwitter sharedInstance];
+    NSLog(@"twitterUser:%@", twitter.twitterUser);
+    [params setObject:twitter.twitterUsername forKey:@"linked_screen_name"];
+    [params setObject:twitter.twitterToken forKey:@"token"];
+    [params setObject:twitter.twitterTokenSecret forKey:@"secret"];
+    [params setObject:@"twitter" forKey:@"service_name"];
+    //[params setObject:fb.facebook.expirationDate forKey:@"token_expiration"];
+    [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/add.json"
+                                                 post:YES
+                                        authenticated:YES
+                                               params:params
+                                              mapping:[STSimpleBooleanResponse mapping]
+                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                              self.twitterPending = NO;
+                                              if (result) {
+                                                  
+                                              }
+                                              else {
+                                                  self.disconnectFromTwitter.hidden = YES;
+                                                  self.connectToTwitter.hidden = NO;
+                                                  [Util warnWithAPIError:error andBlock:nil];
+                                              }
+                                          }];
+}
+
+- (void)twitterAuthFailed:(id)notImportant {
+    self.twitterPending = NO;
+    [Util warnWithMessage:@"Could not link to Twitter" andBlock:nil];
+}
+
+- (void)connectToTwitter:(id)notImportant {
+    if (!self.twitterPending) {
+        self.twitterPending = YES;
+        [[STTwitter sharedInstance] auth];
+    }
+}
+
+- (void)disconnectFromTwitter:(id)notImportant {
+    if (!self.twitterPending) {
+        self.twitterPending = YES;
+        [[STStampedAPI sharedInstance] removeLinkedAccountWithService:@"twitter"
+                                                          andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                                                              self.twitterPending = NO;
+                                                              if (success) {
+                                                                  self.connectToTwitter.hidden = NO;
+                                                                  self.disconnectFromTwitter.hidden = YES;
+                                                              }
+                                                              else {
+                                                                  [Util warnWithAPIError:error
+                                                                                andBlock:nil];
+                                                              }
+                                                          }];
+    }
 }
 
 - (void)facebookAuthChanged:(id)notImportant {
     if ([[STFacebook sharedInstance] isSessionValid]) {
         _connectToFacebook.hidden = YES;
         _disconnectFromFacebook.hidden = NO;
-        NSLog(@"facebook:%@",[[STFacebook sharedInstance] userData]);
-        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/remove.json"
-                                                     post:YES
-                                            authenticated:YES
-                                                   params:[NSDictionary dictionaryWithObject:@"facebook" forKey:@"service_name"]
-                                                  mapping:[STSimpleBooleanResponse mapping]
-                                              andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                  [[[STFacebook sharedInstance] facebook] requestWithGraphPath:@"me" andDelegate:self]; 
-                                              }];
+        [self loadOpenGraphSettings];
     }
     else {
         _disconnectFromFacebook.hidden = YES;
@@ -259,7 +520,8 @@ static const CGFloat _textOffset = 26;
 - (void)connectToFacebook:(id)notImportant {
     if (!self.locked) {
         [[STFacebook sharedInstance] auth];
-        [[[STFacebook sharedInstance] facebook] requestWithGraphPath:@"me" andDelegate:self]; 
+        Facebook* fb = [[STFacebook sharedInstance] facebook];
+        self.meDetailsRequest = [fb requestWithGraphPath:@"me" andDelegate:self];
     }
 }
 
@@ -273,7 +535,13 @@ static const CGFloat _textOffset = 26;
                                                   mapping:[STSimpleBooleanResponse mapping]
                                               andCallback:^(id result, NSError *error, STCancellation *cancellation) {
                                                   self.locked = NO;
-                                                  [[STFacebook sharedInstance] invalidate];
+                                                  if (!error) {
+                                                      [[STFacebook sharedInstance] invalidate];
+                                                      [self.openGraphCancellation cancel];
+                                                      self.openGraphCancellation = nil;
+                                                      [self.openGraphValues removeAllObjects];
+                                                      self.openGraphItems = [NSArray array];
+                                                  }
                                               }];
     }
 }
@@ -298,13 +566,39 @@ static const CGFloat _textOffset = 26;
     }
 }
 
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    id<STAlertItem> item = [self.openGraphItems objectAtIndex:indexPath.row];
+    NSString* reuseID = @"OpenGraphCell";
+    STOpenGraphCell* cell = [tableView dequeueReusableCellWithIdentifier:reuseID];
+    if (!cell) {
+        cell = [[[STOpenGraphCell alloc] initWithReuseIdentifier:reuseID] autorelease];
+    }
+    cell.controller = self;
+    [cell setupWithAlertItem:item];
+    return cell;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.openGraphItems.count;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return self.openGraphItems.count ? 1 : 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return _cellHeight;
+}
+
 - (UIView*)footerWithText:(NSString*)text {
-    STChunk* start = [STChunk chunkWithLineHeight:16 andWidth:240];
-    start.bottomLeft = CGPointMake(_textOffset, 24);
+    STChunk* start = [STChunk chunkWithLineHeight:16 andWidth:290];
+    start.bottomLeft = CGPointMake(16, 16);
     STTextChunk* textChunk = [[[STTextChunk alloc] initWithPrev:start
                                                            text:text
                                                            font:[UIFont stampedFontWithSize:12]
                                                           color:[UIColor stampedGrayColor]] autorelease];
+    STChunksView* view = [[[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:textChunk]] autorelease];
+    return view;
 }
 
 - (void)addDividerBar {
@@ -384,4 +678,180 @@ static const CGFloat _textOffset = 26;
     
 }
 
+- (void)handleOpenGraphItems:(NSArray<STAlertItem>*)items withError:(NSError*)error {
+    self.openGraphCancellation = nil;
+    if (items) {
+        if (self.openGraphValues.count) {
+            [self consumePendingOpenGraphChanges];
+        }
+        else {
+            self.openGraphItems = items;
+        }
+    }
+    else {
+        [Util warnWithAPIError:error andBlock:nil];
+    }
+}
+
+- (void)setOpenGraphItems:(NSArray<STAlertItem> *)items {
+    
+    NSInteger countBefore = _openGraphItems.count;
+    [_openGraphItems autorelease];
+    _openGraphItems = [items retain];
+    NSInteger rowDelta = items.count - countBefore;
+    CGRect frame = self.openGraphTable.frame;
+    frame.size.height = items.count * _cellHeight;
+    CGFloat duration = abs(rowDelta) * .08;
+    [self.openGraphSettings.delegate childView:self.openGraphSettings shouldChangeHeightBy:rowDelta * _cellHeight overDuration:duration];
+    if (countBefore == 0 && rowDelta != 0) {
+        self.openGraphTable.frame = frame;
+        [self.openGraphTable beginUpdates];
+        [self.openGraphTable insertSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 1)] withRowAnimation:UITableViewRowAnimationFade];
+        [self.openGraphTable endUpdates];
+    }
+    else if (items.count == 0 && rowDelta != 0) {
+        [self.openGraphTable beginUpdates];
+        [self.openGraphTable deleteSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+        [self.openGraphTable endUpdates];
+        [UIView animateWithDuration:duration animations:^{
+            self.openGraphTable.frame = frame;
+        }];
+    }
+    else {
+        self.openGraphTable.frame = frame;
+        [self.openGraphTable reloadData];
+    }
+}
+
+- (void)consumePendingOpenGraphChanges {
+    if (!self.openGraphCancellation) {
+        NSMutableSet* on = [NSMutableSet set];
+        NSMutableSet* off = [NSMutableSet set];
+        for (NSString* tID in self.openGraphValues.allKeys) {
+            NSNumber* value = [self.openGraphValues objectForKey:tID];
+            if (value.boolValue) {
+                [on addObject:tID];
+            }
+            else {
+                [off addObject:tID];
+            }
+        }
+        [self.openGraphValues removeAllObjects];
+        NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [[on allObjects] componentsJoinedByString:@","], @"on",
+                                [[off allObjects] componentsJoinedByString:@","], @"off",
+                                @"facebook", @"service_name",
+                                nil];
+        self.openGraphCancellation = [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/facebook/settings/update.json"
+                                                                               post:YES
+                                                                      authenticated:YES
+                                                                             params:params
+                                                                            mapping:[STSimpleAlertItem mapping]
+                                                                        andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                                            [self handleOpenGraphItems:(id)results withError:error];
+                                                                        }];
+    }
+}
+
+- (void)loadOpenGraphSettings {
+    if (!self.openGraphCancellation) {
+        NSLog(@"herererearear");
+        self.openGraphCancellation = [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/facebook/settings/show.json"
+                                                                               post:NO
+                                                                      authenticated:YES
+                                                                             params:[NSDictionary dictionaryWithObject:@"facebook" forKey:@"service_name"]
+                                                                            mapping:[STSimpleAlertItem mapping]
+                                                                        andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                        
+                                                                            NSLog(@"herererearear2222");
+                                                                            [self handleOpenGraphItems:(id)results withError:error];
+                                                                        }];
+    }
+}
+
+- (void)setToggleID:(NSString*)toggleID toValue:(BOOL)value {
+    NSNumber* currentValue = [self.openGraphValues objectForKey:toggleID];
+    if (currentValue) {
+        if (currentValue.boolValue == value) {
+            return;
+        }
+    }
+    [self.openGraphValues setObject:[NSNumber numberWithBool:value] forKey:toggleID];
+    [self consumePendingOpenGraphChanges];
+}
+
+
 @end
+
+
+@implementation STOpenGraphCell
+
+@synthesize title = _title;
+@synthesize check = _check;
+@synthesize button = _button;
+@synthesize toggleID = _toggleID;
+@synthesize controller = _controller;
+@synthesize locked = _locked;
+
+- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
+    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+    if (self) {
+        UIImage* buttonImage = [UIImage imageNamed:@"notifications-checkbox"];
+        UIImage* checkImage = [UIImage imageNamed:@"notifications-checkmark"];
+        _button = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+        _button.frame = CGRectMake(213, 8, 30, 30);
+        [_button setImage:buttonImage forState:UIControlStateNormal];
+        [_button addTarget:self action:@selector(toggle:) forControlEvents:UIControlEventTouchUpInside];
+        [self.contentView addSubview:_button];
+        _check = [[UIImageView alloc] initWithImage:checkImage];
+        _check.frame = _button.frame;
+        [self.contentView addSubview:_check];
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_title release];
+    [_button release];
+    [_check release];
+    [_toggleID release];
+    [super dealloc];
+}
+
+- (void)toggle:(id)notImportant {
+    if (!self.locked) {
+        self.check.hidden = !self.check.hidden;
+        BOOL value = !self.check.hidden;
+        [self.controller setToggleID:self.toggleID toValue:value];
+    }
+}
+
+- (void)setupWithAlertItem:(id<STAlertItem>)item {
+    [self.title removeFromSuperview];
+    self.title = nil;
+    self.toggleID = nil;
+    self.button.hidden = YES;
+    self.locked = YES;
+    STChunk* titleStart = [STChunk chunkWithLineHeight:16 andWidth:200];
+    STTextChunk* titleChunk = [[[STTextChunk alloc] initWithPrev:titleStart
+                                                            text:[item name]
+                                                            font:[UIFont stampedFontWithSize:12]
+                                                           color:[UIColor stampedGrayColor]] autorelease];
+    titleChunk.bottomLeft = CGPointMake(26, 26);
+    self.title = [[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:titleChunk]];
+    [self.contentView addSubview:self.title];
+    if (item.toggles.count) {
+        id<STAlertToggle> toggle = [item.toggles objectAtIndex:0];
+        if (toggle.value && toggle.toggleID) {
+            self.locked = NO;
+            self.button.hidden = NO;
+            self.check.hidden = ![toggle.value boolValue];
+            self.toggleID = [toggle toggleID];      
+        }
+    }
+}
+
+@end
+

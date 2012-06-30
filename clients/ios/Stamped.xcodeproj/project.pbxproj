@@ -1893,6 +1893,11 @@
 		637589BD1593A4FA0049A0AA /* STHoverToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 637589BC1593A4FA0049A0AA /* STHoverToolbar.m */; };
 		637589BE1593A4FA0049A0AA /* STHoverToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 637589BC1593A4FA0049A0AA /* STHoverToolbar.m */; };
 		637589BF1593A4FA0049A0AA /* STHoverToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 637589BC1593A4FA0049A0AA /* STHoverToolbar.m */; };
+		6376B44B159F562B00860CDD /* STSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = 6376B44A159F562B00860CDD /* STSpotify.m */; };
+		6376B44C159F562B00860CDD /* STSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = 6376B44A159F562B00860CDD /* STSpotify.m */; };
+		6376B44D159F562B00860CDD /* STSpotify.m in Sources */ = {isa = PBXBuildFile; fileRef = 6376B44A159F562B00860CDD /* STSpotify.m */; };
+		6376B45C159F5EBF00860CDD /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6376B45B159F5EBF00860CDD /* libstdc++.dylib */; };
+		6376B45E159F5ED800860CDD /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6376B45D159F5ED800860CDD /* CoreAudio.framework */; };
 		637A181C1558110F00148C0B /* STConsumptionToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 637A181B1558110F00148C0B /* STConsumptionToolbar.m */; };
 		637A181D1558110F00148C0B /* STConsumptionToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 637A181B1558110F00148C0B /* STConsumptionToolbar.m */; };
 		637A18211558113500148C0B /* STConsumptionToolbarItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 637A18201558113500148C0B /* STConsumptionToolbarItem.m */; };
@@ -3578,6 +3583,10 @@
 		6375899C15939EBB0049A0AA /* consumption_music@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "consumption_music@2x.png"; sourceTree = "<group>"; };
 		637589BB1593A4F90049A0AA /* STHoverToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHoverToolbar.h; sourceTree = "<group>"; };
 		637589BC1593A4FA0049A0AA /* STHoverToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHoverToolbar.m; sourceTree = "<group>"; };
+		6376B449159F562B00860CDD /* STSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSpotify.h; sourceTree = "<group>"; };
+		6376B44A159F562B00860CDD /* STSpotify.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSpotify.m; sourceTree = "<group>"; };
+		6376B45B159F5EBF00860CDD /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
+		6376B45D159F5ED800860CDD /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		637A181A1558110F00148C0B /* STConsumptionToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConsumptionToolbar.h; sourceTree = "<group>"; };
 		637A181B1558110F00148C0B /* STConsumptionToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConsumptionToolbar.m; sourceTree = "<group>"; };
 		637A181F1558113500148C0B /* STConsumptionToolbarItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConsumptionToolbarItem.h; sourceTree = "<group>"; };
@@ -4195,6 +4204,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6376B45E159F5ED800860CDD /* CoreAudio.framework in Frameworks */,
+				6376B45C159F5EBF00860CDD /* libstdc++.dylib in Frameworks */,
 				63CAB15F159E1A6B002D3A1E /* MediaPlayer.framework in Frameworks */,
 				63CAB15D159CDB49002D3A1E /* AVFoundation.framework in Frameworks */,
 				036C13301580505700FB9880 /* AddressBookUI.framework in Frameworks */,
@@ -5990,6 +6001,8 @@
 				63C98377154B052F000180DC /* STActionPair.m */,
 				632ECBB6159CCE990047399F /* STActionUtil.h */,
 				632ECBB7159CCE990047399F /* STActionUtil.m */,
+				6376B449159F562B00860CDD /* STSpotify.h */,
+				6376B44A159F562B00860CDD /* STSpotify.m */,
 			);
 			name = Actions;
 			sourceTree = "<group>";
@@ -6583,6 +6596,8 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				6376B45D159F5ED800860CDD /* CoreAudio.framework */,
+				6376B45B159F5EBF00860CDD /* libstdc++.dylib */,
 				63CAB15E159E1A6B002D3A1E /* MediaPlayer.framework */,
 				63CAB15C159CDB49002D3A1E /* AVFoundation.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
@@ -9212,6 +9227,7 @@
 				632ECBBA159CCE9A0047399F /* STActionUtil.m in Sources */,
 				63CAB164159E4696002D3A1E /* STSimpleLinkedAccounts.m in Sources */,
 				63CAB169159E46DF002D3A1E /* STSimpleLinkedAccount.m in Sources */,
+				6376B44D159F562B00860CDD /* STSpotify.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9554,6 +9570,7 @@
 				632ECBB9159CCE9A0047399F /* STActionUtil.m in Sources */,
 				63CAB163159E4696002D3A1E /* STSimpleLinkedAccounts.m in Sources */,
 				63CAB168159E46DF002D3A1E /* STSimpleLinkedAccount.m in Sources */,
+				6376B44C159F562B00860CDD /* STSpotify.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9907,6 +9924,7 @@
 				632ECBB8159CCE9A0047399F /* STActionUtil.m in Sources */,
 				63CAB162159E4696002D3A1E /* STSimpleLinkedAccounts.m in Sources */,
 				63CAB167159E46DF002D3A1E /* STSimpleLinkedAccount.m in Sources */,
+				6376B44B159F562B00860CDD /* STSpotify.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10005,7 +10023,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "StampedEther copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
 				PROVISIONING_PROFILE = "7A213450-F178-4B84-8729-F24BAE4C193E";
@@ -10051,7 +10072,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "StampedEther copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
 				PROVISIONING_PROFILE = "7A213450-F178-4B84-8729-F24BAE4C193E";
@@ -10098,7 +10122,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "StampedEther copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
 				PROVISIONING_PROFILE = "7A213450-F178-4B84-8729-F24BAE4C193E";
@@ -10151,7 +10178,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
 				PROVISIONING_PROFILE = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
@@ -10198,7 +10228,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
 				PROVISIONING_PROFILE = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
@@ -10246,7 +10279,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped copy-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Stamped copy";
 				PROVISIONING_PROFILE = "8C2CF3E5-9BA5-4247-9AAF-64E0C5BFE05F";
@@ -10321,7 +10357,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "D578280E-EB1A-4501-AB8D-F486F490E724";
@@ -10429,7 +10468,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -10471,7 +10513,10 @@
 				GCC_VERSION = "";
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";

@@ -1319,11 +1319,15 @@ static Rdio* _rdio;
     }
 }
 
-+ (NSURL *)cacheDirectory {
++ (NSString*)versionString {
     NSDictionary *appInfo = [[NSBundle mainBundle] infoDictionary];
-    NSString *versionStr = [NSString stringWithFormat:@"%@.%@", 
-                            [appInfo objectForKey:@"CFBundleShortVersionString"], 
-                            [appInfo objectForKey:@"CFBundleVersion"]];
+    return [NSString stringWithFormat:@"%@.%@", 
+            [appInfo objectForKey:@"CFBundleShortVersionString"], 
+            [appInfo objectForKey:@"CFBundleVersion"]];
+}
+
++ (NSURL *)cacheDirectory {
+    NSString *versionStr = [self versionString];
     return [self _cacheForVersion:versionStr];
 }
 
