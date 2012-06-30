@@ -65,7 +65,13 @@ def loadTestDbDataFromText(text):
     dbDict = json.loads(text, object_hook=json_util.object_hook)
     for (tableName, tableContents) in dbDict.items():
         if tableContents:
-            getattr(db, tableName).insert(tableContents)
+            batchSize = 20
+            curr = 0
+            while curr < len(tableContents):
+                nextCurr = curr + batchSize
+                currBatch = tableContents[curr:nextCurr]
+                getattr(db, tableName).insert(currBatch)
+                curr = nextCurr
 
 def loadTestDbDataFromFilename(filename):
     fileHandle = open(filename)

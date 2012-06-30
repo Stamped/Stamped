@@ -12,7 +12,7 @@ import re
 from utils import indentText
 from libs.LRUCache import lru_cache
 from resolve.Resolver import *
-from resolve.TitleUtils import cleanBookTitle, tokenizeString
+from resolve.TitleUtils import cleanBookTitle, tokenizeString, convertRomanNumerals
 from search.SearchResult import SearchResult
 from search import ScoringUtils
 from DataQualityUtils import *
@@ -580,6 +580,15 @@ class TvSearchResultCluster(SearchResultCluster):
 
 
 class MovieSearchResultCluster(SearchResultCluster):
+    ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')
+    @classmethod
+    def _endsInDifferentNumbers(cls, title1, title2):
+        title1 = convertRomanNumerals(title1)
+        title2 = convertRomanNumerals(title2)
+        match1 = cls.ENDING_NUMBER_RE.search(title1)
+        match2 = cls.ENDING_NUMBER_RE.search(title2)
+        return match1 and match2 and match1.group(1) != match2.group(1)
+
     @classmethod
     def _compare_proxies(cls, movie1, movie2):
         # Our task here is a bit harder than normal. There are often remakes, so name is not decisive. There are often
@@ -591,6 +600,9 @@ class MovieSearchResultCluster(SearchResultCluster):
         simple_name_similarity = cached_string_comparison(cached_movie_simplify(movie1.name),
                                                           cached_movie_simplify(movie2.name))
         sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+
+        if cls._endsInDifferentNumbers(movie1.name, movie2.name):
+            sim_score -= 0.3
 
         if movie1.release_date and movie2.release_date:
             time_difference = abs(movie1.release_date - movie2.release_date)

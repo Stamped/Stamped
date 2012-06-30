@@ -156,6 +156,8 @@
                         
                         a.screen-name {
                             color: #000;
+                            font-size: 80%;
+                            font-style: bold;
                         }
                         
                         p {
@@ -167,8 +169,8 @@
                             .stamped-font();
                             
                             line-height: 100%;
-                            letter-spacing: .05em;
-                            color: #000;
+                            letter-spacing: .02em;
+                            color: #262626;
                             
                             display: block;
                             margin:  0;
@@ -176,8 +178,8 @@
                         }
                         
                         p.name {
-                            font-weight: 700;
-                            color: #000;
+                            font-weight: 400;
+                            color: #262626;
                         }
                         
                         p.title {
@@ -185,8 +187,8 @@
                             
                             line-height: 100%;
                             font-size: 7em;
-                            letter-spacing: .05em;
-                            color: #000;
+                            letter-spacing: .02em;
+                            color: #262626;
                             
                             display: block;
                             padding: 0;
@@ -194,6 +196,7 @@
                         
                         .user-location {
                             font-size: 80%;
+                            color: #000
                         }
                         
                         .inner-lhs {
@@ -257,7 +260,7 @@
                                     margin-right: 12px;
                                     
                                     line-height: 100%;
-                                    letter-spacing: .05em;
+                                    letter-spacing: .02em;
                                     
                                     font-size: 2.5em;
                                     font-weight: 500;
@@ -289,8 +292,8 @@
                             .user-stamp-distribution {
                                 margin-top: 1em;
                                 font-weight: 700;
-                                font-size: 80%;
-                                color: #000;
+                                font-size: 70%;
+                                color: #262626;
                                 
                                 .section {
                                     position: relative;
@@ -457,7 +460,7 @@
                     background: url(/assets/img/insetstamp2.png) center top no-repeat;
                     text-align: center;
                     position: relative;
-                    top: -75px;
+                    top: -70px;
                     
                     width: 167px;
                     min-height: 75px;
@@ -469,15 +472,17 @@
                     .stamp-count {
                         .stamped-font();
                         
-                        font-size: 3em;
-                        letter-spacing: .05em;
+                        font-size: 3.5em;
+                        letter-spacing: .03em;
                         margin: 0 0 -.2em;
-                        text-shadow: 2px 2px #d2d2d2;
+                        text-shadow: 0px 2px 2px rgba(0,0,0,0.30);
+                        position: relative;
+                        top: 5px;
                     }
                     
                     p {
                         margin: 0 0 .5em;
-                        color: #000;
+                        color: #262626;
                     }
                 }
             }
@@ -752,7 +757,7 @@ body.music, body.book, body.film, body.app {
     }
     
     .stamp-gallery-item-inner {
-        border-bottom: 1px solid #c2c2c2;
+        border-bottom: 1px solid #bfbfbf;
     }
     
     .content {
@@ -798,10 +803,10 @@ body.music, body.book, body.film, body.app {
                 white-space: nowrap;
                 text-align: right;
                 font-size: 80%;
-                color: #777;
+                color: #999;
                 
                 position: absolute;
-                right: 105%;
+                right: 110%;
                 top:   4px;
             }
             
@@ -843,6 +848,7 @@ body.music, body.book, body.film, body.app {
     .count {
         position: relative;
         top: -4px;
+        margin: 0px 7px 0px 0px;
     }
     
     .social-feedback-like {
@@ -977,7 +983,7 @@ body.music, body.book, body.film, body.app {
         z-index: 25;
         
         img {
-            .box-shadow(0, 4px, 8px, -4px, rgba(30,30,30,0.85));
+            .box-shadow(0, 1px, 2px, 1px, rgba(30,30,30,0.3));
         }
     }
     
@@ -989,7 +995,7 @@ body.music, body.book, body.film, body.app {
         z-index: 23;
         
         img {
-            .box-shadow(0, 4px, 8px, -2px, rgba(30,30,30,0.85));
+            .box-shadow(0, 1px, 2px, 1px, rgba(30,30,30,0.3));
         }
     }
     
@@ -1003,7 +1009,7 @@ body.music, body.book, body.film, body.app {
         display:  block;
         width: 100%;
         
-        .rounded(4px);
+        .rounded(2px);
     }
     
     .stamp-category-music .stamp-subcategory-artist .stamp-icon {
@@ -1041,11 +1047,14 @@ body.music, body.book, body.film, body.app {
     display: block;
     text-align: left;
     quotes: "\201C" "\201D";
-    font-family: 'arial', sans-serif;
-    color: #666;
-    
-    line-height: 125%;
-    margin: 0 0 1em;
+    font-family: 'helvetica', sans-serif;
+    font-weight: 200;
+    color: #999999;    
+    line-height: 140%;
+    letter-spacing: 0.02em;
+    margin: 0px 0px 9px 0px;
+    top: -8px;
+    position: relative;
 }
 
 .blurb {
@@ -1063,7 +1072,9 @@ body.music, body.book, body.film, body.app {
 .subtitle-line {
     position: relative;
     display: block;
-    margin: -0.25em 0 0;
+    margin: -0.3em 0 0;
+    top: 0px;
+    left: -3px;
     
     p {
         margin:  0;
@@ -1074,10 +1085,10 @@ body.music, body.book, body.film, body.app {
         display: inline;
         font-size: 80%;
         position: relative;
-        top: -2px;
-        
-        font-family: 'arial', sans-serif;
-        color: #666;
+        top: -4.5px;
+        font-family: 'helvetica', sans-serif;
+        font-weight: 200;
+        color: #999999;
     }
     
     .icon {
@@ -1153,7 +1164,7 @@ body.music, body.book, body.film, body.app {
         white-space: inherit;
         overflow: inherit;
         text-overflow: clip;
-        margin: 0 0 1em 0;
+        margin: 0 0 0em 0;
         font-size: 80%;
     }
 }
@@ -1192,9 +1203,9 @@ body.music, body.book, body.film, body.app {
     visibility: hidden;
     background: #666;
     
-    @radius: 4px;
+    @radius: 0px;
     .rounded(@radius);
-    .box-shadow(0, 2px, 8px, -2px, @shadow);
+    .box-shadow(0, 3px, 15px, 0px, rgba(30, 30, 30, 0.4);
     
     top:   50%;
     right: 40px;
@@ -1605,7 +1616,7 @@ body.sdetail_popup {
 @-webkit-keyframes map-profile-inner-bounce {
     0%   { -webkit-transform: perspective(600px) translate(0, 0); }
     50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
-    100% { -webkit-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+    100% { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
 @-webkit-keyframes map-profile-inner-shadow-bounce {
@@ -1617,7 +1628,7 @@ body.sdetail_popup {
 @-moz-keyframes map-profile-inner-bounce {
     0%   { -moz-transform: perspective(600px) translate(0, 0); }
     50%  { -moz-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
-    100% { -moz-transform: perspective(600px) rotateY(360deg) translate(0, 0); }
+    100% { -moz-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
 @-moz-keyframes map-profile-inner-shadow-bounce {
@@ -1627,10 +1638,12 @@ body.sdetail_popup {
 }
 
 a.map-profile-link {
-    font: bold 12pt "Helvetica", "Arial", sans-serif;
+    font: bold 10pt "Helvetica", "helvetica", sans-serif;
     color: #999;
     display: inline-block;
     min-width: 10em;
+    letter-spacing: 0.05em;
+    top: -2px;
     
     .map-profile-icon-wrapper {
         display: inline-block;
@@ -1640,7 +1653,7 @@ a.map-profile-link {
         height: 27px;
         
         border: 2px solid transparent;
-        .rounded(2px);
+        .rounded(4px);
         
         .map-profile-icon {
             background: url(/assets/img/map_profile_sprite.png) no-repeat;
@@ -1704,7 +1717,7 @@ a.map-profile-link {
         
         .map-profile-icon-wrapper {
             .map-profile-icon {
-                @duration: .6s;
+                @duration: .5s;
                 @timing: easeInOutCubic;
                 
                 .inner {
@@ -1751,7 +1764,7 @@ a.map-profile-link {
         white-space: nowrap;
         
         .box-shadow(0, 3px, 3px, 0, @shadow);
-        .rounded(2px);
+        .rounded(0px);
         
         .pronounced-title {
             float: left;
@@ -1813,13 +1826,12 @@ a.map-profile-link {
                 
                 padding: (@padding / 2) @padding;
                 
-                .profile-image-wrapper, .stamp, .name {
+                .profile-image-small, .stamp, .name {
                     float: left;
                 }
                 
-                .profile-image-wrapper {
+                .profile-image-small {
                     margin-right: 16px;
-                    position: relative;
                 }
                 
                 .stamp {
@@ -1864,28 +1876,8 @@ a.map-profile-link {
     }
 }
 
-.popup-sdetail-social {
-    .pronounced-title {
-        font-size: 2em;
-    }
-    
-    .popup-header .rhs-icon {
-        margin-top: 4px;
-    }
-}
-.popup-todos {
-    .pronounced-title {
-        font-size: 3em;
-    }
-    
-    .popup-header .rhs-icon {
-        background-position: -76px 0 !important;
-        margin-top: 16px;
-        
-        .tongue {
-            display: none;
-        }
-    }
+.popup-todos .popup-header .rhs-icon {
+    background-position: -76px 0 !important;
 }
 
 .popup-followers .popup-header .rhs-icon {
@@ -1894,27 +1886,5 @@ a.map-profile-link {
 
 .popup-following .popup-header .rhs-icon {
     background-position: -152px 0 !important;
-}
-
-.user-preview-icon {
-    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
-    position: absolute;
-    z-index: 26;
-    
-    right:  -6px;
-    bottom: -6px;
-    
-    width:  17px;
-    height: 17px;
-    pointer-events: none;
-}
-
-
-.like .user-preview-icon {
-    background-position: 0 0;
-}
-
-.todo .user-preview-icon {
-    background-position: -19px 0;
 }
 

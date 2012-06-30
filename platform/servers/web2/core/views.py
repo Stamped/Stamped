@@ -374,14 +374,16 @@ def popup_sdetail_social(request, schema, **kwargs):
     
     title = ""
     popup = "popup-sdetail-social"
+    like  = "Like%s" % ("s" if len(likes) != 1 else "")
+    todo  = "Todo%s" % ("s" if len(todos) != 1 else "")
     
     if len(likes) > 0:
         if len(todos) > 0:
-            title = "%d Likes and %d Todos" % (len(likes), len(todos))
+            title = "%d %s and %d %s" % (len(likes), like, len(todos), todo)
         else:
-            title = "%d Likes" % len(likes)
+            title = "%d %s" % (len(likes), like)
     elif len(todos) > 0:
-        title = "%d Todos" % len(todos)
+        title = "%d %s" % (len(todos), todo)
         popup = "%s popup-todos" % popup
     
     return stamped_render(request, 'popup.html', {

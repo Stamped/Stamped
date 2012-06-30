@@ -136,7 +136,6 @@ TODO:
     
     * DONE - experiment with 'screen' blending mode for header cover images
     
-    * fix infinite scroll after returning to default category
     * hide stamp blurb quotes if blurb is empty
     
     * use a Backbone model to hold StampedClient state s.t. you could bind log-in / log-out to body-level CSS tags?
@@ -221,6 +220,7 @@ OLD:
     * modify update_stamps to be more efficient and only process new stamps!!!
     * user stamp category distribution
     * fix broken thetvdb images
+    * fix infinite scroll after returning to default category
 
 
 ChangeList 6/8/2012:

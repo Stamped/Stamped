@@ -19,10 +19,15 @@
                          CUSTOM COLOR SCHEME SETUP
    ************************************************************************** */
 
+<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
 {{#user}}
 @user_primary:   #{{color_primary}};   /* #004ab2 */
 @user_secondary: #{{color_secondary}}; /* #0057d1 */
 {{/user}}
+=======
+@user_primary:   #8B00B4;   /* #004ab2 */
+@user_secondary: #220070; /* #0057d1 */
+>>>>>>> Design Polish:platform/servers/web2/.profile.less
 
 /*
 @l0: hue(hsl(lightness(@user_primary), 0, 0));
@@ -123,16 +128,24 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 }
 
 .user-logo-large {
+<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png) no-repeat;
     {{/user}}
+=======
+    background: url(http://static.stamped.com/logos/8B00B4-220070-logo-195x195.png) no-repeat;
+>>>>>>> Design Polish:platform/servers/web2/.profile.less
     background-size: 100% 100%;
 }
 
 .user-logo-small {
+<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
+=======
+    background: url(http://static.stamped.com/logos/8B00B4-220070-email-36x36.png) no-repeat;
+>>>>>>> Design Polish:platform/servers/web2/.profile.less
     background-size: 100% 100%;
     
     width:  36px;
@@ -140,9 +153,13 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 }
 
 .user-logo-tiny {
+<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
+=======
+    background: url(http://static.stamped.com/logos/8B00B4-220070-email-36x36.png) no-repeat;
+>>>>>>> Design Polish:platform/servers/web2/.profile.less
     background-size: 100% 100%;
     
     width:  24px;
@@ -161,14 +178,22 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
     background-color: #fff;
 }
 
-.user-primary-selection:hover, .stamp-map .stamp-map-canvas .stamp-map-item:hover .stamp-map-item-overlay {
+.user-primary-selection:hover {
     background-color: fade(@primary, 15%) !important;
     cursor: pointer;
     
     .transition(background-color, 0s, ease-out);
 }
 
-.user-primary-selection:active, .stamp-map .stamp-map-canvas .stamp-map-item:active .stamp-map-item-overlay {
+.stamp-map-item-overlay:hover .stamp-map-item-arrow-inner {
+    border-top: 20px solid fade(@primary, 15%) !important;
+}
+
+.stamp-map-item-overlay:active .stamp-map-item-arrow-inner {
+    border-top: 20px solid fade(@primary, 25%) !important;
+}
+
+.user-primary-selection:active {
     background-color: fade(@primary, 25%) !important;
     cursor: pointer;
     

@@ -2,7 +2,9 @@
 
 {% block pre-popup %}
 <div class="popup {{popup_class}}">
-    <div class="ribbon-bottom"></div>
+    <div class="ribbon-wrapper">
+        <div class="ribbon-bottom"></div>
+    </div>
     {% endblock pre-popup %}
     
     {% block popup-header %}
@@ -22,9 +24,12 @@
         <div class="popup-body-inner">
             {% for user in users %}
                 <div class="user user-primary-selection clearfix">
-                    <div class="profile-image-wrapper {{user.preview_type}}">
+                    <div class="profile-image-wrapper {% if user.preview_type %}{{user.preview_type}}{% endif %}">
                         {% handlebars_template "profile-image-small" user %}
-                        <div class='user-preview-icon'></div>
+                        
+                        {% if user.preview_type %}
+                            <div class='user-preview-icon'></div>
+                        {% endif %}
                     </div>
                     
                     <img class="stamp" src="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png" />
@@ -44,7 +49,9 @@
     {% endblock popup-body %}
     
     {% block post-popup %}
-    <div class="ribbon-top"></div>
+    <div class="ribbon-wrapper">
+        <div class="ribbon-top"></div>
+    </div>
 </div>
 {% endblock post-popup %}
 

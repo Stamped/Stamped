@@ -1312,13 +1312,13 @@ var g_update_stamps = null;
                 if (category !== g_category) {
                     var sel = '.header-category-' + orig_category;
                     var $elem = $(sel);
+                    g_category = category;
                     
                     if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                         var completion_func = function() {
                             $('.header-selected').removeClass('header-animating header-selected');
                             $elem.removeClass('header-animating').addClass('header-selected');
                             
-                            g_category = category;
                             set_body_class(orig_category);
                             g_init_social_sharing();
                         };
@@ -1352,6 +1352,10 @@ var g_update_stamps = null;
                 
                 var $target = $("<div></div>");
                 $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                    if (category !== g_category) {
+                        return;
+                    }
+                    
                     if (status == "error") {
                         console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
                         console.debug(response);
