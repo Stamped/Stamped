@@ -336,7 +336,7 @@ static STRestKitLoader* _sharedInstance;
 }
 
 - (void)setCurrentUser:(id<STUserDetail>)userDetail {
-    [_currentUser release];
+    [_currentUser autorelease];
     _currentUser = [userDetail retain];
     if (userDetail) {
         NSData* data = [NSKeyedArchiver archivedDataWithRootObject:userDetail];
@@ -378,7 +378,7 @@ static STRestKitLoader* _sharedInstance;
             NSString* path = @"/oauth2/login.json";
             NSString* username = [_passwordKeychainItem objectForKey:(id)kSecAttrAccount];
             NSString* password = [_passwordKeychainItem objectForKey:(id)kSecValueData];
-            if (username && password) {
+            if (username.length && password.length) {
                 [params setObject:username forKey:@"login"];
                 [params setObject:password forKey:@"password"];
                 return [self loadOneWithPath:path
@@ -397,7 +397,7 @@ static STRestKitLoader* _sharedInstance;
         else if ([loginType isEqualToString:_loginTypeFacebook]) {
             NSString* path = @"/oauth2/login/facebook.json";
             NSString* userToken = [_facebookUserTokenKeychainItem objectForKey:(id)kSecValueData];
-            if (userToken) {
+            if (userToken.length) {
                 [params setObject:userToken forKey:@"user_token"];
                 return [self loadOneWithPath:path
                                         post:YES
@@ -417,7 +417,7 @@ static STRestKitLoader* _sharedInstance;
             NSString* path = @"/oauth2/login/twitter.json";
             NSString* userToken = [_twitterUserTokenKeychainItem objectForKey:(id)kSecValueData];
             NSString* userSecret = [_twitterUserSecretKeychainItem objectForKey:(id)kSecValueData];
-            if (userToken) {
+            if (userToken.length && userSecret.length) {
                 [params setObject:userToken forKey:@"user_token"];
                 [params setObject:userSecret forKey:@"user_secret"];
                 return [self loadOneWithPath:path
@@ -438,7 +438,7 @@ static STRestKitLoader* _sharedInstance;
 
 - (STCancellation*)sendTokenRefreshRequestWithCallback:(void (^)(id<STOAuthToken> token, NSError* error, STCancellation* cancellation))block {
     NSString* refreshToken = [_refreshTokenKeychainItem objectForKey:(id)kSecValueData];
-    if (refreshToken) {
+    if (refreshToken.length) {
         NSString* path = @"/oauth2/token.json";
         NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
                                 refreshToken, @"refresh_token",
@@ -602,13 +602,13 @@ static STRestKitLoader* _sharedInstance;
         //NSLog(@"tokenExpirationDate found");
         NSData* userData = [[NSUserDefaults standardUserDefaults] objectForKey:_userDataUserDefaultsKey];
         NSString* refreshToken = [_refreshTokenKeychainItem objectForKey:(id)kSecValueData];
-        if (userData && refreshToken) {
+        if (userData && refreshToken.length) {
             //NSLog(@"user and refresh token found");
             self.authToken.refreshToken = refreshToken;
             self.currentUser = [NSKeyedUnarchiver unarchiveObjectWithData:userData];
             NSTimeInterval timeUntilTokenRefresh = [tokenExpirationDate timeIntervalSinceNow];
             NSString* accessToken = [_accessTokenKeychainItem objectForKey:(id)kSecValueData];
-            if (accessToken && timeUntilTokenRefresh > 0) {
+            if (accessToken.length && timeUntilTokenRefresh > 0) {
                 self.authToken.accessToken = accessToken;
                 self.refreshTimer = [NSTimer scheduledTimerWithTimeInterval:timeUntilTokenRefresh
                                                                      target:self
@@ -664,7 +664,8 @@ static STRestKitLoader* _sharedInstance;
     if (queue == _authRequestQueue) {
         //NSLog(@"releasing auth lock");
         [RKClient sharedClient].requestQueue.suspended = YES;
-    } else if (queue == [RKClient sharedClient].requestQueue) {
+    } 
+    else if (queue == [RKClient sharedClient].requestQueue) {
         if (!self.authToken.accessToken) {
             [self refreshToken];
         }

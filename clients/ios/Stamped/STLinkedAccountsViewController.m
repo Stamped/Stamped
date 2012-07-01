@@ -18,15 +18,16 @@
 #import "STSimpleEndpointResponse.h"
 #import "STActionManager.h"
 #import "STSimpleAlertItem.h"
-#import "CocoaLibSpotify.h"
 #import "STTwitter.h"
 #import "STStampedAPI.h"
 #import "Util.h"
+#import "STSpotify.h"
+#import "STPlayer.h"
 
 static const CGFloat _headerWidth = 200;
 static const CGFloat _textOffset = 26;
 static const CGFloat _cellHeight = 46;
-
+static const CGFloat _headerHeight = _cellHeight;
 
 @interface STOpenGraphCell : UITableViewCell
 
@@ -66,6 +67,8 @@ static const CGFloat _cellHeight = 46;
 
 @property (nonatomic, readwrite, assign) BOOL twitterPending;
 
+@property (nonatomic, readwrite, retain) STCancellation* spotifyCancellation;
+
 @property (nonatomic, readwrite, retain) STCancellation* netflixCancellation;
 @property (nonatomic, readwrite, assign) BOOL netflixEndpointPending;
 
@@ -97,6 +100,8 @@ static const CGFloat _cellHeight = 46;
 @synthesize openGraphCancellation = _openGraphCancellation;
 
 @synthesize twitterPending = _twitterPending;
+
+@synthesize spotifyCancellation = _spotifyCancellation;
 
 @synthesize netflixCancellation = _netflixCancellation;
 @synthesize netflixEndpointPending = _netflixEndpointPending;
@@ -137,6 +142,9 @@ static const CGFloat _cellHeight = 46;
     [_openGraphItems release];
     [_openGraphValues release];
     [_openGraphCancellation release];
+    
+    [_spotifyCancellation cancel];
+    [_spotifyCancellation release];
     
     [_netflixCancellation cancel];
     [_netflixCancellation release];
@@ -257,7 +265,7 @@ static const CGFloat _cellHeight = 46;
         
         UIView* socialFooter2 = [self footerWithText:@"We will never post anything without your permission"];
         
-        [Util reframeView:socialFooter2 withDeltas:CGRectMake(0, 4, 0, 12)];
+        [Util reframeView:socialFooter2 withDeltas:CGRectMake(0, 4, 0, 19)];
         [self.scrollView appendChildView:socialFooter2];
         
         [self addDividerBar];
@@ -287,20 +295,20 @@ static const CGFloat _cellHeight = 46;
         
         _connectToSpotify = [[self buttonWithTitle:@"Spotify"
                                           subtitle:@"Connect to Spotify"
-                                            action:@selector(connectTemp:)
+                                            action:@selector(connectToSpotify:)
                                              image:@"welcome_spotify_btn" 
                                              color:[UIColor whiteColor]] retain];
         _disconnectFromSpotify = [[self buttonWithTitle:@"Spotify"
                                                subtitle:@"Disconnect from Spotify"
-                                                 action:@selector(connectTemp:)
+                                                 action:@selector(disconnectFromSpotify:)
                                                   image:@"welcome_spotify-dis_btn" 
                                                   color:[UIColor stampedGrayColor]] retain];
         [self wrapAndAppendViews:_connectToSpotify other:_disconnectFromSpotify];
         
-        _disconnectFromSpotify.hidden = YES;
+        [self updateSpotify];
         
         UIView* musicFooter = [self footerWithText:@"Access your listening history, listen to full songs in Stamped, and add songs to your playlist."];
-        [Util reframeView:musicFooter withDeltas:CGRectMake(0, 0, 0, 12)];
+        [Util reframeView:musicFooter withDeltas:CGRectMake(0, 0, 0, 19)];
         [self.scrollView appendChildView:musicFooter];
         
         [self addDividerBar];
@@ -329,13 +337,41 @@ static const CGFloat _cellHeight = 46;
         }
         
         UIView* filmFooter = [self footerWithText:@"Access your recommendations and add stamps to your Netflix queue."];
-        [Util reframeView:filmFooter withDeltas:CGRectMake(0, 0, 0, 24)];
+        [Util reframeView:filmFooter withDeltas:CGRectMake(0, 0, 0, 32)];
     }
     else {
         [Util warnWithAPIError:error andBlock:^{
             [Util compareAndPopController:self animated:YES]; 
         }];
     }
+}
+
+- (void)updateSpotify {
+    BOOL connected = [STSpotify sharedInstance].connected;
+    self.connectToSpotify.hidden = connected;
+    self.disconnectFromSpotify.hidden = !connected;
+}
+
+- (void)connectToSpotify:(id)notImportant {
+    NSLog(@"connect");
+    self.spotifyCancellation = [[STSpotify sharedInstance] loginWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        NSLog(@"callback");
+        if (error) {
+            [Util warnWithAPIError:error andBlock:nil];
+        }
+        [self updateSpotify];
+    }];
+}
+
+- (void)disconnectFromSpotify:(id)notImportant {
+    NSLog(@"disconnect");
+    self.spotifyCancellation = [[STSpotify sharedInstance] logoutWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        NSLog(@"callback2");
+        if (error) {
+            [Util warnWithAPIError:error andBlock:nil];
+        }
+        [self updateSpotify];
+    }];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification*)notification {
@@ -590,6 +626,28 @@ static const CGFloat _cellHeight = 46;
     return _cellHeight;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return _headerHeight;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    return @"Publish to Timeline";
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.frame.size.width, _headerHeight)] autorelease];
+    
+    STChunk* titleStart = [STChunk chunkWithLineHeight:16 andWidth:200];
+    STTextChunk* titleChunk = [[[STTextChunk alloc] initWithPrev:titleStart
+                                                            text:[self tableView:tableView titleForHeaderInSection:section]
+                                                            font:[UIFont stampedBoldFontWithSize:12]
+                                                           color:[UIColor stampedDarkGrayColor]] autorelease];
+    titleChunk.bottomLeft = CGPointMake(26, 26);
+    STChunksView* title = [[[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:titleChunk]] autorelease];
+    [view addSubview:title];
+    return view;
+}
+
 - (UIView*)footerWithText:(NSString*)text {
     STChunk* start = [STChunk chunkWithLineHeight:16 andWidth:290];
     start.bottomLeft = CGPointMake(16, 16);
@@ -699,10 +757,17 @@ static const CGFloat _cellHeight = 46;
     [_openGraphItems autorelease];
     _openGraphItems = [items retain];
     NSInteger rowDelta = items.count - countBefore;
+    CGFloat heightDelta = rowDelta * _cellHeight;
+    if (countBefore == 0 && rowDelta != 0) {
+        heightDelta += _headerHeight;
+    }
+    else if (items.count == 0 && rowDelta != 0) {
+        heightDelta -= _headerHeight;
+    }
+    CGFloat duration = .08 * (abs(heightDelta) / _cellHeight);
     CGRect frame = self.openGraphTable.frame;
-    frame.size.height = items.count * _cellHeight;
-    CGFloat duration = abs(rowDelta) * .08;
-    [self.openGraphSettings.delegate childView:self.openGraphSettings shouldChangeHeightBy:rowDelta * _cellHeight overDuration:duration];
+    frame.size.height += heightDelta;
+    [self.openGraphSettings.delegate childView:self.openGraphSettings shouldChangeHeightBy:heightDelta overDuration:duration];
     if (countBefore == 0 && rowDelta != 0) {
         self.openGraphTable.frame = frame;
         [self.openGraphTable beginUpdates];
@@ -799,7 +864,7 @@ static const CGFloat _cellHeight = 46;
         UIImage* buttonImage = [UIImage imageNamed:@"notifications-checkbox"];
         UIImage* checkImage = [UIImage imageNamed:@"notifications-checkmark"];
         _button = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-        _button.frame = CGRectMake(213, 8, 30, 30);
+        _button.frame = CGRectMake(240, 8, 30, 30);
         [_button setImage:buttonImage forState:UIControlStateNormal];
         [_button addTarget:self action:@selector(toggle:) forControlEvents:UIControlEventTouchUpInside];
         [self.contentView addSubview:_button];

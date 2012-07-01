@@ -12,11 +12,14 @@
 #import "STConfiguration.h"
 #import <AVFoundation/AVFoundation.h>
 #import "STActionUtil.h"
+#import "STSpotify.h"
+#import "CocoaLibSpotify.h"
 
 typedef enum {
     STPlayerServiceNone = 0,
     STPlayerServicePreview = 1,
     STPlayerServiceRdio = 2,
+    STPlayerServiceSpotify = 3,
 } STPlayerService;
 
 NSString* const STPlayerItemChangedNotification = @"STPlayerItemChangedNotification";
@@ -27,7 +30,6 @@ NSString* const STPlayerCummulativeKey = @"Player.cummulative";
 NSString* const STPlayerRevertKey = @"Player.revert";
 NSString* const STPlayerFullFooterKey = @"Player.fullFooter";
 
-
 @interface STPlayer () <RDPlayerDelegate>
 
 @property (nonatomic, readonly, retain) NSMutableArray<STPlaylistItem>* items;
@@ -37,6 +39,8 @@ NSString* const STPlayerFullFooterKey = @"Player.fullFooter";
 
 @property (nonatomic, readonly, retain) Rdio* rdio;
 @property (nonatomic, readonly, retain) AVPlayer* previewPlayer;
+@property (nonatomic, readwrite, retain) SPPlaybackManager* spotifyPlaybackManager;
+
 
 @end
 
@@ -49,6 +53,7 @@ NSString* const STPlayerFullFooterKey = @"Player.fullFooter";
 
 @synthesize items = _items;
 @synthesize rdio = _rdio;
+@synthesize spotifyPlaybackManager = _spotifyPlaybackManager;
 
 static id _sharedInstance;
 
@@ -72,6 +77,10 @@ static id _sharedInstance;
                                                  selector:@selector(previewEnded:) 
                                                      name:AVPlayerItemDidPlayToEndTimeNotification
                                                    object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                 selector:@selector(spotifyTrackEnded:) 
+                                                     name:STSpotifyTrackEndedNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -82,9 +91,59 @@ static id _sharedInstance;
     [_rdio release];
     [_items release];
     [_previewPlayer release];
+    [_spotifyPlaybackManager release];
     [super dealloc];
 }
 
+- (void)initializeSpotify {
+    if (!self.spotifyPlaybackManager) {
+        self.spotifyPlaybackManager = [[[SPPlaybackManager alloc] initWithPlaybackSession:[SPSession sharedSession]] autorelease];
+    }
+}
+
+- (void)playKatyPerry {
+    [self playSpotifyTrack:@"spotify:track:6OBK6xjgbwXapL375a02zf"];
+}
+
+- (void)playSpotifyTrack:(NSString*)key {
+    void (^block)() = ^{
+        [self initializeSpotify];
+        
+        NSURL *trackURL = [NSURL URLWithString:key];
+        [[SPSession sharedSession] trackForURL:trackURL callback:^(SPTrack *track) {
+            
+            if (track != nil) {
+                
+                [SPAsyncLoading waitUntilLoaded:track timeout:kSPAsyncLoadingDefaultTimeout then:^(NSArray *tracks, NSArray *notLoadedTracks) {
+                    [self.spotifyPlaybackManager playTrack:track callback:^(NSError *error) {
+                        if (error) {
+                            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Cannot Play Track"
+                                                                            message:[error localizedDescription]
+                                                                           delegate:nil
+                                                                  cancelButtonTitle:@"OK"
+                                                                  otherButtonTitles:nil];
+                            [alert show];
+                        } else {
+                            NSLog(@"playing with Spotify:%@", key);
+                            // self.currentTrack = track;
+                        }
+                        
+                    }];
+                }];
+            }
+        }]; 
+    };
+    if ([STSpotify sharedInstance].loggedIn) {
+        block();
+    }
+    else {
+        [[STSpotify sharedInstance] loginWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+            if (success) {
+                block();
+            }
+        }];
+    }
+}
 
 - (void)seekToItemAtIndex:(NSInteger)index {
     [self _stopItem];
@@ -143,10 +202,15 @@ static id _sharedInstance;
 }
 
 - (STPlayerService)serviceForItem:(id<STPlaylistItem>)item {
+    BOOL spotifyConnect = [STSpotify sharedInstance].connected;
     BOOL rdioConnected = [STRdio sharedRdio].connected;
+    NSString* spotifyID = [STActionUtil sourceIDForItem:item withSource:@"spotify"];
     NSString* rdioID = [STActionUtil sourceIDForItem:item withSource:@"rdio"];
     NSString* preview = [STActionUtil previewURLForItem:item];
-    if ((rdioID && rdioConnected)) {
+    if ((spotifyID && spotifyConnect)) {
+        return STPlayerServiceSpotify;
+    }
+    else if ((rdioID && rdioConnected)) {
         return STPlayerServiceRdio;
     }
     else if (preview) {
@@ -158,27 +222,28 @@ static id _sharedInstance;
 }
 
 - (void)_stopItem {
-    if (self.items.count) {
-        id<STPlaylistItem> item = [self.items objectAtIndex:self.currentItemIndex];
-        STPlayerService service = [self serviceForItem:item];
+    //if (self.items.count) {
+        //id<STPlaylistItem> item = [self.items objectAtIndex:self.currentItemIndex];
         [self.previewPlayer pause]; //helps with Rdio login
         [self.rdio.player stop];
+        [self.spotifyPlaybackManager setIsPlaying:NO];
         //  else if (STPlayerServicePreview == service) {
 //            [self.previewPlayer pause];
 //        }
-    }
+    //}
 }
 
 - (void)_playItemAtIndex:(NSInteger)index {
     id<STPlaylistItem> item = [self.items objectAtIndex:index];
     STPlayerService service = [self serviceForItem:item];
-    if (STPlayerServiceRdio == service) {
-        NSString* rdioID = nil;
-        for (id<STSource> source in item.action.sources) {
-            if ([[source source] isEqualToString:@"rdio"]) {
-                rdioID = [source sourceID];
-            }
+    if (STPlayerServiceSpotify == service) {
+        NSString* spotifyID = [STActionUtil sourceIDForItem:item withSource:@"spotify"];
+        if (spotifyID) {
+            [self playSpotifyTrack:spotifyID];
         }
+    }
+    else if (STPlayerServiceRdio == service) {
+        NSString* rdioID = [STActionUtil sourceIDForItem:item withSource:@"rdio"];
         if (rdioID) {
             //NSLog(@"rdio play:%@", rdioID);
             [self.rdio.player playSource:rdioID];
@@ -235,7 +300,10 @@ static id _sharedInstance;
         if (self.items.count) {
             id<STPlaylistItem> item = [self.items objectAtIndex:self.currentItemIndex];
             STPlayerService service = [self serviceForItem:item];
-            if (STPlayerServiceRdio == service) {
+            if (STPlayerServiceSpotify == service) {
+                [self.spotifyPlaybackManager setIsPlaying:!paused];
+            }
+            else if (STPlayerServiceRdio == service) {
                 if (paused && self.rdio.player.state != RDPlayerStatePaused) {
                     [self.rdio.player togglePause];
                 }
@@ -268,17 +336,22 @@ static id _sharedInstance;
 /**
  * Notification that the player has changed states. See <code>RDPlayerState</code>.
  */
+
+- (void)seekToNext {
+    NSInteger next = self.currentItemIndex + 1;
+    if (next < self.itemCount) {
+        [self seekToItemAtIndex:next];
+    }
+    else {
+        self.paused = YES;
+    }
+}
+
 -(void)rdioPlayerChangedFromState:(RDPlayerState)oldState toState:(RDPlayerState)newState {
     NSAssert1([NSThread isMainThread], @"not main thread %@", [NSThread currentThread]);
     if (!self.paused) {
         if (oldState == RDPlayerStatePlaying && newState == RDPlayerStateStopped) {
-            NSInteger next = self.currentItemIndex + 1;
-            if (next < self.itemCount) {
-                [self seekToItemAtIndex:next];
-            }
-            else {
-                self.paused = YES;
-            }
+            [self seekToNext];
         }
     }
 }
@@ -286,13 +359,13 @@ static id _sharedInstance;
 - (void)previewEnded:(NSNotification*)notifications {
     if (!self.paused) {
        // NSLog(@"itunes song");
-        NSInteger next = self.currentItemIndex + 1;
-        if (next < self.itemCount) {
-            [self seekToItemAtIndex:next];
-        }
-        else {
-            self.paused = YES;
-        }
+        [self seekToNext];
+    }
+}
+
+- (void)spotifyTrackEnded:(id)notImportant {
+    if (!self.paused) {
+        [self seekToNext];
     }
 }
 

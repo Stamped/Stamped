@@ -12,6 +12,12 @@
 #import "CocoaLibSpotify.h"
 #import "STMenuController.h"
 #import "Util.h"
+#import "KeyChainItemWrapper.h"
+
+// Test account
+// 1235969194
+
+extern NSString* const STSpotifyTrackEndedNotification = @"STSpotifyTrackEndedNotification";
 
 static const uint8_t g_appkey[] = {
 	0x01, 0xD2, 0x04, 0x53, 0x59, 0x3A, 0x72, 0x17, 0xB8, 0x32, 0xA1, 0x90, 0xA3, 0xD1, 0x21, 0x54,
@@ -37,17 +43,27 @@ static const uint8_t g_appkey[] = {
 	0x24,
 };
 
+static NSString* const _spotifyKeychainItemID = @"SpotifyCredentials";
+
 static const size_t g_appkey_size = sizeof(g_appkey);
 
 @interface STSpotify () <SPSessionDelegate>
 
 @property (nonatomic, readwrite, assign) BOOL startedSession;
+@property (nonatomic, readonly, retain) KeychainItemWrapper* keychainItem;
+@property (nonatomic, readwrite, retain) STCancellation* cancellation;
+@property (nonatomic, readwrite, copy) void (^block)(BOOL, NSError*, STCancellation*);
+@property (nonatomic, readwrite, assign) BOOL loggedIn;
 
 @end
 
 @implementation STSpotify
 
 @synthesize startedSession = _startedSession;
+@synthesize keychainItem = _keychainItem;
+@synthesize cancellation = _cancellation;
+@synthesize block = _block;
+@synthesize loggedIn = _loggedIn;
 
 static id _sharedInstance;
 
@@ -63,47 +79,129 @@ static id _sharedInstance;
 {
     self = [super init];
     if (self) {
-        
+        _keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:_spotifyKeychainItemID];
     }
     return self;
 }
 
+- (void)dealloc
+{
+    [_keychainItem release];
+    [_cancellation release];
+    [_block release];
+    [super dealloc];
+}
+
+- (BOOL)connected {
+    NSString* account = [_keychainItem objectForKey:(id)kSecAttrAccount];
+    NSLog(@"account:%@,%p", account, account);
+    return account && ![account isEqualToString:@""];
+}
+
+- (STCancellation*)loginWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    if (self.loggedIn) {
+        STCancellation* cancellation = [STCancellation cancellation];
+        [Util executeOnMainThread:^{
+            block(YES, nil, cancellation);
+        }];
+        return cancellation;
+    }
+    else if (self.cancellation) {
+        STCancellation* cancellation = [STCancellation cancellation];
+        [Util executeOnMainThread:^{
+            block(NO, [NSError errorWithDomain:@"Stamped" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Operation pending" forKey:NSLocalizedDescriptionKey]], cancellation);
+        }];
+        return cancellation;
+    }
+    else {
+        self.cancellation = [STCancellation cancellation];
+        self.block = block;
+        [self startSession];
+        if (self.connected) {
+            NSString* userName = [_keychainItem objectForKey:(id)kSecAttrAccount];
+            NSString* credential = [_keychainItem objectForKey:(id)kSecValueData];
+            [[SPSession sharedSession] attemptLoginWithUserName:userName existingCredential:credential rememberCredentials:YES];
+        }
+        else {
+            SPLoginViewController *controller = [SPLoginViewController loginControllerForSession:[SPSession sharedSession]];
+            controller.allowsCancel = NO;
+            [[Util sharedMenuController] presentModalViewController:controller animated:YES];
+        }
+        return self.cancellation;
+    }
+}
+
+- (STCancellation*)logoutWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    [self startSession];
+    STCancellation* cancellation = [STCancellation cancellation];
+    [[SPSession sharedSession] logout:^{
+        [self.keychainItem resetKeychainItem];
+        if (!cancellation.cancelled) {
+            block(YES, nil, cancellation);
+        }
+    }];
+    return cancellation;
+}
+
 - (void)startSession {    
-	[SPSession initializeSharedSessionWithApplicationKey:[NSData dataWithBytes:&g_appkey length:g_appkey_size] 
-											   userAgent:@"com.stamped.iOS"
-												   error:nil];
-	[[SPSession sharedSession] setDelegate:self];
+    if (!self.startedSession) {
+        [SPSession initializeSharedSessionWithApplicationKey:[NSData dataWithBytes:&g_appkey length:g_appkey_size] 
+                                                   userAgent:@"com.stamped.iOS" 
+                                               loadingPolicy:SPAsyncLoadingManual
+                                                       error:nil];
+        [[SPSession sharedSession] setDelegate:self];
+        self.startedSession = YES;
+    }
 }
 
 #pragma mark SPSessionDelegate Methods
 
 -(UIViewController *)viewControllerToPresentLoginViewForSession:(SPSession *)aSession {
-	return [Util sharedMenuController];
+	return nil;
 }
 
--(void)sessionDidLoginSuccessfully:(SPSession *)aSession; {
+-(void)session:(SPSession *)aSession didGenerateLoginCredentials:(NSString *)credential forUserName:(NSString *)userName {
+    [self.keychainItem setObject:credential forKey:(id)kSecValueData];
+    [self.keychainItem setObject:userName forKey:(id)kSecAttrAccount];
+    if (self.block && self.cancellation) {
+        if (!self.cancellation.cancelled) {
+            self.block(YES, nil, self.cancellation);
+        }
+    }
+    self.cancellation = nil;
+    self.block = nil;
+}
+
+-(void)sessionDidLoginSuccessfully:(SPSession *)aSession {
 	// Invoked by SPSession after a successful login.
+    self.loggedIn = YES;
 }
 
--(void)session:(SPSession *)aSession didFailToLoginWithError:(NSError *)error; {
+-(void)session:(SPSession *)aSession didFailToLoginWithError:(NSError *)error {
 	// Invoked by SPSession after a failed login.
+    if (self.block && self.cancellation) {
+        if (!self.cancellation.cancelled) {
+            self.block(NO, error, self.cancellation);
+        }
+    }
+    self.cancellation = nil;
+    self.block = nil;
 }
 
 -(void)sessionDidLogOut:(SPSession *)aSession {
-	
-	SPLoginViewController *controller = [SPLoginViewController loginControllerForSession:[SPSession sharedSession]];
-	
-	controller.allowsCancel = NO;
-	
-    [Util pushController:controller modal:YES animated:YES];
+    self.loggedIn = NO;
 }
 
--(void)session:(SPSession *)aSession didEncounterNetworkError:(NSError *)error; {}
--(void)session:(SPSession *)aSession didLogMessage:(NSString *)aMessage; {}
--(void)sessionDidChangeMetadata:(SPSession *)aSession; {}
+-(void)sessionDidEndPlayback:(id <SPSessionPlaybackProvider>)aSession {
+    [[NSNotificationCenter defaultCenter] postNotificationName:STSpotifyTrackEndedNotification object:nil];
+}
 
--(void)session:(SPSession *)aSession recievedMessageForUser:(NSString *)aMessage; {
-	return;
+-(void)session:(SPSession *)aSession didEncounterNetworkError:(NSError *)error {}
+-(void)session:(SPSession *)aSession didLogMessage:(NSString *)aMessage {}
+-(void)sessionDidChangeMetadata:(SPSession *)aSession {}
+
+
+-(void)session:(SPSession *)aSession recievedMessageForUser:(NSString *)aMessage {
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message from Spotify"
 													message:aMessage
 												   delegate:nil
