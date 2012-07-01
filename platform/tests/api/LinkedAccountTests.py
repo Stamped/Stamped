@@ -135,7 +135,6 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 0)
 
-
 class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
 
     def setUp(self):
