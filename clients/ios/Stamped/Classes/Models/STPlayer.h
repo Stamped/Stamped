@@ -29,6 +29,7 @@ extern NSString* const STPlayerFullFooterKey;
 - (NSInteger)currentItemIndex;
 - (NSInteger)itemCount;
 - (void)clear;
+- (void)playKatyPerry;
 
 @property (nonatomic, readwrite, assign) BOOL paused;
 
