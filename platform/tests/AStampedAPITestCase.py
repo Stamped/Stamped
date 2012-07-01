@@ -160,10 +160,7 @@ class AStampedAPITestCase(AStampedFixtureTestCase):
 
 
     def showAccount(self, authUserId):
-        account = self.api.getAccount(authUserId)
-        if account is None:
-            raise StampedIllegalActionError('Could not retrieve account for id: %s' % authUserId)
-        return account
+        return self.api.getAccount(authUserId)
 
     def showLinkedAccounts(self, authUserId):
         return self.api.getLinkedAccounts(authuserId)

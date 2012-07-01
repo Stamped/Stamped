@@ -227,7 +227,7 @@ class StampedAPI(AStampedAPI):
         secondary = secondary.upper()
 
         if not utils.validate_hex_color(primary) or not utils.validate_hex_color(secondary):
-            raise StampedInputError("Invalid format for colors")
+            raise StampedInvalidStampColorsError("Invalid format for colors")
 
         return primary, secondary
 
@@ -284,7 +284,7 @@ class StampedAPI(AStampedAPI):
 
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
-            raise StampedInvalidScreenNameError("Blacklisted screen name: %s" % account.screen_name)
+            raise StampedBlackListedScreenNameError("Blacklisted screen name: %s" % account.screen_name)
 
         # Validate email address
         if account.email is not None and account.auth_service == 'stamped':
@@ -344,7 +344,6 @@ class StampedAPI(AStampedAPI):
             except (StampedInputError, StampedUnavailableError) as e:
                 logs.warning("Unable to get user info from facebook %s" % e)
                 raise StampedInputError('Unable to connect to Facebook')
-            logs.info('### facebookUser id: %s' % facebookUser['id'])
             if facebookUser['id'] != linkedAccount.linked_user_id:
                 logs.warning("The facebook id associated with the facebook token is different from the id provided")
                 raise StampedAuthError('Unable to connect to Facebook')
@@ -353,9 +352,8 @@ class StampedAPI(AStampedAPI):
             try:
                 twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
             except (StampedInputError, StampedUnavailableError):
-                logs.warning("Unable to get user info from facebook %s" % e)
+                logs.warning("Unable to get user info from twitter %s" % e)
                 raise StampedInputError('Unable to connect to Twitter')
-            logs.info('### twitterUser id: %s' % twitterUser['id'])
             if twitterUser['id'] != linkedAccount.linked_user_id:
                 logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
                 raise StampedAuthError('Unable to connect to Twitter')
@@ -368,7 +366,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountExistsError("Account already exists for facebookId: %s" % facebookId)
+        raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
 
     def _verifyTwitterAccount(self, twitterId):
         # Check that no Stamped account is linked to the twitterId
@@ -376,7 +374,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountExistsError("Account already exists for twitterId: %s" % twitterId)
+        raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -401,11 +399,12 @@ class StampedAPI(AStampedAPI):
         else:
             account.email = str(account.email).lower().strip()
             if not utils.validate_email(account.email):
-                raise StampedInputError("Invalid format for email address")
+                raise StampedInvalidEmailError("Invalid format for email address")
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
         fb_acct.service_name                = 'facebook'
+        fb_acct.token                       = new_fb_account.user_token
         fb_acct.linked_user_id              = facebookUser['id']
         fb_acct.linked_name                 = facebookUser['name']
         fb_acct.linked_screen_name          = facebookUser.pop('username', None)
@@ -622,7 +621,7 @@ class StampedAPI(AStampedAPI):
 
             # Check Blacklist
             if account.screen_name.lower() in Blacklist.screen_names:
-                raise StampedInputError("Blacklisted screen name")
+                raise StampedBlackListedScreenNameError("Blacklisted screen name")
 
             # Asynchronously update profile picture link if screen name has changed
             tasks.invoke(tasks.APITasks.changeProfileImageName, args=[
@@ -639,8 +638,7 @@ class StampedAPI(AStampedAPI):
             if utils.validate_url(fields['website']):
                 account.website = fields['website']
             else:
-                logs.warning("Could not update account 'website' field - not a valid url string")
-                raise StampedInputError("Could not update account website")
+                raise StampedInvalidWebsiteError("Could not update account 'website' field - not a valid url string")
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
         if 'color_primary' in fields and 'color_secondary' in fields:
@@ -724,7 +722,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExistsError("More than one account exists using facebook_id: %s" % facebookId)
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
 
     @API_CALL
@@ -733,7 +731,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExistsError("More than one account exists using twitter_id: %s" % twitterId)
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
 
     @API_CALL
@@ -742,7 +740,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExistsError("More than one account exists using netflix_id: %s" % netflixId)
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
 
     @API_CALL
@@ -793,29 +791,21 @@ class StampedAPI(AStampedAPI):
         ### TODO: Clean this up (along with HTTP API function)
         valid = False
 
-        try:
-            # Email
-            if utils.validate_email(login):
+        # Email
+        if utils.validate_email(login):
+            valid = True
+            user = self._accountDB.getAccountByEmail(login)
+        # Screen Name
+        elif utils.validate_screen_name(login):
+            # Check blacklist
+            if login.lower() not in Blacklist.screen_names:
                 valid = True
-                user = self._accountDB.getAccountByEmail(login)
-            # Screen Name
-            elif utils.validate_screen_name(login):
-                # Check blacklist
-                if login.lower() not in Blacklist.screen_names:
-                    valid = True
-                    user = self._accountDB.getAccountByScreenName(login)
-                else:
-                    logs.info('Blacklisted login: %s' % login)
+                user = self._accountDB.getAccountByScreenName(login)
             else:
-                raise
-            return user
-        except Exception:
-            if valid == True:
-                msg = "Login info does not exist"
-                logs.debug(msg)
-                raise KeyError(msg)
-            else:
-                raise StampedInputError("Invalid input")
+                raise StampedBlacklistedAccountError('Blacklisted login: %s' % login)
+        else:
+            raise StampedAccountNotFoundError("Could not find account for email or screen_name")
+        return user
 
     @API_CALL
     def updateAlerts(self, authUserId, on, off):
@@ -852,21 +842,21 @@ class StampedAPI(AStampedAPI):
 
     def _getTwitterFollowers(self, user_token, user_secret):
         if user_token is None or user_secret is None:
-            raise StampedIllegalActionError("Connecting to Twitter requires a valid key / secret")
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Twitter requires a valid key / secret")
 
         twitterIds = self._twitter.getFollowerIds(user_token, user_secret)
         return self._userDB.findUsersByTwitter(twitterIds)
 
     def _getTwitterFriends(self, user_token, user_secret):
         if user_token is None or user_secret is None:
-            raise StampedIllegalActionError("Connecting to Twitter requires a valid key / secret")
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Twitter requires a valid key / secret")
 
         twitterIds = self._twitter.getFriendIds(user_token, user_secret)
         return self._userDB.findUsersByTwitter(twitterIds)
 
     def _getFacebookFriends(self, user_token):
         if user_token is None:
-            raise StampedIllegalActionError("Connecting to Facebook requires a valid token")
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Facebook requires a valid token")
 
         facebookIds = self._facebook.getFriendIds(user_token)
         return self._userDB.findUsersByFacebook(facebookIds)
@@ -897,8 +887,10 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
         account = self._accountDB.getAccount(authUserId)
+        if account.linked is None or getattr(account.linked, service_name, None) is None:
+            StampedLinkedAccountDoesNotExistError("Referencing non-existent linked account: %s for user: %s" %
+                                                  (service_name, authUserId))
         linkedAccount = getattr(account.linked, service_name)
-
 
         shareSettings = linkedAccount.share_settings
         if shareSettings is None:
@@ -2484,13 +2476,15 @@ class StampedAPI(AStampedAPI):
         account = self.getAccount(authUserId)
 
         if service_name == 'facebook':
-            if account.linked is None or account.linked.facebook is None is None \
-               or account.linked.facebook.token is None or account.linked.facebook.linked_user_id:
+            if account.linked is None or account.linked.facebook is None \
+               or account.linked.facebook.token is None or account.linked.facebook.linked_user_id is None:
                 raise StampedLinkedAccountError('Cannot share stamp on facebook, missing necessary linked account information.')
             self._facebook.postToNewsFeed(account.linked.facebook.linked_user_id,
                                           account.linked.facebook.token,
                                           stamp.contents[-1].blurb,
                                           imageUrl)
+        else:
+            raise StampedInputError("Sharing is not implemented for service: %s" % service_name)
         return stamp
 
     @API_CALL
@@ -4030,6 +4024,8 @@ class StampedAPI(AStampedAPI):
     #     # #    #   #   #  #  #  #   #     #
     #     #  ####    #   #   ##   #   #     #
     """
+
+
     def _addFollowActivity(self, userId, friendId):
         objects = ActivityObjectIds()
         objects.user_ids = [ friendId ]

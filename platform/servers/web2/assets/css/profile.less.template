@@ -19,16 +19,10 @@
                          CUSTOM COLOR SCHEME SETUP
    ************************************************************************** */
 
-<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
 {{#user}}
 @user_primary:   #{{color_primary}};   /* #004ab2 */
 @user_secondary: #{{color_secondary}}; /* #0057d1 */
 {{/user}}
-=======
-@user_primary:   #8B00B4;   /* #004ab2 */
-@user_secondary: #220070; /* #0057d1 */
->>>>>>> Design Polish:platform/servers/web2/.profile.less
-
 /*
 @l0: hue(hsl(lightness(@user_primary), 0, 0));
 @l1: hue(hsl(lightness(@user_secondary), 0, 0));
@@ -128,24 +122,16 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 }
 
 .user-logo-large {
-<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png) no-repeat;
     {{/user}}
-=======
-    background: url(http://static.stamped.com/logos/8B00B4-220070-logo-195x195.png) no-repeat;
->>>>>>> Design Polish:platform/servers/web2/.profile.less
-    background-size: 100% 100%;
+        background-size: 100% 100%;
 }
 
 .user-logo-small {
-<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
-=======
-    background: url(http://static.stamped.com/logos/8B00B4-220070-email-36x36.png) no-repeat;
->>>>>>> Design Polish:platform/servers/web2/.profile.less
     background-size: 100% 100%;
     
     width:  36px;
@@ -153,13 +139,9 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 }
 
 .user-logo-tiny {
-<<<<<<< HEAD:platform/servers/web2/assets/css/profile.less.template
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
-=======
-    background: url(http://static.stamped.com/logos/8B00B4-220070-email-36x36.png) no-repeat;
->>>>>>> Design Polish:platform/servers/web2/.profile.less
     background-size: 100% 100%;
     
     width:  24px;
