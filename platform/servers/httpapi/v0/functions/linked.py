@@ -27,11 +27,11 @@ exceptions = {
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
     if linkedAccounts is None:
-        result = None
+        result = {}
     else:
-        result = HTTPLinkedAccounts().importLinkedAccounts(linkedAccounts)
+        result = HTTPLinkedAccounts().importLinkedAccounts(linkedAccounts).dataExport()
 
-    return transformOutput(result.dataExport())
+    return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPLinkedAccount,
                    conversion=HTTPLinkedAccount.exportLinkedAccount)

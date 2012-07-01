@@ -347,6 +347,13 @@ class StampedAPI(AStampedAPI):
             if facebookUser['id'] != linkedAccount.linked_user_id:
                 logs.warning("The facebook id associated with the facebook token is different from the id provided")
                 raise StampedAuthError('Unable to connect to Facebook')
+#            if facebookUser['name'] != linkedAccount.linked_name:
+#                logs.warning("The name associated with the Facebook account is different from the name provided")
+#                raise StampedAuthError('Unable to connect to Facebook')
+#            if linkedAccount.linked_screen_name is not None and \
+#               facebookUser['username'] != linkedAccount.linked_screen_name:
+#                logs.warning("The username associated with the Facebook account is different from the screen name provided")
+#                raise StampedAuthError('Unable to connect to Facebook')
             self._verifyFacebookAccount(facebookUser['id'])
         elif linkedAccount.service_name == 'twitter':
             try:
@@ -354,9 +361,12 @@ class StampedAPI(AStampedAPI):
             except (StampedInputError, StampedUnavailableError):
                 logs.warning("Unable to get user info from twitter %s" % e)
                 raise StampedInputError('Unable to connect to Twitter')
-            if twitterUser['id'] != linkedAccount.linked_user_id:
-                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-                raise StampedAuthError('Unable to connect to Twitter')
+#            if twitterUser['id'] != linkedAccount.linked_user_id:
+#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+#                raise StampedAuthError('Unable to connect to Twitter')
+#            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
+#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+#                raise StampedAuthError('Unable to connect to Twitter')
             self._verifyTwitterAccount(twitterUser['id'])
         return True
 
