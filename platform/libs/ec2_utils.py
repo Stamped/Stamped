@@ -177,7 +177,7 @@ def get_db_nodes():
     # f.write(json.dumps(list(dbNodes), indent=2))
     # f.close()
 
-    return list[dbNodes]
+    return list(dbNodes)
 
 def get_api_elb(stack=None):
     if not is_ec2():
