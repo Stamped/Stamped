@@ -357,6 +357,7 @@ static STRestKitLoader* _sharedInstance;
     [_refreshTokenKeychainItem resetKeychainItem];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:_tokenExpirationUserDefaultsKey];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:_loginTypeUserDefaultsKey];
+    self.currentUser = nil;
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -652,7 +653,6 @@ static STRestKitLoader* _sharedInstance;
 
 - (void)logout {
     [self clearAuthState];
-    self.currentUser = nil;
     [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILogoutNotification object:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
 }
