@@ -352,7 +352,7 @@ class StampedAPI(AStampedAPI):
             try:
                 twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
             except (StampedInputError, StampedUnavailableError):
-                logs.warning("Unable to get user info from facebook %s" % e)
+                logs.warning("Unable to get user info from twitter %s" % e)
                 raise StampedInputError('Unable to connect to Twitter')
             if twitterUser['id'] != linkedAccount.linked_user_id:
                 logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
@@ -366,7 +366,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountExistsError("Account already exists for facebookId: %s" % facebookId)
+        raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
 
     def _verifyTwitterAccount(self, twitterId):
         # Check that no Stamped account is linked to the twitterId
@@ -374,7 +374,7 @@ class StampedAPI(AStampedAPI):
             self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountExistsError("Account already exists for twitterId: %s" % twitterId)
+        raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -722,7 +722,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExistsError("More than one account exists using facebook_id: %s" % facebookId)
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
 
     @API_CALL
@@ -731,7 +731,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExistsError("More than one account exists using twitter_id: %s" % twitterId)
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
 
     @API_CALL
@@ -740,7 +740,7 @@ class StampedAPI(AStampedAPI):
         if len(accounts) == 0:
             raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
-            raise StampedLinkedAccountExistsError("More than one account exists using netflix_id: %s" % netflixId)
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
 
     @API_CALL
@@ -887,8 +887,10 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
         account = self._accountDB.getAccount(authUserId)
+        if account.linked is None or getattr(account.linked, service_name, None) is None:
+            StampedLinkedAccountDoesNotExistError("Referencing non-existent linked account: %s for user: %s" %
+                                                  (service_name, authUserId))
         linkedAccount = getattr(account.linked, service_name)
-
 
         shareSettings = linkedAccount.share_settings
         if shareSettings is None:

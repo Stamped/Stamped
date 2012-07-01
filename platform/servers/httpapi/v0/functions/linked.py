@@ -16,6 +16,12 @@ from Facebook           import *
 from django.http        import HttpResponseRedirect
 
 
+exceptions = {
+    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
+
+    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(400, kind='invalid_credentials', msg="No such third party account linked to user"),
+}
+
 @handleHTTPRequest(parse_request=False)
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
@@ -79,7 +85,8 @@ def _buildShareSettingsFromLinkedAccount(linked):
 
     return map(lambda x: x.dataExport(), result)
 
-@handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest)
+@handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def updateSettings(request, authUserId, http_schema, **kwargs):
     on = None
@@ -109,7 +116,6 @@ def showSettings(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def removeTwitter(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-
     return transformOutput(True)
 
 
@@ -117,14 +123,6 @@ def removeTwitter(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 def removeFacebook(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
-
-    return transformOutput(True)
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeTwitter(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-
     return transformOutput(True)
 
 def createNetflixLoginResponse(request, netflixAddId=None):

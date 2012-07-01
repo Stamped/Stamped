@@ -155,7 +155,7 @@ class StampedAuth(AStampedAuth):
             raise StampedUnavailableError("Unable to find account with facebook_id: %s" % fb_user['id'])
         elif len(accounts) > 1:
             logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
-            raise StampedLinkedAccountExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
         account = accounts[0]
 
         if account.linked.facebook is None or account.linked.facebook.linked_user_id is None:

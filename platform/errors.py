@@ -117,10 +117,13 @@ class StampedAuthError(Exception):
 
 # Specific Stamped Exceptions
 
-class StampedLinkedAccountExistsError(StampedIllegalActionError):
+class StampedLinkedAccountAlreadyExistsError(StampedIllegalActionError):
     def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
+class StampedLinkedAccountDoesNotExistError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
 
 class StampedInvalidPasswordError(StampedInputError):
     def __init__(self, msg=None):
