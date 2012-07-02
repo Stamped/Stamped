@@ -18,11 +18,14 @@ from django.http        import HttpResponseRedirect
 
 exceptions = {
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
-
-    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(400, kind='invalid_credentials', msg="No such third party account linked to user"),
+    'StampedMissingLinkedAccountTokenError' : StampedHTTPError(400, kind='invalid_credentials', msg="Must provide a token for third party service"),
+    'StampedNetflixNoInstantWatchError'     : StampedHTTPError(403, kind='illegal_action', msg="Netflix account must have instant watch access"),
+    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(403, kind='illegal_action', msg="No such third party account linked to user"),
+    'StampedLinkedAccountIsAuthError'       : StampedHTTPError(403, kind='illegal_action', msg="This third-party account is used for authorization and cannot be removed"),
 }
 
-@handleHTTPRequest(parse_request=False)
+@handleHTTPRequest(parse_request=False,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
@@ -33,17 +36,34 @@ def show(request, authUserId, **kwargs):
 
     return transformOutput(result)
 
+exceptions_add = {
+    'StampedMissingParametersError'       : StampedHTTPError(400, kind='bad_request', msg='Missing third party service name'),
+}
 @handleHTTPRequest(http_schema=HTTPLinkedAccount,
-                   conversion=HTTPLinkedAccount.exportLinkedAccount)
+                   conversion=HTTPLinkedAccount.exportLinkedAccount,
+                   exceptions=exceptions.update(exceptions_add))
 @require_http_methods(["POST"])
 def add(request, authUserId, http_schema, schema, **kwargs):
+    if http_schema.service_name is None:
+        if 'service_name' not in kwargs:
+            raise StampedMissingParametersError("Missing linked account service_name parameter")
+        else:
+            schema.service_name = kwargs['service_name']
+
     result = stampedAPI.addLinkedAccount(authUserId, schema)
 
     return transformOutput(True)
 
-@handleHTTPRequest(http_schema=HTTPServiceNameForm)
+@handleHTTPRequest(http_schema=HTTPServiceNameForm,
+                   exceptions=exceptions.update(exceptions_add))
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
+    if http_schema.service_name is None:
+        if 'service_name' not in kwargs:
+            raise StampedMissingParametersError("Missing Linked account service_name parameter")
+        else:
+            http_schema.service_name = kwargs['service_name']
+
     result = stampedAPI.removeLinkedAccount(authUserId, http_schema.service_name)
 
     return transformOutput(True)
@@ -96,7 +116,8 @@ def updateSettings(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(result)
 
-@handleHTTPRequest(http_schema=HTTPServiceNameForm)
+@handleHTTPRequest(http_schema=HTTPServiceNameForm,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def showSettings(request, authUserId, http_schema, **kwargs):
     linked  = stampedAPI.getLinkedAccount(authUserId, http_schema.service_name)
@@ -110,7 +131,7 @@ def createNetflixLoginResponse(request, netflixAddId=None):
     elif 'oauth_token' in request.POST:
         oauth_token = request.POST['oauth_token']
     else:
-        raise StampedInputError("Access token not found")
+        raise StampedMissingLinkedAccountTokenError("Access token not found")
 
 
     netflix = globalNetflix()
@@ -125,12 +146,14 @@ def createNetflixLoginResponse(request, netflixAddId=None):
 
     return transformOutput(response.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPNetflixId)
+@handleHTTPRequest(http_schema=HTTPNetflixId,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLogin(request, http_schema, authUserId, **kwargs):
     return createNetflixLoginResponse(request, http_schema.netflix_id)
 
-@handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse)
+@handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse,
+                           exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
@@ -159,7 +182,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
         return HttpResponseRedirect("stamped://netflix/add/success")
     return HttpResponseRedirect("stamped://netflix/link/success")
 
-@handleHTTPRequest(http_schema=HTTPNetflixId)
+@handleHTTPRequest(http_schema=HTTPNetflixId,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
     try:

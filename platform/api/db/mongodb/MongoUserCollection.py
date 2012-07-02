@@ -133,7 +133,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             elif relationship == 'following':
                 domain = self.friends_collection.getFriends(authUserId)
             else:
-                raise StampedInputError("invalid relationship")
+                raise StampedInvalidRelationshipError("invalid relationship: %s" % relationship)
             
             domain = set(domain)
         
@@ -239,7 +239,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             elif relationship == 'following':
                 domain = self.friends_collection.getFriends(authUserId)
             else:
-                raise StampedInputError("invalid relationship")
+                raise StampedInvalidRelationshipError("invalid relationship")
             
             domain = set(domain)
         

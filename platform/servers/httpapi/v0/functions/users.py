@@ -8,6 +8,7 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = {
+    'StampedMissingParametersError'     : StampedHTTPERROR(400, kind='bad_request', msg="Missing parameters: user ids or screen names required"),
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
     'StampedPermissionError'            : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to view user'),
 }
@@ -30,7 +31,7 @@ def lookup(request, authUserId, http_schema, **kwargs):
     elif http_schema.screen_names is not None:
         users = stampedAPI.getUsers(None, http_schema.screen_names.split(','), authUserId)
     else:
-        raise StampedInputError("Field missing")
+        raise StampedMissingParametersError("User ids or screen names required")
     
     output = []
     for user in users:
@@ -96,7 +97,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
             msg = 'Invalid email: %s' % email
             logs.warning(msg)
 
-    users       = stampedAPI.findUsersByEmail(authUserId, emails)
+    users = stampedAPI.findUsersByEmail(authUserId, emails)
 
     output = []
     for user in users:
