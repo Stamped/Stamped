@@ -12,7 +12,7 @@ import re
 from utils import indentText
 from libs.LRUCache import lru_cache
 from resolve.Resolver import *
-from resolve.TitleUtils import cleanBookTitle, tokenizeString, convertRomanNumerals
+from resolve.TitleUtils import *
 from search.SearchResult import SearchResult
 from search import ScoringUtils
 from DataQualityUtils import *
@@ -500,6 +500,8 @@ class BookSearchResultCluster(SearchResultCluster):
         if book1_name_simple == title2_without_subtitle or book2_name_simple == title1_without_subtitle:
             similarity = max(similarity, 0.95)
         elif title1_without_subtitle == title2_without_subtitle:
+            similarity = max(similarity, 0.9)
+        elif isSuspiciousPrefixBookTitle(book1_name_simple, book2_name_simple):
             similarity = max(similarity, 0.9)
         else:
             subtitle_similarity = cached_string_comparison(title1_without_subtitle, title2_without_subtitle)
