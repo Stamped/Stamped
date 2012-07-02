@@ -91,7 +91,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=Entity)
         AEntityDB.__init__(self)
 
-    def _downgradeAccountFromTwoPointOh(data):
+    def _downgradeAccountFromTwoPointOh(self, data):
         if 'schema_version' not in data:
             return api._entityDB._convertFromMongo(data)
 
