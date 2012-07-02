@@ -159,8 +159,8 @@ def get_db_nodes():
         raise Exception("DB nodes not found: %s" % instance_id)
 
     dbStackName = cur_instance.tags['stack']
-    if 'dbStack' in cur_instance.tags:
-        dbStackName = cur_instance.tags['dbStack']
+    if 'db_stack' in cur_instance.tags:
+        dbStackName = cur_instance.tags['db_stack']
 
     # Generate db nodes based on specified db stack
     dbStack = get_stack(dbStackName)
