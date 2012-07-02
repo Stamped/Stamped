@@ -46,7 +46,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         # Convert multi-blurb documents into single-blurb schema
         contents = document.pop('contents', None)
-        if 'contents' is not None and len(contents) > 0:
+        if contents is not None and len(contents) > 0:
             for content in contents:
                 if 'blurb' in content:
                     document['blurb'] = content['blurb']
