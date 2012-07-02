@@ -362,8 +362,12 @@ def handleHTTPCallbackRequest(
 def checkClient(request, required=True):
     ### Parse Request for Client Credentials
     try:
-        client_id       = request.POST['client_id']
-        client_secret   = request.POST['client_secret']
+        if request.method == 'GET':
+            client_id       = request.GET['client_id']
+            client_secret   = request.GET['client_secret']
+        elif request.method == 'POST':
+            client_id       = request.POST['client_id']
+            client_secret   = request.POST['client_secret']
     except Exception:
         if not required:
             return None 
