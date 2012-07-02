@@ -20,8 +20,8 @@ exceptions = {
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
     'StampedMissingLinkedAccountTokenError' : StampedHTTPError(400, kind='invalid_credentials', msg="Must provide a token for third party service"),
     'StampedNetflixNoInstantWatchError'     : StampedHTTPError(403, kind='illegal_action', msg="Netflix account must have instant watch access"),
-    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(403, kind='illegal_action', msg="No such third party account linked to user"),
-    'StampedLinkedAccountIsAuthError'       : StampedHTTPError(403, kind='illegal_action', msg="This third-party account is used for authorization and cannot be removed"),
+    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(400, kind='illegal_action', msg="No such third party account linked to user"),
+    'StampedLinkedAccountIsAuthError'       : StampedHTTPError(403, kind='forbidden', msg="This third-party account is used for authorization and cannot be removed"),
 }
 
 @handleHTTPRequest(parse_request=False,

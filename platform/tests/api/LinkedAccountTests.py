@@ -148,14 +148,7 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
         StampedAPILinkedAccountHttpTest.setUp(self)
         (self.fb_user_token_a, self.fb_user_id_a)     = self._createFacebookTestUser(name='fbusera')
         # add the linked account
-        data = {
-            'service_name'   : 'facebook',
-            'linked_user_id'        : self.fb_user_id_a,
-            'linked_screen_name'    : 'fbusera',
-            'linked_name'           : 'Test User',
-            'token'          : self.fb_user_token_a,
-            }
-        self.addLinkedAccount(self.token, **data)
+        self.addLinkedFacebookAccount(self.token, self.fb_user_token_a)
 
     def tearDown(self):
         StampedAPILinkedAccountHttpTest.tearDown(self)
@@ -206,6 +199,28 @@ class StampedAPIOpenGraphTest(StampedAPILinkedAccountHttpTest):
 
         import pprint
         pprint.pprint(result)
+
+
+
+    def test_update_facebook_share_settings_with_no_account(self):
+        # verify that the linked account was properly added
+        self.removeLinkedAccount(self.token, 'facebook')
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 0)
+
+        logs.info('linkedAccounts: %s' % linkedAccounts)
+
+        # update share settings: enable share stamps on facebook
+
+        path = "account/linked/facebook/settings/update.json"
+        data = {
+            "oauth_token"   : self.token['access_token'],
+            'service_name'   : 'facebook',
+            'on'   : 'share_stamps,share_follows,share_todos,share_likes',
+            }
+        with expected_exception():
+            self.handlePOST(path, data)
+
 
 #    def test_update_facebook_share_settings(self):
 #        # verify that the linked account was properly added

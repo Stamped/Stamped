@@ -10,6 +10,9 @@ from httpapi.v0.helpers import *
 
 exceptions = {
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
+    'StampedOutOfStampsError'           : StampedHTTPError(403, kind='forbidden', msg='No more stamps remaining'),
+    'StampedUserRequiredForScope'       : StampedHTTPError(400, kind='bad_request', msg='User required'),
+    'StampedInvalidScopeCombinationError' : StampedHTTPError(400, kind='bad_request', msg="Invalid scope combination"),
 }
 
 def transformStamps(stamps):
@@ -29,7 +32,8 @@ def transformStamps(stamps):
 
     return transformOutput(result)
 
-@handleHTTPRequest(http_schema=HTTPStampNew)
+@handleHTTPRequest(http_schema=HTTPStampNew,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def create(request, authUserId, data, **kwargs):
     entityRequest = {
@@ -68,6 +72,10 @@ def share(request, authUserId, http_schema, data, **kwargs):
     stamp = HTTPStamp().importStamp(stamp)
     return transformOutput(stamp.dataExport())
 
+
+exceptions_remove = {
+    'StampedPermissionsError' : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to remove stamp'),
+}
 @handleHTTPRequest(http_schema=HTTPStampId)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
@@ -92,8 +100,12 @@ def update(request, authUserId, http_schema, data, **kwargs):
     
     return transformOutput(stamp.dataExport())
 
-
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPStampRef)
+exceptions_show = {
+    'StampedPermissionsError' : StampedHTTPError(403, "forbidden", "Insufficient privileges to view stamp")
+}
+@handleHTTPRequest(requires_auth=False,
+                  http_schema=HTTPStampRef,
+                  exceptions=exceptions,)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     if http_schema.stamp_id is not None:
@@ -116,7 +128,9 @@ def collection(request, authUserId, schema, **kwargs):
 
 
 # Search
-@handleHTTPRequest(http_schema=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice)
+@handleHTTPRequest(http_schema=HTTPSearchSlice,
+                  conversion=HTTPSearchSlice.exportSearchSlice
+                )
 @require_http_methods(["GET"])
 def search(request, authUserId, schema, **kwargs):
     stamps = stampedAPI.searchStampCollection(schema, authUserId)
