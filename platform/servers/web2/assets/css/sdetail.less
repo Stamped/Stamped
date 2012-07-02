@@ -527,7 +527,9 @@
                         background: #fff;
                         
                         margin:  0 24px;
-                        padding: .5em 0;
+                        padding: .8em 0;
+                        
+                        font-size: 80%;
                         
                         .show {
                             display: none;
@@ -601,7 +603,6 @@
                         
                         .show {
                             display: block;
-                            font-size: 80%;
                         }
                         
                         .hide {
@@ -639,10 +640,10 @@
         padding-left: 37px;
         
         p.share {
+            font-weight: 700;
             font-size: 80%;
-            font-weight: bold;
-            color: #595959;
             letter-spacing: 0.01em;
+            color: #595959;
         }
         
         .share-button {
@@ -667,26 +668,28 @@
         .stamped-font();
         
         font-size: 2.8em;
-        color: #262626;
-        margin-bottom: 7px;
         letter-spacing: 0.02em;
-        padding: 0px 20px 5px 9px;
+        color: #262626;
+        
+        margin:  0;
+        padding: 0 20px 12px 9px;
         
         .box-shadow(0, 2px, 4px, 0, rgba(0,0,0,0.1));
     }
     
     .menus {
-        max-height: 380px; // TODO: nuance
+        max-height: 380px;
         overflow-y: scroll;
         
         p {
-            margin: 0;
-            padding:0px 60px 0px 60px;
-            line-height: 130%;
-            font-size: 67%;
-            letter-spacing: 0.05em;
-            color: #999999;
+            margin:  0;
+            padding: 0 60px;
             margin-bottom: 6px;
+            
+            line-height: 130%;
+            letter-spacing: 0.05em;
+            font-size: 67%;
+            color: #999999;
         }
         
         .jspVerticalBar {
@@ -701,22 +704,18 @@
             .submenu-title {
                 color: #999999;
                 
-                font-size: 80%;
-                font-style: bold;
-                font-family: "helvetica", sans-serif;
+                font: bold 80% "helvetica", sans-serif;
                 margin-bottom: 12px;
                 
                 /* TODO: use font shorthand here! */
             }
             
             .submenu-desc {
-                font-style: italic;
-                font-size: 80%;
+                font: italic 80%;
             }
             
             .submenu-footnote {
-                font-style: italic;
-                font-size: 80%;
+                font: italic 80%;
             }
             
             .section {
@@ -724,16 +723,14 @@
                 color: #999;
                 
                 .section-title {
-                	font-style: italic;
-                	font-family: "Georgia", "helvetica", sans-serif;
-                    font-size: 100%;
+                    font: italic 100% "Georgia", "helvetica", sans-serif;
                     color: #595959;
+                    
                     margin-bottom: 19px;
                 }
                 
                 .section-desc {
-                    font-style: italic;
-                    font-size: 60%;
+                    font: italic 60%;
                 }
                 
                 .items {
@@ -741,14 +738,12 @@
                         margin-bottom: 1em;
                         
                         .item-title {
-                            font-weight: 400;
-                            font-size: 80%;
+                            font: bold 80%;
                             margin-bottom: 3px;
                         }
                         
                         .item-prices {
-                            font-style: italic;
-                            font-size: 80%;
+                            font: italic 80%;
                             color: #bfbfbf;
                         }
                         
@@ -763,7 +758,7 @@
     
     .attribution {
         .box-shadow(0, -2px, 3px, 0, rgba(0,0,0,0.1));
-        padding: 12px 50px 0px 50px;
+        padding: 12px 50px 0;
         
         font-style: normal;
         font-size: 67%;

@@ -222,7 +222,7 @@ a.follow-button {
 
 #main-page-content {
     position: relative;
-    top:  86px;
+    top:  126px;
     left: 0;
 }
 
@@ -298,18 +298,25 @@ a.follow-button {
         width:  24px;
         height: 24px;
         
-        right: 4px;
+        right: 8px;
         top:   50%;
-        margin-top: -14px;
+        margin-top: -12px;
         
         background: url(/assets/img/user-gallery-expand.png) no-repeat;
-        .profile-image-border(2px);
+        .profile-image-border(1px);
         
         &:hover, &:active {
             .context-popup {
                 display: block;
             }
         }
+    }
+}
+
+// target only Firefox
+@-moz-document url-prefix() {
+    .user-gallery .expand-friends {
+        margin-top: -13px;
     }
 }
 
