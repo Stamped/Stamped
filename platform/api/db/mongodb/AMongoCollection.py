@@ -33,48 +33,38 @@ class MongoDBConfig(Singleton):
     
     @property
     def isValid(self):
-        return 'mongodb' in self.config and \
-                  'host' in self.config.mongodb and \
-                  'port' in self.config.mongodb
+        return 'mongodb' in self.config and 'hosts' in self.config.mongodb 
+
+        # return 'mongodb' in self.config and \
+        #           'host' in self.config.mongodb and \
+        #           'port' in self.config.mongodb
     
     def _init(self):
         if utils.is_ec2():
-            stack_info  = libs.ec2_utils.get_stack()
-            self.config = None
-            
-            for node in stack_info.nodes:
-                # TODO: need way of dynamically determining which db node is primary
-                # TODO: does replicasetconnection allow more than one host:port pair?
-                
-                if 'db' in node.roles:
-                    self.config = AttributeDict({
-                       "mongodb" : {
-                           "host" : node.private_ip_address, 
-                           "port" : 27017, 
-                       }
-                    })
-                    
-                    if node.name.endswith('db0'):
-                        break
+            dbNodes = libs.ec2_utils.get_db_nodes()
+
+            hosts = []
+            for dbNode in dbNodes:
+                hosts.append((dbNode['private_ip_address'], 27017))
+
+            if len(hosts) > 0:
+                self.config['mongodb'] = {
+                    "hosts" : hosts
+                }
         
         if not 'mongodb' in self.config:
             self.config = AttributeDict({
-               "mongodb" : {
-                   "host" : "localhost", 
-                   "port" : 27017, 
+                "mongodb" : {
+                    "hosts" : [("localhost", 27017)]
                }
             })
             
-            logs.info("MongoDB connection defaulting to %s:%d" % 
-                      (self.config.mongodb.host, self.config.mongodb.port))
+            logs.info("MongoDB connection defaulting to %s" % 
+                      (self.config.mongodb.hosts))
     
     @property
-    def host(self):
-        return str(self.config.mongodb.host)
-    
-    @property
-    def port(self):
-        return int(self.config.mongodb.port)
+    def hosts(self):
+        return self.config.mongodb.hosts
     
     @property
     def user(self):
@@ -104,16 +94,15 @@ class MongoDBConfig(Singleton):
         
         while True:            
             try:
-                logs.info("Connecting to MongoDB: %s:%d" % (self.host, self.port))
+                hosts = ','.join(map(lambda x: "%s:%s" % (x[0], x[1]), self.hosts))
+                logs.info("Connecting to MongoDB: %s" % hosts)
                 
                 if replicaset:
-                    self._connection = pymongo.ReplicaSetConnection(self.host, 
-                                                                    self.port, 
+                    self._connection = pymongo.ReplicaSetConnection(hosts,
                                                                     read_preference=pymongo.ReadPreference.PRIMARY, 
                                                                     replicaset=replicaset)
                 else:
-                    self._connection = pymongo.Connection(self.host,
-                                                          self.port,
+                    self._connection = pymongo.Connection(hosts,
                                                           read_preference=pymongo.ReadPreference.SECONDARY)
                 
                 #self._connection.stamped.read_preference = pymongo.ReadPreference.SECONDARY
