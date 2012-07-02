@@ -17,6 +17,7 @@ from django.http        import HttpResponseRedirect
 
 
 exceptions = {
+    'StampedDocumentNotFoundError'      : StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data."),
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
     'StampedMissingLinkedAccountTokenError' : StampedHTTPError(400, kind='invalid_credentials', msg="Must provide a token for third party service"),
     'StampedNetflixNoInstantWatchError'     : StampedHTTPError(403, kind='illegal_action', msg="Netflix account must have instant watch access"),
