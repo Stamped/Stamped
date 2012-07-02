@@ -23,7 +23,6 @@
 @user_primary:   #{{color_primary}};   /* #004ab2 */
 @user_secondary: #{{color_secondary}}; /* #0057d1 */
 {{/user}}
-
 /*
 @l0: hue(hsl(lightness(@user_primary), 0, 0));
 @l1: hue(hsl(lightness(@user_secondary), 0, 0));
@@ -126,7 +125,7 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
     {{#user}}
     background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png) no-repeat;
     {{/user}}
-    background-size: 100% 100%;
+        background-size: 100% 100%;
 }
 
 .user-logo-small {
@@ -161,14 +160,22 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
     background-color: #fff;
 }
 
-.user-primary-selection:hover, .stamp-map .stamp-map-canvas .stamp-map-item:hover .stamp-map-item-overlay {
+.user-primary-selection:hover {
     background-color: fade(@primary, 15%) !important;
     cursor: pointer;
     
     .transition(background-color, 0s, ease-out);
 }
 
-.user-primary-selection:active, .stamp-map .stamp-map-canvas .stamp-map-item:active .stamp-map-item-overlay {
+.stamp-map-item-overlay:hover .stamp-map-item-arrow-inner {
+    border-top: 20px solid fade(@primary, 15%) !important;
+}
+
+.stamp-map-item-overlay:active .stamp-map-item-arrow-inner {
+    border-top: 20px solid fade(@primary, 25%) !important;
+}
+
+.user-primary-selection:active {
     background-color: fade(@primary, 25%) !important;
     cursor: pointer;
     

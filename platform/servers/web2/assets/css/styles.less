@@ -33,11 +33,15 @@ body, html {
 }
 
 body {
-    font-family: 'arial', sans-serif;
+    font-family: 'helvetica', sans-serif;
     font-size: 1em;
     
     background: #fff;
     color: #666;
+}
+
+a, a:link {
+	font-style: inherit;
 }
 
 a, a:focus {
@@ -53,7 +57,7 @@ a:visited {
 }
 
 a:hover {
-    text-decoration: underline;
+    color: black;
 }
 
 ol, ul {
@@ -162,7 +166,7 @@ a.follow-button {
 
 .post-header {
     .fullwidth;
-    .box-shadow(0, 3px, 3px, 0, @shadow);
+    .box-shadow(0, 2px, 3px, 0, rgba(50, 50, 50, 0.15));
     
     position: relative;
     display:  block;
@@ -270,7 +274,7 @@ a.follow-button {
 }
 
 .profile-image-tiny {
-    .profile-image(24px,  2px);
+    .profile-image(24px,  1px);
 }
 
 
@@ -280,7 +284,7 @@ a.follow-button {
 
 
 .user-gallery {
-    display: block;
+    display:  block;
     position: relative;
     
     .user-gallery-item {
@@ -288,10 +292,12 @@ a.follow-button {
     }
     
     .expand-friends {
+        position: absolute;
+        display:  block;
+        
         width:  24px;
         height: 24px;
-        position: absolute;
-        display: block;
+        
         right: 4px;
         top:   50%;
         margin-top: -14px;
@@ -313,7 +319,7 @@ a.follow-button {
    ************************************************************************** */
 
 
-.static-map(@size: 200px, @b: 0, @angle: 35deg, @perspective: 200px) {
+.static-map(@size: 200px, @b: 0, @angle: 45deg, @perspective: 200px) {
     position: relative;
     display:  block;
     width:   @size;
@@ -538,7 +544,7 @@ a.follow-button {
 
 .share-widget {
     background-color: #fff;
-    padding: 0.25em 0.5em;
+    padding: 7px 17px 4px 17px;
     
     .rounded(1em);
     .box-shadow(0, 0, 18px, 0, @shadow);
@@ -563,7 +569,7 @@ a.follow-button {
         display: none;
         white-space: nowrap;
         
-        margin: 4px auto;
+        margin: 7px 0px 5px 0px;
         
         .share-button {
             display: inline-block;
@@ -744,10 +750,11 @@ footer .copyright a, footer .copyright a {
     text-transform: lowercase;
     font-family: "StampedScreenNameFont", helvetica, sans-serif;
     letter-spacing: .05em;
+    font-size: 85%;
 }
 
 .pronounced-title a, a.pronounced-title {
-    color: #000;
+    color: #262626;
 }
 
 .pronounced-title {
@@ -755,9 +762,9 @@ footer .copyright a, footer .copyright a {
     
     .stamped-font();
     
-    font-size: 3em;
+    font-size: 2.8em;
     letter-spacing: .05em;
-    color: #000;
+    color: #262626;
 }
 
 .context-popup {
@@ -790,6 +797,7 @@ footer .copyright a, footer .copyright a {
     border: 4px solid #bfbfbf;
     background: #fff;
     .rounded(36px);
+    .box-shadow(0, 0, 6px, 0, @shadow);
     
     .close-button-inner {
         background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;

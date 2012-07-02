@@ -19,7 +19,7 @@ typedef void(^FacebookMeRequestHandler)(NSDictionary *);
 @property (nonatomic, readonly, getter = isReloading) BOOL reloading;
 @property (nonatomic, copy) FacebookMeRequestHandler handler;
 
-+ (id)sharedInstance;
++ (STFacebook*)sharedInstance;
 
 - (void)auth;
 - (BOOL)isSessionValid;

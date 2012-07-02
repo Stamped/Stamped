@@ -1312,6 +1312,23 @@ static STStampedAPI* _sharedInstance;
                                                  }];
 }
 
+- (STCancellation*)removeLinkedAccountWithService:(NSString*)service
+                                      andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/remove.json"
+                                                 post:YES 
+                                        authenticated:YES
+                                               params:[NSDictionary dictionaryWithObject:service forKey:@"service_name"]
+                                              mapping:[STSimpleBooleanResponse mapping]
+                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                              BOOL success = NO;
+                                              if (result) {
+                                                  id<STBooleanResponse> response = result;
+                                                  success = [response result].boolValue; 
+                                              }
+                                              block(success, error, cancellation);
+                                          }];
+}
 
 - (void)fastPurge {
     [self.entityDetailCache fastMemoryPurge];

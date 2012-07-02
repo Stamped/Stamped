@@ -16,16 +16,22 @@ from Facebook           import *
 from django.http        import HttpResponseRedirect
 
 
+exceptions = {
+    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
+
+    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(400, kind='invalid_credentials', msg="No such third party account linked to user"),
+}
+
 @handleHTTPRequest(parse_request=False)
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
     if linkedAccounts is None:
-        result = None
+        result = {}
     else:
-        result = HTTPLinkedAccounts().importLinkedAccounts(linkedAccounts)
+        result = HTTPLinkedAccounts().importLinkedAccounts(linkedAccounts).dataExport()
 
-    return transformOutput(result.dataExport())
+    return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPLinkedAccount,
                    conversion=HTTPLinkedAccount.exportLinkedAccount)
@@ -79,7 +85,8 @@ def _buildShareSettingsFromLinkedAccount(linked):
 
     return map(lambda x: x.dataExport(), result)
 
-@handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest)
+@handleHTTPRequest(http_schema=HTTPShareSettingsToggleRequest,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def updateSettings(request, authUserId, http_schema, **kwargs):
     on = None
@@ -109,7 +116,6 @@ def showSettings(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 def removeTwitter(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-
     return transformOutput(True)
 
 
@@ -117,14 +123,6 @@ def removeTwitter(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 def removeFacebook(request, authUserId, **kwargs):
     result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
-
-    return transformOutput(True)
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeTwitter(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-
     return transformOutput(True)
 
 def createNetflixLoginResponse(request, netflixAddId=None):
@@ -139,7 +137,7 @@ def createNetflixLoginResponse(request, netflixAddId=None):
     netflix = globalNetflix()
     secret, url = netflix.getLoginUrl(oauth_token, netflixAddId)
 
-    response                = HTTPEndpointResponse()
+    response                = HTTPActionResponse()
     source                  = HTTPActionSource()
     source.source           = 'netflix'
     source.link             = url
@@ -150,7 +148,7 @@ def createNetflixLoginResponse(request, netflixAddId=None):
 
 @handleHTTPRequest(http_schema=HTTPNetflixId)
 @require_http_methods(["GET"])
-def netflixLogin(request, authUserId, **kwargs):
+def netflixLogin(request, http_schema, authUserId, **kwargs):
     return createNetflixLoginResponse(request, http_schema.netflix_id)
 
 @handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse)
@@ -192,7 +190,7 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     if result == None:
         return createNetflixLoginResponse(request, http_schema.netflix_id)
 
-    response = HTTPEndpointResponse()
+    response = HTTPActionResponse()
 
     source                              = HTTPActionSource()
     source.name                         = 'Added to Netflix Instant Queue'

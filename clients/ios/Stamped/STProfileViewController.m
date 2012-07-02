@@ -19,6 +19,7 @@
 #import "STUsersViewController.h"
 #import "STPhotoViewController.h"
 #import "STProfileSource.h"
+#import "STPlayer.h"
 
 @interface STProfileViewController ()
 
@@ -42,141 +43,141 @@ static const NSInteger _headerHeight = 95;
 
 - (id)initWithUserID:(NSString*)userID 
 {
-  self = [super initWithHeaderHeight:_headerHeight];
-  if (self) {
-    userID_ = [userID retain];
-  }
-  return self;
+    self = [super initWithHeaderHeight:_headerHeight];
+    if (self) {
+        userID_ = [userID retain];
+    }
+    return self;
 }
 
 - (void)dealloc
 {
-  [source_ release];
-  [userDetail_ release];
-  [userID_ release];
-  [header_ release];
-  [super dealloc];
+    [source_ release];
+    [userDetail_ release];
+    [userID_ release];
+    [header_ release];
+    [super dealloc];
 }
 
 - (void)viewDidLoad
 {
-  [super viewDidLoad];
-  [self reloadStampedData];
+    [super viewDidLoad];
+    [self reloadStampedData];
 }
 
 - (void)viewDidUnload
 {
-  [super viewDidUnload];
-  self.header = nil;
+    [super viewDidUnload];
+    self.header = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [self.source resumeOperations];
+    [super viewDidAppear:animated];
+    [self.source resumeOperations];
 }
 
 - (void)cancelPendingRequests {
-  [self.source cancelPendingOperations];
+    [self.source cancelPendingOperations];
 }
 
 - (void)setSource:(STProfileSource *)source {
-  source_.table = nil;
-  [source_ release];
-  source_ = [source retain];
-  source_.table = self.tableView;
+    source_.table = nil;
+    [source_ release];
+    source_ = [source retain];
+    source_.table = self.tableView;
 }
 
 - (void)followButtonClicked:(id)button {
-  [[STStampedAPI sharedInstance] addFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
-    if (userDetail) {
-      [self reloadStampedData];
-    }
-  }];
+    [[STStampedAPI sharedInstance] addFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+        if (userDetail) {
+            [self reloadStampedData];
+        }
+    }];
 }
 
 - (void)unfollowButtonClicked:(id)button {
-  [[STStampedAPI sharedInstance] removeFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
-    if (userDetail) {
-      [self reloadStampedData];
-    }
-  }];
+    [[STStampedAPI sharedInstance] removeFriendForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+        if (userDetail) {
+            [self reloadStampedData];
+        }
+    }];
 }
 
 - (void)reloadStampedData {
-  self.userDetail = nil;
-  [[STStampedAPI sharedInstance] userDetailForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
-    if (userDetail) {
-      self.userDetail = userDetail;
-      [self commonSetup];
-      STProfileSource* source = [[[STProfileSource alloc] initWithUserDetail:userDetail] autorelease];
-      self.source = source;
-      [[STStampedAPI sharedInstance] isFriendForUserID:userDetail.userID andCallback:^(BOOL isFriend, NSError *error) {
-        NSString* string;
-        SEL action;
-        if (isFriend) {
-          string = @"Unfollow";
-          action = @selector(unfollowButtonClicked:);
+    self.userDetail = nil;
+    [[STStampedAPI sharedInstance] userDetailForUserID:self.userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+        if (userDetail) {
+            self.userDetail = userDetail;
+            [self commonSetup];
+            STProfileSource* source = [[[STProfileSource alloc] initWithUserDetail:userDetail] autorelease];
+            self.source = source;
+            [[STStampedAPI sharedInstance] isFriendForUserID:userDetail.userID andCallback:^(BOOL isFriend, NSError *error) {
+                NSString* string;
+                SEL action;
+                if (isFriend) {
+                    string = @"Unfollow";
+                    action = @selector(unfollowButtonClicked:);
+                }
+                else {
+                    string = @"Follow";
+                    action = @selector(followButtonClicked:);
+                }
+                UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:string
+                                                                                 style:UIBarButtonItemStylePlain
+                                                                                target:self
+                                                                                action:action] autorelease];
+                self.navigationItem.rightBarButtonItem = rightButton;
+            }];
         }
-        else {
-          string = @"Follow";
-          action = @selector(followButtonClicked:);
-        }
-        UIBarButtonItem* rightButton = [[[UIBarButtonItem alloc] initWithTitle:string
-                                                                        style:UIBarButtonItemStylePlain
-                                                                       target:self
-                                                                       action:action] autorelease];
-        self.navigationItem.rightBarButtonItem = rightButton;
-      }];
-    }
-  }];
+    }];
 }
 
 - (void)commonSetup {
-  [self.header removeFromSuperview];
-  self.header = [[[UIView alloc] initWithFrame:CGRectMake(0, self.headerOffset, self.scrollView.frame.size.width, _headerHeight)] autorelease];
-  CGFloat padding = 10;
-  CGFloat imageOffset = padding;
-  UIView* userImage = [Util profileImageViewForUser:self.userDetail withSize:72];
-  [Util reframeView:userImage withDeltas:CGRectMake(imageOffset, imageOffset, 0, 0)];
-  [self.header addSubview:userImage];
-  UIView* imageButtom = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageTapped:) andMessage:nil];
-  [self.header addSubview:imageButtom];
-  
-  
-  UIImage* stampImage = [Util stampImageForUser:self.userDetail withSize:STStampImageSize60];
-  UIImageView* stampImageView = [[[UIImageView alloc] initWithImage:stampImage] autorelease];
-  [Util reframeView:stampImageView withDeltas:CGRectMake(CGRectGetMaxX(userImage.frame) - 34,
-                                                         CGRectGetMinY(userImage.frame) - 20,
-                                                         0, 
-                                                         0)];
-  [self.header addSubview:stampImageView];
-  
-  CGFloat textOffset = CGRectGetMaxX(userImage.frame) + imageOffset + 5;
-  CGFloat textMaxWidth = self.header.frame.size.width - padding - textOffset;
-  UILabel* nameView = [Util viewWithText:self.userDetail.name
-                                    font:[UIFont stampedBoldFontWithSize:18]
-                                   color:[UIColor stampedDarkGrayColor]
-                                    mode:UILineBreakModeTailTruncation
-                              andMaxSize:CGSizeMake(textMaxWidth, CGFLOAT_MAX)];
-  [Util reframeView:nameView withDeltas:CGRectMake(textOffset, CGRectGetMinY(userImage.frame), 0, 0)];
-  [self.header addSubview:nameView];
-  UILabel* screenName = [Util viewWithText:self.userDetail.screenName
-                                      font:[UIFont stampedFontWithSize:14]
-                                     color:[UIColor stampedGrayColor]
+    [self.header removeFromSuperview];
+    self.header = [[[UIView alloc] initWithFrame:CGRectMake(0, self.headerOffset, self.scrollView.frame.size.width, _headerHeight)] autorelease];
+    CGFloat padding = 10;
+    CGFloat imageOffset = padding;
+    UIView* userImage = [Util profileImageViewForUser:self.userDetail withSize:72];
+    [Util reframeView:userImage withDeltas:CGRectMake(imageOffset, imageOffset, 0, 0)];
+    [self.header addSubview:userImage];
+    UIView* imageButtom = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageTapped:) andMessage:nil];
+    [self.header addSubview:imageButtom];
+    
+    
+    UIImage* stampImage = [Util stampImageForUser:self.userDetail withSize:STStampImageSize60];
+    UIImageView* stampImageView = [[[UIImageView alloc] initWithImage:stampImage] autorelease];
+    [Util reframeView:stampImageView withDeltas:CGRectMake(CGRectGetMaxX(userImage.frame) - 34,
+                                                           CGRectGetMinY(userImage.frame) - 20,
+                                                           0, 
+                                                           0)];
+    [self.header addSubview:stampImageView];
+    
+    CGFloat textOffset = CGRectGetMaxX(userImage.frame) + imageOffset + 5;
+    CGFloat textMaxWidth = self.header.frame.size.width - padding - textOffset;
+    UILabel* nameView = [Util viewWithText:self.userDetail.name
+                                      font:[UIFont stampedBoldFontWithSize:18]
+                                     color:[UIColor stampedDarkGrayColor]
                                       mode:UILineBreakModeTailTruncation
                                 andMaxSize:CGSizeMake(textMaxWidth, CGFLOAT_MAX)];
-  [Util reframeView:screenName withDeltas:CGRectMake(textOffset, CGRectGetMaxY(nameView.frame), 0, 0)];
-  [self.header addSubview:screenName];
-  
-  if (self.userDetail.bio) {
-    UIView* bioView = [Util viewWithText:self.userDetail.bio
-                                    font:[UIFont stampedFontWithSize:12]
-                                   color:[UIColor stampedGrayColor]
-                                    mode:UILineBreakModeWordWrap
-                              andMaxSize:CGSizeMake(textMaxWidth, 20)];
-    [Util reframeView:bioView withDeltas:CGRectMake(textOffset, CGRectGetMaxY(screenName.frame), 0, 0)];
-    [self.header addSubview:bioView];
-  }
+    [Util reframeView:nameView withDeltas:CGRectMake(textOffset, CGRectGetMinY(userImage.frame), 0, 0)];
+    [self.header addSubview:nameView];
+    UILabel* screenName = [Util viewWithText:self.userDetail.screenName
+                                        font:[UIFont stampedFontWithSize:14]
+                                       color:[UIColor stampedGrayColor]
+                                        mode:UILineBreakModeTailTruncation
+                                  andMaxSize:CGSizeMake(textMaxWidth, CGFLOAT_MAX)];
+    [Util reframeView:screenName withDeltas:CGRectMake(textOffset, CGRectGetMaxY(nameView.frame), 0, 0)];
+    [self.header addSubview:screenName];
+    
+    if (self.userDetail.bio) {
+        UIView* bioView = [Util viewWithText:self.userDetail.bio
+                                        font:[UIFont stampedFontWithSize:12]
+                                       color:[UIColor stampedGrayColor]
+                                        mode:UILineBreakModeWordWrap
+                                  andMaxSize:CGSizeMake(textMaxWidth, 20)];
+        [Util reframeView:bioView withDeltas:CGRectMake(textOffset, CGRectGetMaxY(screenName.frame), 0, 0)];
+        [self.header addSubview:bioView];
+    }
     self.header.backgroundColor = [UIColor whiteColor];
     self.header.layer.shadowColor = [UIColor blackColor].CGColor;
     self.header.layer.shadowOpacity = .5;

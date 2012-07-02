@@ -282,7 +282,6 @@ static NSString* const _reuseIdentifier = @"NotificationCell";
 }
 
 - (void)setupWithAlertItem:(id<STAlertItem>)item {
-    NSLog(@"affasfasdfsd");
     [self.title removeFromSuperview];
     self.title = nil;
     self.emailType = nil;

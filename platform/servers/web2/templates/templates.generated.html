@@ -1,0 +1,397 @@
+<!-- close-button.template.html -->
+<script id='close-button' type='text/html' class='handlebars-template'>
+    <a title="Close" class="close-button"><div class="close-button-inner"></div></a>
+</script>
+
+<!-- comment.template.html -->
+<script id='comment' type='text/html' class='handlebars-template'>
+    <div class="comment">
+        <p>{{#user}}{{> screen-name}}: {{/user}}{{blurb}}</p>
+    </div>
+</script>
+
+<!-- context-popup.template.html -->
+<script id='context-popup' type='text/html' class='handlebars-template'>
+    <div class="context-popup">{{screen_name}}</div>
+</script>
+
+<!-- profile-image-large.template.html -->
+<script id='profile-image-large' type='text/html' class='handlebars-template'>
+    <a class="profile-image-large" href="/{{screen_name}}" title="{{screen_name}}">
+        {{user_profile_image 144 }}
+    </a>
+</script>
+
+<!-- profile-image-large-ish.template.html -->
+<script id='profile-image-large-ish' type='text/html' class='handlebars-template'>
+    <a class="profile-image-large-ish" href="/{{screen_name}}" title="{{screen_name}}">
+        {{user_profile_image 144 }}
+    </a>
+</script>
+
+<!-- profile-image-medium.template.html -->
+<script id='profile-image-medium' type='text/html' class='handlebars-template'>
+    <a class="profile-image-medium" href="/{{screen_name}}" title="{{screen_name}}">
+        {{user_profile_image 60 }}
+    </a>
+</script>
+
+<!-- profile-image-medium-ish.template.html -->
+<script id='profile-image-medium-ish' type='text/html' class='handlebars-template'>
+    <a class="profile-image-medium-ish" href="/{{screen_name}}" title="{{screen_name}}">
+        {{user_profile_image 60}}
+    </a>
+</script>
+
+<!-- profile-image-small.template.html -->
+<script id='profile-image-small' type='text/html' class='handlebars-template'>
+    <a class="profile-image-small" href="/{{screen_name}}" title="{{screen_name}}">
+        {{user_profile_image 48}}
+    </a>
+</script>
+
+<!-- profile-image-tiny.template.html -->
+<script id='profile-image-tiny' type='text/html' class='handlebars-template'>
+    <div class="profile-image-tiny">
+        {{user_profile_image 24}}
+        {{> context-popup}}
+    </div>
+</script>
+
+<!-- screen-name.template.html -->
+<script id='screen-name' type='text/html' class='handlebars-template'>
+    <a class='screen-name' href="/{{screen_name}}">{{screen_name}}</a>
+</script>
+
+<!-- share-widget.template.html -->
+<script id='share-widget' type='text/html' class='handlebars-template'>
+    <div class="share-widget">
+        <div class="desc">{{#share_widget_desc}}{{.}}{{/share_widget_desc}}{{^share_widget_desc}}Share this collection{{/share_widget_desc}}</div>
+        
+        <div class='share-buttons clearfix'>
+            <div class='share-button facebook'>
+                <div class="fb-like" data-layout="button_count"></div>
+            </div>
+            
+            <div class='share-button twitter'>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp">Tweet</a>
+            </div>
+            
+            <div class='share-button google'>
+                <g:plusone size="medium"></g:plusone>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- social-feedback.template.html -->
+<script id='social-feedback' type='text/html' class='handlebars-template'>
+    <div class="social-feedback">
+        <div class='social-feedback-item count_{{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}'>
+            <div class='social-feedback-like'></div>
+            <span class='count'>
+                {{#num_likes}}{{.}}{{/num_likes}}{{^num_likes}}0{{/num_likes}}
+            </span>
+        </div>
+        
+        <div class='social-feedback-item count_{{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}'>
+            <div class='social-feedback-todo'></div>
+            <span class='count'>
+                {{#num_todos}}{{.}}{{/num_todos}}{{^num_todos}}0{{/num_todos}}
+            </span>
+        </div>
+        
+        <div class='social-feedback-item count_{{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}'>
+            <div class='social-feedback-comments'></div>
+            <span class='count'>
+                {{#num_comments}}{{.}}{{/num_comments}}{{^num_comments}}0{{/num_comments}}
+            </span>
+        </div>
+    </div>
+</script>
+
+<!-- social-sharing.template.html -->
+<script id='social-sharing' type='text/html' class='handlebars-template'>
+    <div class='social-sharing'>
+        <p class='share'>
+            Share this stamp:
+        </p>
+        
+        <div class='share-buttons clearfix'>
+            <div class='share-button facebook'>
+                <div class="fb-like" data-layout="button_count"></div>
+            </div>
+            
+            <div class='share-button twitter'>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-hashtags="stamped">Tweet</a>
+            </div>
+            
+            <div class='share-button google'>
+                <g:plusone size="medium"></g:plusone>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- stamp-card-image.template.html -->
+<script id='stamp-card-image' type='text/html' class='handlebars-template'>
+    <div class="stamp-preview stamp-category-{{entity.category}} stamp-subcategory-{{entity.subcategory}}">
+        <div class='preview-image stamp-user-image'>
+            {{#contents}}
+                {{entity_image}}
+            {{/contents}}
+        </div>
+    </div>
+</script>
+
+<!-- stamp-gallery.template.html -->
+<script id='stamp-gallery' type='text/html' class='handlebars-template'>
+    <div class="stamp-gallery wide-gallery">
+        
+        <div class='stamp-gallery-header clearfix'>
+            <div class='stamp-gallery-sort'>
+                <a href="#" class='item selected sort-modified' title='Sort stamps by most recent'>
+                    Newest<span class='arrow'> &#x25BC</span>
+                </a>
+                
+                <a href="#" class='item sort-popularity' title='Sort stamps by popularity'>
+                    Popular<span class='arrow'> &#x25BC</span>
+                </a>
+            </div>
+            
+            <div class='stamp-gallery-view-map'>
+                <a class="map-profile-link" href="/{{user.screen_name}}/map"><span class="desc">View Map </span><div class='map-profile-icon-wrapper map-icon'><div class='map-profile-icon'><div class='inner-shadow'></div><div class='inner'></div></div></div></a>
+            </div>
+        </div>
+        
+        <div class="bottom-wave"></div>
+        <div class="loading"></div>
+        
+        <div class="stamps">
+            {{#stamps}}
+                {{> stamp-gallery-item}}
+            {{/stamps}}
+        </div>
+        
+        <div class="stamp-gallery-loading"></div>
+        
+        <div class="stamp-gallery-nav">
+            <ul>
+                {{#prev_url}}
+                <li>
+                    <a href="{{.}}">Prev</a>
+                </li>
+                {{/prev_url}}
+                {{#next_url}}
+                <li>
+                    <a href="{{.}}">Next</a>
+                </li>
+                {{/next_url}}
+            </ul>
+        </div>
+    </div>
+</script>
+
+<!-- stamp-gallery-item.template.html -->
+<script id='stamp-gallery-item' type='text/html' class='handlebars-template'>
+    <div class="stamp-gallery-item user-primary-selection">
+        <div class="stamp-gallery-item-inner">
+            <div class="content clearfix">
+                
+                <div class="content_0 clearfix">
+                    {{#user}}
+                        {{> profile-image-medium }}
+                    {{/user}}
+                    
+                    <div class="entity-header">
+                        <div class="stamp-category-{{entity.category}} stamp-subcategory-{{entity.subcategory}}">
+                            <div class='title clearfloat'>
+                                <div class="pronounced-title">
+                                    <a class='sdetail' href="{{url}}" title="{{entity.title}}">{{entity.title}}</a>
+                                </div>
+                                <span class='user-logo-small'></span>
+                            </div>
+                            
+                            <div class="subtitle-line">
+                                <p>
+                                    <span class="icon"></span>
+                                    <span class="subtitle">{{entity.subtitle}}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content_2">
+                    {{#modified}}<div class="timestamp_raw">{{.}}</div>{{/modified}}
+                    
+                    {{> stamp-image}}
+                </div>
+                
+                <div class="content_1">
+                    <div class="stamp-category-{{entity.category}} stamp-subcategory-{{entity.subcategory}}">
+                        <div class="stamp-contents">
+                            {{#contents}}
+                            <div class="stamped-content">
+                                {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
+                            </div>
+                            {{/contents}}
+                        </div>
+                        
+                        {{>social-feedback}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- stamp-image.template.html -->
+<script id='stamp-image' type='text/html' class='handlebars-template'>
+    <div class="stamp-preview-raw stamp-category-{{entity.category}}">
+        <div class="stamp-category-{{entity.category}}">
+            <div class="stamp-subcategory-{{entity.subcategory}}">
+                <div class='preview-image stamp-user-image'>
+                    {{#contents}}
+                        {{entity_image}}
+                    {{/contents}}
+                </div>
+                
+                <div class='preview-image stamp-entity-image'>
+                    {{#entity}}
+                        {{entity_image}}
+                    {{/entity}}
+                </div>
+                
+                {{#if entity.coordinates}}
+                    <div>
+                        <div class='preview-image stamp-map'>
+                            {{> static-map-small}}
+                        </div>
+                    </div>
+                {{/if}}
+                
+                <div>
+                    <div class="preview-image stamp-icon"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- stamp-image-sdetail.template.html -->
+<script id='stamp-image-sdetail' type='text/html' class='handlebars-template'>
+    <div class="stamp-preview-raw stamp-category-{{entity.category}}">
+        <div class="stamp-category-{{entity.category}}">
+            <div class="stamp-subcategory-{{entity.subcategory}}">
+                <div class='preview-image stamp-user-image'>
+                    {{#contents}}
+                        {{entity_image}}
+                    {{/contents}}
+                </div>
+                
+                <div class='preview-image stamp-entity-image'>
+                    {{#entity}}
+                        {{entity_image}}
+                    {{/entity}}
+                </div>
+                
+                {{#if entity.coordinates}}
+                    <div>
+                        <div class='preview-image stamp-map'>
+                            {{> static-map-sdetail}}
+                        </div>
+                    </div>
+                {{/if}}
+                
+                <div>
+                    <div class="preview-image stamp-icon"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- stamp-map-item.template.html -->
+<script id='stamp-map-item' type='text/html' class='handlebars-template'>
+    <div class="stamp-map-item-wrapper">
+        <div class="stamp-map-item-shadow"></div>
+        
+        <div class="stamp-map-item">
+            <div class="stamp-map-item-overlay user-primary-selection">
+                <div class="clearfix">
+                    <div class="profile-image-small">
+                        <img src="{{user.image_url}}" />
+                    </div>
+                    
+                    <div class="entity-header">
+                        <div class="stamp-category-{{entity.category}}">
+                            <div class='title clearfix'>
+                                <div class="pronounced-title">
+                                    <a class='sdetail' href="{{#url}}{{.}}{{/url}}" title="{{entity.title}}">{{entity.title}}</a>
+                                </div>
+                                
+                                <span class='user-logo-small'></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a title="Close" class="stamp-map-item-close-button"></a>
+                    
+                    <div class="content">
+                        <div class="blurbs">
+                            {{#contents}}
+                            <div class="stamped-content">
+                                {{#blurb}}<p class="blurb">{{.}}</p>{{/blurb}}
+                            </div>
+                            {{/contents}}
+                        </div>
+                        
+                        {{> social-feedback}}
+                    </div>
+                </div>
+                
+                <div class="stamp-map-item-arrow"></div>
+                <div class="stamp-map-item-arrow-inner"></div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- stamp-mini.template.html -->
+<script id='stamp-mini' type='text/html' class='handlebars-template'>
+    <div class="stamp-mini">
+        {{#user}}{{> screen-name}}{{/user}}
+    </div>
+</script>
+
+<!-- static-map-sdetail.template.html -->
+<script id='static-map-sdetail' type='text/html' class='handlebars-template'>
+    <a class="static-map-sdetail" href="/{{user.screen_name}}/map?stamp_id={{stamp_id}}"><img src="https://maps.googleapis.com/maps/api/staticmap?center={{entity.coordinates}}&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=200x200" /></a>
+</script>
+
+<!-- static-map-small.template.html -->
+<script id='static-map-small' type='text/html' class='handlebars-template'>
+    <div class="static-map-small">
+        <a class="zoom zoom-map" href="/{{user.screen_name}}/map?stamp_id={{stamp_id}}"></a>
+        
+        <div class="static-map-inner">
+            <div class="r0" style="background-image: url('https://maps.googleapis.com/maps/api/staticmap?center={{entity.coordinates}}&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=140x140');"></div>
+            
+            <div class="r1" style="background-image: url('https://maps.googleapis.com/maps/api/staticmap?center={{entity.coordinates}}&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=140x140');"><div class='dark-layer'></div></div>
+            
+            <div class="r2" style="background-image: url('https://maps.googleapis.com/maps/api/staticmap?center={{entity.coordinates}}&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=140x140');"></div>
+            
+            <div class="r3" style="background-image: url('https://maps.googleapis.com/maps/api/staticmap?center={{entity.coordinates}}&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=140x140');"><div class='dark-layer'></div></div>
+            
+            <div class='pin'><div class='pin-inner'></div></div>
+        </div>
+    </div>
+</script>
+
+<!-- user-mini.template.html -->
+<script id='user-mini' type='text/html' class='handlebars-template'>
+    <div class="user-mini">
+        {{> screen-name}}
+    </div>
+</script>

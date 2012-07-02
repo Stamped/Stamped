@@ -64,7 +64,7 @@ footer {
             background: #FEFEFE;
             color: #666;
             
-            .box-shadow(0, 0, 8px, 0, rgba(0, 0, 0, 0.35));
+            .box-shadow(0, 0, 4px, 0, rgba(0, 0, 0, 0.5));
             
             padding: 3px;
             margin:  0;
@@ -90,15 +90,34 @@ footer {
             
             .stamp-map-item-arrow {
                 position: absolute;
-                left:   32px;
-                bottom: -12px;
+                left:    25px;
+                bottom: -18px;
                 
-                width:  27px;
-                height: 12px;
-                z-index: 26;
+                width:  0; 
+                height: 0; 
                 
-                background: url(/assets/img/mapstamp-arrow.png) no-repeat;
+                border-left:  20px solid transparent;
+                border-right: 20px solid transparent;
+                border-top:   20px solid #fff;
             }
+            
+            .stamp-map-item-arrow-inner {
+                position: absolute;
+                left:    25px;
+                bottom: -18px;
+                
+                width:  0;
+                height: 0;
+                
+                border-left:  20px solid transparent;
+                border-right: 20px solid transparent;
+                border-top:   20px solid transparent;
+            }
+            
+            /*width:  27px;
+            height: 12px;
+            z-index: 26;
+            background: url(/assets/img/mapstamp-arrow.png) no-repeat;*/
         }
         
         .stamp-map-item {
@@ -108,24 +127,22 @@ footer {
             z-index: 26;
             
             background: #fff;
-            padding: @marker_space;
             
-            .box-shadow(0, 0, 4px, 0, @shadow);
-            .rounded(4px);
+            .box-shadow(0, 0, 8px, 0, rgba(0,0,0,0.1));
+            .rounded(0px);
             
             &:hover {
                 cursor: pointer;
             }
             
             .stamp-map-item-overlay {
-                position: absolute;
-                top:  0;
-                left: 0;
-                
-                width:  100%;
-                height: 100%;
-                
                 background: transparent;
+                padding: @marker_space;
+                
+                .rounded(0px);
+            }
+            
+            .clearfix {
                 pointer-events: none;
             }
             
@@ -135,6 +152,8 @@ footer {
                 width:  14px;
                 height: 14px;
                 float: right;
+                position: relative;
+                left: 8px;
                 
                 &:hover {
                     background-position: -48px 0;
@@ -156,8 +175,8 @@ footer {
             }
             
             .entity-header {
-                float: left;
                 position: relative;
+                float: left;
                 top: 0;
                 
                 margin-left: 0;
@@ -170,7 +189,8 @@ footer {
                     .pronounced-title {
                         line-height: 100%;
                         padding: 0;
-                        margin:  0;
+                        margin: 0px 0px 6px 0px;
+                        letter-spacing: 0.02em;
                     }
                 }
             }
@@ -182,9 +202,10 @@ footer {
                 .blurbs {
                     .stamped-content {
                         display: none;
+                        margin: 0px 0px 4px 0px;
                         
                         p.blurb {
-                            font-size: 80%;
+                            font-size: 100%;
                         }
                         p.blurb:hover {
                             cursor: text;
@@ -204,7 +225,7 @@ footer {
    ************************************************************************** */
     
     
-    @map_nav_width: 316px;
+    @map_nav_width: 280px;
     @map_nav_space: 24px;
     
     .fixedwidth {
@@ -232,7 +253,7 @@ footer {
                 .nav-header {
                     padding: @map_nav_space (@map_nav_space / 4 - 2px) 0 @map_nav_space;
                     background: #fff;
-                    .box-shadow(0, 3px, 3px, 0, @shadow);
+                    .box-shadow(0, 2px, 3px, 0, rgba(0,0,0,0.15));
                     
                     position: relative;
                     z-index: 26;
@@ -315,7 +336,7 @@ footer {
                     .stamp-list-view-item {
                         padding: (@map_nav_space / 2) @map_nav_space;
                         
-                        border-bottom: 1px solid #c2c2c2;
+                        border-bottom: 1px solid #f2f2f2;
                         
                         // very slight background-color transition on mouse-out
                         // (immediate transition on mouse-over)
@@ -328,8 +349,8 @@ footer {
                             top: 0;
                             
                             .pronounced-title {
-                                font-size: 1.5em !important;
-                                margin-bottom: .5em;
+                                font-size: 1.70em !important;
+                                margin-bottom: -5px;
                             }
                         }
                     }
@@ -351,7 +372,7 @@ footer {
             }
             
             .nav-footer, .nav-dummy-footer {
-                .box-shadow(0, -3px, 3px, 0, @shadow);
+                .box-shadow(0, -2px, 3px, 0, rgba(0,0,0,0.15));
                 
                 position: relative;
                 z-index: 26;

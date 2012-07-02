@@ -66,14 +66,14 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         documentId = self._getObjectIdFromString(userId)
         document   = self._getMongoDocumentFromId(documentId)
         if document is None:
-            raise StampedUnavailableError("Unable to find user (%s)" % userId)
+            raise StampedAccountNotFoundError("Unable to find user (%s)" % userId)
         return self._convertFromMongo(document)
     
     def getUserByScreenName(self, screenName):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
         if document is None:
-            raise StampedUnavailableError("Unable to find user (%s)" % screenName)
+            raise StampedAccountNotFoundError("Unable to find user (%s)" % screenName)
         return self._convertFromMongo(document)
     
     def checkScreenNameExists(self, screenName):

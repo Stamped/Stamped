@@ -1,7 +1,7 @@
 
 import time
 import urllib, urllib2, json, urlparse
-import logs
+import logs, utils
 import re
 from errors import *
 
@@ -11,7 +11,8 @@ APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
+ACCESS_TOKEN = 'AAACEdEose0cBAGGHyR8mSgOzB4H7KfEcr28ZAEyma3KPnjXlAxZAuB59rqZCk7COEcx3nQVNLlRyS0zM6GZBt6MREgqyhrTaZBT5MPjtvYv1NNEsNHXts'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -52,18 +53,23 @@ class Facebook(object):
                     result = urllib2.urlopen(url).read()
                 return result
             except urllib2.HTTPError as e:
+                logs.info('e: %s' % e)
                 result = json.load(e)
+                logs.info('result: %s' % result)
                 if 'error' in result:
+#                    if 'code' in result['error']:
+#                        # if a code is provided, then we can reauth the user
+#                        logs.info('### hit error in FB with code')
+#                        self.getUserAccessToken(result['error']['code'])
                     if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                         # OAuth exception
                         msg = result['error']['message']
 
                 logs.info('Facebook API Error: code: %s  message: %s' % (e.code, e))
+
                 num_retries += 1
                 if num_retries > max_retries:
-                    if e.code == 400:
-                        raise StampedInputError('Facebook API 400 Error')
-                    raise StampedUnavailableError('Facebook API Error')
+                    raise StampedThirdPartyError('Facebook API Error')
 
                 logs.info("Retrying (%s)" % (num_retries))
                 time.sleep(0.5)
@@ -121,6 +127,20 @@ class Facebook(object):
         )
         r = re.search('access_token=([^&]*)', result)
         return r.group(1)
+
+    def getUserAccessToken(self, code, client_id=APP_ID, client_secret=APP_SECRET):
+        logs.info('### getUserAccessToken called # client_id: %s, client_secret: %s, code: %s' % (client_id, client_secret, code))
+        redirect_uri = 'https://dev.stamped.com/v0/account/linked/facebook/login_callback.json'
+        path = "oauth/access_token"
+        result = self._get(
+            None,
+            path,
+            False,
+            client_id       = client_id,
+            client_secret   = client_secret,
+            code            = code,
+            redirect_uri    = redirect_uri,
+        )
 
     def createTestUser(self, name, access_token, permissions=None, installed=True, locale='en_US', app_id=APP_ID):
         path = '%s/accounts/test-users' % app_id
@@ -199,14 +219,24 @@ class Facebook(object):
         except Exception as e:
             print('EXCEPTION: %s' % e)
 
+    def getNewsFeed(self, user_id, access_token):
+        path = '%s/feed' % user_id
+        self._get(
+            access_token,
+            path,
+        )
 
     def postToNewsFeed(self, user_id, access_token, message, picture=None):
         path = '%s/feed' % user_id
+        params = {}
+        if picture is not None:
+            params['picture'] = picture
+        if message is not None:
+            params['message'] = message
         self._post(
             access_token,
             path,
-            message = message,
-            picture = picture,
+            **params
         )
 
 __globalFacebook = None
@@ -231,8 +261,8 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
-    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('todo', access_token,
-                                                   'app', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/ml/stamps/29/Angry-Birds-Space'))
+    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('stamp', access_token,
+                                                   'restaurant', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/ml/s/2'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
@@ -240,7 +270,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToOpenGraph'
+    methods = 'getUserInfo'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

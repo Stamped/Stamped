@@ -25,7 +25,7 @@ static id __instance;
 @synthesize handler;
 @synthesize userData;
 
-+ (id)sharedInstance {
++ (STFacebook*)sharedInstance {
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{

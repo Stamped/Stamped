@@ -42,54 +42,15 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return document
 
 
-    def _upgradeLinkedAccounts(self, document):
+    def _removeOldLinkedAccounts(self, document):
         linkedAccounts = document.pop('linked_accounts', None)
         if linkedAccounts is None:
-            return
-
-        if 'linked' in document:
-            logs.warning("Account contains both 'linked' and 'linked_account' fields.  Should only have one")
             return document
-
-        document['linked'] = {}
-        if 'twitter' in linkedAccounts:
-            twitterAcct = {
-                'service_name'          : 'twitter',
-                'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
-                'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
-                'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
-            }
-            twitterAcctSparse = {}
-            for k,v in twitterAcct.iteritems():
-                if v is not None:
-                    twitterAcctSparse[k] = v
-            document['linked']['twitter'] = twitterAcctSparse
-
-        if 'facebook' in linkedAccounts:
-            facebookAcct = {
-                'service_name'          : 'facebook',
-                'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
-                'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
-                'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
-                }
-            facebookAcctSparse = {}
-            for k,v in facebookAcct.iteritems():
-                if v is not None:
-                    facebookAcctSparse[k] = v
-            document['linked']['facebook'] = facebookAcctSparse
-
-        if 'netflix' in linkedAccounts:
-            netflixAcct = {
-                'service_name'          : 'netflix',
-                'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
-                'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
-                'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
-                }
-            netflixAcctSparse = {}
-            for k,v in netflixAcct.iteritems():
-                if v is not None:
-                    netflixAcctSparse[k] = v
-            document['linked']['netflix'] = netflixAcctSparse
+        self._collection.update(
+                {'_id': document['user_id']},
+                {'$unset': { 'linked_accounts' : 1 } }
+        )
+        return document
 
     def _convertFromMongo(self, document):
         if document is None:
@@ -147,7 +108,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'auth_service' not in document:
             document['auth_service'] = 'stamped'
 
-        self._upgradeLinkedAccounts(document)
+        document = self._removeOldLinkedAccounts(document)
 
         if self._obj is not None:
             return self._obj().dataImport(document, overflow=self._overflow)
@@ -177,8 +138,11 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 raise StampedDuplicationError("Account information already exists: %s" % e)
     
     def getAccount(self, userId):
-        documentId = self._getObjectIdFromString(userId)
-        document = self._getMongoDocumentFromId(documentId)
+        try:
+            documentId = self._getObjectIdFromString(userId)
+            document = self._getMongoDocumentFromId(documentId)
+        except Exception:
+            raise StampedAccountNotFoundError("Account not found in database")
         return self._convertFromMongo(document)
     
     def getAccounts(self, userIds, limit=0):
@@ -213,14 +177,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         email = str(email).lower()
         document = self._collection.find_one({"email": email})
         if document is None:
-            raise StampedUnavailableError("Unable to find account (%s)" % email)
+            raise StampedAccountNotFoundError("Unable to find account (%s)" % email)
         return self._convertFromMongo(document)
     
     def getAccountByScreenName(self, screenName):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
         if document is None:
-            raise StampedUnavailableError("Unable to find account (%s)" % screenName)
+            raise StampedAccountNotFoundError("Unable to find account (%s)" % screenName)
         return self._convertFromMongo(document)
 
     def getAccountsByFacebookId(self, facebookId):

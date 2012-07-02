@@ -261,4 +261,6 @@ typedef enum STGradientStyle {
 
 + (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block;
 
++ (NSString*)versionString;
+
 @end
