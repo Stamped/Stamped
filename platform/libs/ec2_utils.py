@@ -134,7 +134,7 @@ def get_db_nodes():
                 nodes = json.loads(f.read())
                 f.close()
                 if len(nodes) > 0:
-                    return nodes
+                    return map(utils.AttributeDict, nodes)
             except:
                 utils.log("error getting cached stack info; recomputing")
                 utils.printException()
@@ -173,9 +173,9 @@ def get_db_nodes():
     if len(dbNodes) == 0:
         raise Exception("DB nodes not found for stack '%s'" % dbStackName)
 
-    # f = open(path, 'w')
-    # f.write(json.dumps(list(dbNodes), indent=2))
-    # f.close()
+    f = open(path, 'w')
+    f.write(json.dumps(map(lambda x: dict(x), dbNodes), indent=2))
+    f.close()
 
     return list(dbNodes)
 
