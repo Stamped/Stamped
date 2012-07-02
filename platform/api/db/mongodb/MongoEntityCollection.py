@@ -112,7 +112,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
             # Category / Subcategory
             kind = data.pop('kind')
-            types = data.pop('types', ['other'])
+            types = data.pop('types', [])
+            if len(types) == 0:
+                types = ['other']
             subcategory = types[0]
             assert subcategory is not None
             entity.subcategory = subcategory
