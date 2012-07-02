@@ -65,10 +65,20 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         document['entity'] = {'entity_id' : entity['entity_id']}
 
         ### TODO: Add stamp stats from MongoStampStatsCollection
+
+        # Remove stamped timestamp
+        if 'stamped' in document['timestamp']:
+            del(document['timestamp']['stamped'])
         
         stamp = self._obj(document, overflow=self._overflow)
 
         return stamp 
+    
+    def _convertToMongo(self, stamp):
+        document = AMongoCollection._convertToMongo(self, stamp)
+        document['timestamp']['stamped'] = stamp.created
+        
+        return document
     
     ### PUBLIC
     
