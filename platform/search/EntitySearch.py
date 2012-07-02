@@ -30,9 +30,9 @@ def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
 
 
-# Editable via command-line flags.
+# Editable via command-line flags, but these are the defaults...
 shouldLogSourceResults = False
-shouldLogTiming = False
+shouldLogTiming = True
 shouldLogClusters = False
 shouldLogRawSourceResults = False
 shouldDisableTimeout = False
