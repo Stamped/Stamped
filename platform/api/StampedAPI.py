@@ -877,7 +877,7 @@ class StampedAPI(AStampedAPI):
 
         if service_name == 'facebook':
             if linkedAccount.token is None:
-                raise StampedInputError("Must provide an access token for facebook account")
+                raise StampedMissingLinkedAccountTokenError("Must provide an access token for facebook account")
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
@@ -885,13 +885,13 @@ class StampedAPI(AStampedAPI):
                 linkedAccount.linked_screen_name = userInfo['username']
         elif service_name == 'twitter':
             if linkedAccount.token is None or linkedAccount.secret is None:
-                raise StampedInputError("Must provide a token and secret for twitter account")
+                raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for twitter account")
             userInfo = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_screen_name = userInfo['screen_name']
         elif service_name == 'netflix':
             if linkedAccount.token is None or linkedAccount.secret is None:
-                raise StampedInputError("Must provide a token and secret for netflix account")
+                raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for netflix account")
             userInfo = self._netflix.getUserInfo(linkedAccount.token, linkedAccount.secret)
             if userInfo['can_instant_watch'] == False:
                 raise StampedNetflixNoInstantWatchError("Netflix account must have instant watch access")
@@ -946,13 +946,11 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
         if service_name not in ['facebook', 'twitter', 'netflix', 'rdio']:
-            logs.warning('Attempted to remove invalid linked account: %s' % service_name)
-            raise StampedIllegalActionError("Invalid linked account: %s" % service_name)
+            raise StampedLinkedAccountDoesNotExistError("Invalid linked account: %s" % service_name)
 
         account = self.getAccount(authUserId)
         if account.auth_service == service_name:
-            logs.warning('Attempted to remove linked account used for auth service')
-            raise StampedIllegalActionError('Cannot remove a third-party account used for authorization.')
+            raise StampedLinkedAccountIsAuthError('Cannot remove a linked account used for authorization.')
 
         self._accountDB.removeLinkedAccount(authUserId, service_name)
         return True
@@ -1054,7 +1052,7 @@ class StampedAPI(AStampedAPI):
             userTiny = UserTiny().dataImport(userTiny)
 
         if userTiny.user_id is None and userTiny.screen_name is None:
-            raise StampedInputError("Required field missing (user id or screen name)")
+            raise StampedMissingParametersError("Required field missing (user id or screen name)")
 
         if userTiny.user_id is not None:
             return self._userDB.getUser(userTiny.user_id)

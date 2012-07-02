@@ -262,9 +262,9 @@ def handleHTTPRequest(requires_auth=True,
                         
                         params['http_schema']   = parseFileUpload(http_schema(), request, upload, **parse_kwargs)
                     elif http_schema is not None:
-                        params['http_schema']   = parseRequest(http_schema(), request, kwargs, **parse_kwargs)
+                        params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
                     else:
-                        params['http_schema']   = parseRequest(None, request, kwargs, **parse_kwargs)
+                        params['http_schema']   = parseRequest(None, request, **parse_kwargs)
                     
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
@@ -297,7 +297,8 @@ def handleHTTPCallbackRequest(
         http_schema=None,
         conversion=None,
         parse_request_kwargs=None,
-        parse_request=True):
+        parse_request=True,
+        exceptions=None):
 
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the
@@ -332,9 +333,9 @@ def handleHTTPCallbackRequest(
                     parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
 
                     if http_schema is not None:
-                        params['http_schema']   = parseRequest(http_schema(), request, kwargs, **parse_kwargs)
+                        params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
                     else:
-                        params['http_schema']   = parseRequest(None, request, kwargs, **parse_kwargs)
+                        params['http_schema']   = parseRequest(None, request, **parse_kwargs)
 
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
@@ -348,7 +349,7 @@ def handleHTTPCallbackRequest(
                 return ret
 
             except Exception as e:
-                handleStampedExceptions(e)
+                handleStampedExceptions(e, exceptions)
             finally:
                 try:
                     logs.save()
@@ -428,7 +429,7 @@ def checkOAuth(oauth_token, required=True):
         logs.warning("Error: %s" % e)
         raise StampedAuthError("invalid_token", "Invalid access token")
 
-def parseRequest(schema, request, extra_args, **kwargs):
+def parseRequest(schema, request, **kwargs):
     data = { }
     
     ### Parse Request
@@ -439,8 +440,6 @@ def parseRequest(schema, request, extra_args, **kwargs):
             rawData = request.POST
         else:
             raise
-
-        rawData = dict(rawData.items()).update(extra_args)
 
         # Build the dict because django sucks
         for k, v in rawData.iteritems():

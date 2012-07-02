@@ -47,7 +47,7 @@ class AWSDeploymentStack(ADeploymentStack):
             # Skip database nodes if db_stack is specified
             if db_stack is not None:
                 if 'db' in instance['roles']:
-                    print 'Skipping db node: %s' % instance
+                    print 'Skipping db node: %s' % instance['name']
                     continue
                 instance['db_stack'] = db_stack
             
@@ -524,6 +524,11 @@ class AWSDeploymentStack(ADeploymentStack):
         force = (len(args) >= 1 and args[0] == 'force')
         
         db_instances = self.db_instances
+
+        if len(db_instances) == 0:
+            utils.log("[%s] No db instances" % self)
+            return
+
         utils.log("[%s] attempting to repair replica set containing %d db instances" % (self, len(db_instances)))
         
         try:

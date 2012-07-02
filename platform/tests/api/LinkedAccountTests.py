@@ -92,6 +92,24 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 0)
 
+    def test_update_twitter_account(self):
+        # add the linked account
+        self.addLinkedTwitterAccount(self.token, TWITTER_USER_A0_TOKEN, TWITTER_USER_A0_SECRET)
+
+        # verify that the linked account was properly added
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 1)
+        self.assertEqual(linkedAccounts['twitter']['service_name'], 'twitter')
+
+        from pprint import pprint
+        pprint(linkedAccounts)
+
+        # remove the linked account and verify that it has been removed
+        self.removeLinkedAccount(self.token, 'twitter')
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 0)
+
+
     def test_add_facebook_account(self):
 
 

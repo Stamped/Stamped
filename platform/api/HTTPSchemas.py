@@ -563,7 +563,7 @@ class HTTPAccountCheck(Schema):
 class HTTPServiceNameForm(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('service_name',                     basestring)
 
 class HTTPUpdateLinkedAccountShareSettingsForm(Schema):
     @classmethod
@@ -589,7 +589,7 @@ class HTTPLinkedAccountShareSettings(Schema):
 class HTTPLinkedAccount(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('service_name',                     basestring)
         cls.addProperty('linked_user_id',                   basestring)
         cls.addProperty('linked_screen_name',               basestring)
         cls.addProperty('linked_name',                      basestring)
