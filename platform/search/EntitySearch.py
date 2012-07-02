@@ -183,10 +183,19 @@ class EntitySearch(object):
             # more gracefully.
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
+        def termWaiting():
+            logs.debug('in termWaiting')
+            try:
+                return self.__terminateWaiting(pool, datetime.datetime.now(), category, results)
+            except Exception:
+                logs.report()
+            logs.debug('done with termWaiting')
+
         logs.debug("SHOULD_DISABLE_TIMEOUT IS " + str(shouldDisableTimeout))
         if not shouldDisableTimeout:
             logTimingData('SPAWNING TERMINATE WAITING')
-            pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
+            #pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
+            pool.spawn(termWaiting)
 
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
