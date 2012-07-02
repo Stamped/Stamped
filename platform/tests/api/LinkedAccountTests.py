@@ -77,35 +77,44 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
 
     def test_add_twitter_account(self):
         # add the linked account
-        data = {
-            'service_name'   : 'twitter',
-            'linked_user_id'        : TWITTER_USER_A0_ID,
-            'linked_screen_name'    : 'test_user_a',
-            'token'          : TWITTER_USER_A0_TOKEN,  #'test_twitter_token',
-            'secret'         : TWITTER_USER_A0_SECRET, #'test_twitter_secret',
-        }
-        self.addLinkedAccount(self.token, **data)
+        self.addLinkedTwitterAccount(self.token, TWITTER_USER_A0_TOKEN, TWITTER_USER_A0_SECRET)
 
         # verify that the linked account was properly added
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 1)
         self.assertEqual(linkedAccounts['twitter']['service_name'], 'twitter')
 
+        from pprint import pprint
+        pprint(linkedAccounts)
+
         # remove the linked account and verify that it has been removed
         self.removeLinkedAccount(self.token, 'twitter')
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 0)
 
-    def test_add_facebook_account(self):
+    def test_update_twitter_account(self):
         # add the linked account
-        data = {
-            'service_name'   : 'facebook',
-            'linked_user_id'        : self.fb_user_id_a,
-            'linked_screen_name'    : 'fbusera',
-            'linked_name'           : 'Test User',
-            'token'          : self.fb_user_token_a,
-            }
-        self.addLinkedAccount(self.token, **data)
+        self.addLinkedTwitterAccount(self.token, TWITTER_USER_A0_TOKEN, TWITTER_USER_A0_SECRET)
+
+        # verify that the linked account was properly added
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 1)
+        self.assertEqual(linkedAccounts['twitter']['service_name'], 'twitter')
+
+        from pprint import pprint
+        pprint(linkedAccounts)
+
+        # remove the linked account and verify that it has been removed
+        self.removeLinkedAccount(self.token, 'twitter')
+        linkedAccounts = self.showLinkedAccounts(self.token)
+        self.assertEqual(len(linkedAccounts), 0)
+
+
+    def test_add_facebook_account(self):
+
+
+        # add the linked account
+        self.addLinkedFacebookAccount(self.token, self.fb_user_token_a)
 
         # verify that the linked account was properly added
         linkedAccounts = self.showLinkedAccounts(self.token)
@@ -117,13 +126,11 @@ class StampedAPILinkedAccountAdd(StampedAPILinkedAccountHttpTest):
         linkedAccounts = self.showLinkedAccounts(self.token)
         self.assertEqual(len(linkedAccounts), 0)
 
+
+
     def test_add_rdio_account(self):
         # add the linked account
-        data = {
-            'service_name'   : 'rdio',
-            'token'          : 'TOKEN_DUMMY',
-            }
-        self.addLinkedAccount(self.token, **data)
+        self.addLinkedRdioAccount(self.token, "TOKEN_DUMMY")
 
         # verify that the linked account was properly added
         linkedAccounts = self.showLinkedAccounts(self.token)

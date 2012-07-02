@@ -14,10 +14,11 @@ from errors import Fail
 from ADeploymentPlatform import ADeploymentPlatform
 
 class DeploymentPlatform(ADeploymentPlatform):
-    def __init__(self, stack_class):
+    def __init__(self, stack_class, db_stack=None):
         ADeploymentPlatform.__init__(self)
         
         self.stack_class = stack_class
+        self.db_stack = db_stack
         self._stacks = { }
         self._init_env()
     
@@ -46,7 +47,7 @@ class DeploymentPlatform(ADeploymentPlatform):
             utils.log("Warning: deleting duplicate stack '%s' before create can occur" % stackName)
             self.delete(stackName)
         
-        stack = self.stack_class(stackName, self)
+        stack = self.stack_class(stackName, self, db_stack=self.db_stack)
         stack.create()
         
         self._stacks[stackName] = stack

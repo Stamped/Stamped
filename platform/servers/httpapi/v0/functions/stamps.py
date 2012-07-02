@@ -8,6 +8,10 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+exceptions = {
+    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
+}
+
 def transformStamps(stamps):
     """
     Convert stamps to HTTPStamp and return as json-formatted HttpResponse
@@ -41,10 +45,19 @@ def create(request, authUserId, data, **kwargs):
     
     return transformOutput(stamp.dataExport())
 
-
-@handleHTTPRequest(http_schema=HTTPStampShare)
+exceptions_share = {
+    'StampedMissingParametersError'       : StampedHTTPError(400, kind='bad_request', msg='Missing third party service name'),
+}
+@handleHTTPRequest(http_schema=HTTPStampShare,
+                   exceptions=exceptions.update(exceptions_share))
 @require_http_methods(["POST"])
 def share(request, authUserId, http_schema, data, **kwargs):
+    if http_schema.service_name is None:
+        if 'service_name' not in kwargs:
+            raise StampedMissingParametersError("Missing linked account service_name parameter")
+        else:
+            http_schema.service_name = kwargs['service_name']
+
     try:
         stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
     except StampedLinkedAccountError:

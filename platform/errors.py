@@ -14,6 +14,7 @@ error_kinds = set([
     'stamped_error',
     'forbidden',
     'invalid_credentials',
+    'bad_request',
     'illegal_action',
     'already_exists',
     'not_found',
@@ -115,7 +116,26 @@ class StampedAuthError(Exception):
         if msg is not None:
             logs.warning(msg)
 
+class StampedInternalError(Exception):
+    def __init__(self, msg=None, desc=None):
+        Exception.__init__(self, msg)
+        self.msg  = msg
+        self.desc = desc
+
+        if msg is not None:
+            logs.warning(msg)
+
+# Specific Internal Errors
+
+class StampedInvalidRelationshipError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
 # Specific Stamped Exceptions
+
+class StampedMissingParametersError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
 
 class StampedLinkedAccountAlreadyExistsError(StampedIllegalActionError):
     def __init__(self, msg=None):
@@ -174,6 +194,20 @@ class StampedBlackListedScreenNameError(StampedIllegalActionError):
 class StampedLinkedAccountError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
+
+class StampedMissingLinkedAccountTokenError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedNetflixNoInstantWatchError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+class StampedLinkedAccountIsAuthError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+
 
 # Third Party Stamped Exceptions
 

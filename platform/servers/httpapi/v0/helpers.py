@@ -297,7 +297,8 @@ def handleHTTPCallbackRequest(
         http_schema=None,
         conversion=None,
         parse_request_kwargs=None,
-        parse_request=True):
+        parse_request=True,
+        exceptions=None):
 
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the
@@ -348,7 +349,7 @@ def handleHTTPCallbackRequest(
                 return ret
 
             except Exception as e:
-                handleStampedExceptions(e)
+                handleStampedExceptions(e, exceptions)
             finally:
                 try:
                     logs.save()
@@ -439,7 +440,7 @@ def parseRequest(schema, request, **kwargs):
             rawData = request.POST
         else:
             raise
-        
+
         # Build the dict because django sucks
         for k, v in rawData.iteritems():
             data[k] = v

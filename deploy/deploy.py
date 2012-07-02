@@ -45,6 +45,9 @@ def parseCommandLine():
     parser.add_option("-n", "--noop", action="store_true", default=False, 
                       help="enable dry run noop mode, where no actual action will be taken (useful to test & debug commands before running them for real)")
     
+    parser.add_option("-d", "--dbStack", dest="db_stack", default=None, type="string",
+                      help="Denote an external stack to use for the database")
+    
     (options, args) = parser.parse_args()
     args = map(lambda arg: arg.lower(), args)
     
