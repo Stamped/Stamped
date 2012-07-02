@@ -8,13 +8,17 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = {
+    'StampedDocumentNotFoundError'      : StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data."),
     'StampedMissingParametersError'     : StampedHTTPERROR(400, kind='bad_request', msg="Missing parameters: user ids or screen names required"),
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
-    'StampedPermissionError'            : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to view user'),
+    'StampedViewUserPermissionsError'   : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to view user'),
+
 }
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
@@ -23,7 +27,9 @@ def show(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserIds)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPUserIds,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def lookup(request, authUserId, http_schema, **kwargs):
     if http_schema.user_ids is not None:
@@ -39,7 +45,9 @@ def lookup(request, authUserId, http_schema, **kwargs):
     
     return transformOutput(output)
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def images(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
@@ -47,7 +55,8 @@ def images(request, authUserId, http_schema, **kwargs):
     return transformOutput(images.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPUserSearch)
+@handleHTTPRequest(http_schema=HTTPUserSearch,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def search(request, authUserId, http_schema, **kwargs):
     users  = stampedAPI.searchUsers(authUserId, 
@@ -63,7 +72,8 @@ def search(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPSuggestedUserRequest)
+@handleHTTPRequest(http_schema=HTTPSuggestedUserRequest,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def suggested(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.getSuggestedUsers(authUserId, limit=http_schema.limit, offset=http_schema.offset)
@@ -76,7 +86,8 @@ def suggested(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def privacy(request, authUserId, http_schema, **kwargs):
     privacy = stampedAPI.getPrivacy(http_schema)
@@ -84,7 +95,9 @@ def privacy(request, authUserId, http_schema, **kwargs):
     return transformOutput(privacy)
 
 
-@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['query']})
+@handleHTTPRequest(http_schema=HTTPFindUser,
+                   parse_request_kwargs={'obfuscate':['query']},
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def findEmail(request, authUserId, http_schema, **kwargs):
     q = http_schema.query.split(',')
@@ -107,7 +120,9 @@ def findEmail(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPFindUser, parse_request_kwargs={'obfuscate':['query']})
+@handleHTTPRequest(http_schema=HTTPFindUser,
+                   parse_request_kwargs={'obfuscate':['query']},
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def findPhone(request, authUserId, http_schema, **kwargs):
     q = http_schema.query.split(',')
@@ -141,7 +156,6 @@ def findPhone(request, authUserId, http_schema, **kwargs):
 exceptions_findTwitter = {
     'StampedThirdPartyInvalidCredentialsError' : StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Twitter credentials'),
 }
-
 @handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]},
                    exceptions=exceptions.update(exceptions_findTwitter))
@@ -159,11 +173,9 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
 exceptions_findFacebook = {
     'StampedThirdPartyInvalidCredentialsError' : StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Facebook credentials'),
 }
-
 @handleHTTPRequest(http_schema=HTTPFindFacebookUser, 
                    parse_request_kwargs={'obfuscate':['user_token' ]},
                    exceptions=exceptions.update(exceptions_findTwitter))
-
 @require_http_methods(["POST"])
 def findFacebook(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.findUsersByFacebook(authUserId, http_schema.user_token)

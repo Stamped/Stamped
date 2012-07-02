@@ -127,7 +127,6 @@ urlpatterns = patterns('',
     ### STAMPS
     (r'v0/stamps/create.json',                              'v0.functions.stamps.create'),
     (r'v0/stamps/share/facebook.json',                      'v0.functions.stamps.share', { 'service_name' : 'facebook' }),
-    (r'v0/stamps/update.json',                              'v0.functions.stamps.update'),
     (r'v0/stamps/show.json',                                'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json',                              'v0.functions.stamps.remove'),
     (r'v0/stamps/collection.json',                          'v0.functions.stamps.collection'),

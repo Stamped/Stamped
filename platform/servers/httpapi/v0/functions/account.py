@@ -25,6 +25,8 @@ exceptions = {
     'StampedDuplicateEmailError'        : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address"),
     'StampedDuplicateScreenNameError'   : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name"),
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
+    'StampedAlreadyStampedAuthError'    : StampedHTTPError(400, kind='bad_request', msg='This account is already a Stamped account'),
+    #'InternalEerror'                    : StampedHTTPError()
 }
 
 
@@ -65,7 +67,8 @@ def upgrade(request, client_id, authUserId, http_schema, **kwargs):
 
 
 exceptions_createWithFacebook = {
-    'StampedLinkedAccountExistsError' : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Facebook user")
+    'StampedLinkedAccountExistsError' : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Facebook user"),
+    'StampedThirdPartyError'          : StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Facebook"),
 }
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
@@ -86,7 +89,8 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     return transformOutput(output)
 
 exceptions_createWithTwitter = {
-    'StampedLinkedAccountExistsError' : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Twitter user")
+    'StampedLinkedAccountExistsError' : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Twitter user"),
+    'StampedThirdPartyError'          : StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Twitter"),
 }
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
