@@ -81,7 +81,7 @@ class EntitySearch(object):
         self.__registerSource(SpotifySource(), music=8)
 
     def __terminateWaiting(self, pool, start_time, category, resultsDict):
-        logTimingData('TEST TEST TEST')
+        logTimingData('IN TERMINATE WAITING')
         sources_to_priorities = dict(self.__categories_to_sources_and_priorities[category])
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
@@ -183,8 +183,11 @@ class EntitySearch(object):
             # more gracefully.
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
+        logs.debug("SHOULD_DISABLE_TIMEOUT IS " + str(shouldDisableTimeout))
         if not shouldDisableTimeout:
+            logTimingData('SPAWNING TERMINATE WAITING')
             pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
+
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
         logTimingData("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
