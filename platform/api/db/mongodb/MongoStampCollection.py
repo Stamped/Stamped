@@ -76,7 +76,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def _convertToMongo(self, stamp):
         document = AMongoCollection._convertToMongo(self, stamp)
-        document['timestamp']['stamped'] = stamp.created
+        document['timestamp']['stamped'] = stamp.timestamp.created
         
         return document
     
@@ -188,7 +188,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             if len(stampIds) == 0:
                 return []
             
-            ids     = map(self._getObjectIdFromString, stampIds)
+            ids = map(self._getObjectIdFromString, stampIds)
             
             if len(ids) == 1:
                 query   = { '_id' : ids[0] }
