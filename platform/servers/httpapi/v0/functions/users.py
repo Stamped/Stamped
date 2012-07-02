@@ -8,7 +8,7 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = {
-    'StampedMissingParametersError'     : StampedHTTPERROR(400, kind='bad_request', msg="Missing parameters: user ids or screen names required"),
+    'StampedMissingParametersError'     : StampedHTTPError(400, kind='bad_request', msg="Missing parameters: user ids or screen names required"),
     'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
     'StampedPermissionError'            : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to view user'),
 }
