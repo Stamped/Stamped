@@ -339,7 +339,7 @@ var g_update_stamps = null;
                 
                 try {
                     var $elem = $(elem);
-                    var ts    = moment($elem.text())
+                    var ts    = moment.utc($elem.text(), "YYYY-MM-DD HH:mm:ss.SSSS");
                     var now   = moment();
                     
                     if (now.diff(ts, 'months') < 1) { // within 1 month
@@ -349,7 +349,7 @@ var g_update_stamps = null;
                     } else { // after 1 year
                         expl = ts.format("MMM Do YYYY");
                     }
-                } catch(e) { 
+                } catch(e) {
                     return;
                 }
                 
