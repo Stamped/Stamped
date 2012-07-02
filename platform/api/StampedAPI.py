@@ -919,8 +919,9 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
         account = self._accountDB.getAccount(authUserId)
+
         if account.linked is None or getattr(account.linked, service_name, None) is None:
-            StampedLinkedAccountDoesNotExistError("Referencing non-existent linked account: %s for user: %s" %
+            raise StampedLinkedAccountDoesNotExistError("Referencing non-existent linked account: %s for user: %s" %
                                                   (service_name, authUserId))
         linkedAccount = getattr(account.linked, service_name)
 
@@ -2255,7 +2256,7 @@ class StampedAPI(AStampedAPI):
 
         # Check to make sure the user has stamps left
         if not stampExists and user.stats.num_stamps_left <= 0:
-            raise StampedIllegalActionError("No more stamps remaining")
+            raise StampedOutOfStampsError("No more stamps remaining")
 
         # Build content
         content = StampContent()
@@ -3193,15 +3194,15 @@ class StampedAPI(AStampedAPI):
             elif authUserId is not None:
                 return self._collectionDB.getUserCreditStampIds(authUserId)
             else:
-                raise StampedInputError("User required")
+                raise StampedUserRequiredForScope("User required")
 
         if scope == 'user':
             if userId is not None:
                 return self._collectionDB.getUserStampIds(userId)
-            raise StampedInputError("User required")
+            raise StampedUserRequiredForScope("User required")
 
         if userId is not None and scope is not None:
-            raise StampedInputError("Invalid scope combination")
+            raise StampedInvalidScopeCombinationError("Invalid scope combination")
 
         if userId is not None:
             self._collectionDB.getUserStampIds(userId)
