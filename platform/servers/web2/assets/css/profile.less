@@ -772,6 +772,7 @@ body.music, body.book, body.film, body.app {
             //border: 1px solid red;
             display: block;
             float: left;
+            min-width: 70%;
         }
         
         .content_1 {
@@ -923,11 +924,12 @@ body.music, body.book, body.film, body.app {
 }
 
 .entity-header {
-    display: block;
-    float: left;
+    position: relative;
+    display:  block;
+    float:    left;
+    
     text-align: left;
     margin-left: 24px;
-    position: relative;
     padding: 2px;
     top: -7px;
     
@@ -1134,12 +1136,11 @@ body.music, body.book, body.film, body.app {
         
         .content {
             .entity-header {
-                max-width: @stamp-gallery-item-min-width - 62px;
+                max-width: @stamp-gallery-item-min-width - 64px;
                 margin-bottom: .5em;
             }
             
             .content_0 {
-                float: none;
                 display: block;
                 width: 100%;
             }
