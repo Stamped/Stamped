@@ -474,7 +474,7 @@
                         
                         font-size: 3.5em;
                         letter-spacing: .03em;
-                        margin: 0px 0px 3px 0px;
+                        margin: 0 0 3px;
                         text-shadow: 0px 2px 1.5px rgba(0,0,0,0.25);
                         position: relative;
                         top: 5px;
@@ -590,7 +590,6 @@ body.app {
 
 #main-content {
     position: relative;
-   
 }
 
 .stamp-gallery-header {
@@ -669,7 +668,7 @@ body.app {
     .expanded {
         position: absolute;
         background: #fff;
-        left: 0px;
+        left: 0;
         
         border: 1px solid @shadow;
         .box-shadow(0, 0, 6px, 0, rgba(0,0,0,0.15));
@@ -960,12 +959,14 @@ body.music, body.book, body.film, body.app {
     background-size: 100% 100%;
     
     max-width: @width;
-    width:  @width;
-    height: auto;
+    width:     @width;
+    height:     auto;
 }
 
 .stamp-preview, .stamp-preview-raw {
     .sized(@preview-wrapper-width);
+    position: relative;
+    z-index: 20;
     
     .transform-style(preserve-3d);
     .backface-visibility(hidden);
@@ -986,10 +987,11 @@ body.music, body.book, body.film, body.app {
         z-index: 25;
         
         img {
-            width: 85%;
-            .box-shadow(0, 1px, 3px, -1px, rgba(0,0,0,0.3));
-            border: 10px solid #fbfbfb;
-            .rounded(0px);
+            // TODO: resolve these changes
+            //width: 85%;
+            //.box-shadow(0, 1px, 3px, -1px, rgba(0,0,0,0.3));
+            //border: 10px solid #fbfbfb;
+            //.rounded(0px);
            
         }
     }
@@ -1271,7 +1273,7 @@ body.music, body.book, body.film, body.app {
                     height: 100%;
                     
                     opacity: 0;
-                    .transition(opacity, 0.1s, ease-out);
+                    .transition(opacity, 0.2s, ease-out);
                 }
                 
                 .icon {
@@ -1306,7 +1308,7 @@ body.music, body.book, body.film, body.app {
                     font-size: 13px;
                     color: #262626;
                     width: 120px;
-                                       
+                    
                     opacity: 0;
                     .transform(translatex(-72px));
                     .transition-transform2(.2s, ease-out, opacity, .4s, ease-out);
@@ -1650,7 +1652,6 @@ a.map-profile-link {
     display: inline-block;
     min-width: 10em;
     letter-spacing: 0.03em;
-    top: 0px;
     
     .map-profile-icon-wrapper {
         display: inline-block;
@@ -1834,11 +1835,12 @@ a.map-profile-link {
                 
                 padding: (@padding / 2) @padding;
                 
-                .profile-image-small, .stamp, .name {
+                .profile-image-wrapper, .stamp, .name {
                     float: left;
                 }
                 
-                .profile-image-small {
+                .profile-image-wrapper {
+                    position: relative;
                     margin-right: 16px;
                 }
                 
@@ -1859,7 +1861,7 @@ a.map-profile-link {
                     
                     .fullname {
                         font-weight: 700;
-                        margin: 0 0 .5em;
+                        margin:  0 0 .5em;
                         padding: 0;
                     }
                     
@@ -1884,8 +1886,29 @@ a.map-profile-link {
     }
 }
 
-.popup-todos .popup-header .rhs-icon {
-    background-position: -76px 0 !important;
+.popup-sdetail-social {
+    .pronounced-title {
+        font-size: 2em;
+    }
+    
+    .popup-header .rhs-icon {
+        margin-top: 4px;
+    }
+}
+
+.popup-todos {
+    .pronounced-title {
+        font-size: 3em;
+    }
+    
+    .popup-header .rhs-icon {
+        background-position: -76px 0 !important;
+        margin-top: 16px;
+        
+        .tongue {
+            display: none;
+        }
+    }
 }
 
 .popup-followers .popup-header .rhs-icon {
@@ -1894,5 +1917,27 @@ a.map-profile-link {
 
 .popup-following .popup-header .rhs-icon {
     background-position: -152px 0 !important;
+}
+
+.user-preview-icon {
+    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+    position: absolute;
+    z-index: 26;
+    
+    right:  -6px;
+    bottom: -6px;
+    
+    width:  17px;
+    height: 17px;
+    pointer-events: none;
+}
+
+
+.like .user-preview-icon {
+    background-position: 0 0;
+}
+
+.todo .user-preview-icon {
+    background-position: -19px 0;
 }
 
