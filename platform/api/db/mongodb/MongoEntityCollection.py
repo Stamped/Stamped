@@ -116,6 +116,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             if len(types) == 0:
                 types = ['other']
             subcategory = types[0]
+            if subcategory == 'track':
+                subcategory = 'song'
             assert subcategory is not None
             entity.subcategory = subcategory
 
