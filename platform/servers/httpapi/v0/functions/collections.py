@@ -16,7 +16,8 @@ def transform_stamps(stamps):
                 result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
             else:
                 result.append(HTTPStamp().importSchema(stamp).exportSparse())
-        except:
+        except Exception as e:
+            logs.warning("Unable to convert stamp: %s" % stamp)
             logs.warn(utils.getFormattedException())
     
     return result
