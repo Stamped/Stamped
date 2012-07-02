@@ -83,7 +83,7 @@ US_ADDRESS_STRING_W_POSTAL_CODE_RE = re.compile("[^,]\s*([A-Za-z. -]+)[ ,]+([A-Z
 US_ADDRESS_STRING_WO_POSTAL_CODE_RE = re.compile("[^,]\s*([A-Za-z. -]+)[ ,]+([A-Z]{2})([ ,]+(US))?\s*$")
 
 def tryToGetPostalCodeFromPlace(placeResolverObject):
-    if placeResolverObject.address and 'postcode' in placeResolverObject.address:
+    if placeResolverObject.address and placeResolverObject.address.get('postcode', None):
         reMatch = US_POSTAL_CODE_RE.match(placeResolverObject.address['postcode'])
         if reMatch:
             return int(reMatch.group(1))
@@ -93,7 +93,7 @@ def tryToGetPostalCodeFromPlace(placeResolverObject):
             return int(reMatch.group(3))
 
 def tryToGetStateFromPlace(placeResolverObject):
-    if placeResolverObject.address and 'region' in placeResolverObject.address:
+    if placeResolverObject.address and placeResolverObject.address.get('region', None):
         reMatch = US_STATE_RE.match(placeResolverObject.address['region'])
         if reMatch:
             return placeResolverObject.address['region']
@@ -106,7 +106,7 @@ def tryToGetStateFromPlace(placeResolverObject):
             return reMatch.group(2)
 
 def tryToGetLocalityFromPlace(placeResolverObject):
-    if placeResolverObject.address and 'locality' in placeResolverObject.address:
+    if placeResolverObject.address and placeResolverObject.address.get('locality', None):
         return placeResolverObject.address['locality']
     if placeResolverObject.address_string:
         reMatch = US_ADDRESS_STRING_W_POSTAL_CODE_RE.search(placeResolverObject.address_string)
@@ -126,7 +126,7 @@ def tryToGetStreetAddressFromPlace(placeResolverObject):
     # First try to retrieve it from structured data.
     address = placeResolverObject.address
     # TODO: Is this the right name?
-    if address and 'street' in address:
+    if address and address.get('street', None):
         return address['street']
 
     # Next, look in the address string. Peel off the first segment of it and try to determine if it's a street
