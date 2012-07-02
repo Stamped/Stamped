@@ -262,9 +262,9 @@ def handleHTTPRequest(requires_auth=True,
                         
                         params['http_schema']   = parseFileUpload(http_schema(), request, upload, **parse_kwargs)
                     elif http_schema is not None:
-                        params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
+                        params['http_schema']   = parseRequest(http_schema(), request, kwargs, **parse_kwargs)
                     else:
-                        params['http_schema']   = parseRequest(None, request, **parse_kwargs)
+                        params['http_schema']   = parseRequest(None, request, kwargs, **parse_kwargs)
                     
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
@@ -332,9 +332,9 @@ def handleHTTPCallbackRequest(
                     parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
 
                     if http_schema is not None:
-                        params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
+                        params['http_schema']   = parseRequest(http_schema(), request, kwargs, **parse_kwargs)
                     else:
-                        params['http_schema']   = parseRequest(None, request, **parse_kwargs)
+                        params['http_schema']   = parseRequest(None, request, kwargs, **parse_kwargs)
 
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
@@ -428,7 +428,7 @@ def checkOAuth(oauth_token, required=True):
         logs.warning("Error: %s" % e)
         raise StampedAuthError("invalid_token", "Invalid access token")
 
-def parseRequest(schema, request, **kwargs):
+def parseRequest(schema, request, extra_args, **kwargs):
     data = { }
     
     ### Parse Request
@@ -439,7 +439,9 @@ def parseRequest(schema, request, **kwargs):
             rawData = request.POST
         else:
             raise
-        
+
+        rawData = dict(rawData.items()).update(extra_args)
+
         # Build the dict because django sucks
         for k, v in rawData.iteritems():
             data[k] = v

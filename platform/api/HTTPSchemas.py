@@ -596,7 +596,7 @@ class HTTPLinkedAccount(Schema):
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
-        cls.addNestedProperty('share_settings',                   HTTPLinkedAccountShareSettings)
+        cls.addNestedProperty('share_settings',             HTTPLinkedAccountShareSettings)
 
     def importLinkedAccount(self, linked):
         self.dataImport(linked.dataExport(), overflow=True)

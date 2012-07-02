@@ -56,11 +56,10 @@ class Twitter(object):
         return self.__http('POST', service, user_token, user_secret, **params)
 
     def getUserInfo(self, user_token, user_secret):
-        print ('calling verifyCredentials with user_token: %s  user_secret: %s' % (user_token, user_secret))
         result = self.__get(
             '1/account/verify_credentials.json',
-            user_token,
-            user_secret,
+            str(user_token),
+            str(user_secret),
         )
         if 'id' not in result:
             raise StampedThirdPartyError('An error occurred while retrieving user information from Twitter')

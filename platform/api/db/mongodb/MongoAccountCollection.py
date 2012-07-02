@@ -233,15 +233,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return self.user_linked_alerts_history_collection.removeLinkedAlerts(userId)
 
     def addLinkedAccount(self, userId, linkedAccount):
-
-        # Verify that the linked account service does not already exist in the account
-        #documents = self._collection.find({'linked_accounts.service_name' : linkedAccount.service_name })
-        document = self._collection.find_one({ "linked.service_name" : linkedAccount.service_name })
-        if document is not None:
-            raise StampedDuplicationError("Linked '%s' account already exists for user." % linkedAccount.service_name)
-        #documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
-
-
         # create a dict of all twitter fields and bools indicating if required
         valid_twitter = {
             'service_name'          : True,

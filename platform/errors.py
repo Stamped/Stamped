@@ -175,6 +175,10 @@ class StampedLinkedAccountError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
 
+class StampedNetflixNoInstantWatchError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
 # Third Party Stamped Exceptions
 
 class StampedThirdPartyError(StampedInputError):

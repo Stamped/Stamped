@@ -873,8 +873,30 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addLinkedAccount(self, authUserId, linkedAccount):
-        # Verify account is valid and
-        self.verifyLinkedAccount(linkedAccount)
+        service_name = linkedAccount.service_name
+
+        if service_name == 'facebook':
+            if linkedAccount.token is None:
+                raise StampedInputError("Must provide an access token for facebook account")
+            userInfo = self._facebook.getUserInfo(linkedAccount.token)
+            linkedAccount.linked_user_id = userInfo['id']
+            linkedAccount.linked_name = userInfo['name']
+            if 'username' in userInfo:
+                linkedAccount.linked_screen_name = userInfo['username']
+        elif service_name == 'twitter':
+            if linkedAccount.token is None or linkedAccount.secret is None:
+                raise StampedInputError("Must provide a token and secret for twitter account")
+            userInfo = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
+            linkedAccount.linked_user_id = userInfo['id']
+            linkedAccount.linked_screen_name = userInfo['screen_name']
+        elif service_name == 'netflix':
+            if linkedAccount.token is None or linkedAccount.secret is None:
+                raise StampedInputError("Must provide a token and secret for netflix account")
+            userInfo = self._netflix.getUserInfo(linkedAccount.token, linkedAccount.secret)
+            if userInfo['can_instant_watch'] == False:
+                raise StampedNetflixNoInstantWatchError("Netflix account must have instant watch access")
+            linkedAccount.linked_user_id = userInfo['user_id']
+            linkedAccount.linked_name = "%s %s" % (userInfo['first_name'], userInfo['last_name'])
 
         linkedAccount = self._accountDB.addLinkedAccount(authUserId, linkedAccount)
 

@@ -48,13 +48,6 @@ def remove(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(True)
 
-@handleHTTPRequest(http_schema=HTTPLinkedAccount)
-@require_http_methods(["POST"])
-def update(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.updateLinkedAccount(authUserId, http_schema)
-
-    return transformOutput(True)
-
 def _buildShareSettingsFromLinkedAccount(linked):
     shares = getattr(linked, 'share_settings', None)
     result = []
@@ -110,20 +103,6 @@ def showSettings(request, authUserId, http_schema, **kwargs):
     result = _buildShareSettingsFromLinkedAccount(linked)
 
     return transformOutput(result)
-
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeTwitter(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-    return transformOutput(True)
-
-
-@handleHTTPRequest()
-@require_http_methods(["POST"])
-def removeFacebook(request, authUserId, **kwargs):
-    result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
-    return transformOutput(True)
 
 def createNetflixLoginResponse(request, netflixAddId=None):
     if 'oauth_token' in request.GET:
