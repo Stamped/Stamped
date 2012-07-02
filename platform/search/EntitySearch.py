@@ -146,26 +146,26 @@ class EntitySearch(object):
             gevent.sleep(0.01)
 
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
-        # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
-        # enough to give a solid idea.
-        before = datetime.datetime.now()
-        if shouldLogRawSourceResults:
-            queryParams['logRawResults'] = True
         try:
+            # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
+            # enough to give a solid idea.
+            before = datetime.datetime.now()
+            if shouldLogRawSourceResults:
+                queryParams['logRawResults'] = True
             results = source.searchLite(queryCategory, queryText, **queryParams)
+
+            after = datetime.datetime.now()
+            # First level of filtering on data quality score -- results that are really horrendous get dropped entirely
+            # pre-clustering.
+            filteredResults = [result for result in results if result.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_CLUSTER]
+            timesDict[source] = after - before
+            logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d, AFTER FILTERING: %d" % (
+                source.sourceName, str(after - before), len(results), len(filteredResults)
+            ))
+            resultsDict[source] = filteredResults
         except:
             logs.report()
-            results = []
-
-        after = datetime.datetime.now()
-        # First level of filtering on data quality score -- results that are really horrendous get dropped entirely
-        # pre-clustering.
-        filteredResults = [result for result in results if result.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_CLUSTER]
-        timesDict[source] = after - before
-        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d, AFTER FILTERING: %d" % (
-            source.sourceName, str(after - before), len(results), len(filteredResults)
-        ))
-        resultsDict[source] = filteredResults
+            resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
