@@ -81,6 +81,7 @@ class EntitySearch(object):
         self.__registerSource(SpotifySource(), music=8)
 
     def __terminateWaiting(self, pool, start_time, category, resultsDict):
+        logTimingData('TEST TEST TEST')
         sources_to_priorities = dict(self.__categories_to_sources_and_priorities[category])
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
