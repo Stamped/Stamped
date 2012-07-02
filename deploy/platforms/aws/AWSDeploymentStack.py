@@ -28,7 +28,7 @@ import fabric.contrib.files as fabricfiles
 
 class AWSDeploymentStack(ADeploymentStack):
     
-    def __init__(self, name, system, instances=None):
+    def __init__(self, name, system, instances=None, db_stack=None):
         ADeploymentStack.__init__(self, name, system)
         
         self.commonOptions = system.commonOptions
@@ -44,6 +44,13 @@ class AWSDeploymentStack(ADeploymentStack):
             """
         
         for instance in instances:
+            # Skip database nodes if db_stack is specified
+            if db_stack is not None:
+                if 'db' in instance['roles']:
+                    print 'Skipping db node: %s' % instance
+                    continue
+                instance['db_stack'] = db_stack
+            
             awsInstance = AWSInstance(self, instance)
             self.instances.append(awsInstance)
         
@@ -91,7 +98,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
-        
+
         # initialize replica set
         self.repair()
     
@@ -788,8 +795,11 @@ class AWSDeploymentStack(ADeploymentStack):
         placements['us-east-1c'] = 0
         top = -1
         
+        dbStack = None
         # infer the suffix number for the new instance (e.g., api4, db2, etc.)
         for instance in self.instances:
+            if 'db_stack' in instance.tags:
+                dbStack = instance.tags['db_stack']
             if instance.name.startswith(add):
                 sim.append(instance)
                 cur = int(instance.name[len(add):])
@@ -813,6 +823,10 @@ class AWSDeploymentStack(ADeploymentStack):
             }))
         
         conf = dict(sim[0].config).copy()
+
+        # Add db stack
+        if dbStack is not None:
+            conf['db_stack'] = dbStack 
         
         if isinstance(conf['roles'], basestring):
             conf['roles'] = eval(conf['roles'])
