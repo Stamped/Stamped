@@ -176,12 +176,6 @@ class EntitySearch(object):
         results = {}
         times = {}
         pool = Pool(len(self.__categories_to_sources_and_priorities))
-        for (source, priority) in self.__categories_to_sources_and_priorities[category]:
-            # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
-            # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
-            # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
-            # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
         def termWaiting():
             logs.debug('in termWaiting')
@@ -196,6 +190,14 @@ class EntitySearch(object):
             logTimingData('SPAWNING TERMINATE WAITING')
             #pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
             pool.spawn(termWaiting)
+
+        for (source, priority) in self.__categories_to_sources_and_priorities[category]:
+            # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
+            # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
+            # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
+            # more gracefully.
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
+
 
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
