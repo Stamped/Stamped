@@ -152,7 +152,7 @@ class StampedAPI(AStampedAPI):
         if self._node_name == 'unknown':
             try:
                 stack_info = libs.ec2_utils.get_stack()
-                self._node_name = stack_info.instance.name
+                self._node_name = "%s.%s" % (stack_info.instance.stack, stack_info.instance.name)
             except Exception:
                 pass
 
