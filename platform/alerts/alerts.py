@@ -35,20 +35,8 @@ IS_PROD       = libs.ec2_utils.is_prod_stack()
 USE_PROD_CERT = True
 
 admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton','jstaehle'])
-admin_emails = set([
-    'kevin@stamped.com',
-    'robby@stamped.com',
-    'bart@stamped.com',
-    'travis@stamped.com',
-    'mike@stamped.com',
-    'landon@stamped.com',
-    'anthony@stamped.com',
-    'liz@stamped.com',
-    'paul@stamped.com',
-    'geoff@stamped.com',
-    'joey@stamped.com',         'jws295@cornell.edu',
-])
-admin_tokens = set([])
+admin_emails = set()
+admin_tokens = set()
 
 # create wrapper
 if USE_PROD_CERT:
