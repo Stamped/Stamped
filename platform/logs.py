@@ -33,66 +33,112 @@ try:
 except:
     pass
 
-def _generateLogId():
-    m = hashlib.md5(str(time.time()))
-    m.update(str(random.random()))
-    return str(m.hexdigest())
 
-def _begin():
-    try:
-        localData.logId
-    except:
-        refresh()
+class LoggingContext(object):
+    def __init__(self, format=None):
+        self.__format = format
+        self.__logId = self.__generateLogId()
+        self.__log = {
+            'log': [],
+            'begin': datetime.datetime.utcnow(),
+            'request_id': self.__logId
+        }
 
-def _log(level, msg, *args, **kwargs):
-    _begin()
+    def save(self):
+        if self.__format != 'object':
+            return
 
-    try:
-        filename    = inspect.stack()[2][1]
-        if filename.rfind('/') != -1:
-            filename = filename[filename.rfind('/') + 1:]
-        lineno      = inspect.stack()[2][2]
-        fnc         = inspect.stack()[2][3]
-    except:
-        fnc = "UNKNOWN FUNCTION"
-    
-    if localData.format == 'object':
+        self.__log['finish'] = datetime.datetime.utcnow()
+
         try:
-            msg = unicode(msg)
-        except Exception:
-            msg = "LOGGER ERROR: failed to convert msg (type: %s) to string" % type(msg)
-        item = (datetime.datetime.utcnow(), level, filename, lineno, fnc, msg)
-        localData.log['log'].append(item)
-        localData.log[level] = True
+            localData.saveStat(localData.log)
+        except:
+            pass
 
-    if isinstance(msg, unicode):
-        msg = msg.encode('utf-8')
+        try:
+            localData.saveLog(localData.log)
+        except Exception as e:
+            pprint.pprint(localData.log)
+            pass
 
-    # else:
-    msg = "{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), localData.logId[:6], filename, lineno, fnc, msg)
-    if level == 'warning':
-        log.warning(msg, *args, **kwargs)
-    elif level == 'info':
-        log.info(msg, *args, **kwargs)
+    @classmethod
+    def __generateLogId(cls):
+        m = hashlib.md5(str(time.time()))
+        m.update(str(random.random()))
+        return str(m.hexdigest())
+
+    def addLogParameter(self, key, value):
+        self.__log[key] = value
+
+    def appendToLog(self, item):
+        self.__log['log'].append(item)
+
+    def log(self, level, msg, *args, **kwargs):
+        try:
+            filename    = inspect.stack()[2][1]
+            if filename.rfind('/') != -1:
+                filename = filename[filename.rfind('/') + 1:]
+            lineno      = inspect.stack()[2][2]
+            fnc         = inspect.stack()[2][3]
+        except:
+            fnc = "UNKNOWN FUNCTION"
+            filename = "UNKNOWN FILENAME"
+            lineno = "UNKNOWN LINENO"
+
+        if self.__format == 'object':
+            try:
+                msg = unicode(msg)
+            except Exception:
+                msg = "LOGGER ERROR: failed to convert msg (type: %s) to string" % type(msg)
+            item = (datetime.datetime.utcnow(), level, filename, lineno, fnc, msg)
+            self.appendToLog(item)
+            self.addLogParameter(level, True)
+
+
+        if isinstance(msg, unicode):
+            msg = msg.encode('utf-8')
+
+        # else:
+        msg = "{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), self.__logId[:6], filename, lineno, fnc, msg)
+        if level == 'warning':
+            log.warning(msg, *args, **kwargs)
+        elif level == 'info':
+            log.info(msg, *args, **kwargs)
+        else:
+            log.debug(msg, *args, **kwargs)
+
+
+
+def _getLoggingContext(forceCreate=False):
+    if not forceCreate:
+        return localData.loggingContext
     else:
-        log.debug(msg, *args, **kwargs)
-
+        try:
+            return localData.loggingContext
+        except AttributeError:
+            localData.loggingContext = LoggingContext()
+            return localData.loggingContext
 
 def refresh(format=None):
-    localData.logId = _generateLogId()
-    localData.format = format
-    localData.log = {
-        'log': [],
-        'begin': datetime.datetime.utcnow(),
-        'request_id': localData.logId,
-    }
-    localData.output = None
+    localData.loggingContext = LoggingContext(format=format)
+    return localData.loggingContext
 
 localData = threading.local()
 refresh()
 
+def _log(level, msg, *args, **kwargs):
+    _getLoggingContext(forceCreate=True).log(level, msg, *args, **kwargs)
+
+def runInOtherLoggingContext(fn, context):
+    oldLoggingContext = _getLoggingContext(forceCreate=True)
+    localData.loggingContext = context
+    try:
+        return fn()
+    finally:
+        localData.loggingContext = oldLoggingContext
+
 def formatMessage(msg, fnc):
-    msg = "%s | %-25s | %s" % (localData.logId, fnc, msg)
+    msg = "%s | %-25s | %s" % (_getLoggingContext().logId, fnc, msg)
     return msg
 
 # Logging Functions
@@ -111,117 +157,75 @@ def warn(msg, *args, **kwargs):
 
 # HTTP Log Requests
 def begin(**kwargs):
-    saveLog     = kwargs.pop('saveLog', None)
-    saveStat    = kwargs.pop('saveStat', None)
+    loggingContext = refresh(format='object')
+    # Pretty hacky.
+    loggingContext.saveLog = kwargs.pop('saveLog', None)
+    loggingContext.saveStat = kwargs.pop('saveStat', None)
+
     requestData = kwargs.pop('requestData', None)
     nodeName    = kwargs.pop('nodeName', None)
-    
-    refresh(format='object')
-    
-    localData.saveLog  = saveLog
-    localData.saveStat = saveStat
     
     if requestData:
         request(requestData)
     
     if nodeName:
-        localData.log['node'] = nodeName
+        loggingContext.addLogParameter('node', nodeName)
 
 def request(request):
+    loggingContext = _getLoggingContext()
     try:
-        localData.log['path'] = request.path
-        localData.log['method'] = request.method
-        localData.log['headers'] = str(request.META)
+        loggingContext.addLogParameter('path', request.path)
+        loggingContext.addLogParameter('method', request.method)
+        loggingContext.addLogParameter('headers', request.META)
     except:
-        localData.log['request'] = 'FAIL'
+        loggingContext.addLogParameter('request', 'FAIL')
 
 def async_request(method, *args, **kwargs):
+    loggingContext = _getLoggingContext()
     try:
-        localData.log['path']   = method
-        localData.log['method'] = 'ASYNC'
-        localData.log['args']   = str(args)
-        localData.log['kwargs'] = str(kwargs)
+        loggingContext.addLogParameter('path', method)
+        loggingContext.addLogParameter('method', 'ASYNC')
+        loggingContext.addLogParameter('args', str(args))
+        loggingContext.addLogParameter('kwargs', str(kwargs))
     except:
-        localData.log['request'] = 'FAIL'
+        loggingContext.addLogParameter('request', 'FAIL')
 
 def token(token):
-    try:
-        localData.log['token'] = token
-    except:
-        localData.log['token'] = 'FAIL'
+    _getLoggingContext().addLogParameter('token', token)
 
 def user(user_id):
-    try:
-        localData.log['user_id'] = user_id
-    except:
-        localData.log['user_id'] = 'FAIL'
+    _getLoggingContext().addLogParameter('user_id', user_id)
 
 def client(client_id):
-    try:
-        localData.log['client_id'] = client_id
-    except:
-        localData.log['client_id'] = 'FAIL'
+    _getLoggingContext().addLogParameter('client_id', client_id)
 
 def form(data):
-    try:
-        localData.log['form'] = data
-    except:
-        localData.log['form'] = 'FAIL'
+    _getLoggingContext().addLogParameter('form', data)
 
 def attachment(name, size):
-    try:
-        localData.log['file_name'] = name
-        localData.log['file_size'] = size
-    except:
-        localData.log['file_name'] = 'FAIL'
+    loggingContext = _getLoggingContext()
+    loggingContext.addLogParameter('file_name', name)
+    loggingContext.addLogParameter('file_size', size)
 
 def output(data):
-    try:
-        localData.log['output'] = data
-    except:
-        localData.log['output'] = 'FAIL'
+    _getLoggingContext().addLogParameter('output', data)
 
 def auth(msg):
-    try:
-        localData.log['auth'] = msg
-    except:
-        localData.log['auth'] = 'FAIL'
+    _getLoggingContext().addLogParameter('auth', msg)
 
 def error(code):
-    try:
-        localData.log['result'] = code
-    except:
-        localData.log['result'] = 'FAIL'
-    
+    loggingContext = _getLoggingContext()
+    loggingContext.addLogParameter('result', code)
     try:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         f = traceback.format_exception(exc_type, exc_value, exc_traceback)
         f = string.joinfields(f, '')
-        localData.log['stack_trace'] = f
+        loggingContext.addLogParameter('stack_trace', f)
     except:
-        localData.log['stack_trace'] = 'FAIL'
+        loggingContext.addLogParameter('stack_trace', 'FAIL')
 
 def save():
-    if localData.format != 'object':
-        # Skip if not an object
-        return
-    
-    localData.log['finish'] = datetime.datetime.utcnow()
-    
-    try:
-        if localData.saveStat is None:
-            raise
-        localData.saveStat(localData.log)
-    except:
-        pass
-    
-    try:
-        if localData.saveLog is None:
-            raise
-        localData.saveLog(localData.log)
-    except Exception as e:
-        pprint.pprint(localData.log)
-        pass
+    _getLoggingContext().save()
 
 def _report(caller,msg='',level=logging.ERROR):
     caller2 = log.findCaller()
