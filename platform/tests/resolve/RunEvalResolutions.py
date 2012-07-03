@@ -30,7 +30,7 @@ class RunEvalResolutions(AStampedFixtureTestCase):
         # First fill in entity ids for any entity without them. We will be matching using these ids.
         idGen = entityIdGen()
         for resultList in searchResults.itervalues():
-            for entity, _ in resultList:
+            for entity, _ in resultList[:5]:
                 if entity.entity_id is None:
                     entity.entity_id = next(idGen)
         with open('/tmp/resolution_eval_input', 'w') as output:
