@@ -181,14 +181,14 @@ def runAlerts(options):
                 send_push   = settings.alerts_followers_apns
                 send_email  = settings.alerts_followers_email
             elif alert.verb.startswith('friend_'):
-                send_push   = None ## TODO: Add
-                send_email  = None ## TODO: Add
+                send_push   = False ## TODO: Add
+                send_email  = False ## TODO: Add
             elif alert.verb.startswith('action_'):
-                send_push   = None ## TODO: Add
-                send_email  = None ## TODO: Add
+                send_push   = False ## TODO: Add
+                send_email  = False ## TODO: Add
             else:
-                send_push   = None
-                send_email  = None
+                send_push   = False
+                send_email  = False
             
             # User
             user = userIds[str(alert.subject)]
@@ -227,7 +227,7 @@ def runAlerts(options):
                     logs.debug("User: %s" % user.user_id)
                     logs.debug("Recipient: %s" % recipient.user_id)
 
-            elif userUnreadCount[alert.recipient_id] > 0 and alert.recipient_id not in userPushUnread:
+            elif userUnreadCount[alert.recipient_id] > 0:
                 """
                 If the user doesn't have alerts enabled but we have an APNS token for them, send them a notification 
                 with just the badge count. This will only be applied during sending if no other push notifications are 
@@ -284,7 +284,7 @@ def runAlerts(options):
         sendEmails(userEmailQueue, options)
     
     # Send push notifications
-    if len(userPushQueue) > 0:
+    if len(userPushQueue) > 0 or len(userPushUnread) > 0:
         sendPushNotifications(userPushQueue, userPushUnread, options)
 
 """
