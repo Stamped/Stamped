@@ -13,6 +13,7 @@ import datetime, gzip, httplib, json, logging, os, pickle, re, string, sys
 import htmlentitydefs, threading, time, traceback, urllib, urllib2
 import keys.aws, logs, math, random, boto, bson
 import libs.ec2_utils
+import functools
 
 from errors              import *
 from boto.ec2.connection import EC2Connection
@@ -21,6 +22,35 @@ from functools           import wraps
 from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
+from gevent.pool         import Pool
+
+
+class LoggingThreadPool(object):
+    """
+    Wrapper around gevent.pool.Pool that (a) logs any exceptions that show up in the spawned tasks and (b) ensures that
+    log statements from the spawned tasks are attached to the current logging context.
+    """
+    def __init__(self, *args, **kwargs):
+        self.__pool = Pool(*args, **kwargs)
+
+    def spawn(self, fn, *args, **kwargs):
+        def userFn():
+            return fn(*args, **kwargs)
+
+        currLoggingContext = logs.localData.loggingContext
+
+        @functools.wraps(fn)
+        def wrapperFn():
+            try:
+                return logs.runInOtherLoggingContext(userFn, currLoggingContext)
+            except:
+                logs.report()
+
+        self.__pool.spawn(wrapperFn)
+
+    def __getattr__(self, attr):
+        return getattr(self.__pool, attr)
+
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
