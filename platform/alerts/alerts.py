@@ -33,7 +33,7 @@ IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether-prod.pem')
 IS_PROD       = libs.ec2_utils.is_prod_stack()
 USE_PROD_CERT = True
 
-admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton'])
+admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton','jstaehle'])
 admin_emails = set([
     'kevin@stamped.com',
     'robby@stamped.com',
@@ -45,6 +45,7 @@ admin_emails = set([
     'liz@stamped.com',
     'paul@stamped.com',
     'geoff@stamped.com',
+    'joey@stamped.com',         'jws295@cornell.edu',
 ])
 admin_tokens = set([])
 
