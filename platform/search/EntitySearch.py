@@ -9,6 +9,7 @@ import Globals
 import sys, datetime, logs, gevent, utils, math
 from api                        import Entity
 from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
 from resolve.RdioSource         import RdioSource
@@ -174,7 +175,7 @@ class EntitySearch(object):
         start = datetime.datetime.now()
         results = {}
         times = {}
-        pool = utils.LoggingThreadPool(len(self.__categories_to_sources_and_priorities))
+        pool = Pool(len(self.__categories_to_sources_and_priorities))
 
         def termWaiting():
             logs.debug('in termWaiting')
