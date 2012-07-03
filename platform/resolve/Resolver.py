@@ -1077,22 +1077,7 @@ class Resolver(object):
                 'types': 0.01
             }
         if 'groups' not in options:
-            groups = [options['count']]
-            if query.kind == 'person':
-                groups.extend([4, 20, 30])
-            elif query.kind == 'media_collection':
-                if query.isType('album'):
-                    groups.extend([5, 10, 50]) # Album
-            elif query.kind == 'media_item':
-                if query.isType('track'):
-                    groups.extend([20, 50, 100]) # Track
-                elif query.isType('movie'):
-                    groups.extend([10, 20, 50]) # Movie
-                elif query.isType('book'):
-                    groups.extend([20, 50, 100]) # Book
-            else:
-                #generic
-                groups.extend([10, 20, 50]) 
+            groups = [options['count'], 4, 10]
             options['groups'] = groups
         if 'check' not in options:
             if query.kind == 'person':

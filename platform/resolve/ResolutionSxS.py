@@ -22,6 +22,19 @@ def __createDiffTable(leftData, rightData):
     return differ.make_table(leftLines, rightLines)
 
 
+def __stripEntity(entityDict):
+    """Strip out irrelevant/noisy fields in the entity dict, so the output is
+    more readable.
+    """
+
+    def stripTimestamps(d):
+        return {k : v for k, v in d.iteritems() if 'timestamp' not in k}
+    entityDict = stripTimestamps(entityDict)
+    if 'sources' in entityDict:
+        entityDict['sources'] = stripTimestamps(entityDict['sources'])
+    return entityDict
+
+
 DIFF_FILE_HEADER = """
 <html>
     <head>
@@ -54,8 +67,8 @@ def writeComparisons(oldResults, newResults, outputDir):
         _, newResolved, _ = newResults[key]
 
         filename = key + '.html'
-        oldData = oldResolved.dataExport()
-        newData = newResolved.dataExport()
+        oldData = __stripEntity(oldResolved.dataExport())
+        newData = __stripEntity(newResolved.dataExport())
         with open(path.join(outputDir, filename), 'w') as fout:
             print >> fout, DIFF_FILE_HEADER
             print >> fout, '<h1>%s</h1>' % 'Input'
