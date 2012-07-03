@@ -190,10 +190,11 @@ class MongoActivityCollection(AActivityDB):
                     continue
                 
                 alert               = Alert()
-                alert.recipient_id  = recipientId
                 alert.activity_id   = activityId
-                alert.user_id       = subject
-                alert.genre         = verb
+                alert.recipient_id  = recipientId
+                alert.subject       = subject
+                alert.verb          = verb
+                alert.objects       = ActivityObjectIds().dataImport(objects)
                 alert.created       = created
                 alerts.append(alert)
 

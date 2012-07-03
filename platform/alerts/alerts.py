@@ -6,14 +6,14 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, logs
 import os, sys, pymongo, json, struct, ssl, binascii
 import binascii, boto, keys.aws, libs.ec2_utils
  
 from optparse       import OptionParser
 from datetime       import *
 from socket         import socket
-from errors         import Fail
+from errors         import *
 from HTTPSchemas    import *
 
 from db.mongodb.MongoAlertQueueCollection   import MongoAlertQueueCollection
@@ -27,9 +27,8 @@ from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackW
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-print 'WARNING: RUNNING PUSH NOTIFICATION CERTS FOR DEV APP'
-IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-ether.pem')
-IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether.pem')
+IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-ether-prod.pem')
+IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether-prod.pem')
 
 IS_PROD       = libs.ec2_utils.is_prod_stack()
 USE_PROD_CERT = True
@@ -87,47 +86,57 @@ def parseCommandLine():
     return options
 
 def main():
+    logs.begin(
+        saveLog=api._logsDB.saveLog,
+        saveStat=api._statsDB.addStat,
+        nodeName=api.node_name
+    )
+    logs.async_request('alerts')
+
+    logs.warning('WARNING: USING PUSH NOTIFICATION CERTS FOR "ETHER" APP')
+
     lock = os.path.join(base, 'alerts.lock')
     if os.path.exists(lock):
-        print 'LOCKED'
+        logs.warning('Locked - aborting')
         return
     
     try:
         open(lock, 'w').close()
-        print '-' * 40
-        print 'BEGIN: %s' % datetime.utcnow()
-
         options = parseCommandLine()
         runAlerts(options)
-        runInvites(options)
-        
-        print 'END:   %s' % datetime.utcnow()
-        print '-' * 40
+        # runInvites(options)
+
     except Exception as e:
-        print e
-        utils.printException()
-        print 'FAIL!'
-        print '-' * 40
+        logs.warning('Exception: %s' % e)
+        logs.warning(utils.getFormattedException())
+        logs.error(500)
+
     finally:
         os.remove(lock)
+        try:
+            logs.save()
+        except Exception:
+            print '\n\n\nWARNING: UNABLE TO SAVE LOGS\n\n\n'
 
 
 def runAlerts(options):
     stampedAuth = MongoStampedAuth()
 
     numAlerts = alertDB.numAlerts()
-    alerts  = alertDB.getAlerts(limit=options.limit)
+    alerts = alertDB.getAlerts(limit=options.limit)
     userIds = {}
+    userUnreadCount = {}
     userEmailQueue = {}
-    userPushQueue  = {}
+    userPushQueue = {}
+    userPushUnread = {}
 
     if len(alerts) == 0:
-        print 'No alerts!'
+        logs.info('No alerts!')
         return
     
     for alert in alerts:
-        userIds[str(alert.user_id)] = 1
-        userIds[str(alert.recipient_id)] = 1
+        userIds[str(alert.subject)] = None
+        userIds[str(alert.recipient_id)] = None
     
     accounts = accountDB.getAccounts(userIds.keys())
     
@@ -137,171 +146,147 @@ def runAlerts(options):
     # Get email settings tokens
     tokens = stampedAuth.ensureEmailAlertTokensForUsers(userIds.keys())
     
-    print 'Number of alerts: %s' % numAlerts
+    logs.info('Number of alerts: %s' % numAlerts)
     
     for alert in alerts:
         try:
-            print alert
-            if userIds[str(alert.recipient_id)] == 1 \
-                or userIds[str(alert.user_id)] == 1:
-                raise
+            if userIds[str(alert.recipient_id)] is None or userIds[str(alert.subject)] is None:
+                msg = "Recipient (%s) or user (%s) not found" % (alert.recipient_id, alert.subject)
+                raise StampedUnavailableError(msg)
 
             # Check recipient settings
             recipient = userIds[str(alert.recipient_id)]
-
             settings = recipient.alert_settings
 
-            if alert.genre == 'restamp':
+            if alert.verb == 'credit':
                 send_push   = settings.alerts_credits_apns
                 send_email  = settings.alerts_credits_email
-            elif alert.genre == 'like':
+            elif alert.verb == 'like':
                 send_push   = settings.alerts_likes_apns
                 send_email  = settings.alerts_likes_email
-            elif alert.genre == 'todo':
+            elif alert.verb == 'todo':
                 send_push   = settings.alerts_todos_apns
                 send_email  = settings.alerts_todos_email
-            elif alert.genre == 'mention':
+            elif alert.verb == 'mention':
                 send_push   = settings.alerts_mentions_apns
                 send_email  = settings.alerts_mentions_email
-            elif alert.genre == 'comment':
+            elif alert.verb == 'comment':
                 send_push   = settings.alerts_comments_apns
                 send_email  = settings.alerts_comments_email
-            elif alert.genre == 'reply':
+            elif alert.verb == 'reply':
                 send_push   = settings.alerts_replies_apns
                 send_email  = settings.alerts_replies_email
-            elif alert.genre == 'follower':
+            elif alert.verb == 'follow':
                 send_push   = settings.alerts_followers_apns
                 send_email  = settings.alerts_followers_email
-            elif alert.genre == 'friend':
+            elif alert.verb.startswith('friend_'):
+                send_push   = None ## TODO: Add
+                send_email  = None ## TODO: Add
+            elif alert.verb.startswith('action_'):
                 send_push   = None ## TODO: Add
                 send_email  = None ## TODO: Add
             else:
                 send_push   = None
                 send_email  = None
             
-            # Raise if no settings
-            #if not send_push and not send_email:
-            #    raise
-            
-            # Activity
-            activity = activityDB.getActivityItem(alert.activity_id)
-            
             # User
-            user = userIds[str(alert.user_id)]
+            user = userIds[str(alert.subject)]
             
             # Build admin list
             if recipient.screen_name in admins:
                 admin_emails.add(recipient.email)
                 for token in recipient.devices.ios_device_tokens:
                     admin_tokens.add(token)
+
+            # Build unread count
+            if alert.recipient_id not in userUnreadCount:
+                try:
+                    userUnreadCount[alert.recipient_id] = api.getUnreadActivityCount(alert.recipient_id)
+                except Exception as e:
+                    logs.warning("Unable to set unread count: %s" % e)
+                    userUnreadCount[alert.recipient_id] = 0
             
+            # Build APNS notifications
             if send_push:
                 try:
-                    # Send push notification
-                    print 'PUSH'
-                    
-                    if not recipient.devices.ios_device_tokens:
-                        raise
-                    print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
+                    if recipient.devices is not None and recipient.devices.ios_device_tokens is not None:
+                        # Build push notification and add to queue
+                        numUnread = userUnreadCount[alert.recipient_id]
+                        msg = _pushNotificationMessage(alert.verb, user)
+                        for deviceId in recipient.devices.ios_device_tokens:
+                            result = buildPushNotification(alert.activity_id, msg=msg, numUnread=numUnread)
+                            if deviceId not in userPushQueue:
+                                userPushQueue[deviceId] = []
+                            userPushQueue[deviceId].append(result)
+                    else:
+                        logs.info("No devices found for recipient '%s'" % recipient.user_id)
 
-                    # Build push notification
-                    for token in recipient.devices.ios_device_tokens:
-                        result = buildPushNotification(user, activity, token.dataExport())
-                        if token not in userPushQueue:
-                            userPushQueue[token] = []
-                        userPushQueue[token].append(result)
+                except Exception as e:
+                    logs.warning("Push generation failed for alert '%s': %s" % (alert.alert_id, e))
+                    logs.debug("User: %s" % user.user_id)
+                    logs.debug("Recipient: %s" % recipient.user_id)
 
-                    print 'PUSH COMPLETE'
-                except:
-                    print 'PUSH FAILED'
-            # else:
-            #     try:
-            #         # Send push notification with badge only
-            #         print 'PUSH WITH NO MSG'
+            elif userUnreadCount[alert.recipient_id] > 0 and alert.recipient_id not in userPushUnread:
+                """
+                If the user doesn't have alerts enabled but we have an APNS token for them, send them a notification 
+                with just the badge count. This will only be applied during sending if no other push notifications are 
+                sent.
+                """
+                try:
+                    if recipient.devices is not None and recipient.devices.ios_device_tokens is not None:
+                        numUnread = userUnreadCount[alert.recipient_id]
+                        for deviceId in recipient.devices.ios_device_tokens:
+                            userPushUnread[deviceId] = numUnread
+                    else:
+                        logs.info("No devices found for recipient '%s'" % recipient.user_id)
 
-            #         if not recipient.devices.ios_device_tokens:
-            #             raise
-            #         print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
+                except Exception as e:
+                    logs.warning("Push count generation failed for alert '%s': %s" % (alert.alert_id, e))
+                    logs.debug("User: %s" % user.user_id)
+                    logs.debug("Recipient: %s" % recipient.user_id)
 
-            #         # Build push notification
-            #         for token in recipient.devices.ios_device_tokens:
-            #             result = buildPushNotification(user, activity, token.dataExport())
-            #             if token not in userPushQueue:
-            #                 userPushQueue[token] = []
-            #             userPushQueue[token].append(result)
-
-            #         print 'PUSH COMPLETE'
-            #     except:
-            #         print 'PUSH FAILED'
-            
+            # Build email
             if send_email:
                 try:
-                    # Send email
-                    print 'EMAIL'
+                    if recipient.email is not None: ### TODO: Check for validity of email address
 
-                    if recipient.email is None:
-                        continue
+                        # Add email address
+                        if recipient.email not in userEmailQueue:
+                            userEmailQueue[recipient.email] = []
 
-                    # Add email address
-                    if recipient.email not in userEmailQueue:
-                        userEmailQueue[recipient.email] = []
+                        # Grab settings token
+                        token = tokens[recipient.user_id]
 
-                    # Grab settings token
-                    token = tokens[recipient.user_id]
+                        # Build email
+                        subject = _setSubject(alert.verb, user)
+                        body = _setBody(alert.verb, token, user, alert.objects)
+                        email = buildEmail(alert.activity_id, subject, body)
+                        userEmailQueue[recipient.email].append(email)
+                    else:
+                        logs.info("No email address found for recipient '%s'" % recipient.user_id)
 
-                    # Build email
-                    email = buildEmail(user, recipient, activity, token)
-                    userEmailQueue[recipient.email].append(email)
-
-                    print 'EMAIL COMPLETE'
                 except Exception as e:
-                    print e
-                    print 'EMAIL FAILED'
-            
-            # Remove the alert
-            raise
+                    logs.warning("Email generation failed for alert '%s': %s" % (alert.alert_id, e))
+                    logs.debug("User: %s" % user.user_id)
+                    logs.debug("Recipient: %s" % recipient.user_id)
 
-        except:
-            print 'REMOVED'
+        except Exception as e:
+            logs.warning("An error occurred: %s" % e)
+            logs.warning("Alert removed: %s" % alert)
+
+        finally:
             if not options.noop:
                 alertDB.removeAlert(alert.alert_id)
-            
-            continue
-    
-    print
     
     # Send emails
     if len(userEmailQueue) > 0:
-        print '-' * 40
-        print 'ALERT EMAILS:'
-        for k, v in userEmailQueue.iteritems():
-            for email in v:
-                try:
-                    print u"%64s | %s" % (email['to'], email['subject'])
-                except Exception as e:
-                    print e
-        print
-        for k, v in userEmailQueue.iteritems():
-            print k, len(v)
-        print
         sendEmails(userEmailQueue, options)
-        print
     
     # Send push notifications
     if len(userPushQueue) > 0:
-        print '-' * 40
-        print 'ALERT PUSH NOTIFICATIONS:'
-        for k, v in userPushQueue.iteritems():
-            for push in v:
-                print push
-        print
-        for k, v in userPushQueue.iteritems():
-            print k, len(v)
-        print
-        sendPushNotifications(userPushQueue, options)
-        print
+        sendPushNotifications(userPushQueue, userPushUnread, options)
 
-
+"""
 def runInvites(options):
     numInvites = inviteDB.numInvites()
     invites  = inviteDB.getInvites(limit=options.limit)
@@ -379,11 +364,10 @@ def runInvites(options):
         except:
             print 'REMOVED'
             if not options.noop:
-                inviteDB.removeInvite(invite.invite_id)
+                pass
+                # inviteDB.removeInvite(invite.invite_id)
 
             continue
-
-
 
     print
 
@@ -403,32 +387,32 @@ def runInvites(options):
         print
         sendEmails(userEmailQueue, options)
         print
+"""
 
+def _setSubject(verb, user):
 
-def _setSubject(user, genre):
-
-    if genre == 'restamp':
+    if verb == 'credit':
         msg = u'%s (@%s) gave you credit for a stamp' % (user.name, user.screen_name)
 
-    elif genre == 'like':
+    elif verb == 'like':
         msg = u'%s (@%s) liked your stamp' % (user.name, user.screen_name)
 
-    elif genre == 'todo':
+    elif verb == 'todo':
         msg = u'%s (@%s) added your stamp as a to-do' % (user.name, user.screen_name)
 
-    elif genre == 'mention':
+    elif verb == 'mention':
         msg = u'%s (@%s) mentioned you on Stamped' % (user.name, user.screen_name)
 
-    elif genre == 'comment':
+    elif verb == 'comment':
         msg = u'%s (@%s) commented on your stamp' % (user.name, user.screen_name)
 
-    elif genre == 'reply':
+    elif verb == 'reply':
         msg = u'%s (@%s) replied to you on Stamped' % (user.name, user.screen_name)
 
-    elif genre == 'follower':
+    elif verb == 'follow':
         msg = u'%s (@%s) is now following you on Stamped' % (user.name, user.screen_name)
     else:
-        ### TODO: Add error logging?
+        logs.warning("Invalid verb for subject: %s" % verb)
         raise
 
     if not IS_PROD:
@@ -436,38 +420,62 @@ def _setSubject(user, genre):
 
     return msg
 
-def _setBody(user, activity, emailAddress, settingsToken):
+def _setBody(verb, settingsToken, user, objects=None):
 
     try:
-        path = os.path.join(base, 'templates', 'email_%s.html.j2' % activity.genre)
+        path = os.path.join(base, 'templates', 'email_%s.html.j2' % verb)
         template = open(path, 'r')
-    except:
-        ### TODO: Add error logging?
+    except Exception as e:
+        logs.warning("Unable to get email template: %s" % verb)
         raise
 
-    params = HTTPUser().dataImport(user.dataExport()).dataExport()
-    params['title'] = activity.subject
-    params['blurb'] = activity.blurb
+    params = HTTPUser().importUser(user).dataExport()
+
+    if objects is not None:
+        if objects.stamp_ids is not None and len(objects.stamp_ids) > 0:
+            stampId = objects.stamp_ids[-1]
+            ### TODO: Cache stamp objects
+            #if stampId in stampIds:
+            stamp = api.getStamp(stampId)
+            params['title'] = stamp.entity.title
+            if verb == 'credit' or verb == 'mention':
+                params['blurb'] = stamp.contents[-1].blurb
+
+        if objects.comment_ids is not None and len(objects.comment_ids) > 0:
+            commentId = objects.comment_ids[-1]
+            comment = self._commentDB.getComment(commentId)
+            if 'title' not in params:
+                stampId = comment.stamp_id 
+                stamp = api.getStamp(stampId)
+                params['title'] = stamp.entity.title
+            params['blurb'] = comment.blurb
 
     # HTML Encode the bio?
     if 'bio' not in params:
         params['bio'] = ''
     else:
-        params['bio'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
+        replacements = [
+            ('&', '&amp;'),
+            ('<', '&lt;'),
+            ('>', '&gt;'),
+            ('"', '&quot;'),
+            ("'", '&#39;'),
+        ]
+        for replacement in replacements:
+            params['bio'].replace(replacement[0], replacement[1])
 
-    params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
-
-    # Add email address
-    params['email_address'] = emailAddress
+    params['image_url_96'] = params['image_url'].replace('.jpg', '-96x96.jpg')
 
     # Add settings url
-    settingsUrl = 'http://www.stamped.com/settings/alerts?token=%s' % settingsToken
-    params['settings_url'] = settingsUrl
+    params['settings_url'] = 'http://www.stamped.com/settings/alerts?token=%s' % settingsToken
 
-    html = parseTemplate(template, params)
+    try:
+        html = parseTemplate(template, params)
+    except Exception as e:
+        logs.warning("Could not parse template: %s" % e)
+        raise
 
     return html
-
 
 def parseTemplate(src, params):
     try:
@@ -481,174 +489,167 @@ def parseTemplate(src, params):
     return template.render(params)
 
 
-def buildEmail(user, recipient, activityItem, settingsToken):
+def buildEmail(activityId, subject, body):
     email = {}
-    email['to'] = recipient.email
     email['from'] = 'Stamped <noreply@stamped.com>'
-    email['subject'] = _setSubject(user, activityItem.genre)
-    email['body'] = _setBody(user, activityItem, recipient.email, settingsToken)
-    email['activity_id'] = activityItem.activity_id
+    email['subject'] = subject
+    email['body'] = body
+    email['activity_id'] = activityId
 
     return email
 
 
-def buildPushNotification(user, activityItem, deviceId, sendMessage=True):
-    genre = activityItem.genre
-    
-    # Set message
-    if sendMessage:
-        if genre == 'restamp':
-            msg = '%s gave you credit' % (user.screen_name)
+def _pushNotificationMessage(verb, user):
+    if verb == 'credit':
+        msg = '%s gave you credit' % (user.screen_name)
 
-        elif genre == 'like':
-            #msg = u'%s \ue057 your stamp' % (user.screen_name)
-            msg = '%s liked your stamp' % (user.screen_name)
+    elif verb == 'like':
+        #msg = u'%s \ue057 your stamp' % (user.screen_name)
+        msg = '%s liked your stamp' % (user.screen_name)
 
-        elif genre == 'todo':
-            msg = '%s added your stamp as a to-do' % (user.screen_name)
+    elif verb == 'todo':
+        msg = '%s added your stamp as a to-do' % (user.screen_name)
 
-        elif genre == 'mention':
-            msg = "%s mentioned you" % (user.screen_name)
+    elif verb == 'mention':
+        msg = "%s mentioned you" % (user.screen_name)
 
-        elif genre == 'comment':
-            msg = '%s commented on your stamp' % (user.screen_name)
+    elif verb == 'comment':
+        msg = '%s commented on your stamp' % (user.screen_name)
 
-        elif genre == 'reply':
-            msg = '%s replied' % (user.screen_name)
+    elif verb == 'reply':
+        msg = '%s replied' % (user.screen_name)
 
-        elif genre == 'follower':
-            msg = '%s is now following you' % (user.screen_name)
+    elif verb == 'follow':
+        msg = '%s is now following you' % (user.screen_name)
 
-        elif genre == 'friend':
+    elif verb.startswith('friend_'):
+        if verb == 'friend_twitter':
+            msg = 'Your Twitter friend %s joined Stamped' % (user.screen_name)
+        elif verb == 'friend_facebook':
+            msg = 'Your Facebook friend %s joined Stamped' % (user.screen_name)
+        else:
             msg = 'Your friend %s joined Stamped' % (user.screen_name)
 
-        if not IS_PROD:
-            msg = 'DEV: %s' % msg
+    else:
+        raise Exception("Unrecognized verb: %s" % verb)
 
-        msg = msg.encode('ascii', 'ignore')
-    
-    """
-    # Build payload
-    content = {
-        'aps': {
-            'alert': msg,
-            # 'sound': 'default',
-        }
-    }
-    
-    # if user.stats.num_unread_news:
-    #     content['aps']['badge'] = user.stats.num_unread_news
-    
-    s_content = json.dumps(content, separators=(',',':'))
-    
-    # Format actual notification
-    fmt = "!cH32sH%ds" % len(s_content)
-    command = '\x00'
-    
-    payload = struct.pack(fmt, command, 32, binascii.unhexlify(deviceId), \
-                          len(s_content), s_content)
-    """
+    if not IS_PROD:
+        msg = 'DEV: %s' % msg
 
-    # get the number of unread news items for badge count
-    numUnread = api.getUnreadActivityCount(user.user_id)
+    msg = msg.encode('ascii', 'ignore')
+
+    return msg
+
+def buildPushNotification(activityId, msg=None, numUnread=0):
+    # Convert the number of unread news items for badge count
+    badge = -1
+    if numUnread > 0:
+        badge = numUnread
 
     result = {
-        #'payload': payload, 
-        'activity_id': activityItem.activity_id,
-        'device_id': deviceId,
-        'badge': numUnread,
+        'activity_id'   : activityId,
+        'badge'         : badge,
     }
-    if sendMessage:
+
+    if msg is not None:
         result['message'] = msg
     
     return result
 
 
 def sendEmails(queue, options):
-    ses = boto.connect_ses(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-    
     # Apply rate limit
     limit = 8
+
+    ses = boto.connect_ses(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     
-    for user, emailQueue in queue.iteritems():
-        if IS_PROD or user in admin_emails:
+    for emailAddress, emailQueue in queue.iteritems():
+        if IS_PROD or emailAddress in admin_emails:
             count = 0
             emailQueue.reverse()
-            for msg in emailQueue:
+            for item in emailQueue:
+                count += 1
+                if count > limit:
+                    logs.debug("Limit exceeded for email '%s'" % emailAddress)
+                    break
+
                 try:
-                    count += 1
-                    if count > limit:
-                        print 'LIMIT EXCEEDED (%s)' % count
-                        raise
-                    
-                    if options.noop:
-                        print 'EMAIL (activity_id=%s): "To: %s Subject: %s"' % \
-                            (msg['activity_id'], msg['to'], msg['subject'])
-                        continue
-                    
-                    ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format='html')
+                    logs.debug("Email activity_id '%s' to address '%s'" % (item['activity_id'], emailAddress))
+                    if not options.noop:
+                        ses.send_email(item['from'], item['subject'], item['body'], emailAddress, format='html')
+
                 except Exception as e:
-                    try:
-                        print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
-                            (msg['activity_id'], msg['to'], msg['subject'])
-                    except:
-                        print 'EMAIL FAILED (activity_id=%s)' % msg['activity_id']
-                    print e
-        else:
-            print 'SKIPPED: %s' % user
+                    logs.warning("Email failed for activity_id '%s' to address '%s'" % \
+                        (item['activity_id'], emailAddress))
+                    logs.warning(utils.getFormattedException())
+
+    logs.info("Success!")
 
 
-def sendPushNotifications(queue, options):
+def sendPushNotifications(queue, unreadQueue, options):
     # Apply rate limit
     limit = 3
+
+    apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
     
-    for user, pushQueue in queue.iteritems():
-        if IS_PROD or user in admin_tokens:
-            apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
+    for deviceId, pushQueue in queue.iteritems():
+        if IS_PROD or deviceId in admin_tokens:
             count = 0
             
             pushQueue.reverse()
-            for notification in pushQueue:
+            for item in pushQueue:
                 count += 1
                 if count > limit:
-                    print 'LIMIT EXCEEDED (%s)' % count
-                
-                if options.noop:
-                    print 'PUSH MSG (activity_id=%s): device_id = %s ' % \
-                        (notification['activity_id'], notification['device_id'])
-                    
-                    utils.log(notification['message'])
-                    #utils.log(type(msg['payload']))
-                    continue
+                    logs.debug("Limit exceeded for device '%s'" % deviceId)
+                    break
                 
                 try:
-                    # create APNS notification
-                    apsnNotification = APNSNotification()
+                    # Build APNS notification
+                    logs.debug("Push activity_id '%s' to device '%s'" % (item['activity_id'], deviceId))
+
+                    apnsNotification = APNSNotification()
+                    apnsNotification.token(binascii.unhexlify(deviceId))
+
+                    if 'message' in item:
+                        msg = item['message'].encode('ascii', 'ignore')
+                        apnsNotification.alert(msg)
                     
-                    #deviceId = 'f02e7b4c384e32404645443203dd0b71750e54fe13b5d0a8a434a12a0f5e7a25' # bart
-                    #deviceId = '8b78c702f8c8d5e02c925146d07c28f615283bc862b226343f013b5f8765ba5a' # travis
-                    deviceId = str(notification['device_id'])
+                    if 'badge' in item:
+                        apnsNotification.badge(item['badge'])
 
-                    apsnNotification.token(binascii.unhexlify(deviceId))
-                    if 'message' in notification:
-                        msg = notification['message'].encode('ascii', 'ignore')
-                        apsnNotification.alert(msg)
-                    if 'badge' in notification:
-                        apsnNotification.badge(notification['badge'])
-                    #apsnNotification.badge(queue.count())
+                    # Add notification to wrapper
+                    apns_wrapper.append(apnsNotification)
 
-                    # add notification to tuple and send it to APNS server
-                    apns_wrapper.append(apsnNotification)
-                except:
-                    print 'PUSH MSG FAILED (activity_id=%s): device_id = %s ' % \
-                        (notification['activity_id'], notification['device_id'])
-                    utils.printException()
-            
-            apns_wrapper.notify()
-    
-    return
+                except Exception as e:
+                    logs.warning("Push failed for activity_id '%s' to device_id '%s'" % (item['activity_id'], deviceId))
+                    logs.warning(utils.getFormattedException())
+
+    for deviceId, numUnread in unreadQueue.iteritems():
+        if IS_PROD or deviceId in admin_tokens:
+            if deviceId not in queue:
+                try:
+                    # Build APNS notification
+                    logs.debug("Push unread count to device '%s'" % (deviceId))
+
+                    apnsNotification = APNSNotification()
+                    apnsNotification.token(binascii.unhexlify(deviceId))
+                    apnsNotification.badge(numUnread)
+
+                    # Add notification to wrapper
+                    apns_wrapper.append(apnsNotification)
+
+                except Exception as e:
+                    logs.warning("Push failed for unread count to device_id '%s'" % deviceId)
+                    logs.warning(utils.getFormattedException())
+
+    logs.info("Submitting %s push notifications" % apns_wrapper.count())
+    if not options.noop:
+        apns_wrapper.notify()
+    logs.info("Success!")
 
 def removeAPNSTokens():
+    raise NotImplementedError 
+
     # Only run this on prod
     if not IS_PROD or not USE_PROD_CERT:
         print "NOT PROD!"

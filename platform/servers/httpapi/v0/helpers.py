@@ -402,8 +402,8 @@ def parseRequest(schema, request, **kwargs):
             data[k] = v
 
         if not kwargs.get('allow_oauth_token', False):
-            data.pop('oauth_token',   None)
-        data.pop('client_id',     None)
+            data.pop('oauth_token', None)
+        data.pop('client_id', None)
         data.pop('client_secret', None)
         
         logData = data.copy()
