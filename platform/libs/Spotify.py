@@ -38,10 +38,10 @@ class Spotify(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
-    @countedFn('Rdio (before caching)')
+    @countedFn('Spotify (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
-    @countedFn('Rdio (after caching)')
+    @countedFn('Spotify (after caching)')
     def method(self, service, method, **params):
         with self.__limiter:
             try:
