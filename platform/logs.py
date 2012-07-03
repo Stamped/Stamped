@@ -51,14 +51,14 @@ class LoggingContext(object):
         self.__log['finish'] = datetime.datetime.utcnow()
 
         try:
-            localData.saveStat(localData.log)
+            localData.saveStat(self.__log)
         except:
             pass
 
         try:
-            localData.saveLog(localData.log)
+            localData.saveLog(self.__log)
         except Exception as e:
-            pprint.pprint(localData.log)
+            pprint.pprint(self.__log)
             pass
 
     @classmethod
