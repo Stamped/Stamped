@@ -1975,10 +1975,10 @@ class HTTPEntityNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('title',                            basestring, required=True)
-        cls.addProperty('subtitle',                         basestring, required=True)
         cls.addProperty('category',                         basestring, required=True)
         cls.addProperty('subcategory',                      basestring, required=True)
-        cls.addProperty('desc',                             basestring)
+        cls.addProperty('subtitle',                         basestring, cast=validateString)
+        cls.addProperty('desc',                             basestring, cast=validateString)
         cls.addProperty('address',                          basestring)
         cls.addProperty('coordinates',                      basestring)
         cls.addProperty('cast',                             basestring)
@@ -1998,7 +1998,7 @@ class HTTPEntityNew(Schema):
         entity.title            = self.title
 
         def addField(entity, field, value, timestamp):
-            if value is not None:
+            if value is not None and value != '':
                 try:
                     setattr(entity, field, value)
                     setattr(entity, '%s_source' % field, 'seed')
@@ -2007,7 +2007,7 @@ class HTTPEntityNew(Schema):
                     pass
 
         def addListField(entity, field, value, entityMini=None, timestamp=None):
-            if value is not None:
+            if value is not None and value != '':
                 try:
                     if entityMini is not None:
                         item = entityMini()
@@ -2030,9 +2030,10 @@ class HTTPEntityNew(Schema):
             coords = Coordinates().dataImport(_coordinatesFlatToDict(self.coordinates))
             addField(entity, 'coordinates', coords, now)
 
-        entity.sources.user_generated_id            = authUserId
-        entity.sources.user_generated_subtitle      = self.subtitle
-        entity.sources.user_generated_timestamp     = now
+        entity.sources.user_generated_id = authUserId
+        entity.sources.user_generated_timestamp = now
+        if self.subtitle is not None and self.subtitle != '':
+            entity.sources.user_generated_subtitle = self.subtitle
 
         addListField(entity, 'directors', self.director, PersonEntityMini, now)
         addListField(entity, 'cast', self.cast, PersonEntityMini, now)

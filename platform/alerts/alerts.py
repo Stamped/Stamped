@@ -27,13 +27,14 @@ from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackW
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-dev.pem')
-IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
+print 'WARNING: RUNNING PUSH NOTIFICATION CERTS FOR DEV APP'
+IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-ether.pem')
+IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether.pem')
 
 IS_PROD       = libs.ec2_utils.is_prod_stack()
 USE_PROD_CERT = True
 
-admins = set(['kevin','robby','bart','travis','ml','landon','anthony', 'lizwalton'])
+admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton'])
 admin_emails = set([
     'kevin@stamped.com',
     'robby@stamped.com',
@@ -125,8 +126,8 @@ def runAlerts(options):
         return
     
     for alert in alerts:
-        userIds[str(alert['user_id'])] = 1
-        userIds[str(alert['recipient_id'])] = 1
+        userIds[str(alert.user_id)] = 1
+        userIds[str(alert.recipient_id)] = 1
     
     accounts = accountDB.getAccounts(userIds.keys())
     
@@ -141,37 +142,39 @@ def runAlerts(options):
     for alert in alerts:
         try:
             print alert
-            if userIds[str(alert['recipient_id'])] == 1 \
-                or userIds[str(alert['user_id'])] == 1:
+            if userIds[str(alert.recipient_id)] == 1 \
+                or userIds[str(alert.user_id)] == 1:
                 raise
 
             # Check recipient settings
-            recipient = userIds[str(alert['recipient_id'])]
+            recipient = userIds[str(alert.recipient_id)]
+
+            settings = recipient.alert_settings
 
             if alert.genre == 'restamp':
-                send_push   = recipient.alerts.ios_alert_credit
-                send_email  = recipient.alerts.email_alert_credit
+                send_push   = settings.alerts_credits_apns
+                send_email  = settings.alerts_credits_email
             elif alert.genre == 'like':
-                send_push   = recipient.alerts.ios_alert_like
-                send_email  = recipient.alerts.email_alert_like
+                send_push   = settings.alerts_likes_apns
+                send_email  = settings.alerts_likes_email
             elif alert.genre == 'todo':
-                send_push   = recipient.alerts.ios_alert_todo
-                send_email  = recipient.alerts.email_alert_todo
+                send_push   = settings.alerts_todos_apns
+                send_email  = settings.alerts_todos_email
             elif alert.genre == 'mention':
-                send_push   = recipient.alerts.ios_alert_mention
-                send_email  = recipient.alerts.email_alert_mention
+                send_push   = settings.alerts_mentions_apns
+                send_email  = settings.alerts_mentions_email
             elif alert.genre == 'comment':
-                send_push   = recipient.alerts.ios_alert_comment
-                send_email  = recipient.alerts.email_alert_comment
+                send_push   = settings.alerts_comments_apns
+                send_email  = settings.alerts_comments_email
             elif alert.genre == 'reply':
-                send_push   = recipient.alerts.ios_alert_reply
-                send_email  = recipient.alerts.email_alert_reply
+                send_push   = settings.alerts_replies_apns
+                send_email  = settings.alerts_replies_email
             elif alert.genre == 'follower':
-                send_push   = recipient.alerts.ios_alert_follow
-                send_email  = recipient.alerts.email_alert_follow
+                send_push   = settings.alerts_followers_apns
+                send_email  = settings.alerts_followers_email
             elif alert.genre == 'friend':
-                send_push   = recipient.alerts.ios_alert_follow
-                send_email  = recipient.alerts.io_email_follow
+                send_push   = None ## TODO: Add
+                send_email  = None ## TODO: Add
             else:
                 send_push   = None
                 send_email  = None
@@ -184,7 +187,7 @@ def runAlerts(options):
             activity = activityDB.getActivityItem(alert.activity_id)
             
             # User
-            user = userIds[str(alert['user_id'])]
+            user = userIds[str(alert.user_id)]
             
             # Build admin list
             if recipient.screen_name in admins:
@@ -211,25 +214,25 @@ def runAlerts(options):
                     print 'PUSH COMPLETE'
                 except:
                     print 'PUSH FAILED'
-            else:
-                try:
-                    # Send push notification with badge only
-                    print 'PUSH WITH NO MSG'
+            # else:
+            #     try:
+            #         # Send push notification with badge only
+            #         print 'PUSH WITH NO MSG'
 
-                    if not recipient.devices.ios_device_tokens:
-                        raise
-                    print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
+            #         if not recipient.devices.ios_device_tokens:
+            #             raise
+            #         print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
 
-                    # Build push notification
-                    for token in recipient.devices.ios_device_tokens:
-                        result = buildPushNotification(user, activity, token.dataExport())
-                        if token not in userPushQueue:
-                            userPushQueue[token] = []
-                        userPushQueue[token].append(result)
+            #         # Build push notification
+            #         for token in recipient.devices.ios_device_tokens:
+            #             result = buildPushNotification(user, activity, token.dataExport())
+            #             if token not in userPushQueue:
+            #                 userPushQueue[token] = []
+            #             userPushQueue[token].append(result)
 
-                    print 'PUSH COMPLETE'
-                except:
-                    print 'PUSH FAILED'
+            #         print 'PUSH COMPLETE'
+            #     except:
+            #         print 'PUSH FAILED'
             
             if send_email:
                 try:
@@ -306,7 +309,7 @@ def runInvites(options):
     userEmailQueue = {}
     
     for invite in invites:
-        userIds[str(invite['user_id'])] = 1
+        userIds[str(invite.user_id)] = 1
     
     accounts = accountDB.getAccounts(userIds.keys())
     
@@ -321,13 +324,13 @@ def runInvites(options):
             print
 
             print invite
-            if userIds[str(invite['user_id'])] == 1:
+            if userIds[str(invite.user_id)] == 1:
                 raise
 
             ### TODO: Check if recipient is already a member?
             ### TODO: Check if user is on email blacklist
 
-            user = userIds[str(invite['user_id'])]
+            user = userIds[str(invite.user_id)]
             emailAddress = invite.recipient_email
 
             try:
@@ -353,7 +356,7 @@ def runInvites(options):
                 email = {}
                 email['to'] = emailAddress
                 email['from'] = 'Stamped <noreply@stamped.com>'
-                email['subject'] = u'%s thinks you have great taste' % user['name']
+                email['subject'] = u'%s thinks you have great taste' % user.name
                 email['invite_id'] = invite.invite_id
 
                 if not IS_PROD:
@@ -405,25 +408,25 @@ def runInvites(options):
 def _setSubject(user, genre):
 
     if genre == 'restamp':
-        msg = u'%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) gave you credit for a stamp' % (user.name, user.screen_name)
 
     elif genre == 'like':
-        msg = u'%s (@%s) liked your stamp' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) liked your stamp' % (user.name, user.screen_name)
 
     elif genre == 'todo':
-        msg = u'%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) added your stamp as a to-do' % (user.name, user.screen_name)
 
     elif genre == 'mention':
-        msg = u'%s (@%s) mentioned you on Stamped' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) mentioned you on Stamped' % (user.name, user.screen_name)
 
     elif genre == 'comment':
-        msg = u'%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) commented on your stamp' % (user.name, user.screen_name)
 
     elif genre == 'reply':
-        msg = u'%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) replied to you on Stamped' % (user.name, user.screen_name)
 
     elif genre == 'follower':
-        msg = u'%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
+        msg = u'%s (@%s) is now following you on Stamped' % (user.name, user.screen_name)
     else:
         ### TODO: Add error logging?
         raise
@@ -443,8 +446,8 @@ def _setBody(user, activity, emailAddress, settingsToken):
         raise
 
     params = HTTPUser().dataImport(user.dataExport()).dataExport()
-    params['title'] = activity['subject']
-    params['blurb'] = activity['blurb']
+    params['title'] = activity.subject
+    params['blurb'] = activity.blurb
 
     # HTML Encode the bio?
     if 'bio' not in params:
