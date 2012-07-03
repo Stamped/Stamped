@@ -58,9 +58,17 @@ logs.info("INIT: %s sec" % duration)
 if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
+#defaultExceptions = [
+#    (StampedAuthError, StampedHTTPError(401, kind='blah blah', msg='blah blah')),
+#]
+#
+
 def handleStampedExceptions(e, handlers=None):
+
+#    exceptions = handlers + defaultExceptions
+
+    logs.info('### handleStampedExceptions: %s' % handlers)
     if handlers is not None:
-        logs.info('### e.__class__: %s' % e.__class__)
         if e.__class__.__name__ in handlers:
             exception = handlers[e.__class__.__name__]
             logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
@@ -80,7 +88,6 @@ def handleStampedExceptions(e, handlers=None):
             if message is not None:
                 error['message'] = unicode(message)
 
-            logs.info('### about to return error message')
             return transformOutput(error, status=exception.code)
 
     if isinstance(e, StampedHTTPError):
@@ -153,11 +160,32 @@ def handleStampedExceptions(e, handlers=None):
             error['message'] = unicode(e.msg)
         return transformOutput(error, status=404)
 
-    logs.warning("500 Error: %s" % e)
-    logs.warning(utils.getFormattedException())
-    logs.error(500)
+    logs.info('### exception: %s' % e)
+    logs.info('%s %s' % (handlers is not None, handlers))
+    if handlers is not None and "InternalError" in handlers:
+        exception = handlers['InternalError']
+        logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
+        logs.warning(utils.getFormattedException())
+        logs.error(exception.code)
 
-    error = {'error': 'internal_server_error'}
+        kind = exception.kind
+        if kind is None:
+            kind = 'internal'
+
+        message = exception.msg
+        if message is None and e.msg is not None:
+            message = "An error occurred.  Please try again later."
+
+        error = {
+            'error' : kind,
+            'message' : unicode(message),
+        }
+    else:
+        logs.warning("500 Error: %s" % e)
+        logs.warning(utils.getFormattedException())
+        logs.error(500)
+
+        error = {'error': 'internal_server_error'}
     return transformOutput(error, status=500)
 
 
@@ -208,7 +236,8 @@ def handleHTTPRequest(requires_auth=True,
                              to require a valid client_id and client_secret, it must 
                              set requires_client to True.
     """
-
+    logs.info('### http_schema %s' % http_schema)
+    logs.info('### exceptions: %s' % exceptions)
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -281,6 +310,7 @@ def handleHTTPRequest(requires_auth=True,
                 return ret
 
             except Exception as e:
+                logs.info('### calling handleStampedExceptions: %s' % exceptions)
                 return handleStampedExceptions(e, exceptions)
             finally:
                 try:

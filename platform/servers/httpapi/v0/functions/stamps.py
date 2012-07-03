@@ -44,7 +44,7 @@ def transformStamps(stamps):
 def create(request, authUserId, data, **kwargs):
     entityRequest = {
         'entity_id' : data.pop('entity_id', None),
-        'search_id' : data.pop('search_id', None)
+        'search_id' : data.pop('search_id', None),
     }
     
     if 'credits' in data and data['credits'] is not None:

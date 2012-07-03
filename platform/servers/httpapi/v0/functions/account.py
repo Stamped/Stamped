@@ -24,12 +24,27 @@ exceptions = {
     'StampedInvalidStampColorsError'    : StampedHTTPError(403, kind='invalid_credentials', msg="Invalid stamp colors"),
     'StampedDuplicateEmailError'        : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address"),
     'StampedDuplicateScreenNameError'   : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name"),
-    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
-    'StampedAlreadyStampedAuthError'    : StampedHTTPError(400, kind='bad_request', msg='This account is already a Stamped account'),
-    #'InternalEerror'                    : StampedHTTPError()
-}
+    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information'),
+    'StampedAlreadyStampedAuthError'    : StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account'),
+    'InternalError'                     : StampedHTTPError(400, kind='internal',            msg='There was a problem creating the account.  Please try again later.'),
+    }
+
+#exceptions = [
+#    ('StampedInvalidEmailError',          StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),
+#    'StampedInvalidScreenNameError'     : StampedHTTPError(400, kind='invalid_credentials', msg="Invalid screen name"),
+#    'StampedBlackListedScreenNameError' : StampedHTTPError(403, kind='forbidden',           msg='Invalid screen name'),
+#    'StampedInvalidPasswordError'       : StampedHTTPError(403, kind='invalid_credentials', msg='Incorrect password'),
+#    'StampedInvalidWebsiteError'        : StampedHTTPError(403, kind='invalid_credentials', msg="Could not update account website"),
+#    'StampedInvalidStampColorsError'    : StampedHTTPError(403, kind='invalid_credentials', msg="Invalid stamp colors"),
+#    'StampedDuplicateEmailError'        : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address"),
+#    'StampedDuplicateScreenNameError'   : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name"),
+#    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information'),
+#    'StampedAlreadyStampedAuthError'    : StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account'),
+#    'InternalError'                     : StampedHTTPError(400, kind='internal',            msg='There was a problem creating the account.  Please try again later.'),
+#    ]
 
 
+exceptions_create = { 'InternalError'    : StampedHTTPError(400, kind='internal', msg='There was a problem creating the account.  Please try again later.'), }
 @handleHTTPRequest(requires_auth=False, 
                    requires_client=True, 
                    http_schema=HTTPAccountNew, 
@@ -49,6 +64,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
     
     return transformOutput(output)
 
+exceptions_create = { 'InternalError'    : StampedHTTPError(400, kind='internal', msg='There was a problem upgrading the account.  Please try again later.'), }
 # upgrade account from third party auth to stamped auth
 @handleHTTPRequest(requires_client=True,
                    http_schema=HTTPAccountUpgradeForm,
