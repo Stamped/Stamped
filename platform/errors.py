@@ -129,7 +129,7 @@ class StampedInternalError(Exception):
 
 class StampedMissingParametersError(StampedInputError):
     def __init__(self, msg=None):
-        StampedIllegalActionError.__init__(self, msg)
+        StampedInputError.__init__(self, msg)
 
 class StampedNotLoggedInError(StampedPermissionsError):
     def __init__(self, msg=None):

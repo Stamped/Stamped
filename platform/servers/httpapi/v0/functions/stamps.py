@@ -14,11 +14,11 @@ exceptions = {
     'StampedOutOfStampsError'           : StampedHTTPError(403, kind='forbidden', msg='No more stamps remaining'),
     'StampedNotLoggedInError'           : StampedHTTPError(401, kind='bad_request', msg='You must be logged in to perform this action.'),
     'StampedRemovePermissionsError'     : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to remove stamp'),
-    'StampedViewPermissionsError'       : StampedHTTPError(403, kind="forbidden", "Insufficient privileges to view stamp"),
-    'StampedAddCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", "Insufficient privileges to add comment"),
-    'StampedRemoveCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", "Insufficient privileges to remove comment"),
-    'StampedViewCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", "Insufficient privileges to view comment"),
-    'StampedUserBlockedError'           : StampedHTTPError(403, kind='forbidden', "User is blocked"),
+    'StampedViewPermissionsError'       : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view stamp"),
+    'StampedAddCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to add comment"),
+    'StampedRemoveCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to remove comment"),
+    'StampedViewCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view comment"),
+    'StampedUserBlockedError'           : StampedHTTPError(403, kind='forbidden', msg="User is blocked"),
 }
 
 def transformStamps(stamps):
