@@ -8,18 +8,18 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-exceptions = {
-    'StampedDocumentNotFoundError'      : StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data."),
-    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
-    'StampedOutOfStampsError'           : StampedHTTPError(403, kind='forbidden', msg='No more stamps remaining'),
-    'StampedNotLoggedInError'           : StampedHTTPError(401, kind='bad_request', msg='You must be logged in to perform this action.'),
-    'StampedRemovePermissionsError'     : StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to remove stamp'),
-    'StampedViewPermissionsError'       : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view stamp"),
-    'StampedAddCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to add comment"),
-    'StampedRemoveCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to remove comment"),
-    'StampedViewCommentPermissionsError' : StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view comment"),
-    'StampedUserBlockedError'           : StampedHTTPError(403, kind='forbidden', msg="User is blocked"),
-}
+exceptions = [
+    (StampedDocumentNotFoundError, StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data.")),
+    (StampedAccountNotFoundError, StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information')),
+    (StampedOutOfStampsError, StampedHTTPError(403, kind='forbidden', msg='No more stamps remaining')),
+    (StampedNotLoggedInError, StampedHTTPError(401, kind='bad_request', msg='You must be logged in to perform this action.')),
+    (StampedRemoveStampPermissionsError, StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to remove stamp')),
+    (StampedViewStampPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view stamp")),
+    (StampedAddCommentPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to add comment")),
+    (StampedRemoveCommentPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to remove comment")),
+    (StampedViewCommentPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view comment")),
+    (StampedBlockedUserError, StampedHTTPError(403, kind='forbidden', msg="User is blocked")),
+]
 
 def transformStamps(stamps):
     """
@@ -55,11 +55,9 @@ def create(request, authUserId, data, **kwargs):
     
     return transformOutput(stamp.dataExport())
 
-exceptions_share = {
-    'StampedMissingParametersError'       : StampedHTTPError(400, kind='bad_request', msg='Missing third party service name'),
-}
+exceptions_share = [ (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request', msg='Missing third party service name')) ]
 @handleHTTPRequest(http_schema=HTTPStampShare,
-                   exceptions=exceptions.update(exceptions_share))
+                   exceptions=exceptions + exceptions_share)
 @require_http_methods(["POST"])
 def share(request, authUserId, http_schema, data, **kwargs):
     if http_schema.service_name is None:
@@ -88,12 +86,10 @@ def remove(request, authUserId, http_schema, **kwargs):
     
     return transformOutput(stamp.dataExport())
 
-exceptions_show = {
-    'StampedPermissionsError' : StampedHTTPError(403, "forbidden", "Insufficient privileges to view stamp")
-}
+exceptions_show = [ (StampedPermissionsError, StampedHTTPError(403, "forbidden", "Insufficient privileges to view stamp")) ]
 @handleHTTPRequest(requires_auth=False,
                   http_schema=HTTPStampRef,
-                  exceptions=exceptions.update(exceptions_show))
+                  exceptions=exceptions + exceptions_show)
 @require_http_methods(["GET"])
 def show(request, authUserId, http_schema, **kwargs):
     if http_schema.stamp_id is not None:

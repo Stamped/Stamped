@@ -23,6 +23,7 @@ from bson.objectid          import ObjectId
 def parsePhoneNumber(phoneStr):
     if phoneStr is not None:
         return re.sub("[^0-9]", "", str(phoneStr))
+    return None
 
 _color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
 def validateHexColor(color):
@@ -56,8 +57,7 @@ def validateURL(url):
     try:
         val(url)
     except ValidationError, e:
-        logs.warning("Invalid URL" % url)
-        raise StampedHTTPError(400, msg="Invalid URL")
+        raise StampedInvalidWebsiteError("Invalid URL: %s" % url)
     return url
 
 def validateObjectId(string):

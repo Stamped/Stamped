@@ -463,6 +463,16 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
             lambda x: self.assertEqual(len(x), 1),
             ])
 
+class StampedAPIFacebookFind(StampedAPIFacebookTest):
+    def test_invite_facebook_collection(self):
+        path = "v0/users/invite/facebook/collection.json"
+        data = {
+            "oauth_token"   : self.fUserAToken['access_token'],
+            }
+        result = self.handlePOST(path, data)
+        from pprint import pprint
+        pprint(result)
+
 
 class StampedAPITwitterHttpTest(AStampedAPIHttpTestCase):
 

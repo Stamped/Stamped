@@ -428,7 +428,7 @@ class HTTPAccount(Schema):
         cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
-        cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
+        cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
@@ -515,9 +515,8 @@ class HTTPTwitterAccountNew(Schema):
 
     def convertToTwitterAccountNew(self):
         data = self.dataExport()
-        phone = _phoneToInt(data.pop('phone', None))
-        if phone is not None:
-            data['phone'] = phone
+        if 'phone' in data:
+            data['phone'] = _phoneToInt(data['phone'])
 
         return TwitterAccountNew().dataImport(data, overflow=True)
 
@@ -538,9 +537,8 @@ class HTTPAccountUpdateForm(Schema):
 
     def convertToAccountUpdateForm(self):
         data = self.dataExport()
-        phone = _phoneToInt(data.pop('phone', None))
-        if phone is not None:
-            data['phone'] = phone
+        if 'phone' in data:
+            data['phone'] = _phoneToInt(data['phone'])
 
         return AccountUpdateForm().dataImport(data, overflow=True)
 
@@ -731,6 +729,12 @@ class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_token',                       basestring)
+
+class HTTPFacebookFriendsCollectionForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod

@@ -14,43 +14,45 @@ from HTTPSchemas        import *
 from Netflix            import *
 from Facebook           import *
 
-
-exceptions = {
-    'StampedInvalidEmailError'          : StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address"),
-    'StampedInvalidScreenNameError'     : StampedHTTPError(400, kind='invalid_credentials', msg="Invalid screen name"),
-    'StampedBlackListedScreenNameError' : StampedHTTPError(403, kind='forbidden',           msg='Invalid screen name'),
-    'StampedInvalidPasswordError'       : StampedHTTPError(403, kind='invalid_credentials', msg='Incorrect password'),
-    'StampedInvalidWebsiteError'        : StampedHTTPError(403, kind='invalid_credentials', msg="Could not update account website"),
-    'StampedInvalidStampColorsError'    : StampedHTTPError(403, kind='invalid_credentials', msg="Invalid stamp colors"),
-    'StampedDuplicateEmailError'        : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address"),
-    'StampedDuplicateScreenNameError'   : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name"),
-    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information'),
-    'StampedAlreadyStampedAuthError'    : StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account'),
-    'InternalError'                     : StampedHTTPError(400, kind='internal',            msg='There was a problem creating the account.  Please try again later.'),
-    }
-
-#exceptions = [
-#    ('StampedInvalidEmailError',          StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),
-#    'StampedInvalidScreenNameError'     : StampedHTTPError(400, kind='invalid_credentials', msg="Invalid screen name"),
-#    'StampedBlackListedScreenNameError' : StampedHTTPError(403, kind='forbidden',           msg='Invalid screen name'),
-#    'StampedInvalidPasswordError'       : StampedHTTPError(403, kind='invalid_credentials', msg='Incorrect password'),
-#    'StampedInvalidWebsiteError'        : StampedHTTPError(403, kind='invalid_credentials', msg="Could not update account website"),
-#    'StampedInvalidStampColorsError'    : StampedHTTPError(403, kind='invalid_credentials', msg="Invalid stamp colors"),
-#    'StampedDuplicateEmailError'        : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address"),
-#    'StampedDuplicateScreenNameError'   : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name"),
-#    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information'),
-#    'StampedAlreadyStampedAuthError'    : StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account'),
-#    'InternalError'                     : StampedHTTPError(400, kind='internal',            msg='There was a problem creating the account.  Please try again later.'),
-#    ]
+#@handleHTTPRequest(requires_auth=False,
+#                   requires_client=True,
+#                   http_schema=HTTPAccountNew,
+#                   conversion=HTTPAccountNew.convertToAccount,
+#                   upload='profile_image',
+#                   parse_request_kwargs={'obfuscate':['password']})
+#@require_http_methods(["POST"])
+#def create(request, client_id, http_schema, schema, **kwargs):
+#    account = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
+#
+#    user   = HTTPUser().importAccount(account)
+#    logs.user(user.user_id)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
 
 
-exceptions_create = { 'InternalError'    : StampedHTTPError(400, kind='internal', msg='There was a problem creating the account.  Please try again later.'), }
-@handleHTTPRequest(requires_auth=False, 
-                   requires_client=True, 
-                   http_schema=HTTPAccountNew, 
+exceptions = [
+    (StampedInvalidEmailError,         StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),
+    (StampedInvalidScreenNameError,    StampedHTTPError(400, kind='invalid_credentials', msg="Invalid screen name")),
+    (StampedScreenNameInUseError,      StampedHTTPError(400, kind='invalid_credentials', msg="Screen name is already in use")),
+    (StampedBlackListedScreenNameError, StampedHTTPError(403, kind='forbidden',          msg='Invalid screen name')),
+    (StampedInvalidPasswordError,      StampedHTTPError(403, kind='invalid_credentials', msg='Incorrect password')),
+    (StampedInvalidWebsiteError,       StampedHTTPError(403, kind='invalid_credentials', msg="Could not update account website")),
+    (StampedInvalidStampColorsError,   StampedHTTPError(403, kind='invalid_credentials', msg="Invalid stamp colors")),
+    (StampedDuplicateEmailError,       StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address")),
+    (StampedDuplicateScreenNameError,  StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name")),
+    (StampedAccountNotFoundError,      StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information')),
+    (StampedAlreadyStampedAuthError,   StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account')),
+]
+exceptions_create = [(StampedInternalError,  StampedHTTPError(400, kind='internal', msg='There was a problem creating the account.  Please try again later.'))]
+@handleHTTPRequest(requires_auth=False,
+                   requires_client=True,
+                   http_schema=HTTPAccountNew,
                    conversion=HTTPAccountNew.convertToAccount,
                    upload='profile_image',
-                   parse_request_kwargs={'obfuscate':['password' ]},
+                   parse_request_kwargs={'obfuscate':['password']},
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def create(request, client_id, http_schema, schema, **kwargs):
@@ -58,18 +60,18 @@ def create(request, client_id, http_schema, schema, **kwargs):
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
-    
+
     token  = stampedAuth.addRefreshToken(client_id, user.user_id)
     output = { 'user': user.dataExport(), 'token': token }
-    
+
     return transformOutput(output)
 
-exceptions_create = { 'InternalError'    : StampedHTTPError(400, kind='internal', msg='There was a problem upgrading the account.  Please try again later.'), }
+exceptions_update = [(StampedInternalError, StampedHTTPError(400, kind='internal', msg='There was a problem upgrading the account.  Please try again later.'))]
 # upgrade account from third party auth to stamped auth
 @handleHTTPRequest(requires_client=True,
                    http_schema=HTTPAccountUpgradeForm,
                    parse_request_kwargs={'obfuscate':['password']},
-                   exceptions=exceptions)
+                   exceptions=exceptions + exceptions_update)
 @require_http_methods(["POST"])
 def upgrade(request, client_id, authUserId, http_schema, **kwargs):
     account = stampedAPI.upgradeAccount(authUserId, http_schema.email, http_schema.password)
@@ -82,16 +84,16 @@ def upgrade(request, client_id, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-exceptions_createWithFacebook = {
-    'StampedLinkedAccountExistsError' : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Facebook user"),
-    'StampedThirdPartyError'          : StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Facebook"),
-}
+exceptions_createWithFacebook = [
+    (StampedLinkedAccountAlreadyExistsError, StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Facebook user")),
+    (StampedThirdPartyError, StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Facebook")),
+]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPFacebookAccountNew,
                    conversion=HTTPFacebookAccountNew.convertToFacebookAccountNew,
                    parse_request_kwargs={'obfuscate':['user_token']},
-                   exceptions=exceptions.update(exceptions_createWithFacebook))
+                   exceptions=exceptions + exceptions_createWithFacebook)
 @require_http_methods(["POST"])
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
@@ -104,16 +106,16 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
 
     return transformOutput(output)
 
-exceptions_createWithTwitter = {
-    'StampedLinkedAccountExistsError' : StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Twitter user"),
-    'StampedThirdPartyError'          : StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Twitter"),
-}
+exceptions_createWithTwitter = [
+    (StampedLinkedAccountAlreadyExistsError, StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Twitter user")),
+    (StampedThirdPartyError, StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Twitter")),
+]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPTwitterAccountNew,
                    conversion=HTTPTwitterAccountNew.convertToTwitterAccountNew,
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret']},
-                   exceptions=exceptions.update(exceptions_createWithTwitter))
+                   exceptions=exceptions + exceptions_createWithTwitter)
 @require_http_methods(["POST"])
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
     account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
@@ -131,7 +133,7 @@ def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
 def remove(request, authUserId, **kwargs):
     account = stampedAPI.removeAccount(authUserId)
     account = HTTPAccount().importAccount(account)
-    
+
     return transformOutput(account.dataExport())
 
 
@@ -145,35 +147,37 @@ def show(request, authUserId, **kwargs):
     return transformOutput(account.dataExport())
 
 
+exceptions_update = [(StampedInternalError, StampedHTTPError(400, kind='internal', msg='There was a problem updating the account.  Please try again later.'))]
 @handleHTTPRequest(http_schema=HTTPAccountUpdateForm,
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm,
-                   exceptions=exceptions)
+                   exceptions=exceptions + exceptions_update)
 @require_http_methods(["POST"])
 def update(request, authUserId, http_schema, schema, **kwargs):
+    logs.info('### http_schema: %s    schema: %s' % (http_schema, schema))
     account = stampedAPI.updateAccount(authUserId, schema)
 
     user    = HTTPUser().importUser(account)
     return transformOutput(user.dataExport())
 
-#@handleHTTPRequest(parse_request=False)
-#@require_http_methods(["POST"])
-#def update(request, authUserId, **kwargs):x
-#    ### TODO: Carve out password changes, require original password sent again?
-#
-#    ### TEMP: Generate list of changes. Need to do something better eventually..
-#    schema = parseRequest(HTTPAccountSettings(), request)
-#    data   = schema.dataExport()
-#
-#    for k, v in data.iteritems():
-#        if v == '':
-#            data[k] = None
-#
-#    ### TODO: Verify email is valid
-#    account = stampedAPI.updateAccountSettings(authUserId, data)
-#
-#    account     = HTTPAccount().importAccount(account)
-#
-#    return transformOutput(account.dataExport())
+##@handleHTTPRequest(parse_request=False)
+##@require_http_methods(["POST"])
+##def update(request, authUserId, **kwargs):x
+##    ### TODO: Carve out password changes, require original password sent again?
+##
+##    ### TEMP: Generate list of changes. Need to do something better eventually..
+##    schema = parseRequest(HTTPAccountSettings(), request)
+##    data   = schema.dataExport()
+##
+##    for k, v in data.iteritems():
+##        if v == '':
+##            data[k] = None
+##
+##    ### TODO: Verify email is valid
+##    account = stampedAPI.updateAccountSettings(authUserId, data)
+##
+##    account     = HTTPAccount().importAccount(account)
+##
+##    return transformOutput(account.dataExport())
 
 
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp,
@@ -182,12 +186,12 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 def customizeStamp(request, authUserId, data, **kwargs):
     account = stampedAPI.customizeStamp(authUserId, data)
     user    = HTTPUser().importUser(account)
-    
+
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, 
-                   requires_client=True, 
+@handleHTTPRequest(requires_auth=False,
+                   requires_client=True,
                    http_schema=HTTPAccountCheck,
                    exceptions=exceptions)
 @require_http_methods(["POST"])
@@ -197,16 +201,16 @@ def check(request, client_id, http_schema, **kwargs):
 
     return transformOutput(user.dataExport())
 
-@handleHTTPRequest(http_schema=HTTPAccountChangePassword, 
+@handleHTTPRequest(http_schema=HTTPAccountChangePassword,
                    parse_request_kwargs={'obfuscate':['old_password', 'new_password']})
 @require_http_methods(["POST"])
 def changePassword(request, authUserId, http_schema, **kwargs):
     new = http_schema.new_password
     old = http_schema.old_password
-    
+
     stampedAuth.verifyPassword(authUserId, old)
     result = stampedAuth.updatePassword(authUserId, new)
-    
+
     return transformOutput(True)
 
 
@@ -284,7 +288,7 @@ def updateAlerts(request, authUserId, http_schema, **kwargs):
 def updateApns(request, authUserId, http_schema, **kwargs):
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
-    
+
     stampedAPI.updateAPNSToken(authUserId, http_schema.token)
     return transformOutput(True)
 
@@ -294,7 +298,7 @@ def updateApns(request, authUserId, http_schema, **kwargs):
 def removeApns(request, authUserId, http_schema, **kwargs):
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
-    
+
     stampedAPI.removeAPNSTokenForUser(authUserId, http_schema.token)
     return transformOutput(True)
 

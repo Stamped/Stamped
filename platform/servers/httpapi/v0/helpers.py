@@ -58,28 +58,37 @@ logs.info("INIT: %s sec" % duration)
 if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
-#defaultExceptions = [
-#    (StampedAuthError, StampedHTTPError(401, kind='blah blah', msg='blah blah')),
-#]
-#
+defaultExceptions = [
+    (StampedAuthError, StampedHTTPError(401, kind='invalid_credentials', msg='There was an error during authentication')),
+    (StampedInputError, StampedHTTPError(400, kind='bad_request', msg='An error occurred. Please try again later.')),
+    (StampedIllegalActionError, StampedHTTPError(403, kind='bad_request', msg='An error occurred. Please try again later.')),
+    (StampedPermissionsError, StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges')),
+    (StampedDuplicationError, StampedHTTPError(409, kind='already_exists', msg='An error occurred. Please try again later')),
+    (StampedUnavailableError, StampedHTTPError(404, kind='not_found', msg='Not found')),
+    (StampedInternalError, StampedHTTPError(500, kind='internal', msg='An error occurred.  Please try again later')),
+]
+
 
 def handleStampedExceptions(e, handlers=None):
+    if isinstance(e, StampedHTTPError):
+        exceptions =  [(StampedHTTPError, e)]
+    elif handlers is not None:
+        exceptions = handlers + defaultExceptions
+    else:
+        exceptions = defaultExceptions
 
-#    exceptions = handlers + defaultExceptions
 
-    logs.info('### handleStampedExceptions: %s' % handlers)
-    if handlers is not None:
-        if e.__class__.__name__ in handlers:
-            exception = handlers[e.__class__.__name__]
-            logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
+    for (exception, httpexception) in exceptions:
+        if isinstance(e, exception):
+            logs.warning("%s Error (%s): %s" % (httpexception.code, httpexception.kind, httpexception.msg))
             logs.warning(utils.getFormattedException())
-            logs.error(exception.code)
+            logs.error(httpexception.code)
 
-            kind = exception.kind
+            kind = httpexception.kind
             if kind is None:
                 kind = 'stamped_error'
 
-            message = exception.msg
+            message = httpexception.msg
             if message is None and e.msg is not None:
                 message = e.msg
 
@@ -88,106 +97,16 @@ def handleStampedExceptions(e, handlers=None):
             if message is not None:
                 error['message'] = unicode(message)
 
-            return transformOutput(error, status=exception.code)
-
-    if isinstance(e, StampedHTTPError):
-        if e.kind is None:
-            e.kind = 'stamped_error'
-
-        logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(e.code)
-
-        error = {'error': e.kind}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-
-        return transformOutput(error, status=e.code)
-
-    if isinstance(e, StampedAuthError):
-        logs.warning("401 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(401)
-
-        error = {'error': e.msg}
-        return transformOutput(error, status=401)
-
-    if isinstance(e, StampedInputError):
-        logs.warning("400 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(400)
-
-        error = {'error': 'invalid_request'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=400)
-
-    if isinstance(e, StampedIllegalActionError):
-        logs.warning("403 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(403)
-
-        error = {'error': 'illegal_action'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=403)
-
-    if isinstance(e, StampedPermissionsError):
-        logs.warning("403 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(403)
-
-        error = {'error': 'insufficient_privileges'}
-        return transformOutput(error, status=403)
-
-    if isinstance(e, StampedDuplicationError):
-        logs.warning("409 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(409)
-
-        error = {'error': 'already_exists'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=409)
-
-    if isinstance(e, StampedUnavailableError):
-        logs.warning("404 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(404)
-
-        error = {'error': 'not_found'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=404)
-
-    logs.info('### exception: %s' % e)
-    logs.info('%s %s' % (handlers is not None, handlers))
-    if handlers is not None and "InternalError" in handlers:
-        exception = handlers['InternalError']
-        logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(exception.code)
-
-        kind = exception.kind
-        if kind is None:
-            kind = 'internal'
-
-        message = exception.msg
-        if message is None and e.msg is not None:
-            message = "An error occurred.  Please try again later."
-
-        error = {
-            'error' : kind,
-            'message' : unicode(message),
-        }
+            return transformOutput(error, status=httpexception.code)
     else:
+        error = {
+            'error' :   'stamped_error',
+            'message' : e.message,
+        }
         logs.warning("500 Error: %s" % e)
         logs.warning(utils.getFormattedException())
         logs.error(500)
-
-        error = {'error': 'internal_server_error'}
-    return transformOutput(error, status=500)
-
+        return transformOutput(error, status=500)
 
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False,
@@ -236,8 +155,6 @@ def handleHTTPRequest(requires_auth=True,
                              to require a valid client_id and client_secret, it must 
                              set requires_client to True.
     """
-    logs.info('### http_schema %s' % http_schema)
-    logs.info('### exceptions: %s' % exceptions)
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -477,6 +394,8 @@ def parseRequest(schema, request, **kwargs):
 
         # Build the dict because django sucks
         for k, v in rawData.iteritems():
+            if v == '':
+                v = None
             data[k] = v
 
         if not kwargs.get('allow_oauth_token', False):

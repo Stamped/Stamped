@@ -605,14 +605,13 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
 
-        if 'screen_name' in fields and account.screen_name != fields['screen_name']:
+        if 'screen_name' in fields and account.screen_name != fields['screen_name'] and fields['screen_name'] is not None:
             old_screen_name = account.screen_name
             account.screen_name = fields['screen_name']
 
             # Validate screen name
-            account.screen_name = account.screen_name.strip()
-            if not utils.validate_screen_name(account.screen_name):
-                raise StampedInputError("Invalid format for screen name")
+            screen_name = SchemaValidation.validateScreenName(account.screen_name.strip())
+            account.screen_name = screen_name
 
             # Verify screen_name unused
             existingAcct = None
@@ -621,8 +620,7 @@ class StampedAPI(AStampedAPI):
             except StampedUnavailableError:
                 pass
             if existingAcct is not None:
-                logs.warning('Attempted to update account with pre-existing screen name')
-                raise StampedInputError("The screen name is already in use")
+                raise StampedScreenNameInUseError("The screen name is already in use")
 
             # Check Blacklist
             if account.screen_name.lower() in Blacklist.screen_names:
@@ -632,7 +630,7 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.changeProfileImageName, args=[
                 old_screen_name.lower(), account.screen_name.lower()])
 
-        if 'name' in fields and account.name != fields['name']:
+        if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
             account.name = fields['name']
         if 'phone' in fields and account.phone != fields['phone']:
             account.phone = fields['phone']
@@ -640,10 +638,8 @@ class StampedAPI(AStampedAPI):
         if 'bio' in fields and account.bio != fields['bio']:
             account.bio = fields['bio']
         if 'website' in fields and account.website != fields['website']:
-            if utils.validate_url(fields['website']):
-                account.website = fields['website']
-            else:
-                raise StampedInvalidWebsiteError("Could not update account 'website' field - not a valid url string")
+            url = SchemaValidation.validateURL(fields['website'])
+            account.website = url
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
         if 'color_primary' in fields and 'color_secondary' in fields:
@@ -713,7 +709,11 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getLinkedAccount(self, authUserId, service_name):
-        return getattr(self.getAccount(authUserId).linked, service_name)
+        account = self.getAccount(authUserId)
+        try:
+            return getattr(account.linked, service_name)
+        except Exception:
+            raise StampedLinkedAccountDoesNotExistError("User has no linked account: %s" % service_name)
 
     @API_CALL
     def getLinkedAccounts(self, authUserId):
@@ -1201,6 +1201,15 @@ class StampedAPI(AStampedAPI):
         # Grab friend list from Facebook API
         users = self._getFacebookFriends(user_token)
         return self._enrichUserObjects(users, authUserId=authUserId)
+
+    @API_CALL
+    def getFacebookFriendData(self, user_token=None, offset=0, limit=30):
+        ### TODO: Add check for privacy settings?
+        if user_token is None:
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Facebook requires a valid token")
+
+        # Grab friend list from Facebook API
+        return self._facebook.getFriendData(user_token, offset, limit)
 
     @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):
