@@ -15,6 +15,7 @@ from datetime       import *
 from socket         import socket
 from errors         import *
 from HTTPSchemas    import *
+from SchemaValidation import validateEmail
 
 from db.mongodb.MongoAlertQueueCollection   import MongoAlertQueueCollection
 from db.mongodb.MongoInviteQueueCollection  import MongoInviteQueueCollection
@@ -249,7 +250,9 @@ def runAlerts(options):
             # Build email
             if send_email:
                 try:
-                    if recipient.email is not None: ### TODO: Check for validity of email address
+                    if recipient.email is not None: 
+
+                        email = validateEmail(recipient.email)
 
                         # Add email address
                         if recipient.email not in userEmailQueue:
@@ -266,6 +269,8 @@ def runAlerts(options):
                     else:
                         logs.info("No email address found for recipient '%s'" % recipient.user_id)
 
+                except StampedInvalidEmailError:
+                    logs.debug("Invalid email address: %s" % recipient.email)
                 except Exception as e:
                     logs.warning("Email generation failed for alert '%s': %s" % (alert.alert_id, e))
                     logs.debug("User: %s" % user.user_id)
