@@ -82,6 +82,8 @@ class LoggingContext(object):
             fnc         = inspect.stack()[2][3]
         except:
             fnc = "UNKNOWN FUNCTION"
+            filename = "UNKNOWN FILENAME"
+            lineno = "UNKNOWN LINENO"
 
         if self.__format == 'object':
             try:
