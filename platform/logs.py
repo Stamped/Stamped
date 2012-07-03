@@ -44,7 +44,6 @@ class LoggingContext(object):
             'request_id': self.__logId
         }
 
-    @property
     def save(self):
         if self.__format != 'object':
             return
