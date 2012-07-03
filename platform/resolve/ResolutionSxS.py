@@ -15,6 +15,29 @@ import random
 from sys import argv
 from os import path
 
+def __createDiffTable(leftData, rightData):
+    leftLines = pprint.pformat(leftData).split('\n')
+    rightLines = pprint.pformat(rightData).split('\n')
+    differ = difflib.HtmlDiff(wrapcolumn=100)
+    return differ.make_table(leftLines, rightLines)
+
+
+DIFF_FILE_HEADER = """
+<html>
+    <head>
+        <style type="text/css">
+            table.diff {font-family:Courier; border:medium;}
+            .diff_header {background-color:#e0e0e0}
+            td.diff_header {text-align:right}
+            .diff_next {background-color:#c0c0c0}
+            .diff_add {background-color:#aaffaa}
+            .diff_chg {background-color:#ffff77}
+            .diff_sub {background-color:#ffaaaa}
+        </style>
+    </head>
+    <body>
+"""
+
 def writeComparisons(oldResults, newResults, outputDir):
     oldKeys = oldResults.viewkeys()
     newKeys = newResults.viewkeys()
@@ -26,29 +49,24 @@ def writeComparisons(oldResults, newResults, outputDir):
     changedRows = []
     allRows = []
     commonKeys = oldKeys & newKeys
-    for key in sorted(commonKeys):
+    for key in commonKeys:
         original, oldResolved = oldResults[key]
         _, newResolved = newResults[key]
 
+        oldData = oldResolved.dataExport()
+        newData = newResolved.dataExport()
         filename = key + '.html'
         with open(path.join(outputDir, filename), 'w') as fout:
-            print >> fout, '<pre>'
-            pprint.pprint(original, fout)
-            print >> fout, '</pre>'
-        originalLink = '<td><a href="%s">original</a></td>' % filename
+            print >> fout, DIFF_FILE_HEADER
+            print >> fout, '<h1>%s</h1>' % 'Resolve input vs. output'
+            print >> fout, __createDiffTable(original, newData)
+            print >> fout, '<h1>%s</h1>' % 'Old resolve output vs. new'
+            print >> fout, __createDiffTable(oldData, newData)
+            print >> fout, '</body></html>'
+        diffLink = '<td><a href="%s">show diffs</a></td>' % filename
 
-        leftData = oldResolved.dataExport()
-        rightData = newResolved.dataExport()
-        leftLines = pprint.pformat(leftData).split('\n')
-        rightLines = pprint.pformat(rightData).split('\n')
-        differ = difflib.HtmlDiff(wrapcolumn=100)
-        filename = key + '_diff.html'
-        with open(path.join(outputDir, filename), 'w') as fout:
-            print >> fout, differ.make_file(leftLines, rightLines)
-        diffLink = '<td><a href="%s">show diff</a></td>' % filename
-
-        tableRow = '<tr><td>%s</td>%s%s' % (original['title'], originalLink, diffLink)
-        if leftData != rightData:
+        tableRow = '<tr><td>%s</td>%s</tr>' % (original['title'], diffLink)
+        if oldData != newData:
             changedRows.append(tableRow)
         allRows.append(tableRow)
     allRowsFilename = 'index_all.html'
