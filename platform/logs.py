@@ -51,14 +51,16 @@ class LoggingContext(object):
         self.__log['finish'] = datetime.datetime.utcnow()
 
         try:
-            localData.saveStat(self.__log)
+            self.saveStat(self.__log)
         except:
+            warning("FAILED TO SAVE STAT\n" + traceback.format_exc())
             pass
 
         try:
-            localData.saveLog(self.__log)
+            self.saveLog(self.__log)
         except Exception as e:
-            pprint.pprint(self.__log)
+            warning("FAILED TO SAVE LOG\n" + traceback.format_exc() +
+                    "\n\nLOG CONTENTS:\n\n" + pprint.pformat(self.__log))
             pass
 
     @classmethod
@@ -176,7 +178,7 @@ def request(request):
     try:
         loggingContext.addLogParameter('path', request.path)
         loggingContext.addLogParameter('method', request.method)
-        loggingContext.addLogParameter('headers', request.META)
+        loggingContext.addLogParameter('headers', str(request.META))
     except:
         loggingContext.addLogParameter('request', 'FAIL')
 
