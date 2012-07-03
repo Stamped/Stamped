@@ -19,6 +19,7 @@ error_kinds = set([
     'already_exists',
     'not_found',
     'internal_server_error',
+    'third_party',
 ])
 
 class StampedHTTPError(Exception):
@@ -130,8 +131,21 @@ class StampedMissingParametersError(StampedInputError):
     def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
+class StampedNotLoggedInError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
 
 # Specific Stamped Exceptions
+
+    # Database-related Errors
+class StampedDocumentNotFoundError(StampedUnavailableError):
+    def __init__(self, msg=None):
+        StampedUnavailableError.__init__(self, msg)
+
+class StampedInvalidObjectIdError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
 
     # Internal Errors
 class StampedInvalidRelationshipError(StampedInternalError):
@@ -176,6 +190,17 @@ class StampedBlackListedScreenNameError(StampedIllegalActionError):
     def __init(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
+class StampedAlreadyStampedAuthError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+
+        # Users
+class StampedViewUserPermissionsError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
+
     # Auth
 class StampedInvalidClientError(StampedInputError):
     def __init__(self, msg=None):
@@ -211,6 +236,10 @@ class StampedLinkedAccountIsAuthError(StampedIllegalActionError):
     def __init(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
+class StampedNoSharingForLinkedAccountError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
     # Third Party Errors
 
 class StampedThirdPartyError(StampedInputError):
@@ -221,21 +250,40 @@ class StampedThirdPartyInvalidCredentialsError(StampedInvalidCredentialsError):
     def __init__(self, msg=None):
         StampedInvalidCredentialsError.__init__(self, msg)
 
-
     # Stamps
 class StampedOutOfStampsError(StampedIllegalActionError):
     def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
-class StampedInvalidScopeCombinationError(StampedInputError):
+class StampedRemoveStampPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
-        StampedInputError.__init__(self, msg)
+        StampedPermissionsError.__init__(self, msg)
 
-class StampedUserRequiredForScope(StampedInputError):
+class StampedViewStampPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
-        StampedInputError.__init__(self, msg)
+        StampedPermissionsError.__init__(self, msg)
 
-class StampedRemovePermissionsError(StampedPermissionsError):
-        def __init__(self, msg=None):
-            StampedPermissionsError.__init__(self, msg)
+class StampedAddCommentPermissionsError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
 
+class StampedRemoveCommentPermissionsError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
+class StampedViewCommentPermissionsError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
+class StampedBlockedUserError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
+    # Friendships
+class StampedInvalidFriendshipError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+class StampedFriendshipCheckPermissionsError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)

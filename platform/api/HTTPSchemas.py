@@ -428,7 +428,7 @@ class HTTPAccount(Schema):
         cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
-        cls.addProperty('email',                            basestring, required=True)
+        cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
@@ -441,7 +441,7 @@ class HTTPAccountNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
-        cls.addProperty('email',                            basestring, required=True)
+        cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
         cls.addProperty('password',                         basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
@@ -476,7 +476,7 @@ class HTTPFacebookAccountNew(Schema):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('user_token',                       basestring, required=True)
-        cls.addProperty('email',                            basestring)
+        cls.addProperty('email',                            basestring, cast=validateEmail)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
@@ -502,7 +502,7 @@ class HTTPTwitterAccountNew(Schema):
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('user_token',                       basestring, required=True)
         cls.addProperty('user_secret',                      basestring, required=True)
-        cls.addProperty('email',                            basestring)
+        cls.addProperty('email',                            basestring, cast=validateEmail)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
         cls.addProperty('bio',                              basestring)
@@ -906,7 +906,7 @@ class HTTPUserImages(Schema):
 class HTTPEmail(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('email',                            basestring)
+        cls.addProperty('email',                            basestring, cast=validateEmail)
 
 
 # ######## #

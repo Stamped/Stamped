@@ -49,7 +49,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             del(document['_id'])
 
         # Convert single-blurb documents into new multi-blurb schema
-        if 'stamped' not in document['timestamp']:
+        if 'contents' not in document:
             if 'created' in document['timestamp']:
                 created = document['timestamp']['created']
             else:
@@ -78,7 +78,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['contents'] = [ contents ]
             document['timestamp']['stamped'] = created
 
-        elif 'contents' in document:
+        else:
             contents = []
             for content in document['contents']:
                 if 'mentions' in content:

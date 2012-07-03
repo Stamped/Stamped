@@ -129,7 +129,6 @@ footer {
             background: #fff;
             
             .box-shadow(0, 0, 8px, 0, rgba(0,0,0,0.1));
-            .rounded(0px);
             
             &:hover {
                 cursor: pointer;
@@ -139,7 +138,7 @@ footer {
                 background: transparent;
                 padding: @marker_space;
                 
-                .rounded(0px);
+                //.rounded(0px);
             }
             
             .clearfix {
@@ -148,11 +147,12 @@ footer {
             
             .stamp-map-item-close-button {
                 background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
-                display: block;
+                position: relative;
+                display:  block;
+                
                 width:  14px;
                 height: 14px;
                 float: right;
-                position: relative;
                 left: 8px;
                 
                 &:hover {
@@ -189,7 +189,7 @@ footer {
                     .pronounced-title {
                         line-height: 100%;
                         padding: 0;
-                        margin: 0px 0px 6px 0px;
+                        margin: 0 0 6px;
                         letter-spacing: 0.02em;
                     }
                 }
@@ -202,10 +202,10 @@ footer {
                 .blurbs {
                     .stamped-content {
                         display: none;
-                        margin: 0px 0px 4px 0px;
+                        margin: 0 0 4px;
                         
                         p.blurb {
-                            font-size: 100%;
+                            //font-size: 100%;
                         }
                         p.blurb:hover {
                             cursor: text;
@@ -349,7 +349,7 @@ footer {
                             top: 0;
                             
                             .pronounced-title {
-                                font-size: 1.70em !important;
+                                font-size: 1.7em !important;
                                 margin-bottom: -5px;
                             }
                         }
