@@ -234,7 +234,10 @@ def handleHTTPRequest(requires_auth=True,
                     logs.save()
                 except Exception:
                     print 'Unable to save logs'
-        
+                    import traceback
+                    traceback.print_exc()
+                    logs.warning(traceback.format_exc())
+
         return wrapper
     return decorator
 

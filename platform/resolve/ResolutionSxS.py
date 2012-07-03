@@ -15,6 +15,42 @@ import random
 from sys import argv
 from os import path
 
+def __createDiffTable(leftData, rightData):
+    leftLines = leftData.split('\n')
+    rightLines = rightData.split('\n')
+    differ = difflib.HtmlDiff(wrapcolumn=100)
+    return differ.make_table(leftLines, rightLines)
+
+
+def __stripEntity(entityDict):
+    """Strip out irrelevant/noisy fields in the entity dict, so the output is
+    more readable.
+    """
+
+    def stripTimestamps(d):
+        return {k : v for k, v in d.iteritems() if 'timestamp' not in k}
+    entityDict = stripTimestamps(entityDict)
+    if 'sources' in entityDict:
+        entityDict['sources'] = stripTimestamps(entityDict['sources'])
+    return entityDict
+
+
+DIFF_FILE_HEADER = """
+<html>
+    <head>
+        <style type="text/css">
+            .diff {font-family:Courier; border:medium;}
+            .diff_header {background-color:#e0e0e0}
+            td.diff_header {text-align:right}
+            .diff_next {background-color:#c0c0c0}
+            .diff_add {background-color:#aaffaa}
+            .diff_chg {background-color:#ffff77}
+            .diff_sub {background-color:#ffaaaa}
+        </style>
+    </head>
+    <body>
+"""
+
 def writeComparisons(oldResults, newResults, outputDir):
     oldKeys = oldResults.viewkeys()
     newKeys = newResults.viewkeys()
@@ -26,29 +62,27 @@ def writeComparisons(oldResults, newResults, outputDir):
     changedRows = []
     allRows = []
     commonKeys = oldKeys & newKeys
-    for key in sorted(commonKeys):
-        original, oldResolved = oldResults[key]
-        _, newResolved = newResults[key]
+    for key in commonKeys:
+        original, oldResolved, oldProxy = oldResults[key]
+        _, newResolved, _ = newResults[key]
 
         filename = key + '.html'
+        oldData = __stripEntity(oldResolved.dataExport())
+        newData = __stripEntity(newResolved.dataExport())
         with open(path.join(outputDir, filename), 'w') as fout:
-            print >> fout, '<pre>'
-            pprint.pprint(original, fout)
-            print >> fout, '</pre>'
-        originalLink = '<td><a href="%s">original</a></td>' % filename
+            print >> fout, DIFF_FILE_HEADER
+            print >> fout, '<h1>%s</h1>' % 'Input'
+            print >> fout, '<pre class="diff">'
+            pprint.pprint(original.dataExport(), fout)
+            print >> fout, '</pre><h1>%s</h1>' % 'Proxy'
+            print >> fout, '<pre class="diff">%s</pre>' % str(oldProxy)
+            print >> fout, '<h1>%s</h1>' % 'Resolve output'
+            print >> fout, __createDiffTable(pprint.pformat(oldData), pprint.pformat(newData))
+            print >> fout, '</body></html>'
+        diffLink = '<td><a href="%s">show diffs</a></td>' % filename
 
-        leftData = oldResolved.dataExport()
-        rightData = newResolved.dataExport()
-        leftLines = pprint.pformat(leftData).split('\n')
-        rightLines = pprint.pformat(rightData).split('\n')
-        differ = difflib.HtmlDiff(wrapcolumn=100)
-        filename = key + '_diff.html'
-        with open(path.join(outputDir, filename), 'w') as fout:
-            print >> fout, differ.make_file(leftLines, rightLines)
-        diffLink = '<td><a href="%s">show diff</a></td>' % filename
-
-        tableRow = '<tr><td>%s</td>%s%s' % (original['title'], originalLink, diffLink)
-        if leftData != rightData:
+        tableRow = '<tr><td>%s</td>%s</tr>' % (original.title[:100], diffLink)
+        if oldData != newData:
             changedRows.append(tableRow)
         allRows.append(tableRow)
     allRowsFilename = 'index_all.html'
@@ -57,7 +91,7 @@ def writeComparisons(oldResults, newResults, outputDir):
     summary = """
         %d out of %d (%f%%) of the rows changed. Here's a shuffled list of them.
         <a href="%s">show all</a>
-        """ % (len(changedRows), len(allRows), float(len(changedRows)) / len(allRows), allRowsFilename)
+        """ % (len(changedRows), len(allRows), float(len(changedRows)) * 100 / len(allRows), allRowsFilename)
     random.shuffle(changedRows)
     writeTableOfContent(changedRows, summary, path.join(outputDir, 'index.html'))
 
@@ -66,7 +100,7 @@ def writeTableOfContent(table, heading, filename):
     # TODO(geoff): write a real HTML doc when not so lazy anymore.
     with open(filename, 'w') as fout:
         print >> fout, '<h1>%s</h1>' % heading
-        print >> fout, '<table>'
+        print >> fout, '<table cellpadding="5">'
         for line in table:
             print >> fout, line.encode('utf-8')
         print >> fout, '</table>'
