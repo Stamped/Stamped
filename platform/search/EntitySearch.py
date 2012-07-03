@@ -397,6 +397,9 @@ def main():
         print "SUBTITLE", subtitle
         print result
 
+    from libs.CountedFunction import printFunctionCounts
+    printFunctionCounts()
+
 
 if __name__ == '__main__':
     main()

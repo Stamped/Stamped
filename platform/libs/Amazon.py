@@ -16,6 +16,7 @@ try:
     from LibUtils       import xmlToPython
     from LRUCache       import lru_cache
     from CachedFunction import cachedFn
+    from libs.CountedFunction import countedFn
 except:
     report()
     raise
@@ -34,8 +35,10 @@ class Amazon(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn(name='Amazon (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn(name='Amazon (after caching)')
     def item_search(self, **kwargs):
         logs.info("Amazon API: ItemSearch %s" % kwargs)
         return self._item_helper(self.amazon.ItemSearch, **kwargs)
@@ -43,8 +46,10 @@ class Amazon(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn(name='Amazon (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn(name='Amazon (after caching)')
     def item_lookup(self, **kwargs):
         logs.info("Amazon API: ItemLookup %s" % kwargs)
         return self._item_helper(self.amazon.ItemLookup, **kwargs)

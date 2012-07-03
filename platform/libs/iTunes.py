@@ -22,6 +22,7 @@ try:
     from RateLimiter            import RateLimiter, RateException
     from LRUCache               import lru_cache
     from CachedFunction         import cachedFn
+    from libs.CountedFunction   import countedFn
     
     try:
         import json
@@ -43,8 +44,10 @@ class iTunes(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('iTunes (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn('iTunes (after caching)')
     def method(self, method, **params):
         try:
             url = 'http://itunes.apple.com/%s' % method
