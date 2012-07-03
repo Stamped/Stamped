@@ -149,30 +149,32 @@ def runAlerts(options):
             # Check recipient settings
             recipient = userIds[str(alert.recipient_id)]
 
+            settings = recipient.alert_settings
+
             if alert.genre == 'restamp':
-                send_push   = recipient.alerts.ios_alert_credit
-                send_email  = recipient.alerts.email_alert_credit
+                send_push   = settings.alerts_credits_apns
+                send_email  = settings.alerts_credits_email
             elif alert.genre == 'like':
-                send_push   = recipient.alerts.ios_alert_like
-                send_email  = recipient.alerts.email_alert_like
+                send_push   = settings.alerts_likes_apns
+                send_email  = settings.alerts_likes_email
             elif alert.genre == 'todo':
-                send_push   = recipient.alerts.ios_alert_todo
-                send_email  = recipient.alerts.email_alert_todo
+                send_push   = settings.alerts_todos_apns
+                send_email  = settings.alerts_todos_email
             elif alert.genre == 'mention':
-                send_push   = recipient.alerts.ios_alert_mention
-                send_email  = recipient.alerts.email_alert_mention
+                send_push   = settings.alerts_mentions_apns
+                send_email  = settings.alerts_mentions_email
             elif alert.genre == 'comment':
-                send_push   = recipient.alerts.ios_alert_comment
-                send_email  = recipient.alerts.email_alert_comment
+                send_push   = settings.alerts_comments_apns
+                send_email  = settings.alerts_comments_email
             elif alert.genre == 'reply':
-                send_push   = recipient.alerts.ios_alert_reply
-                send_email  = recipient.alerts.email_alert_reply
+                send_push   = settings.alerts_replies_apns
+                send_email  = settings.alerts_replies_email
             elif alert.genre == 'follower':
-                send_push   = recipient.alerts.ios_alert_follow
-                send_email  = recipient.alerts.email_alert_follow
+                send_push   = settings.alerts_followers_apns
+                send_email  = settings.alerts_followers_email
             elif alert.genre == 'friend':
-                send_push   = recipient.alerts.ios_alert_follow
-                send_email  = recipient.alerts.io_email_follow
+                send_push   = None ## TODO: Add
+                send_email  = None ## TODO: Add
             else:
                 send_push   = None
                 send_email  = None
