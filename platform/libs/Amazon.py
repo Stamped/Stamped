@@ -16,7 +16,7 @@ try:
     from LibUtils       import xmlToPython
     from LRUCache       import lru_cache
     from CachedFunction import cachedFn
-    from CountedFunction import countedFn
+    from libs.CountedFunction import countedFn
 except:
     report()
     raise

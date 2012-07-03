@@ -36,7 +36,7 @@ try:
     from RateLimiter            import RateLimiter, RateException
     from LRUCache               import lru_cache
     from CachedFunction         import cachedFn
-    from CountedFunction        import countedFn
+    from libs.CountedFunction   import countedFn
     from urlparse               import parse_qsl
     from urllib2                import HTTPError
     from urllib                 import quote_plus

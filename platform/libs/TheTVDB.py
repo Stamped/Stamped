@@ -17,7 +17,7 @@ from lxml            import objectify, etree
 from pprint          import pprint
 from LRUCache        import lru_cache
 from CachedFunction  import cachedFn
-from CountedFunction import countedFn
+from libs.CountedFunction import countedFn
 
 class TheTVDB(object):
     

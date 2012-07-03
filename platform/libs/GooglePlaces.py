@@ -15,7 +15,7 @@ from AEntitySource  import AExternalServiceEntitySource
 from api.Schemas    import PlaceEntity, Coordinates
 from LRUCache       import lru_cache
 from CachedFunction import *
-from CountedFunction import countedFn
+from libs.CountedFunction import countedFn
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'

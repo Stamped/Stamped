@@ -66,7 +66,7 @@ import logs
 from urlparse               import urlparse, parse_qsl
 from LRUCache               import lru_cache
 from CachedFunction         import cachedFn
-from CountedFunction        import countedFn
+from libs.CountedFunction   import countedFn
 from api.Schemas            import BasicEntity
 from SinglePlatform         import StampedSinglePlatform
 from pprint                 import pprint
