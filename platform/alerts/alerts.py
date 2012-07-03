@@ -564,11 +564,13 @@ def buildPushNotification(activityId, msg=None, numUnread=0):
 
 
 def sendEmails(queue, options):
+    logs.info("Submitting emails to %s users" % len(queue))
+
     # Apply rate limit
     limit = 8
 
     ses = boto.connect_ses(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-    
+
     for emailAddress, emailQueue in queue.iteritems():
         if IS_PROD or emailAddress in admin_emails:
             count = 0
