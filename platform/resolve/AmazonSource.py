@@ -672,12 +672,16 @@ class AmazonSource(GenericSource):
 
     def __getLookupResult(self, results):
         # TODO(geoff): log a warning if we get more than one?
-        return self.__getResults('ItemLookupResponse', results)[0]
+        results = self.__getResults('ItemLookupResponse', results)
+        if len(results) > 1:
+            logs.warn("Received more than one result for lookup: " + str(results))
+        return results[0] if results else None
 
     def __getResults(self, firstLayer, results):
         items = xp(results, firstLayer, 'Items')['c']
         if 'Item' in items:
             return list(items['Item'])
+        return []
 
     def __searchGen(self, proxy, *queries):
         def gen():
@@ -1308,15 +1312,13 @@ class AmazonSource(GenericSource):
             kind = xp(result, 'ItemAttributes', 'ProductGroup')['v'].lower()
             logs.debug(kind)
 
-            if kind == 'book':
+            if kind == 'book' or kind == 'ebooks':
                 return AmazonBook(key, result, 0)
             if kind == 'video games':
                 return AmazonVideoGame(key, result, 0)
-            # TODO(geoff): the use of the following function to construct music proxies in this
-            # context is, in fact, untested.
             return self.__constructMusicObjectFromResult(result, 0)
         except KeyError:
-            pass
+            logs.report()
         return None
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):

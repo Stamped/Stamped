@@ -4203,6 +4203,9 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
+        t0 = time.time()
+        t1 = t0
+
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
 
         # Append user objects
@@ -4240,12 +4243,22 @@ class StampedAPI(AStampedAPI):
         for user in users:
             userIds[str(user.user_id)] = user.minimize()
 
+        logs.debug("### getActivity section 1: %s" % (time.time() - t1))
+        t1 = time.time()
+
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
+
+        logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
+        t1 = time.time()
+
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
+
+        logs.debug("### getActivity section 2b: %s" % (time.time() - t1))
+        t1 = time.time()
 
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -4287,6 +4300,9 @@ class StampedAPI(AStampedAPI):
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
+
+        logs.debug("### getActivity section 3: %s" % (time.time() - t1))
+        t1 = time.time()
 
         return activity
 

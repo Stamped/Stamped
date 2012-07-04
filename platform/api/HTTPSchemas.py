@@ -2534,10 +2534,12 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
-            blurb, references = _buildTextReferences(content.blurb)
-            if len(references) > 0:
-                item.blurb = blurb 
-                item.blurb_references = references
+            logs.info('### content.blurb: %s' % content.blurb)
+            if content.blurb is not None:
+                blurb, references = _buildTextReferences(content.blurb)
+                if len(references) > 0:
+                    item.blurb = blurb
+                    item.blurb_references = references
 
             if content.images is not None:
                 newImages = []
