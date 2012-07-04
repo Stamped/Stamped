@@ -1312,6 +1312,8 @@ class AmazonSource(GenericSource):
                 return AmazonBook(key, result, 0)
             if kind == 'video games':
                 return AmazonVideoGame(key, result, 0)
+            # TODO(geoff): the use of the following function to construct music proxies in this
+            # context is, in fact, untested.
             return self.__constructMusicObjectFromResult(result, 0)
         except KeyError:
             pass
