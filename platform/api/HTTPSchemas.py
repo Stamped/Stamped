@@ -2534,6 +2534,7 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
+            logs.info('### content.blurb: %s' % content.blurb)
             if content.blurb is not None:
                 blurb, references = _buildTextReferences(content.blurb)
                 if len(references) > 0:
