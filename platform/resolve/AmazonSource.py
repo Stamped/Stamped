@@ -667,19 +667,17 @@ class AmazonSource(GenericSource):
         return self.emptySource
 
 
-    def __iterateSearchResults(self, results):
-        return self.__iterateResults('ItemSearchResponse', results)
+    def __getSearchResults(self, results):
+        return self.__getResults('ItemSearchResponse', results)
 
     def __getLookupResult(self, results):
-        # TODO(geoff): check we get at most one result.
-        return next(self.__iterateResults('ItemSearchResponse', results))
+        # TODO(geoff): log a warning if we get more than one?
+        return self.__getResults('ItemLookupResponse', results)[0]
 
-    def __iterateResults(self, firstLayer, results):
+    def __getResults(self, firstLayer, results):
         items = xp(results, firstLayer, 'Items')['c']
         if 'Item' in items:
-            items = items['Item']
-            for item in items:
-                yield item
+            return list(items['Item'])
 
     def __searchGen(self, proxy, *queries):
         def gen():
@@ -692,7 +690,7 @@ class AmazonSource(GenericSource):
                         params['ResponseGroup'] = "ItemAttributes"
                     results = globalAmazon().item_search(**params)
 
-                    for item in self.__iterateSearchResults(results):
+                    for item in self.__getSearchResults(results):
                         try:
                             if test == None or test(item):
                                 yield xp(item, 'ASIN')['v'], item
@@ -822,7 +820,7 @@ class AmazonSource(GenericSource):
         #pprint(searchResults)
         #print "\n\n\n\nENDMAZON\n\n\n\n\n"
         indexResults = []
-        for item in self.__iterateSearchResults(searchResults):
+        for item in self.__getSearchResults(searchResults):
             parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
             if parsedItem:
                 indexResults.append(parsedItem)
@@ -1306,16 +1304,15 @@ class AmazonSource(GenericSource):
     def entityProxyFromKey(self, key, **kwargs):
         try:
             lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key)
-            kind = xp(lookupData, 'ItemLookupResponse','Items','Item','ItemAttributes','ProductGroup')['v'].lower()
+            result = self.__getLookupResult(lookupData)
+            kind = xp(result, 'ItemAttributes', 'ProductGroup')['v'].lower()
             logs.debug(kind)
 
-            # TODO: Avoid additional API calls here.
-            
             if kind == 'book':
-                return AmazonBook(key)
+                return AmazonBook(key, result, 0)
             if kind == 'video games':
-                return AmazonVideoGame(key)
-            return self.__constructMusicObjectFromResult(self.__getLookupResult(lookupData), 0)
+                return AmazonVideoGame(key, result, 0)
+            return self.__constructMusicObjectFromResult(result, 0)
         except KeyError:
             pass
         return None
