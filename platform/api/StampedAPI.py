@@ -4440,16 +4440,16 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
 
     def mergeEntityAsync(self, entityDict):
-        self._mergeEntity(Entity.buildEntity(entityDict), set())
+        self._mergeEntity(Entity.buildEntity(entityDict))
 
     def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
         tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
 
     def mergeEntityIdAsync(self, entityId):
-        self._mergeEntity(self._entityDB.getEntity(entityId), set())
+        self._mergeEntity(self._entityDB.getEntity(entityId))
 
-    def _mergeEntity(self, entity, resolved, depth=2):
+    def _mergeEntity(self, entity, depth=2):
         """Enriches the entity and possibly follow any links it may have.
 
         The resolved parameter is used to keep track of the entities we've
@@ -4460,12 +4460,19 @@ class StampedAPI(AStampedAPI):
         The depth is a way to limit the scope of the search. We will only look
         at items within "depth" distance from the given entity.
         """
+        persistedEntities = set()
+        entity = self._enrichAndPersistEntity(entity, persistedEntities)
+        self._followOutLinks(entity, persistedEntities, depth)
+        return entity
 
-        if entity.entity_id and entity.entity_id in resolved:
+
+    def _enrichAndPersistEntity(self, entity, persisted):
+        if entity.entity_id and entity.entity_id in persisted:
             return entity
 
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
+        logs.info('Modified: ' + str(modified))
         modified = self._resolveRelatedEntities(entity) or modified
 
         if modified:
@@ -4474,11 +4481,7 @@ class StampedAPI(AStampedAPI):
             else:
                 entity = self._entityDB.updateEntity(entity)
 
-        resolved.add(entity.entity_id)
-
-        if depth and self._followOutLinks(entity, resolved, depth-1):
-            entity = self._entityDB.updateEntity(entity)
-
+        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -4558,11 +4561,11 @@ class StampedAPI(AStampedAPI):
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
-    def _followOutLinks(self, entity, resolved, depth):
+    def _followOutLinks(self, entity, persisted, depth):
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
-                return False
+                return
 
             mergeEntityTasks = []
             for stub in stubList:
@@ -4571,19 +4574,25 @@ class StampedAPI(AStampedAPI):
                     logs.warning('stub resolution failed: %s' % stub)
                     mergeEntityTasks.append(None)
                 else:
-                    mergeEntityTasks.append(gevent.spawn(self._mergeEntity, resolvedFull, resolved, depth))
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
             
             modified = False
             visitedStubs = []
+            mergedEntities = []
             for stub, task in zip(stubList, mergeEntityTasks):
-                if not task:
+                if task is None:
+                    modified = True
                     continue
-                merged = task.get().minimize()
-                visitedStubs.append(merged)
-                modified = modified or (merged != stub)
+                mergedEntities.append(task.get())
+                visitedStubs.append(mergedEntities[-1].minimize())
+                modified = modified or (visitedStubs[-1] != stub)
             setattr(entity, attr, visitedStubs)
-            return modified
-        return self._iterateOutLinks(entity, followStubList)
+            if modified:
+                self._entityDB.updateEntity(entity)
+            if depth:
+                for mergedEntity in mergedEntities:
+                    self._followOutLinks(mergedEntity, persisted, depth-1)
+        self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
         """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
