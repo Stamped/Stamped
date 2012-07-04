@@ -65,11 +65,11 @@ def argIsSerializable(original_arg):
 def assertCallIsSerializable(args, kwargs):
     for idx, arg in enumerate(args):
         if not argIsSerializable(arg):
-            raise SerializationError('Failed to serialize %dth argument value: (%s)' % (idx, str(arg)))
+            raise SerializationError('Failed to serialize %dth argument value: (%s: %s)' % (idx, str(arg), str(type(arg))))
 
     for key, val in kwargs.items():
         if not argIsSerializable(val):
-            raise SerializationError('Failed to serialize "%s" keyword argument value: (%s)' % (key, str(val)))
+            raise SerializationError('Failed to serialize "%s" keyword argument value: (%s: %s)' % (key, str(val), str(type(val))))
 
 
 def serializeArgument(arg):
