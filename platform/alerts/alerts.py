@@ -561,7 +561,7 @@ class NotificationQueue(object):
         # Apply rate limit
         limit = 3
 
-        apns_wrapper = APNSNotificationWrapper(self.__apnsCert, self.__sandbox)
+        apns_wrapper = APNSNotificationWrapper(self.__apnsCert, sandbox=self.__sandbox)
         
         for deviceId, pushQueue in self.__pushQueue.iteritems():
             if IS_PROD or deviceId in self.__adminTokens:
@@ -606,7 +606,7 @@ class NotificationQueue(object):
             logs.warning("Skipping APNS cleanup (not prod / noop)")
             return
 
-        feedback = APNSFeedbackWrapper(self.__apnsCert, self.__sandbox)
+        feedback = APNSFeedbackWrapper(self.__apnsCert, sandbox=self.__sandbox)
 
         for d, t in feedback.tuples():
             token = binascii.hexlify(t)
