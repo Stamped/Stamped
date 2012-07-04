@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent.pool
+    import os, logs, re, time, urlparse, math, pylibmc, gevent
 
     import Blacklist
     import libs.ec2_utils
@@ -4449,7 +4449,7 @@ class StampedAPI(AStampedAPI):
     def mergeEntityIdAsync(self, entityId):
         self._mergeEntity(self._entityDB.getEntity(entityId), set())
 
-    def _mergeEntity(self, entity, resolved, depth=3):
+    def _mergeEntity(self, entity, resolved, depth=2):
         """Enriches the entity and possibly follow any links it may have.
 
         The resolved parameter is used to keep track of the entities we've
@@ -4461,9 +4461,7 @@ class StampedAPI(AStampedAPI):
         at items within "depth" distance from the given entity.
         """
 
-        entitySummary = (entity.title, entity.kind)
-        if entitySummary in resolved and entity.entity_id:
-            # TODO(geoff): maybe we can just check for entity_id here.
+        if entity.entity_id and entity.entity_id in resolved:
             return entity
 
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
@@ -4476,7 +4474,7 @@ class StampedAPI(AStampedAPI):
             else:
                 entity = self._entityDB.updateEntity(entity)
 
-        resolved.add(entitySummary)
+        resolved.add(entity.entity_id)
 
         if depth and self._followOutLinks(entity, resolved, depth-1):
             entity = self._entityDB.updateEntity(entity)
@@ -4560,27 +4558,27 @@ class StampedAPI(AStampedAPI):
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
-    def _followOutLinks(self, entity, resolved, depth, geventPool=gevent.pool.Pool(32)):
-        """Follow the outlinks on the entity and merge all the entities to which it refers.
-
-        Note that the geventPool is being used as a singleton here. Unless a separate pool is
-        explicitly passed in, all invocations of this method will share a single pool.
-        """
+    def _followOutLinks(self, entity, resolved, depth):
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
 
-            resolveTasks = [geventPool.spawn(self._resolveStub, stub, False) for stub in stubList]
-            modified = False
-            visitedStubs = []
-            for stub, task in zip(stubList, resolveTasks):
-                resolvedFull = task.get()
+            mergeEntityTasks = []
+            for stub in stubList:
+                resolvedFull = self._resolveStub(stub, False)
                 if resolvedFull is None:
                     logs.warning('stub resolution failed: %s' % stub)
+                    mergeEntityTasks.append(None)
+                else:
+                    mergeEntityTasks.append(gevent.spawn(self._mergeEntity, resolvedFull, resolved, depth))
+            
+            modified = False
+            visitedStubs = []
+            for stub, task in zip(stubList, mergeEntityTasks):
+                if not task:
                     continue
-
-                merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
+                merged = task.get().minimize()
                 visitedStubs.append(merged)
                 modified = modified or (merged != stub)
             setattr(entity, attr, visitedStubs)

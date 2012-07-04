@@ -44,6 +44,7 @@
 #import "FindFriendsViewController.h"
 #import "STUserViewController.h"
 #import "STPlayer.h"
+#import "STDebug.h"
 
 static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
 #if defined (DEV_BUILD)
@@ -89,8 +90,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #if defined (CONFIGURATION_Beta)
 #warning QuincyKit Beta (Ad Hoc) is configured for this build
     NSString* key;
-    key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
-//    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
+//    key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
+    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
     [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
 #endif
     
@@ -164,13 +165,33 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     NSLog(@"Did fail to register");
+    NSString* msg = [NSString stringWithFormat:@"APNS registration failed: %@", error];
+    STLog(msg);
 }
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
-    
 }
 
+/*
+ Apple was actually helpful and clear!!!
+ 
+ From Apple's "Local and Push Notification Programming Guide":
+ iOS Note: In iOS, you can determine whether an application is launched as a result of the user tapping the action button
+ or whether the notification was delivered to the already-running application by examining the application state. In the delegate’s
+ implementation of the application:didReceiveRemoteNotification: or application:didReceiveLocalNotification: method, get the value
+ of the applicationState property and evaluate it. If the value is UIApplicationStateInactive, the user tapped the action button;
+ if the value is UIApplicationStateActive, the application was frontmost when it received the notification.
+ */
+
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    BOOL shouldGoToNews = application.applicationState == UIApplicationStateInactive;
+    if (shouldGoToNews) {
+        //TODO go staight to news
+        [[STUnreadActivity sharedInstance] update];
+    }
+    else {
+        [[STUnreadActivity sharedInstance] update];
+    }
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)devToken {

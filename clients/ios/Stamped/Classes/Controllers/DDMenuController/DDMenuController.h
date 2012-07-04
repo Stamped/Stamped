@@ -26,6 +26,8 @@
 
 #import <UIKit/UIKit.h>
 
+extern NSString* const DDMenuControllerWillShowLeftMenuNotification;
+
 typedef enum {
     DDMenuPanDirectionLeft = 0,
     DDMenuPanDirectionRight,

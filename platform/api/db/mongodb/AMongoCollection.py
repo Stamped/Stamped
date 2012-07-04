@@ -138,7 +138,7 @@ class AMongoCollection(object):
         cfg = MongoDBConfig.getInstance()
         self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
         
-        logs.info("Connected to MongoDB collection: %s" % collection)
+        logs.debug("Connected to MongoDB collection: %s" % collection)
     
     def _validateUpdate(self, result):
         try:

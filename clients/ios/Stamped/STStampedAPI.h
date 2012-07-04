@@ -42,6 +42,10 @@
 #import <CoreLocation/CoreLocation.h>
 #import "STAlertItem.h"
 #import "STLinkedAccounts.h"
+#import "STCache.h"
+
+#define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)
+#define IS_CURRENT_USER(user_id) [[[[STStampedAPI sharedInstance] currentUser] userID] isEqualToString:(user_id)]
 
 typedef enum {
     STStampedAPIScopeYou = 0,
@@ -60,7 +64,7 @@ extern NSString* const STStampedAPIRefreshedTokenNotification;
 extern NSString* const STStampedAPIUserUpdatedNotification;
 extern NSString* const STStampedAPILocalStampModificationNotification;
 
-@interface STStampedAPI : NSObject
+@interface STStampedAPI : NSObject <STCacheAccelerator>
 
 //TODO modifify calls to returns cancellable NSOperations that have already been disbatched and autoreleased
 // This strategy should be reverse compatible with existing usage.
@@ -139,11 +143,10 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 - (STCancellation*)entityDetailForSearchID:(NSString*)searchID 
                                andCallback:(void(^)(id<STEntityDetail>, NSError*, STCancellation*))block;
 
-- (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
-                             andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block;
-
-- (void)activitiesForFriendsWithGenericSlice:(STGenericSlice*)slice 
-                                 andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block;
+- (STCancellation*)activitiesForScope:(STStampedAPIScope)scope
+                               offset:(NSInteger)offset 
+                                limit:(NSInteger)limit 
+                          andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error, STCancellation* cancellation))block;
 
 - (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
 
@@ -266,6 +269,12 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)alertsWithCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)creditingStampsWithUserID:(NSString*)userID 
+                                        date:(NSDate*)date 
+                                       limit:(NSInteger)limit 
+                                      offset:(NSInteger)offset
+                                 andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block;
+
 - (STCancellation*)alertsWithOnIDs:(NSArray*)onIDs
                             offIDs:(NSArray*)offIDS 
                        andCallback:(void (^)(NSArray<STAlertItem>* alerts, NSError* error, STCancellation* cancellation))block;
@@ -287,6 +296,12 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (UIImage*)currentUserImageForSize:(STProfileImageSize)profileImageSize;
 
+- (STCancellation*)createEntityWithParams:(NSDictionary*)params
+                              andCallback:(void (^)(id<STEntityDetail> entityDetail, NSError* error, STCancellation* cancellation))block;
+
++ (void)logError:(NSString*)message;
+
 @property (nonatomic, readwrite, retain) UIImage* currentUserImage;
 
 @end
+

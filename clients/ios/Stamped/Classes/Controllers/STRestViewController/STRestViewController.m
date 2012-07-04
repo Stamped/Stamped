@@ -7,6 +7,8 @@
 
 #import "STRestViewController.h"
 
+static CGFloat _shelfOffset = 9;
+
 @implementation STRestViewController
 
 @synthesize tableView=_tableView;
@@ -18,7 +20,7 @@
 @synthesize searching=_searching;
 
 - (id)init {
-    if ((self = [super init])) {
+    if ((self = [super initWithNibName:nil bundle:nil])) {
         _tableStyle = UITableViewStylePlain;
     }
     return self;
@@ -53,9 +55,11 @@
     
     if (!_tableView) {
         UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:_tableStyle];
+        tableView.clipsToBounds = NO;
         tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         tableView.delegate = (id<UITableViewDelegate>)self;
         tableView.dataSource = (id<UITableViewDataSource>)self;
+        [Util reframeView:self.tableView withDeltas:CGRectMake(0, _shelfOffset, 0, -_shelfOffset)];
         [self.view addSubview:tableView];
         _tableView = [tableView retain];
         [tableView release];
@@ -207,8 +211,9 @@
     }
     
     CGRect frame = self.tableView.frame;
-    frame.origin.y = origin;
-    frame.size.height = height;
+    self.tableView.clipsToBounds = NO;
+    frame.origin.y = origin + _shelfOffset;
+    frame.size.height = height - _shelfOffset;
     self.tableView.frame = frame;
     
 }

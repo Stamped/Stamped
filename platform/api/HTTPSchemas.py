@@ -1308,7 +1308,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
 
-            if entity.sources.singleplatform_id is not None:
+            if entity.menu is not None and entity.menu:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'stamped'

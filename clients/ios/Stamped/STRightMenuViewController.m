@@ -13,6 +13,7 @@
 #import "STMenuController.h"
 #import "STAppDelegate.h"
 #import "STRootViewController.h"
+#import "CreateEntityViewController.h"
 
 @interface STRightMenuViewController ()
 - (void)animateIn:(BOOL)animated;
@@ -100,7 +101,6 @@
         }
         
         frame.origin.y = floorf(frame.origin.y + 48.0f);
-        /*
          // more
          button = [UIButton buttonWithType:UIButtonTypeCustom];
          button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
@@ -109,7 +109,7 @@
          button.frame = frame;
          [_scrollView addSubview:button];
          [_buttons addObject:button];
-         */      
+
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_right.png"]];
         [self.view addSubview:corner];
         [corner release];
@@ -268,8 +268,9 @@
 }
 
 - (void)more:(id)sender {
-    
-    
+    CreateEntityViewController *controller = [[[CreateEntityViewController alloc] initWithEntityCategory:@"other" entityTitle:@""] autorelease];
+    [Util pushController:controller modal:NO animated:YES];
+    [[Util sharedMenuController] showRootController:YES];
 }
 
 - (void)buttonHit:(UIButton*)button {

@@ -297,8 +297,8 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     self.pending = nil;
     self.finished = NO;
     [self.todos removeAllObjects];
-    [self.tableView reloadData];
     [self loadMore];
+    [self.tableView reloadData];
     [super reloadDataSource];
 }
 
