@@ -2296,7 +2296,7 @@ class StampedAPI(AStampedAPI):
         else:
             stamp                       = Stamp()
 
-        logs.debug('### addStamp section 1: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 1: %s' % (time.time() - t1))
         t1 = time.time()
 
         # Update content if stamp exists
