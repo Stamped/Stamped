@@ -4463,6 +4463,7 @@ class StampedAPI(AStampedAPI):
         persistedEntities = set()
         entity = self._enrichAndPersistEntity(entity, persistedEntities)
         self._followOutLinks(entity, persistedEntities, depth)
+        return entity
 
 
     def _enrichAndPersistEntity(self, entity, persisted):

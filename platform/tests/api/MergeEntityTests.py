@@ -30,7 +30,7 @@ class MergeEntityTest(AStampedFixtureTestCase):
             if item.isType('artist') and (item.albums or item.tracks):
                 del item.albums
                 del item.tracks
-                mongoApi._mergeEntity(item, set())
+                mongoApi._mergeEntity(item)
                 self.verifyAllLinks(item.entity_id, collection)
                 break
 
@@ -49,11 +49,10 @@ class MergeEntityTest(AStampedFixtureTestCase):
         merged = None
         for item in allItems:
             if item.isType('track') and item.title == 'Call Me Maybe':
-                del item.albums
-                del item.artists
-                merged = mongoApi._mergeEntity(item, set())
+                merged = mongoApi._mergeEntity(item)
                 break
-        assert merged is not None
+        else:
+            raise Exception('could not find track')
         for artist in merged.artists:
             if artist.title == ARTIST:
                 self.verifyAllLinks(artist.entity_id, collection)
