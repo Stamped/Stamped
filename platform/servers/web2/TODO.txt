@@ -44,6 +44,7 @@
 TODO:
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
     
+    * clicking on header stamp logo should bring you back to your default profile page
     * incorporate versioning into asset management
     
     * optimization:

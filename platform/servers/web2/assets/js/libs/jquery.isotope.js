@@ -7,6 +7,8 @@
  * http://metafizzy.co/#licenses
  *
  * Copyright 2012 David DeSandro / Metafizzy
+ * 
+ * NOTE: Stamped owns a single-domain commercial license to use the Isotope library.
  */
 
 /*jshint asi: true, browser: true, curly: true, eqeqeq: true, forin: false, immed: false, newcap: true, noempty: true, strict: true, undef: true */
