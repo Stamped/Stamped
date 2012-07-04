@@ -10,10 +10,10 @@ APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -58,6 +58,10 @@ class Facebook(object):
                 result = json.load(e)
                 logs.info('result: %s' % result)
                 if 'error' in result:
+                    if 'code' in result['error']:
+                        code = result['error']['code']
+                        if code == 190:
+                            raise StampedFacebookTokenError('Invalid Facebook token')
 #                    if 'code' in result['error']:
 #                        # if a code is provided, then we can reauth the user
 #                        logs.info('### hit error in FB with code')

@@ -162,6 +162,17 @@ class StampedInvalidRelationshipError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
 
+class StampedInvalidTypeSchemaImportError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedActivityMissingRecipientError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedUnknownSourceError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
 
     # Accounts
 class StampedInvalidPasswordError(StampedInputError):
@@ -209,7 +220,7 @@ class StampedAlreadyStampedAuthError(StampedIllegalActionError):
         StampedIllegalActionError.__init__(self, msg)
 
 
-        # Users
+    # Users
 class StampedViewUserPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
@@ -238,6 +249,10 @@ class StampedLinkedAccountError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
 
+class StampedLinkedAccountMismatchError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
 class StampedMissingLinkedAccountTokenError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
@@ -263,6 +278,10 @@ class StampedThirdPartyError(StampedInputError):
 class StampedThirdPartyInvalidCredentialsError(StampedInvalidCredentialsError):
     def __init__(self, msg=None):
         StampedInvalidCredentialsError.__init__(self, msg)
+
+class StampedFacebookTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self,msg)
 
     # Stamps
 class StampedOutOfStampsError(StampedIllegalActionError):
@@ -301,3 +320,7 @@ class StampedInvalidFriendshipError(StampedIllegalActionError):
 class StampedFriendshipCheckPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
+
+class StampedInviteExistsError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)

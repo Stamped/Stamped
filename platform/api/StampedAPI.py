@@ -340,11 +340,9 @@ class StampedAPI(AStampedAPI):
             try:
                 facebookUser = self._facebook.getUserInfo(linkedAccount.token)
             except (StampedInputError, StampedUnavailableError) as e:
-                logs.warning("Unable to get user info from facebook %s" % e)
-                raise StampedInputError('Unable to connect to Facebook')
+                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
             if facebookUser['id'] != linkedAccount.linked_user_id:
-                logs.warning("The facebook id associated with the facebook token is different from the id provided")
-                raise StampedAuthError('Unable to connect to Facebook')
+                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
 #            if facebookUser['name'] != linkedAccount.linked_name:
 #                logs.warning("The name associated with the Facebook account is different from the name provided")
 #                raise StampedAuthError('Unable to connect to Facebook')
@@ -725,7 +723,7 @@ class StampedAPI(AStampedAPI):
     def getAccountByFacebookId(self, facebookId):
         accounts = self._accountDB.getAccountsByFacebookId(facebookId)
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
+            raise StampedAccountNotFoundError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
@@ -734,7 +732,7 @@ class StampedAPI(AStampedAPI):
     def getAccountByTwitterId(self, twitterId):
         accounts = self._accountDB.getAccountsByTwitterId(twitterId)
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
+            raise StampedAccountNotFoundError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
@@ -743,7 +741,7 @@ class StampedAPI(AStampedAPI):
     def getAccountByNetflixId(self, netflixId):
         accounts = self._accountDB.getAccountsByNetflixId(netflixId)
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
+            raise StampedAccountNotFoundError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
@@ -1359,7 +1357,7 @@ class StampedAPI(AStampedAPI):
             friendship.friend_id    = userA.user_id
 
             if not self._friendshipDB.checkFriendship(check):
-                raise StampedPermissionsError("Insufficient privileges to check friendship")
+                raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
 
         if userB.privacy == True and authUserId != userB.user_id:
             check                   = Friendship()
@@ -1367,7 +1365,7 @@ class StampedAPI(AStampedAPI):
             friendship.friend_id    = userB.user_id
 
             if not self._friendshipDB.checkFriendship(check):
-                raise StampedPermissionsError("Insufficient privileges to check friendship")
+                raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
 
         friendship              = Friendship()
         friendship.user_id      = userA.user_id
@@ -1465,11 +1463,10 @@ class StampedAPI(AStampedAPI):
     def inviteFriend(self, authUserId, email):
         # Validate email address
         email = str(email).lower().strip()
-        if not utils.validate_email(email):
-            raise StampedInputError("Invalid format for email address")
+        email = SchemaValidation.validateEmail(email)
 
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise StampedInputError("Invite already exists")
+            raise StampedInviteExistsError("Invite already exists")
 
         # Store email address linked to auth user id
         tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
@@ -1498,7 +1495,7 @@ class StampedAPI(AStampedAPI):
         searchId    = entityRequest.pop('search_id', None)
 
         if entityId is None and searchId is None:
-            raise StampedInputError("Required field missing (entity_id or search_id)")
+            raise StampedMissingParametersError("Required field missing (entity_id or search_id)")
 
         if entityId is None:
             entityId = searchId
@@ -4189,7 +4186,7 @@ class StampedAPI(AStampedAPI):
             recipientIds.remove(userId)
 
         if requireRecipient and len(recipientIds) == 0:
-            raise Exception("Missing recipient")
+            raise StampedActivityMissingRecipientError("Missing recipient")
 
         # Save activity
         self._activityDB.addActivity(verb           = verb,
@@ -4374,8 +4371,7 @@ class StampedAPI(AStampedAPI):
         }
 
         if source_name.lower() not in sources:
-            logs.warning('Source not found: %s (%s)' % (source_name, search_id))
-            raise StampedUnavailableError
+            raise StampedUnknownSourceError('Source not found: %s (%s)' % (source_name, search_id))
 
         # Attempt to resolve against the Stamped DB
         source    = sources[source_name.lower()]()

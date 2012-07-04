@@ -55,7 +55,10 @@ def create(request, authUserId, data, **kwargs):
     
     return transformOutput(stamp.dataExport())
 
-exceptions_share = [ (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request', msg='Missing third party service name')) ]
+exceptions_share = [
+    (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request', msg='Missing third party service name')),
+    (StampedFacebookTokenError, StampedHTTPError(401, kind='facebook_auth', msg="Facebook login failed. Please reauthorize your account.")),
+]
 @handleHTTPRequest(http_schema=HTTPStampShare,
                    exceptions=exceptions + exceptions_share)
 @require_http_methods(["POST"])
