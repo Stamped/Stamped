@@ -23,6 +23,7 @@ from resolve.RdioSource import RdioSource
 from resolve.SpotifySource import SpotifySource
 from resolve.TMDBSource import TMDBSource
 from resolve.TheTVDBSource import TheTVDBSource
+from libs.CountedFunction import printFunctionCounts
 
 from tests.framework.FixtureTest import *
 
@@ -53,6 +54,9 @@ class RunEvalResolutions(AStampedFixtureTestCase):
         with tempfile.NamedTemporaryFile(delete=False) as output:
             pickle.dump(resolutionResult, output)
             print outputMessage % output.name
+
+        printFunctionCounts()
+
 
     def __convertSearchId(self, searchId, fullResolver):
         source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', searchId).groups()
