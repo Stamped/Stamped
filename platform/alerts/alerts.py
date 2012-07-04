@@ -239,8 +239,7 @@ def runAlerts(options):
             if send_email:
                 try:
                     if recipient.email is not None: 
-
-                        email = validateEmail(recipient.email)
+                        emailAddress = validateEmail(recipient.email)
 
                         # Add email address
                         if recipient.email not in userEmailQueue:
@@ -280,111 +279,71 @@ def runAlerts(options):
     if len(userPushQueue) > 0 or len(userPushUnread) > 0:
         sendPushNotifications(userPushQueue, userPushUnread, options)
 
-"""
 def runInvites(options):
     numInvites = inviteDB.numInvites()
-    invites  = inviteDB.getInvites(limit=options.limit)
-    userIds   = {}
+    invites = inviteDB.getInvites(limit=options.limit)
+    userIds = {}
     userEmailQueue = {}
     
     for invite in invites:
-        userIds[str(invite.user_id)] = 1
+        userIds[str(invite.user_id)] = None
     
     accounts = accountDB.getAccounts(userIds.keys())
     
     for account in accounts:
         userIds[account.user_id] = account
     
-    print 'Number of invitations: %s' % numInvites
+    logs.info('Number of invitations: %s' % numInvites)
     
     for invite in invites:
         try:
-            print 
-            print
-
-            print invite
-            if userIds[str(invite.user_id)] == 1:
-                raise
-
-            ### TODO: Check if recipient is already a member?
-            ### TODO: Check if user is on email blacklist
+            if userIds[str(invite.user_id)] is None:
+                msg = "User (%s) not found" % (invite.user_id)
+                raise StampedUnavailableError(msg)
 
             user = userIds[str(invite.user_id)]
             emailAddress = invite.recipient_email
+            emailAddress = validateEmail(emailAddress)
 
-            try:
-                # Send email
-                print 'EMAIL'
+            if emailAddress not in userEmailQueue:
+                userEmailQueue[emailAddress] = []
 
-                if not emailAddress:
-                    raise
+            # Grab template
+            path = os.path.join(base, 'templates', 'email_invite.html.j2')
+            template = open(path, 'r')
 
-                if emailAddress not in userEmailQueue:
-                    userEmailQueue[emailAddress] = []
+            # Build email
+            email = {}
+            email['to'] = emailAddress
+            email['from'] = 'Stamped <noreply@stamped.com>'
+            email['subject'] = u'%s thinks you have great taste' % user.name
+            email['invite_id'] = invite.invite_id
 
-                # Grab template
-                try:
-                    path = os.path.join(base, 'templates', 'email_invite.html.j2')
-                    print path
-                    template = open(path, 'r')
-                except:
-                    ### TODO: Add error logging?
-                    raise
-
-                # Build email
-                email = {}
-                email['to'] = emailAddress
-                email['from'] = 'Stamped <noreply@stamped.com>'
-                email['subject'] = u'%s thinks you have great taste' % user.name
-                email['invite_id'] = invite.invite_id
-
-                if not IS_PROD:
-                    email['subject'] = u'DEV: %s' % email['subject']
-                
-                params = HTTPUser().importSchema(user).dataExport()
-                html = parseTemplate(template, params)
-                email['body'] = html
-
-                userEmailQueue[emailAddress].append(email)
-
-                print 'EMAIL COMPLETE'
-            except Exception as e:
-                print e
-                print 'EMAIL FAILED'
+            if not IS_PROD:
+                email['subject'] = u'DEV: %s' % email['subject']
             
-            # Remove the invite
-            raise
+            params = HTTPUser().importUser(user).dataExport()
+            html = parseTemplate(template, params)
+            email['body'] = html
 
-        except:
-            print 'REMOVED'
+            userEmailQueue[emailAddress].append(email)
+
+        except StampedInvalidEmailError:
+            logs.debug("Invalid email address: %s" % invite.recipient_email)
+        except Exception as e:
+            logs.warning("An error occurred: %s" % e)
+            logs.warning("Invite removed: %s" % invite)
+
+        finally:
             if not options.noop:
-                pass
-                # inviteDB.removeInvite(invite.invite_id)
-
-            continue
-
-    print
-
+                inviteDB.removeInvite(invite.invite_id)
+    
     # Send emails
     if len(userEmailQueue) > 0:
-        print '-' * 40
-        print 'INVITE EMAILS:'
-        for k, v in userEmailQueue.iteritems():
-            for email in v:
-                try:
-                    print u"%64s | %s" % (email['to'], email['subject'])
-                except Exception as e:
-                    print e
-        print
-        for k, v in userEmailQueue.iteritems():
-            print k, len(v)
-        print
         sendEmails(userEmailQueue, options)
-        print
-"""
+
 
 def _setSubject(verb, user):
-
     if verb == 'credit':
         msg = u'%s (@%s) gave you credit for a stamp' % (user.name, user.screen_name)
 
@@ -405,6 +364,7 @@ def _setSubject(verb, user):
 
     elif verb == 'follow':
         msg = u'%s (@%s) is now following you on Stamped' % (user.name, user.screen_name)
+
     else:
         logs.warning("Invalid verb for subject: %s" % verb)
         raise
@@ -415,7 +375,6 @@ def _setSubject(verb, user):
     return msg
 
 def _setBody(verb, settingsToken, user, objects=None):
-
     try:
         path = os.path.join(base, 'templates', 'email_%s.html.j2' % verb)
         template = open(path, 'r')
@@ -437,7 +396,7 @@ def _setBody(verb, settingsToken, user, objects=None):
 
         if objects.comment_ids is not None and len(objects.comment_ids) > 0:
             commentId = objects.comment_ids[-1]
-            comment = self._commentDB.getComment(commentId)
+            comment = api._commentDB.getComment(commentId)
             if 'title' not in params:
                 stampId = comment.stamp_id 
                 stamp = api.getStamp(stampId)
@@ -516,13 +475,12 @@ def _pushNotificationMessage(verb, user):
     elif verb == 'follow':
         msg = '%s is now following you' % (user.screen_name)
 
+    elif verb == 'friend_twitter':
+        msg = 'Your Twitter friend %s joined Stamped' % (user.screen_name)
+    elif verb == 'friend_facebook':
+        msg = 'Your Facebook friend %s joined Stamped' % (user.screen_name)
     elif verb.startswith('friend_'):
-        if verb == 'friend_twitter':
-            msg = 'Your Twitter friend %s joined Stamped' % (user.screen_name)
-        elif verb == 'friend_facebook':
-            msg = 'Your Facebook friend %s joined Stamped' % (user.screen_name)
-        else:
-            msg = 'Your friend %s joined Stamped' % (user.screen_name)
+        msg = 'Your friend %s joined Stamped' % (user.screen_name)
 
     else:
         raise Exception("Unrecognized verb: %s" % verb)
