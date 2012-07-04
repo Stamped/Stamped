@@ -215,6 +215,10 @@ class PushNotification(object):
         self.__unreadCount = unreadCount
         self.__activityId = activityId
 
+    def __repr__(self):
+        return "<Push Notification: activity='%s', verb='%s', recipient='%s'" % \
+            (self.__activityId, self.__verb, self.__recipient)
+
     @property 
     def activityId(self):
         return self.__activityId
@@ -554,7 +558,7 @@ class NotificationQueue(object):
         # Apply rate limit
         limit = 3
 
-        apns_wrapper = APNSNotificationWrapper(self.__apnsCert, not self.__sandbox)
+        apns_wrapper = APNSNotificationWrapper(self.__apnsCert, self.__sandbox)
         
         for deviceId, pushQueue in self.__pushQueue.iteritems():
             if IS_PROD or deviceId in self.__adminTokens:
@@ -599,7 +603,7 @@ class NotificationQueue(object):
             logs.warning("Skipping APNS cleanup (not prod / noop)")
             return
 
-        feedback = APNSFeedbackWrapper(self.__apnsCert, not self.__sandbox)
+        feedback = APNSFeedbackWrapper(self.__apnsCert, self.__sandbox)
 
         for d, t in feedback.tuples():
             token = binascii.hexlify(t)
