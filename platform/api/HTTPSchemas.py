@@ -257,6 +257,9 @@ def _buildTextReferences(text):
     refs = []
     offsets = {}
 
+    if text is None:
+        return []
+
     # Mentions
     mentions = mention_re.finditer(text)
     for item in mentions:
