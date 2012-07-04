@@ -197,12 +197,12 @@ var g_update_stamps = null;
             
             // update the user's stamp category distribution bargraph via a spiffy animation
             $('.bargraph-row-value').each(function(i, elem) {
-                var $this = $(this);
-                var percentage = 0;
-                var opacity = 1.0;
+                var percentage  = 0;
+                var opacity     = 1.0;
+                var $this       = $(this);
                 
                 if (bargraph) {
-                    var count  = $this.data('count') || 0;
+                    var count   = $this.data('count') || 0;
                     
                     if (count > 0) {
                         percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
@@ -212,7 +212,7 @@ var g_update_stamps = null;
                     }
                 }
                 
-                $this.stop(true, false).animate({
+                $this.stop(true, false).delay(50).animate({
                     width   : percentage + "%", 
                     opacity : opacity
                 }, {
@@ -228,9 +228,6 @@ var g_update_stamps = null;
                     }
                 });
             });
-            
-            setTimeout(function() {
-            }, 200);
             
             return false;
         });
@@ -271,10 +268,6 @@ var g_update_stamps = null;
                 });
             }
         };
-        
-        // TODO: may not be recursive
-        //$(document).emoji();
-        //$container.emoji();
         
         
         // ---------------------------------------------------------------------
@@ -631,6 +624,7 @@ var g_update_stamps = null;
                 $items = $scope.find('.stamp-gallery-item');
             } else if ($scope.hasClass(sdetail_wrapper)) {
                 $items = null;
+                $scope.find('.normal_blurb').emoji();
             }
             
             update_timestamps($scope);
@@ -662,13 +656,21 @@ var g_update_stamps = null;
                     var $this = $(this);
                     var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
                     var href  = $link.attr('href');
+                    var title = $link.data("title");
                     
                     href = href.replace('http://www.stamped.com', '');
                     //href = href + "&" + new Date().getTime();
                     
-                    open_sdetail(href);
+                    if (History && History.enabled) {
+                        History.pushState(null, title, href);
+                    } else {
+                        open_sdetail(href);
+                    }
+                    
                     return false;
                 });
+                
+                $items.find('.blurb').emoji();
             }
             
             $scope.find("a.lightbox").fancybox(get_fancybox_options({
@@ -797,7 +799,7 @@ var g_update_stamps = null;
                     // TODO: customize loading image
                     infinite_scroll = $gallery.infinitescroll({
                         bufferPx        : window.innerHeight * .2, 
-                        debug           : true, 
+                        debug           : STAMPED_PRELOAD.DEBUG, 
                         
                         navSelector     : "div.stamp-gallery-nav", 
                         nextSelector    : infinite_scroll_next_selector, 
@@ -834,10 +836,10 @@ var g_update_stamps = null;
                         }, 
                         
                         state           : {
-                            isDuringAjax: false,
-                            isInvalidPage: false,
-                            isDestroyed : false,
-                            isDone      : false
+                            isDuringAjax    : false,
+                            isInvalidPage   : false,
+                            isDestroyed     : false,
+                            isDone          : false
                         }
                     }, function(new_elements) {
                         var $elements = $(new_elements);
@@ -955,7 +957,7 @@ var g_update_stamps = null;
         
         
         // parse the given URL for its base URL and parameters
-        var parse_url = function(url) {
+        var parse_url = function(url, title) {
             var parts         = url.split('?');
             var base_url_s    = parts[0];
             var base_uri0_s   = base_url_s.split('/');
@@ -980,21 +982,20 @@ var g_update_stamps = null;
             return {
                 base_url : base_url_s, 
                 options  : options_s, 
-                base_uri : base_uri_s
+                base_uri : base_uri_s, 
+                title    : title
             };
         };
         
         var url         = document.URL;
-        var parsed_url  = parse_url(url);
-        
-        var base_url    = parsed_url.base_url;
-        var options     = parsed_url.options;
-        var base_uri    = parsed_url.base_uri;
+        var title       = document.title;
+        var orig_url    = parse_url(url, title);
         
         if (STAMPED_PRELOAD.sdetail) {
-            options     = { };
-            base_uri    = "/" + screen_name;
-            base_url    = base_uri;
+            orig_url.options  = { };
+            orig_url.base_uri = "/" + screen_name;
+            orig_url.base_url = orig_url.base_uri;
+            orig_url.title    = "Stamped - " + screen_name;
         }
         
         // Returns a new dictionary of parameters, comprised of (opts | params) 
@@ -1003,7 +1004,7 @@ var g_update_stamps = null;
         // this page's URL will be used as the defaults.
         var get_custom_params = function(params, opts) {
             if (typeof(opts) === 'undefined') {
-                opts = options;
+                opts = orig_url.options;
             }
             
             var custom_params = {};
@@ -1038,7 +1039,7 @@ var g_update_stamps = null;
         
         var get_custom_params_string = function(params, uri) {
             if (typeof(uri) === 'undefined') {
-                uri = base_uri;
+                uri = orig_url.base_uri;
             }
             
             var custom_params = get_custom_params(params);
@@ -1064,7 +1065,7 @@ var g_update_stamps = null;
         
         var get_custom_url = function(params, url) {
             if (typeof(url) === 'undefined') {
-                url = base_url;
+                url = orig_url.base_url;
             }
             
             var custom_params = get_custom_params(params);
@@ -1088,7 +1089,7 @@ var g_update_stamps = null;
         };
         
         console.debug("Stamped profile page for screen_name '" + screen_name + "'");
-        console.debug(options);
+        console.debug(orig_url.options);
         
         
         // ---------------------------------------------------------------------
@@ -1254,205 +1255,233 @@ var g_update_stamps = null;
         
         var g_category = null;
         
+        if (typeof(orig_url.options.category) !== 'undefined') {
+            g_category = orig_url.options.category;
+        } else {
+            g_category = 'default';
+        }
+        
         // TODO: if history is disabled but JS is enabled, user will be unable 
         // to navigate categories
         
         if (History && History.enabled) {
-            History.Adapter.bind(window, 'statechange', function() {
-                var State    = History.getState();
-                var category = 'default';
-                var custom_params = {
-                    'ajax' : true
-                };
-                
-                for (var key in State.data) {
-                    if (State.data.hasOwnProperty(key)) {
-                        custom_params[key] = State.data[key];
-                    }
-                }
-                
-                if (typeof(custom_params['category']) !== 'undefined') {
-                    category = custom_params['category'];
-                }
-                
-                console.debug("NEW CATEGORY: " + category);
-                console.debug("user_id: " + user_id);
-                
-                History.log(State.data, State.title, State.url);
-                var orig_category = category;
-                
-                if (category === 'default') {
-                    category = null;
-                    custom_params['category'] = null;
-                }
-                
-                var params    = get_custom_params(custom_params);
-                var url       = get_custom_url(params);
-                var $items    = $('.stamp-gallery-item');
-                
-                $gallery.css({
-                    visibility : 'hidden', 
-                    opacity    : 0
-                });
-                
-                $('.stamp-gallery-nav').hide();
-                $('.loading').show();
-                
-                $(".stamp-gallery-nav a").each(function() {
-                    var href   = $(this).attr('href');
-                    var parsed = parse_url(href);
-                    var params = get_custom_params({ category : category }, parsed.options);
-                    var url    = get_custom_url(params, parsed.base_url);
-                    //console.debug('HREF: ' + url);
+            var views = [
+                {
+                    title : 'sdetail', 
                     
-                    $(this).attr('href', url);
-                });
-                
-                // animated transition between category-specific headers
-                if (category !== g_category) {
-                    var sel = '.header-category-' + orig_category;
-                    var $elem = $(sel);
-                    g_category = category;
-                    
-                    if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
-                        var completion_func = function() {
-                            $('.header-selected').removeClass('header-animating header-selected');
-                            $elem.removeClass('header-animating').addClass('header-selected');
-                            
-                            set_body_class(orig_category);
-                            g_init_social_sharing();
-                        };
+                    is_match_func : function(state, url, relative_url) {
+                        var regexes = [
+                            /.*[\w]+\/s\/[\d]+.*/, 
+                            /.*[\w]+\/stamps\/[\d]+.*/
+                        ];
                         
-                        if (category === null) {
-                            completion_func();
+                        var is_sdetail = false;
+                        $.each(regexes, function(i, re) {
+                            if (relative_url.match(re)) {
+                                is_sdetail = true;
+                                return false;
+                            }
+                        });
+                        
+                        return is_sdetail;
+                    }, 
+                    
+                    apply_func : function(state, url, relative_url) {
+                        open_sdetail(url);
+                    }
+                }, 
+                {
+                    title : 'main', 
+                    
+                    is_match_func : null, 
+                    
+                    apply_func : function(state, url, relative_url) {
+                        if (!!close_sdetail_func) {
+                            close_sdetail_func();
+                        }
+                        
+                        var custom_params = { 'ajax' : true };
+                        var category;
+                        
+                        // parse parameters
+                        if (typeof(orig_url.options.category) !== 'undefined') {
+                            category = orig_url.options.category;
                         } else {
-                            $elem.addClass('header-animating').stop(true, false).css({
-                                top : "-100%", 
-                            }).animate({
-                                top : 0, 
+                            category = 'default';
+                        }
+                        
+                        for (var key in state.data) {
+                            if (state.data.hasOwnProperty(key)) {
+                                custom_params[key] = state.data[key];
+                            }
+                        }
+                        
+                        if (typeof(custom_params['category']) !== 'undefined') {
+                            category = custom_params['category'];
+                        }
+                        
+                        var orig_category = category;
+                        
+                        if (category === 'default') {
+                            category = null;
+                            custom_params['category'] = null;
+                        }
+                        
+                        if (orig_category !== g_category) {
+                            var params    = get_custom_params(custom_params);
+                            var url       = get_custom_url(params);
+                            var $items    = $('.stamp-gallery-item');
+                            
+                            $gallery.css({
+                                visibility : 'hidden', 
+                                opacity    : 0
+                            });
+                            
+                            $('.stamp-gallery-nav').hide();
+                            $('.loading').show();
+                            
+                            $(".stamp-gallery-nav a").each(function() {
+                                var href   = $(this).attr('href');
+                                var parsed = parse_url(href);
+                                var params = get_custom_params({ category : category }, parsed.options);
+                                var url    = get_custom_url(params, parsed.base_url);
+                                //console.debug('HREF: ' + url);
+                                
+                                $(this).attr('href', url);
+                            });
+                            
+                            // animated transition between category-specific headers
+                            var sel = '.header-category-' + orig_category;
+                            var $elem = $(sel);
+                            g_category = category;
+                            
+                            console.debug("NEW CATEGORY: " + category);
+                            History.log(state.data, state.title, state.url);
+                            
+                            if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
+                                var completion_func = function() {
+                                    $('.header-selected').removeClass('header-animating header-selected');
+                                    $elem.removeClass('header-animating').addClass('header-selected');
+                                    
+                                    set_body_class(orig_category);
+                                    g_init_social_sharing();
+                                };
+                                
+                                if (category === null) {
+                                    completion_func();
+                                } else {
+                                    $elem.addClass('header-animating').stop(true, false).css({
+                                        top : "-100%", 
+                                    }).animate({
+                                        top : 0, 
+                                    }, {
+                                        duration : 600, 
+                                        specialEasing : { 
+                                            top : 'easeOutCubic'
+                                        }, 
+                                        complete : completion_func
+                                    });
+                                }
+                            }
+                            
+                            // scroll page back to top
+                            $('body,html').stop(true, false).animate({
+                                scrollTop: 0
                             }, {
-                                duration : 600, 
+                                duration : 200, 
                                 specialEasing : { 
-                                    top : 'easeOutCubic'
-                                }, 
-                                complete : completion_func
+                                    scrollTop : 'easeInOutCubic'
+                                }
+                            });
+                            
+                            // load in new content via AJAX
+                            var $target = $("<div></div>");
+                            $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                                if (category !== g_category) {
+                                    return;
+                                }
+                                
+                                if (status == "error") {
+                                    console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
+                                    console.debug(response);
+                                    console.debug(xhr);
+                                    
+                                    //alert("TODO: handle AJAX and backend errors gracefuly");
+                                    return;
+                                }
+                                
+                                // TODO: optimize!!
+                                var $elements = $target.find('.stamp-gallery-item').remove();
+                                
+                                //$('.stamp-gallery-nav').show();
+                                //$('.inset-stamp .number').html(stamps.length);
+                                var s = ".stamp-gallery-nav a";
+                                var href = $($target.find(s).get(0)).attr('href');
+                                if (typeof(href) === 'undefined') {
+                                    href = "#";
+                                }
+                                //log("NEW HREF: " + href);
+                                //console.debug("NEW HREF: " + href);
+                                
+                                var $next = $(infinite_scroll_next_selector);
+                                if ($next.length === 1) {
+                                    $next.attr('href', href);
+                                } else {
+                                    // no previous next selector, so add one
+                                    $(".stamp-gallery-nav ul").append("<li><a href='" + href + "'>Next</a></li>");
+                                }
+                                
+                                destroy_infinite_scroll();
+                                
+                                $gallery.append($elements);
+                                update_stamps();
+                                
+                                $gallery.isotope('remove',   $items,    function() {
+                                    $('.loading').hide();
+                                });
+                                
+                                $gallery.isotope('appended', $elements, function() {
+                                    init_infinite_scroll();
+                                });
+                                
+                                $gallery.stop(true, false).css({
+                                    visibility : 'visible'
+                                }).animate({
+                                    opacity : 1
+                                }, {
+                                    duration : 200, 
+                                    specialEasing : { 
+                                        opacity : 'easeInCubic'
+                                    }
+                                });
                             });
                         }
                     }
                 }
+            ];
+            
+            History.Adapter.bind(window, 'statechange', function() {
+                var state   = History.getState();
+                var root    = History.getRootUrl();
+                var url     = state.url;
+                var relative_url = url.replace(root, '');
                 
-                $('body,html').stop(true, false).animate({
-                    scrollTop: 0
-                }, {
-                    duration : 200, 
-                    specialEasing : { 
-                        scrollTop : 'easeInOutCubic'
-                    }
-                });
-                
-                var $target = $("<div></div>");
-                $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
-                    if (category !== g_category) {
-                        return;
+                for (var i = 0, len = views.length; i < len; i++) {
+                    var view = views[i];
+                    var is_match_func = view.is_match_func;
+                    var is_match = (i >= len - 1);
+                    
+                    if (!!is_match_func) {
+                        is_match |= is_match_func(state, url, relative_url);
                     }
                     
-                    if (status == "error") {
-                        console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
-                        console.debug(response);
-                        console.debug(xhr);
+                    if (is_match) {
+                        console.debug("History matched view '" + view.title + "'");
                         
-                        //alert("TODO: handle AJAX and backend errors gracefuly");
-                        return;
+                        view.apply_func(state, url, relative_url);
+                        break;
                     }
-                    
-                    // TODO: optimize!!
-                    var $elements = $target.find('.stamp-gallery-item').remove();
-                    
-                    //$('.stamp-gallery-nav').show();
-                    //$('.inset-stamp .number').html(stamps.length);
-                    var s = ".stamp-gallery-nav a";
-                    var href = $($target.find(s).get(0)).attr('href');
-                    if (typeof(href) === 'undefined') {
-                        href = "#";
-                    }
-                    //log("NEW HREF: " + href);
-                    //console.debug("NEW HREF: " + href);
-                    
-                    var $next = $(infinite_scroll_next_selector);
-                    if ($next.length === 1) {
-                        $next.attr('href', href);
-                    } else {
-                        // no previous next selector, so add one
-                        $(".stamp-gallery-nav ul").append("<li><a href='" + href + "'>Next</a></li>");
-                    }
-                    
-                    destroy_infinite_scroll();
-                    
-                    $gallery.append($elements);
-                    update_stamps();
-                    
-                    $gallery.isotope('remove',   $items,    function() {
-                        $('.loading').hide();
-                    });
-                    
-                    $gallery.isotope('appended', $elements, function() {
-                        init_infinite_scroll();
-                    });
-                    
-                    $gallery.stop(true, false).css({
-                        visibility : 'visible'
-                    }).animate({
-                        opacity : 1
-                    }, {
-                        duration : 200, 
-                        specialEasing : { 
-                            opacity : 'easeInCubic'
-                        }
-                    });
-                });
-                
-                /*
-                // load stamps for new category selection via AJAX
-                client.get_user_stamps_by_screen_name(screen_name, params).done(function(stamps) {
-                    //console.debug("num_stamps: " + stamps.length);
-                    
-                    if (stamps.length > 0) {
-                        var $target = $("<div></div>");
-                        
-                        var stamps_view = new client.StampsGalleryView({
-                            model : stamps, 
-                            el : $target
-                        });
-                        
-                        stamps_view.render();
-                        
-                        var $elements = $target.find('.stamp-gallery-item').remove();
-                        
-                        //$('.stamp-gallery-nav').show();
-                        //$('.inset-stamp .number').html(stamps.length);
-                        
-                        $gallery.append($elements);
-                        update_stamps();
-                        
-                        $gallery.isotope('remove',   $items,    function() {
-                            $('.loading').hide();
-                        });
-                        
-                        $gallery.isotope('appended', $elements, function() {
-                        });
-                        
-                        $gallery.stop(true, false).css({
-                            visibility : 'visible'
-                        }).animate({
-                            opacity : 1
-                        }, {
-                            duration : 200, 
-                            specialEasing : { 
-                                opacity : 'easeInCubic'
-                            }
-                        });
-                    }
-                });*/
+                }
             });
         }
         
@@ -1473,9 +1502,9 @@ var g_update_stamps = null;
             if (History && History.enabled) {
                 var params_str = get_custom_params_string(params);
                 
-                console.debug(params);
-                console.debug(orig_category);
-                console.debug(params_str);
+                //console.debug(params);
+                //console.debug(orig_category);
+                //console.debug(params_str);
                 
                 var title = "Stamped - " + screen_name;
                 if (category !== null) {
@@ -1504,7 +1533,6 @@ var g_update_stamps = null;
             } else {
                 var next_url = get_custom_url(params);
                 
-                //alert("TODO: support navigation when browser history is disabled: " + next_url);
                 window.location = next_url;
             }
             
@@ -1657,6 +1685,32 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
+        var close_sdetail = function() {
+            if (!!close_sdetail_func) {
+                if (History && History.enabled) {
+                    var options = { };
+                    
+                    for (var key in orig_url.options) {
+                        if (orig_url.options.hasOwnProperty(key)) {
+                            options[key] = orig_url.options[key];
+                        }
+                    }
+                    
+                    if (!!g_category) {
+                        if (!g_category || g_category === 'default') {
+                            delete options['category'];
+                        } else {
+                            options.category = g_category;
+                        }
+                    }
+                    
+                    History.pushState(options, orig_url.title, get_custom_url(options));
+                } else {
+                    close_sdetail_func();
+                }
+            }
+        };
+        
         var open_sdetail = function(href, html) {
             var scroll_top = 0;
             var $target;
@@ -1695,43 +1749,39 @@ var g_update_stamps = null;
                 
                 $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                 
-                var close_sdetail_inner_func = function() {
-                    resume_infinite_scroll();
-                    update_dynamic_header();
-                    update_navbar_layout();
-                    g_init_social_sharing();
-                    
-                    // reset window's vertical scroll position to where it was 
-                    // before the sDetail popup
-                    // TODO: this is broken on Firefox
-                    $window.scrollTop(scroll_top);
-                    
-                    // reenable gallery animations
-                    enable_gallery_animations(true);
-                    
-                    if (!href) {
-                        update_gallery_layout(true);
-                        init_header_subsections();
-                    }
-                    
-                    resize_sdetail_wrapper($target, 'closing', function() {
-                        $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
-                        
-                        if (!href) {
-                            update_gallery_layout(true);
-                            
-                            setTimeout(function() {
-                                update_gallery_layout(true, null, true);
-                            }, 150);
-                        }
-                    });
-                };
-                
                 if (!!$gallery) {
                     update_gallery_layout(true);
                 }
                 
-                close_sdetail_inner_func();
+                resume_infinite_scroll();
+                update_dynamic_header();
+                update_navbar_layout();
+                g_init_social_sharing();
+                
+                // reset window's vertical scroll position to where it was 
+                // before the sDetail popup
+                // TODO: this is broken on Firefox
+                $window.scrollTop(scroll_top);
+                
+                // reenable gallery animations
+                enable_gallery_animations(true);
+                
+                if (!href) {
+                    update_gallery_layout(true);
+                    init_header_subsections();
+                }
+                
+                resize_sdetail_wrapper($target, 'closing', function() {
+                    $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
+                    
+                    if (!href) {
+                        update_gallery_layout(true);
+                        
+                        setTimeout(function() {
+                            update_gallery_layout(true, null, true);
+                        }, 150);
+                    }
+                });
             };
             
             if (!!href) {
@@ -1765,6 +1815,8 @@ var g_update_stamps = null;
             var $comments_list  = $comments_div.find('.comments-list');
             var $comments       = $comments_div.find('.comment');
             var comments_len    = $comments.length;
+            
+            $comments.find('.normal_blurb').emoji();
             
             // initialize comment collapsing
             if (comments_len > 2) {
@@ -1842,24 +1894,6 @@ var g_update_stamps = null;
                     
                     //$comments_div.toggleClass(collapsed);
                     return false;
-                });
-                
-                $comments.each(function (i, comment) {
-                    //console.debug("COMMENT " + i + ") " + $(comment).position().top);
-                    /*var $comment = $(comment);
-                    
-                    if (i < comments_len - 2) {
-                        var comment_pos = $comment.position();
-                        
-                        // TODO: z-indexing
-                        $comment.css({
-                            position : 'absolute', 
-                            top      : 0, //-comment_pos.top, 
-                            left     : comment_pos.left, 
-                            border   : '1px solid red'
-                            //, opacity : 0
-                        });
-                    }*/
                 });
             }
             
@@ -1957,6 +1991,7 @@ var g_update_stamps = null;
                 if ($value.length === 1) {
                     $item.removeClass(metadata_item_expanded);
                     var h0 = $value.height();
+                    
                     $item.addClass(metadata_item_expanded);
                     var h1 = $value.height();
                     
@@ -2000,7 +2035,7 @@ var g_update_stamps = null;
                             'height'        : height, 
                             
                             'max-width'     : width, 
-                            'max-height'    : height, 
+                            'max-height'    : height
                         });
                     }
                 }
@@ -2024,10 +2059,7 @@ var g_update_stamps = null;
             $sdetail.find('.close-button').click(function(event) {
                 event.preventDefault();
                 
-                if (!!close_sdetail_func) {
-                    close_sdetail_func();
-                }
-                
+                close_sdetail();
                 return false;
             });
             
@@ -2069,10 +2101,8 @@ var g_update_stamps = null;
             // close lightboxes, sDetail, and/or map popups when the user presses ESC
             // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
-                if (typeof(close_sdetail_func) !== 'undefined' && !!close_sdetail_func) {
-                    if ($('.fancybox-opened').length <= 0) {
-                        close_sdetail_func();
-                    }
+                if ($('.fancybox-opened').length <= 0) {
+                    close_sdetail();
                 }
                 
                 if (typeof(g_close_map_popup) !== 'undefined' && !!g_close_map_popup) {
@@ -2094,6 +2124,7 @@ var g_update_stamps = null;
         g_init_social_sharing();
         update_dynamic_header();
         init_header_subsections();
+        
         update_stamps();
         init_gallery();
         update_navbar_layout();
@@ -2103,8 +2134,8 @@ var g_update_stamps = null;
             if (!__init || $('#main-content').css('visibility') !== 'visible') {
                 __init = true;
                 
-                update_gallery_layout(true);
-                setTimeout(show_initial_gallery, 150);
+                update_gallery_layout(true, null, true);
+                setTimeout(show_initial_gallery, 500);
             }
         };
         

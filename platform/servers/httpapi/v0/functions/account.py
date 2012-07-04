@@ -45,6 +45,8 @@ exceptions = [
     (StampedDuplicateScreenNameError,  StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name")),
     (StampedAccountNotFoundError,      StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information')),
     (StampedAlreadyStampedAuthError,   StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account')),
+    (StampedLinkedAccountMismatchError, StampedHTTPError(400, kind='illegal_action',    msg="There was a problem verifying the third-party account")),
+
 ]
 exceptions_create = [(StampedInternalError,  StampedHTTPError(400, kind='internal', msg='There was a problem creating the account.  Please try again later.'))]
 @handleHTTPRequest(requires_auth=False,

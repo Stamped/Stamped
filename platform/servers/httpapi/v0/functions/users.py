@@ -167,7 +167,10 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-exceptions_findFacebook = [(StampedThirdPartyInvalidCredentialsError, StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Facebook credentials')) ]
+exceptions_findFacebook = [
+    (StampedThirdPartyInvalidCredentialsError, StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Facebook credentials')),
+    (StampedFacebookTokenError, StampedHTTPError(401, kind='facebook_auth', msg="Facebook login failed. Please reauthorize your account.")),
+]
 @handleHTTPRequest(http_schema=HTTPFindFacebookUser, 
                    parse_request_kwargs={'obfuscate':['user_token' ]},
                    exceptions=exceptions + exceptions_findFacebook)
@@ -179,7 +182,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-exceptions_inviteFacebookCollection = [(StampedThirdPartyInvalidCredentialsError, StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Facebook credentials')) ]
+exceptions_inviteFacebookCollection = exceptions_findFacebook
 @handleHTTPRequest(http_schema=HTTPFacebookFriendsCollectionForm,
     parse_request_kwargs={'obfuscate':['user_token' ]},
     exceptions=exceptions + exceptions_inviteFacebookCollection)
