@@ -23,6 +23,7 @@ try:
     from datetime                   import datetime
     from Resolver                   import *
     from ResolverObject             import *
+    from TitleUtils                 import *
 except:
     report()
     raise
@@ -89,9 +90,11 @@ class _NetflixObject(object):
         except Exception as e:
             return None
 
+    def _cleanName(self, title):
+        return cleanTvTitle(title)
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self._titleObj['title']['regular']
 
     @lazyProperty

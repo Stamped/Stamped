@@ -13,6 +13,9 @@ from errors import *
 
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
+from LRUCache               import lru_cache
+from CachedFunction         import cachedFn
+from libs.CountedFunction   import countedFn
 
 HOST              = 'api-public.netflix.com'
 PORT              = '80'
@@ -144,6 +147,13 @@ class Netflix(object):
             else:
                 return StampedThirdPartyError(message)
 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Netflix (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn()
+    @countedFn('Netflix (after caching)')
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 

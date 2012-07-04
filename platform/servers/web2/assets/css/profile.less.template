@@ -65,12 +65,6 @@
     margin: 0;
 }
 
-body.sdetail_popup_animation, body.sdetail_popup {
-    .post-header {
-        .user-gradient-func(135deg, 10%);
-    }
-}
-
 .user-primary {
     color: @user_primary;
 }
