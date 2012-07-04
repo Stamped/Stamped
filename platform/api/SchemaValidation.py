@@ -23,11 +23,12 @@ from bson.objectid          import ObjectId
 def parsePhoneNumber(phoneStr):
     if phoneStr is not None:
         return re.sub("[^0-9]", "", str(phoneStr))
+    return None
 
 _color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
 def validateHexColor(color):
     global _color_re
-    if color is None:
+    if color is None or color == '':
         return None
     color = color.upper()
     try:
@@ -38,19 +39,29 @@ def validateHexColor(color):
         logs.warning("Invalid hex color: %s" % color)
         raise StampedInputError("Invalid color value.")
 
+def validateString(string):
+    if string is None or string == '':
+        return None 
+    if isinstance(string, basestring):
+        return string
+    try: 
+        return unicode(string)
+    except Exception as e:
+        logs.warning("Invalid string: %s (%s)" % (string, e))
+        raise StampedInputError("Invalid string")
+
 def validateURL(url):
-    if url is None or url == "":
+    if url is None or url == '':
         return None
     val = URLValidator(verify_exists=False)
     try:
         val(url)
     except ValidationError, e:
-        logs.warning("Invalid URL" % url)
-        raise StampedHTTPError(400, msg="Invalid URL")
+        raise StampedInvalidWebsiteError("Invalid URL: %s" % url)
     return url
 
 def validateObjectId(string):
-    if string is None:
+    if string is None or string == '':
         return None
     try:
         r = ObjectId(string)
@@ -67,7 +78,7 @@ def validateStampId(stampId):
 
 def validateViewport(string):
     # Structure: "lat0,lng0,lat1,lng1"
-    if string is None:
+    if string is None or string == '':
         return None
     try:
         coords = string.split(',')
@@ -93,7 +104,7 @@ def validateViewport(string):
     raise StampedInputError("Invalid viewport: %s" % string)
 
 def validateCategory(category):
-    if category is None:
+    if category is None or category == '':
         return None
     try:
         category = category.lower()
@@ -104,7 +115,7 @@ def validateCategory(category):
         raise StampedInputError("Invalid category: %s" % category)
 
 def validateSubcategory(subcategory):
-    if subcategory is None:
+    if subcategory is None or subcategory == '':
         return None
     try:
         subcategory = subcategory.lower()
@@ -117,7 +128,7 @@ def validateSubcategory(subcategory):
 _screen_name_re = re.compile("^[\w-]{1,20}$", re.IGNORECASE)
 def validateScreenName(screen_name):
     global _screen_name_re
-    if screen_name is None:
+    if screen_name is None or screen_name == '':
         return None
     try:
         if _screen_name_re.match(screen_name) and isinstance(screen_name, basestring):
@@ -132,7 +143,7 @@ __email_re = re.compile(
     R'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
     R')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)   # domain
 def validateEmail(email):
-    if email is None:
+    if email is None or email == '':
         return None
     # Source: http://data.iana.org/TLD/tlds-alpha-by-domain.txt
     # Version 2012012600, Last Updated Thu Jan 26 15:07:01 2012 UTC

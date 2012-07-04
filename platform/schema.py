@@ -251,7 +251,7 @@ class Schema(object):
             overflow = True
         
         if isinstance(properties, Schema):
-            raise Exception("Invalid data type: cannot import schema object")
+            raise StampedInvalidTypeSchemaImportError("Invalid data type: cannot import schema object")
         try:
             for k, v in properties.items():
                 try:
@@ -281,7 +281,7 @@ class Schema(object):
                         raise
         except Exception as e:
             logs.warning(e)
-            raise
+            raise e
         return self
 
     @classmethod

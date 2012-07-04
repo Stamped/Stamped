@@ -317,7 +317,7 @@ def _buildTextReferences(text):
     # Sort by index
     refs.sort(key=lambda x: x.indices[0])
 
-    return refs
+    return text, refs
 
 
 # ######### #
@@ -428,7 +428,7 @@ class HTTPAccount(Schema):
         cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
-        cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
+        cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
@@ -515,9 +515,8 @@ class HTTPTwitterAccountNew(Schema):
 
     def convertToTwitterAccountNew(self):
         data = self.dataExport()
-        phone = _phoneToInt(data.pop('phone', None))
-        if phone is not None:
-            data['phone'] = phone
+        if 'phone' in data:
+            data['phone'] = _phoneToInt(data['phone'])
 
         return TwitterAccountNew().dataImport(data, overflow=True)
 
@@ -538,9 +537,8 @@ class HTTPAccountUpdateForm(Schema):
 
     def convertToAccountUpdateForm(self):
         data = self.dataExport()
-        phone = _phoneToInt(data.pop('phone', None))
-        if phone is not None:
-            data['phone'] = phone
+        if 'phone' in data:
+            data['phone'] = _phoneToInt(data['phone'])
 
         return AccountUpdateForm().dataImport(data, overflow=True)
 
@@ -731,6 +729,12 @@ class HTTPFindFacebookUser(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('user_token',                       basestring)
+
+class HTTPFacebookFriendsCollectionForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
 
 class HTTPFacebookLoginResponse(Schema):
     @classmethod
@@ -928,8 +932,9 @@ class HTTPComment(Schema):
         self.dataImport(comment.dataExport(), overflow=True)
         self.created = comment.timestamp.created
         self.user = HTTPUserMini().importUserMini(comment.user)
-        references = _buildTextReferences(self.blurb)
+        blurb, references = _buildTextReferences(self.blurb)
         if len(references) > 0:
+            self.blurb = blurb
             self.blurb_references = references
         return self
 
@@ -1975,10 +1980,10 @@ class HTTPEntityNew(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('title',                            basestring, required=True)
-        cls.addProperty('subtitle',                         basestring, required=True)
         cls.addProperty('category',                         basestring, required=True)
         cls.addProperty('subcategory',                      basestring, required=True)
-        cls.addProperty('desc',                             basestring)
+        cls.addProperty('subtitle',                         basestring, cast=validateString)
+        cls.addProperty('desc',                             basestring, cast=validateString)
         cls.addProperty('address',                          basestring)
         cls.addProperty('coordinates',                      basestring)
         cls.addProperty('cast',                             basestring)
@@ -1998,7 +2003,7 @@ class HTTPEntityNew(Schema):
         entity.title            = self.title
 
         def addField(entity, field, value, timestamp):
-            if value is not None:
+            if value is not None and value != '':
                 try:
                     setattr(entity, field, value)
                     setattr(entity, '%s_source' % field, 'seed')
@@ -2007,7 +2012,7 @@ class HTTPEntityNew(Schema):
                     pass
 
         def addListField(entity, field, value, entityMini=None, timestamp=None):
-            if value is not None:
+            if value is not None and value != '':
                 try:
                     if entityMini is not None:
                         item = entityMini()
@@ -2030,9 +2035,10 @@ class HTTPEntityNew(Schema):
             coords = Coordinates().dataImport(_coordinatesFlatToDict(self.coordinates))
             addField(entity, 'coordinates', coords, now)
 
-        entity.sources.user_generated_id            = authUserId
-        entity.sources.user_generated_subtitle      = self.subtitle
-        entity.sources.user_generated_timestamp     = now
+        entity.sources.user_generated_id = authUserId
+        entity.sources.user_generated_timestamp = now
+        if self.subtitle is not None and self.subtitle != '':
+            entity.sources.user_generated_subtitle = self.subtitle
 
         addListField(entity, 'directors', self.director, PersonEntityMini, now)
         addListField(entity, 'cast', self.cast, PersonEntityMini, now)
@@ -2528,8 +2534,9 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
-            references = _buildTextReferences(content.blurb)
+            blurb, references = _buildTextReferences(content.blurb)
             if len(references) > 0:
+                item.blurb = blurb 
                 item.blurb_references = references
 
             if content.images is not None:

@@ -36,7 +36,7 @@
                                     <table width="600" cellpadding="0" cellspacing="0">
                                         <tr>
                                             <td width="600" height="36" align="center" valign="bottom" style="color:#262626;font-family:Helvetica,Arial;font-size:16px">
-                                                <strong>{{ name }}</strong> (@{{ screen_name }}) is now following you on Stamped.
+                                                Congratulations! <strong>{{ name }}</strong> (@{{ screen_name }}) gave you credit for <strong>{{ title }}</strong>. This means you earn 2 more stamps. Nice!
                                             </td>
                                         </tr>
                                         
@@ -51,55 +51,18 @@
                                                 <table cellpadding="0" cellspacing="0">
                                                     <tr>
                                                         <td rowspan=2 width="94" height="94" valign="top">
-                                                            <img src="{{ image_url_92 }}" width="92" height="92" border="1" alt="{{ screen_name }}" style="border-size:1px;border-style:solid;border-color:#e6e6e6">
+                                                            <img src="{{ image_url_96 }}" width="92" height="92" border="1" alt="{{ screen_name }}" style="border-size:1px;border-style:solid;border-color:#e6e6e6">
                                                         </td>
                                                         <td rowspan=2 width="20" height="92">
                                                             &nbsp;
                                                         </td>
-                                                        <td width="455" valign="top">
-                                                            <table>
-                                                                <tr>
-                                                                    <td rowspan=2 width="44" align="left" valign="top">
-                                                                        <img src="http://static.stamped.com/logos/{{ color_primary }}-{{ color_secondary }}-email-36x36.png" alt="Stamp Color" width="36" height="36">
-                                                                    </td>
-                                                                    <td valign="top" style="color:#999999;font-family:Helvetica,Arial,sans-serif;font-size:14px">
-                                                                        {% if location %} {{ location }} {% else %} <strong>{{ name }}</strong> (@{{ screen_name }}) {% endif %}
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td valign="top" height="32" style="color:#262626;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-style:italic;">
-                                                                        {{ bio }}
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                        <td width="455" valign="top" height="28" style="color:#999999;font-family:Helvetica,Arial;font-size:16px">
+                                                            <strong>{{ screen_name }}</strong> stamped
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td width="445" style="color:#262626;font-family:Helvetica,Arial;font-size:14px;" valign="top">
-                                                            <table>
-                                                                <tr>
-                                                                    <td width="130" align="left" valign="bottom" style="color:#262626;font-weight:bold;font-size:18px;line-height:16px;">
-                                                                        {{ num_credits }}
-                                                                    </td>
-                                                                    <td width="130" align="left" valign="bottom" style="color:#262626;font-weight:bold;font-size:18px;line-height:16px;">
-                                                                        {{ num_followers }}
-                                                                    </td>
-                                                                    <td width="130" align="left" valign="bottom" style="color:#262626;font-weight:bold;font-size:18px;line-height:16px;">
-                                                                        {{ num_friends }}
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td width="130" align="left" valign="top" style="color:#999999;font-size:14px;">
-                                                                        credited
-                                                                    </td>
-                                                                    <td width="130" align="left" valign="top" style="color:#999999;font-size:14px;">
-                                                                        followers
-                                                                    </td>
-                                                                    <td width="130" align="left" valign="top" style="color:#999999;font-size:14px;">
-                                                                        following
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
+                                                        <td width="445" style="color:#262626;font-family:Helvetica,Arial;font-size:16px;" valign="top">
+                                                            {{ blurb }}
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -121,7 +84,7 @@
                                                         </td>
                                                         <td width="257" style="line-height:12px;font-size:12px;font-family:Helvetica,Arial,sans-serif;color:#999999;margin:0;padding:0;">
                                                             <h3 style="line-height:14px;font-size:14px;font-family:Helvetica,Arial,sans-serif;color:#595959;font-weight:bold;margin:0 0 5px;padding:0;">Launch Stamped on your iPhone</h3>
-                                                            to view @{{ screen_name }}'s profile
+                                                            to view @{{ screen_name }}'s stamp
                                                         </td>
                                                     </tr>
                                                 </table>

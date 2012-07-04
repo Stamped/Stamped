@@ -340,11 +340,9 @@ class StampedAPI(AStampedAPI):
             try:
                 facebookUser = self._facebook.getUserInfo(linkedAccount.token)
             except (StampedInputError, StampedUnavailableError) as e:
-                logs.warning("Unable to get user info from facebook %s" % e)
-                raise StampedInputError('Unable to connect to Facebook')
+                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
             if facebookUser['id'] != linkedAccount.linked_user_id:
-                logs.warning("The facebook id associated with the facebook token is different from the id provided")
-                raise StampedAuthError('Unable to connect to Facebook')
+                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
 #            if facebookUser['name'] != linkedAccount.linked_name:
 #                logs.warning("The name associated with the Facebook account is different from the name provided")
 #                raise StampedAuthError('Unable to connect to Facebook')
@@ -605,14 +603,13 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
 
-        if 'screen_name' in fields and account.screen_name != fields['screen_name']:
+        if 'screen_name' in fields and account.screen_name != fields['screen_name'] and fields['screen_name'] is not None:
             old_screen_name = account.screen_name
             account.screen_name = fields['screen_name']
 
             # Validate screen name
-            account.screen_name = account.screen_name.strip()
-            if not utils.validate_screen_name(account.screen_name):
-                raise StampedInputError("Invalid format for screen name")
+            screen_name = SchemaValidation.validateScreenName(account.screen_name.strip())
+            account.screen_name = screen_name
 
             # Verify screen_name unused
             existingAcct = None
@@ -621,8 +618,7 @@ class StampedAPI(AStampedAPI):
             except StampedUnavailableError:
                 pass
             if existingAcct is not None:
-                logs.warning('Attempted to update account with pre-existing screen name')
-                raise StampedInputError("The screen name is already in use")
+                raise StampedScreenNameInUseError("The screen name is already in use")
 
             # Check Blacklist
             if account.screen_name.lower() in Blacklist.screen_names:
@@ -632,7 +628,7 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.changeProfileImageName, args=[
                 old_screen_name.lower(), account.screen_name.lower()])
 
-        if 'name' in fields and account.name != fields['name']:
+        if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
             account.name = fields['name']
         if 'phone' in fields and account.phone != fields['phone']:
             account.phone = fields['phone']
@@ -640,10 +636,8 @@ class StampedAPI(AStampedAPI):
         if 'bio' in fields and account.bio != fields['bio']:
             account.bio = fields['bio']
         if 'website' in fields and account.website != fields['website']:
-            if utils.validate_url(fields['website']):
-                account.website = fields['website']
-            else:
-                raise StampedInvalidWebsiteError("Could not update account 'website' field - not a valid url string")
+            url = SchemaValidation.validateURL(fields['website'])
+            account.website = url
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
         if 'color_primary' in fields and 'color_secondary' in fields:
@@ -713,7 +707,11 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getLinkedAccount(self, authUserId, service_name):
-        return getattr(self.getAccount(authUserId).linked, service_name)
+        account = self.getAccount(authUserId)
+        try:
+            return getattr(account.linked, service_name)
+        except Exception:
+            raise StampedLinkedAccountDoesNotExistError("User has no linked account: %s" % service_name)
 
     @API_CALL
     def getLinkedAccounts(self, authUserId):
@@ -725,7 +723,7 @@ class StampedAPI(AStampedAPI):
     def getAccountByFacebookId(self, facebookId):
         accounts = self._accountDB.getAccountsByFacebookId(facebookId)
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % facebookId)
+            raise StampedAccountNotFoundError("Unable to find account with facebook_id: %s" % facebookId)
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using facebook_id: %s" % facebookId)
         return accounts[0]
@@ -734,7 +732,7 @@ class StampedAPI(AStampedAPI):
     def getAccountByTwitterId(self, twitterId):
         accounts = self._accountDB.getAccountsByTwitterId(twitterId)
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with twitter_id: %s" % twitterId)
+            raise StampedAccountNotFoundError("Unable to find account with twitter_id: %s" % twitterId)
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % twitterId)
         return accounts[0]
@@ -743,7 +741,7 @@ class StampedAPI(AStampedAPI):
     def getAccountByNetflixId(self, netflixId):
         accounts = self._accountDB.getAccountsByNetflixId(netflixId)
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with netflix_id: %s" % netflixId)
+            raise StampedAccountNotFoundError("Unable to find account with netflix_id: %s" % netflixId)
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using netflix_id: %s" % netflixId)
         return accounts[0]
@@ -1203,6 +1201,15 @@ class StampedAPI(AStampedAPI):
         return self._enrichUserObjects(users, authUserId=authUserId)
 
     @API_CALL
+    def getFacebookFriendData(self, user_token=None, offset=0, limit=30):
+        ### TODO: Add check for privacy settings?
+        if user_token is None:
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Facebook requires a valid token")
+
+        # Grab friend list from Facebook API
+        return self._facebook.getFriendData(user_token, offset, limit)
+
+    @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):
         if limit <= 0 or limit > 20:
             limit = 20
@@ -1350,7 +1357,7 @@ class StampedAPI(AStampedAPI):
             friendship.friend_id    = userA.user_id
 
             if not self._friendshipDB.checkFriendship(check):
-                raise StampedPermissionsError("Insufficient privileges to check friendship")
+                raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
 
         if userB.privacy == True and authUserId != userB.user_id:
             check                   = Friendship()
@@ -1358,7 +1365,7 @@ class StampedAPI(AStampedAPI):
             friendship.friend_id    = userB.user_id
 
             if not self._friendshipDB.checkFriendship(check):
-                raise StampedPermissionsError("Insufficient privileges to check friendship")
+                raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
 
         friendship              = Friendship()
         friendship.user_id      = userA.user_id
@@ -1456,11 +1463,10 @@ class StampedAPI(AStampedAPI):
     def inviteFriend(self, authUserId, email):
         # Validate email address
         email = str(email).lower().strip()
-        if not utils.validate_email(email):
-            raise StampedInputError("Invalid format for email address")
+        email = SchemaValidation.validateEmail(email)
 
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise StampedInputError("Invite already exists")
+            raise StampedInviteExistsError("Invite already exists")
 
         # Store email address linked to auth user id
         tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
@@ -1489,7 +1495,7 @@ class StampedAPI(AStampedAPI):
         searchId    = entityRequest.pop('search_id', None)
 
         if entityId is None and searchId is None:
-            raise StampedInputError("Required field missing (entity_id or search_id)")
+            raise StampedMissingParametersError("Required field missing (entity_id or search_id)")
 
         if entityId is None:
             entityId = searchId
@@ -2694,7 +2700,7 @@ class StampedAPI(AStampedAPI):
             # Call async process to update references
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
-        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
+        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 2.0)
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
         stats.score = int(score)
@@ -2962,10 +2968,7 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedViewCommentPermissionsError("Insufficient privileges to view comments")
 
-        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id,
-                                                            before=before,
-                                                            limit=limit,
-                                                            offset=offset)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id, before=before, limit=limit, offset=offset)
 
         # Get user objects
         userIds = {}
@@ -2980,8 +2983,7 @@ class StampedAPI(AStampedAPI):
         comments = []
         for comment in commentData:
             if userIds[comment.user.user_id] == 1:
-                msg = 'Unable to get user_id %s for comment_id %s' % \
-                    (comment.user.user_id, comment.comment_id)
+                msg = 'Unable to get user_id %s for comment_id %s' % (comment.user.user_id, comment.comment_id)
                 logs.warning(msg)
             else:
                 comment.user = userIds[comment.user.user_id]
@@ -4180,7 +4182,7 @@ class StampedAPI(AStampedAPI):
             recipientIds.remove(userId)
 
         if requireRecipient and len(recipientIds) == 0:
-            raise Exception("Missing recipient")
+            raise StampedActivityMissingRecipientError("Missing recipient")
 
         # Save activity
         self._activityDB.addActivity(verb           = verb,
@@ -4365,8 +4367,7 @@ class StampedAPI(AStampedAPI):
         }
 
         if source_name.lower() not in sources:
-            logs.warning('Source not found: %s (%s)' % (source_name, search_id))
-            raise StampedUnavailableError
+            raise StampedUnknownSourceError('Source not found: %s (%s)' % (source_name, search_id))
 
         # Attempt to resolve against the Stamped DB
         source    = sources[source_name.lower()]()

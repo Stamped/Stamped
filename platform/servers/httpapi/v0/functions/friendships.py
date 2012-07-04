@@ -7,11 +7,12 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-exceptions = {
-    'StampedDocumentNotFoundError'      : StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data."),
-    'StampedInvalidFriendshipError'     : StampedHTTPError(400, kind="not_found", msg="You cannot follow yourself."),
-    'StampedFriendshipCheckPermissionsError' :  StampedHTTPError(404, kind="not_found", msg="Insufficient privileges to check friendship status."),
-}
+exceptions = [
+    (StampedDocumentNotFoundError, StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data.")),
+    (StampedInvalidFriendshipError, StampedHTTPError(400, kind="not_found", msg="You cannot follow yourself.")),
+    (StampedFriendshipCheckPermissionsError, StampedHTTPError(404, kind="not_found", msg="Insufficient privileges to check friendship status.")),
+    (StampedInviteExistsError, StampedHTTPError(403, kind="illegal_action", msg="Invite already sent.")),
+]
 
 @handleHTTPRequest(http_schema=HTTPUserId,
                    exceptions=exceptions)
@@ -62,7 +63,8 @@ def followers(request, authUserId, http_schema, **kwargs):
     
     return transformOutput(output)
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def blocksCreate(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.addBlock(authUserId, http_schema)
@@ -71,7 +73,8 @@ def blocksCreate(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def blocksCheck(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.checkBlock(authUserId, http_schema)
