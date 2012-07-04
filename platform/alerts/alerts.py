@@ -7,12 +7,10 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, logs
-import os, sys, pymongo, json, struct, ssl, binascii
+import os, sys, pymongo, json, struct
 import binascii, boto, keys.aws, libs.ec2_utils
  
 from optparse               import OptionParser
-from datetime               import *
-from socket                 import socket
 from errors                 import *
 from HTTPSchemas            import *
 from SchemaValidation       import validateEmail
@@ -22,7 +20,6 @@ from jinja2                 import Template
 from db.mongodb.MongoAlertQueueCollection   import MongoAlertQueueCollection
 from db.mongodb.MongoInviteQueueCollection  import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
-from db.mongodb.MongoActivityCollection     import MongoActivityCollection
 from MongoStampedAuth                       import MongoStampedAuth
 from MongoStampedAPI                        import MongoStampedAPI
 
@@ -33,25 +30,21 @@ base = os.path.dirname(os.path.abspath(__file__))
 IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-ether-prod.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether-prod.pem')
 
-IS_PROD       = libs.ec2_utils.is_prod_stack()
-USE_PROD_CERT = True
+IS_PROD = libs.ec2_utils.is_prod_stack()
 
 admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton','jstaehle'])
 
-# create wrapper
-if USE_PROD_CERT:
-    pem = IPHONE_APN_PUSH_CERT_PROD
-else:
-    pem = IPHONE_APN_PUSH_CERT_DEV
 
-### TODO: Get rid of this. Seriously.
-api = MongoStampedAPI()
+stampedAPI = MongoStampedAPI()
 
 
 class Email(object):
-    def __init__(self, recipient, settingsToken):
+    def __init__(self, recipient):
         self.__recipient = recipient
-        self.__settingsUrl = 'http://www.stamped.com/settings/alerts?token=%s' % settingsToken
+
+    @property 
+    def recipient(self):
+        return self.__recipient
 
     @property 
     def sender(self):
@@ -76,17 +69,21 @@ class Email(object):
 
 class AlertEmail(Email):
     def __init__(self, recipient, verb, settingsToken, subject=None, objects=None, activityId=None):
-        Email.__init__(self, recipient, settingsToken)
+        Email.__init__(self, recipient)
         self.__verb = verb 
         self.__subject = subject
         self.__objects = objects
         self.__activityId = activityId
+        self.__settingsUrl = 'http://www.stamped.com/settings/alerts?token=%s' % settingsToken
+
+    def __repr__(self):
+        return "<Alert Email: recipient='%s', verb='%s', title='%s'>" % (self.__recipient, self.__verb, self.title)
 
     @property 
     def activityId(self):
         return self.__activityId
 
-    @property 
+    @lazyProperty 
     def title(self):
         assert self.__subject is not None 
 
@@ -120,7 +117,7 @@ class AlertEmail(Email):
 
         return msg
 
-    @property 
+    @lazyProperty 
     def body(self):
         try:
             path = os.path.join(base, 'templates', 'email_%s.html.j2' % self.__verb)
@@ -137,17 +134,17 @@ class AlertEmail(Email):
                 stampId = self.__objects.stamp_ids[-1]
                 ### TODO: Cache stamp objects
                 #if stampId in stampIds:
-                stamp = self._api.getStamp(stampId)
+                stamp = stampedAPI.getStamp(stampId)
                 params['title'] = stamp.entity.title
                 if self.__verb == 'credit' or self.__verb == 'mention':
                     params['blurb'] = stamp.contents[-1].blurb
 
             if self.__objects.comment_ids is not None and len(self.__objects.comment_ids) > 0:
                 commentId = self.__objects.comment_ids[-1]
-                comment = self._api._commentDB.getComment(commentId)
+                comment = stampedAPI._commentDB.getComment(commentId)
                 if 'title' not in params:
                     stampId = comment.stamp_id 
-                    stamp = self._api.getStamp(stampId)
+                    stamp = stampedAPI.getStamp(stampId)
                     params['title'] = stamp.entity.title
                 params['blurb'] = comment.blurb
 
@@ -169,9 +166,44 @@ class AlertEmail(Email):
         # Add settings url
         params['settings_url'] = self.__settingsUrl
 
-        html = self._parseTemplate(template, params)
+        return self._parseTemplate(template, params)
 
-        return html
+
+class InviteEmail(Email):
+    def __init__(self, recipient, subject, inviteId=None):
+        Email.__init__(self, recipient)
+        self.__subject = subject
+        self.__inviteId = inviteId
+
+    def __repr__(self):
+        return "<Invite Email: recipient='%s', title='%s'>" % (self.__recipient, self.title)
+
+    @property 
+    def inviteId(self):
+        return self.__inviteId
+
+    @lazyProperty 
+    def title(self):
+        title = u'%s thinks you have great taste' % self.__subject.name
+
+        if not IS_PROD:
+            title = u'DEV: %s' % title
+
+        return title
+
+    @lazyProperty 
+    def body(self):
+        try:
+            path = os.path.join(base, 'templates', 'email_invite.html.j2')
+            template = open(path, 'r')
+        except Exception as e:
+            logs.warning("Unable to get email template: %s" % self.__verb)
+            raise
+
+        params = HTTPUser().importUser(self.__subject).dataExport()
+
+        return parseTemplate(template, params)
+
 
 class PushNotification(object):
     def __init__(self, recipient, subject=None, verb=None, unreadCount=0, activityId=None):
@@ -235,8 +267,8 @@ class PushNotification(object):
             return self.__unreadCount
         return -1
 
-class NotificationQueue(object):
 
+class NotificationQueue(object):
     def __init__(self, sandbox=True, admins=None):
         self.__admins = set()
         self.__adminEmails = set()
@@ -258,10 +290,6 @@ class NotificationQueue(object):
         self.__pushQueue = {}
 
     @lazyProperty
-    def _api(self):
-        return MongoStampedAPI()
-
-    @lazyProperty
     def _auth(self):
         return MongoStampedAuth()
 
@@ -274,34 +302,36 @@ class NotificationQueue(object):
         return MongoAccountCollection()
 
     @lazyProperty
-    def _activityDB(self):
-        return MongoActivityCollection()
-
-    @lazyProperty
     def _inviteDB(self):
         return MongoInviteQueueCollection()
 
 
     def buildAlerts(self, limit=0, noop=False):
         alerts = self._alertDB.getAlerts(limit=limit)
+        
+        logs.info('Number of alerts: %s' % len(alerts))
 
         if len(alerts) == 0:
-            logs.info('No alerts!')
+            logs.debug('Aborting')
             return
         
         for alert in alerts:
-            self.__users[str(alert.subject)] = None
-            self.__users[str(alert.recipient_id)] = None
+            if alert.subject not in self.__users:
+                self.__users[str(alert.subject)] = None
+            if alert.recipient_id not in self.__users:
+                self.__users[str(alert.recipient_id)] = None
         
-        accounts = self._accountDB.getAccounts(self.__users.keys())
+        missingAccounts = set()
+        for k, v in self.__users.iteritems():
+            if v is None:
+                missingAccounts.add(k)
+        accounts = self._accountDB.getAccounts(list(missingAccounts))
         
         for account in accounts:
             self.__users[account.user_id] = account
 
         # Get email settings tokens
         tokens = self._auth.ensureEmailAlertTokensForUsers(self.__users.keys())
-        
-        logs.info('Number of alerts: %s' % len(alerts))
         
         for alert in alerts:
             try:
@@ -356,7 +386,7 @@ class NotificationQueue(object):
                 # Build unread count
                 if alert.recipient_id not in self.__unreadCount:
                     try:
-                        self.__unreadCount[alert.recipient_id] = api.getUnreadActivityCount(alert.recipient_id)
+                        self.__unreadCount[alert.recipient_id] = stampedAPI.getUnreadActivityCount(alert.recipient_id)
                     except Exception as e:
                         logs.warning("Unable to set unread count: %s" % e)
                         self.__unreadCount[alert.recipient_id] = 0
@@ -366,7 +396,7 @@ class NotificationQueue(object):
                     try:
                         if recipient.devices is not None and recipient.devices.ios_device_tokens is not None:
                             # Build push notification and add to queue
-                            notification = PushNotification(recipient=recipient, 
+                            notification = PushNotification(recipient=deviceId, 
                                                             subject=subject, 
                                                             verb=alert.verb, 
                                                             unreadCount=self.__unreadCount[alert.recipient_id], 
@@ -397,7 +427,7 @@ class NotificationQueue(object):
                             token = tokens[recipient.user_id]
 
                             # Build email
-                            email = AlertEmail(recipient, 
+                            email = AlertEmail(recipient=recipient.email, 
                                                 verb=alert.verb, 
                                                 settingsToken=token, 
                                                 subject=subject, 
@@ -439,8 +469,55 @@ class NotificationQueue(object):
             except Exception as e:
                 logs.warning("Push count generation failed for recipient '%s': %s" % (recipientId, e))
 
-    def buildInvitations(self, options):
-        pass
+    def buildInvitations(self, limit=0, noop=False):
+        invites = self._inviteDB.getInvites(limit=limit)
+        
+        logs.info('Number of invitations: %s' % len(invites))
+
+        if len(invites) == 0:
+            logs.debug('Aborting')
+            return
+        
+        for invite in invites:
+            if invite.user_id not in self.__users:
+                self.__users[str(invite.user_id)] = None
+        
+        missingAccounts = set()
+        for k, v in self.__users:
+            if v is None:
+                missingAccounts.add(k)
+        accounts = self._accountDB.getAccounts(list(missingAccounts))
+        
+        for account in accounts:
+            self.__users[account.user_id] = account
+        
+        for invite in invites:
+            try:
+                if self.__users[str(invite.user_id)] is None:
+                    raise StampedUnavailableError("User (%s) not found" % (invite.user_id))
+
+                subject = self.__users[str(invite.user_id)]
+                emailAddress = invite.recipient_email
+                emailAddress = validateEmail(emailAddress)
+
+                # Add email address
+                if emailAddress not in self.__emailQueue:
+                    self.__emailQueue[emailAddress] = []
+
+                # Build email
+                email = InviteEmail(recipient=emailAddress, subject=subject, inviteId=invite.invite_id)
+                
+                self.__emailQueue[emailAddress].append(email)
+
+            except StampedInvalidEmailError:
+                logs.debug("Invalid email address: %s" % invite.recipient_email)
+            except Exception as e:
+                logs.warning("An error occurred: %s" % e)
+                logs.warning("Invite removed: %s" % invite)
+
+            finally:
+                if not noop:
+                    inviteDB.removeInvite(invite.invite_id)
 
     def sendEmails(self, noop=False):
         logs.info("Submitting emails to %s users" % len(self.__emailQueue))
@@ -466,8 +543,7 @@ class NotificationQueue(object):
                             ses.send_email(email.sender, email.title, email.body, emailAddress, format='html')
 
                     except Exception as e:
-                        logs.warning("Email failed for activityId '%s' to address '%s': %s" % \
-                            (email.activityId, emailAddress, e))
+                        logs.warning("Email failed: %s" % email)
                         logs.warning(utils.getFormattedException())
 
         logs.info("Success!")
@@ -483,7 +559,7 @@ class NotificationQueue(object):
                 count = 0
                 
                 pushQueue.reverse()
-                for item in pushQueue:
+                for notification in pushQueue:
                     count += 1
                     if count > limit:
                         logs.debug("Limit exceeded for device '%s'" % deviceId)
@@ -491,23 +567,23 @@ class NotificationQueue(object):
                     
                     try:
                         # Build APNS notification
-                        logs.debug("Push activityId '%s' to device '%s'" % (item.activityId, deviceId))
+                        logs.debug("Push activityId '%s' to device '%s'" % (notification.activityId, deviceId))
 
                         apnsNotification = APNSNotification()
                         apnsNotification.token(binascii.unhexlify(deviceId))
 
-                        if item.message is not None:
-                            msg = item.message.encode('ascii', 'ignore')
+                        if notification.message is not None:
+                            msg = notification.message.encode('ascii', 'ignore')
                             apnsNotification.alert(msg)
                         
-                        if item.badge is not None:
-                            apnsNotification.badge(item.badge)
+                        if notification.badge is not None:
+                            apnsNotification.badge(notification.badge)
 
                         # Add notification to wrapper
                         apns_wrapper.append(apnsNotification)
 
                     except Exception as e:
-                        logs.warning("Push failed for activityId '%s' to device_id '%s'" % (item.activityId, deviceId))
+                        logs.warning("Push failed: '%s'" % notification)
                         logs.warning(utils.getFormattedException())
 
         logs.info("Submitting %s push notifications" % apns_wrapper.count())
@@ -515,15 +591,27 @@ class NotificationQueue(object):
             apns_wrapper.notify()
         logs.info("Success!")
 
-    def cleanupPush(self):
-        pass
+    def cleanupPush(self, noop=False):
+        # Only run this on prod
+        if not IS_PROD or noop:
+            logs.warning("Skipping APNS cleanup (not prod / noop)")
+            return
+
+        feedback = APNSFeedbackWrapper(self.__apnsCert, not self.__sandbox)
+
+        for d, t in feedback.tuples():
+            token = binascii.hexlify(t)
+            try:
+                self._accountDB.removeAPNSToken(token)
+                logs.debug("Removed token: %s" % token)
+            except Exception as e:
+                logs.debug("Failed to remove token: %s" % token)
 
     def run(self, options):
-
         logs.begin(
-            saveLog=self._api._logsDB.saveLog,
-            saveStat=self._api._statsDB.addStat,
-            nodeName=self._api.node_name
+            saveLog=stampedAPI._logsDB.saveLog,
+            saveStat=stampedAPI._statsDB.addStat,
+            nodeName=stampedAPI.node_name
         )
         logs.async_request('alerts')
 
@@ -537,10 +625,10 @@ class NotificationQueue(object):
         try:
             open(lock, 'w').close()
             self.buildAlerts(limit=options.limit, noop=options.noop)
-            self.buildInvitations(options)
+            self.buildInvitations(limit=options.limit, noop=options.noop)
             self.sendEmails(noop=options.noop)
             self.sendPush(noop=options.noop)
-            self.cleanupPush()
+            self.cleanupPush(noop=options.noop)
 
         except Exception as e:
             logs.warning('Exception: %s' % e)
