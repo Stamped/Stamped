@@ -605,7 +605,7 @@ class NotificationQueue(object):
     def cleanupPush(self, noop=False):
         # Only run this on prod
         if not IS_PROD or noop:
-            logs.warning("Skipping APNS cleanup (not prod / noop)")
+            logs.info("Skipping APNS cleanup (not prod / noop)")
             return
 
         feedback = APNSFeedbackWrapper(self.__apnsCert, sandbox=self.__sandbox)
@@ -637,8 +637,10 @@ class NotificationQueue(object):
             open(lock, 'w').close()
             self.buildAlerts(limit=options.limit, noop=options.noop)
             self.buildInvitations(limit=options.limit, noop=options.noop)
-            self.sendEmails(noop=options.noop)
-            self.sendPush(noop=options.noop)
+            if len(self.__emailQueue) > 0:
+                self.sendEmails(noop=options.noop)
+            if len(self.__pushQueue) > 0:
+                self.sendPush(noop=options.noop)
             self.cleanupPush(noop=options.noop)
 
         except Exception as e:
