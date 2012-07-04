@@ -117,6 +117,7 @@ static const CGFloat _headerHeight = _cellHeight;
     if (self) {
         _openGraphItems = (id)[[NSArray alloc] init];
         _openGraphValues = [[NSMutableDictionary alloc] init];
+        self.disableReload = YES;
     }
     return self;
 }
@@ -353,9 +354,8 @@ static const CGFloat _headerHeight = _cellHeight;
 }
 
 - (void)connectToSpotify:(id)notImportant {
-    NSLog(@"connect");
     self.spotifyCancellation = [[STSpotify sharedInstance] loginWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-        NSLog(@"callback");
+        self.spotifyCancellation = nil;
         if (error) {
             [Util warnWithAPIError:error andBlock:nil];
         }
@@ -364,9 +364,8 @@ static const CGFloat _headerHeight = _cellHeight;
 }
 
 - (void)disconnectFromSpotify:(id)notImportant {
-    NSLog(@"disconnect");
     self.spotifyCancellation = [[STSpotify sharedInstance] logoutWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-        NSLog(@"callback2");
+        self.spotifyCancellation = nil;
         if (error) {
             [Util warnWithAPIError:error andBlock:nil];
         }
@@ -425,7 +424,7 @@ static const CGFloat _headerHeight = _cellHeight;
         self.netflixCancellation = [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/netflix/remove.json"
                                                                                 post:YES
                                                                        authenticated:YES
-                                                                              params:[NSDictionary dictionary]
+                                                                              params:[NSDictionary dictionaryWithObject:@"netflix" forKey:@"service_name"]
                                                                              mapping:[STSimpleBooleanResponse mapping]
                                                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
                                                                              self.netflixCancellation = nil;
@@ -452,8 +451,8 @@ static const CGFloat _headerHeight = _cellHeight;
 }
 
 - (void)reloadStampedData {
-    [self loadOpenGraphSettings];
-    [self checkNetflix];
+    //[self loadOpenGraphSettings];
+    //[self checkNetflix];
 }
 
 - (void)twitterAuthFinished:(id)notImportant {
@@ -466,9 +465,8 @@ static const CGFloat _headerHeight = _cellHeight;
     [params setObject:twitter.twitterUsername forKey:@"linked_screen_name"];
     [params setObject:twitter.twitterToken forKey:@"token"];
     [params setObject:twitter.twitterTokenSecret forKey:@"secret"];
-    [params setObject:@"twitter" forKey:@"service_name"];
-    //[params setObject:fb.facebook.expirationDate forKey:@"token_expiration"];
-    [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/add.json"
+//    [params setObject:@"twitter" forKey:@"service_name"];
+    [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/twitter/add.json"
                                                  post:YES
                                         authenticated:YES
                                                params:params
@@ -535,10 +533,10 @@ static const CGFloat _headerHeight = _cellHeight;
         [params setObject:[result objectForKey:@"username"] forKey:@"linked_screen_name"];
         [params setObject:[result objectForKey:@"name"] forKey:@"linked_name"];
         [params setObject:[result objectForKey:@"id"] forKey:@"linked_user_id"];
-        [params setObject:@"facebook" forKey:@"service_name"];
+//        [params setObject:@"facebook" forKey:@"service_name"];
         [params setObject:fb.facebook.accessToken forKey:@"token"];
         //[params setObject:fb.facebook.expirationDate forKey:@"token_expiration"];
-        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/add.json"
+        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/facebook/add.json"
                                                      post:YES
                                             authenticated:YES
                                                    params:params
@@ -564,10 +562,10 @@ static const CGFloat _headerHeight = _cellHeight;
 - (void)disconnectFromFacebook:(id)notImportant {
     if (!self.locked) {
         self.locked = YES;
-        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/remove.json"
+        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/facebook/remove.json"
                                                      post:YES
                                             authenticated:YES
-                                                   params:[NSDictionary dictionaryWithObject:@"facebook" forKey:@"service_name"]
+                                                   params:[NSDictionary dictionary]
                                                   mapping:[STSimpleBooleanResponse mapping]
                                               andCallback:^(id result, NSError *error, STCancellation *cancellation) {
                                                   self.locked = NO;
@@ -820,15 +818,12 @@ static const CGFloat _headerHeight = _cellHeight;
 
 - (void)loadOpenGraphSettings {
     if (!self.openGraphCancellation) {
-        NSLog(@"herererearear");
         self.openGraphCancellation = [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/facebook/settings/show.json"
                                                                                post:NO
                                                                       authenticated:YES
                                                                              params:[NSDictionary dictionaryWithObject:@"facebook" forKey:@"service_name"]
                                                                             mapping:[STSimpleAlertItem mapping]
                                                                         andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
-                                                        
-                                                                            NSLog(@"herererearear2222");
                                                                             [self handleOpenGraphItems:(id)results withError:error];
                                                                         }];
     }

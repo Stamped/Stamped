@@ -41,11 +41,59 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         return document
 
-
-    def _removeOldLinkedAccounts(self, document):
+    def _upgradeLinkedAccounts(self, document):
         linkedAccounts = document.pop('linked_accounts', None)
         if linkedAccounts is None:
             return document
+
+        if 'linked' not in document:
+            document['linked'] = {}
+            if 'twitter' in linkedAccounts:
+                twitterAcct = {
+                    'service_name'          : 'twitter',
+                    'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
+                    'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
+                    'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
+                    }
+                twitterAcctSparse = {}
+                for k,v in twitterAcct.iteritems():
+                    if v is not None:
+                        twitterAcctSparse[k] = v
+                document['linked']['twitter'] = twitterAcctSparse
+
+                if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
+                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
+
+            if 'facebook' in linkedAccounts:
+                facebookAcct = {
+                    'service_name'          : 'facebook',
+                    'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
+                    'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
+                    'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
+                    }
+                facebookAcctSparse = {}
+                for k,v in facebookAcct.iteritems():
+                    if v is not None:
+                        facebookAcctSparse[k] = v
+                document['linked']['facebook'] = facebookAcctSparse
+
+                if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
+                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
+
+            if 'netflix' in linkedAccounts:
+                netflixAcct = {
+                    'service_name'          : 'netflix',
+                    'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
+                    'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
+                    'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
+                    }
+                netflixAcctSparse = {}
+                for k,v in netflixAcct.iteritems():
+                    if v is not None:
+                        netflixAcctSparse[k] = v
+                document['linked']['netflix'] = netflixAcctSparse
+
+
         self._collection.update(
                 {'_id': document['user_id']},
                 {'$unset': { 'linked_accounts' : 1 } }
@@ -108,7 +156,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'auth_service' not in document:
             document['auth_service'] = 'stamped'
 
-        document = self._removeOldLinkedAccounts(document)
+        document = self._upgradeLinkedAccounts(document)
 
         if self._obj is not None:
             return self._obj().dataImport(document, overflow=self._overflow)
@@ -215,18 +263,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         result = self.user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
         if result:
             return True
-        # Check for deprecated alerts sent flag and update database if exists
-        account = self.getAccount(userId)
-        documentId = self._getObjectIdFromString(userId)
-        document = self._getMongoDocumentFromId(documentId)
-        if 'linked_accounts' in document:
-            for k, v in document['linked_accounts'].iteritems():
-                if k == 'facebook':
-                    self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['facebook_id'])
-                elif k == 'twitter':
-                    self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['twitter_id'])
-                elif k == 'netflix':
-                    self.user_linked_alerts_history_collection.addLinkedAlert(userId, k, v['netflix_user_id'])
         return False
 
     def removeLinkedAccountAlertHistory(self, userId):

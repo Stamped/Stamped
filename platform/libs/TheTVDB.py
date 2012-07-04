@@ -10,7 +10,7 @@ __all__       = [ 'TheTVDB', 'globalTheTVDB' ]
 import Globals
 import string, sys, urllib, utils
 
-from api.Schemas     import *
+from Schemas            import *
 from optparse        import OptionParser
 from LibUtils        import parseDateString
 from lxml            import objectify, etree
@@ -18,6 +18,7 @@ from pprint          import pprint
 from LRUCache        import lru_cache
 from CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
+from Schemas         import MediaCollectionEntity
 
 class TheTVDB(object):
     
@@ -29,7 +30,7 @@ class TheTVDB(object):
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn(name='TheTVDB (before caching)')
     @lru_cache(maxsize=64)
-    @cachedFn()
+    @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
     def searchRaw(self, query):
         url = self._get_url(query)
@@ -64,7 +65,7 @@ class TheTVDB(object):
                     continue
             
             if detailed:
-                entity = self.lookup(item.find('id'))
+                entity = self.lookup(int(item.find('id')))
             else:
                 entity = self._parse_entity(item)
             

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "STDatum.h"
 
+@protocol STCacheAccelerator;
+
 @interface STCachePage : NSObject <NSCoding>
 
 @property (nonatomic, readonly, retain) NSDate* start;
@@ -31,5 +33,6 @@
 - (STCachePage*)pageForIndex:(NSInteger)index;
 - (NSNumber*)indexAfterDate:(NSDate*)date;
 - (STCachePage*)pageWithAddedPage:(STCachePage*)page;
+- (STCachePage*)pageWithUpdatesFromAccelerator:(id<STCacheAccelerator>)accelerator;
 
 @end

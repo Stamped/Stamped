@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent.pool
+    import os, logs, re, time, urlparse, math, pylibmc, gevent
 
     import Blacklist
     import libs.ec2_utils
@@ -1868,6 +1868,9 @@ class StampedAPI(AStampedAPI):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
 
     def _extractMentions(self, text):
+        if text is None:
+            return set()
+
         screenNames = set()
 
         # Extract screen names with regex
@@ -2237,6 +2240,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
+        t0 = time.time()
+        t1 = t0
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
@@ -2290,6 +2295,9 @@ class StampedAPI(AStampedAPI):
             stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
         else:
             stamp                       = Stamp()
+
+        logs.debug('### addStamp section 1: %s' % (time.time() - t1))
+        t1 = time.time()
 
         # Update content if stamp exists
         if stampExists:
@@ -2348,6 +2356,9 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
+        logs.debug('### addStamp section 2: %s' % (ime.time() - t1))
+        t1 = time.time()
+
         if imageUrl is not None:
             self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, stamp.stamp_id, content.content_id])
@@ -2360,6 +2371,9 @@ class StampedAPI(AStampedAPI):
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
         logs.info('### stampExists: %s' % stampExists)
+
+        logs.debug('### addStamp section 3: %s' % (ime.time() - t1))
+        t1 = time.time()
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
@@ -2382,6 +2396,9 @@ class StampedAPI(AStampedAPI):
         else:
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
+        logs.debug('### addStamp section 4: %s' % (ime.time() - t1))
+        t1 = time.time()
 
         return stamp
 
@@ -2444,15 +2461,17 @@ class StampedAPI(AStampedAPI):
             self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
 
         # Add activity for mentioned users
-        mentionedUserIds = set()
-        mentions = self._extractMentions(stamp.contents[-1].blurb)
-        if len(mentions) > 0:
-            mentionedUsers = self._userDB.lookupUsers(screenNames=list(mentions))
-            for user in mentionedUsers:
-                if user.user_id != authUserId and user.user_id not in creditedUserIds:
-                    mentionedUserIds.add(user.user_id)
-        if len(mentionedUserIds) > 0:
-            self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
+        blurb = stamp.contents[-1].blurb
+        if blurb is not None:
+            mentionedUserIds = set()
+            mentions = self._extractMentions(blurb)
+            if len(mentions) > 0:
+                mentionedUsers = self._userDB.lookupUsers(screenNames=list(mentions))
+                for user in mentionedUsers:
+                    if user.user_id != authUserId and user.user_id not in creditedUserIds:
+                        mentionedUserIds.add(user.user_id)
+            if len(mentionedUserIds) > 0:
+                self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
 
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
@@ -3209,7 +3228,7 @@ class StampedAPI(AStampedAPI):
             return None
 
         if authUserId is None:
-            raise StampedLoggedInError("Must be logged in to view %s" % scope)
+            raise StampedNotLoggedInError("Must be logged in to view %s" % scope)
 
         if scope == 'me':
             return self._collectionDB.getUserStampIds(authUserId)
@@ -4203,6 +4222,9 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
+        t0 = time.time()
+        t1 = t0
+
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
 
         # Append user objects
@@ -4240,12 +4262,22 @@ class StampedAPI(AStampedAPI):
         for user in users:
             userIds[str(user.user_id)] = user.minimize()
 
+        logs.debug("### getActivity section 1: %s" % (time.time() - t1))
+        t1 = time.time()
+
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
+
+        logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
+        t1 = time.time()
+
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
+
+        logs.debug("### getActivity section 2b: %s" % (time.time() - t1))
+        t1 = time.time()
 
         # Enrich entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -4287,6 +4319,9 @@ class StampedAPI(AStampedAPI):
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
+
+        logs.debug("### getActivity section 3: %s" % (time.time() - t1))
+        t1 = time.time()
 
         return activity
 
@@ -4405,16 +4440,16 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
 
     def mergeEntityAsync(self, entityDict):
-        self._mergeEntity(Entity.buildEntity(entityDict), set())
+        self._mergeEntity(Entity.buildEntity(entityDict))
 
     def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
         tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
 
     def mergeEntityIdAsync(self, entityId):
-        self._mergeEntity(self._entityDB.getEntity(entityId), set())
+        self._mergeEntity(self._entityDB.getEntity(entityId))
 
-    def _mergeEntity(self, entity, resolved, depth=3):
+    def _mergeEntity(self, entity, depth=2):
         """Enriches the entity and possibly follow any links it may have.
 
         The resolved parameter is used to keep track of the entities we've
@@ -4425,14 +4460,19 @@ class StampedAPI(AStampedAPI):
         The depth is a way to limit the scope of the search. We will only look
         at items within "depth" distance from the given entity.
         """
+        persistedEntities = set()
+        entity = self._enrichAndPersistEntity(entity, persistedEntities)
+        self._followOutLinks(entity, persistedEntities, depth)
+        return entity
 
-        entitySummary = (entity.title, entity.kind)
-        if entitySummary in resolved and entity.entity_id:
-            # TODO(geoff): maybe we can just check for entity_id here.
+
+    def _enrichAndPersistEntity(self, entity, persisted):
+        if entity.entity_id and entity.entity_id in persisted:
             return entity
 
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
+        logs.info('Modified: ' + str(modified))
         modified = self._resolveRelatedEntities(entity) or modified
 
         if modified:
@@ -4441,11 +4481,7 @@ class StampedAPI(AStampedAPI):
             else:
                 entity = self._entityDB.updateEntity(entity)
 
-        resolved.add(entitySummary)
-
-        if depth and self._followOutLinks(entity, resolved, depth-1):
-            entity = self._entityDB.updateEntity(entity)
-
+        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -4525,32 +4561,38 @@ class StampedAPI(AStampedAPI):
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
-    def _followOutLinks(self, entity, resolved, depth, geventPool=gevent.pool.Pool(32)):
-        """Follow the outlinks on the entity and merge all the entities to which it refers.
-
-        Note that the geventPool is being used as a singleton here. Unless a separate pool is
-        explicitly passed in, all invocations of this method will share a single pool.
-        """
+    def _followOutLinks(self, entity, persisted, depth):
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
-                return False
+                return
 
-            resolveTasks = [geventPool.spawn(self._resolveStub, stub, False) for stub in stubList]
-            modified = False
-            visitedStubs = []
-            for stub, task in zip(stubList, resolveTasks):
-                resolvedFull = task.get()
+            mergeEntityTasks = []
+            for stub in stubList:
+                resolvedFull = self._resolveStub(stub, False)
                 if resolvedFull is None:
                     logs.warning('stub resolution failed: %s' % stub)
+                    mergeEntityTasks.append(None)
+                else:
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
+            
+            modified = False
+            visitedStubs = []
+            mergedEntities = []
+            for stub, task in zip(stubList, mergeEntityTasks):
+                if task is None:
+                    modified = True
                     continue
-
-                merged = self._mergeEntity(resolvedFull, resolved, depth).minimize()
-                visitedStubs.append(merged)
-                modified = modified or (merged != stub)
+                mergedEntities.append(task.get())
+                visitedStubs.append(mergedEntities[-1].minimize())
+                modified = modified or (visitedStubs[-1] != stub)
             setattr(entity, attr, visitedStubs)
-            return modified
-        return self._iterateOutLinks(entity, followStubList)
+            if modified:
+                self._entityDB.updateEntity(entity)
+            if depth:
+                for mergedEntity in mergedEntities:
+                    self._followOutLinks(mergedEntity, persisted, depth-1)
+        self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
         """Tries to return either an existing StampedSource entity or a third-party source entity proxy.

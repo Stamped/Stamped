@@ -174,6 +174,10 @@ class StampedUnknownSourceError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
 
+class StampedMissingRequiredLinkedAccountError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
     # Accounts
 class StampedInvalidPasswordError(StampedInputError):
     def __init__(self, msg=None):
@@ -227,14 +231,29 @@ class StampedViewUserPermissionsError(StampedPermissionsError):
 
 
     # Auth
+class StampedInvalidAuthTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedInvalidRefreshTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedGrantTypeIncorrectError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
 class StampedInvalidClientError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
-class StampedInvalidCredentialsError(StampedInputError):
+class StampedInvalidCredentialsError(StampedAuthError):
     def __init__(self, msg=None):
-        StampedInputError.__init__(self, msg)
+        StampedAuthError.__init__(self, msg)
 
+class StampedWrongAuthServiceError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
 
     # Linked Accounts
 class StampedLinkedAccountAlreadyExistsError(StampedIllegalActionError):

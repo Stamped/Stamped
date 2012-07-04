@@ -77,11 +77,11 @@ class LoggingContext(object):
 
     def log(self, level, msg, *args, **kwargs):
         try:
-            filename    = inspect.stack()[2][1]
+            filename    = inspect.stack()[3][1]
             if filename.rfind('/') != -1:
                 filename = filename[filename.rfind('/') + 1:]
-            lineno      = inspect.stack()[2][2]
-            fnc         = inspect.stack()[2][3]
+            lineno      = inspect.stack()[3][2]
+            fnc         = inspect.stack()[3][3]
         except:
             fnc = "UNKNOWN FUNCTION"
             filename = "UNKNOWN FILENAME"
@@ -111,15 +111,12 @@ class LoggingContext(object):
 
 
 
-def _getLoggingContext(forceCreate=False):
-    if not forceCreate:
+def _getLoggingContext():
+    try:
         return localData.loggingContext
-    else:
-        try:
-            return localData.loggingContext
-        except AttributeError:
-            localData.loggingContext = LoggingContext()
-            return localData.loggingContext
+    except AttributeError:
+        localData.loggingContext = LoggingContext()
+        return localData.loggingContext
 
 def refresh(format=None):
     localData.loggingContext = LoggingContext(format=format)
@@ -129,10 +126,10 @@ localData = threading.local()
 refresh()
 
 def _log(level, msg, *args, **kwargs):
-    _getLoggingContext(forceCreate=True).log(level, msg, *args, **kwargs)
+    _getLoggingContext().log(level, msg, *args, **kwargs)
 
 def runInOtherLoggingContext(fn, context):
-    oldLoggingContext = _getLoggingContext(forceCreate=True)
+    oldLoggingContext = _getLoggingContext()
     localData.loggingContext = context
     try:
         return fn()
