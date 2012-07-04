@@ -73,7 +73,7 @@ def getEntityFromSearchId(searchId):
     }
 
     if source_name.lower() not in sources:
-        raise Exception('Source not found: %s (%s)' % (source_name, search_id))
+        raise Exception('Source not found: %s (%s)' % (source_name, searchId))
 
     source = sources[source_name.lower()]()
     proxy = source.entityProxyFromKey(source_id)
