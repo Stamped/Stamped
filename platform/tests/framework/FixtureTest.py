@@ -81,8 +81,7 @@ def loadTestDbDataFromFilename(filename):
 
 def issueQueries(queries):
     # TODO: Pull this out to a named constant somewhere, or be more intelligent about this, or something.
-    host, port = get_db_config('peach.db2')
-    config = { 'mongodb' : { 'host': host, 'port': port } }
+    config = { 'mongodb' : { 'hosts': [get_db_config('peach.db3')] } }
     devDbConfig = MongoDBConfig()
     devDbConfig.config = AttributeDict(config)
     devDb = devDbConfig.connection.stamped
