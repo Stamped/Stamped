@@ -96,49 +96,41 @@ class StampedAuth(AStampedAuth):
     # ##### #
     
     def verifyUserCredentials(self, clientId, userIdentifier, password):
-        try:
-            # Login via email
-            if utils.validate_email(userIdentifier):
-                account = self._accountDB.getAccountByEmail(userIdentifier)
-            # Login via screen name
-            elif utils.validate_screen_name(userIdentifier):
-                account = self._accountDB.getAccountByScreenName(userIdentifier)
-            else:
-                raise
+        # Login via email
+        if utils.validate_email(userIdentifier):
+            account = self._accountDB.getAccountByEmail(userIdentifier)
+        # Login via screen name
+        elif utils.validate_screen_name(userIdentifier):
+            account = self._accountDB.getAccountByScreenName(userIdentifier)
+        else:
+            raise
 
-            if account.auth_service != 'stamped':
-                msg = "Attempting a stamped login for an account that doesn't use stamped for auth'"
-                logs.warning(msg)
-                raise StampedInvalidCredentialsError("Invalid credentials")
+        if account.auth_service != 'stamped':
+            raise StampedWrongAuthServiceError("Attempting a stamped login for an account that doesn't use stamped for auth")
 
-            if not auth.comparePasswordToStored(password, account.password):
-                logs.warning('Invalid password for user: %s' % userIdentifier)
-                raise
+        if not auth.comparePasswordToStored(password, account.password):
+            raise StampedInvalidCredentialsError("Invalid password for user: %s" % userIdentifier)
 
-            logs.info("Login successful")
+        logs.info("Login successful")
 
-            """
-            IMPORTANT!!!!!
+        """
+        IMPORTANT!!!!!
 
-            Right now we're returning a refresh token upon login. This will 
-            have to change ultimately, but it's an okay assumption for now 
-            that every login will be from the iPhone. Once that changes we may 
-            have to modify this.
+        Right now we're returning a refresh token upon login. This will
+        have to change ultimately, but it's an okay assumption for now
+        that every login will be from the iPhone. Once that changes we may
+        have to modify this.
 
-            Also, we'll ultimately need a way to deprecate unused refresh 
-            tokens. Not sure how we'll implement that yet....
-            """
+        Also, we'll ultimately need a way to deprecate unused refresh
+        tokens. Not sure how we'll implement that yet....
+        """
 
-            ### Generate Refresh Token & Access Token
-            token = self.addRefreshToken(clientId, account.user_id)
+        ### Generate Refresh Token & Access Token
+        token = self.addRefreshToken(clientId, account.user_id)
 
-            logs.info("Token created")
+        logs.info("Token created")
 
-            return account, token
-        except Exception as e:
-            msg = "Invalid user credentials: %s" % e
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
+        return account, token
 
 # TODO: Consolidate facebook credentials verifications with twitter?
 
@@ -152,21 +144,13 @@ class StampedAuth(AStampedAuth):
         # TODO: remove repetitious code here (same as api.getAccountByFacebookId()
         accounts = self._accountDB.getAccountsByFacebookId(fb_user['id'])
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with facebook_id: %s" % fb_user['id'])
+            raise StampedAccountNotFoundError("Unable to find account with facebook_id: %s" % fb_user['id'])
         elif len(accounts) > 1:
-            logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
         account = accounts[0]
 
         if account.linked.facebook is None or account.linked.facebook.linked_user_id is None:
-            msg = "Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account"
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
-
-        if fb_user['id'] != account.linked.facebook.linked_user_id:
-            msg = "Invalid credentials: Facebook id does not match Stamped user"
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
+            raise StampedWrongAuthServiceError("Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account")
 
         logs.info("Login successful")
 
@@ -199,26 +183,16 @@ class StampedAuth(AStampedAuth):
         # TODO: remove repetitious code here (same as api.getAccountByTwitterId()
         accounts = self._accountDB.getAccountsByTwitterId(tw_user['id'])
         if len(accounts) == 0:
-            raise StampedUnavailableError("Unable to find account with twitter_id: %s" % tw_user['id'])
+            raise StampedAccountNotFoundError("Unable to find account with twitter_id: %s" % tw_user['id'])
         elif len(accounts) > 1:
-            logs.info('accounts[0] %s   accounts[1] %s' % (accounts[0], accounts[1]))
-            raise StampedIllegalActionError("More than one account exists using twitter_id: %s" % tw_user['id'])
+            raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % tw_user['id'])
         account = accounts[0]
 
         if account.auth_service != 'twitter':
-            msg = "Attempting to do a twitter login for an account that doesn't use twitter auth'"
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
+            raise StampedWrongAuthServiceError("Attempting to login via Twitter for an account that doesn't use twitter auth")
 
         if account.linked.twitter is None or account.linked.twitter.linked_user_id is None:
-            msg = "Invalid credentials: Attempting to login via twitter with an account that has no twitter linked account"
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
-
-        if tw_user['id'] != account.linked.twitter.linked_user_id:
-            msg = "Invalid credentials: twitter id does not match Stamped user"
-            logs.warning(msg)
-            raise StampedInvalidCredentialsError("Invalid credentials")
+            raise StampedMissingRequiredLinkedAccountError("Twitter Auth account does not have twitter linked account information!  user_id: %s" % account.user_id)
 
         logs.info("Login successful")
 
