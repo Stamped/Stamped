@@ -994,10 +994,10 @@ body.music, body.book, body.film, body.app {
         
         img {
             // TODO: resolve these changes
-            width: 85%;
-            .box-shadow(0, 1px, 3px, -1px, rgba(0,0,0,0.3));
-            border: 10px solid #fbfbfb;
-            //.rounded(0px);
+            //width: 85%;
+            .box-shadow(0, 2px, 3px, -1px, rgba(0,0,0,0.3));
+            //border: 10px solid #fbfbfb;
+            .rounded(4px);
         }
     }
     
@@ -1063,7 +1063,7 @@ body.music, body.book, body.film, body.app {
     quotes: "\201C" "\201D";
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
-    color: #999999;    
+    color: #666;    
     line-height: 140%;
     letter-spacing: 0.02em;
     margin: 0px 0px 9px 0px;
@@ -1078,10 +1078,10 @@ body.music, body.book, body.film, body.app {
     text-overflow: ellipsis;
 }
 
-/*
-.blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
-*/
+.stamp-inner-content {
+    .normal_blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+    .normal_blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
+}
 
 .subtitle-line {
     position: relative;
@@ -1102,7 +1102,7 @@ body.music, body.book, body.film, body.app {
         top: -4.5px;
         font-family: 'helvetica', sans-serif;
         font-weight: 200;
-        color: #999999;
+        color: #999;
     }
     
     .icon {
@@ -1598,8 +1598,8 @@ ul.user-category-distribution {
 
 body.sdetail_popup_animation, body.sdetail_popup {
     #main-page-content-body {
-        display: block;
         visibility: visible !important;
+        display: block;
         
         #stamp-category-nav-bar {
             opacity: 0;
