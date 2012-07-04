@@ -1,8 +1,17 @@
 {% extends "base2.html" %}
 {% load stamped_tags %}
 
-<!-- Javascript dependencies
-     - - - - - - - - - - - -
+<!-- 
+    NOTE: this is a workaround because the built-in ssi tag doesn't support 
+    context variables as arguments. We use ssi to include other html files 
+    which contain non-django templates that the django templating system 
+    should not attempt to parse. Note that we would use the built-in include 
+    tag if we wanted to parse an external template before inclusion.
+-->
+{% load ssi from future %}
+
+<!-- Javascript Dependencies => profile.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
         script: libs/jquery.infinitescroll.js
@@ -22,17 +31,22 @@
         script: profile.js
 -->
 
-<!-- 
-    NOTE: this is a workaround because the built-in ssi tag doesn't support 
-    context variables as arguments. We use ssi to include other html files 
-    which contain non-django templates that the django templating system 
-    should not attempt to parse. Note that we would use the built-in include 
-    tag if we wanted to parse an external template before inclusion.
+<!-- CSS Dependencies => profile.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css?v=2.0.6
+        stylesheet: libs/jquery.jscrollpane.less
+    
+    Core stamped dependencies:
+        stylesheet: profile.less
+        stylesheet: sdetail.less
 -->
-{% load ssi from future %}
 
 {% block styles %}
     {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.css">-->
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
