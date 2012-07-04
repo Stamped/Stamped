@@ -40,7 +40,7 @@ def loginWithFacebook(request, client_id, http_schema, **kwargs):
         account, token = stampedAuth.verifyFacebookUserCredentials(client_id, http_schema.user_token)
     except (StampedInputError, StampedInvalidCredentialsError):
         raise StampedHTTPError(400, msg="Facebook login failed")
-    except StampedLinkedAccountExistsError:
+    except StampedLinkedAccountAlreadyExistsError:
         raise StampedHTTPError(409, msg="Multiple accounts exist for this Facebook user")
 
     user = HTTPUser().importAccount(account)
@@ -57,7 +57,7 @@ def loginWithTwitter(request, client_id, http_schema, **kwargs):
         account, token = stampedAuth.verifyTwitterUserCredentials(client_id, http_schema.user_token, http_schema.user_secret)
     except (StampedInputError, StampedInvalidCredentialsError):
         raise StampedHTTPError(400, msg="Twitter login failed")
-    except StampedLinkedAccountExistsError:
+    except StampedLinkedAccountAlreadyExistsError:
         raise StampedHTTPError(409, msg="Multiple accounts exist for this Twitter user")
 
     user = HTTPUser().importAccount(account)
