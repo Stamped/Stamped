@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'TheTVDBSource', 'TheTVDBArtist', 'TheTVDBAlbum', 'TheTVDBTrack', 'TheTVDBSearchAll' ]
+__all__ = [ 'TheTVDBSource', 'TheTVDBShow', 'TheTVDBSearchAll' ]
 
 import Globals
 from logs import report
@@ -165,20 +165,8 @@ class TheTVDBSource(GenericSource):
         return globalTheTVDB()
     
     def entityProxyFromKey(self, key, **kwargs):
-        try:
-            if key.startswith('t'):
-                return TheTVDBTrack(rdio_id=key)
-            if key.startswith('a'):
-                return TheTVDBAlbum(rdio_id=key)
-            if key.startswith('r'):
-                return TheTVDBArtist(rdio_id=key)
-            raise KeyError
-        except KeyError:
-            logs.warning('Unable to find TVDB item for key: %s' % key)
-            raise
-        
-        return None
-    
+        return TheTVDBShow(thetvdb_id=key)
+
     def entityProxyFromData(self, data):
         return TheTVDBSource(data=data)
     
@@ -198,7 +186,7 @@ class TheTVDBSource(GenericSource):
     
     def tvSource(self, query):
         return self.generatorSource(self.__queryGen(query=query.name), 
-                                    constructor=TheTVDBTrack)
+                                    constructor=TheTVDBShow)
     
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
