@@ -16,6 +16,14 @@ extern NSString* STActionManagerShowAllActionsKey;
 
 + (STActionManager*)sharedActionManager;
 
+- (BOOL)lock;
+
+- (BOOL)unlock;
+
++ (BOOL)lock;
+
++ (BOOL)unlock;
+
 - (void)setStampContext:(id<STStamp>)stamp;
 
 @property (nonatomic, readwrite, assign) id actionsLocked;

@@ -31,6 +31,11 @@
 #import "STGenericCacheConfiguration.h"
 #import "STInboxPageSource.h"
 #import "STSharedCaches.h"
+#import "Util.h"
+#import "STNavigationItem.h"
+#import "STEvents.h"
+
+#import "STStampsViewController.h"
 
 @interface STUserViewController ()
 
@@ -417,8 +422,10 @@
     
     switch (stat) {
         case STUserHeaderStatCredit:
-            
-            [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
+            [STStampsViewController creditsViewWithUserID:self.userIdentifier
+                                              andCallback:^(UIViewController *controller, NSError *error, STCancellation *cancellation) {
+                                                  [Util compareAndPushOnto:self withController:controller modal:NO animated:YES]; 
+                                              }];
             
             break;
         case STUserHeaderStatFollowers:
@@ -773,13 +780,13 @@
 
 - (void)cacheWillLoadPage:(NSNotification *)notification {
     self.loadingStamps = YES;
-    [self.tableView reloadData];
+    //[self.tableView reloadData];
 }
 
 - (void)cacheDidLoadPage:(NSNotification *)notification {
     self.loadingStamps = NO;
     [self dataSourceDidFinishLoading];
-    [self.tableView reloadData];
+    //[self.tableView reloadData];
 }
 
 - (void)cacheUpdate:(NSNotification *)notification {

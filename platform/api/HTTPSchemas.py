@@ -257,6 +257,9 @@ def _buildTextReferences(text):
     refs = []
     offsets = {}
 
+    if text is None:
+        return None, []
+
     # Mentions
     mentions = mention_re.finditer(text)
     for item in mentions:
@@ -1305,7 +1308,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
 
-            if entity.sources.singleplatform_id is not None:
+            if entity.menu is not None and entity.menu:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'stamped'
@@ -2534,10 +2537,11 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
-            blurb, references = _buildTextReferences(content.blurb)
-            if len(references) > 0:
-                item.blurb = blurb 
-                item.blurb_references = references
+            if content.blurb is not None:
+                blurb, references = _buildTextReferences(content.blurb)
+                if len(references) > 0:
+                    item.blurb = blurb
+                    item.blurb_references = references
 
             if content.images is not None:
                 newImages = []
