@@ -558,15 +558,16 @@ class NotificationQueue(object):
         logs.info("Success!")
 
     def sendPush(self, noop=False):
+        logs.info("Submitting push notifications to %s devices" % len(self.__pushQueue))
         # Apply rate limit
         limit = 3
-
-        apns_wrapper = APNSNotificationWrapper(self.__apnsCert, sandbox=self.__sandbox)
         
         for deviceId, pushQueue in self.__pushQueue.iteritems():
             if IS_PROD or deviceId in self.__adminTokens:
                 count = 0
                 
+                apns_wrapper = APNSNotificationWrapper(self.__apnsCert, sandbox=self.__sandbox)
+
                 pushQueue.reverse()
                 for notification in pushQueue:
                     count += 1
@@ -595,9 +596,10 @@ class NotificationQueue(object):
                         logs.warning("Push failed: '%s'" % notification)
                         logs.warning(utils.getFormattedException())
 
-        logs.info("Submitting %s push notifications" % apns_wrapper.count())
-        if not noop:
-            apns_wrapper.notify()
+                if apns_wrapper.count() > 0:
+                    if not noop:
+                        apns_wrapper.notify()
+
         logs.info("Success!")
 
     def cleanupPush(self, noop=False):
