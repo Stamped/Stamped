@@ -13,6 +13,9 @@ from errors import *
 
 from datetime           import datetime, timedelta
 from RateLimiter        import RateLimiter
+from LRUCache               import lru_cache
+from CachedFunction         import cachedFn
+from libs.CountedFunction   import countedFn
 
 HOST              = 'api-public.netflix.com'
 PORT              = '80'
@@ -144,6 +147,13 @@ class Netflix(object):
             else:
                 return StampedThirdPartyError(message)
 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Netflix (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn()
+    @countedFn('Netflix (after caching)')
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
@@ -290,7 +300,17 @@ class Netflix(object):
             token                   = token,
         )
 
-    def getUserInfo(self, user_id, user_token, user_secret):
+    def getUserInfo(self, user_token, user_secret):
+        token = oauth.OAuthToken(user_token, user_secret)
+        userInfo = self.__get(
+            'users/current',
+            token = token,
+        )
+        userUrl = userInfo['resource']['link']['href']
+        userId = userUrl[userUrl.rfind('/')+1:]
+        return self.getUserInfoWithId(userId, user_token, user_secret)
+
+    def getUserInfoWithId(self, user_id, user_token, user_secret):
         token = oauth.OAuthToken(user_token, user_secret)
         return self.__get(
             'users/%s' % user_id,
@@ -383,7 +403,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'autocomplete' in methods:         pprint( netflix.autocomplete(title) )
     if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
     if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
-    if 'getUserInfo' in methods:          pprint( netflix.getUserInfo(user_id, user_token, user_secret) )
+    if 'getUserInfo' in methods:          pprint( netflix.getUserInfo(user_token, user_secret) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
     if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
     if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
@@ -392,7 +412,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'addToQueue'
+    methods = 'getUserInfo'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

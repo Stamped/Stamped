@@ -9,7 +9,6 @@ import Globals
 import sys, datetime, logs, gevent, utils, math
 from api                        import Entity
 from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
-from gevent.pool                import Pool
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
 from resolve.RdioSource         import RdioSource
@@ -30,9 +29,9 @@ def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
 
 
-# Editable via command-line flags.
+# Editable via command-line flags, but these are the defaults...
 shouldLogSourceResults = False
-shouldLogTiming = False
+shouldLogTiming = True
 shouldLogClusters = False
 shouldLogRawSourceResults = False
 shouldDisableTimeout = False
@@ -81,6 +80,7 @@ class EntitySearch(object):
         self.__registerSource(SpotifySource(), music=8)
 
     def __terminateWaiting(self, pool, start_time, category, resultsDict):
+        logTimingData('IN TERMINATE WAITING')
         sources_to_priorities = dict(self.__categories_to_sources_and_priorities[category])
         total_value_received = 0
         total_potential_value_outstanding = sum(sources_to_priorities.values())
@@ -146,26 +146,26 @@ class EntitySearch(object):
             gevent.sleep(0.01)
 
     def __searchSource(self, source, queryCategory, queryText, resultsDict, timesDict, **queryParams):
-        # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
-        # enough to give a solid idea.
-        before = datetime.datetime.now()
-        if shouldLogRawSourceResults:
-            queryParams['logRawResults'] = True
         try:
+            # Note that the timing here is not 100% legit because gevent won't interrupt code except on I/O, but it's good
+            # enough to give a solid idea.
+            before = datetime.datetime.now()
+            if shouldLogRawSourceResults:
+                queryParams['logRawResults'] = True
             results = source.searchLite(queryCategory, queryText, **queryParams)
+
+            after = datetime.datetime.now()
+            # First level of filtering on data quality score -- results that are really horrendous get dropped entirely
+            # pre-clustering.
+            filteredResults = [result for result in results if result.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_CLUSTER]
+            timesDict[source] = after - before
+            logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d, AFTER FILTERING: %d" % (
+                source.sourceName, str(after - before), len(results), len(filteredResults)
+            ))
+            resultsDict[source] = filteredResults
         except:
             logs.report()
-            results = []
-
-        after = datetime.datetime.now()
-        # First level of filtering on data quality score -- results that are really horrendous get dropped entirely
-        # pre-clustering.
-        filteredResults = [result for result in results if result.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_CLUSTER]
-        timesDict[source] = after - before
-        logs.debug("GOT RESULTS FROM SOURCE %s IN ELAPSED TIME %s -- COUNT: %d, AFTER FILTERING: %d" % (
-            source.sourceName, str(after - before), len(results), len(filteredResults)
-        ))
-        resultsDict[source] = filteredResults
+            resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
         if category not in Entity.categories:
@@ -174,7 +174,22 @@ class EntitySearch(object):
         start = datetime.datetime.now()
         results = {}
         times = {}
-        pool = Pool(len(self.__categories_to_sources_and_priorities))
+        pool = utils.LoggingThreadPool(len(self.__categories_to_sources_and_priorities))
+
+        def termWaiting():
+            logs.debug('in termWaiting')
+            try:
+                return self.__terminateWaiting(pool, datetime.datetime.now(), category, results)
+            except Exception:
+                logs.report()
+            logs.debug('done with termWaiting')
+
+        logs.debug("SHOULD_DISABLE_TIMEOUT IS " + str(shouldDisableTimeout))
+        if not shouldDisableTimeout:
+            logTimingData('SPAWNING TERMINATE WAITING')
+            #pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
+            pool.spawn(termWaiting)
+
         for (source, priority) in self.__categories_to_sources_and_priorities[category]:
             # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
@@ -182,8 +197,7 @@ class EntitySearch(object):
             # more gracefully.
             pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
 
-        if not shouldDisableTimeout:
-            pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
+
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
         pool.join()
         logTimingData("TIME CHECK GOT ALL RESPONSES AT " + str(datetime.datetime.now()))
@@ -382,6 +396,9 @@ def main():
             subtitle = result.formatAddress()
         print "SUBTITLE", subtitle
         print result
+
+    from libs.CountedFunction import printFunctionCounts
+    printFunctionCounts()
 
 
 if __name__ == '__main__':

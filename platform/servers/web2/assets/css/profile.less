@@ -319,10 +319,8 @@
                                         height: 1em;
                                         
                                         .bargraph-row-value {
-                                            /*.transition(all, .5s, easeOutCubic);*/
                                             .rounded(1em);
                                             
-                                            //background-color: #000;
                                             @c0: lighten(@b0, 10%);
                                             @c1: lighten(@b1, 15%);
                                             
@@ -330,6 +328,15 @@
                                             
                                             width:  0%;
                                             height: 100%;
+                                        }
+                                        
+                                        .bargraph-row-value-inner {
+                                            .rounded(1em);
+                                            
+                                            width:  100%;
+                                            height: 100%;
+                                            
+                                            background: url(/assets/img/progress.png) repeat-x;
                                         }
                                     }
                                     
@@ -474,7 +481,7 @@
                         
                         font-size: 3.5em;
                         letter-spacing: .03em;
-                        margin: 0px 0px 3px 0px;
+                        margin: 0 0 3px;
                         text-shadow: 0px 2px 1.5px rgba(0,0,0,0.25);
                         position: relative;
                         top: 5px;
@@ -590,7 +597,6 @@ body.app {
 
 #main-content {
     position: relative;
-   
 }
 
 .stamp-gallery-header {
@@ -669,7 +675,7 @@ body.app {
     .expanded {
         position: absolute;
         background: #fff;
-        left: 0px;
+        left: 0;
         
         border: 1px solid @shadow;
         .box-shadow(0, 0, 6px, 0, rgba(0,0,0,0.15));
@@ -773,6 +779,7 @@ body.music, body.book, body.film, body.app {
             //border: 1px solid red;
             display: block;
             float: left;
+            min-width: 70%;
         }
         
         .content_1 {
@@ -924,11 +931,12 @@ body.music, body.book, body.film, body.app {
 }
 
 .entity-header {
-    display: block;
-    float: left;
+    position: relative;
+    display:  block;
+    float:    left;
+    
     text-align: left;
     margin-left: 24px;
-    position: relative;
     padding: 2px;
     top: -7px;
     
@@ -960,19 +968,18 @@ body.music, body.book, body.film, body.app {
     background-size: 100% 100%;
     
     max-width: @width;
-    width:  @width;
-    height: auto;
+    width:     @width;
+    height:     auto;
 }
 
 .stamp-preview, .stamp-preview-raw {
     .sized(@preview-wrapper-width);
-    
-    .transform-style(preserve-3d);
-    .backface-visibility(hidden);
+    position: relative;
+    z-index: 20;
     
     .preview-image {
         position: relative;
-        display: block;
+        display:  block;
         width: 100%;
         
         .transition-transform(0.5s, ease-out);
@@ -986,11 +993,11 @@ body.music, body.book, body.film, body.app {
         z-index: 25;
         
         img {
-            width: 85%;
-            .box-shadow(0, 1px, 3px, -1px, rgba(0,0,0,0.3));
-            border: 10px solid #fbfbfb;
-            .rounded(0px);
-           
+            // TODO: resolve these changes
+            //width: 85%;
+            .box-shadow(0, 2px, 3px, -1px, rgba(0,0,0,0.3));
+            //border: 10px solid #fbfbfb;
+            .rounded(4px);
         }
     }
     
@@ -1056,7 +1063,7 @@ body.music, body.book, body.film, body.app {
     quotes: "\201C" "\201D";
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
-    color: #999999;    
+    color: #666;    
     line-height: 140%;
     letter-spacing: 0.02em;
     margin: 0px 0px 9px 0px;
@@ -1071,10 +1078,10 @@ body.music, body.book, body.film, body.app {
     text-overflow: ellipsis;
 }
 
-/*
-.blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
-*/
+.stamp-inner-content {
+    .normal_blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+    .normal_blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
+}
 
 .subtitle-line {
     position: relative;
@@ -1095,7 +1102,7 @@ body.music, body.book, body.film, body.app {
         top: -4.5px;
         font-family: 'helvetica', sans-serif;
         font-weight: 200;
-        color: #999999;
+        color: #999;
     }
     
     .icon {
@@ -1132,12 +1139,11 @@ body.music, body.book, body.film, body.app {
         
         .content {
             .entity-header {
-                max-width: @stamp-gallery-item-min-width - 62px;
+                max-width: @stamp-gallery-item-min-width - 64px;
                 margin-bottom: .5em;
             }
             
             .content_0 {
-                float: none;
                 display: block;
                 width: 100%;
             }
@@ -1271,7 +1277,7 @@ body.music, body.book, body.film, body.app {
                     height: 100%;
                     
                     opacity: 0;
-                    .transition(opacity, 0.1s, ease-out);
+                    .transition(opacity, 0.2s, ease-out);
                 }
                 
                 .icon {
@@ -1306,7 +1312,7 @@ body.music, body.book, body.film, body.app {
                     font-size: 13px;
                     color: #262626;
                     width: 120px;
-                                       
+                    
                     opacity: 0;
                     .transform(translatex(-72px));
                     .transition-transform2(.2s, ease-out, opacity, .4s, ease-out);
@@ -1592,8 +1598,8 @@ ul.user-category-distribution {
 
 body.sdetail_popup_animation, body.sdetail_popup {
     #main-page-content-body {
-        display: block;
         visibility: visible !important;
+        display: block;
         
         #stamp-category-nav-bar {
             opacity: 0;
@@ -1650,7 +1656,6 @@ a.map-profile-link {
     display: inline-block;
     min-width: 10em;
     letter-spacing: 0.03em;
-    top: 0px;
     
     .map-profile-icon-wrapper {
         display: inline-block;
@@ -1834,11 +1839,12 @@ a.map-profile-link {
                 
                 padding: (@padding / 2) @padding;
                 
-                .profile-image-small, .stamp, .name {
+                .profile-image-wrapper, .stamp, .name {
                     float: left;
                 }
                 
-                .profile-image-small {
+                .profile-image-wrapper {
+                    position: relative;
                     margin-right: 16px;
                 }
                 
@@ -1859,7 +1865,7 @@ a.map-profile-link {
                     
                     .fullname {
                         font-weight: 700;
-                        margin: 0 0 .5em;
+                        margin:  0 0 .5em;
                         padding: 0;
                     }
                     
@@ -1884,8 +1890,29 @@ a.map-profile-link {
     }
 }
 
-.popup-todos .popup-header .rhs-icon {
-    background-position: -76px 0 !important;
+.popup-sdetail-social {
+    .pronounced-title {
+        font-size: 2em;
+    }
+    
+    .popup-header .rhs-icon {
+        margin-top: 4px;
+    }
+}
+
+.popup-todos {
+    .pronounced-title {
+        font-size: 3em;
+    }
+    
+    .popup-header .rhs-icon {
+        background-position: -76px 0 !important;
+        margin-top: 16px;
+        
+        .tongue {
+            display: none;
+        }
+    }
 }
 
 .popup-followers .popup-header .rhs-icon {
@@ -1894,5 +1921,27 @@ a.map-profile-link {
 
 .popup-following .popup-header .rhs-icon {
     background-position: -152px 0 !important;
+}
+
+.user-preview-icon {
+    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+    position: absolute;
+    z-index: 26;
+    
+    right:  -6px;
+    bottom: -6px;
+    
+    width:  17px;
+    height: 17px;
+    pointer-events: none;
+}
+
+
+.like .user-preview-icon {
+    background-position: 0 0;
+}
+
+.todo .user-preview-icon {
+    background-position: -19px 0;
 }
 

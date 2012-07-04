@@ -9,7 +9,6 @@ import Globals
 import keys.aws, logs, utils
 import os, time, urllib2
 
-from gevent.pool            import Pool
 from libs.ec2_utils         import is_ec2, is_prod_stack
 from errors                 import *
 from bson.objectid          import ObjectId

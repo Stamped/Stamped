@@ -44,9 +44,12 @@
 TODO:
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
     
+    * incorporate versioning into asset management
+    
     * optimization:
         * http://developer.yahoo.com/performance/rules.html
         * combine & minify JS, CSS, & HTML
+        * test hosting assets on cloudfront
         * gzip components
         * configure ETags and cache expiration headers
         * ensure favicon.ico is optimized and cacheable

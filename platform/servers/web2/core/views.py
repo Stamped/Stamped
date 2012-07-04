@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import api.HTTPSchemas
-import os, utils
+import os, pprint, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
 from schemas        import *
@@ -289,7 +289,7 @@ def sdetail(request, schema, **kwargs):
     #import time
     #time.sleep(2)
     
-    logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
+    logs.info('SDETAIL: %s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
     if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
         user = travis_test.user
@@ -307,16 +307,16 @@ def sdetail(request, schema, **kwargs):
     if 'likes' in previews and len(previews['likes']) > 0:
         likes = previews['likes']
         
-        for user in likes:
-            user['preview_type'] = 'like'
+        for u in likes:
+            u['preview_type'] = 'like'
         
         users.extend(likes)
     
     if 'todos' in previews and len(previews['todos']) > 0:
         todos = previews['todos']
         
-        for user in todos:
-            user['preview_type'] = 'todo'
+        for u in todos:
+            u['preview_type'] = 'todo'
         
         users.extend(todos)
     
@@ -333,8 +333,7 @@ def sdetail(request, schema, **kwargs):
         return sdetail
     else:
         return handle_profile(request, HTTPWebTimeSlice().dataImport({
-            'screen_name'   : schema.screen_name, 
-            'user_id'       : user['user_id']
+            'screen_name'   : schema.screen_name
         }), user=user, sdetail=sdetail.content, stamp=stamp, entity=entity)
 
 @stamped_view(schema=HTTPEntityId)
@@ -351,7 +350,13 @@ def menu(request, schema, **kwargs):
 
 @stamped_view()
 def test_view(request, **kwargs):
-    return stamped_render(request, 'test.html', { })
+    user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
+    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
+    
+    return stamped_render(request, 'test.html', {
+        'user'  : user, 
+        'stamp' : stamp
+    })
 
 @stamped_view(schema=HTTPStampId)
 def popup_sdetail_social(request, schema, **kwargs):

@@ -227,6 +227,26 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
         with expected_exception():
             self.handlePOST(path, data)
 
+    def test_set_no_phone(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "phone": "1234567",
+            }
+        self.handlePOST(path, data)
+        account = self.showAccount(self.token)
+        self.assertEqual(account['phone'], '1234567')
+
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "phone": "",
+            }
+        self.handlePOST(path, data)
+        account = self.showAccount(self.token)
+        self.assertEqual(account['phone'], None)
+
+
 """
 # Disabled for now - Mike is rewriting due to implementation changes
 class StampedAPIAccountUpdateProfileImage(StampedAPIAccountHttpTest):

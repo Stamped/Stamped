@@ -58,10 +58,13 @@ class TitleDataQualityRegexpTest(object):
         except:
             return any(regexp.search(query) for regexp in self.exceptionQueryRegexps)
 
+    def matchesTitle(self, title, query=None):
+        return self.titleRegexp.search(title) and not (query and self.__matchesException(query))
+
     def applyTest(self, searchResult, searchQuery):
         title = searchResult.resolverObject.raw_name if self.rawName else searchResult.resolverObject.name
         anyMatches = False
-        if self.titleRegexp.search(title) and not self.__matchesException(searchQuery):
+        if self.matchesTitle(title, searchQuery):
             searchResult.dataQuality *= 1 - self.penalty
             searchResult.addDataQualityComponentDebugInfo(self.message, self.penalty)
             anyMatches = True
@@ -103,6 +106,12 @@ REPLACEMENTS = {
     'i' : 1,
 }
 def convertRomanNumerals(title):
+    """Convert roman numerals in special places of the title to their decimal representation.
+
+    This function is conservative, in that the roman numerals will only be replaced if it occurs at
+    the end of the title or right before a ":". This avoids false positives, for example, whenever
+    the word "I" is used.
+    """
     def romanToInt(numeral):
         numeral = numeral.lower()
         total = 0
@@ -120,6 +129,24 @@ def convertRomanNumerals(title):
         numeralInt = romanToInt(numeral)
         title = title[:matchStart] + title[matchStart:matchEnd].replace(numeral, numeralInt, 1) + modifiedTail
     return title
+
+
+def __stripPrefix(a, b):
+    longer, shorter = (a, b) if len(a) > len(b) else (b, a)
+    if longer.startswith(shorter):
+        return longer[len(shorter):].strip()
+
+
+def isDelimitedPrefix(a, b):
+    """Returns true if one string is a prefix of the other, and the remaining string is separated by
+    a delimiter
+
+    Currently a delimiter is one of :-,([. This is to cluster titles like "Twilight" and "Twilight:
+    Book 1 of the Corny Overused Vampire Themed Series Special Edition"
+    """
+    remainder = __stripPrefix(a, b)
+    delimiters = ':-,(['
+    return remainder and remainder[0] in delimiters
 
 
 POSSESSIVE_RE = re.compile('\'s[$\s]', re.IGNORECASE)
@@ -348,6 +375,9 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
     TitleDataQualityRegexpTest('\(', 'parenthesis in title', 0.1),
     TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
 
+    _makeSingleTokenSuspiciousTest('audiobook', 0.4),
+
+    _makeSingleTokenSuspiciousTest('audio', 0.25),
     _makeSingleTokenSuspiciousTest('box', 0.25),
     _makeSingleTokenSuspiciousTest('boxed', 0.25),
     _makeSingleTokenSuspiciousTest('edition', 0.25),
@@ -356,8 +386,10 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
     _makeSingleTokenSuspiciousTest('collection', 0.25),
     _makeSingleTokenSuspiciousTest('series', 0.25),
 
-    _makeSingleTokenSuspiciousTest('trilogy', 0.1),
+    _makeSingleTokenSuspiciousTest('abridged', 0.1),
     _makeSingleTokenSuspiciousTest('complete', 0.1),
+    _makeSingleTokenSuspiciousTest('trilogy', 0.1),
+    _makeSingleTokenSuspiciousTest('unabridged', 0.1),
 
     # TODO(geoff): this is a hacky way to demote the study guides. There are just so many of them...
     TitleDataQualityRegexpTest('(Cliff.*Notes?)', '"cliff notes" in title', 0.4,
@@ -368,6 +400,17 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
 
 def applyBookTitleDataQualityTests(searchResult, searchQuery):
     applyTitleTests(BOOK_TITLE_SUSPICIOUS_TESTS, searchResult, searchQuery)
+
+
+def isSuspiciousPrefixBookTitle(a, b):
+    """Returns true if one string is a prefix of the other, and the reminder is suspicious.
+
+    That is, if the remainder contains words like "edition," "collection," etc. This would cluster
+    together titles like "The Help" and "The Help Duluxe Edition."""
+    remainer = __stripPrefix(a, b)
+    if remainer:
+        return any(test.matchesTitle(remainer) for test in BOOK_TITLE_SUSPICIOUS_TESTS)
+
 
 ############################################################################################################
 ################################################    APPS    ################################################

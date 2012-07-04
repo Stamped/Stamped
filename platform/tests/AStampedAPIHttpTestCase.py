@@ -250,11 +250,23 @@ class AStampedAPIHttpTestCase(AStampedTestCase):
 
         return user, token
 
-    def addLinkedAccount(self, user_token, **kwargs):
+    def addLinkedFacebookAccount(self, user_token, fb_token):
+        return self._addLinkedAccount(user_token, 'facebook', token=fb_token)
+
+    def addLinkedTwitterAccount(self, user_token, tw_token, tw_secret):
+        return self._addLinkedAccount(user_token, 'twitter', token=tw_token, secret=tw_secret)
+
+    def addLinkedNetflixAccount(self, user_token, nf_token, nf_secret):
+        return self._addLinkedAccount(user_token, 'netflix', token=nf_token, secret=nf_secret)
+
+    def addLinkedRdioAccount(self, user_token, rdio_token):
+        return self._addLinkedAccount(user_token, 'rdio', token=rdio_token)
+
+    def _addLinkedAccount(self, user_token, service_name, **kwargs):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/linked/add.json"
+        path = "account/linked/%s/add.json" % service_name
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
@@ -267,12 +279,11 @@ class AStampedAPIHttpTestCase(AStampedTestCase):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
         c_secret    = CLIENT_SECRETS[c_id]
 
-        path = "account/linked/remove.json"
+        path = "account/linked/%s/remove.json" % service_name
         data = {
             "client_id"         : c_id,
             "client_secret"     : c_secret,
             "oauth_token"       : token['access_token'],
-            "service_name"      : service_name
             }
         return self.handlePOST(path, data)
 
