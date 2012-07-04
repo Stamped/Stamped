@@ -388,9 +388,7 @@ class StampedAuth(AStampedAuth):
             if token.user_id == None:
                 raise
         except:
-            msg = "Invalid refresh token"
-            logs.warning(msg)
-            raise StampedAuthError("invalid_token", msg)
+            raise StampedInvalidRefreshTokenError("Invalid refresh token")
 
         ### Generate Access Token
         token = self.addAccessToken(clientId, token.user_id, refreshToken)
@@ -453,11 +451,8 @@ class StampedAuth(AStampedAuth):
             logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(token.token_id)
             raise
-        except Exception, e:
-            logs.warning("Error: %s" % e)
-            msg = "Invalid Access Token"
-            logs.warning(msg)
-            raise StampedAuthError("invalid_token", msg)
+        except Exception:
+            raise StampedInvalidAuthTokenError("Invalid Access Token")
     
     def removeAccessToken(self, tokenId):
         return self._accessTokenDB.removeAccessToken(tokenId)
@@ -495,11 +490,9 @@ class StampedAuth(AStampedAuth):
                 raise
             return token.user_id
         except:
-            msg = "Invalid token"
-            logs.warning(msg)
-            raise StampedAuthError("invalid_token", msg)
+            raise StampedInvalidAuthTokenError("Invalid Email Alert Auth Token")
 
-    def ensureEamilAlertTokenForUser(self, userId):
+    def ensureEmailAlertTokenForUser(self, userId):
         token = self._emailAlertDB.getTokensForUser(userId)
 
         if token.user_id != userId:

@@ -9,6 +9,8 @@ from httpapi.v0.helpers import *
 
 
 exceptions = [
+    (StampedInvalidAuthTokenError,          StampedHTTPError(401, kind='invalid_credentials', msg="Invalid Access Token")),
+    (StampedInvalidRefreshTokenError,       StampedHTTPError(401, kind='invalid_credentials', msg="Invalid Refresh Token")),
     (StampedInvalidClientError,             StampedHTTPError(401, kind='invalid_credentials', msg="Invalid client credentials")),
     (StampedGrantTypeIncorrectError,        StampedHTTPError(400, kind='bad_request', msg="There was a problem authorizing the account")),
     (StampedAccountNotFoundError,           StampedHTTPError(401, kind='invalid_credentials', msg='The username / password combination was incorrect')),

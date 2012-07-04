@@ -231,6 +231,14 @@ class StampedViewUserPermissionsError(StampedPermissionsError):
 
 
     # Auth
+class StampedInvalidAuthTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedInvalidRefreshTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
 class StampedGrantTypeIncorrectError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
