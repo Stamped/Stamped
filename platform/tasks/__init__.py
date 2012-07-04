@@ -13,7 +13,7 @@ import atexit, logs, pprint, time, utils
 from datetime           import datetime, timedelta
 from celery.task        import task
 from celery.task.base   import BaseTask
-from gevent.pool        import Pool
+from utils              import LoggingThreadPool
 
 __broker_status__   = utils.AttributeDict({
     'errors'  : [], 
@@ -36,7 +36,7 @@ def invoke(task, args=None, kwargs=None, **options):
     if not utils.is_ec2():
         global local_worker_pool
         if local_worker_pool is None:
-            local_worker_pool = Pool(16)
+            local_worker_pool = LoggingThreadPool(16)
             atexit.register(local_worker_pool.join)
         if args is None:
             args = ()
