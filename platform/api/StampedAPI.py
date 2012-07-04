@@ -886,6 +886,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for netflix account")
             userInfo = self._netflix.getUserInfo(linkedAccount.token, linkedAccount.secret)
+            logs.info('### netflix userInfo: %s' % userInfo)
             if userInfo['can_instant_watch'] == False:
                 raise StampedNetflixNoInstantWatchError("Netflix account must have instant watch access")
             linkedAccount.linked_user_id = userInfo['user_id']
@@ -4271,8 +4272,8 @@ class StampedAPI(AStampedAPI):
         logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
         t1 = time.time()
 
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
@@ -4728,4 +4729,3 @@ class StampedAPI(AStampedAPI):
         entry.created = datetime.utcnow()
 
         return self._clientLogsDB.addEntry(entry)
-
