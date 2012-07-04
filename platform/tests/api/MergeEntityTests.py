@@ -49,6 +49,8 @@ class MergeEntityTest(AStampedFixtureTestCase):
         merged = None
         for item in allItems:
             if item.isType('track') and item.title == 'Call Me Maybe':
+                del item.albums
+                del item.artists
                 merged = mongoApi._mergeEntity(item)
                 break
         else:

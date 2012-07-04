@@ -4472,6 +4472,7 @@ class StampedAPI(AStampedAPI):
 
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
+        logs.info('Modified: ' + str(modified))
         modified = self._resolveRelatedEntities(entity) or modified
 
         if modified:
@@ -4564,7 +4565,7 @@ class StampedAPI(AStampedAPI):
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
-                return False
+                return
 
             mergeEntityTasks = []
             for stub in stubList:
@@ -4579,7 +4580,7 @@ class StampedAPI(AStampedAPI):
             visitedStubs = []
             mergedEntities = []
             for stub, task in zip(stubList, mergeEntityTasks):
-                if not task:
+                if task is None:
                     modified = True
                     continue
                 mergedEntities.append(task.get())
