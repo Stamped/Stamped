@@ -1318,7 +1318,7 @@ class AmazonSource(GenericSource):
                 return AmazonVideoGame(key, result, 0)
             return self.__constructMusicObjectFromResult(result, 0)
         except KeyError:
-            pass
+            logs.report()
         return None
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
