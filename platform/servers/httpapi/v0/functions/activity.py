@@ -16,12 +16,14 @@ def collection(request, authUserId, http_schema, **kwargs):
     activity = stampedAPI.getActivity(authUserId, http_schema.scope, limit=http_schema.limit, offset=http_schema.offset)
 
     result = []
+    t0 = time.time()
     for item in activity:
         try:
             result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
         except Exception as e:
             logs.warning("Failed to enrich activity: %s" % e)
             logs.debug("Activity: %s" % item)
+    logs.debug("### importEnrichedActivity for all HTTPActivity: %s" % (time.time() - t0))
     return transformOutput(result)
 
 @handleHTTPRequest()

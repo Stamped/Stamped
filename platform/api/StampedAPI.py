@@ -2240,6 +2240,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
+        t0 = time.time()
+        t1 = t0
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
@@ -2293,6 +2295,9 @@ class StampedAPI(AStampedAPI):
             stamp                       = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
         else:
             stamp                       = Stamp()
+
+        logs.debug('### addStamp section 1: %s' % (ime.time() - t1))
+        t1 = time.time()
 
         # Update content if stamp exists
         if stampExists:
@@ -2351,6 +2356,9 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
+        logs.debug('### addStamp section 2: %s' % (ime.time() - t1))
+        t1 = time.time()
+
         if imageUrl is not None:
             self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, stamp.stamp_id, content.content_id])
@@ -2363,6 +2371,9 @@ class StampedAPI(AStampedAPI):
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
         logs.info('### stampExists: %s' % stampExists)
+
+        logs.debug('### addStamp section 3: %s' % (ime.time() - t1))
+        t1 = time.time()
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
@@ -2385,6 +2396,9 @@ class StampedAPI(AStampedAPI):
         else:
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+
+        logs.debug('### addStamp section 4: %s' % (ime.time() - t1))
+        t1 = time.time()
 
         return stamp
 
@@ -3214,7 +3228,7 @@ class StampedAPI(AStampedAPI):
             return None
 
         if authUserId is None:
-            raise StampedLoggedInError("Must be logged in to view %s" % scope)
+            raise StampedNotLoggedInError("Must be logged in to view %s" % scope)
 
         if scope == 'me':
             return self._collectionDB.getUserStampIds(authUserId)
