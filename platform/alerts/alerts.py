@@ -149,6 +149,11 @@ class AlertEmail(Email):
                     params['title'] = stamp.entity.title
                 params['blurb'] = comment.blurb
 
+            if self.__objects.entity_ids is not None and len(self.__objects.entity_ids) > 0 and 'title' not in params:
+                entityId = self.__objects.entity_ids[-1]
+                entity = stampedAPI._entityDB.getEntity(entityId)
+                params['title'] = entity.title
+
         if 'bio' not in params:
             params['bio'] = ''
         else:
