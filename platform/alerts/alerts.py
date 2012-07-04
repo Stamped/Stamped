@@ -395,13 +395,13 @@ class NotificationQueue(object):
                 if send_push:
                     try:
                         if recipient.devices is not None and recipient.devices.ios_device_tokens is not None:
-                            # Build push notification and add to queue
-                            notification = PushNotification(recipient=deviceId, 
-                                                            subject=subject, 
-                                                            verb=alert.verb, 
-                                                            unreadCount=self.__unreadCount[alert.recipient_id], 
-                                                            activityId=alert.activity_id)
                             for deviceId in recipient.devices.ios_device_tokens:
+                                # Build push notification and add to queue
+                                notification = PushNotification(recipient=deviceId, 
+                                                                subject=subject, 
+                                                                verb=alert.verb, 
+                                                                unreadCount=self.__unreadCount[alert.recipient_id], 
+                                                                activityId=alert.activity_id)
                                 if deviceId not in self.__pushQueue:
                                     self.__pushQueue[deviceId] = []
                                 self.__pushQueue[deviceId].append(notification)
