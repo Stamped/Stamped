@@ -1,10 +1,10 @@
-/* profile.js
+/*! profile.js
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
 /*jslint plusplus: true */
-/*global STAMPED_PRELOAD, StampedClient, jQuery, $, History, moment */
+/*global STAMPED_PRELOAD, jQuery, $, History, moment */
 
 var g_update_stamps = null;
 
@@ -12,11 +12,10 @@ var g_update_stamps = null;
     $(document).ready(function() {
         
         // ---------------------------------------------------------------------
-        // initialize StampedClient
+        // initialize page globals
         // ---------------------------------------------------------------------
         
         
-        var client                  = new StampedClient();
         var screen_name             = STAMPED_PRELOAD.user.screen_name;
         var user_id                 = STAMPED_PRELOAD.user.user_id;
         var $body                   = $('body');
@@ -388,7 +387,7 @@ var g_update_stamps = null;
                     set_gallery_visible();
                 }
                 
-                if (_.isFunction(callback)) {
+                if (!!callback) {
                     callback();
                 }
                 
@@ -624,6 +623,8 @@ var g_update_stamps = null;
                 $items = $scope.find('.stamp-gallery-item');
             } else if ($scope.hasClass(sdetail_wrapper)) {
                 $items = null;
+                
+                // convert iOS emoji unicode characters to inline images in the sdetail stamp blurb
                 $scope.find('.normal_blurb').emoji();
             }
             
@@ -670,6 +671,7 @@ var g_update_stamps = null;
                     return false;
                 });
                 
+                // convert iOS emoji unicode characters to inline images in the stamp blurbs
                 $items.find('.blurb').emoji();
             }
             
@@ -728,7 +730,7 @@ var g_update_stamps = null;
                                 
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
                                 
-                                if (_.isFunction(anim_callback)) {
+                                if (!!anim_callback) {
                                     anim_callback();
                                 }
                             }
@@ -749,7 +751,7 @@ var g_update_stamps = null;
                             complete : function() {
                                 $body.removeClass('sdetail_popup_animation');
                                 
-                                if (_.isFunction(anim_callback)) {
+                                if (!!anim_callback) {
                                     anim_callback();
                                 }
                             }
@@ -844,7 +846,6 @@ var g_update_stamps = null;
                     }, function(new_elements) {
                         var $elements = $(new_elements);
                         
-                        //$elements.emoji();
                         $gallery.isotope('appended', $elements);
                         update_stamps();
                     });
@@ -987,10 +988,13 @@ var g_update_stamps = null;
             };
         };
         
+        // parse and store page's original URL for different parts, options, etc.
         var url         = document.URL;
         var title       = document.title;
         var orig_url    = parse_url(url, title);
         
+        // if we're on an sdetail page, the underlying URL is assumed to be the 
+        // user's profile page; initialize the original URL accordingly
         if (STAMPED_PRELOAD.sdetail) {
             orig_url.options  = { };
             orig_url.base_uri = "/" + screen_name;
@@ -1138,21 +1142,21 @@ var g_update_stamps = null;
         $header.height(header_height);
         
         $join.css({
-            position : 'absolute', 
-            float    : 'none', 
-            top      : join_pos.top, 
-            left     : join_pos.left, 
-            width    : join_width, 
-            height   : join_height
+            'position'  : 'absolute', 
+            'float'     : 'none', 
+            'top'       : join_pos.top, 
+            'left'      : join_pos.left, 
+            'width'     : join_width, 
+            'height'    : join_height
         });
         
         $login.css({
-            position : 'absolute', 
-            float    : 'none', 
-            top      : login_pos.top, 
-            left     : login_pos.left, 
-            width    : login_width, 
-            height   : login_height
+            'position'  : 'absolute', 
+            'float'     : 'none', 
+            'top'       : login_pos.top, 
+            'left'      : login_pos.left, 
+            'width'     : login_width, 
+            'height'    : login_height
         });
         
         var last_ratio = null;
@@ -1685,11 +1689,13 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
+        // cleanly closes the current sdetail popup if one exists
         var close_sdetail = function() {
             if (!!close_sdetail_func) {
                 if (History && History.enabled) {
                     var options = { };
                     
+                    // restore original URL options beneath sdetail popup
                     for (var key in orig_url.options) {
                         if (orig_url.options.hasOwnProperty(key)) {
                             options[key] = orig_url.options[key];
@@ -1711,6 +1717,7 @@ var g_update_stamps = null;
             }
         };
         
+        // loads and opens the specified sdetail popup
         var open_sdetail = function(href, html) {
             var scroll_top = 0;
             var $target;
@@ -1805,6 +1812,7 @@ var g_update_stamps = null;
             }
         };
         
+        // initializes an sdetail popup after it's been loaded
         var init_sdetail = function($sdetail) {
             if (!$sdetail) {
                 $sdetail        = $('.sdetail_body');
@@ -1816,6 +1824,7 @@ var g_update_stamps = null;
             var $comments       = $comments_div.find('.comment');
             var comments_len    = $comments.length;
             
+            // convert iOS emoji unicode characters to inline images in the comments
             $comments.find('.normal_blurb').emoji();
             
             // initialize comment collapsing

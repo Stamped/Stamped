@@ -1,6 +1,25 @@
 {% extends "base2.html" %}
 {% load stamped_tags %}
 
+<!-- Javascript dependencies
+     - - - - - - - - - - - -
+    
+    jQuery plugin dependencies
+    script: libs/jquery.infinitescroll.js
+    script: libs/jquery.isotope.js
+    script: libs/jquery.emoji.js
+    script: libs/jquery-easing.js
+    script: libs/history/jquery.history.js
+    script: libs/jquery.fancybox.js
+    script: libs/jquery.mousewheel.js
+    script: libs/jquery.jscrollpane.js
+    
+    script: libs/moment.js
+    
+    script: social_sharing.js
+    script: profile.js
+-->
+
 <!-- 
     NOTE: this is a workaround because the built-in ssi tag doesn't support 
     context variables as arguments. We use ssi to include other html files 
@@ -372,33 +391,13 @@
 {% block scripts %}
     {{ block.super }}
      
-     <!-- jQuery plugins -->
-    <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
-    <!--<script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>-->
-    <script src="{{ STATIC_URL }}js/libs/jquery.fancybox{% if IS_PROD %}.pack{% endif %}.js?v=2.0.6"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.hotkeys{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/glfx.js"></script>
+    <!-- Stamped profile scripts -->
+    <script src="{{ STATIC_URL }}js/profile.generated.js"></script>
     
     <!-- Social sharing plugins -->
     <script src="//platform.twitter.com/widgets.js"></script>
     <script src="//connect.facebook.net/en_US/all.js"></script>
     <script src="https://apis.google.com/js/plusone.js"></script>
-    
-    <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
-    
-    <!-- Misc library dependencies -->
-    <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
-    
-    <!-- Stamped scripts -->
-    <script src="{{ STATIC_URL }}js/client.js"></script>
-    <script src="{{ STATIC_URL }}js/profile.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

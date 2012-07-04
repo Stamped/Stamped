@@ -2,6 +2,17 @@
 {% load stamped_tags %}
 {% load ssi from future %}
 
+<!-- Javascript dependencies
+     - - - - - - - - - - - -
+    
+    script: libs/jquery.hotkeys.js
+    script: libs/handlebars.js
+    script: libs/infobox.js
+    script: libs/markerclusterer.js
+    
+    script: map.js
+-->
+
 {% block styles %}
     {{ block.super }}
     
@@ -96,8 +107,6 @@
     {{ block.super }}
      
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
-    <script src="{{ STATIC_URL }}js/libs/infobox{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/markerclusterer{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/map.js"></script>
+    <script src="{{ STATIC_URL }}js/map.generated.js"></script>
 {% endblock scripts %}
 

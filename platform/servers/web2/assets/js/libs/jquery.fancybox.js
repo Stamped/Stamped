@@ -7,7 +7,8 @@
  * License: www.fancyapps.com/fancybox/#license
  *
  * Copyright 2012 Janis Skarnelis - janis@fancyapps.com
- *
+ * 
+ * NOTE: Stamped owns a single-domain commercial license to use the FancyBox library.
  */
 
 (function (window, document, $, undefined) {
