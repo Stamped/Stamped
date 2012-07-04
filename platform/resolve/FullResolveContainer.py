@@ -109,7 +109,7 @@ def main():
         from api.MongoStampedAPI import MongoStampedAPI
         cursor = MongoStampedAPI()._entityDB._collection.find(query)
         if cursor.count() == 0:
-            print("Could not find a matching entity for %s" % title)
+            print("Could not find a matching entity for query: %s" % query)
             return
 
         entity =  MongoStampedAPI()._entityDB._convertFromMongo(cursor[0])
