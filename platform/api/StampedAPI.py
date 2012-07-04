@@ -2700,7 +2700,7 @@ class StampedAPI(AStampedAPI):
             # Call async process to update references
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
-        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 4.0)
+        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 2.0)
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
         stats.score = int(score)
@@ -2968,10 +2968,7 @@ class StampedAPI(AStampedAPI):
             if not self._friendshipDB.checkFriendship(friendship):
                 raise StampedViewCommentPermissionsError("Insufficient privileges to view comments")
 
-        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id,
-                                                            before=before,
-                                                            limit=limit,
-                                                            offset=offset)
+        commentData = self._commentDB.getCommentsForStamp(stamp.stamp_id, before=before, limit=limit, offset=offset)
 
         # Get user objects
         userIds = {}
@@ -2986,8 +2983,7 @@ class StampedAPI(AStampedAPI):
         comments = []
         for comment in commentData:
             if userIds[comment.user.user_id] == 1:
-                msg = 'Unable to get user_id %s for comment_id %s' % \
-                    (comment.user.user_id, comment.comment_id)
+                msg = 'Unable to get user_id %s for comment_id %s' % (comment.user.user_id, comment.comment_id)
                 logs.warning(msg)
             else:
                 comment.user = userIds[comment.user.user_id]

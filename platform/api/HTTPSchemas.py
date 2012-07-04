@@ -317,7 +317,7 @@ def _buildTextReferences(text):
     # Sort by index
     refs.sort(key=lambda x: x.indices[0])
 
-    return refs
+    return text, refs
 
 
 # ######### #
@@ -932,8 +932,9 @@ class HTTPComment(Schema):
         self.dataImport(comment.dataExport(), overflow=True)
         self.created = comment.timestamp.created
         self.user = HTTPUserMini().importUserMini(comment.user)
-        references = _buildTextReferences(self.blurb)
+        blurb, references = _buildTextReferences(self.blurb)
         if len(references) > 0:
+            self.blurb = blurb
             self.blurb_references = references
         return self
 
@@ -2533,8 +2534,9 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
-            references = _buildTextReferences(content.blurb)
+            blurb, references = _buildTextReferences(content.blurb)
             if len(references) > 0:
+                item.blurb = blurb 
                 item.blurb_references = references
 
             if content.images is not None:
