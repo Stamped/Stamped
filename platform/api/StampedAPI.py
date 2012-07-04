@@ -1868,6 +1868,9 @@ class StampedAPI(AStampedAPI):
         return re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
 
     def _extractMentions(self, text):
+        if text is None:
+            return set()
+
         screenNames = set()
 
         # Extract screen names with regex
@@ -2444,15 +2447,17 @@ class StampedAPI(AStampedAPI):
             self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
 
         # Add activity for mentioned users
-        mentionedUserIds = set()
-        mentions = self._extractMentions(stamp.contents[-1].blurb)
-        if len(mentions) > 0:
-            mentionedUsers = self._userDB.lookupUsers(screenNames=list(mentions))
-            for user in mentionedUsers:
-                if user.user_id != authUserId and user.user_id not in creditedUserIds:
-                    mentionedUserIds.add(user.user_id)
-        if len(mentionedUserIds) > 0:
-            self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
+        blurb = stamp.contents[-1].blurb
+        if blurb is not None:
+            mentionedUserIds = set()
+            mentions = self._extractMentions(blurb)
+            if len(mentions) > 0:
+                mentionedUsers = self._userDB.lookupUsers(screenNames=list(mentions))
+                for user in mentionedUsers:
+                    if user.user_id != authUserId and user.user_id not in creditedUserIds:
+                        mentionedUserIds.add(user.user_id)
+            if len(mentionedUserIds) > 0:
+                self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
 
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
