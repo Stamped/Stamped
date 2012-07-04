@@ -77,7 +77,8 @@ class AlertEmail(Email):
         self.__settingsUrl = 'http://www.stamped.com/settings/alerts?token=%s' % settingsToken
 
     def __repr__(self):
-        return "<Alert Email: recipient='%s', verb='%s', title='%s'>" % (self.__recipient, self.__verb, self.title)
+        return "<Alert Email: activity='%s', recipient='%s', verb='%s', title='%s'>" % \
+            (self.__activityId, self.__recipient, self.__verb, self.title)
 
     @property 
     def activityId(self):
@@ -176,7 +177,8 @@ class InviteEmail(Email):
         self.__inviteId = inviteId
 
     def __repr__(self):
-        return "<Invite Email: recipient='%s', title='%s'>" % (self.__recipient, self.title)
+        return "<Invite Email: invite='%s', recipient='%s', title='%s'>" % \
+            (self.__inviteId, self.__recipient, self.title)
 
     @property 
     def inviteId(self):
