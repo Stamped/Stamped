@@ -40,7 +40,9 @@ class RunEvalResolutions(AStampedFixtureTestCase):
             for entity, _ in resultList[:5]:
                 item = HTTPEntitySearchResultsItem()
                 item.importEntity(entity)
-                resolutionResult[item.search_id] = (item,) + self.__convertSearchId(item.search_id, resolver)
+                converted = self.__convertSearchId(item.search_id, resolver)
+                if converted:
+                    resolutionResult[item.search_id] = (item,) + converted
 
         outputMessage = """
         /---------------------------------------------
@@ -67,19 +69,20 @@ class RunEvalResolutions(AStampedFixtureTestCase):
         }
 
         if source_name.lower() not in sources:
-            logs.warning('Source not found: %s (%s)' % (source_name, search_id))
-            raise StampedUnavailableError
+            raise Exception('Unknow source: ' + source_name.lower())
 
         source = sources[source_name.lower()]()
         try:
             proxy = source.entityProxyFromKey(source_id)
-        except KeyError:
-            raise StampedUnavailableError("Entity not found")
+        except KeyError as e:
+            print e
+            return None
 
-        entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-        entity = entityProxy.buildEntity()
-        fullResolver.enrichEntity(entity, {})
-        return entity, proxy
+        if proxy is not None:
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            fullResolver.enrichEntity(entity, {})
+            return entity, proxy
 
 
 if __name__ == '__main__':

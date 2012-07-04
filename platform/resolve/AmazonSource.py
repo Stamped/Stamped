@@ -666,6 +666,21 @@ class AmazonSource(GenericSource):
 
         return self.emptySource
 
+
+    def __iterateSearchResults(self, results):
+        return self.__iterateResults('ItemSearchResponse', results)
+
+    def __getLookupResult(self, results):
+        # TODO(geoff): check we get at most one result.
+        return next(self.__iterateResults('ItemSearchResponse', results))
+
+    def __iterateResults(self, firstLayer, results):
+        items = xp(results, firstLayer, 'Items')['c']
+        if 'Item' in items:
+            items = items['Item']
+            for item in items:
+                yield item
+
     def __searchGen(self, proxy, *queries):
         def gen():
             try:
@@ -676,21 +691,17 @@ class AmazonSource(GenericSource):
                     if 'ResponseGroup' not in params:
                         params['ResponseGroup'] = "ItemAttributes"
                     results = globalAmazon().item_search(**params)
-                    items = xp(results, 'ItemSearchResponse', 'Items')['c']
-                    
-                    if 'Item' in items:
-                        items = items['Item']
-                        
-                        for item in items:
-                            try:
-                                if test == None or test(item):
-                                    yield xp(item, 'ASIN')['v']
-                            except Exception:
-                                pass
+
+                    for item in self.__iterateSearchResults(results):
+                        try:
+                            if test == None or test(item):
+                                yield xp(item, 'ASIN')['v'], item
+                        except Exception:
+                            pass
             except GeneratorExit:
                 pass
 
-        return self.generatorSource(gen(), constructor=lambda x: proxy( x ), unique=True)
+        return self.generatorSource(gen(), constructor=lambda x: proxy(*x, maxLookupCalls=0), unique=True)
     
     def albumSource(self, query=None, query_string=None):
         if query_string is None:
@@ -810,16 +821,12 @@ class AmazonSource(GenericSource):
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)
         #print "\n\n\n\nENDMAZON\n\n\n\n\n"
-        items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
-
-        if 'Item' in items:
-            items = items['Item']
-            indexResults = []
-            for item in items:
-                parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
-                if parsedItem:
-                    indexResults.append(parsedItem)
-            results[searchIndexData.searchIndexName] = indexResults
+        indexResults = []
+        for item in self.__iterateSearchResults(searchResults):
+            parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
+            if parsedItem:
+                indexResults.append(parsedItem)
+        results[searchIndexData.searchIndexName] = indexResults
 
     def __searchIndexesLite(self, searchIndexes, queryText, timeout=None, logRawResults=False):
         """
@@ -1306,14 +1313,9 @@ class AmazonSource(GenericSource):
             
             if kind == 'book':
                 return AmazonBook(key)
-            if kind == 'digital music album':
-                return AmazonAlbum(key)
-            if kind == 'digital music track':
-                return AmazonTrack(key)
             if kind == 'video games':
                 return AmazonVideoGame(key)
-            
-            raise Exception("unsupported amazon product type: %s" % kind)
+            return self.__constructMusicObjectFromResult(self.__getLookupResult(lookupData), 0)
         except KeyError:
             pass
         return None
